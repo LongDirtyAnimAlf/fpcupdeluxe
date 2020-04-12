@@ -660,7 +660,7 @@ begin
   try
     Processor.Execute;
     result := (Processor.ExitStatus=0);
-    if result then RegisterPackageFeature:=(GetNumericalVersion(Processor.OutputString)>=CalculateFullVersion(1,7,0));
+    if result then RegisterPackageFeature:=(CalculateNumericalVersion(Processor.OutputString)>=CalculateFullVersion(1,7,0));
   except
     on E: Exception do
     begin
@@ -1833,7 +1833,7 @@ begin
       if (RemoteURL<>'') AND (NOT SourceOK) then
       begin
         infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
-        aName:=GetFileNameFromURL(RemoteURL);
+        aName:=FileNameFromURL(RemoteURL);
         if Length(aName)>0 then
         begin
           aName:=SysUtils.ExtractFileExt(aName);

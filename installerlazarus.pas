@@ -1296,7 +1296,7 @@ function TLazarusInstaller.GetVersionFromUrl(aUrl:string):string;
 var
   aVersion: string;
 begin
-  aVersion:=GetVersionFromUrl(aUrl);
+  aVersion:=VersionFromUrl(aUrl);
   if aVersion='trunk' then
     result:=LAZARUSTRUNKVERSION
   else
@@ -1431,7 +1431,7 @@ begin
         s:='Lazarus native builder: ';
       end;
       infoln(s+'Detected source version Lazarus: '+VersionSnippet, etInfo);
-      s2:=GetCompilerVersion(FCompiler);
+      s2:=CompilerVersion(FCompiler);
       infoln(s+'Using FPC compiler with version: '+s2, etInfo);
     end;
   end;
@@ -1537,10 +1537,10 @@ begin
       {$IF (defined(Darwin))}
       if Length(DebuggerPath)=0 then
       begin
-        infoln(infotext+'No GDB debugger found ! Looking for LLDB debugger for Lazarus version '+InttoStr(NumericalVersion), etWarning);
         if (NumericalVersion>=CalculateFullVersion(2,0,0)) then
         begin
           //Check for newest lldb debugger ... does work !!
+          infoln(infotext+'Looking for LLDB debugger for Lazarus.', etInfo);
           DebuggerPath:='/Library/Developer/CommandLineTools/usr/bin/lldb';
           if NOT FileExists(DebuggerPath) then DebuggerPath:='/usr/bin/lldb';
           if FileExists(DebuggerPath) then

@@ -969,13 +969,13 @@ var
 begin
   {$ifdef MSWindows}
   OpenSSLURL:=OpenSSLSourceURL[Low(OpenSSLSourceURL)];
-  OpenSSLZip:=IncludeTrailingPathDelimiter(GetWindowsDownloadFolder)+GetFileNameFromURL(OpenSSLURL);
+  OpenSSLZip:=IncludeTrailingPathDelimiter(GetWindowsDownloadFolder)+FileNameFromURL(OpenSSLURL);
   SysUtils.Deletefile(OpenSSLZip);
   Success:=OpenURL(OpenSSLURL);
   if (NOT Success) then
   begin
     OpenSSLURL:=OpenSSLSourceURL[High(OpenSSLSourceURL)];
-    OpenSSLZip:=IncludeTrailingPathDelimiter(GetWindowsDownloadFolder)+GetFileNameFromURL(OpenSSLURL);
+    OpenSSLZip:=IncludeTrailingPathDelimiter(GetWindowsDownloadFolder)+FileNameFromURL(OpenSSLURL);
     SysUtils.Deletefile(OpenSSLZip);
     Success:=OpenURL(OpenSSLURL);
   end;
@@ -2892,7 +2892,7 @@ begin
                     begin
                       if AnsiContainsText(aList[i],TargetFile) then
                       begin
-                        TargetFile := GetFileNameFromURL(aList[i]);
+                        TargetFile := FileNameFromURL(aList[i]);
                         success:=true;
                         break;
                       end;
@@ -3045,7 +3045,7 @@ begin
                     begin
                       if Pos(TargetFile,aList[i])>0 then
                       begin
-                        TargetFile := GetFileNameFromURL(aList[i]);
+                        TargetFile := FileNameFromURL(aList[i]);
                         success:=true;
                         break;
                       end;
@@ -3636,7 +3636,7 @@ begin
   if Length(s)>0 then FPCupManager.LazarusDesiredRevision:=s;
 
   // overrides for old versions of Lazarus
-  aLazarusVersion:=GetNumericalVersion(LazarusTarget);
+  aLazarusVersion:=CalculateNumericalVersion(LazarusTarget);
   if (aLazarusVersion<>0) AND (aLazarusVersion<CalculateFullVersion(1,0,0)) then
   begin
     s:=FPCupManager.OnlyModules;

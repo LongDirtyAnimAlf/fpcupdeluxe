@@ -556,7 +556,7 @@ begin
     {$ifdef win32}
     if (CrossInstaller.TargetCPU=TCPU.x86_64) and ((CrossInstaller.TargetOS=TOS.win64) or (CrossInstaller.TargetOS=TOS.win32)) then
     begin
-      if (GetNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,2)) then
+      if (CalculateNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,2)) then
       begin
         result:=true;
         exit;
@@ -617,7 +617,7 @@ begin
         ChosenCompiler:=FCompiler;
       end;
 
-      s1:=GetCompilerVersion(ChosenCompiler);
+      s1:=CompilerVersion(ChosenCompiler);
 
       if s1<>'0.0.0'
         then infoln('FPC '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+' cross-builder: Using compiler with version: '+s1, etInfo)
@@ -1178,7 +1178,7 @@ begin
           FCompiler:=GetCompiler;
 
           {$ifdef MSWINDOWS}
-          CreateBinutilsList(GetCompilerVersion(ChosenCompiler));
+          CreateBinutilsList(CompilerVersion(ChosenCompiler));
 
           // get wince debugger
           if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.wince) then
@@ -1382,7 +1382,7 @@ begin
   result:=inherited;
   OperationSucceeded:=true;
 
-  s1:=GetCompilerVersion(FCompiler);
+  s1:=CompilerVersion(FCompiler);
   if s1<>'0.0.0'
     then infoln('FPC native builder: Using FPC bootstrap compiler with version: '+s1, etInfo)
     else infoln(infotext+'FPC bootstrap version error: '+s1+' ! Should never happen: expect many errors !!', etError);
@@ -1483,7 +1483,7 @@ begin
   Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
   Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
 
-  if (GetNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,4)) then
+  if (CalculateNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,4)) then
   begin
     Processor.Parameters.Add('DATA2INC=echo');
   end;
@@ -1730,7 +1730,7 @@ begin
   Major:=-1;
   Minor:=-1;
   Build:=-1;
-  GetVersionFromString(aVersion,Major,Minor,Build);
+  VersionFromString(aVersion,Major,Minor,Build);
   if index=0 then result:=Major;
   if index=1 then result:=Minor;
   if index=2 then result:=Build;
@@ -1740,7 +1740,7 @@ function TFPCInstaller.GetVersionFromUrl(aUrl: string): string;
 var
   aVersion: string;
 begin
-  aVersion:=GetVersionFromUrl(aUrl);
+  aVersion:=VersionFromUrl(aUrl);
   if aVersion='trunk' then result:=FPCTRUNKVERSION else result:=aVersion;
 end;
 
@@ -1912,24 +1912,24 @@ begin
 
   {$IFDEF CPUAARCH64}
   // we need at least 3.2.0 for aarch64
-  if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';
+  if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.2.0') then result:='3.2.0';
   {$ENDIF}
 
   {$IFDEF HAIKU}
   {$IFDEF CPUX64}
   // we need at least 3.2.0 for Haiku x86_64
   //if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';
-  if GetNumericalVersion(result)<GetNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
+  if CalculateNumericalVersion(result)<CalculateNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
   {$ENDIF}
   {$IFDEF CPUX32}
   // we need at least 3.0.0 for Haiku x32
-  if GetNumericalVersion(result)<GetNumericalVersion('3.0.0') then result:='3.0.0';
+  if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.0.0') then result:='3.0.0';
   {$ENDIF}
   {$ENDIF}
 
   {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
   // we need at least 3.2.0 for ppc64le
-  if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';
+  if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.2.0') then result:='3.2.0';
   {$ENDIF}
 end;
 
@@ -1962,13 +1962,13 @@ begin
       if x>0 then
       begin
         Delete(s,1,x+Length(REQ1)-1);
-        RequiredVersion:=GetNumericalVersion(s);
+        RequiredVersion:=CalculateNumericalVersion(s);
       end;
       x:=Pos(REQ2,s);
       if x>0 then
       begin
         Delete(s,1,x+Length(REQ2)-1);
-        RequiredVersion2:=GetNumericalVersion(s);
+        RequiredVersion2:=CalculateNumericalVersion(s);
       end;
 
       if ((RequiredVersion>0) AND (RequiredVersion2>0)) then break;
@@ -1998,12 +1998,12 @@ begin
 
     {$IFDEF CPUAARCH64}
     // we need at least 3.2.0 for aarch64
-    if FinalVersion<GetNumericalVersion('3.2.0') then FinalVersion:=GetNumericalVersion('3.2.0');
+    if FinalVersion<CalculateNumericalVersion('3.2.0') then FinalVersion:=CalculateNumericalVersion('3.2.0');
     {$ENDIF}
 
     {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
     // we need at least 3.2.0 for ppc64le
-    if FinalVersion<GetNumericalVersion('3.2.0') then FinalVersion:=GetNumericalVersion('3.2.0');
+    if FinalVersion<CalculateNumericalVersion('3.2.0') then FinalVersion:=CalculateNumericalVersion('3.2.0');
     {$ENDIF}
 
     result:=InttoStr(FinalVersion DIV 10000);
@@ -2098,7 +2098,7 @@ begin
   if OperationSucceeded then
   begin
     BootstrapFileArchiveDir:=IncludeTrailingPathDelimiter(BootstrapFileArchiveDir);
-    BootstrapFilePath:=BootstrapFileArchiveDir+GetFileNameFromURL(FBootstrapCompilerURL);
+    BootstrapFilePath:=BootstrapFileArchiveDir+FileNameFromURL(FBootstrapCompilerURL);
 
     // Delete old compiler in archive directory (if any)
     SysUtils.DeleteFile(BootstrapFileArchiveDir+CompilerName);
@@ -2241,7 +2241,7 @@ begin
 
   if FileExists(testcompiler) then
   begin
-    result:=GetCompilerVersion(testcompiler);
+    result:=CompilerVersion(testcompiler);
   end
   else
   begin
@@ -2332,7 +2332,7 @@ begin
 
         aCompilerList:=TStringList.Create;
         try
-          while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do
+          while ((NOT aCompilerFound) AND (CalculateNumericalVersion(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do
           begin
             infoln(localinfotext+'Looking for official FPC bootstrapper with version '+aLocalBootstrapVersion,etInfo);
 
@@ -2511,7 +2511,7 @@ begin
             infoln(localinfotext+'Found online bootstrap compiler: '+aCompilerList[i],etDebug);
           end;
 
-          while ((NOT aFPCUPCompilerFound) AND (GetNumericalVersion(aLocalFPCUPBootstrapVersion)>0)) do
+          while ((NOT aFPCUPCompilerFound) AND (CalculateNumericalVersion(aLocalFPCUPBootstrapVersion)>0)) do
           begin
             infoln(localinfotext+'Looking online for a FPCUP(deluxe) bootstrapper with version '+aLocalFPCUPBootstrapVersion,etInfo);
 
@@ -2618,9 +2618,9 @@ begin
           else
           begin
             if (
-              ( GetNumericalVersion(aLocalFPCUPBootstrapVersion)>GetNumericalVersion(aLocalBootstrapVersion) )
+              ( CalculateNumericalVersion(aLocalFPCUPBootstrapVersion)>CalculateNumericalVersion(aLocalBootstrapVersion) )
               OR
-              ( (GetNumericalVersion(aLocalFPCUPBootstrapVersion)=GetNumericalVersion(aLocalBootstrapVersion)) AND aLookForBetterAlternative )
+              ( (CalculateNumericalVersion(aLocalFPCUPBootstrapVersion)=CalculateNumericalVersion(aLocalBootstrapVersion)) AND aLookForBetterAlternative )
               ) then
             begin
               aCompilerFound:=true;
@@ -2637,7 +2637,7 @@ begin
 
       // go ahead with compiler found !!
       // get compiler version (if any)
-      s:=GetCompilerVersion(FCompiler);
+      s:=CompilerVersion(FCompiler);
 
       // we did not find any suitable bootstrapper
       // check if we have a manual installed bootstrapper
@@ -2652,7 +2652,7 @@ begin
             aCompilerList:=TStringList.Create;
             try
               aCompilerList.Clear;
-              GetVersionFromString(aBootstrapVersion,i,j,k);
+              VersionFromString(aBootstrapVersion,i,j,k);
               s:=FPCFTPSNAPSHOTURL+'/v'+InttoStr(i)+InttoStr(j)+'/'+GetTargetCPUOS+'/';
               result:=aDownLoader.getFTPFileList(s,aCompilerList);
               if result then
@@ -2705,7 +2705,7 @@ begin
           if result then
           begin
             FCompiler:=FBootstrapCompiler;
-            s:=GetCompilerVersion(FCompiler);
+            s:=CompilerVersion(FCompiler);
             //Check if version is correct: if so, disable overrideversioncheck !
             if s=aBootstrapVersion then FBootstrapCompilerOverrideVersionCheck:=false;
           end;
@@ -2872,7 +2872,7 @@ begin
 
   s2:=GetVersion;
   s:=GetCompilerInDir(FInstallDirectory);
-  if FileExists(s) then VersionSnippet:=GetCompilerVersion(s);
+  if FileExists(s) then VersionSnippet:=CompilerVersion(s);
   if VersionSnippet='0.0.0' then VersionSnippet:=s2;
   if VersionSnippet<>'0.0.0' then
   begin
@@ -2940,7 +2940,7 @@ begin
     // do we already have a suitable compiler somewhere ?
     if FileExists(FCompiler) then
     begin
-      OperationSucceeded:=(GetCompilerVersion(FCompiler)=RequiredBootstrapVersionLow);
+      OperationSucceeded:=(CompilerVersion(FCompiler)=RequiredBootstrapVersionLow);
       if OperationSucceeded
         then RequiredBootstrapVersion:=RequiredBootstrapVersionLow
         else
@@ -2948,7 +2948,7 @@ begin
           // check if higher compiler version is available
           if (RequiredBootstrapVersionLow<>RequiredBootstrapVersionHigh) then
           begin
-            OperationSucceeded:=(GetCompilerVersion(FCompiler)=RequiredBootstrapVersionHigh);
+            OperationSucceeded:=(CompilerVersion(FCompiler)=RequiredBootstrapVersionHigh);
             if OperationSucceeded then RequiredBootstrapVersion:=RequiredBootstrapVersionHigh;
           end;
         end;
@@ -2966,12 +2966,12 @@ begin
 
       result:=InitModule(RequiredBootstrapVersion);
 
-      if (GetCompilerVersion(FCompiler)=RequiredBootstrapVersion)
+      if (CompilerVersion(FCompiler)=RequiredBootstrapVersion)
         then infoln(infotext+'To compile this FPC, we will use a fresh compiler with version : '+RequiredBootstrapVersion,etInfo)
         else
         begin
           // check if we have a lower acceptable requirement for the bootstrapper
-          if (GetCompilerVersion(FCompiler)=RequiredBootstrapVersionLow) then
+          if (CompilerVersion(FCompiler)=RequiredBootstrapVersionLow) then
           begin
             // if so, set bootstrapper to lower one !!
             RequiredBootstrapVersion:=RequiredBootstrapVersionLow;

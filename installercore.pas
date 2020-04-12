@@ -407,9 +407,9 @@ type
     function GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
     function GetSanityCheck:boolean;
 
-    function GetVersionFromSource(aSourcePath:string):string;virtual;abstract;
-    function GetVersionFromURL(aUrl:string):string;virtual;abstract;
-    function GetReleaseCandidateFromSource(aSourcePath:string):integer;virtual;abstract;
+    function {%H-}GetVersionFromSource(aSourcePath:string):string;virtual;abstract;
+    function {%H-}GetVersionFromURL(aUrl:string):string;virtual;abstract;
+    function {%H-}GetReleaseCandidateFromSource(aSourcePath:string):integer;virtual;abstract;
     function GetVersion:string;
 
   public
@@ -1427,7 +1427,7 @@ begin
   // if Win Vista or higher: use modern (2.4.0 and higher) binutils
   if CheckWin32Version(6,0) then
   begin
-    if (GetNumericalVersion(aVersion)<CalculateFullVersion(2,4,0)) then
+    if (CalculateNumericalVersion(aVersion)<CalculateFullVersion(2,4,0)) then
        aVersion:='2.4.0';
   end;
 
@@ -2360,7 +2360,7 @@ begin
 
     for i:=0 to (Length(NewSourceURL)-1) do
     try
-      WgetFile:=GetFileNameFromURL(NewSourceURL[i]);
+      WgetFile:=FileNameFromURL(NewSourceURL[i]);
 
       //always get this file with the native downloader !!
       OperationSucceeded:=GetFile(NewSourceURL[i],WgetExe,true,true);
@@ -3033,9 +3033,9 @@ begin
   PatchUniversal:=(PatchUniversal AND (NOT PatchLaz));
   {$endif};
 
-  if PatchFPC then TrunkVersion:=GetNumericalVersion(FPCTRUNKVERSION);
+  if PatchFPC then TrunkVersion:=CalculateNumericalVersion(FPCTRUNKVERSION);
   {$ifndef FPCONLY}
-  if PatchLaz then TrunkVersion:=GetNumericalVersion(LAZARUSTRUNKVERSION);
+  if PatchLaz then TrunkVersion:=CalculateNumericalVersion(LAZARUSTRUNKVERSION);
   {$endif}
 
   if PatchFPC then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpc';
@@ -3121,7 +3121,7 @@ begin
           PatchAccepted:=(Pos('fpcuppatch',PatchFilePath)>0);
           if PatchAccepted then
           begin
-            PatchAccepted:=(Pos(LowerCase(ModuleName),LowerCase(GetFileNameFromURL(PatchFilePath)))>0);
+            PatchAccepted:=(Pos(LowerCase(ModuleName),LowerCase(FileNameFromURL(PatchFilePath)))>0);
           end;
         end;
 
@@ -3131,10 +3131,10 @@ begin
 
         if NOT PatchUniversal then
         begin
-          s:=GetFileNameFromURL(PatchFilePath);
+          s:=FileNameFromURL(PatchFilePath);
           s:=ExtractFileNameOnly(s);
-          s:=GetVersionFromUrl(s);
-          PatchVersion:=GetNumericalVersion(s);
+          s:=VersionFromUrl(s);
+          PatchVersion:=CalculateNumericalVersion(s);
 
           if (s='trunk') or (PatchVersion=0) then
           begin
@@ -3210,7 +3210,7 @@ begin
         begin
           infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil be applied !',etInfo);
           ForceDirectoriesSafe(PatchDirectory);
-          s:=GetFileNameFromURL(PatchFilePath);
+          s:=FileNameFromURL(PatchFilePath);
           GetFile(PatchFilePath,PatchDirectory+DirectorySeparator+s,true);
         end
         else
@@ -3609,9 +3609,9 @@ begin
     FMinorVersion := -1;
     FReleaseVersion := -1;
     FPatchVersion := -1;
-    GetVersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion);
+    VersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion);
     FPatchVersion:=GetReleaseCandidateFromSource(FSourceDirectory);
-    if FPatchVersion=-1 then FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
+    if FPatchVersion=-1 then FPatchVersion:=ReleaseCandidateFromUrl(FURL);
   end;
   result:=s;
 end;

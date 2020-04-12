@@ -293,16 +293,15 @@ function DeleteFilesSubDirs(const DirectoryName: string; const Names:TStringList
 function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
 // only if filename contains specfied part somewhere
 function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas: string): boolean;
-function GetFileNameFromURL(URL:string):string;
+function FileNameFromURL(URL:string):string;
 function StripUrl(URL:string): string;
-function GetCompilerVersion(CompilerPath: string): string;
-function GetCompilerRevision(CompilerPath: string): integer;
-function GetLazbuildVersion(LazbuildPath: string): string;
-procedure GetVersionFromString(const VersionSnippet:string;out Major,Minor,Build: Integer);
+function CompilerVersion(CompilerPath: string): string;
+function CompilerRevision(CompilerPath: string): integer;
+procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build: Integer);
 function CalculateFullVersion(Major,Minor,Release:integer):dword;
-function GetNumericalVersion(VersionSnippet: string): word;
-function GetVersionFromUrl(URL:string): string;
-function GetReleaseCandidateFromUrl(aURL:string): integer;
+function CalculateNumericalVersion(VersionSnippet: string): word;
+function VersionFromUrl(URL:string): string;
+function ReleaseCandidateFromUrl(aURL:string): integer;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
@@ -1127,7 +1126,7 @@ begin
   {$ENDIF UNIX}
 end;
 
-function GetFileNameFromURL(URL:string):string;
+function FileNameFromURL(URL:string):string;
 const
   URLMAGIC='/download';
 var
@@ -1148,7 +1147,7 @@ begin
   result:=URI.Host+URI.Path;
 end;
 
-function GetCompilerVersion(CompilerPath: string): string;
+function CompilerVersion(CompilerPath: string): string;
 var
   Output: string;
 begin
@@ -1170,7 +1169,7 @@ begin
   end;
 end;
 
-function GetCompilerRevision(CompilerPath: string): integer;
+function CompilerRevision(CompilerPath: string): integer;
 var
   Output: string;
   i:integer;
@@ -1196,39 +1195,7 @@ begin
   end;
 end;
 
-
-function GetLazbuildVersion(LazbuildPath: string): string;
-var
-  Output: string;
-  OutputLines:TStringList;
-begin
-  Result:='0.0.0';
-  if ((LazbuildPath='') OR (NOT FileExists(LazbuildPath))) then exit;
-  try
-    Output:='';
-    if (ExecuteCommand(LazbuildPath+ ' --version', Output, false)=0) then
-    begin
-      Output:=TrimRight(Output);
-      if Length(Output)>0 then
-      begin
-        OutputLines:=TStringList.Create;
-        try
-          OutputLines.Text:=Output;
-          if OutputLines.Count>0 then
-          begin
-            // lazbuild outputs version info as last line
-            result:=OutputLines.Strings[OutputLines.Count-1];
-          end;
-        finally
-          OutputLines.Free;
-        end;
-      end;
-    end;
-  except
-  end;
-end;
-
-procedure GetVersionFromString(const VersionSnippet:string;out Major,Minor,Build: Integer);
+procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build: Integer);
 var
   i,j:integer;
   found:boolean;
@@ -1287,18 +1254,18 @@ begin
     result:=0;
 end;
 
-function GetNumericalVersion(VersionSnippet: string): word;
+function CalculateNumericalVersion(VersionSnippet: string): word;
 var
   Major,Minor,Build: Integer;
 begin
   Major:=0;
   Minor:=0;
   Build:=0;
-  GetVersionFromString(VersionSnippet,Major,Minor,Build);
+  VersionFromString(VersionSnippet,Major,Minor,Build);
   result:=CalculateFullVersion(Major,Minor,Build);
 end;
 
-function GetVersionFromUrl(URL:string): string;
+function VersionFromUrl(URL:string): string;
 var
   VersionSnippet:string;
   i:integer;
@@ -1358,7 +1325,7 @@ begin
   end;
 end;
 
-function GetReleaseCandidateFromUrl(aURL:string): integer;
+function ReleaseCandidateFromUrl(aURL:string): integer;
 const
   RC_MAGIC='_RC';
 var
@@ -2158,7 +2125,7 @@ begin
             False,
             aURL,
             Ms,
-            HTTPProxyUser,
+            HTTPProxyHost,
             HTTPProxyPort,
             HTTPProxyUser,
             HTTPProxyPassword);
@@ -2171,7 +2138,7 @@ begin
               true,
               aURL,
               Ms,
-              HTTPProxyUser,
+              HTTPProxyHost,
               HTTPProxyPort,
               HTTPProxyUser,
               HTTPProxyPassword);
@@ -2225,7 +2192,7 @@ begin
             False,
             aURL,
             Ms,
-            HTTPProxyUser,
+            HTTPProxyHost,
             HTTPProxyPort,
             HTTPProxyUser,
             HTTPProxyPassword);
@@ -2238,7 +2205,7 @@ begin
               true,
               aURL,
               Ms,
-              HTTPProxyUser,
+              HTTPProxyHost,
               HTTPProxyPort,
               HTTPProxyUser,
               HTTPProxyPassword);
@@ -3524,7 +3491,7 @@ begin
       begin
         if Length(s)>0 then
         begin
-          GetVersionFromString(s,Major,Minor,Build);
+          VersionFromString(s,Major,Minor,Build);
           t:=t+' '+InttoStr(Major)+'.'+InttoStr(Minor)+'.'+InttoStr(Build);
         end;
       end;
@@ -3618,8 +3585,8 @@ begin
             // tag_name: "1.6.2b"
             // name: "Release v1.6.2b of fpcupdeluxe"
             s:=JsonObject.Get('tag_name');
-            if GetNumericalVersion(s)>GetNumericalVersion(DELUXEVERSION) then NewVersion:=True;
-            if GetNumericalVersion(s)=GetNumericalVersion(DELUXEVERSION) then
+            if CalculateNumericalVersion(s)>CalculateNumericalVersion(DELUXEVERSION) then NewVersion:=True;
+            if CalculateNumericalVersion(s)=CalculateNumericalVersion(DELUXEVERSION) then
             begin
               if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
             end;

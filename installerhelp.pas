@@ -318,7 +318,7 @@ begin
     i:=Low(HELPSOURCEURL);
     repeat
       LazarusVersion:=HELPSOURCEURL[i,0];
-      if GetNumericalVersion(LazarusVersion)>=CalculateFullVersion(FMajorVersion,FMinorVersion,FReleaseVersion) then
+      if CalculateNumericalVersion(LazarusVersion)>=CalculateFullVersion(FMajorVersion,FMinorVersion,FReleaseVersion) then
       begin
         HelpUrl:=HELPSOURCEURL[i,1];
         //Continue search for even better version with same version number
@@ -326,7 +326,7 @@ begin
         begin
           Inc(i);
           LazarusVersion:=HELPSOURCEURL[i,0];
-          if GetNumericalVersion(LazarusVersion)=CalculateFullVersion(FMajorVersion,FMinorVersion,FReleaseVersion) then
+          if CalculateNumericalVersion(LazarusVersion)=CalculateFullVersion(FMajorVersion,FMinorVersion,FReleaseVersion) then
           begin
             HelpUrl:=HELPSOURCEURL[i,1];
           end;
@@ -911,7 +911,7 @@ begin
   LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
   try
     LazVersion:=LazarusConfig.GetVariable(EnvironmentConfig,'EnvironmentOptions/Version/Lazarus');
-    GetVersionFromString(LazVersion,FMajorVersion,FMinorVersion,FReleaseVersion);
+    VersionFromString(LazVersion,FMajorVersion,FMinorVersion,FReleaseVersion);
   finally
     LazarusConfig.Free;
   end;
