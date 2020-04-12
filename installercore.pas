@@ -553,23 +553,19 @@ var
   idx: integer;
   target: string;
 begin
-  result := nil;
   target := GetFPCTarget(false);
-  if Assigned(FCrossInstaller) AND (FCrossInstaller.RegisterName=target) then
+  if (NOT Assigned(FCrossInstaller)) OR (FCrossInstaller.RegisterName<>target) then
   begin
-    result:=FCrossInstaller;
-  end
-  else
-  begin
+    FCrossInstaller:=nil;
     if assigned(CrossInstallers) then
-      for idx := 0 to CrossInstallers.Count - 1 do
+      for idx := 0 to Pred(CrossInstallers.Count) do
         if CrossInstallers[idx] = target then
         begin
           FCrossInstaller:=TCrossInstaller(CrossInstallers.Objects[idx]);
-          result:=FCrossInstaller;
           break;
         end;
   end;
+  result:=FCrossInstaller;
 end;
 
 function TInstaller.GetCrossCompilerPresent:boolean;
