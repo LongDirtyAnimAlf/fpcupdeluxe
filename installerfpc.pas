@@ -240,9 +240,6 @@ begin
     SnippetText.Text:=Snippet;
     ConfigText.LoadFromFile(FPCCFG);
 
-    s:=ConfigText[0];
-    s:=SnippetText.Strings[0];
-
     // Look for exactly this string (first snippet-line always contains Magic + OS and CPU combo):
     i:=StringListStartsWith(ConfigText,SnippetText.Strings[0]);
 
@@ -253,28 +250,23 @@ begin
       SnipEnd:=MaxInt;
       SnipEndLastResort:=MaxInt;
 
-      for i:=(SnipBegin+1) to ConfigText.Count-1 do
-      begin
-        // Once again, look exactly for this text:
-        if ConfigText.Strings[i]=SnipMagicEnd then
+      i:=StringListStartsWith(ConfigText,SnipMagicEnd,SnipBegin);
+      if (i<>-1) then
+        SnipEnd:=i // got you !!
+      else
         begin
-          SnipEnd:=i;
-          break;
+          // in case of failure, find beginning of next (magic) config segment
+          i:=StringListStartsWith(ConfigText,SnipMagicBegin,SnipBegin);
+          if (i<>-1) then SnipEndLastResort:=i-1; // got you !!
         end;
-        // in case of failure, find beginning of next (magic) config segment
-        if Pos(SnipMagicBegin,ConfigText.Strings[i])>0 then
-        begin
-           SnipEndLastResort:=i-1;
-           break;
-        end;
-      end;
+
       if SnipEnd=MaxInt then
       begin
         //apparently snippet was not closed correct
         if SnipEndLastResort<>MaxInt then
         begin
           SnipEnd:=SnipEndLastResort;
-          infoln(INFOTEXT+'Existing snippet was not closed correct. Please check your '+FPCCONFIGFILENAME+'.',etWarning);
+          infoln(INFOTEXT+'Existing snippet was not closed correct. Will continue, but please check your '+FPCCONFIGFILENAME+'.',etWarning);
         end;
       end;
       if SnipEnd=MaxInt then
@@ -284,19 +276,18 @@ begin
         exit;
       end;
 
-      if (SnippetText.Count>1) then
+      // Do we have a snipped with a CPU define
+      i:=StringListStartsWith(SnippetText,'#IFDEF CPU');
+      if (i<>-1) then
       begin
-        // found end of OS and CPU snippet ; now check detailed CPU setting
+        s:=SnippetText[i];
+        // Check detailed CPU setting
         for i:=SnipBegin to SnipEnd do
         begin
           // do we have a CPU define ...
-          if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
+          if ConfigText.Strings[i]=s then
           begin
-            if (Pos(ConfigText.Strings[i]+LineEnding,Snippet)>0) then
-            begin
-              // we have exactly the same CPU type: delete snipped from config-file to replace !!!
-              result:=true;
-            end;
+            result:=true;
             break;
           end;
         end;
@@ -724,7 +715,7 @@ begin
               '# Cross compile settings dependent on both target OS and target CPU'+LineEnding+
               '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
               '#IFDEF '+uppercase(CrossInstaller.TargetOSName)+LineEnding+
-              '#IFDEF CPU'+Options+LineEnding+
+              '#IFDEF CPU'+s2+LineEnding+
               '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
               s1+
               '#ENDIF'+LineEnding+
