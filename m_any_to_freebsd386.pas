@@ -182,7 +182,7 @@ var
 
 initialization
   any_freebsd386:=Tany_freebsd386.Create;
-  RegisterExtension(any_freebsd386.RegisterName,any_freebsd386);
+  RegisterCrossCompiler(any_freebsd386.RegisterName,any_freebsd386);
 
 finalization
   any_freebsd386.Destroy;

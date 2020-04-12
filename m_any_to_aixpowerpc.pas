@@ -179,7 +179,7 @@ var
 
 initialization
   Any_AIXPowerPC:=TAny_AIXPowerPC.Create;
-  RegisterExtension(Any_AIXPowerPC.RegisterName,Any_AIXPowerPC);
+  RegisterCrossCompiler(Any_AIXPowerPC.RegisterName,Any_AIXPowerPC);
 finalization
   Any_AIXPowerPC.Destroy;
 end.

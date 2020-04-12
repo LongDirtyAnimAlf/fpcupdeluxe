@@ -152,7 +152,7 @@ var
 
 initialization
   Any_NetBSDx64:=TAny_NetBSDx64.Create;
-  RegisterExtension(Any_NetBSDx64.RegisterName,Any_NetBSDx64);
+  RegisterCrossCompiler(Any_NetBSDx64.RegisterName,Any_NetBSDx64);
 
 finalization
   Any_NetBSDx64.Destroy;

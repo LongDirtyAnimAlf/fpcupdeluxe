@@ -203,7 +203,7 @@ var
 
 initialization
   any_freebsdx64:=Tany_freebsdx64.Create;
-  RegisterExtension(any_freebsdx64.RegisterName,any_freebsdx64);
+  RegisterCrossCompiler(any_freebsdx64.RegisterName,any_freebsdx64);
 
 finalization
   any_freebsdx64.Destroy;

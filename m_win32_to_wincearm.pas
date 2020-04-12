@@ -175,7 +175,7 @@ var
 
 initialization
   Win32_wincearm:=TWin32_wincearm.Create;
-  RegisterExtension(Win32_wincearm.RegisterName,Win32_wincearm);
+  RegisterCrossCompiler(Win32_wincearm.RegisterName,Win32_wincearm);
 
 finalization
   Win32_wincearm.Destroy;

@@ -163,7 +163,7 @@ var
 
 initialization
   any_haiku386:=Tany_haiku386.Create;
-  RegisterExtension(any_haiku386.RegisterName,any_haiku386);
+  RegisterCrossCompiler(any_haiku386.RegisterName,any_haiku386);
 
 finalization
   any_haiku386.Destroy;

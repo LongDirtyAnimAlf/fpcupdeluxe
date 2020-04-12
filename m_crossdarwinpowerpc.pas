@@ -82,7 +82,7 @@ var
 
 initialization
   Darwinpowerpc:=TDarwinpowerpc.Create;
-  RegisterExtension(Darwinpowerpc.RegisterName,Darwinpowerpc);
+  RegisterCrossCompiler(Darwinpowerpc.RegisterName,Darwinpowerpc);
 
 finalization
   Darwinpowerpc.Destroy;

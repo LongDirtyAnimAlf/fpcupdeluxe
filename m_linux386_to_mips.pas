@@ -172,7 +172,7 @@ var
 // Even though it's officially for x86, x64 may work
 initialization
   Linux386_mips:=TLinux386_mips.Create;
-  RegisterExtension(Linux386_mips.RegisterName,Linux386_mips);
+  RegisterCrossCompiler(Linux386_mips.RegisterName,Linux386_mips);
 
 finalization
   Linux386_mips.Destroy;

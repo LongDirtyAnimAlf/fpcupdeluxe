@@ -221,7 +221,7 @@ var
 
 initialization
   any_darwin386:=Tany_darwin386.Create;
-  RegisterExtension(any_darwin386.RegisterName,any_darwin386);
+  RegisterCrossCompiler(any_darwin386.RegisterName,any_darwin386);
 
 finalization
   any_darwin386.Destroy;

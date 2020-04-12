@@ -149,7 +149,7 @@ var
 
 initialization
   Any_SolarisSparc:=TAny_SolarisSparc.Create;
-  RegisterExtension(Any_SolarisSparc.RegisterName,Any_SolarisSparc);
+  RegisterCrossCompiler(Any_SolarisSparc.RegisterName,Any_SolarisSparc);
 
 finalization
   Any_SolarisSparc.Destroy;

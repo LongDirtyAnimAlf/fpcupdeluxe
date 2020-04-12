@@ -70,7 +70,7 @@ var
 
 initialization
   Anyinternallinker_win386:=Tanyinternallinker_win386.Create;
-  RegisterExtension(Anyinternallinker_win386.RegisterName,Anyinternallinker_win386);
+  RegisterCrossCompiler(Anyinternallinker_win386.RegisterName,Anyinternallinker_win386);
 
 finalization
   Anyinternallinker_win386.Destroy;

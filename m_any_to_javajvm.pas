@@ -134,7 +134,7 @@ var
 
 initialization
   any_javajvm:=Tany_javajvm.Create;
-  RegisterExtension(any_javajvm.RegisterName,any_javajvm);
+  RegisterCrossCompiler(any_javajvm.RegisterName,any_javajvm);
 finalization
   any_javajvm.Destroy;
 

@@ -157,7 +157,7 @@ var
 
 initialization
   any_ArosARM:=Tany_ArosARM.Create;
-  RegisterExtension(any_ArosARM.RegisterName,any_ArosARM);
+  RegisterCrossCompiler(any_ArosARM.RegisterName,any_ArosARM);
 
 finalization
   any_ArosARM.Destroy;

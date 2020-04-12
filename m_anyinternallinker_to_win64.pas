@@ -70,7 +70,7 @@ var
 
 initialization
   Anyinternallinker_win64:=Tanyinternallinker_win64.Create;
-  RegisterExtension(Anyinternallinker_win64.RegisterName,Anyinternallinker_win64);
+  RegisterCrossCompiler(Anyinternallinker_win64.RegisterName,Anyinternallinker_win64);
 
 finalization
   Anyinternallinker_win64.Destroy;

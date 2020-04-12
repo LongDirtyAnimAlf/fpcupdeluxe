@@ -116,7 +116,7 @@ var
 
 initialization
   any_androidjvm:=Tany_androidjvm.Create;
-  RegisterExtension(any_androidjvm.RegisterName,any_androidjvm);
+  RegisterCrossCompiler(any_androidjvm.RegisterName,any_androidjvm);
 
 finalization
   any_androidjvm.Destroy;

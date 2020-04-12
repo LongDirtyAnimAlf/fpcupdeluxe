@@ -268,7 +268,7 @@ var
 
 initialization
   any_linux386:=Tany_linux386.Create;
-  RegisterExtension(any_linux386.RegisterName,any_linux386);
+  RegisterCrossCompiler(any_linux386.RegisterName,any_linux386);
 
 finalization
   any_linux386.Destroy;

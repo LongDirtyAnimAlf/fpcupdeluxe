@@ -158,7 +158,7 @@ var
 
 initialization
   Any_OpenBSD386:=TAny_OpenBSD386.Create;
-  RegisterExtension(Any_OpenBSD386.RegisterName,Any_OpenBSD386);
+  RegisterCrossCompiler(Any_OpenBSD386.RegisterName,Any_OpenBSD386);
 
 finalization
   Any_OpenBSD386.Destroy;

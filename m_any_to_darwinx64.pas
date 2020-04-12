@@ -220,7 +220,7 @@ var
 
 initialization
   any_darwinx64:=Tany_darwinx64.Create;
-  RegisterExtension(any_darwinx64.RegisterName,any_darwinx64);
+  RegisterCrossCompiler(any_darwinx64.RegisterName,any_darwinx64);
 
 finalization
   any_darwinx64.Destroy;

@@ -148,7 +148,7 @@ var
 
 initialization
   any_dragonflyx64:=Tany_dragonflyx64.Create;
-  RegisterExtension(any_dragonflyx64.RegisterName,any_dragonflyx64);
+  RegisterCrossCompiler(any_dragonflyx64.RegisterName,any_dragonflyx64);
 
 finalization
   any_dragonflyx64.Destroy;

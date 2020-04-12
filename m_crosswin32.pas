@@ -93,7 +93,7 @@ var
 
 initialization
   Win32:=TWin32.Create;
-  RegisterExtension(Win32.RegisterName,Win32);
+  RegisterCrossCompiler(Win32.RegisterName,Win32);
 
 finalization
   Win32.Destroy;

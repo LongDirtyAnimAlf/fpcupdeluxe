@@ -161,7 +161,7 @@ var
 
 initialization
   Any_Solarisx64:=TAny_Solarisx64.Create;
-  RegisterExtension(Any_Solarisx64.RegisterName,Any_Solarisx64);
+  RegisterCrossCompiler(Any_Solarisx64.RegisterName,Any_Solarisx64);
 
 finalization
   Any_Solarisx64.Destroy;

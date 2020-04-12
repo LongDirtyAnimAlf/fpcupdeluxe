@@ -162,7 +162,7 @@ var
 
 initialization
   any_haikux64:=Tany_haikux64.Create;
-  RegisterExtension(any_haikux64.RegisterName,any_haikux64);
+  RegisterCrossCompiler(any_haikux64.RegisterName,any_haikux64);
 
 finalization
   any_haikux64.Destroy;

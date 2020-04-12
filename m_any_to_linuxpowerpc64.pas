@@ -241,7 +241,7 @@ var
 
 initialization
   any_linuxpowerpc64:=Tany_linuxpowerpc64.Create;
-  RegisterExtension(any_linuxpowerpc64.RegisterName,any_linuxpowerpc64);
+  RegisterCrossCompiler(any_linuxpowerpc64.RegisterName,any_linuxpowerpc64);
 
 finalization
   any_linuxpowerpc64.Destroy;

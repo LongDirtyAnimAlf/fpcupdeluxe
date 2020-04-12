@@ -161,7 +161,7 @@ var
 
 initialization
   any_linuxaarch64:=Tany_linuxaarch64.Create;
-  RegisterExtension(any_linuxaarch64.RegisterName,any_linuxaarch64);
+  RegisterCrossCompiler(any_linuxaarch64.RegisterName,any_linuxaarch64);
 
 finalization
   any_linuxaarch64.Destroy;

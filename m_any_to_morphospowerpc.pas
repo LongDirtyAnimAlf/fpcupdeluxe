@@ -149,7 +149,7 @@ var
 
 initialization
   any_MorphosPowerPC:=Tany_MorphosPowerPC.Create;
-  RegisterExtension(any_MorphosPowerPC.RegisterName,any_MorphosPowerPC);
+  RegisterCrossCompiler(any_MorphosPowerPC.RegisterName,any_MorphosPowerPC);
 
 finalization
   any_MorphosPowerPC.Destroy;

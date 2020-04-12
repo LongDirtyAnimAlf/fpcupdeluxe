@@ -193,9 +193,9 @@ function GetOS(aOS:TOS):string;
 function GetTOS(aOS:string):TOS;
 function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
 
-Procedure RegisterExtension(Platform:string;aCrossInstaller:TCrossInstaller);
+procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 
-Var
+var
   CrossInstallers:TStringList=nil;
 
 implementation
@@ -205,7 +205,7 @@ uses
 
 function GetCPU(aCPU:TCPU):string;
 begin
-  if Ord(aCPU) < 0 then
+  if (aCPU<Low(TCPU)) OR (aCPU>High(TCPU)) then
     raise Exception.Create('Invalid CPU for GetCPU.');
   result:=GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU));
 end;
@@ -234,7 +234,7 @@ end;
 
 function GetOS(aOS:TOS):string;
 begin
-  if Ord(aOS) < 0 then
+  if (aOS<Low(TOS)) OR (aOS>High(TOS)) then
     raise Exception.Create('Invalid OS for GetOS.');
   result:=GetEnumNameSimple(TypeInfo(TOS),Ord(aOS));
 end;
@@ -277,7 +277,7 @@ begin
 end;
 
 { TCrossInstaller }
-procedure RegisterExtension(Platform:string;aCrossInstaller:TCrossInstaller);
+procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 begin
   if not assigned(CrossInstallers) then
     CrossInstallers:=TStringList.Create;

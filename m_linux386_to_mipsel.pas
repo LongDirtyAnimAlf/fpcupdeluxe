@@ -182,7 +182,7 @@ var
 // Even though it's officially for x86, x64 may work
 initialization
   Linux386_mipsel:=TLinux386_mipsel.Create;
-  RegisterExtension(Linux386_mipsel.TargetCPU+'-'+Linux386_mipsel.TargetOS,Linux386_mipsel);
+  RegisterCrossCompiler(Linux386_mipsel.TargetCPU+'-'+Linux386_mipsel.TargetOS,Linux386_mipsel);
 finalization
   Linux386_mipsel.Destroy;
 {$ENDIF}

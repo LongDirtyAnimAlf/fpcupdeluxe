@@ -155,7 +155,7 @@ var
 
 initialization
   DarwinARM:=TDarwinARM.Create;
-  RegisterExtension(DarwinARM.RegisterName,DarwinARM);
+  RegisterCrossCompiler(DarwinARM.RegisterName,DarwinARM);
 
 finalization
   DarwinARM.Destroy;

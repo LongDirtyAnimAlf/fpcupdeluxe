@@ -91,7 +91,7 @@ var
 
 initialization
   Darwin32:=TDarwin32.Create;
-  RegisterExtension(Darwin32.RegisterName,Darwin32);
+  RegisterCrossCompiler(Darwin32.RegisterName,Darwin32);
 
 finalization
   Darwin32.Destroy;

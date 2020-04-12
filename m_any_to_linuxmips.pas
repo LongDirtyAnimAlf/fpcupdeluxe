@@ -202,7 +202,7 @@ var
 
 initialization
   Any_linuxmips:=Tany_linuxmips.Create;
-  RegisterExtension(Any_linuxmips.RegisterName,Any_linuxmips);
+  RegisterCrossCompiler(Any_linuxmips.RegisterName,Any_linuxmips);
 
 finalization
   Any_linuxmips.Destroy;

@@ -169,7 +169,7 @@ var
 
 initialization
   Darwin64iphonesim:=TDarwin64iphonesim.Create;
-  RegisterExtension(Darwin64iphonesim.RegisterName,Darwin64iphonesim);
+  RegisterCrossCompiler(Darwin64iphonesim.RegisterName,Darwin64iphonesim);
 
 finalization
   Darwin64iphonesim.Destroy;

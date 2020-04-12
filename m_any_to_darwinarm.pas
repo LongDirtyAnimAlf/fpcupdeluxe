@@ -222,7 +222,7 @@ var
 
 initialization
   any_darwinarm:=Tany_darwinarm.Create;
-  RegisterExtension(any_darwinarm.RegisterName,any_darwinarm);
+  RegisterCrossCompiler(any_darwinarm.RegisterName,any_darwinarm);
 
 finalization
   any_darwinarm.Destroy;

@@ -403,7 +403,7 @@ var
 
 initialization
   Any_Android386:=TAny_Android386.Create;
-  RegisterExtension(Any_Android386.RegisterName,Any_Android386);
+  RegisterCrossCompiler(Any_Android386.RegisterName,Any_Android386);
 
 finalization
   Any_Android386.Destroy;

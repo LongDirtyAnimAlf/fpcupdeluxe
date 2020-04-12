@@ -2715,7 +2715,10 @@ end;
 
 function TInstaller.GetFPCTarget(Native: boolean): string;
 begin
-  result:=GetFPCTargetCPUOS(GetCPU(FCrossCPU_Target),GetOS(FCrossOS_Target),Native);
+  if Native then
+    result:=GetTargetCPU+'-'+GetTargetOS
+  else
+    result:=GetCPU(FCrossCPU_Target)+'-'+GetOS(FCrossOS_Target);
 end;
 
 function TInstaller.GetPath: string;

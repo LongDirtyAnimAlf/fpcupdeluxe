@@ -88,7 +88,7 @@ var
 
 initialization
   darwin64:=TDarwin64.Create;
-  RegisterExtension(darwin64.RegisterName,darwin64);
+  RegisterCrossCompiler(darwin64.RegisterName,darwin64);
 
 finalization
   darwin64.Destroy;

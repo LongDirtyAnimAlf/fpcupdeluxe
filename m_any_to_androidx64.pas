@@ -405,7 +405,7 @@ var
 
 initialization
   Any_Androidx64:=TAny_Androidx64.Create;
-  RegisterExtension(Any_Androidx64.RegisterName,Any_Androidx64);
+  RegisterCrossCompiler(Any_Androidx64.RegisterName,Any_Androidx64);
 finalization
   Any_Androidx64.Destroy;
 end.

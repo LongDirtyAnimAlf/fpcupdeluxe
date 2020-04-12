@@ -163,7 +163,7 @@ var
 
 initialization
   FreeBSD_Linux64:=TFreeBSD_Linux64.Create;
-  RegisterExtension(FreeBSD_Linux64.TargetCPU+'-'+FreeBSD_Linux64.TargetOS,FreeBSD_Linux64);
+  RegisterCrossCompiler(FreeBSD_Linux64.TargetCPU+'-'+FreeBSD_Linux64.TargetOS,FreeBSD_Linux64);
 finalization
   FreeBSD_Linux64.Destroy;
 {$ENDIF FREEBSD}

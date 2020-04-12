@@ -179,7 +179,7 @@ var
 
 initialization
   Linux386_wincearm:=TLinux386_wincearm.Create;
-  RegisterExtension(Linux386_wincearm.RegisterName,Linux386_wincearm);
+  RegisterCrossCompiler(Linux386_wincearm.RegisterName,Linux386_wincearm);
 
 finalization
   Linux386_wincearm.Destroy;

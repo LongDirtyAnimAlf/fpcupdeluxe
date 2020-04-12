@@ -157,7 +157,7 @@ var
 
 initialization
   any_Arosx64:=Tany_Arosx64.Create;
-  RegisterExtension(any_Arosx64.RegisterName,any_Arosx64);
+  RegisterCrossCompiler(any_Arosx64.RegisterName,any_Arosx64);
 
 finalization
   any_Arosx64.Destroy;

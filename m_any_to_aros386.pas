@@ -157,7 +157,7 @@ var
 
 initialization
   any_Aros386:=Tany_Aros386.Create;
-  RegisterExtension(any_Aros386.RegisterName,any_Aros386);
+  RegisterCrossCompiler(any_Aros386.RegisterName,any_Aros386);
 
 finalization
   any_Aros386.Destroy;

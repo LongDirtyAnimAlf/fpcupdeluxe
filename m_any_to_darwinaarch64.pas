@@ -256,7 +256,7 @@ var
 
 initialization
   any_darwinaarch64:=Tany_darwinaarch64.Create;
-  RegisterExtension(any_darwinaarch64.RegisterName,any_darwinaarch64);
+  RegisterCrossCompiler(any_darwinaarch64.RegisterName,any_darwinaarch64);
 
 finalization
   any_darwinaarch64.Destroy;

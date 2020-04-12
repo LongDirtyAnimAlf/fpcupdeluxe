@@ -254,7 +254,7 @@ var
 
 initialization
   Any_Embeddedavr:=TAny_Embeddedavr.Create;
-  RegisterExtension(Any_Embeddedavr.RegisterName,Any_Embeddedavr);
+  RegisterCrossCompiler(Any_Embeddedavr.RegisterName,Any_Embeddedavr);
 
 finalization
   Any_Embeddedavr.Destroy;

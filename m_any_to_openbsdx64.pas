@@ -151,7 +151,7 @@ var
 
 initialization
   Any_OpenBSDx64:=TAny_OpenBSDx64.Create;
-  RegisterExtension(Any_OpenBSDx64.RegisterName,Any_OpenBSDx64);
+  RegisterCrossCompiler(Any_OpenBSDx64.RegisterName,Any_OpenBSDx64);
 
 finalization
   Any_OpenBSDx64.Destroy;

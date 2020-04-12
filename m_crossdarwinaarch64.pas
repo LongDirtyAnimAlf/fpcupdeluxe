@@ -167,7 +167,7 @@ var
 
 initialization
   Darwinaarch64:=TDarwinaarch64.Create;
-  RegisterExtension(Darwinaarch64.RegisterName,Darwinaarch64);
+  RegisterCrossCompiler(Darwinaarch64.RegisterName,Darwinaarch64);
 
 finalization
   Darwinaarch64.Destroy;

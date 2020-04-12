@@ -149,7 +149,7 @@ var
 
 initialization
   any_Amigam68k:=Tany_Amigam68k.Create;
-  RegisterExtension(any_Amigam68k.RegisterName,any_Amigam68k);
+  RegisterCrossCompiler(any_Amigam68k.RegisterName,any_Amigam68k);
 
 finalization
   any_Amigam68k.Destroy;

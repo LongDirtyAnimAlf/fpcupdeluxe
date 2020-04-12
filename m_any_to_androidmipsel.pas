@@ -412,7 +412,7 @@ var
 
 initialization
   Any_AndroidMIPSEL:=TAny_AndroidMIPSEL.Create;
-  RegisterExtension(Any_AndroidMIPSEL.RegisterName,Any_AndroidMIPSEL);
+  RegisterCrossCompiler(Any_AndroidMIPSEL.RegisterName,Any_AndroidMIPSEL);
 finalization
   Any_AndroidMIPSEL.Destroy;
 end.

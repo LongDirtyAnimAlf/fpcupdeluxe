@@ -245,7 +245,7 @@ var
 
 initialization
   Any_Embeddedmipsel:=TAny_Embeddedmipsel.Create;
-  RegisterExtension(Any_Embeddedmipsel.RegisterName,Any_Embeddedmipsel);
+  RegisterCrossCompiler(Any_Embeddedmipsel.RegisterName,Any_Embeddedmipsel);
 
 finalization
   Any_Embeddedmipsel.Destroy;

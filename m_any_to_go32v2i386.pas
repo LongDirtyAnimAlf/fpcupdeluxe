@@ -191,7 +191,7 @@ var
 
 initialization
   Any_go32v2i386:=TAny_go32v2i386.Create;
-  RegisterExtension(Any_go32v2i386.RegisterName,Any_go32v2i386);
+  RegisterCrossCompiler(Any_go32v2i386.RegisterName,Any_go32v2i386);
 
 finalization
   Any_go32v2i386.Destroy;

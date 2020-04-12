@@ -243,7 +243,7 @@ var
 
 initialization
   Any_Embeddedarm:=TAny_Embeddedarm.Create;
-  RegisterExtension(Any_Embeddedarm.RegisterName,Any_Embeddedarm);
+  RegisterCrossCompiler(Any_Embeddedarm.RegisterName,Any_Embeddedarm);
 
 finalization
   Any_Embeddedarm.Destroy;

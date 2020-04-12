@@ -260,7 +260,7 @@ var
 
 initialization
   Any_linuxmipsel:=Tany_linuxmipsel.Create;
-  RegisterExtension(Any_linuxmipsel.RegisterName,Any_linuxmipsel);
+  RegisterCrossCompiler(Any_linuxmipsel.RegisterName,Any_linuxmipsel);
 
 finalization
   Any_linuxmipsel.Destroy;

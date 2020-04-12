@@ -434,7 +434,7 @@ var
 
 initialization
   Any_AndroidARM:=TAny_AndroidARM.Create;
-  RegisterExtension(Any_AndroidARM.RegisterName,Any_AndroidARM);
+  RegisterCrossCompiler(Any_AndroidARM.RegisterName,Any_AndroidARM);
 
 finalization
   Any_AndroidARM.Destroy;

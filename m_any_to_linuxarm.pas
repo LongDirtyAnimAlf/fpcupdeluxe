@@ -328,7 +328,7 @@ var
 
 initialization
   any_linuxarm:=Tany_linuxarm.Create;
-  RegisterExtension(any_linuxarm.RegisterName,any_linuxarm);
+  RegisterCrossCompiler(any_linuxarm.RegisterName,any_linuxarm);
 
 finalization
   any_linuxarm.Destroy;

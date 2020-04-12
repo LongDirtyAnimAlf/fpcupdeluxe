@@ -237,7 +237,7 @@ var
 {$ifdef mswindows}
 initialization
   any_darwinpowerpc64:=Tany_darwinpowerpc64.Create;
-  RegisterExtension(any_darwinpowerpc64.RegisterName,any_darwinpowerpc64);
+  RegisterCrossCompiler(any_darwinpowerpc64.RegisterName,any_darwinpowerpc64);
 
 finalization
   any_darwinpowerpc64.Destroy;

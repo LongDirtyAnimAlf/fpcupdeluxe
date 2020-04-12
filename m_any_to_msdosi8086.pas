@@ -212,7 +212,7 @@ var
 
 initialization
   Any_msdosi8086:=TAny_msdosi8086.Create;
-  RegisterExtension(Any_msdosi8086.RegisterName,Any_msdosi8086);
+  RegisterCrossCompiler(Any_msdosi8086.RegisterName,Any_msdosi8086);
 
 finalization
   Any_msdosi8086.Destroy;

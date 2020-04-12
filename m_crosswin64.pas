@@ -92,7 +92,7 @@ var
 
 initialization
   Win64:=TWin64.Create;
-  RegisterExtension(Win64.RegisterName,Win64);
+  RegisterCrossCompiler(Win64.RegisterName,Win64);
 
 finalization
   Win64.Destroy;

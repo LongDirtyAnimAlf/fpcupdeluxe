@@ -204,7 +204,7 @@ var
 
 initialization
   Any_AIXPowerPC64:=TAny_AIXPowerPC64.Create;
-  RegisterExtension(Any_AIXPowerPC64.RegisterName,Any_AIXPowerPC64);
+  RegisterCrossCompiler(Any_AIXPowerPC64.RegisterName,Any_AIXPowerPC64);
 
 finalization
   Any_AIXPowerPC64.Destroy;

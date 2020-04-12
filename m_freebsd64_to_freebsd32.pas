@@ -129,7 +129,7 @@ var
 {$IFDEF CPUX64}
 initialization
   FreeBSD64_FreeBSD386:=TFreeBSD64_FreeBSD386.Create;
-  RegisterExtension(FreeBSD64_FreeBSD386.TargetCPU+'-'+FreeBSD64_FreeBSD386.TargetOS,FreeBSD64_FreeBSD386);
+  RegisterCrossCompiler(FreeBSD64_FreeBSD386.TargetCPU+'-'+FreeBSD64_FreeBSD386.TargetOS,FreeBSD64_FreeBSD386);
 finalization
   FreeBSD64_FreeBSD386.Destroy;
 {$ENDIF CPUX64}
