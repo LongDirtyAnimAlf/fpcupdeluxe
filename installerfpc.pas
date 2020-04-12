@@ -227,6 +227,7 @@ var
   i:integer;
   SnipBegin,SnipEnd,SnipEndLastResort: integer;
   SnippetText: TStringList;
+  s:string;
 begin
   result:=false;
 
@@ -239,6 +240,8 @@ begin
     SnippetText.Text:=Snippet;
     ConfigText.LoadFromFile(FPCCFG);
 
+    s:=ConfigText[0];
+    s:=SnippetText.Strings[0];
 
     // Look for exactly this string (first snippet-line always contains Magic + OS and CPU combo):
     i:=StringListStartsWith(ConfigText,SnippetText.Strings[0]);
@@ -348,6 +351,7 @@ begin
 
   infoln(INFOTEXT+'Inserting snippet in '+FPCCFG+' done.',etInfo);
 end;
+
 
 // remove stale compiled files
 procedure RemoveStaleBuildDirectories(aBaseDir,aCPU,aOS:string);
@@ -664,7 +668,7 @@ begin
         begin
           s1:='';
           {$ifdef Darwin}
-          if (CrossInstaller.TargetCPU=GetCPU(TCPU.aarch64)) OR (CrossInstaller.TargetCPU=GetCPU(TCPU.arm)) then
+          if (CrossInstaller.TargetCPU=TCPU.aarch64) OR (CrossInstaller.TargetCPU=TCPU.arm) then
           begin
             s1:=GetSDKVersion('iphoneos');
           end
@@ -691,36 +695,35 @@ begin
           if (MakeCycle=Low(TSTEPS)) OR (MakeCycle=High(TSTEPS)) then
           begin
 
-            Options:=UpperCase(CrossInstaller.TargetCPUName);
+            //Set basic config text
+            s1:='# Dummy (blank) config just to replace dedicated settings during build of cross-compiler'+LineEnding;
 
-            //Distinguish between 32 and 64 bit powerpc
+            //Set CPU
+            s2:=UpperCase(CrossInstaller.TargetCPUName);
             if (CrossInstaller.TargetCPU=TCPU.powerpc) then
             begin
-              Options:='POWERPC32';
+              s2:='POWERPC32'; //Distinguish between 32 and 64 bit powerpc
             end;
 
             //Remove dedicated settings of config snippet
             if MakeCycle=Low(TSTEPS) then
-            begin
-              infoln(infotext+'Removing '+FPCCONFIGFILENAME+' config snippet.',etInfo);
-              s1:='# dummy (blank) config just to remove dedicated settings during build of cross-compiler'+LineEnding;
-            end;
+              infoln(infotext+'Removing '+FPCCONFIGFILENAME+' config snippet for target '+CrossInstaller.RegisterName,etInfo);
 
             //Add config snippet
             if (MakeCycle=High(TSTEPS)) then
             begin
-              infoln(infotext+'Adding '+FPCCONFIGFILENAME+' config snippet.',etInfo);
+              infoln(infotext+'Adding '+FPCCONFIGFILENAME+' config snippet for target '+CrossInstaller.RegisterName,etInfo);
               if CrossInstaller.FPCCFGSnippet<>''
                  then s1:=CrossInstaller.FPCCFGSnippet+LineEnding
-                 else s1:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
+                 else s1:='# Dummy (blank) config for auto-detect cross-compilers'+LineEnding;
             end;
 
             //Edit dedicated settings of config snippet
             InsertFPCCFGSnippet(FPCCfg,
               SnipMagicBegin+CrossInstaller.RegisterName+LineEnding+
-              '# cross compile settings dependent on both target OS and target CPU'+LineEnding+
+              '# Cross compile settings dependent on both target OS and target CPU'+LineEnding+
               '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
-              '#IFDEF '+uppercase(GetOS(CrossInstaller.TargetOS))+LineEnding+
+              '#IFDEF '+uppercase(CrossInstaller.TargetOSName)+LineEnding+
               '#IFDEF CPU'+Options+LineEnding+
               '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
               s1+
@@ -1009,7 +1012,7 @@ begin
              {$endif}
 
              {$ifdef Darwin}
-             if (CrossInstaller.TargetOS=GetOS(TOS.darwin)) OR (CrossInstaller.TargetOS=GetOS(TOS.iphonesim)) then
+             if (CrossInstaller.TargetOS=TOS.darwin) OR (CrossInstaller.TargetOS=TOS.iphonesim) then
              begin
                s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'..'+DirectorySeparator+'..');
                CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s1);

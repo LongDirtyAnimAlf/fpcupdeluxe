@@ -1323,6 +1323,7 @@ var
   aCompiler:string;
 begin
   result:=true;
+
   CrossCompiling:=(FParent.CrossCPU_Target<>TCPU.cpuNone) or (FParent.CrossOS_Target<>TOS.osNone);
 
   //check if this is a known module:
@@ -1383,8 +1384,8 @@ begin
   begin
     if assigned(FInstaller) then
       begin
-      if (not crosscompiling and (FInstaller is TLazarusNativeInstaller)) or
-        (crosscompiling and (FInstaller is TLazarusCrossInstaller)) then
+      if (not CrossCompiling and (FInstaller is TLazarusNativeInstaller)) or
+        (CrossCompiling and (FInstaller is TLazarusCrossInstaller)) then
       begin
         exit; //all fine, continue with current FInstaller
       end
@@ -1537,6 +1538,8 @@ begin
 
     if CrossCompiling then
     begin
+      // The below is used to get the right cross-installer !!
+      // By setting the target.
       FInstaller.SetTarget(FParent.CrossCPU_Target,FParent.CrossOS_Target,FParent.CrossOS_SubArch);
       FInstaller.CrossOPT:=FParent.CrossOPT;
       FInstaller.CrossLibraryDirectory:=FParent.CrossLibraryDirectory;

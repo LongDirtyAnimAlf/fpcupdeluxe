@@ -1999,7 +1999,6 @@ var
   aList: TStringList;
   BaseBinsURL:string;
   BinsURL,LibsURL:string;
-  aCPU:TCPU;
 begin
   result:=false;
 
@@ -2161,7 +2160,7 @@ begin
     {$endif}
 
     {$ifdef CPUX86}
-    if FPCupManager.CrossCPU_Target=GetCPU(TCPU.i386) then
+    if FPCupManager.CrossCPU_Target=TCPU.i386 then
     begin
       if Sender<>nil then Application.MessageBox(PChar('On Linux i386, you cannot cross towards another Linux i386.'), PChar('FPC limitation'), MB_ICONERROR);
       FPCupManager.CrossOS_Target:=TOS.osNone; // cleanup

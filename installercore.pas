@@ -275,6 +275,7 @@ type
   private
     FKeepLocalChanges: boolean;
     FReApplyLocalChanges: boolean;
+    FCrossInstaller:TCrossInstaller;
     FCrossCPU_Target: TCPU; //When cross-compiling: CPU, e.g. x86_64
     FCrossOS_Target: TOS; //When cross-compiling: OS, e.g. win64
     FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
@@ -427,10 +428,6 @@ type
     property Compiler: string {read GetCompiler} write FCompiler;
     // Compiler options passed on to make as OPT= or FPCOPT=
     property CompilerOptions: string write FCompilerOptions;
-    // CPU for the target (together with CrossOS_Target the cross compile equivalent to GetFPCTarget)
-    //property CrossCPU_Target: TCPU read FCrossCPU_Target;
-    // OS for target (together with CrossCPU_Target the cross compile equivalent to GetFPCTarget)
-    //property CrossOS_Target: TOS read FCrossOS_Target;
     // SubArch for target embedded
     property CrossOS_SubArch: string read FCrossOS_SubArch;
     // Options for cross compiling. User can specify his own, but cross compilers can set defaults, too
@@ -556,15 +553,23 @@ var
   idx: integer;
   target: string;
 begin
-  Result := nil;
+  result := nil;
   target := GetFPCTarget(false);
-  if assigned(CrossInstallers) then
-    for idx := 0 to CrossInstallers.Count - 1 do
-      if CrossInstallers[idx] = target then
-      begin
-        Result := TCrossInstaller(CrossInstallers.Objects[idx]);
-        break;
-      end;
+  if Assigned(FCrossInstaller) AND (FCrossInstaller.RegisterName=target) then
+  begin
+    result:=FCrossInstaller;
+  end
+  else
+  begin
+    if assigned(CrossInstallers) then
+      for idx := 0 to CrossInstallers.Count - 1 do
+        if CrossInstallers[idx] = target then
+        begin
+          FCrossInstaller:=TCrossInstaller(CrossInstallers.Objects[idx]);
+          result:=FCrossInstaller;
+          break;
+        end;
+  end;
 end;
 
 function TInstaller.GetCrossCompilerPresent:boolean;
@@ -3504,6 +3509,8 @@ constructor TInstaller.Create;
 begin
   inherited Create;
 
+  FCrossInstaller:=nil;
+
   FProcessEx:=TProcessEx.Create(nil);
   FProcessEx.OnErrorM := @LogError;
 
@@ -3675,6 +3682,7 @@ begin
   FGitClient.Free;
   FHGClient.Free;
   FSVNClient.Free;
+  FCrossInstaller:=nil;
   inherited Destroy;
 end;
 

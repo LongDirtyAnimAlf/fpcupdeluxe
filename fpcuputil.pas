@@ -2527,9 +2527,9 @@ begin
   for i:=StartIndex to Pred(SearchIn.Count) do
   begin
     if CS then
-      Found:=AnsiStartsStr(TrimLeft(SearchIn[i]),SearchFor)
+      Found:=AnsiStartsStr(SearchFor,TrimLeft(SearchIn[i]))
     else
-      Found:=AnsiStartsText(TrimLeft(SearchIn[i]),SearchFor);
+      Found:=AnsiStartsText(SearchFor,TrimLeft(SearchIn[i]));
     if Found then break;
   end;
   if Found then

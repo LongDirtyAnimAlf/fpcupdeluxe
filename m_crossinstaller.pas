@@ -213,24 +213,20 @@ end;
 function GetTCPU(aCPU:string):TCPU;
 var
   xCPU:TCPU;
-  aLocalCPU:string;
 begin
   result:=TCPU.cpuNone;
-
-  aLocalCPU:=aCPU;
-
-  if length(aLocalCPU)>0 then
+  if length(aCPU)>0 then
   begin
-    if aLocalCPU='ppc' then xCPU:=TCPU.powerpc
+    if aCPU='ppc' then xCPU:=TCPU.powerpc
     else
-    if aLocalCPU='ppc64' then xCPU:=TCPU.powerpc64
+    if aCPU='ppc64' then xCPU:=TCPU.powerpc64
     else
-    if aLocalCPU='x8664' then xCPU:=TCPU.x86_64
+    if aCPU='x8664' then xCPU:=TCPU.x86_64
     else
     begin
-      xCPU:=TCPU(GetEnumValueSimple(TypeInfo(TCPU),aLocalCPU));
+      xCPU:=TCPU(GetEnumValueSimple(TypeInfo(TCPU),aCPU));
       if Ord(xCPU) < 0 then
-        raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aLocalCPU]);
+        raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aCPU]);
     end;
     result:=xCPU;
   end;
@@ -246,26 +242,22 @@ end;
 function GetTOS(aOS:string):TOS;
 var
   xOS:TOS;
-  aLocalOS:string;
 begin
   result:=TOS.osNone;
-  aLocalOS:=aOS;
-  if length(aLocalOS)>0 then
+  if length(aOS)>0 then
   begin
-    //if aLocalOS='win32' then aLocalOS:='windows';
-    //if aLocalOS='win64' then aLocalOS:='windows';
-    if aLocalOS='i-sim' then xOS:=TOS.iphonesim
+    if aOS='i-sim' then xOS:=TOS.iphonesim
     else
-    if aLocalOS='i-simulator' then xOS:=TOS.iphonesim
+    if aOS='i-simulator' then xOS:=TOS.iphonesim
     else
-    if aLocalOS='iphone-simulator' then xOS:=TOS.iphonesim
+    if aOS='iphone-simulator' then xOS:=TOS.iphonesim
     else
-    if aLocalOS='iphonesimulator' then xOS:=TOS.iphonesim
+    if aOS='iphonesimulator' then xOS:=TOS.iphonesim
     else
     begin
-      xOS:=TOS(GetEnumValueSimple(TypeInfo(TOS),aLocalOS));
+      xOS:=TOS(GetEnumValueSimple(TypeInfo(TOS),aOS));
       if Ord(xOS) < 0 then
-        raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aLocalOS]);
+        raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aOS]);
     end;
     result:=xOS;
   end;
@@ -273,8 +265,15 @@ end;
 
 function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
 begin
+  result.CPU:=TCPU.cpuNone;
+  result.OS:=TOS.osNone;
   result.CPU:=GetTCPU(aCPU);
-  result.OS:=GetTOS(aOS);
+  if aOS='windows' then
+  begin
+    if result.CPU=TCPU.i386 then result.OS:=TOS.win32;
+    if result.CPU=TCPU.x86_64 then result.OS:=TOS.win64;
+  end
+  else result.OS:=GetTOS(aOS);
 end;
 
 { TCrossInstaller }
@@ -292,12 +291,12 @@ end;
 
 function TCrossInstaller.GetTargetCPUName:string;
 begin
-  GetCPU(TargetCPU);
+  result:=GetCPU(TargetCPU);
 end;
 
 function TCrossInstaller.GetTargetOSName:string;
 begin
-  GetOS(TargetOS);
+  result:=GetOS(TargetOS);
 end;
 
 
@@ -540,13 +539,13 @@ begin
   FCrossOpts.Clear;
   FSubArch:='';
 
-  FRegisterName:=GetCPU(TargetCPU)+'-'+GetOS(TargetOS);
+  FRegisterName:=TargetCPUName+'-'+TargetOSName;
   FBinUtilsDirectoryID:=FRegisterName;
 
   if TargetOS=TOS.android then
-    FBinUtilsPrefix:=GetCPU(TargetCPU)+'-linux-'+GetOS(TargetOS)+'-' //standard eg in Android NDK 9
+    FBinUtilsPrefix:=TargetCPUName+'-linux-'+TargetOSName+'-' //standard eg in Android NDK 9
   else
-    FBinUtilsPrefix:=GetCPU(TargetCPU)+'-'+GetOS(TargetOS)+'-';
+    FBinUtilsPrefix:=TargetCPUName+'-'+TargetOSName+'-'; //normal binutils prefix name
 
   FBinutilsPathInPath:=false; //don't add binutils directory to path when cross compiling
 
