@@ -81,9 +81,8 @@ begin
   if result then
   begin
     FLibsFound:=true;
-    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath);// buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries
+    AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
   end;
 end;
 
@@ -100,13 +99,9 @@ begin
   result:=inherited;
   if result then exit;
 
-  //todo: remove once done
-  ShowInfo('Experimental, not finished. Stopping now.', etError);
-  result:=false;
-
   //todo: use conditional compilation for hostcpu, hostos; determine what to do depending on that
   FBinUtilsPrefix:='';
-  FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'/cross/bin/'+TargetCPU+'-'+TargetOS; //these do not contain as etc though
+  FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'/cross/bin/'+TargetCPUName+'-'+TargetOSName; //these do not contain as etc though
   if not FileExists(FBinUtilsPath+'/as') then
   begin
     // Check for and get Linux binutils.
@@ -130,11 +125,8 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
-    '-Tlinux'; {target operating system}
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
   end;
 end;
 
@@ -142,12 +134,9 @@ constructor TFreeBSD_Linux64.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TFreeBSD';
-  FBinUtilsPath:='';
-  FBinUtilsPrefix:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.linux);
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.linux;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -163,7 +152,8 @@ var
 
 initialization
   FreeBSD_Linux64:=TFreeBSD_Linux64.Create;
-  RegisterCrossCompiler(FreeBSD_Linux64.TargetCPU+'-'+FreeBSD_Linux64.TargetOS,FreeBSD_Linux64);
+  RegisterCrossCompiler(FreeBSD_Linux64.RegisterName,FreeBSD_Linux64);
+
 finalization
   FreeBSD_Linux64.Destroy;
 {$ENDIF FREEBSD}

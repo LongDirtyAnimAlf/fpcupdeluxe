@@ -1820,10 +1820,10 @@ begin
   Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
   Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
 
-  if (Self is TLazarusCrossInstaller) then
+  if (CrossCompiling) then
   begin
-    Processor.Parameters.Add('OS_TARGET=' + TLazarusCrossInstaller(Self).CrossInstaller.TargetOSName);
-    Processor.Parameters.Add('CPU_TARGET=' + TLazarusCrossInstaller(Self).CrossInstaller.TargetCPUName);
+    Processor.Parameters.Add('OS_TARGET=' + CrossInstaller.TargetOSName);
+    Processor.Parameters.Add('CPU_TARGET=' + CrossInstaller.TargetCPUName);
   end
   else
   begin

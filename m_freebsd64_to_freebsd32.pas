@@ -93,11 +93,8 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
-    '-Tfreebsd'; {target operating system}
+    AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
   end;
 end;
 
@@ -105,13 +102,10 @@ constructor TFreeBSD64_FreeBSD386.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TFreeBSD64';
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FTargetCPU:=GetCPU(TCPU.i386);
-  FTargetOS:=GetOS(TOS.freebsd);
+  FTargetCPU:=TCPU.i386;
+  FTargetOS:=TOS.freebsd;
+  Reset;
   FBinUtilsPrefix:='';
-  //FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FLibsPath:='';
   ShowInfo;
 end;
@@ -129,7 +123,8 @@ var
 {$IFDEF CPUX64}
 initialization
   FreeBSD64_FreeBSD386:=TFreeBSD64_FreeBSD386.Create;
-  RegisterCrossCompiler(FreeBSD64_FreeBSD386.TargetCPU+'-'+FreeBSD64_FreeBSD386.TargetOS,FreeBSD64_FreeBSD386);
+  RegisterCrossCompiler(FreeBSD64_FreeBSD386.RegisterName,FreeBSD64_FreeBSD386);
+
 finalization
   FreeBSD64_FreeBSD386.Destroy;
 {$ENDIF CPUX64}
