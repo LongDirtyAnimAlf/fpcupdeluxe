@@ -45,8 +45,23 @@ uses
   fpcuputil;
 
 const
-  ARCH='x86_64';
-  OS='iphonesim';
+  SDKNAME='iPhoneSimulator';
+
+  SDKLOCATIONS:array[0..4] of string = (
+    '/Applications/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
+    '/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
+    '~/Desktop/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
+    '~/Downloads/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
+    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk'
+  );
+
+  TOOLCHAINLOCATIONS:array[0..4] of string = (
+    '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+    '/Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+    '~/Desktop/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+    '~/Downloads/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain'
+  );
 
 type
 
@@ -65,38 +80,36 @@ end;
 { TDarwin64iphonesim }
 
 function TDarwin64iphonesim.GetLibs(Basepath:string): boolean;
-var
-  IOS_BASE:string;
 begin
   result:=FLibsFound;
   if result then exit;
 
   FLibsPath:='';
+  result:=false;
+  FLibsFound:=false;
+
+  for FLibsPath in SDKLOCATIONS do
+  begin
+    FLibsPath:=ExpandFileName(FLibsPath);
+    if DirectoryExists(FLibsPath) then
+    begin
+      FLibsFound:=true;
+      break;
+    end;
+  end;
+
+  if FLibsFound then
+  begin
+    FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
+  end else FLibsPath:='';
+
+  // Never fail.
   result:=true;
   FLibsFound:=true;
-
-  IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExists(IOS_BASE) then
-     IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExists(IOS_BASE) then
-     IOS_BASE:='~/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExists(IOS_BASE) then
-     IOS_BASE:='~/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-
-  if DirectoryExists(IOS_BASE) then
-  begin
-    FLibsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/lib/';
-    //FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    //'-XR'+ExcludeTrailingPathDelimiter(IOS_BASE);
-    //'-Xr'+IncludeTrailingPathDelimiter(FLibsPath); //set linker's rlink path
-    //'-Xr'+IncludeTrailingPathDelimiter(IOS_BASE); //set linker's rlink path
-    //'-Xr'; //set linker's rlink path
-  end;
 end;
 
 function TDarwin64iphonesim.GetBinUtils(Basepath:string): boolean;
 var
-  IOS_BASE:string;
   aOption:string;
 begin
   result:=inherited;
@@ -104,25 +117,32 @@ begin
 
   FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
+  result:=false;
+  FBinsFound:=false;
+
+  for FBinUtilsPath in TOOLCHAINLOCATIONS do
+  begin
+    FBinUtilsPath:=ExpandFileName(FBinUtilsPath);
+    if DirectoryExists(FBinUtilsPath) then
+    begin
+      FBinsFound:=true;
+      break;
+    end;
+  end;
+
+  if FBinsFound then
+  begin
+    AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FBinUtilsPath));
+    FBinUtilsPath:=IncludeTrailingPathDelimiter(FBinUtilsPath)+'usr/bin';
+    AddFPCCFGSnippet('-FD'+FBinUtilsPath);{search this directory for compiler utilities}
+  end else FBinUtilsPath:='';
+
+  aOption:=GetSDKVersion(LowerCase(SDKNAME));
+  if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
+
+  // Never fail
   result:=true;
   FBinsFound:=true;
-
-  IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExists(IOS_BASE) then
-     IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExists(IOS_BASE) then
-     IOS_BASE:='~/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExists(IOS_BASE) then
-     IOS_BASE:='~/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-
-  if DirectoryExists(IOS_BASE) then
-  begin
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/bin';
-    AddFPCCFGSnippet('-FD'+FBinUtilsPath); {search this directory for compiler utilities}
-    AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(IOS_BASE));
-  end;
-  aOption:=GetSDKVersion('iphonesimulator');
-  if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
 end;
 
 constructor TDarwin64iphonesim.Create;

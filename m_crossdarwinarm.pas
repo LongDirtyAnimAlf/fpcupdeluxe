@@ -17,13 +17,16 @@ uses
   fpcuputil;
 
 const
+  SDKNAME='iPhoneOS';
+
   SDKLOCATIONS:array[0..4] of string = (
-    '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk',
-    '/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk',
-    '~/Desktop/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk',
-    '~/Downloads/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk',
-    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk'
+    '/Applications/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
+    '/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
+    '~/Desktop/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
+    '~/Downloads/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
+    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk'
   );
+
   TOOLCHAINLOCATIONS:array[0..4] of string = (
     '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
     '/Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
@@ -120,7 +123,7 @@ begin
     AddFPCCFGSnippet('-FD'+FBinUtilsPath);{search this directory for compiler utilities}
   end else FBinUtilsPath:='';
 
-  aOption:=GetSDKVersion('iphoneos');
+  aOption:=GetSDKVersion(LowerCase(SDKNAME));
   if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
 
   // Never fail
