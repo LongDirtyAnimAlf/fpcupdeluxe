@@ -1,8 +1,8 @@
 Index: rtl/dragonfly/Makefile
 ===================================================================
---- rtl/dragonfly/Makefile	(revision 43661)
+--- rtl/dragonfly/Makefile	(revision 44690)
 +++ rtl/dragonfly/Makefile	(working copy)
-@@ -3265,26 +3265,37 @@
+@@ -3319,26 +3319,37 @@
  	$(AS) -o $(UNITTARGETDIRPREFIX)dllprt0$(OEXT) $(CPU_TARGET)/dllprt0.as
  $(SYSTEMUNIT)$(PPUEXT) : $(BSDINC)/$(SYSTEMUNIT).pp unxconst.inc $(SYSDEPS)
  	$(COMPILER) $(FPC_SYSTEM_OPT) -Us -Sg $(BSDINC)/$(SYSTEMUNIT).pp
@@ -42,7 +42,7 @@ Index: rtl/dragonfly/Makefile
  sysutils$(PPUEXT) : $(UNIXINC)/sysutils.pp $(wildcard $(OBJPASDIR)/sysutils/*.inc) \
  		    objpas$(PPUEXT) unix$(PPUEXT) errors$(PPUEXT) sysconst$(PPUEXT)
  	$(COMPILER) -Fi$(OBJPASDIR)/sysutils $(UNIXINC)/sysutils.pp
-@@ -3291,7 +3302,8 @@
+@@ -3345,7 +3356,8 @@
  rtlconsts$(PPUEXT) : $(OBJPASDIR)/rtlconsts.pp
  	$(COMPILER) $(OBJPASDIR)/rtlconsts.pp
  classes$(PPUEXT) : $(UNIXINC)/classes.pp $(wildcard $(OBJPASDIR)/classes/*.inc) \
@@ -52,7 +52,7 @@ Index: rtl/dragonfly/Makefile
  	$(COMPILER) -Fi$(OBJPASDIR)/classes $(UNIXINC)/classes.pp
  fgl$(PPUEXT) : $(OBJPASDIR)/fgl.pp objpas$(PPUEXT) types$(PPUEXT) system$(PPUEXT) sysutils$(PPUEXT) sortbase$(PPUEXT)
  	$(COMPILER) $(OBJPASDIR)/fgl.pp
-@@ -3312,29 +3324,55 @@
+@@ -3366,29 +3378,55 @@
  extpas$(PPUEXT) : $(INC)/extpas.pp dos$(PPUEXT)
  	$(COMPILER) $(INC)/extpas.pp $(REDIR)
  x86$(PPUEXT) : $(UNIXINC)/x86.pp $(SYSTEMUNIT)$(PPUEXT)
@@ -112,7 +112,7 @@ Index: rtl/dragonfly/Makefile
 +	$(COMPILER) $<
 Index: rtl/dragonfly/Makefile.fpc
 ===================================================================
---- rtl/dragonfly/Makefile.fpc	(revision 43661)
+--- rtl/dragonfly/Makefile.fpc	(revision 44690)
 +++ rtl/dragonfly/Makefile.fpc	(working copy)
 @@ -10,11 +10,11 @@
  

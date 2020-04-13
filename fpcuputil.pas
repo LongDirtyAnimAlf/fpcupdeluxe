@@ -356,6 +356,7 @@ function SaveFileFromResource(filename,resourcename:string):boolean;
 function SaveInisFromResource(filename,resourcename:string):boolean;
 // Searches for SearchFor in the stringlist and returns the index if found; -1 if not
 // Search optionally starts from position SearchFor
+function StringsStartsWith(const SearchIn:array of string; SearchFor:string; StartIndex:integer; CS:boolean): integer;
 function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
 function StringListContains(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
 function GetTotalPhysicalMemory: DWord;
@@ -1734,6 +1735,15 @@ end;
 function DownloadBase(aDownLoader:TBasicDownloader;URL: string; DataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 begin
   result:=false;
+
+  {$ifdef mswindows}
+  if (Pos('/openssl',URL)>0) AND (Pos('.zip',URL)>0) then
+  begin
+    // Skip native download of ssl libraries : will not work without these libraries
+    if aDownLoader.InheritsFrom(TNativeDownLoader) then exit;
+  end;
+  {$endif}
+
   if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   result:=aDownLoader.getStream(URL,DataStream);
   if (NOT result) then
@@ -2498,6 +2508,25 @@ begin
     result:=s;
 end;
 
+
+function StringsStartsWith(const SearchIn:array of string; SearchFor:string; StartIndex:integer; CS:boolean): integer;
+var
+  Found:boolean=false;
+  i:integer;
+begin
+  for i:=StartIndex to High(SearchIn) do
+  begin
+    if CS then
+      Found:=AnsiStartsStr(SearchFor,TrimLeft(SearchIn[i]))
+    else
+      Found:=AnsiStartsText(SearchFor,TrimLeft(SearchIn[i]));
+    if Found then break;
+  end;
+  if Found then
+    result:=i
+  else
+    result:=-1;
+end;
 
 function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex:integer; CS:boolean): integer;
 var
