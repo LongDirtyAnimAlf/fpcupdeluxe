@@ -4607,6 +4607,7 @@ constructor TUseWGetDownloader.Create;
 begin
   Inherited;
 
+  FCURLOk:=False;
   {$ifdef ENABLECURL}
   FCURLOk:=LoadCurlLibrary;
   {$endif}
