@@ -2212,52 +2212,56 @@ function TInstaller.DownloadOpenSSL: boolean;
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
-  OpenSSLFileName,Output,aSourceURL: string;
+  OpenSSLFileName,aSourceURL: string;
   i:integer;
 begin
+  result:=false;
+  OperationSucceeded := false;
+
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
 
   infoln(localinfotext+'No OpenSLL library files available for SSL. Going to download them.',etWarning);
 
-  OperationSucceeded := false;
 
-  OpenSSLFileName := GetTempFileNameExt('FPCUPTMP','zip');
-
-  for i:=0 to (Length(OpenSSLSourceURL)-1) do
-  try
-    aSourceURL:=OpenSSLSourceURL[i];
-    //always get this file with the native downloader !!
-    OperationSucceeded:=GetFile(aSourceURL,OpenSSLFileName,true,true);
-    if (NOT OperationSucceeded) then
+  //if (NOT CheckWin32Version(6,2)) then
+  begin
+    if FSVNClient.ValidClient then
     begin
-      // try one more time
-      SysUtils.DeleteFile(OpenSSLFileName);
-      OperationSucceeded:=GetFile(aSourceURL,OpenSSLFileName,true,true);
-    end;
-    if (NOT OperationSucceeded) then
-      SysUtils.DeleteFile(OpenSSLFileName)
-    else
-      break;
+      OpenSSLFileName:='libeay32.dll';
+      // First check remote URL
+      OperationSucceeded:=SimpleExportFromSVN('DownloadOpenSSL',OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,'');
+      // Perform download
+      if OperationSucceeded then
+        OperationSucceeded:=SimpleExportFromSVN('DownloadOpenSSL',OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath);
 
-  except
-    on E: Exception do
-    begin
-      OperationSucceeded := false;
-      writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library', true);
+      OpenSSLFileName:='ssleay32.dll';
+      // First check remote URL
+      if OperationSucceeded then
+        OperationSucceeded:=SimpleExportFromSVN('DownloadOpenSSL',OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,'');
+      // Perform download
+      if OperationSucceeded then
+        OperationSucceeded:=SimpleExportFromSVN('DownloadOpenSSL',OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath);
     end;
+
+    if OperationSucceeded
+       then infoln(localinfotext+'SVN OpenSLL library files download from '+OPENSSL_URL_LATEST_SVN+' ok.',etWarning)
   end;
 
-  {
   if (NOT OperationSucceeded) then
   begin
-    infoln(localinfotext+'Could not download/install openssl library the normal way', etInfo);
-    infoln(localinfotext+'Now going to use BitsAdmin (may be slow)', etInfo);
+    OpenSSLFileName := GetTempFileNameExt('FPCUPTMP','zip');
 
     for i:=0 to (Length(OpenSSLSourceURL)-1) do
     try
       aSourceURL:=OpenSSLSourceURL[i];
-      SysUtils.DeleteFile(OpenSSLFileName);
-      OperationSucceeded:=DownloadByBitsAdmin(aSourceURL,OpenSSLFileName);
+      //always get this file with the native downloader !!
+      OperationSucceeded:=GetFile(aSourceURL,OpenSSLFileName,true,true);
+      if (NOT OperationSucceeded) then
+      begin
+        // try one more time
+        SysUtils.DeleteFile(OpenSSLFileName);
+        OperationSucceeded:=GetFile(aSourceURL,OpenSSLFileName,true,true);
+      end;
       if (NOT OperationSucceeded) then
         SysUtils.DeleteFile(OpenSSLFileName)
       else
@@ -2267,63 +2271,63 @@ begin
       on E: Exception do
       begin
         OperationSucceeded := false;
-        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library by BitsAdmin', true);
-      end;
-    end;
-  end;
-  }
-
-  if OperationSucceeded then
-  begin
-    // Extract
-    with TNormalUnzipper.Create do
-    begin
-      try
-        resultcode:=2;
-        SysUtils.Deletefile(SafeGetApplicationPath+'libeay32.dll');
-        if GetLastOSError<>5 then // no access denied
-        begin
-          SysUtils.Deletefile(SafeGetApplicationPath+'ssleay32.dll');
-          if GetLastOSError<>5 then // no access denied
-          begin
-            resultcode:=1;
-            if DoUnZip(OpenSSLFileName,SafeGetApplicationPath,['libeay32.dll','ssleay32.dll']) then resultcode:=0;
-          end;
-        end;
-      finally
-        Free;
+        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library', true);
       end;
     end;
 
-    if resultcode <> 0 then
-    begin
-      OperationSucceeded := false;
-      if resultcode=2 then writelnlog(etWarning, localinfotext + 'Download OpenSSL error: could not delete/overwrite existing files.');
-      if resultcode=1 then writelnlog(etError, localinfotext + 'Download OpenSSL error: could not unzip files.');
-    end;
-  end;
-
-  if OperationSucceeded
-     then infoln(localinfotext+'OpenSLL library files download and unpacking from '+aSourceURL+' ok.',etWarning)
-     else infoln(localinfotext+'Could not download/install openssl library archive.', etError);
-  SysUtils.Deletefile(OpenSSLFileName); //Get rid of temp zip if success.
-
-  //Real last resort: get OpenSSL from from Lazarus binaries
-  if (NOT OperationSucceeded) then
-  begin
-    OpenSSLFileName:=SafeGetApplicationPath+'libeay32.dll';
-    OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/libeay32.dll',OpenSSLFileName,true,true);
     if OperationSucceeded then
     begin
-      OpenSSLFileName:=SafeGetApplicationPath+'ssleay32.dll';
-      OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/ssleay32.dll',OpenSSLFileName,true,true);
+      // Extract
+      with TNormalUnzipper.Create do
+      begin
+        try
+          resultcode:=2;
+          SysUtils.Deletefile(SafeGetApplicationPath+'libeay32.dll');
+          if GetLastOSError<>5 then // no access denied
+          begin
+            SysUtils.Deletefile(SafeGetApplicationPath+'ssleay32.dll');
+            if GetLastOSError<>5 then // no access denied
+            begin
+              resultcode:=1;
+              if DoUnZip(OpenSSLFileName,SafeGetApplicationPath,['libeay32.dll','ssleay32.dll']) then resultcode:=0;
+            end;
+          end;
+        finally
+          Free;
+        end;
+      end;
+
+      if resultcode <> 0 then
+      begin
+        OperationSucceeded := false;
+        if resultcode=2 then writelnlog(etWarning, localinfotext + 'Download OpenSSL error: could not delete/overwrite existing files.');
+        if resultcode=1 then writelnlog(etError, localinfotext + 'Download OpenSSL error: could not unzip files.');
+      end;
     end;
+
     if OperationSucceeded
-       then infoln(localinfotext+'OpenSLL library files download from '+OPENSSL_URL_LATEST_SVN+'s ok.',etWarning)
-       else infoln(localinfotext+'Could not download/install openssl library from '+OPENSSL_URL_LATEST_SVN+'.', etError);
+       then infoln(localinfotext+'OpenSLL library files download and unpacking from '+aSourceURL+' ok.',etWarning)
+       else infoln(localinfotext+'Could not download/install openssl library archive.', etError);
+
+    SysUtils.Deletefile(OpenSSLFileName); //Get rid of temp zip if success.
   end;
 
-  Result := OperationSucceeded;
+  // Real last resort: direct download OpenSSL from from Lazarus binaries
+  if (NOT OperationSucceeded) AND (NOT FSVNClient.ValidClient) then
+  begin
+    OpenSSLFileName:='libeay32.dll';
+    OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
+    if OperationSucceeded then
+    begin
+      OpenSSLFileName:='ssleay32.dll';
+      OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
+    end;
+
+    if OperationSucceeded
+       then infoln(localinfotext+'Direct OpenSLL library files download from '+OPENSSL_URL_LATEST_SVN+' ok.',etWarning)
+  end;
+
+  result := OperationSucceeded;
  end;
 
 function TInstaller.DownloadWget: boolean;
