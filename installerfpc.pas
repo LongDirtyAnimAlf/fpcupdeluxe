@@ -3392,26 +3392,20 @@ begin
       {$ENDIF}
       try
         ConfigText.LoadFromFile(FPCCfg);
-        y:=ConfigText.Count;
+
+        //Try to find the end of the normal vanilla FPC config file
+        y:=StringListStartsWith(ConfigText,FPCSnipMagic);
+        if (y<>-1) then
+        begin
+          while (y<ConfigText.Count) AND (Length(ConfigText.Strings[y])>0) do Inc(y);
+        end
+        else y:=ConfigText.Count;
 
         // cleanup previous fpcup settings
         repeat
-          x:=-1;
-          if x=-1 then
-          begin
-            s:='# fpcup:';
-            x:=ConfigText.IndexOf(s);
-          end;
-          if x=-1 then
-          begin
-            s:='# Fpcup[deluxe]:';
-            x:=ConfigText.IndexOf(s);
-          end;
-          if x=-1 then
-          begin
-            s:=SnipMagicBegin+FPCUPMAGIC;
-            x:=ConfigText.IndexOf(s);
-          end;
+          x:=StringListStartsWith(ConfigText,'# fpcup:');
+          if x=-1 then x:=StringListStartsWith(ConfigText,'# Fpcup[deluxe]:');
+          if x=-1 then x:=StringListStartsWith(ConfigText,SnipMagicBegin+FPCUPMAGIC);
 
           if x<>-1 then
           begin
@@ -3432,7 +3426,6 @@ begin
             // remove empty lines if any
             while (x<ConfigText.Count) AND (Length(ConfigText.Strings[x])=0) do ConfigText.Delete(x);
           end;
-
         until x=-1;
 
         if y=ConfigText.Count then
@@ -3531,6 +3524,7 @@ begin
           ConfigText.Append('# Prevents crti not found linking errors');
           ConfigText.Append('#IFDEF DARWIN');
           ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
+          //ConfigText.Append('#IFDEF CPU'+UpperCase(GetTargetCPU));
           if CompareVersionStrings(s,'10.8')>=0 then
             ConfigText.Append('-WM10.8')
           else
