@@ -2203,14 +2203,14 @@ begin
     end;
   end;
 
-  {$IFNDEF MSWINDOWS}
+  {$IFDEF UNIX}
   if OperationSucceeded then
   begin
     // Make executable
     OperationSucceeded:=(fpChmod(FBootstrapCompiler, &755)=0); //rwxr-xr-x
     if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,eterror);
   end;
-  {$ENDIF MSWINDOWS}
+  {$ENDIF UNIX}
 
   if OperationSucceeded = True then
   begin

@@ -34,6 +34,7 @@ unit fpcuputil;
 {$mode objfpc}{$H+}
 
 {$define ENABLEWGET}
+{$define ENABLECURL}
 {$define ENABLENATIVE}
 
 {$ifdef Haiku}
@@ -44,6 +45,13 @@ unit fpcuputil;
 // synaser does not work under OpenBSD
 {$undef ENABLENATIVE}
 {$endif}
+{$IF DEFINED(MORPHOS) OR DEFINED(AROS)}
+// libcurl does not work under AROS and Morphos
+{$undef ENABLECURL}
+// synaser does not work under AROS and Morphos
+{$undef ENABLENATIVE}
+{$ENDIF}
+
 {$ifdef Darwin}
 // Do not use wget and family under Darwin
 {$undef ENABLEWGET}
@@ -67,10 +75,12 @@ uses
   {$ifdef darwin}
   ns_url_request,
   {$endif}
+  {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}
   {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30000)}
   fpopenssl,
   {$ENDIF}
   openssl,
+  {$ENDIF}
   //fpftpclient,
   eventlog;
 
@@ -239,9 +249,11 @@ type
     //WGETBinary:string;
     procedure AddHeader(const aHeader,aValue:String);
     function  WGetDownload(Const URL : String; DataStream : TStream):boolean;
+    {$ifdef ENABLECURL}
     function  LibCurlDownload(Const URL : String; DataStream : TStream):boolean;
-    function  WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
     function  LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
+    {$endif}
+    function  WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
     function  Download(const URL: String; DataStream: TStream):boolean;
     function  FTPDownload(Const URL : String; DataStream : TStream):boolean;
     function  HTTPDownload(Const URL : String; DataStream : TStream):boolean;
@@ -348,8 +360,8 @@ function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex
 function StringListContains(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
 function GetTotalPhysicalMemory: DWord;
 function GetSwapFileSize: DWord;
-{$IFDEF UNIX}
 function XdgConfigHome: String;
+{$IFDEF UNIX}
 function GetStartupObjects:string;
 {$IFDEF LINUX}
 function GetFreePhysicalMemory: DWord;
@@ -409,7 +421,9 @@ uses
   {$ifdef ENABLENATIVE}
   ftpsend,
   {$else}
+  {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}
   ftplist,
+  {$ENDIF}
   {$endif}
   FileUtil,
   LazFileUtils,
@@ -432,7 +446,9 @@ uses
   // for wget downloader
   ,process
   // for libc downloader
+  {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}
   ,fpcuplibcurl
+  {$ENDIF}
   {$ENDIF ENABLEWGET}
   ,NumCPULib  in './numcpulib/NumCPULib.pas'
   ,processutils
@@ -985,10 +1001,33 @@ begin
   { Create the link }
   IPFile.Save(PWChar(LinkName), false);
 end;
-{$ENDIF MSWINDOWS}
+{$ELSE}
+{$IFDEF DARWIN}
+procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
+begin
+  // Create shortcut on Desktop and in Applications
+  fpSystem(
+    '/usr/bin/osascript << EOF'+#10+
+    'tell application "Finder"'+#10+
+      'set myLazApp to POSIX file "'+IncludeLeadingPathDelimiter(Target)+'.app" as alias'+#10+
+      'try'+#10+
+          'set myLazDeskShort to (path to desktop folder as string) & "'+ShortcutName+'" as alias'+#10+
+          'on error'+#10+
+             'make new alias to myLazApp at (path to desktop folder as text)'+#10+
+             'set name of result to "'+ShortcutName+'"'+#10+
+      'end try'+#10+
+      'try'+#10+
+          'set myLazAppShort to (path to applications folder as string) & "'+ShortcutName+'" as alias'+#10+
+          'on error'+#10+
+             'make new alias to myLazApp at (path to applications folder as text)'+#10+
+             'set name of result to "'+ShortcutName+'"'+#10+
+      'end try'+#10+
 
-{$IF DEFINED(UNIX) AND NOT DEFINED(HAIKU)}
-{$IFNDEF DARWIN}
+    'end tell'+#10+
+    'EOF');
+end;
+{$ELSE}
+{$IFDEF UNIX}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 var
   OperationSucceeded: boolean;
@@ -1060,38 +1099,14 @@ begin
     XdgDesktopContent.Free;
   end;
 end;
-{$ELSE DARWIN}
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
-begin
-  // Create shortcut on Desktop and in Applications
-  fpSystem(
-    '/usr/bin/osascript << EOF'+#10+
-    'tell application "Finder"'+#10+
-      'set myLazApp to POSIX file "'+IncludeLeadingPathDelimiter(Target)+'.app" as alias'+#10+
-      'try'+#10+
-          'set myLazDeskShort to (path to desktop folder as string) & "'+ShortcutName+'" as alias'+#10+
-          'on error'+#10+
-             'make new alias to myLazApp at (path to desktop folder as text)'+#10+
-             'set name of result to "'+ShortcutName+'"'+#10+
-      'end try'+#10+
-      'try'+#10+
-          'set myLazAppShort to (path to applications folder as string) & "'+ShortcutName+'" as alias'+#10+
-          'on error'+#10+
-             'make new alias to myLazApp at (path to applications folder as text)'+#10+
-             'set name of result to "'+ShortcutName+'"'+#10+
-      'end try'+#10+
-
-    'end tell'+#10+
-    'EOF');
-end;
-{$ENDIF DARWIN}
-{$ENDIF}
-{$IFDEF HAIKU}
+{$ELSE}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 begin
   infoln('Not creating desktop shortcut: don''t know how to do this.');
 end;
-{$ENDIF}
+{$ENDIF UNIX}
+{$ENDIF DARWIN}
+{$ENDIF MSWINDOWS}
 
 procedure CreateHomeStartLink(Target, TargetArguments,
   ShortcutName: string);
@@ -1469,7 +1484,7 @@ begin
   if CheckDirectory(DirectoryName) then exit;
 
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
-  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       // Ignore directories and files without name:
@@ -1480,7 +1495,7 @@ begin
         // Remove read-only file attribute so we can delete it:
         if (FileInfo.Attr and faReadOnly)>0 then
           FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
-        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
+        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; exit with failure on error
           if not DeleteDirectoryEx(CurFilename) then
@@ -1531,7 +1546,7 @@ begin
 
   AllFiles:=(Names.Count=0);
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
-  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       // Ignore directories and files without name:
@@ -1539,7 +1554,7 @@ begin
       begin
         // Look at all files and directories in this directory:
         CurFilename:=CurSrcDir+FileInfo.Name;
-        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
+        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; call recursively exit with failure on error
           if not DeleteFilesSubDirs(CurFilename,Names,OnlyIfPathHas) then
@@ -1608,7 +1623,7 @@ begin
   end;
   AllFiles:=(Extensions.Count=0) or (Extensions.IndexOf('.*')>=0);
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
-  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       // Ignore directories and files without name:
@@ -1616,7 +1631,7 @@ begin
       begin
         // Look at all files and directories in this directory:
         CurFilename:=CurSrcDir+FileInfo.Name;
-        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
+        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; call recursively exit with failure on error
           if not DeleteFilesExtensionsSubdirs(CurFilename, Extensions,OnlyIfPathHas) then
@@ -1667,7 +1682,6 @@ var
   AllFiles: boolean;
   CurSrcDir: String;
   CurFilename: String;
-  i: integer;
 begin
   Result:=false;
 
@@ -1679,7 +1693,7 @@ begin
   if AllFiles then exit;
 
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
-  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       // Ignore directories and files without name:
@@ -1687,7 +1701,7 @@ begin
       begin
         // Look at all files and directories in this directory:
         CurFilename:=CurSrcDir+FileInfo.Name;
-        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
+        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; call recursively exit with failure on error
           if not DeleteFilesNameSubdirs(CurFilename, OnlyIfNameHas) then
@@ -2229,15 +2243,15 @@ var
   FileInfo: TSearchRec;
   {$ENDIF}
 begin
-{$ifdef unix}
-  result:=filesize(FileName);
-{$else}
   if SysUtils.FindFirst(FileName, faAnyFile, FileInfo ) = 0 then
+  {$ifdef MSWindows}
      result := Int64(FileInfo.FindData.nFileSizeHigh) shl Int64(32) + Int64(FileInfo.FindData.nFileSizeLow)
+  {$else}
+    result := FileInfo.Size
+  {$endif}
   else
      result := 0;
   SysUtils.FindClose(FileInfo);
-{$endif}
 end;
 
 function ParentDirectoryIsNotRoot(Dir: string): boolean;
@@ -3075,7 +3089,7 @@ end;
 function IsExecutable(Executable: string):boolean;
 var
   aPath:string;
-  {$ifndef MSWindows}
+  {$ifdef UNIX}
   Info : Stat;
   {$endif}
 begin
@@ -3087,13 +3101,12 @@ begin
   {$endif}
   if ExtractFileExt(aPath)=GetExeExt then
   begin
-    {$ifdef MSWindows}
-    result:=true;
-    {$else}
+    {$ifdef UNIX}
     //result:=(fpAccess(aPath,X_OK)=0);
     result:=(FpStat(aPath,info{%H-})<>-1) and FPS_ISREG(info.st_mode) and
             (BaseUnix.FpAccess(aPath,BaseUnix.X_OK)=0);
-
+    {$else}
+    result:=true;
     {$endif}
   end;
 end;
@@ -3109,20 +3122,22 @@ begin
   end;
 end;
 
-{$IFDEF UNIX}
 //Adapted from sysutils; Unix/Linux only
 Function XdgConfigHome: String;
 { Follows base-dir spec,
   see [http://freedesktop.org/Standards/basedir-spec].
   Always ends with PathDelim. }
 begin
+  {$ifdef UNIX}
   Result:=GetEnvironmentVariable('XDG_CONFIG_HOME');
   if (Result='') then
     Result:=IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+'.config'+DirectorySeparator
   else
     Result:=IncludeTrailingPathDelimiter(Result);
+  {$ELSE}
+  Result:=IncludeTrailingPathDelimiter('.');
+  {$ENDIF}
 end;
-{$ENDIF UNIX}
 
 function CheckExecutable(Executable, Parameters, ExpectOutput: string; Level: TEventType): boolean;
 var
@@ -4592,7 +4607,9 @@ constructor TUseWGetDownloader.Create;
 begin
   Inherited;
 
+  {$ifdef ENABLECURL}
   FCURLOk:=LoadCurlLibrary;
+  {$endif}
 
   if (Length(WGETBinary)=0) OR (NOT FileExists(WGETBinary)) then
   begin
@@ -4667,6 +4684,7 @@ begin
   end;
 end;
 
+{$ifdef ENABLECURL}
 function DoWrite(Ptr : Pointer; Size : size_t; nmemb: size_t; Data : Pointer) : size_t;cdecl;
 begin
   if Data=nil then result:=0 else
@@ -4761,12 +4779,16 @@ begin
     end;
   end;
 end;
+{$endif ENABLECURL}
 
 
 function TUseWGetDownloader.FTPDownload(Const URL : String; DataStream : TStream):boolean;
 begin
+  result:=false;
+  {$ifdef ENABLECURL}
   result:=LibCurlDownload(URL,DataStream);
   if (result) then infoln('LibCurl FTP file download success !!!', etDebug);
+  {$endif}
   if (NOT result) then
   begin
     result:=WGetDownload(URL,DataStream);
@@ -4776,8 +4798,11 @@ end;
 
 function TUseWGetDownloader.HTTPDownload(Const URL : String; DataStream : TStream):boolean;
 begin
+  result:=false;
+  {$ifdef ENABLECURL}
   result:=LibCurlDownload(URL,DataStream);
   if (result) then infoln('LibCurl HTTP file download success !!!', etDebug);
+  {$endif}
   if (NOT result) then
   begin
     result:=WGetDownload(URL,DataStream);
@@ -4806,11 +4831,13 @@ const
   WGETFTPLISTFILE='.listing';
 var
   aURL:string;
-  aTFTPList:TFTPList;
   s:string;
   i:integer;
   URI : TURI;
   P : String;
+  {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}  // this is very bad coding ... ;-)
+  aTFTPList:TFTPList;
+  {$ENDIF}
 begin
   result:=false;
   if (NOT FWGETOk) then exit;
@@ -4824,6 +4851,7 @@ begin
     result:=(ExecuteCommand(WGETBinary+' -q --no-remove-listing --tries='+InttoStr(MaxRetries)+' --spider '+aURL,false)=0);
     if result then
     begin
+      {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}  // this is very bad coding ... ;-)
       if FileExists(WGETFTPLISTFILE) then
       begin
         aTFTPList:=TFTPList.Create;
@@ -4841,10 +4869,12 @@ begin
           aTFTPList.Free;
         end;
       end;
+      {$ENDIF}
     end;
   end;
 end;
 
+{$ifdef ENABLECURL}
 function TUseWGetDownloader.LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
 var
   hCurl : pCurl;
@@ -4953,11 +4983,15 @@ begin
     end;
   end;
 end;
+{$endif ENABLECURL}
 
 function TUseWGetDownloader.getFTPFileList(const URL:string; filelist:TStringList):boolean;
 begin
+  result:=false;
+  {$ifdef ENABLECURL}
   result:=LibCurlFTPFileList(URL,filelist);
   if (result) then infoln('LibCurl FTP filelist success !!!!', etDebug);
+  {$endif}
   if (NOT result) then
   begin
     result:=WGetFTPFileList(URL,filelist);

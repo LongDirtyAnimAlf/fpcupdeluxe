@@ -55,8 +55,10 @@ type
   PTime_t = ^time_t;
   off_t  = clong;
 {$ELSE}
+{$IFDEF UNIX}
 uses
   unixtype;
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF FPC}

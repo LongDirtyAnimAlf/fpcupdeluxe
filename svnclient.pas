@@ -258,7 +258,7 @@ begin
 
   while true do
   begin
-    {$IFNDEF MSWINDOWS}
+    {$IFDEF UNIX}
     if ExecuteSpecialDue2EmptyString then
     begin
       if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);
@@ -409,7 +409,7 @@ begin
     // On Windows, at least certain SVN versions don't update everything.
     // So we try until there are no more files downloaded.
 
-    {$IFNDEF MSWINDOWS}
+    {$IFDEF UNIX}
     if ExecuteSpecialDue2EmptyString then
     begin
       if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);
@@ -475,7 +475,7 @@ begin
         Sleep(500);
         // attempt again !!
 
-        {$IFNDEF MSWINDOWS}
+        {$IFDEF UNIX}
         if ExecuteSpecialDue2EmptyString then
         begin
           if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);
@@ -937,7 +937,7 @@ begin
               end;
               {$ENDIF}
 
-              {$IFNDEF MSWINDOWS}
+              {$IFDEF UNIX}
               if ExecuteSpecialDue2EmptyString then
               begin
                 if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);

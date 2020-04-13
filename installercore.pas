@@ -533,7 +533,7 @@ uses
   {$IFDEF UNIX}
   ,LazFileUtils
   {$ENDIF UNIX}
-  {$IFNDEF HAIKU}
+  {$IF NOT DEFINED(HAIKU) AND NOT DEFINED(AROS) AND NOT DEFINED(MORPHOS)}
   //,ssl_openssl
   // for runtime init of openssl
   {$IFDEF MSWINDOWS}

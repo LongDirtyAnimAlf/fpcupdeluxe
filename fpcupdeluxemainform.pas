@@ -310,7 +310,7 @@ begin
   btnGetOpenSSL.Visible:=false;
   {$endif}
 
-  {$IF defined(CPUAARCH64) OR defined(CPUARM) OR (DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)) OR defined(Haiku)}
+  {$IF defined(CPUAARCH64) OR defined(CPUARM) OR (DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)) OR defined(Haiku) OR defined(AROS) OR defined(Morphos)}
   // disable some features
   OldBtn.Visible:=False;
   {DinoBtn.Visible:=False;}
