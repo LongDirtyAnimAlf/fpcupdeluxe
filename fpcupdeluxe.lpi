@@ -862,9 +862,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-k&quot;-rpath ./&quot;
--k&quot;-rpath /boot/system/develop/lib/x86&quot;
--k&quot;-rpath ~/config/non-packaged/lib&quot;"/>
+            <CustomOptions Value="-fPIC"/>
           </Other>
         </CompilerOptions>
       </Item27>

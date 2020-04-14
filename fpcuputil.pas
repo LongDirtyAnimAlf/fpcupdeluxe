@@ -2051,8 +2051,20 @@ begin
     if (NOT result) then infoln('FPCUP native downloader failure.',etDebug);
   end;
 
-  {$ifdef Windows}
-  //Second resort: use Windows PowerShell
+  {$ifdef MSWindows}
+
+  if (NOT CheckWin32Version(6,2)) then
+  begin
+    //Second resort on older Windows: use Windows INet
+    if (NOT result) then
+    begin
+      SysUtils.Deletefile(TargetFile);
+      result:=DownloadByWinINet(URL,TargetFile);
+      if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
+    end;
+  end;
+
+  //Second or third resort: use Windows PowerShell
   if (NOT result) then
   begin
     SysUtils.Deletefile(TargetFile);
@@ -2060,23 +2072,28 @@ begin
     if (NOT result) then infoln('Windows PowerShell downloader failure.',etDebug);
   end;
 
-  //Third resort: use Windows INet
-  if (NOT result) then
+  if CheckWin32Version(6,2) then
   begin
-    SysUtils.Deletefile(TargetFile);
-    result:=DownloadByWinINet(URL,TargetFile);
-    if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
+    //Second or third resort: use Windows PowerShell
+    if (NOT result) then
+    begin
+      SysUtils.Deletefile(TargetFile);
+      result:=DownloadByWinINet(URL,TargetFile);
+      if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
+    end;
   end;
 
-  //Fourth resort: use BitsAdmin
-  {
-  if (NOT result) then
+  if (NOT CheckWin32Version(6,0)) then
   begin
-    SysUtils.Deletefile(TargetFile);
-    result:=DownloadByBitsAdmin(URL,TargetFile);
-    if (NOT result) then infoln('Windows BitsAdmin downloader failure.',etDebug);
+    //Third or fourth resort: use BitsAdmin on older Windows
+    if (NOT result) then
+    begin
+      SysUtils.Deletefile(TargetFile);
+      result:=DownloadByBitsAdmin(URL,TargetFile);
+      if (NOT result) then infoln('Windows BitsAdmin downloader failure.',etDebug);
+    end;
   end;
-  }
+
   {$endif}
 
   //Final resort: use wget by force

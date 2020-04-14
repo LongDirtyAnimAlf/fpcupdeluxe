@@ -1446,7 +1446,10 @@ begin
       if ExistWordInString(PChar(s),'Extracted ',[soDown]) then
       begin
         FG      := clSilver;
-        BG      := clBlack;
+      end;
+      if ExistWordInString(PChar(s),'Download progress',[soDown]) then
+      begin
+        FG      := TColor($0045FF);
       end;
     end;
 

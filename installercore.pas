@@ -1391,12 +1391,12 @@ end;
 procedure TInstaller.CreateBinutilsList(aVersion:string);
 // Windows-centric
 const
-  SourceURL_gdb = LAZARUSBINARIES+'/i386-win32/gdb/bin/';
+  //SourceURL_gdb = LAZARUSBINARIES+'/i386-win32/gdb/bin/';
   //SourceURL_gdb = 'https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2064%20bits/Alternative%20GDB/GDB%208.1/gdb.exe/download';
   //SourceURL_gdbserver = 'https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2064%20bits/Alternative%20GDB/GDB%208.1/gdbserver.exe/download';
-  //SourceURL_gdb = 'https://github.com/newpascal/fpcupdeluxe/releases/download/gdb-7.11.1/GDB-i386-win32.zip';
-  SourceURL64_gdb = LAZARUSBINARIES+'/x86_64-win64/gdb/bin/';
-  //SourceURL64_gdb = 'https://github.com/newpascal/fpcupdeluxe/releases/download/gdb-7.11.1/GDB-x86_64-win64.zip';
+  SourceURL_gdb = FPCUPGITREPO+'/releases/download/gdb/';
+  //SourceURL64_gdb = LAZARUSBINARIES+'/x86_64-win64/gdb/bin/';
+  SourceURL64_gdb = FPCUPGITREPO+'/releases/download/gdb/';
   SourceURL_QT = LAZARUSBINARIES+'/i386-win32/qt/';
   SourceURL_QT5 = LAZARUSBINARIES+'/i386-win32/qt5/';
 
@@ -1457,9 +1457,13 @@ begin
   AddNewUtil('nm' + GetExeExt,aSourceURL,'',ucBinutil);
 
   // add win32/64 gdb from lazarus
-  AddNewUtil('gdb' + GetExeExt,SourceURL_gdb,'',ucDebugger32);
-  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucDebugger64);
+  //AddNewUtil('gdb' + GetExeExt,SourceURL_gdb,'',ucDebugger32);
+  //AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucDebugger64);
   //AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger64);
+
+  // add win32/64 gdb from fpcup
+  AddNewUtil('i386-win32-gdb.zip',SourceURL_gdb,'',ucDebugger32);
+  AddNewUtil('x86_64-win64-gdb.zip',SourceURL64_gdb,'',ucDebugger64);
 
   {$ifdef win32}
   AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -2047,8 +2051,8 @@ begin
 
       DownloadSuccess:=false;
 
-      // These FPC binutils are always served by SVN, so use SVN client and related.
-      if FSVNClient.ValidClient then
+      // FPC owned binutils are always served by SVN, so use SVN client and related.
+      if (FSVNClient.ValidClient) AND (Pos(FPCBASESVNURL,RemotePath)>0) then
       begin
         //first check remote URL
         DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,'');
@@ -2061,7 +2065,7 @@ begin
 
       if (NOT DownloadSuccess) then
       begin
-        infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' with SVN failed. Now trying normal download.',etWarning);
+        infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' with SVN failed. Now trying normal download.',etInfo);
         DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath+FUtilFiles[Counter].FileName);
       end;
 
@@ -2069,8 +2073,25 @@ begin
       begin
         infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + '.',etError);
         Inc(Errors);
-      end else infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
+      end
+      else
+      begin
+        infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
 
+        if ExtractFileExt(FUtilFiles[Counter].FileName)='.zip' then
+        begin
+          with TNormalUnzipper.Create do
+          begin
+            try
+              if DoUnZip(InstallPath+FUtilFiles[Counter].FileName,InstallPath,[]) then
+                infoln(localinfotext+'Unpacking: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
+            finally
+              Free;
+            end;
+          end;
+        end;
+
+      end;
     end;
 
   end;

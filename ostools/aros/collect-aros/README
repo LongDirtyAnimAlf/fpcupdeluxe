@@ -1,0 +1,32 @@
+ Notes on bootstrapping a new crosscompiler environment.
+
+ You can easily build a standalone version of collect-aros from the configured AROS
+source tree using 'make standalone-collect-aros' command.
+
+ If you are bootstrapping a build for a new architecture, and don't have a compiler for
+the target at all, you'll be unable to configure the tree. In this case you need to do the
+following:
+
+1. Copy env.h.in file as env.h and replace @aros_target_cpu@ with your CPU and @aros_object_format@
+   with correct object format name.
+2. Run "make USER_CFLAGS=-D_STANDALONE_" right in this directory. If you're building on MinGW32,
+   this command won't work. Use "make CC=gcc AROS_HOST_ARCH=mingw32".
+
+ You need to perform the following steps to create a new crosscompiler from scratch:
+
+1. Download patches from contrib/gnu/gcc and contrib/gnu/binutils
+2. Download corresponding binutils and gcc source archives. Note that for i386-aros target
+   you may use the latest binutils because support for this target is already in mainstream.
+3. Download AROS SDK from AROS web site.
+4. Patch, configure, build and install binutils with --target=<cpu>-aros
+5. Extract include and lib directories from SDK into /usr/local/<cpu>-aros/ directory.
+   This assumes that you didn't specify any --prefix while configuring your tools.
+   Otherwise specify yor prefix instead of /usr/local. Rename 'include' to 'sys-include'.
+   If you're on Windows, check also lib/libm.a and lib/libz.a. Originally they are symlinks
+   to libarosm.a and libarosz.a respectively, and they are extracted as zero-length files,
+   which cause linker to fail. Replace them with plain copies of libarosm.a and libarosz.a.
+6. Build collect-aros and install into <prefix>/<cpu>-aros/bin directory
+   (/usr/local/i386-aros/bin for example). In theory you can put it into any directory in
+   your path (like /usr/local/bin), but this will prevent multiple crosstoolchains from
+   coexisting (i386-aros and ppc-aros for example).
+7. Patch, configure, build and install gcc. That's all.
