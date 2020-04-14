@@ -72,26 +72,18 @@ begin
 
   if result then
   begin
-    FLibsFound:=True;
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
     AddFPCCFGSnippet('-Xr/usr/lib');
+  end
+  else
+  begin
+    //no libs yet: go on without them
+    ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
+    FLibsPath:='';
   end;
 
-  if not result then
-  begin
-    if (StringListStartsWith(FCrossOpts,'-Cb-')<>-1) then
-    begin
-      // we have little endian libs: get them !!
-      ShowInfo('Option "-Cb-" detected: trying to get the PowerPC64 little endian libs.',etInfo);
-    end
-    else
-    begin
-      //no libs yet: go on without them
-      ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
-      FLibsPath:='';
-      result:=true;
-    end;
-  end;
+  FLibsFound:=True;
+  result:=FLibsFound;
 end;
 
 {$ifndef FPCONLY}

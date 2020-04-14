@@ -851,9 +851,6 @@
           <CodeGeneration>
             <TargetCPU Value="i386"/>
             <TargetOS Value="aros"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
@@ -861,9 +858,6 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
-          <Other>
-            <CustomOptions Value="-fPIC"/>
-          </Other>
         </CompilerOptions>
       </Item27>
       <Item28 Name="morphosppc">

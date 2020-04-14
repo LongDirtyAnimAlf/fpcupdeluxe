@@ -176,9 +176,6 @@ int main(int argc, char *argv[])
         ldargs[cnt++] = tempoutput;
     }
 
-    nonfatal("tempoutput",tempoutput);
-    nonfatal("ldscriptname",ldscriptname);
-
     ldargs[cnt] = NULL;
               
     docommandvp(full_ld_name, ldargs);
