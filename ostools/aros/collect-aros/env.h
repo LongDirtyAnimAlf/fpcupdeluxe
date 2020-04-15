@@ -1,17 +1,7 @@
 #ifndef _ENV_H_
 #define _ENV_H_
 
-/*
- * Under Windows we can't use paths provided by configure because they are UNIX-style
- * and we don't use MSYS
- */
-#ifdef _WIN32
-#ifndef _STANDALONE_
-#define _STANDALONE_
-#endif
-#endif
-
-#define TARGET_CPU_arm
+#define TARGET_CPU_i386
 
 #ifdef TARGET_CPU_m68k
 #define _TARGET_ "m68k"
@@ -47,19 +37,10 @@
 #define OBJECT_FORMAT "-melf_sparc"
 #endif
 
-#ifdef _CROSS_
-#define LD_NAME      _TARGET_ "-aros-ld.exe"
-#define STRIP_NAME   _TARGET_ "-aros-strip.exe"
-#define NM_NAME      _TARGET_ "-aros-nm.exe"
-#define OBJDUMP_NAME _TARGET_ "-aros-objdump.exe"
-#endif
-
-#ifdef _STANDALONE_
-#define LD_NAME      _TARGET_ "-aros-ld.exe"
-#define STRIP_NAME   _TARGET_ "-aros-strip.exe"
-#define NM_NAME      _TARGET_ "-aros-nm.exe"
-#define OBJDUMP_NAME _TARGET_ "-aros-objdump.exe"
-#endif
+#define LD_NAME      _TARGET_ "-aros-ld"
+#define STRIP_NAME   _TARGET_ "-aros-strip"
+#define NM_NAME      _TARGET_ "-aros-nm"
+#define OBJDUMP_NAME _TARGET_ "-aros-objdump"
 
 /*
  * Having these conditions here helps to bootstrap a crosscompiler.

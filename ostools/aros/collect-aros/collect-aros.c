@@ -13,6 +13,8 @@
 
 #if defined(WINDOWS) || defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 #include <windows.h>
+#else
+#include <limits.h>
 #endif
 
 #include "env.h"
@@ -85,7 +87,7 @@ int main(int argc, char *argv[])
     setnode *setlist = NULL, *liblist = NULL;
 
 
-    char epath[PATH_MAX + 1];
+    char epath[PATH_MAX];
 
     if (!getExecutablePath(epath, sizeof(epath)))
     {

@@ -1,0 +1,1 @@
+make CC=gcc AROS_HOST_ARCH=mingw32 clean all

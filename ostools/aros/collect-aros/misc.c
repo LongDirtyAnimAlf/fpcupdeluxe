@@ -39,9 +39,11 @@
 #if defined(WINDOWS) || defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 /*#if (defined _WIN32 || defined __WIN32__) && !defined(__CYGWIN__)*/
 #include <windows.h>
+#else
+#include <limits.h>
 #endif
 
-#if defined(_WIN32) || defined(__MINGW32__)
+#if defined(WINDOWS) || defined(_WIN32) || defined(__MINGW32__)
 #include <io.h> // _mktemp_s
 #endif
 
@@ -71,10 +73,10 @@ void copy_path(char *to, char *from)
 #define copy_path strcpy
 #endif
 
-char full_ld_name[MAX_PATH];
-char full_strip_name[MAX_PATH];
-char full_nm_name[MAX_PATH];
-char full_objdump_name[MAX_PATH];
+char full_ld_name[PATH_MAX];
+char full_strip_name[PATH_MAX];
+char full_nm_name[PATH_MAX];
+char full_objdump_name[PATH_MAX];
 
 char *program_name;
 
@@ -165,6 +167,7 @@ char *make_temp_file(char *suffix __attribute__((unused)))
 
 char *getExecutablePath(char *buf, size_t len) {
   char *p;
+  char PATHDIV = '/';
 #ifdef __APPLE__
   unsigned int l = len;
   if (_NSGetExecutablePath(buf, &l) != 0)
@@ -220,8 +223,8 @@ char *getExecutablePath(char *buf, size_t len) {
   unsigned int l = 0;
   #if defined(__CYGWIN__)
     const char PATHDIV = '/';
-    char full_path[MAX_PATH];
-    l = GetModuleFileName(NULL, full_path, MAX_PATH);
+    char full_path[PATH_MAX];
+    l = GetModuleFileName(NULL, full_path, PATH_MAX);
 
     p = strchr(full_path, '\\');
     while (p) {
@@ -235,8 +238,8 @@ char *getExecutablePath(char *buf, size_t len) {
 
     snprintf(buf, len, "%c%s%c%s", PATHDIV, "cygdrive", PATHDIV, full_path);
   #else
-    const char PATHDIV = '\\';
-    l = GetModuleFileName(NULL, buf, MAX_PATH);
+    PATHDIV = '\\';
+    l = GetModuleFileName(NULL, buf, PATH_MAX);
   #endif
 
 #else
@@ -256,10 +259,17 @@ char *getExecutablePath(char *buf, size_t len) {
     *p = '\0';
   }
   
-  snprintf(full_ld_name, sizeof(full_ld_name), "%s%c%s", buf, PATHDIV, LD_NAME);
-  snprintf(full_strip_name, sizeof(full_strip_name), "%s%c%s", buf, PATHDIV, STRIP_NAME);
-  snprintf(full_nm_name, sizeof(full_nm_name), "%s%c%s", buf, PATHDIV, NM_NAME);
-  snprintf(full_objdump_name, sizeof(full_objdump_name), "%s%c%s", buf, PATHDIV, OBJDUMP_NAME);
+  #if defined(WIN32)
+    snprintf(full_ld_name, sizeof(full_ld_name), "%s%c%s%s", buf, PATHDIV, LD_NAME,".exe");
+    snprintf(full_strip_name, sizeof(full_strip_name), "%s%c%s%s", buf, PATHDIV, STRIP_NAME,".exe");
+    snprintf(full_nm_name, sizeof(full_nm_name), "%s%c%s%s", buf, PATHDIV, NM_NAME,".exe");
+    snprintf(full_objdump_name, sizeof(full_objdump_name), "%s%c%s%s", buf, PATHDIV, OBJDUMP_NAME,".exe");
+  #else
+    snprintf(full_ld_name, sizeof(full_ld_name), "%s%c%s", buf, PATHDIV, LD_NAME);
+    snprintf(full_strip_name, sizeof(full_strip_name), "%s%c%s", buf, PATHDIV, STRIP_NAME);
+    snprintf(full_nm_name, sizeof(full_nm_name), "%s%c%s", buf, PATHDIV, NM_NAME);
+    snprintf(full_objdump_name, sizeof(full_objdump_name), "%s%c%s", buf, PATHDIV, OBJDUMP_NAME);
+  #endif
 
   return buf;
 }
