@@ -294,7 +294,7 @@ begin
 
   try
     WritelnLog(infotext+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-    Processor.Execute;Processor.WaitForExit;
+    Processor.ExecuteAndWait;
     result := Processor.ExitStatus=0;
     if result then
     begin
@@ -656,7 +656,7 @@ begin
   Processor.Process.Parameters.Clear;
   Processor.Process.Parameters.Add('--version');
   try
-    Processor.Execute;Processor.WaitForExit;
+    Processor.ExecuteAndWait;
     result := (Processor.ExitStatus=0);
     if result then RegisterPackageFeature:=(CalculateNumericalVersion(Processor.WorkerOutput.Text)>=CalculateFullVersion(1,7,0));
   except
@@ -700,7 +700,7 @@ begin
     Processor.Process.Parameters.Add('--add-package');
   Processor.Process.Parameters.Add(DoubleQuoteIfNeeded(PackageAbsolutePath));
   try
-    Processor.Execute;Processor.WaitForExit;
+    Processor.ExecuteAndWait;
     result := Processor.ExitStatus=0;
     // runtime packages will return false, but output will have info about package being "only for runtime"
     if result then
@@ -1222,7 +1222,7 @@ begin
       end;
 
       Processor.Process.CurrentDirectory:=Workingdir;
-      Processor.Execute;Processor.WaitForExit;
+      Processor.ExecuteAndWait;
       s:=Processor.WorkerOutput.Text;
       j:=Processor.ExitStatus;
 

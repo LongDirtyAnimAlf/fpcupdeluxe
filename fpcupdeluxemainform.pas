@@ -1800,7 +1800,10 @@ begin
 
   if (NOT Special) AND (ExistWordInString(PChar(s),'make.exe ',[soDown]) OR ExistWordInString(PChar(s),'make ',[soDown]) OR ExistWordInString(PChar(s),'gmake ',[soDown])) then
   begin
-    FG      := TColor($FF8C00);
+    if ExistWordInString(PChar(s),'fpmake ',[soDown]) then
+      FG      := TColor($FFA000)
+    else
+      FG      := TColor($FF8C00);
     BG      := clBlack;
     Special := True;
   end;

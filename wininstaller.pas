@@ -237,8 +237,7 @@ begin
   Processor.Process.Parameters.Add('""'); //an empty parameter as PATCHFILE
   Processor.Process.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
   if FVerbose then WritelnLog(ClassName+': Running '+Processor.Process.Executable,true);
-  Processor.Execute;Processor.WaitForExit;
-
+  Processor.ExecuteAndWait;
   if Processor.ExitStatus <> 0 then
   begin
     result := False;

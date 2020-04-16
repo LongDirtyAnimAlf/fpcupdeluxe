@@ -1095,14 +1095,14 @@ begin
             else
               infoln(infotext+'Running '+Processor.Process.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+') with CROSSOPT: '+CrossOptions,etInfo);
 
-            Processor.Execute;Processor.WaitForExit;
+            Processor.ExecuteAndWait;
             result:=(Processor.ExitStatus=0);
 
             if ((NOT result) AND (MakeCycle=st_Packages)) then
             begin
               //Sometimes rerun gives good results (on AIX 32bit especially).
               infoln(infotext+'Running '+Processor.Process.Executable+' stage again ... could work !',etInfo);
-              Processor.Execute;Processor.WaitForExit;
+              Processor.ExecuteAndWait;
               result:=(Processor.ExitStatus=0);
             end;
 
@@ -1594,7 +1594,7 @@ begin
   end;
 
   try
-    Processor.Execute;Processor.WaitForExit;
+    Processor.ExecuteAndWait;
     //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
     //Processor.Environment.SetVar('FPCDIR',FPCDirStore);
     if Processor.ExitStatus <> 0 then
@@ -2815,7 +2815,7 @@ var
     Processor.Process.Parameters.Clear;
     Processor.Process.Parameters.Add('-h');
     try
-      Processor.Execute;Processor.WaitForExit;
+      Processor.ExecuteAndWait;
       //if Processor.ExitStatus = 0 then
       begin
         if Processor.WorkerOutput.Count>0 then
@@ -2842,7 +2842,7 @@ var
     Processor.Process.Parameters.Add('' + aFile + '');
     infoln(infotext+'Creating '+ExtractFileName(aFile)+': '+Processor.Process.Executable+' '+StringReplace(Processor.Process.Parameters.CommaText,',',' ',[rfReplaceAll]));
     try
-      Processor.Execute;Processor.WaitForExit;
+      Processor.ExecuteAndWait;
       result:=(Processor.ExitStatus=0);
     except
       on E: Exception do
@@ -3041,7 +3041,7 @@ begin
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
       infoln(infotext+'Running '+Processor.Process.Executable+' cycle for Windows FPC64:',etInfo);
-      Processor.Execute;Processor.WaitForExit;
+      Processor.ExecuteAndWait;
       if Processor.ExitStatus <> 0 then
       begin
         result := False;
@@ -3077,7 +3077,7 @@ begin
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
       infoln(infotext+'Running '+Processor.Process.Executable+' cycle for FPC '+TargetCompilerName+' bootstrap compiler only',etInfo);
-      Processor.Execute;Processor.WaitForExit;
+      Processor.ExecuteAndWait;
       if Processor.ExitStatus <> 0 then
       begin
         result := False;
@@ -3715,14 +3715,14 @@ begin
         infoln(infotext+'Running '+Processor.Process.Executable+' distclean twice for target '+CrossInstaller.RegisterName,etInfo);
       end;
       try
-        writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-        Processor.Execute;Processor.WaitForExit;
+        writelnlog(infotext+Processor.GetExeInfo, true);
+        Processor.ExecuteAndWait;
         result:=(Processor.ExitStatus=0);
         if result then
         begin
           Sleep(100); //now do it again
-          writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-          Processor.Execute;Processor.WaitForExit;
+          writelnlog(infotext+Processor.GetExeInfo, true);
+          Processor.ExecuteAndWait;
           result:=(Processor.ExitStatus=0);
        end;
       except

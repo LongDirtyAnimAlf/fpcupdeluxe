@@ -2,16 +2,20 @@ unit RunTools;
 
 {$mode objfpc}{$H+}
 
+{$ifdef LCL}
+{.$define THREADEDEXECUTE}
+{$endif}
+
 interface
 
 uses
   Classes, SysUtils,
-  {$ifdef LCL}
+  {$ifdef THREADEDEXECUTE}
   LMessages,
   {$endif}
-  UTF8Process;
+  Process;
 
-{$ifdef LCL}
+{$ifdef THREADEDEXECUTE}
 const
   WM_THREADINFO = LM_USER + 2010;
 {$endif}
@@ -73,11 +77,6 @@ type
     ethStopped
     );
 
-  { TAbstractExternalTool
-    Implemented by the IDE.
-    Create one with ExternalToolList.Add or AddDummy.
-    Access needs Tool.Enter/LeaveCriticalSection. }
-
   TAbstractExternalTool = class(TComponent)
   private
     FCritSec: TRTLCriticalSection;
@@ -96,26 +95,23 @@ type
     FTerminated: boolean;
     FStage: TExternalToolStage;
     FWorkerOutput: TStringList;
-    FProcess: TProcessUTF8;
+    FProcess: TProcess;
     function GetProcessEnvironment: TProcessEnvironment;
-    procedure DoCallNotifyHandler(HandlerType: TExternalToolHandler);
-    procedure DoExecute; virtual; abstract;  // starts thread, returns immediately
-    procedure Notification(AComponent: TComponent; Operation: TOperation);
-      override;
+    procedure DoExecute; virtual; abstract;
     function CanFree: boolean; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure EnterCriticalSection;// virtual; // always use before access, when using Tool and View: always lock Tool before View
-    procedure LeaveCriticalSection;// virtual;
-    procedure AutoFree; // (only main thread) free if not in use
+    procedure EnterCriticalSection;
+    procedure LeaveCriticalSection;
+    procedure AutoFree;
 
     property Title: string read FTitle write SetTitle;
-    property Data: TObject read FData write FData; // free for user, e.g. the IDE uses TIDEExternalToolData
-    property FreeData: boolean read FFreeData write FFreeData default false; // true = auto free Data on destroy
+    property Data: TObject read FData write FData;
+    property FreeData: boolean read FFreeData write FFreeData default false;
 
     // process
-    property Process: TProcessUTF8 read FProcess;
+    property Process: TProcess read FProcess;
     property CmdLineParams: string read GetCmdLineParams write SetCmdLineParams;
     property Stage: TExternalToolStage read FStage;
     procedure Execute; virtual; abstract;
@@ -124,7 +120,7 @@ type
     property Terminated: boolean read FTerminated;
     property ExitCode: integer read FExitCode write FExitCode;
     property ExitStatus: integer read FExitStatus write FExitStatus;
-    property ErrorMessage: string read FErrorMessage write FErrorMessage; // error executing tool
+    property ErrorMessage: string read FErrorMessage write FErrorMessage;
     property ReadStdOutBeforeErr: boolean read FReadStdOutBeforeErr write FReadStdOutBeforeErr;
     property Environment:TProcessEnvironment read GetProcessEnvironment;
 
@@ -136,14 +132,22 @@ type
 
   { TExternalToolThread }
 
+  {$ifdef THREADEDEXECUTE}
   TExternalToolThread = class(TThread)
+  {$else}
+  TExternalToolThread = class(TObject)
+  {$endif}
   private
     fLines: TStringList;
     FTool: TExternalTool;
     procedure SetTool(AValue: TExternalTool);
   public
     property Tool: TExternalTool read FTool write SetTool;
+    {$ifdef THREADEDEXECUTE}
     procedure Execute; override;
+    {$else}
+    procedure Execute;
+    {$endif}
     destructor Destroy; override;
   end;
 
@@ -152,15 +156,14 @@ type
   TExternalTool = class(TAbstractExternalTool)
   private
     FThread: TExternalToolThread;
-    procedure ProcessRunning; // (worker thread) after Process.Execute
-    procedure ProcessStopped; // (worker thread) when process stopped
-    procedure AddOutputLines(Lines: TStringList); // (worker thread) when new output arrived
-    procedure SetThread(AValue: TExternalToolThread); // main or worker thread
-    procedure DoTerminate; // (main thread)
+    procedure ProcessRunning;
+    procedure ProcessStopped;
+    procedure AddOutputLines(Lines: TStringList);
+    procedure SetThread(AValue: TExternalToolThread);
+    procedure DoTerminate;
   protected
-    procedure DoExecute; override;           // (main thread)
-    procedure DoStart;                       // (main thread)
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure DoExecute; override;
+    procedure DoStart;
     function CanFree: boolean; override;
     procedure QueueAsyncAutoFree; virtual; abstract;
   public
@@ -172,6 +175,7 @@ type
     procedure WaitForExit; override;
     function GetExeInfo:string;
     function CanStart: boolean;
+    procedure ExecuteAndWait;
   end;
 
   TExternalToolClass = class of TExternalTool;
@@ -180,16 +184,17 @@ implementation
 
 uses
   {$ifdef LCL}
-  Forms,Controls,LCLIntf,
+  Forms,
   {$endif}
-  process,
+  {$ifdef THREADEDEXECUTE}
+  LCLIntf,
+  {$endif}
   Pipes,
   Math,
-  LazUTF8,
   FileUtil,
   LazFileUtils;
 
-{$ifdef LCL}
+{$ifdef THREADEDEXECUTE}
 procedure ThreadLog(Msg: string);
 var
   PInfo: PChar;
@@ -328,26 +333,6 @@ begin
   FTitle:=AValue;
 end;
 
-procedure TAbstractExternalTool.DoCallNotifyHandler(
-  HandlerType: TExternalToolHandler);
-begin
-  //FHandlers[HandlerType].CallNotifyEvents(Self);
-end;
-
-
-procedure TAbstractExternalTool.Notification(AComponent: TComponent;
-  Operation: TOperation);
-begin
-  inherited Notification(AComponent, Operation);
-  if Operation=opRemove then begin
-    EnterCriticalSection;
-    try
-    finally
-      LeaveCriticalSection;
-    end;
-  end;
-end;
-
 function TAbstractExternalTool.CanFree: boolean;
 begin
   Result:=false;
@@ -431,6 +416,9 @@ begin
   finally
     LeaveCriticalSection;
   end;
+  {$ifndef THREADEDEXECUTE}
+  Thread.Destroy;
+  {$endif}
   fThread:=nil;
 end;
 
@@ -450,8 +438,10 @@ begin
     // feed new lines into all parsers, converting raw lines into messages
     for Line:=OldOutputCount to WorkerOutput.Count-1 do begin
       LineStr:=WorkerOutput[Line];
-      {$ifdef LCL}
+      {$ifdef THREADEDEXECUTE}
       ThreadLog(LineStr);
+      {$else}
+      writeln(LineStr);
       {$endif}
     end;
   finally
@@ -484,7 +474,7 @@ constructor TExternalTool.Create(aOwner: TComponent);
 begin
   inherited Create(aOwner);
   FWorkerOutput:=TStringList.Create;
-  FProcess:=TProcessUTF8.Create(nil);
+  FProcess:=TProcess.Create(nil);
   FProcess.Options:= [poUsePipes{$IFDEF Windows},poStderrToOutPut{$ENDIF}];
   FProcess.ShowWindow := swoHide;
 end;
@@ -539,19 +529,19 @@ begin
   // init CurrentDirectory
   Process.CurrentDirectory:=TrimFilename(Process.CurrentDirectory);
   if not FilenameIsAbsolute(Process.CurrentDirectory) then
-    Process.CurrentDirectory:=AppendPathDelim(GetCurrentDirUTF8)+Process.CurrentDirectory;
+    Process.CurrentDirectory:=AppendPathDelim(GetCurrentDir)+Process.CurrentDirectory;
 
   // init Executable
   Process.Executable:=TrimFilename(Process.Executable);
   if not FilenameIsAbsolute(Process.Executable) then begin
     if ExtractFilePath(Process.Executable)<>'' then
-      Process.Executable:=AppendPathDelim(GetCurrentDirUTF8)+Process.Executable
+      Process.Executable:=AppendPathDelim(GetCurrentDir)+Process.Executable
     else if Process.Executable='' then begin
       ErrorMessage:=Format(lisToolHasNoExecutable, [Title]);
       CheckError;
       exit;
     end else begin
-      ExeFile:=FindDefaultExecutablePath(Process.Executable,GetCurrentDirUTF8);
+      ExeFile:=FindDefaultExecutablePath(Process.Executable,GetCurrentDir);
       if ExeFile='' then begin
         ErrorMessage:=Format(lisCanNotFindExecutable, [Process.Executable]);
         CheckError;
@@ -561,12 +551,12 @@ begin
     end;
   end;
   ExeFile:=Process.Executable;
-  if not FileExistsUTF8(ExeFile) then begin
+  if not FileExists(ExeFile) then begin
     ErrorMessage:=Format(lisMissingExecutable, [ExeFile]);
     CheckError;
     exit;
   end;
-  if DirectoryExistsUTF8(ExeFile) then begin
+  if DirectoryExists(ExeFile) then begin
     ErrorMessage:=Format(lisExecutableIsADirectory, [ExeFile]);
     CheckError;
     exit;
@@ -604,6 +594,7 @@ begin
     LeaveCriticalSection;
   end;
 
+  {$ifdef THREADEDEXECUTE}
   // start thread
   if Thread=nil then begin
     FThread:=TExternalToolThread.Create(true);
@@ -611,6 +602,13 @@ begin
     FThread.FreeOnTerminate:=true;
   end;
   Thread.Start;
+  {$else}
+  if Thread=nil then begin
+    FThread:=TExternalToolThread.Create;
+    Thread.Tool:=Self;
+  end;
+  Thread.Execute;
+  {$endif}
 end;
 
 procedure TExternalTool.DoTerminate;
@@ -646,30 +644,10 @@ begin
   end;
 end;
 
-procedure TExternalTool.Notification(AComponent: TComponent; Operation: TOperation);
-begin
-  inherited Notification(AComponent, Operation);
-  if Operation=opRemove then begin
-  end;
-end;
-
 function TExternalTool.CanFree: boolean;
 begin
-  Result:=(FThread=nil)
-       and inherited CanFree;
+  Result:=(FThread=nil) and inherited CanFree;
 end;
-
-{
-procedure TExternalTool.SyncAutoFree(aData: PtrInt);
-begin
-  AutoFree;
-end;
-
-procedure TExternalTool.QueueAsyncAutoFree;
-begin
-  Application.QueueAsyncCall(@SyncAutoFree,0);
-end;
-}
 
 function TExternalTool.CanStart: boolean;
 begin
@@ -729,6 +707,12 @@ end;
 function TExternalTool.GetExeInfo:string;
 begin
   result:='Executing: '+Process.Executable+'. With params: '+CmdLineParams+' (working dir: '+ Process.CurrentDirectory +')';
+end;
+
+procedure TExternalTool.ExecuteAndWait;
+begin
+  Execute;
+  WaitForExit;
 end;
 
 { TExternalToolThread }
@@ -808,8 +792,10 @@ var
     Result:=true;
     StartPos:=1;
     i:=1;
-    while i<=Count do begin
-      if Buf[i] in [#10,#13] then begin
+    while i<=Count do
+    begin
+      if Buf[i] in [#10,#13] then
+      begin
         LineBuf:=LineBuf+copy(Buf,StartPos,i-StartPos);
         if IsStdErr then
           fLines.AddObject(LineBuf,fLines)
@@ -840,27 +826,22 @@ begin
   fLines:=TStringList.Create;
   try
     try
-      if Tool.Stage<>etsStarting then begin
-        exit;
-      end;
+      if Tool.Stage<>etsStarting then exit;
 
-      if not FileIsExecutable(Tool.Process.Executable) then begin
+      if not FileIsExecutable(Tool.Process.Executable) then
+      begin
         Tool.ErrorMessage:=Format(lisCanNotExecute, [Tool.Process.Executable]);
         Tool.ProcessStopped;
         exit;
       end;
-      if not DirectoryExistsUTF8(ChompPathDelim(Tool.Process.CurrentDirectory))
-      then begin
+      if not DirectoryExists(ChompPathDelim(Tool.Process.CurrentDirectory)) then
+      begin
         Tool.ErrorMessage:=Format(lisMissingDirectory, [Tool.Process.
           CurrentDirectory]);
         Tool.ProcessStopped;
         exit;
       end;
 
-      // Under Unix TProcess uses fpFork, which means the current thread is
-      // duplicated. One is the old thread and one runs fpExecve.
-      // If fpExecve runs, then it will not return.
-      // If fpExecve fails it returns via an exception and this thread runs twice.
       ok:=false;
       try
         // now execute
@@ -868,23 +849,22 @@ begin
         Tool.Process.Execute;
         ok:=true;
       except
-        on E: Exception do begin
-          // BEWARE: we are now either in the normal thread or in the failed forked thread
+        on E: Exception do
+        begin
           if Tool.ErrorMessage='' then
             Tool.ErrorMessage:=Format(lisUnableToExecute, [E.Message]);
         end;
       end;
-      // BEWARE: we are now either in the normal thread or in the failed forked thread
-      if not ok then begin
+      if (not ok) then
+      begin
         Tool.ProcessStopped;
         exit;
       end;
-      // we are now in the normal thread
-      if Tool.Stage>=etsStopped then
-        exit;
+      if Tool.Stage>=etsStopped then exit;
+
       Tool.ProcessRunning;
-      if Tool.Stage>=etsStopped then
-        exit;
+
+      if Tool.Stage>=etsStopped then exit;
 
       OutputLine:='';
       StdErrLine:='';
@@ -897,35 +877,29 @@ begin
           HasOutput:=ReadInputPipe(Tool.Process.Stderr,StdErrLine,true)
                   or ReadInputPipe(Tool.Process.Output,OutputLine,false);
         end;
-        if (not HasOutput) then begin
-          // no more pending output
+        if (not HasOutput) then
+        begin
           if not Tool.Process.Running then break;
         end;
         if (fLines.Count>0)
-        and (Abs(int64(GetTickCount64)-LastUpdate)>UpdateTimeDiff) then begin
+        and (Abs(int64(GetTickCount64)-LastUpdate)>UpdateTimeDiff) then
+        begin
           Tool.AddOutputLines(fLines);
           fLines.Clear;
           LastUpdate:=GetTickCount64;
         end;
-        if (not HasOutput) then begin
-          // no more pending output and process is still running
-          // => tool needs some time
-          Sleep(50);
-        end;
+        if (not HasOutput) then Sleep(50); // no more pending output and process is still running
       end;
       // add rest of output
-      if (OutputLine<>'') then
-        fLines.Add(OutputLine);
-      if (StdErrLine<>'') then
-        fLines.Add(StdErrLine);
-      if (Tool<>nil) and (fLines.Count>0) then begin
+      if (OutputLine<>'') then fLines.Add(OutputLine);
+      if (StdErrLine<>'') then fLines.Add(StdErrLine);
+      if (Tool<>nil) and (fLines.Count>0) then
+      begin
         Tool.AddOutputLines(fLines);
         fLines.Clear;
       end;
       try
-        if Tool.Stage>=etsStopped then begin
-          exit;
-        end;
+        if Tool.Stage>=etsStopped then exit;
         Tool.ExitStatus:=Tool.Process.ExitStatus;
         Tool.ExitCode:=Tool.Process.ExitCode;
       except
@@ -933,7 +907,8 @@ begin
       end;
     except
       on E: Exception do begin
-        if (Tool<>nil) and (Tool.ErrorMessage='') then begin
+        if (Tool<>nil) and (Tool.ErrorMessage='') then
+        begin
           Tool.ErrorMessage:=E.Message;
           ErrMsg:=GetExceptionStackTrace;
           Tool.ErrorMessage:=E.Message+LineEnding+ErrMsg;
@@ -946,17 +921,15 @@ begin
       Finalize(buf);
       FreeAndNil(fLines);
     except
-      on E: Exception do begin
+      on E: Exception do
+      begin
         if Tool<>nil then
           Tool.ErrorMessage:=Format(lisFreeingBufferLines, [E.Message]);
       end;
     end;
   end;
-  if Tool.Stage>=etsStopped then begin
-    exit;
-  end;
-  if Tool<>nil then
-    Tool.ProcessStopped;
+  if Tool.Stage>=etsStopped then exit;
+  if Tool<>nil then Tool.ProcessStopped;
 end;
 
 destructor TExternalToolThread.Destroy;

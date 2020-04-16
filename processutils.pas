@@ -150,9 +150,7 @@ begin
       if (i<>-1) then aTool.Process.Parameters.Strings[i]:='""';
     end;
 
-    aTool.Execute;
-
-    aTool.WaitForExit;
+    aTool.ExecuteAndWait;
 
     Output:=aTool.WorkerOutput.Text;
 

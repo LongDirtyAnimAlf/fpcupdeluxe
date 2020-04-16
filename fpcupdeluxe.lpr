@@ -51,7 +51,6 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, Classes, SysUtils,
-  RunTools,
   fpcupdeluxemainform,
   //extrasettings,
   //installerManager, installerUniversal,
@@ -99,7 +98,9 @@ uses
   {$ifndef CPUX86}
   m_crossdarwin32,
   {$endif}
+  {$ifdef CPUX86}
   m_crossdarwinpowerpc,
+  {$endif}
   m_crossdarwinarm,
   m_crossdarwinaarch64,
   m_crossdarwinx64iphonesim,
