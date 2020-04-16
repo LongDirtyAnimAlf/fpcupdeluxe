@@ -1863,19 +1863,15 @@ function TSequencer.Kill: boolean;
 begin
   result:=false;
 
+  if Assigned(Installer) AND Assigned(Installer.Processor) then
+  begin
+    Installer.Processor.Terminate;
+  end;
+
   //Set all to failed to halt the statemachine
   for idx:=0 to FParent.FModuleList.Count -1 do
     PSequenceAttributes(FParent.FModuleList.Objects[idx])^.Executed:=ESFailed;
 
-  if Assigned(Installer) then
-  begin
-    result:=Installer.Processor.Terminate(-1);
-    {$IF FPC_FULLVERSION < 30300}
-    Installer.Processor.WaitOnExit;
-    {$ELSE}
-    Installer.Processor.WaitOnExit(5000);
-    {$ENDIF}
-  end;
 end;
 
 constructor TSequencer.Create(aParent:TFPCupManager);

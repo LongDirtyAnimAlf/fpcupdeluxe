@@ -11,6 +11,7 @@ uses
   SynEdit, SynEditPopup, SynEditMiscClasses,
   installerManager
   {$ifdef usealternateui},alternateui{$endif}
+  ,LMessages
   ,LCLVersion
   {$ifdef RemoteLog}
   ,mormotdatamodelclient
@@ -21,7 +22,14 @@ uses
 {$define EnableLanguages}
 {$endif}
 
+const
+  WM_THREADINFO = LM_USER + 2010;
+
 type
+  TSynEditHelper = class helper for TCustomSynEdit
+    procedure SetFiltered(line: string; outputline:boolean=false); inline;
+  end;
+
 
   { TForm1 }
 
@@ -142,6 +150,7 @@ type
     {$endif}
   private
     { private declarations }
+    FVerbosity:boolean;
     MessageTrigger:boolean;
     FPCupManager:TFPCupManager;
     oldoutput: TextFile;
@@ -159,6 +168,7 @@ type
     sConsentWarning:boolean;
     aDataClient:TDataClient;
     {$endif}
+    procedure HandleThreadInfo(var Msg: TLMessage); message WM_THREADINFO;
     procedure InitFpcupdeluxe({%H-}Data: PtrInt);
     procedure CheckForUpdates({%H-}Data: PtrInt);
     function  AutoUpdateCrossCompiler(Sender: TObject):boolean;
@@ -230,6 +240,200 @@ uses
 
 //{$I message.inc}
 
+
+procedure TSynEditHelper.SetFiltered(line: string; outputline:boolean);
+var
+  i:cardinal;
+  s:string;
+begin
+  // skip stray empty lines
+  if (Length(line)=0) then exit;
+
+  {$ifdef Darwin}
+  // suppress all setfocus errors on Darwin, always
+  if AnsiContainsText(line,'.setfocus') then exit;
+  {$endif}
+
+  {$ifdef Unix}
+  // suppress all Kb Used messages, always
+  if AnsiContainsText(line,'Kb Used') then exit;
+  {$endif}
+
+  // suppress all SynEdit PaintLock errors, always
+  if AnsiContainsText(line,'PaintLock') then exit;
+
+  // suppress some GIT errors, always
+  if AnsiContainsText(line,'fatal: not a git repository') then exit;
+
+  // suppress some lazbuild errors, always
+  if AnsiContainsText(line,'lazbuild') then
+  begin
+    if AnsiContainsText(line,'only for runtime') then exit;
+    if AnsiContainsText(line,'lpk file expected') then exit;
+  end;
+
+  if (NOT outputline) then
+  begin
+    // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
+    // will be a bit redundant , but just to be sure !
+    if (AnsiContainsText(line,'error:'))
+       OR (AnsiContainsText(line,'donalf:'))
+       OR (AnsiContainsText(line,'fatal:'))
+       OR (AnsiContainsText(line,'fpcupdeluxe:'))
+       OR (AnsiContainsText(line,'execute:'))
+       OR (AnsiContainsText(line,'executing:'))
+       OR ((AnsiContainsText(line,'compiling ')) AND (NOT AnsiContainsText(line,'when compiling target')))
+       OR (AnsiContainsText(line,'linking '))
+    then outputline:=true;
+
+    if (NOT outputline) then
+    begin
+      // remove hints and other "trivial"* warnings from output
+      // these line are not that interesting for the average user of fpcupdeluxe !
+      if AnsiContainsText(line,'hint: ') then exit;
+      if AnsiContainsText(line,'verbose: ') then exit;
+      if AnsiContainsText(line,'note: ') then exit;
+      if AnsiContainsText(line,'assembling ') then exit;
+      if AnsiContainsText(line,': entering directory ') then exit;
+      if AnsiContainsText(line,': leaving directory ') then exit;
+      // when generating help
+      if AnsiContainsText(line,'illegal XML element: ') then exit;
+      if AnsiContainsText(line,'parsing used unit ') then exit;
+      if AnsiContainsText(line,'extracting ') then exit;
+
+      // during building of lazarus components, default compiler switches cause version and copyright info to be shown
+      // do not know if this is allowed, but this version / copyright info is very redundant as it is shown everytime the compiler is called ...
+      // I stand corrected if this has to be changed !
+      if AnsiContainsText(line,'Copyright (c) 1993-') then exit;
+      if AnsiContainsText(line,'Free Pascal Compiler version ') then exit;
+
+      // harmless make error
+      if AnsiContainsText(line,'make') then
+      begin
+        if AnsiContainsText(line,'error 1') then exit;
+        if AnsiContainsText(line,'(e=1)') then exit;
+        if AnsiContainsText(line,'error 87') then exit;
+        if AnsiContainsText(line,'(e=87)') then exit;
+        //if AnsiContainsText(line,'dependency dropped') then exit;
+      end;
+
+      if AnsiContainsText(line,'~~~~~~~~') then exit;
+      if AnsiContainsText(line,', coalesced') then exit;
+
+      if AnsiContainsText(line,'TODO: ') then exit;
+
+      // When building a java cross-compiler
+      if AnsiContainsText(line,'Generated: ') then exit;
+
+      // filter warnings
+      if AnsiContainsText(line,'warning: ') then
+      begin
+        if AnsiContainsText(line,'is not portable') then exit;
+        if AnsiContainsText(line,'is deprecated') then exit;
+        if AnsiContainsText(line,'implicit string type conversion') then exit;
+        if AnsiContainsText(line,'function result does not seem to be set') then exit;
+        if AnsiContainsText(line,'comparison might be always') then exit;
+        if AnsiContainsText(line,'converting pointers to signed integers') then exit;
+        if AnsiContainsText(line,'does not seem to be initialized') then exit;
+        if AnsiContainsText(line,'an inherited method is hidden') then exit;
+        if AnsiContainsText(line,'with abstract method') then exit;
+        if AnsiContainsText(line,'comment level 2 found') then exit;
+        if AnsiContainsText(line,'did you forget -T') then exit;
+        if AnsiContainsText(line,'is not recommended') then exit;
+        if AnsiContainsText(line,'were not initialized') then exit;
+        if AnsiContainsText(line,'which is not available for the') then exit;
+        if AnsiContainsText(line,'argument unused during compilation') then exit;
+        if AnsiContainsText(line,'invalid unitname') then exit;
+        if AnsiContainsText(line,'procedure type "FAR" ignored') then exit;
+        if AnsiContainsText(line,'duplicate unit') then exit;
+        if AnsiContainsText(line,'is ignored for the current target platform') then exit;
+        if AnsiContainsText(line,'Inlining disabled') then exit;
+        if AnsiContainsText(line,'not yet supported inside inline procedure/function') then exit;
+        if AnsiContainsText(line,'Check size of memory operand') then exit;
+        if AnsiContainsText(line,'User defined: TODO') then exit;
+        if AnsiContainsText(line,'Circular dependency detected when compiling target') then exit;
+        if AnsiContainsText(line,'overriding recipe for target') then exit;
+        if AnsiContainsText(line,'ignoring old recipe for target') then exit;
+        if AnsiContainsText(line,'Case statement does not handle all possible cases') then exit;
+
+        if AnsiContainsText(line,'unreachable code') then exit;
+        if AnsiContainsText(line,'Fix implicit pointer conversions') then exit;
+        if AnsiContainsText(line,'are not related') then exit;
+        if AnsiContainsText(line,'Constructor should be public') then exit;
+        if AnsiContainsText(line,'is experimental') then exit;
+        if AnsiContainsText(line,'This code is not thread-safe') then exit;
+
+        // when generating help
+        if AnsiContainsText(line,'is unknown') then exit;
+        {$ifdef MSWINDOWS}
+        if AnsiContainsText(line,'unable to determine the libgcc path') then exit;
+        {$endif}
+      end;
+      // suppress "trivial"* build commands
+
+      {$ifdef MSWINDOWS}
+      if AnsiContainsText(line,'rm.exe ') then exit;
+      if AnsiContainsText(line,'mkdir.exe ') then exit;
+      if AnsiContainsText(line,'mv.exe ') then exit;
+      if AnsiContainsText(line,'cmp.exe ') then exit;
+      if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then exit;
+      {$endif}
+
+      s:='rm -f ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+      if AnsiContainsText(line,'/'+TrimRight(s)) OR AnsiStartsText(TrimRight(s),line) then exit;
+      s:='rm -rf ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+      if AnsiContainsText(line,'/'+TrimRight(s)) OR AnsiStartsText(TrimRight(s),line) then exit;
+      s:='mkdir ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+      s:='mv ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+      s:='cp ';
+      if ( (AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line)) AND AnsiContainsText(line,'.compiled') ) then exit;
+      s:='grep: ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+
+      if AnsiContainsText(line,'is up to date.') then exit;
+      if AnsiContainsText(line,'searching ') then exit;
+
+      //Remove some Lazarus info
+      if AnsiContainsText(line,'Info: (lazarus)') then exit;
+      if AnsiStartsText('  File=',line) then exit;
+      if AnsiStartsText('  State file=',line) then exit;
+
+      //Remove some not so very interesting info
+      if AnsiContainsText(line,'Writing Resource String Table') then exit;
+      if AnsiContainsText(line,'Nothing to be done') then exit;
+
+      // Some prehistoric FPC errors.
+      if AnsiContainsText(line,'Unknown option.') then exit;
+      if AnsiContainsText(line,'CreateProcess(') then exit;
+
+      // found modified files
+      outputline:=true;
+    end;
+  end;
+
+  // output line !!
+  if (outputline) then
+  begin
+    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+    Self.Append(line);
+    {$ELSE}
+    Self.Lines.Append(line);
+    {$ENDIF}
+    Self.CaretX:=0;
+    Self.CaretY:=Self.Lines.Count;
+    // the below is needed:
+    // onchange is no longer called, when appending a line ... bug or feature ?!!
+    Self.OnChange(Self);
+    //Application.ProcessMessages;
+  end;
+
+end;
+
+
 { TForm1 }
 
 {$ifdef EnableLanguages}
@@ -282,6 +486,8 @@ var
   aTarget:string;
 begin
   MessageTrigger:=false;
+
+  FVerbosity:=False;
 
   DisEnable(nil,False);
 
@@ -1726,55 +1932,7 @@ begin
 end;
 
 procedure TForm1.btnUpdateLazarusMakefilesClick(Sender: TObject);
-var
-  UpdatemakefilesBaseName:string;
-  aProcess:TProcessEx;
-  OldPath:string;
 begin
-  exit;
-  DisEnable(Sender,False);
-  try
-    PrepareRun;
-
-    aProcess:=TProcessEx.Create(nil);
-    try
-      UpdatemakefilesBaseName:=ConcatPaths([FPCupManager.LazarusDirectory,'tools'])+PathDelim+'updatemakefiles';
-
-      if (NOT FileExists(UpdatemakefilesBaseName+GetExeExt)) then
-      begin
-        aProcess.Parameters.Clear;
-        aProcess.Executable:=IncludeTrailingPathDelimiter(FPCupManager.LazarusDirectory)+'lazbuild'+GetExeExt;
-        aProcess.Parameters.Add(UpdatemakefilesBaseName+'.lpr');
-        //aProcess.Parameters.Add('FPCDIR=' + FPCupManager.FPCInstallDirectory);
-        AddMessage('Execute: '+aProcess.Executable+'. Params: '+aProcess.Parameters.CommaText);
-        aProcess.Execute;
-      end;
-
-      UpdatemakefilesBaseName:=UpdatemakefilesBaseName+GetExeExt;
-
-      if FileExists(UpdatemakefilesBaseName) then
-      begin
-        aProcess.Parameters.Clear;
-        OldPath:=aProcess.Environment.GetVar(PATHVARNAME);
-        if OldPath<>'' then
-          aProcess.Environment.SetVar(PATHVARNAME, ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',GetTargetCPUOS])+PathSeparator+OldPath)
-        else
-          aProcess.Environment.SetVar(PATHVARNAME, ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',GetTargetCPUOS]));
-        aProcess.Executable:=UpdatemakefilesBaseName;
-        aProcess.Parameters.Add('FPCDIR='+FPCupManager.FPCInstallDirectory);
-        AddMessage('Execute: '+aProcess.Executable+'. Params: '+aProcess.Parameters.CommaText);
-        aProcess.Execute;
-        aProcess.Environment.SetVar(PATHVARNAME, OldPath);
-      end;
-    finally
-      aProcess.Free;
-    end;
-
-
-
-  finally
-    DisEnable(Sender,True);
-  end;
 end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);
@@ -3495,10 +3653,10 @@ begin
 
   {$IFDEF DEBUG}
   FPCupManager.Verbose:=True;
-  SetVerbosity(True);
+  FVerbosity:=True;
   {$ELSE}
   FPCupManager.Verbose:=True;
-  SetVerbosity((Form2.ExtraVerbose) AND (FPCupManager.Verbose));
+  FVerbosity:=((Form2.ExtraVerbose) AND (FPCupManager.Verbose));
   {$ENDIF}
 
   // set default values for FPC and Lazarus URL ... can still be changed inside the quick real run button onclicks
@@ -4085,6 +4243,17 @@ begin
       aEdit.Text:=aLocalTarget;
     end;
   end;
+end;
+
+procedure TForm1.HandleThreadInfo(var Msg: TLMessage);
+var
+  MsgStr: PChar;
+  MsgPasStr: string;
+begin
+  MsgStr := PChar(Msg.wparam);
+  MsgPasStr := StrPas(MsgStr);
+  CommandOutputScreen.SetFiltered(MsgPasStr,FVerbosity);
+  StrDispose(MsgStr)
 end;
 
 procedure TForm1.InitFpcupdeluxe(Data: PtrInt);

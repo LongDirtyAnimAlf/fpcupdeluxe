@@ -951,7 +951,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="12">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1016,6 +1016,11 @@
         <Filename Value="revision.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
+      <Unit11>
+        <Filename Value="runtools.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RunTools"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

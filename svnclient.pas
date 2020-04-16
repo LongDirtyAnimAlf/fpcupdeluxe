@@ -96,7 +96,7 @@ implementation
 
 uses
   fpcuputil,
-  Process,
+  RunTools,
   {$IFDEF UNIX}
   BaseUnix,Unix,
   {$ENDIF}
@@ -575,7 +575,7 @@ function TSVNClient.GetDiffAll: string;
 var
   aFile:string;
   aResult:TStringList;
-  aProcess:TProcessEx;
+  aProcess:TExternalTool;
 begin
   result := '';
   FReturnCode := 0;
@@ -590,21 +590,21 @@ begin
   aProcess:=nil;
 
   {$ifdef  MSWINDOWS}
-  aProcess := TProcessEx.Create(nil);
-  aProcess.Executable := GetEnvironmentVariable('COMSPEC');
-  if NOT FileExists(aProcess.Executable) then aProcess.Executable := 'c:\windows\system32\cmd.exe';
-  aProcess.Parameters.Add('/c');
+  aProcess := TExternalTool.Create(nil);
+  aProcess.Process.Executable := GetEnvironmentVariable('COMSPEC');
+  if NOT FileExists(aProcess.Process.Executable) then aProcess.Process.Executable := 'c:\windows\system32\cmd.exe';
+  aProcess.Process.Parameters.Add('/c');
   {$endif  MSWINDOWS}
 
   {$ifdef LINUX}
-  aProcess := TProcessEx.Create(nil);
-  aProcess.Executable := '/bin/sh';
-  aprocess.Parameters.Add('-c');
+  aProcess := TExternalTool.Create(nil);
+  aProcess.Process.Executable := '/bin/sh';
+  aProcess.Process.Parameters.Add('-c');
   {$endif LINUX}
 
   if Assigned(aProcess) then
   begin
-    if NOT FileExists(aProcess.Executable) then
+    if NOT FileExists(aProcess.Process.Executable) then
     begin
       aProcess.Free;
       aProcess:=nil;
@@ -614,10 +614,9 @@ begin
   if Assigned(aProcess) then
   begin
     aFile := ChangeFileExt(GetTempFileName(GetTempDir(false),'FPCUPTMP'),'diff');
-    aProcess.CurrentDirectory:=LocalRepository;
-    aProcess.Parameters.Add(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x --ignore-space-change'+' . > ' + aFile);
-    aProcess.Options := aProcess.Options + [poNoConsole, poWaitOnExit{, poUsePipes}];
-    infoln('Executing: '+aProcess.ResultingCommand+' (working dir: '+ aProcess.CurrentDirectory +')',etInfo);
+    aProcess.Process.CurrentDirectory:=LocalRepository;
+    aProcess.Process.Parameters.Add(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x --ignore-space-change'+' . > ' + aFile);
+    infoln(aProcess.GetExeInfo,etInfo);
     try
       aProcess.Execute;
       FReturnCode:=aProcess.ExitCode;

@@ -725,59 +725,59 @@ begin
               SnipMagicEnd);
           end;
 
-          Processor.Executable := Make;
-          Processor.Parameters.Clear;
+          Processor.Process.Executable := Make;
+          Processor.Process.Parameters.Clear;
           {$IFDEF MSWINDOWS}
-          if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+          if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
           {$ENDIF}
-          Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+          Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
           {
           //Still not clear if jobs can be enabled for crosscompiler builds ... :-|
           if (FNoJobs) then
-            Processor.Parameters.Add('--jobs=1')
+            Processor.Process.Parameters.Add('--jobs=1')
           else
-            Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+            Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
           }
-          Processor.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
-          Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
-          Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
-          Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
-          Processor.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-          Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+          Processor.Process.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
+          Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
+          Processor.Process.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
+          Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
+          Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+          Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
 
           {$IFDEF MSWINDOWS}
           if ChosenCompiler=GetCompilerInDir(FInstallDirectory) then
           begin
             if FileExists(FPCCfg) then
             begin
-              //Processor.Parameters.Add('CFGFILE=' + FPCCfg);
+              //Processor.Process.Parameters.Add('CFGFILE=' + FPCCfg);
             end;
           end;
-          Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-          Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+          Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+          Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           {$ELSE}
-          Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
+          Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
           {$ENDIF}
           // Tell make where to find the target binutils if cross-compiling:
           if CrossInstaller.BinUtilsPath<>'' then
-             Processor.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
+             Processor.Process.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
 
           Options:=FCompilerOptions;
 
           //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
           //Todo: to be investigated
-          //Processor.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
+          //Processor.Process.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
 
           {$ifdef crosssimple}
-          Processor.Parameters.Add('FPC='+ChosenCompiler);
+          Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
           case MakeCycle of
             st_MakeAll:
             begin
-              Processor.Parameters.Add('all');
+              Processor.Process.Parameters.Add('all');
             end;
             st_MakeCrossInstall:
             begin
-              Processor.Parameters.Add('crossinstall');
+              Processor.Process.Parameters.Add('crossinstall');
             end;
           end;
           {$else crosssimple}
@@ -787,8 +787,8 @@ begin
               {$ifdef Darwin}
               if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
               {$endif}
-              Processor.Parameters.Add('FPC='+ChosenCompiler);
-              Processor.Parameters.Add('compiler_cycle');
+              Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
+              Processor.Process.Parameters.Add('compiler_cycle');
             end;
             st_CompilerInstall:
             begin
@@ -810,20 +810,20 @@ begin
               {$ifdef Darwin}
               if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
               {$endif}
-              Processor.Parameters.Add('FPC='+ChosenCompiler);
-              Processor.Parameters.Add('compiler_install');
+              Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
+              Processor.Process.Parameters.Add('compiler_install');
             end;
             st_Rtl:
             begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
-              Processor.Parameters.Add('rtl');
+              Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+              Processor.Process.Parameters.Add('rtl');
             end;
             st_RtlInstall:
             begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
-              Processor.Parameters.Add('rtl_install');
+              Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+              Processor.Process.Parameters.Add('rtl_install');
             end;
             st_Packages:
             begin
@@ -831,14 +831,14 @@ begin
               if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
               {$endif}
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
-              Processor.Parameters.Add('packages');
+              Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+              Processor.Process.Parameters.Add('packages');
             end;
             st_PackagesInstall:
             begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
-              Processor.Parameters.Add('packages_install');
+              Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+              Processor.Process.Parameters.Add('packages_install');
             end;
             st_NativeCompiler:
             begin
@@ -853,12 +853,12 @@ begin
                 then
               begin
                 infoln(infotext+'Building native compiler for '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+'.',etInfo);
-                Processor.Parameters.Add('FPC='+ChosenCompiler);
+                Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
                 //s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-                //Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
-                Processor.Parameters.Add('-C');
-                Processor.Parameters.Add('compiler');
-                Processor.Parameters.Add('compiler');
+                //Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+                Processor.Process.Parameters.Add('-C');
+                Processor.Process.Parameters.Add('compiler');
+                Processor.Process.Parameters.Add('compiler');
               end else continue;
               {$else}
               continue;
@@ -866,7 +866,7 @@ begin
             end;
           end;
 
-          Processor.Parameters.Add('CROSSINSTALL=1');
+          Processor.Process.Parameters.Add('CROSSINSTALL=1');
 
           if (CrossInstaller.TargetCPU=TCPU.jvm) then
           begin
@@ -879,14 +879,14 @@ begin
 
           {$endif crosssimple}
 
-          Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
-          Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
-          Processor.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName); //cross compile for different OS...
-          Processor.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName); // and processor.
-          if Length(CrossInstaller.SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
+          Processor.Process.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
+          Processor.Process.Parameters.Add('OS_SOURCE='+GetTargetOS);
+          Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName); //cross compile for different OS...
+          Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName); // and processor.
+          if Length(CrossInstaller.SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
 
-          //Processor.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
-          Processor.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
+          //Processor.Process.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
+          Processor.Process.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
 
           // Error checking for some known problems with cross compilers
           //todo: this really should go to the cross compiler unit itself but would require a rewrite
@@ -929,7 +929,7 @@ begin
           s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+REVINCFILENAME;
           if FileExists(s2) then
           begin
-            Processor.Parameters.Add('REVSTR='+ActualRevision);
+            Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
             Options:=Options+' -dREVINC';
           end;
           }
@@ -965,7 +965,7 @@ begin
           begin
             //if NOT (MakeCycle in [st_Compiler,st_CompilerInstall]) then
             begin
-              //Processor.Parameters.Add('COMPILER_OPTIONS=-dFPC_USE_LIBC');
+              //Processor.Process.Parameters.Add('COMPILER_OPTIONS=-dFPC_USE_LIBC');
               CrossOptions:=CrossOptions+' -dFPC_USE_LIBC';
             end;
           end;
@@ -980,7 +980,7 @@ begin
           begin
             // Earlier, we used regular OPT; using CROSSOPT is apparently more precise
             CrossOptions:=CrossOptions+' -XP'+CrossInstaller.BinUtilsPrefix;
-            Processor.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
+            Processor.Process.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
           end;
 
           if CrossInstaller.LibsPath<>''then
@@ -1060,7 +1060,7 @@ begin
             {$endif}
             ) then
           begin
-            Processor.Parameters.Add('CROSSOPT='+CrossOptions);
+            Processor.Process.Parameters.Add('CROSSOPT='+CrossOptions);
           end;
 
           {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
@@ -1087,29 +1087,29 @@ begin
           //s:=s+' -g -gl -dEXTDEBUG'; //-va+
           //s:=s+' -dEXTDEBUG'; //-va+
           {$endif}
-          Processor.Parameters.Add('OPT='+s1);
+          Processor.Process.Parameters.Add('OPT='+s1);
 
           try
             if CrossOptions='' then
-               infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')',etInfo)
+               infoln(infotext+'Running '+Processor.Process.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')',etInfo)
             else
-              infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+') with CROSSOPT: '+CrossOptions,etInfo);
+              infoln(infotext+'Running '+Processor.Process.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+') with CROSSOPT: '+CrossOptions,etInfo);
 
-            Processor.Execute;
+            Processor.Execute;Processor.WaitForExit;
             result:=(Processor.ExitStatus=0);
 
             if ((NOT result) AND (MakeCycle=st_Packages)) then
             begin
               //Sometimes rerun gives good results (on AIX 32bit especially).
-              infoln(infotext+'Running '+Processor.Executable+' stage again ... could work !',etInfo);
-              Processor.Execute;
+              infoln(infotext+'Running '+Processor.Process.Executable+' stage again ... could work !',etInfo);
+              Processor.Execute;Processor.WaitForExit;
               result:=(Processor.ExitStatus=0);
             end;
 
           except
             on E: Exception do
             begin
-              WritelnLog(infotext+'Running cross compiler fpc '+Processor.Executable+' generated an exception!'+LineEnding+'Details: '+E.Message,true);
+              WritelnLog(infotext+'Running cross compiler fpc '+Processor.Process.Executable+' generated an exception!'+LineEnding+'Details: '+E.Message,true);
               WritelnLog(infotext+'We are going to try again !',true);
               exit(false);
               //result:=false;
@@ -1139,9 +1139,9 @@ begin
           {$endif win64}
           FCompiler:='////\\\Error trying to compile FPC\|!';
           if result then
-            infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
+            infoln(infotext+'Running cross compiler fpc '+Processor.Process.Executable+' for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
           else
-          infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code.',etError);
+          infoln(infotext+'Running cross compiler fpc '+Processor.Process.Executable+' for '+GetFPCTarget(false)+' failed with an error code.',etError);
           // No use in going on, but
           // do make sure installation continues if this happened with optional crosscompiler:
           exit(result);
@@ -1432,25 +1432,25 @@ begin
     infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
   end;
 
-  Processor.Executable := Make;
-  Processor.Parameters.Clear;
+  Processor.Process.Executable := Make;
+  Processor.Process.Parameters.Clear;
   {$IFDEF MSWINDOWS}
-  if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+  if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
   {$ENDIF}
   FErrorLog.Clear;
   if (FNoJobs) then
-    Processor.Parameters.Add('--jobs=1')
+    Processor.Process.Parameters.Add('--jobs=1')
   else
-    Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-  //Processor.Parameters.Add('FPC='+FCompiler);
-  Processor.Parameters.Add('PP='+FCompiler);
+    Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+  //Processor.Process.Parameters.Add('FPC='+FCompiler);
+  Processor.Process.Parameters.Add('PP='+FCompiler);
 
   {$IFDEF DEBUG}
-  Processor.Parameters.Add('-d');
+  Processor.Process.Parameters.Add('-d');
   {$ENDIF}
-  Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
-  Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
-  Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
+  Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
+  Processor.Process.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
+  Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
 
   //Makefile could pickup FPCDIR setting, so try to set it for fpcupdeluxe
   //FPCDirStore:=Processor.Environment.GetVar('FPCDIR');
@@ -1458,12 +1458,12 @@ begin
 
   //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
   //Todo: to be investigated
-  //Processor.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
+  //Processor.Process.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
 
-  Processor.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-  Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+  Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+  Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   {$IFDEF UNIX}
-  Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
+  Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
   {$ELSE}
 
   if (ModuleName<>_FPC) then
@@ -1471,25 +1471,25 @@ begin
     s1:=IncludeTrailingPathDelimiter(FBinPath)+FPCCONFIGFILENAME;
     if FileExists(s1) then
     begin
-      //Processor.Parameters.Add('CFGFILE=' + s1);
+      //Processor.Process.Parameters.Add('CFGFILE=' + s1);
     end;
   end;
 
-  Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-  Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+  Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
   {$ENDIF}
-  Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
-  Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
-  Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
-  Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
+  Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
+  Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
+  Processor.Process.Parameters.Add('OS_TARGET=' + GetTargetOS);
+  Processor.Process.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
 
   if (CalculateNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,4)) then
   begin
-    Processor.Parameters.Add('DATA2INC=echo');
+    Processor.Process.Parameters.Add('DATA2INC=echo');
   end;
 
   if FBootstrapCompilerOverrideVersionCheck then
-    Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+    Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
   s1:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
   while Pos('  ',s1)>0 do
   begin
@@ -1529,7 +1529,7 @@ begin
 
   s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+REVINCFILENAME;
   if NOT FileExists(s2) then
-    Processor.Parameters.Add('REVSTR='+ActualRevision)
+    Processor.Process.Parameters.Add('REVSTR='+ActualRevision)
   else
     s1:=s1+' -dREVINC';
 
@@ -1552,61 +1552,61 @@ begin
   {$endif}
 
   s1:=Trim(s1);
-  Processor.Parameters.Add('OPT='+s1);
+  Processor.Process.Parameters.Add('OPT='+s1);
 
-  Processor.CurrentDirectory:='';
+  Processor.Process.CurrentDirectory:='';
   case ModuleName of
     _FPC,_MAKEFILECHECKFPC:
     begin
-      Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
     end;
     _PAS2JS:
     begin
-      Processor.CurrentDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'pas2js';
+      Processor.Process.CurrentDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'pas2js';
       // first run fpcmake to generate correct makefile
       // is this still needed !!?? No !!
-      //SysUtils.DeleteFile(IncludeTrailingPathDelimiter(Processor.CurrentDirectory)+'fpmake'+GetExeExt);
-      //ExecuteCommandInDir(IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt,Processor.CurrentDirectory,FVerbose);
+      //SysUtils.DeleteFile(IncludeTrailingPathDelimiter(Processor.Process.CurrentDirectory)+'fpmake'+GetExeExt);
+      //ExecuteCommandInDir(IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt,Processor.Process.CurrentDirectory,FVerbose);
     end;
   end;
 
-  if (Length(Processor.CurrentDirectory)=0) OR (NOT DirectoryExists(Processor.CurrentDirectory)) then
+  if (Length(Processor.Process.CurrentDirectory)=0) OR (NOT DirectoryExists(Processor.Process.CurrentDirectory)) then
   begin
-    Processor.Parameters.Add('--help'); // this should render make harmless
+    Processor.Process.Parameters.Add('--help'); // this should render make harmless
     WritelnLog(etError, infotext+'Invalid module name [' + ModuleName + '] specified! Please fix the code.', true);
     OperationSucceeded := false;
     Result := false;
     exit;
   end;
 
-  Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
+  Processor.Process.Parameters.Add('--directory='+Processor.Process.CurrentDirectory);
 
   if ModuleName=_MAKEFILECHECKFPC then
   begin
-    Processor.Parameters.Add('fpc_baseinfo');
-    infoln(infotext+'Running '+Processor.Executable+' fpc_baseinfo for '+ModuleName,etInfo);
+    Processor.Process.Parameters.Add('fpc_baseinfo');
+    infoln(infotext+'Running '+Processor.Process.Executable+' fpc_baseinfo for '+ModuleName,etInfo);
   end
   else
   begin
-    Processor.Parameters.Add('all');
-    Processor.Parameters.Add('install');
-    infoln(infotext+'Running '+Processor.Executable+' all install for '+ModuleName,etInfo);
+    Processor.Process.Parameters.Add('all');
+    Processor.Process.Parameters.Add('install');
+    infoln(infotext+'Running '+Processor.Process.Executable+' all install for '+ModuleName,etInfo);
   end;
 
   try
-    Processor.Execute;
+    Processor.Execute;Processor.WaitForExit;
     //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
     //Processor.Environment.SetVar('FPCDIR',FPCDirStore);
     if Processor.ExitStatus <> 0 then
     begin
       OperationSucceeded := False;
-      WritelnLog(etError, infotext+'Error running '+Processor.Executable+' for '+ModuleName+' failed with exit code '+IntToStr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
+      WritelnLog(etError, infotext+'Error running '+Processor.Process.Executable+' for '+ModuleName+' failed with exit code '+IntToStr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
     begin
       OperationSucceeded := False;
-      WritelnLog(etError, infotext+'Running fpc '+Processor.Executable+' for '+ModuleName+' failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
+      WritelnLog(etError, infotext+'Running fpc '+Processor.Process.Executable+' for '+ModuleName+' failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
     end;
   end;
 
@@ -2277,8 +2277,6 @@ begin
 
   result:=CheckAndGetTools;
 
-  if FVerbose then Processor.OnOutputM:=@DumpOutput;
-
   WritelnLog(localinfotext+'Init:', false);
   WritelnLog(localinfotext+'FPC directory:      ' + FSourceDirectory, false);
   WritelnLog(localinfotext+'FPC URL:            ' + FURL, false);
@@ -2814,15 +2812,15 @@ var
     aIndex:integer;
   begin
     aIndex:=-1;
-    Processor.Parameters.Clear;
-    Processor.Parameters.Add('-h');
+    Processor.Process.Parameters.Clear;
+    Processor.Process.Parameters.Add('-h');
     try
-      Processor.Execute;
+      Processor.Execute;Processor.WaitForExit;
       //if Processor.ExitStatus = 0 then
       begin
-        if Processor.OutputStrings.Count>0 then
+        if Processor.WorkerOutput.Count>0 then
         begin
-          aIndex:=StringListStartsWith(Processor.OutputStrings,Trim(aOption));
+          aIndex:=StringListStartsWith(Processor.WorkerOutput,Trim(aOption));
         end;
       end;
     except
@@ -2838,13 +2836,13 @@ var
   function RunFPCMkCfgOption(aFile:string):boolean;
   begin
     result:=false;
-    Processor.Parameters.Add('-d');
-    Processor.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-    Processor.Parameters.Add('-o');
-    Processor.Parameters.Add('' + aFile + '');
-    infoln(infotext+'Creating '+ExtractFileName(aFile)+': '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]));
+    Processor.Process.Parameters.Add('-d');
+    Processor.Process.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+    Processor.Process.Parameters.Add('-o');
+    Processor.Process.Parameters.Add('' + aFile + '');
+    infoln(infotext+'Creating '+ExtractFileName(aFile)+': '+Processor.Process.Executable+' '+StringReplace(Processor.Process.Parameters.CommaText,',',' ',[rfReplaceAll]));
     try
-      Processor.Execute;
+      Processor.Execute;Processor.WaitForExit;
       result:=(Processor.ExitStatus=0);
     except
       on E: Exception do
@@ -3021,29 +3019,29 @@ begin
     if (Pos('ppc386.exe',FCompiler)>0) OR (GetCompilerTargetOS(FCompiler)='win32') then //need to build ppcx64 before
     begin
       infoln('We have ppc386. We need ppcx64. So make it !',etInfo);
-      Processor.Executable := Make;
-      Processor.Parameters.Clear;
+      Processor.Process.Executable := Make;
+      Processor.Process.Parameters.Clear;
       {$IFDEF MSWINDOWS}
-      if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+      if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
       {$ENDIF}
-      Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
-      Processor.Parameters.Add('compiler_cycle');
+      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+      Processor.Process.Parameters.Add('compiler_cycle');
       if (FNoJobs) then
-        Processor.Parameters.Add('--jobs=1')
+        Processor.Process.Parameters.Add('--jobs=1')
       else
-        Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-      Processor.Parameters.Add('FPC='+FCompiler);
-      Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
-      Processor.Parameters.Add('OS_SOURCE=win32');
-      Processor.Parameters.Add('CPU_SOURCE=i386');
-      Processor.Parameters.Add('OS_TARGET=win64');
-      Processor.Parameters.Add('CPU_TARGET=x86_64');
-      Processor.Parameters.Add('OPT='+STANDARDCOMPILERVERBOSITYOPTIONS);
+        Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+      Processor.Process.Parameters.Add('FPC='+FCompiler);
+      Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+      Processor.Process.Parameters.Add('OS_SOURCE=win32');
+      Processor.Process.Parameters.Add('CPU_SOURCE=i386');
+      Processor.Process.Parameters.Add('OS_TARGET=win64');
+      Processor.Process.Parameters.Add('CPU_TARGET=x86_64');
+      Processor.Process.Parameters.Add('OPT='+STANDARDCOMPILERVERBOSITYOPTIONS);
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
-        Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      infoln(infotext+'Running '+Processor.Executable+' cycle for Windows FPC64:',etInfo);
-      Processor.Execute;
+        Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+      infoln(infotext+'Running '+Processor.Process.Executable+' cycle for Windows FPC64:',etInfo);
+      Processor.Execute;Processor.WaitForExit;
       if Processor.ExitStatus <> 0 then
       begin
         result := False;
@@ -3060,26 +3058,26 @@ begin
     if pos('ppcuniversal',FCompiler)>0 then //need to build ppcxxx before
     begin
       infoln(infotext+'We have ppcuniversal. We need '+TargetCompilerName+'. So make it !',etInfo);
-      Processor.Executable := Make;
-      Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
-      Processor.Parameters.Clear;
-      Processor.Parameters.Add('compiler_cycle');
+      Processor.Process.Executable := Make;
+      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+      Processor.Process.Parameters.Clear;
+      Processor.Process.Parameters.Add('compiler_cycle');
       if (FNoJobs) then
-        Processor.Parameters.Add('--jobs=1')
+        Processor.Process.Parameters.Add('--jobs=1')
       else
-        Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-      Processor.Parameters.Add('FPC='+FCompiler);
-      Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
-      Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
-      Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
-      Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
-      Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
-      Processor.Parameters.Add('OPT='+STANDARDCOMPILERVERBOSITYOPTIONS);
+        Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+      Processor.Process.Parameters.Add('FPC='+FCompiler);
+      Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+      Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
+      Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
+      Processor.Process.Parameters.Add('OS_TARGET=' + GetTargetOS);
+      Processor.Process.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
+      Processor.Process.Parameters.Add('OPT='+STANDARDCOMPILERVERBOSITYOPTIONS);
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
-        Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      infoln(infotext+'Running '+Processor.Executable+' cycle for FPC '+TargetCompilerName+' bootstrap compiler only',etInfo);
-      Processor.Execute;
+        Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+      infoln(infotext+'Running '+Processor.Process.Executable+' cycle for FPC '+TargetCompilerName+' bootstrap compiler only',etInfo);
+      Processor.Execute;Processor.WaitForExit;
       if Processor.ExitStatus <> 0 then
       begin
         result := False;
@@ -3172,8 +3170,8 @@ begin
 
     if (OperationSucceeded) then
     begin
-      Processor.Executable:=FPCMkCfg;
-      Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FInstallDirectory);
+      Processor.Process.Executable:=FPCMkCfg;
+      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FInstallDirectory);
 
       s2:= ExtractFilePath(FPCMkCfg)+FPFILENAME+GetExeExt;
       if FileExists(s2) then
@@ -3184,17 +3182,17 @@ begin
           //create fp.cfg
           //if CheckFPCMkCfgOption('-1') then
           begin
-            Processor.Parameters.Clear;
-            Processor.Parameters.Add('-1');
-            Processor.Parameters.Add('-d');
-            Processor.Parameters.Add('fpctargetos='+GetTargetOS);
+            Processor.Process.Parameters.Clear;
+            Processor.Process.Parameters.Add('-1');
+            Processor.Process.Parameters.Add('-d');
+            Processor.Process.Parameters.Add('fpctargetos='+GetTargetOS);
 
             {$IFDEF UNIX}
             //s2:=GetStartupObjects;
             //if Length(s2)>0 then
             //begin
-            //  Processor.Parameters.Add('-d');
-            //  Processor.Parameters.Add('GCCLIBPATH= -Fl'+s2);
+            //  Processor.Process.Parameters.Add('-d');
+            //  Processor.Process.Parameters.Add('GCCLIBPATH= -Fl'+s2);
             //end;
             {$ENDIF UNIX}
 
@@ -3212,8 +3210,8 @@ begin
           //create fp.ini
           //if CheckFPCMkCfgOption('-2') then
           begin
-            Processor.Parameters.Clear;
-            Processor.Parameters.Add('-2');
+            Processor.Process.Parameters.Clear;
+            Processor.Process.Parameters.Add('-2');
 
             RunFPCMkCfgOption(s);
           end;
@@ -3241,27 +3239,27 @@ begin
           //Create package configuration fppkg.cfg
           //if CheckFPCMkCfgOption('-3') then
           begin
-            Processor.Parameters.Clear;
-            Processor.Parameters.Add('-3');
+            Processor.Process.Parameters.Clear;
+            Processor.Process.Parameters.Add('-3');
 
-            Processor.Parameters.Add('-d');
-            Processor.Parameters.Add('LocalRepository='+ConcatPaths([FBaseDirectory,PACKAGESLOCATION])+PathDelim);
+            Processor.Process.Parameters.Add('-d');
+            Processor.Process.Parameters.Add('LocalRepository='+ConcatPaths([FBaseDirectory,PACKAGESLOCATION])+PathDelim);
 
-            Processor.Parameters.Add('-d');
-            Processor.Parameters.Add('CompilerConfigDir='+IncludeTrailingPathDelimiter(s2));
+            Processor.Process.Parameters.Add('-d');
+            Processor.Process.Parameters.Add('CompilerConfigDir='+IncludeTrailingPathDelimiter(s2));
 
-            Processor.Parameters.Add('-d');
+            Processor.Process.Parameters.Add('-d');
             {$ifdef MSWINDOWS}
-            Processor.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(FInstallDirectory));
+            Processor.Process.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(FInstallDirectory));
             {$ELSE}
-            Processor.Parameters.Add('GlobalPath='+ConcatPaths([FInstallDirectory,'lib','fpc','{CompilerVersion}'])+PathDelim);
+            Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([FInstallDirectory,'lib','fpc','{CompilerVersion}'])+PathDelim);
             {$ENDIF}
 
-            Processor.Parameters.Add('-d');
-            Processor.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+            Processor.Process.Parameters.Add('-d');
+            Processor.Process.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(FInstallDirectory));
 
-            Processor.Parameters.Add('-d');
-            Processor.Parameters.Add('UserPathSuffix=users');
+            Processor.Process.Parameters.Add('-d');
+            Processor.Process.Parameters.Add('UserPathSuffix=users');
 
             RunFPCMkCfgOption(s);
           end;
@@ -3278,20 +3276,20 @@ begin
           //Create default compiler template
           //if CheckFPCMkCfgOption('-4') then
           begin
-            Processor.Parameters.Clear;
-            Processor.Parameters.Add('-4');
+            Processor.Process.Parameters.Clear;
+            Processor.Process.Parameters.Add('-4');
 
-            Processor.Parameters.Add('-d');
-            Processor.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+            Processor.Process.Parameters.Add('-d');
+            Processor.Process.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(FInstallDirectory));
 
-            Processor.Parameters.Add('-d');
-            Processor.Parameters.Add('fpcbin='+FCompiler);
+            Processor.Process.Parameters.Add('-d');
+            Processor.Process.Parameters.Add('fpcbin='+FCompiler);
 
-            Processor.Parameters.Add('-d');
-            Processor.Parameters.Add('fpctargetos='+GetTargetOS);
+            Processor.Process.Parameters.Add('-d');
+            Processor.Process.Parameters.Add('fpctargetos='+GetTargetOS);
 
-            Processor.Parameters.Add('-d');
-            Processor.Parameters.Add('fpctargetcpu='+GetTargetCPU);
+            Processor.Process.Parameters.Add('-d');
+            Processor.Process.Parameters.Add('fpctargetcpu='+GetTargetCPU);
 
             RunFPCMkCfgOption(s);
           end;
@@ -3307,7 +3305,7 @@ begin
       if (NOT FileExists(s)) then
       begin
         //create fpc.cfg
-        Processor.Parameters.Clear;
+        Processor.Process.Parameters.Clear;
         RunFPCMkCfgOption(s);
       end
       else
@@ -3622,7 +3620,6 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 // by Jonas Maebe, 1 November 2012
 // On Windows, removing fpmake.exe, see Build FAQ (Nov 2011), 2.5
 var
-  oldlog: TErrorMethod;
   CrossCompiling: boolean;
   FileCounter:word;
   DeleteList: TStringList;
@@ -3637,8 +3634,6 @@ begin
   result:=InitModule;
 
   if not result then exit;
-
-  oldlog:=Processor.OnErrorM; //current error handler, if any
 
   CrossCompiling:=(Self is TFPCCrossInstaller);
 
@@ -3670,84 +3665,81 @@ begin
 
   if FileExists(aCleanupCompiler) then
   begin
-
-    Processor.OnErrorM:=nil;  //don't want to log errors in distclean
     try
-      Processor.Executable := Make;
-      Processor.Parameters.Clear;
+      Processor.Process.Executable := Make;
+      Processor.Process.Parameters.Clear;
       {$IFDEF MSWINDOWS}
-      if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+      if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
       {$ENDIF}
-      Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       if (FNoJobs) then
-        Processor.Parameters.Add('--jobs=1')
+        Processor.Process.Parameters.Add('--jobs=1')
       else
-        Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-      Processor.Parameters.Add('FPC='+aCleanupCompiler);
-      Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
-      Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
-      Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
-      Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
-      Processor.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-      Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+        Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+      Processor.Process.Parameters.Add('FPC='+aCleanupCompiler);
+      Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+      Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
+      Processor.Process.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
+      Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
+      Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+      Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
       {$IFDEF UNIX}
-      Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
+      Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
       {$ENDIF}
       {$IFDEF MSWINDOWS}
-      Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-      Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
-      Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
+      Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+      Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Processor.Process.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
+      Processor.Process.Parameters.Add('OS_SOURCE='+GetTargetOS);
       {$ENDIF}
       if Self is TFPCCrossInstaller then
       begin  // clean out the correct compiler
-        Processor.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);
-        Processor.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName);
-        //if Length(CrossInstaller.SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
-        if Length(CrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossOS_SubArch);
+        Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);
+        Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName);
+        //if Length(CrossInstaller.SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
+        if Length(CrossOS_SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossOS_SubArch);
       end
       else
       begin
-        Processor.Parameters.Add('CPU_TARGET='+GetTargetCPU);
-        Processor.Parameters.Add('OS_TARGET='+GetTargetOS);
+        Processor.Process.Parameters.Add('CPU_TARGET='+GetTargetCPU);
+        Processor.Process.Parameters.Add('OS_TARGET='+GetTargetOS);
       end;
-      Processor.Parameters.Add('distclean');
+      Processor.Process.Parameters.Add('distclean');
 
       if (NOT CrossCompiling) then
       begin
-        infoln(infotext+'Running '+Processor.Executable+' distclean twice',etInfo);
+        infoln(infotext+'Running '+Processor.Process.Executable+' distclean twice',etInfo);
       end
       else
       begin
-        infoln(infotext+'Running '+Processor.Executable+' distclean twice for target '+CrossInstaller.RegisterName,etInfo);
+        infoln(infotext+'Running '+Processor.Process.Executable+' distclean twice for target '+CrossInstaller.RegisterName,etInfo);
       end;
       try
-        writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
-        Processor.Execute;
+        writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+        Processor.Execute;Processor.WaitForExit;
         result:=(Processor.ExitStatus=0);
         if result then
         begin
           Sleep(100); //now do it again
-          writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
-          Processor.Execute;
+          writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+          Processor.Execute;Processor.WaitForExit;
           result:=(Processor.ExitStatus=0);
        end;
       except
         on E: Exception do
         begin
           result:=false;
-          WritelnLog(etError, infotext+'Running '+Processor.Executable+' distclean failed with an exception!'+LineEnding+'Details: '+E.Message,true);
+          WritelnLog(etError, infotext+'Running '+Processor.Process.Executable+' distclean failed with an exception!'+LineEnding+'Details: '+E.Message,true);
         end;
       end;
     finally
-      Processor.OnErrorM:=oldlog; //restore previous logging
     end;
 
   end
   else
   begin
     result:=false;
-    infoln(infotext+'Running '+Processor.Executable+' distclean failed: could not find cleanup compiler. Will try again later',etInfo);
+    infoln(infotext+'Running '+Processor.Process.Executable+' distclean failed: could not find cleanup compiler. Will try again later',etInfo);
   end;
 
   if (NOT CrossCompiling) then

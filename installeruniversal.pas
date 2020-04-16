@@ -225,41 +225,41 @@ begin
   result:=false;
   FLazarusNeedsRebuild:=false;
 
-  Processor.Executable := Make;
-  Processor.Parameters.Clear;
+  Processor.Process.Executable := Make;
+  Processor.Process.Parameters.Clear;
   {$IFDEF MSWINDOWS}
-  if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+  if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
   {$ENDIF}
-  Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
+  Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
   {
   //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
   if (FNoJobs) then
-    Processor.Parameters.Add('--jobs=1')
+    Processor.Process.Parameters.Add('--jobs=1')
   else
-    Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
-  Processor.Parameters.Add('FPC=' + FCompiler);
-  Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
-  Processor.Parameters.Add('USESVN2REVISIONINC=0');
-  //Processor.Parameters.Add('--directory=.');
-  Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(LazarusInstallDir));
+    Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
+  Processor.Process.Parameters.Add('FPC=' + FCompiler);
+  Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+  Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
+  //Processor.Process.Parameters.Add('--directory=.');
+  Processor.Process.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(LazarusInstallDir));
   //Make sure our FPC units can be found by Lazarus
-  Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
+  Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
   //Make sure Lazarus does not pick up these tools from other installs
-  Processor.Parameters.Add('FPCMAKE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt);
-  Processor.Parameters.Add('PPUMOVE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'ppumove'+GetExeExt);
+  Processor.Process.Parameters.Add('FPCMAKE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt);
+  Processor.Process.Parameters.Add('PPUMOVE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'ppumove'+GetExeExt);
 
   s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
   //if FileExists(s) then
   begin
-    Processor.Parameters.Add('CFGFILE=' + s);
+    Processor.Process.Parameters.Add('CFGFILE=' + s);
   end;
 
   {$IFDEF MSWINDOWS}
-  Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-  Processor.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+  Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
+  Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
   {$ENDIF MSWINDOWS}
 
-  if FLCL_Platform <> '' then Processor.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
+  if FLCL_Platform <> '' then Processor.Process.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
 
   //Set options
   s := FLazarusCompilerOptions;
@@ -287,14 +287,14 @@ begin
   end;
   s:=Trim(s);
 
-  if Length(s)>0 then Processor.Parameters.Add('OPT='+s);
+  if Length(s)>0 then Processor.Process.Parameters.Add('OPT='+s);
 
-  Processor.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
-  Processor.Parameters.Add('useride');
+  Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
+  Processor.Process.Parameters.Add('useride');
 
   try
-    WritelnLog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
-    Processor.Execute;
+    WritelnLog(infotext+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+    Processor.Execute;Processor.WaitForExit;
     result := Processor.ExitStatus=0;
     if result then
     begin
@@ -496,8 +496,6 @@ begin
   infoln(localinfotext+'Entering ...',etDebug);
   if InitDone then exit;
 
-  if FVerbose then Processor.OnOutputM:=@DumpOutput;
-
   // While getting svn etc may help a bit, if Lazarus isn't installed correctly,
   // it probably won't help for normal use cases.
   // However, in theory, we could run only external modules and
@@ -650,17 +648,17 @@ begin
        else WritelnLog(localinfotext+'Installing '+PackageName+' version '+lpkversion.AsString,True);
   end;
 
-  Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
+  Processor.Process.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
 
   RegisterPackageFeature:=false;
 
   // get lazbuild version to see if we can register packages (available from version 1.7 and up)
-  Processor.Parameters.Clear;
-  Processor.Parameters.Add('--version');
+  Processor.Process.Parameters.Clear;
+  Processor.Process.Parameters.Add('--version');
   try
-    Processor.Execute;
+    Processor.Execute;Processor.WaitForExit;
     result := (Processor.ExitStatus=0);
-    if result then RegisterPackageFeature:=(CalculateNumericalVersion(Processor.OutputString)>=CalculateFullVersion(1,7,0));
+    if result then RegisterPackageFeature:=(CalculateNumericalVersion(Processor.WorkerOutput.Text)>=CalculateFullVersion(1,7,0));
   except
     on E: Exception do
     begin
@@ -677,32 +675,32 @@ begin
 
   if RegisterPackageFeature then RegisterPackageFeature:=RegisterOnly;
 
-  Processor.Parameters.Clear;
+  Processor.Process.Parameters.Clear;
   FErrorLog.Clear;
   if WorkingDir<>'' then
-    Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
-  Processor.Parameters.Clear;
+    Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
+  Processor.Process.Parameters.Clear;
   {$IFDEF DEBUG}
-  Processor.Parameters.Add('--verbose');
+  Processor.Process.Parameters.Add('--verbose');
   {$ELSE}
-  Processor.Parameters.Add('--quiet');
+  Processor.Process.Parameters.Add('--quiet');
   {$ENDIF}
   if (FNoJobs) then
-    Processor.Parameters.Add('--max-process-count=1')
+    Processor.Process.Parameters.Add('--max-process-count=1')
   else
-    Processor.Parameters.Add('--max-process-count='+InttoStr(GetLogicalCpuCount));
-  Processor.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
-  Processor.Parameters.Add('--cpu=' + GetTargetCPU);
-  Processor.Parameters.Add('--os=' + GetTargetOS);
+    Processor.Process.Parameters.Add('--max-process-count='+InttoStr(GetLogicalCpuCount));
+  Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
+  Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);
+  Processor.Process.Parameters.Add('--os=' + GetTargetOS);
   if FLCL_Platform <> '' then
-            Processor.Parameters.Add('--ws=' + FLCL_Platform);
+            Processor.Process.Parameters.Add('--ws=' + FLCL_Platform);
   if RegisterPackageFeature then
-    Processor.Parameters.Add('--add-package-link')
+    Processor.Process.Parameters.Add('--add-package-link')
   else
-    Processor.Parameters.Add('--add-package');
-  Processor.Parameters.Add(DoubleQuoteIfNeeded(PackageAbsolutePath));
+    Processor.Process.Parameters.Add('--add-package');
+  Processor.Process.Parameters.Add(DoubleQuoteIfNeeded(PackageAbsolutePath));
   try
-    Processor.Execute;
+    Processor.Execute;Processor.WaitForExit;
     result := Processor.ExitStatus=0;
     // runtime packages will return false, but output will have info about package being "only for runtime"
     if result then
@@ -716,7 +714,7 @@ begin
     else
     begin
       // if the package is only for runtime, just add an lpl file to inform Lazarus of its existence and location ->> set result to true
-      if (Pos('only for runtime',Processor.OutputString)>0) OR (RegisterPackageFeature)
+      if (Pos('only for runtime',Processor.WorkerOutput.Text)>0) OR (RegisterPackageFeature)
          then result:=True
          else WritelnLog(localinfotext+'Error trying to add package '+PackageName+'. Details: '+FErrorLog.Text,true);
     end;
@@ -1215,17 +1213,17 @@ begin
       result:=false;
       j:=-1;
 
-      Processor.Parameters.Clear;
-      CommandToList(exec,Processor.Parameters);
-      If Processor.Parameters.Count>0 then
+      Processor.Process.Parameters.Clear;
+      CommandToList(exec,Processor.Process.Parameters);
+      If Processor.Process.Parameters.Count>0 then
       begin
-        Processor.Executable:=Processor.Parameters[0];
-        Processor.Parameters.Delete(0);
+        Processor.Process.Executable:=Processor.Process.Parameters[0];
+        Processor.Process.Parameters.Delete(0);
       end;
 
-      Processor.CurrentDirectory:=Workingdir;
-      Processor.Execute;
-      s:=Processor.OutputString;
+      Processor.Process.CurrentDirectory:=Workingdir;
+      Processor.Execute;Processor.WaitForExit;
+      s:=Processor.WorkerOutput.Text;
       j:=Processor.ExitStatus;
 
       if j=0 then

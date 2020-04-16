@@ -28,7 +28,9 @@ interface
 uses
   Classes, SysUtils,
   repoclient, GitClient, HGClient, SvnClient,
-  processutils, m_crossinstaller, fpcuputil;
+  processutils, m_crossinstaller,
+  RunTools,
+  fpcuputil;
 
 {$i revision.inc}
 
@@ -352,7 +354,7 @@ type
     FWget: string;
     FUnrar: string;
     //FGit: string;
-    FProcessEx: TProcessEx;
+    FExternalTool: TExternalTool;
     FSwitchURL: boolean;
     FSolarisOI: boolean;
     FMUSL: boolean;
@@ -391,7 +393,6 @@ type
     function DownloadZlib: boolean;
     {$ENDIF}
     function DownloadJasmin: boolean;
-    procedure DumpOutput(Sender: TProcessEx; output: string);
     // Looks for SVN client in subdirectories and sets FSVNClient.SVNExecutable if found.
     {$IFDEF MSWINDOWS}
     function FindSVNSubDirs: boolean;
@@ -400,7 +401,6 @@ type
     function GetCompiler: string;
     // Returns CPU-OS in the format used by the FPC bin directory, e.g. x86_64-win64:
     function GetFPCTarget(Native: boolean): string;
-    procedure LogError(Sender: TProcessEx; IsException: boolean);
     // Sets the search/binary path to NewPath or adds NewPath before or after existing path:
     procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
     // Get currently set path
@@ -420,9 +420,7 @@ type
     property GitClient: TGitClient read FGitClient;
     property HGClient: THGClient read FHGClient;
     // Get processor for termination of running processes
-    property Processor: TProcessEx read FProcessEx;
-    // Get processerrors and put them into FErrorLog
-    procedure ProcessError(Sender:TProcessEx; {%H-}IsException:boolean);
+    property Processor: TExternalTool read FExternalTool;
     // Source directory for installation (fpcdir, lazdir,... option)
     property SourceDirectory: string write SetSourceDirectory;
     //Base directory for fpc(laz)up(deluxe) itself
@@ -2662,23 +2660,6 @@ begin
   Result:=true; //never fail
 end;
 
-procedure TInstaller.DumpOutput(Sender: TProcessEx; output: string);
-begin
-  if FVerbose then
-  begin
-    // Set up initial output
-    if (NOT Assigned(FLogVerbose)) then
-    begin
-      FLogVerbose:=TLogger.Create;
-      FLogVerbose.LogFile:=GetTempFileNameExt(Copy(BeginSnippet,1,Length(BeginSnippet)-1),'log');
-      FLogVerbose.WriteLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',false);
-      FLogVerbose.WriteLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,false);
-    end;
-    FLogVerbose.WriteLog(Output,false);
-  end;
-  DumpConsole(Sender, output);
-end;
-
 {$IFDEF MSWINDOWS}
 function TInstaller.FindSVNSubDirs: boolean;
 var
@@ -2761,39 +2742,6 @@ begin
     result:=GetEnvironmentVariable(PATHVARNAME);
 end;
 
-procedure TInstaller.LogError(Sender: TProcessEx; IsException: boolean);
-var
-  TempFileName: string;
-begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+': ';
-  TempFileName := GetTempFileNameExt('FPCUPDUMP','dump');
-  if IsException then
-  begin
-    WritelnLog(etError, localinfotext+'Exception raised running ' + Sender.ResultingCommand, true);
-    WritelnLog(etError, localinfotext+Sender.ExceptionInfo, true);
-  end
-  else
-  begin
-    writelnlog(etError, localinfotext+'Running ' + Sender.ResultingCommand + ' failed.', true);
-    writelnlog(etError, localinfotext+'Command returned non-zero ExitStatus: ' + IntToStr(Sender.ExitStatus), true);
-    writelnlog(localinfotext+'Command path set to: ' + Sender.Environment.GetVar(PATHVARNAME), true);
-    writelnlog(localinfotext+'Command current directory: ' + Sender.CurrentDirectory, true);
-    writelnlog(localinfotext+'Command output:', true);
-    // Dump command output to screen and detailed log
-    infoln(localinfotext+Sender.OutputString,etDebug);
-    try
-      Sender.OutputStrings.SaveToFile(TempFileName);
-    except
-      on E: Exception do
-      begin
-        // Preferably continue if we can but do inform user of problems
-        infoln(localinfotext+'Error writing verbose output to '+TempFileName+': '+E.Message,etError);
-      end;
-    end;
-    WritelnLog(localinfotext+'Output logged in ' + TempFileName, false);
-  end;
-end;
-
 procedure TInstaller.SetPath(NewPath: string; Prepend: boolean; Append: boolean);
 var
   OldPath: string;
@@ -2815,12 +2763,6 @@ begin
   end;
   if FVerbose then
     infoln(Copy(Self.ClassName,2,MaxInt)+' (SetPath): Set path to: ' + ResultingPath,etDebug);
-end;
-
-procedure TInstaller.ProcessError(Sender: TProcessEx; IsException: boolean);
-begin
-  // Add exception info generated from processex
-  FErrorLog.AddStrings(Sender.ExceptionInfoStrings);
 end;
 
 procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);
@@ -3542,8 +3484,7 @@ begin
 
   FCrossInstaller:=nil;
 
-  FProcessEx:=TProcessEx.Create(nil);
-  FProcessEx.OnErrorM := @LogError;
+  FExternalTool:=TExternalTool.Create(nil);
 
   FCPUCount  := GetLogicalCpuCount;
 
@@ -3562,7 +3503,6 @@ begin
   // as it depends on verbosity etc
   //FLogVerbose: TLogger.Create;
   FErrorLog := TStringList.Create;
-  FProcessEx.OnErrorM:=@(ProcessError);
 
   FCrossCPU_Target:=TCPU.cpuNone;
   FCrossOS_Target:=TOS.osNone;
@@ -3724,11 +3664,7 @@ begin
     FLogVerbose.Free;
   if Assigned(FErrorLog) then
     FErrorLog.Free;
-  if Assigned(Processor.OnErrorM) then
-    Processor.OnErrorM:=nil;
-  if Assigned(Processor.OnError) then
-    Processor.OnError:=nil;
-  FProcessEx.Free;
+  FExternalTool.Free;
   FGitClient.Free;
   FHGClient.Free;
   FSVNClient.Free;

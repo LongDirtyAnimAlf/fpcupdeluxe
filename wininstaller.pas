@@ -158,8 +158,6 @@ var
   InstallerBatchDir: string; //directory where installer batch script is; will contain log and output dir with installer
 begin
   // todo: split up, move to config, perhaps make dirs properties etc
-  if FVerbose then
-    Processor.OnOutputM:=@DumpOutput;
   infoln('TWinInstaller: creating Lazarus installer. This may take a while...',etInfo);
 
   // Basedirectory = install directory from fpcup.ini/universal module.
@@ -226,25 +224,25 @@ begin
   PATCHFILE: Optional: name of FPC patch file for the FPC sources. If not needed: don't enter it or use ""
   CHMHELPFILES: Optional: directory containing CHM help files to be included in the installer (see A.7). If not needed: don't enter it or use ""
   }
-  Processor.Executable := IncludeTrailingPathDelimiter(InstallerBatchDir)+'create_installer.bat';
+  Processor.Process.Executable := IncludeTrailingPathDelimiter(InstallerBatchDir)+'create_installer.bat';
   // MUST be set to create_installer.bat otherwise it can't find the fpcbuild/lazbuild scripts
-  Processor.CurrentDirectory:=IncludeTrailingPathDelimiter(InstallerBatchDir);
-  Processor.Parameters.Clear;
-  Processor.Parameters.Add(ExcludeTrailingPathDelimiter(FFPCBuildDir)); //FPCSVNDIR
-  Processor.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusDir)); //LAZSVNDIR
-  Processor.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusBinaryDir)); //LAZSVNBINDIR
+  Processor.Process.CurrentDirectory:=IncludeTrailingPathDelimiter(InstallerBatchDir);
+  Processor.Process.Parameters.Clear;
+  Processor.Process.Parameters.Add(ExcludeTrailingPathDelimiter(FFPCBuildDir)); //FPCSVNDIR
+  Processor.Process.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusDir)); //LAZSVNDIR
+  Processor.Process.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusBinaryDir)); //LAZSVNBINDIR
   // Should officially be a bootstrap compiler but should work with current compiler:
-  Processor.Parameters.Add(FCompiler); //RELEASE_PPC
-  Processor.Parameters.Add('""'); //an empty parameter as IDE_WIDGETSET
-  Processor.Parameters.Add('""'); //an empty parameter as PATCHFILE
-  Processor.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
-  if FVerbose then WritelnLog(ClassName+': Running '+Processor.Executable,true);
-  Processor.Execute;
+  Processor.Process.Parameters.Add(FCompiler); //RELEASE_PPC
+  Processor.Process.Parameters.Add('""'); //an empty parameter as IDE_WIDGETSET
+  Processor.Process.Parameters.Add('""'); //an empty parameter as PATCHFILE
+  Processor.Process.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
+  if FVerbose then WritelnLog(ClassName+': Running '+Processor.Process.Executable,true);
+  Processor.Execute;Processor.WaitForExit;
 
   if Processor.ExitStatus <> 0 then
   begin
     result := False;
-    WritelnLog(ClassName+': Failed to create installer; '+Processor.Executable+' returned '+IntToStr(Processor.ExitStatus)+LineEnding+
+    WritelnLog(ClassName+': Failed to create installer; '+Processor.Process.Executable+' returned '+IntToStr(Processor.ExitStatus)+LineEnding+
       'Installer log at '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log',true);
   end
   else
