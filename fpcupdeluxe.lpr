@@ -45,7 +45,6 @@ program fpcupdeluxe;
 
 uses
   {$IFDEF UNIX}
-  //for threaded auto-updater-notifier
   cthreads,
   //cmem,  // the c memory manager is on some systems much faster for multi-threading
   {$ENDIF}

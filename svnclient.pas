@@ -96,7 +96,6 @@ implementation
 
 uses
   fpcuputil,
-  RunTools,
   {$IFDEF UNIX}
   BaseUnix,Unix,
   {$ENDIF}

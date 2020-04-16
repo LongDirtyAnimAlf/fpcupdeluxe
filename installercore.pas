@@ -29,7 +29,6 @@ uses
   Classes, SysUtils,
   repoclient, GitClient, HGClient, SvnClient,
   processutils, m_crossinstaller,
-  RunTools,
   fpcuputil;
 
 {$i revision.inc}
