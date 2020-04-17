@@ -75,7 +75,7 @@ begin
 end;
 
 {$IFDEF Darwin}
-{$IFDEF CPUi386}
+{$IFDEF CPUX86}
 
 var
   Darwinpowerpc:TDarwinpowerpc;

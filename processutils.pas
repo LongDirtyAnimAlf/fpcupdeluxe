@@ -3,7 +3,7 @@ unit processutils;
 {$mode objfpc}{$H+}
 
 {$ifdef LCL}
-{$define THREADEDEXECUTE}
+{.$define THREADEDEXECUTE}
 {$endif}
 
 interface
@@ -162,6 +162,7 @@ type
   TExternalTool = class(TAbstractExternalTool)
   private
     FThread: TExternalToolThread;
+    FVerbose:boolean;
     procedure ProcessRunning;
     procedure ProcessStopped;
     procedure AddOutputLines(Lines: TStringList);
@@ -176,6 +177,7 @@ type
     constructor Create(aOwner: TComponent); override;
     destructor Destroy; override;
     property Thread: TExternalToolThread read FThread write SetThread;
+    property Verbose: boolean read FVerbose write FVerbose;
     procedure Execute; override;
     procedure Terminate; override;
     procedure WaitForExit; override;
@@ -203,6 +205,7 @@ implementation
 uses
   {$ifdef LCL}
   Forms,
+  Controls, // for crHourGlass
   {$endif}
   {$ifdef THREADEDEXECUTE}
   LCLIntf,
@@ -259,6 +262,8 @@ var
   aTool:TExternalTool;
 begin
   aTool:=TExternalTool.Create(nil);
+
+  aTool.Verbose:=Verbose;
 
   try
     if Directory<>'' then
@@ -527,11 +532,14 @@ begin
       if IsMultiThread then
       begin
       end;
-      {$ifdef THREADEDEXECUTE}
-      ThreadLog(LineStr);
-      {$else}
-      writeln(LineStr);
-      {$endif}
+      if Verbose then
+      begin
+        {$ifdef THREADEDEXECUTE}
+        ThreadLog(LineStr);
+        {$else}
+        writeln(LineStr);
+        {$endif}
+      end;
     end;
   finally
     LeaveCriticalSection;
@@ -565,8 +573,12 @@ begin
   inherited Create(aOwner);
   FWorkerOutput:=TStringList.Create;
   FProcess:=TProcess.Create(nil);
-  FProcess.Options:= [poUsePipes{$IFDEF Windows},poStderrToOutPut{$ENDIF}];
+  //FProcess.Options:= [poUsePipes{$IFDEF Windows},poStderrToOutPut{$ENDIF}];
+  FProcess.Options := FProcess.Options +[poUsePipes, poStderrToOutPut];
+  {$ifdef LCL}
   FProcess.ShowWindow := swoHide;
+  {$endif}
+  FVerbose:=true;
 end;
 
 destructor TExternalTool.Destroy;
@@ -906,13 +918,14 @@ var
   end;
 
 const
-  UpdateTimeDiff = 1000 div 5; // update five times a second, even if there is still work
+  UpdateTimeDiff = 1000 div 10; // update 10 times a second, even if there is still work
 var
   OutputLine, StdErrLine: String;
   LastUpdate: QWord;
   ErrMsg: String;
   ok: Boolean;
   HasOutput: Boolean;
+  i:integer;
 begin
   SetLength({%H-}Buf,4096);
   ErrorFrameCount:=0;
@@ -981,7 +994,30 @@ begin
           fLines.Clear;
           LastUpdate:=GetTickCount64;
         end;
-        if (not HasOutput) then Sleep(50); // no more pending output and process is still running
+        if (not HasOutput) then
+        begin
+          // no more pending output and process is still running
+          {$ifndef THREADEDEXECUTE}
+          {$ifdef LCL}
+          Sleep(10);
+          if (i<100) then Inc(i);
+          // process message queue after 50ms
+          if ((i DIV 5)=0) then
+          begin
+            try
+              Application.ProcessMessages;
+            except
+              Application.HandleException(Application);
+            end;
+            if Application.Terminated then Break;
+          end;
+          // set cursor after 1 second of execution time
+          if (i=99) then Application.MainForm.Cursor:=crHourGlass;
+          {$endif}
+          {$else}
+          Sleep(50);
+          {$endif}
+        end;
       end;
       // add rest of output
       if (OutputLine<>'') then fLines.Add(OutputLine);
@@ -991,6 +1027,21 @@ begin
         Tool.AddOutputLines(fLines);
         fLines.Clear;
       end;
+
+      {$ifndef THREADEDEXECUTE}
+      {$ifdef LCL}
+      if Application.MainForm.Cursor=crHourGlass then
+      begin
+        Application.MainForm.Cursor:=crDefault;
+        try
+          Application.ProcessMessages;
+        except
+          Application.HandleException(Application);
+        end;
+      end;
+     {$endif}
+     {$endif}
+
       try
         if Tool.Stage>=etsStopped then exit;
         Tool.ExitStatus:=Tool.Process.ExitStatus;
