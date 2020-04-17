@@ -213,6 +213,8 @@ begin
   result:=inherited;
   if result then exit;
 
+  FBinUtilsPrefix:='i686-linux-'+GetOS(TargetOS)+'-';//standard eg in Android NDK 9
+
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(Basepath,AsFile);
@@ -388,7 +390,6 @@ begin
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.android;
   Reset;
-  FBinUtilsPrefix:='i686-linux-'+GetOS(TargetOS)+'-';//standard eg in Android NDK 9
   FAlreadyWarned:=false;
   ShowInfo;
 end;

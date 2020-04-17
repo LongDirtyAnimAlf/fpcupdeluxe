@@ -71,9 +71,6 @@ begin
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.darwin;
   Reset;
-  FBinUtilsPrefix:='';
-  FBinUtilsPath:='';
-  FLibsPath:='';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

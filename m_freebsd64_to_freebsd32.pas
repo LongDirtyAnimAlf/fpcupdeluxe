@@ -36,6 +36,8 @@ begin
   result:=FLibsFound;
   if result then exit;
 
+  FLibsPath:='';
+
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LIBCNAME);
 
@@ -71,6 +73,8 @@ begin
   result:=inherited;
   if result then exit;
 
+  FBinUtilsPrefix:='';
+
   AsFile:=FBinUtilsPrefix+'as';
 
   result:=SearchBinUtil(BasePath,AsFile);
@@ -105,8 +109,6 @@ begin
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.freebsd;
   Reset;
-  FBinUtilsPrefix:='';
-  FLibsPath:='';
   ShowInfo;
 end;
 

@@ -48,7 +48,10 @@ var
 begin
   result:=inherited;
   if result then exit;
+
   FBinUtilsPath:='';
+  FBinUtilsPrefix:='';
+
   result:=true;
   FBinsFound:=true;
 
@@ -70,7 +73,6 @@ begin
   FTargetCPU:=TCPU.x86_64;
   FTargetOS:=TOS.darwin;
   Reset;
-  FBinUtilsPrefix:='';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

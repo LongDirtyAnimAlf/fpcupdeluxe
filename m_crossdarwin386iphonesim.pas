@@ -154,7 +154,6 @@ begin
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.iphonesim;
   Reset;
-  FBinUtilsPrefix:='';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

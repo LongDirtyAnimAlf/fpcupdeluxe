@@ -48,10 +48,6 @@ implementation
 uses
   FileUtil, fpcuputil;
 
-const
-  ARCH='jvm';
-  OS='java';
-
 type
 
 { Tany_javajvm }
@@ -75,10 +71,11 @@ begin
   result:=FLibsFound;
   if result then exit;
 
+  FLibsPath:='';
+
   //FLibsPath:='where is jasmin.jar'
   //for now, jasmin.jar will be downloaded into normal bin-dir !!
   ShowInfo('Libspath ignored; jasmin.jar will be downloaded into normal bin-dir.');
-  FLibsPath:='';
   result:=True;
   FLibsFound:=True;
 end;
@@ -95,6 +92,10 @@ function Tany_javajvm.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
   if result then exit;
+
+  FBinUtilsPrefix:='';
+  FBinUtilsPath:='';
+
   result:=CheckJava;
   if result then
   begin
@@ -117,9 +118,6 @@ begin
   FTargetCPU:=TCPU.jvm;
   FTargetOS:=TOS.java;
   Reset;
-  FBinUtilsPrefix:='';
-  FBinUtilsPath:='';
-  FLibsPath:='';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

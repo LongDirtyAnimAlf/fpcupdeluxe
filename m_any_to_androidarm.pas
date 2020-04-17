@@ -219,6 +219,8 @@ begin
   result:=inherited;
   if result then exit;
 
+  FBinUtilsPrefix:=TargetCPUName+'-linux-'+TargetOSName+'eabi-'; //standard eg in Android NDK 9
+
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(Basepath,AsFile);

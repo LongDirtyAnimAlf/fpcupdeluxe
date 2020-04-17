@@ -67,8 +67,12 @@ function Tany_androidjvm.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
   if result then exit;
+
+  FLibsPath:='';
+
   //FLibsPath:='where is jasmin.jar'
   //for now, jasmin.jar will be downloaded into normal bin-dir !!
+
   result:=True;
   FLibsFound:=True;
 end;
@@ -77,6 +81,10 @@ function Tany_androidjvm.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
   if result then exit;
+
+  FBinUtilsPath:='';
+  FBinUtilsPrefix:='';
+
   result:=CheckJava;
   if result then
   begin
@@ -99,9 +107,6 @@ begin
   FTargetCPU:=TCPU.jvm;
   FTargetOS:=TOS.android;
   Reset;
-  FBinUtilsPath:='';
-  FBinUtilsPrefix:='';
-  FLibsPath:='';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

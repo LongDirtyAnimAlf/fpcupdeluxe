@@ -106,6 +106,7 @@ begin
 
   FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
+
   result:=false;
   FBinsFound:=false;
 
@@ -151,7 +152,6 @@ begin
   FTargetCPU:=TCPU.aarch64;
   FTargetOS:=TOS.darwin;
   Reset;
-  FBinUtilsPrefix:='';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

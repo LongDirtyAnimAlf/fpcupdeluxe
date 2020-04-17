@@ -118,6 +118,7 @@ begin
 
   FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
+
   result:=false;
   FBinsFound:=false;
 
@@ -153,7 +154,6 @@ begin
   FTargetCPU:=TCPU.x86_64;
   FTargetOS:=TOS.iphonesim;
   Reset;
-  FBinUtilsPrefix:='';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

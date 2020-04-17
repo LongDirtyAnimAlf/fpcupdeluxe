@@ -109,6 +109,8 @@ begin
   result:=inherited;
   if result then exit;
 
+  FBinUtilsPrefix:=GetCPU(TargetCPU)+'-unknown-'+GetOS(TargetOS)+'-';
+
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
@@ -133,7 +135,6 @@ begin
   FTargetCPU:=TCPU.x86_64;
   FTargetOS:=TOS.dragonfly;
   Reset;
-  FBinUtilsPrefix:=GetCPU(TargetCPU)+'-unknown-'+GetOS(TargetOS)+'-';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

@@ -126,6 +126,8 @@ begin
   result:=inherited;
   if result then exit;
 
+  FBinUtilsPrefix:='';
+
   AsFile:=FBinUtilsPrefix+'nasm'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
@@ -197,7 +199,6 @@ begin
   FTargetOS:=TOS.msdos;
   Reset;
   FBinutilsPathInPath:=true;
-  FBinUtilsPrefix:='';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

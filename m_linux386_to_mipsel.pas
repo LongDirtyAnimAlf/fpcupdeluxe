@@ -159,13 +159,9 @@ constructor TLinux386_mipsel.Create;
 begin
   inherited Create;
   FCrossModuleName:='Linux386_mipsel';
-  FBinUtilsPrefix:='mipsel-linux-';
-  FBinUtilsPath:='';
-  FCrossModuleName:='TLinux386_mipsel'; //used in messages to user
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:='mipsel';
-  FTargetOS:=GetOS(TOS.linux);
+  FTargetCPU:=TCPU.mipsel;
+  FTargetOS:=TOS.linux;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

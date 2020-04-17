@@ -47,8 +47,10 @@ var
 begin
   result:=inherited;
   if result then exit;
+
   FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
+
   result:=true;
   FBinsFound:=true;
   aOption:=GetSDKVersion('macosx');
@@ -62,9 +64,6 @@ begin
   FTargetCPU:=TCPU.powerpc;
   FTargetOS:=TOS.darwin;
   Reset;
-  FBinUtilsPrefix:='';
-  FBinUtilsPath:='';
-  FLibsPath:='';
   FAlreadyWarned:=false;
   ShowInfo;
 end;
