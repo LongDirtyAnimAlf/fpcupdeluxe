@@ -661,9 +661,9 @@ begin
             infoln(ModuleName+': compiling build_lcl_docs help compiler:',etInfo);
             writelnlog('Building help compiler (also time consuming generation of documents) !!!!!!', true);
             writelnlog('Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-            Processor.ExecuteAndWait;
-            writelnlog('Execute: '+Processor.Process.Executable+' exit code: '+InttoStr(Processor.ExitStatus), true);
-            if Processor.ExitStatus <> 0 then
+            ProcessorResult:=Processor.ExecuteAndWait;
+            writelnlog('Execute: '+Processor.Process.Executable+' exit code: '+InttoStr(ProcessorResult), true);
+            if ProcessorResult <> 0 then
             begin
               writelnlog(etError,ModuleName+': error compiling build_lcl_docs docs builder.', true);
               OperationSucceeded := False;
@@ -745,8 +745,8 @@ begin
         The generated .xct file is an index file for fpdoc cross file links,
         used if you want to link to the chm from other chms.}
         writelnlog(Processor.GetExeInfo, true);
-        Processor.ExecuteAndWait;
-        BuildResult:=Processor.ExitStatus;
+        ProcessorResult:=Processor.ExecuteAndWait;
+        BuildResult:=ProcessorResult;
         if BuildResult <> 0 then
         begin
           writelnlog(etError,ModuleName+': error creating chm help docs. build_lcl_docs exit status: '+IntToStr(BuildResult), true);

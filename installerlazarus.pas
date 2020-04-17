@@ -452,9 +452,9 @@ begin
 
       try
         writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-        Processor.ExecuteAndWait;
-        Result := Processor.ExitStatus = 0;
-        if not Result then
+        ProcessorResult:=Processor.ExecuteAndWait;
+        Result := (ProcessorResult = 0);
+        if (not Result) then
           WritelnLog(etError,infotext+'Error compiling LCL for ' + GetFPCTarget(false) + ' ' + FCrossLCL_Platform + LineEnding +
             'Details: ' + FErrorLog.Text, true);
       except
@@ -806,11 +806,11 @@ begin
 
     try
       WritelnLog(infotext+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-      Processor.ExecuteAndWait;
-      ExitCode := Processor.ExitStatus;
+      ProcessorResult:=Processor.ExecuteAndWait;
+      ExitCode := ProcessorResult;
       if ExitCode <> 0 then
       begin
-        WritelnLog(etError, infotext+ExtractFileName(Processor.Process.Executable)+' returned error code #'+IntToStr(ExitCode), true);
+        WritelnLog(etError, infotext+ExtractFileName(Processor.Process.Executable)+' returned exit status #'+IntToStr(ExitCode), true);
         OperationSucceeded := false;
         Result := false;
       end;
@@ -901,12 +901,12 @@ begin
         infoln(infotext+'Running lazbuild to get IDE with user-specified packages', etInfo);
         try
           WritelnLog(infotext+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-          Processor.ExecuteAndWait;
+          ProcessorResult:=Processor.ExecuteAndWait;
           //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
           Processor.Environment.SetVar('FPCDIR',FPCDirStore);
-          if Processor.ExitStatus <> 0 then
+          if ProcessorResult <> 0 then
           begin
-            WritelnLog(etError, infotext+ExtractFileName(Processor.Process.Executable)+' returned error code ' + IntToStr(Processor.ExitStatus) + LineEnding +
+            WritelnLog(etError, infotext+ExtractFileName(Processor.Process.Executable)+' returned error code ' + IntToStr(ProcessorResult) + LineEnding +
               'Details: ' + FErrorLog.Text, true);
             OperationSucceeded := false;
           end;
@@ -959,12 +959,12 @@ begin
           infoln(infotext+'Compiling startlazarus to make sure it is present:', etInfo);
           try
             writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-            Processor.ExecuteAndWait;
+            ProcessorResult:=Processor.ExecuteAndWait;
             //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
             Processor.Environment.SetVar('FPCDIR',FPCDirStore);
-            if Processor.ExitStatus <> 0 then
+            if ProcessorResult <> 0 then
             begin
-              Writelnlog(etError, infotext+'Lazbuild startlazarus returned error code ' + IntToStr(Processor.ExitStatus) + LineEnding +
+              Writelnlog(etError, infotext+'Lazbuild startlazarus returned error code ' + IntToStr(ProcessorResult) + LineEnding +
                 'Details: ' + FErrorLog.Text, true);
               OperationSucceeded := false;
             end;
@@ -1324,8 +1324,8 @@ begin
     Processor.Process.Parameters.Clear;
     Processor.Process.Parameters.Add('--version');
     try
-      Processor.ExecuteAndWait;
-      if Processor.ExitStatus = 0 then
+      ProcessorResult:=Processor.ExecuteAndWait;
+      if ProcessorResult = 0 then
       begin
         if Processor.WorkerOutput.Count>0 then
         begin
@@ -1581,8 +1581,8 @@ begin
 
         Processor.Process.Parameters.Clear;
         Processor.Process.Parameters.Add('--version');
-        Processor.ExecuteAndWait;
-        if Processor.ExitStatus = 0 then
+        ProcessorResult:=Processor.ExecuteAndWait;
+        if ProcessorResult = 0 then
         begin
           i:=Processor.WorkerOutput.Count;
           if i>0 then
@@ -1891,10 +1891,10 @@ begin
 
   try
     writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-    Processor.ExecuteAndWait;
+    ProcessorResult:=Processor.ExecuteAndWait;
     sleep(100); //now do it again:
     writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-    Processor.ExecuteAndWait;
+    ProcessorResult:=Processor.ExecuteAndWait;
     Result := true;
   except
     on E: Exception do

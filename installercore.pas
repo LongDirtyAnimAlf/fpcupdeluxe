@@ -354,6 +354,7 @@ type
     FUnrar: string;
     //FGit: string;
     FExternalTool: TExternalTool;
+    FExternalToolResult: integer;
     FSwitchURL: boolean;
     FSolarisOI: boolean;
     FMUSL: boolean;
@@ -420,6 +421,7 @@ type
     property HGClient: THGClient read FHGClient;
     // Get processor for termination of running processes
     property Processor: TExternalTool read FExternalTool;
+    property ProcessorResult: integer read FExternalToolResult write FExternalToolResult;
     // Source directory for installation (fpcdir, lazdir,... option)
     property SourceDirectory: string write SetSourceDirectory;
     //Base directory for fpc(laz)up(deluxe) itself
@@ -3484,6 +3486,7 @@ begin
   FCrossInstaller:=nil;
 
   FExternalTool:=TExternalTool.Create(nil);
+  FExternalToolResult:=0;
 
   FCPUCount  := GetLogicalCpuCount;
 

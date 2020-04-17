@@ -237,11 +237,11 @@ begin
   Processor.Process.Parameters.Add('""'); //an empty parameter as PATCHFILE
   Processor.Process.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
   if FVerbose then WritelnLog(ClassName+': Running '+Processor.Process.Executable,true);
-  Processor.ExecuteAndWait;
-  if Processor.ExitStatus <> 0 then
+  ProcessorResult:=Processor.ExecuteAndWait;
+  if (ProcessorResult <> 0) then
   begin
     result := False;
-    WritelnLog(ClassName+': Failed to create installer; '+Processor.Process.Executable+' returned '+IntToStr(Processor.ExitStatus)+LineEnding+
+    WritelnLog(ClassName+': Failed to create installer; '+Processor.Process.Executable+' returned '+IntToStr(ProcessorResult)+LineEnding+
       'Installer log at '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log',true);
   end
   else

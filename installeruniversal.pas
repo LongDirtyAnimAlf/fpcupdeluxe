@@ -294,8 +294,8 @@ begin
 
   try
     WritelnLog(infotext+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
-    Processor.ExecuteAndWait;
-    result := Processor.ExitStatus=0;
+    ProcessorResult:=Processor.ExecuteAndWait;
+    result := (ProcessorResult=0);
     if result then
     begin
       infoln(infotext+'Lazarus rebuild succeeded',etDebug);
@@ -656,8 +656,8 @@ begin
   Processor.Process.Parameters.Clear;
   Processor.Process.Parameters.Add('--version');
   try
-    Processor.ExecuteAndWait;
-    result := (Processor.ExitStatus=0);
+    ProcessorResult:=Processor.ExecuteAndWait;
+    result := (ProcessorResult=0);
     if result then RegisterPackageFeature:=(CalculateNumericalVersion(Processor.WorkerOutput.Text)>=CalculateFullVersion(1,7,0));
   except
     on E: Exception do
@@ -700,8 +700,8 @@ begin
     Processor.Process.Parameters.Add('--add-package');
   Processor.Process.Parameters.Add(DoubleQuoteIfNeeded(PackageAbsolutePath));
   try
-    Processor.ExecuteAndWait;
-    result := Processor.ExitStatus=0;
+    ProcessorResult:=Processor.ExecuteAndWait;
+    result := (ProcessorResult=0);
     // runtime packages will return false, but output will have info about package being "only for runtime"
     if result then
     begin
@@ -1222,9 +1222,9 @@ begin
       end;
 
       Processor.Process.CurrentDirectory:=Workingdir;
-      Processor.ExecuteAndWait;
+      ProcessorResult:=Processor.ExecuteAndWait;
       s:=Processor.WorkerOutput.Text;
-      j:=Processor.ExitStatus;
+      j:=ProcessorResult;
 
       if j=0 then
       begin

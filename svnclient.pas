@@ -617,7 +617,7 @@ begin
     aProcess.Process.Parameters.Add(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x --ignore-space-change'+' . > ' + aFile);
     infoln(aProcess.GetExeInfo,etInfo);
     try
-      aProcess.Execute;
+      aProcess.ExecuteAndWait;
       FReturnCode:=aProcess.ExitCode;
       if (FReturnCode=0) AND (FileExists(aFile)) then
       begin

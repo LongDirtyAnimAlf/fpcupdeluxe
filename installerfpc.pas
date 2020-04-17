@@ -1095,15 +1095,15 @@ begin
             else
               infoln(infotext+'Running '+Processor.Process.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+') with CROSSOPT: '+CrossOptions,etInfo);
 
-            Processor.ExecuteAndWait;
-            result:=(Processor.ExitStatus=0);
+            ProcessorResult:=Processor.ExecuteAndWait;
+            result:=(ProcessorResult=0);
 
             if ((NOT result) AND (MakeCycle=st_Packages)) then
             begin
               //Sometimes rerun gives good results (on AIX 32bit especially).
               infoln(infotext+'Running '+Processor.Process.Executable+' stage again ... could work !',etInfo);
-              Processor.ExecuteAndWait;
-              result:=(Processor.ExitStatus=0);
+              ProcessorResult:=Processor.ExecuteAndWait;
+              result:=(ProcessorResult=0);
             end;
 
           except
@@ -1123,7 +1123,7 @@ begin
 
         end;// loop over MakeCycle
 
-        if not(Result) then
+        if (not result) then
         begin
           // Not an error but warning for optional modules: crosswin32-64 and crosswin64-32
           // These modules need to be optional because FPC 2.6.2 gives an error crosscompiling regarding fpdoc.css or something.
@@ -1141,10 +1141,7 @@ begin
           if result then
             infoln(infotext+'Running cross compiler fpc '+Processor.Process.Executable+' for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
           else
-          infoln(infotext+'Running cross compiler fpc '+Processor.Process.Executable+' for '+GetFPCTarget(false)+' failed with an error code.',etError);
-          // No use in going on, but
-          // do make sure installation continues if this happened with optional crosscompiler:
-          exit(result);
+            infoln(infotext+'Running cross compiler fpc '+Processor.Process.Executable+' for '+GetFPCTarget(false)+' failed with an error code.',etError);
         end
         else
         begin
@@ -1247,7 +1244,7 @@ begin
       end;
     end;
 
-    RemoveStaleBuildDirectories(FSourceDirectory,CrossInstaller.TargetCPUName,CrossInstaller.TargetOSName);
+    if result then RemoveStaleBuildDirectories(FSourceDirectory,CrossInstaller.TargetCPUName,CrossInstaller.TargetOSName);
 
   end
   else
@@ -1594,13 +1591,13 @@ begin
   end;
 
   try
-    Processor.ExecuteAndWait;
+    ProcessorResult:=Processor.ExecuteAndWait;
     //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
     //Processor.Environment.SetVar('FPCDIR',FPCDirStore);
-    if Processor.ExitStatus <> 0 then
+    if ProcessorResult <> 0 then
     begin
       OperationSucceeded := False;
-      WritelnLog(etError, infotext+'Error running '+Processor.Process.Executable+' for '+ModuleName+' failed with exit code '+IntToStr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
+      WritelnLog(etError, infotext+'Error running '+Processor.Process.Executable+' for '+ModuleName+' failed with exit code '+IntToStr(ProcessorResult)+LineEnding+'. Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
@@ -2815,8 +2812,8 @@ var
     Processor.Process.Parameters.Clear;
     Processor.Process.Parameters.Add('-h');
     try
-      Processor.ExecuteAndWait;
-      //if Processor.ExitStatus = 0 then
+      ProcessorResult:=Processor.ExecuteAndWait;
+      //if ProcessorResult = 0 then
       begin
         if Processor.WorkerOutput.Count>0 then
         begin
@@ -2842,8 +2839,8 @@ var
     Processor.Process.Parameters.Add('' + aFile + '');
     infoln(infotext+'Creating '+ExtractFileName(aFile)+': '+Processor.Process.Executable+' '+StringReplace(Processor.Process.Parameters.CommaText,',',' ',[rfReplaceAll]));
     try
-      Processor.ExecuteAndWait;
-      result:=(Processor.ExitStatus=0);
+      ProcessorResult:=Processor.ExecuteAndWait;
+      result:=(ProcessorResult=0);
     except
       on E: Exception do
       begin
@@ -3041,8 +3038,8 @@ begin
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
       infoln(infotext+'Running '+Processor.Process.Executable+' cycle for Windows FPC64:',etInfo);
-      Processor.ExecuteAndWait;
-      if Processor.ExitStatus <> 0 then
+      ProcessorResult:=Processor.ExecuteAndWait;
+      if ProcessorResult <> 0 then
       begin
         result := False;
         WritelnLog(etError, infotext+'Failed to build ppcx64 bootstrap compiler.');
@@ -3077,8 +3074,8 @@ begin
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
       infoln(infotext+'Running '+Processor.Process.Executable+' cycle for FPC '+TargetCompilerName+' bootstrap compiler only',etInfo);
-      Processor.ExecuteAndWait;
-      if Processor.ExitStatus <> 0 then
+      ProcessorResult:=Processor.ExecuteAndWait;
+      if ProcessorResult <> 0 then
       begin
         result := False;
         WritelnLog(etError, infotext+'Failed to build '+s+' bootstrap compiler.');
@@ -3716,14 +3713,14 @@ begin
       end;
       try
         writelnlog(infotext+Processor.GetExeInfo, true);
-        Processor.ExecuteAndWait;
-        result:=(Processor.ExitStatus=0);
+        ProcessorResult:=Processor.ExecuteAndWait;
+        result:=(ProcessorResult=0);
         if result then
         begin
           Sleep(100); //now do it again
           writelnlog(infotext+Processor.GetExeInfo, true);
-          Processor.ExecuteAndWait;
-          result:=(Processor.ExitStatus=0);
+          ProcessorResult:=Processor.ExecuteAndWait;
+          result:=(ProcessorResult=0);
        end;
       except
         on E: Exception do
@@ -3733,12 +3730,12 @@ begin
         end;
       end;
     finally
+      FCleanModuleSuccess:=result;
     end;
-
   end
   else
   begin
-    result:=false;
+    result:=true;
     infoln(infotext+'Running '+Processor.Process.Executable+' distclean failed: could not find cleanup compiler. Will try again later',etInfo);
   end;
 
@@ -3815,10 +3812,6 @@ begin
   finally
     DeleteList.Free;
   end;
-  // store result !
-  FCleanModuleSuccess:=result;
-  // do not fail !
-  result:=true;
 end;
 
 function TFPCInstaller.ConfigModule(ModuleName: string): boolean;

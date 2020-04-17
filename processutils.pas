@@ -183,7 +183,7 @@ type
     procedure WaitForExit; override;
     function GetExeInfo:string;
     function CanStart: boolean;
-    procedure ExecuteAndWait;
+    function ExecuteAndWait:integer;
   end;
 
   // Convenience functions
@@ -795,7 +795,6 @@ begin
     finally
       LeaveCriticalSection;
     end;
-    // call synchronized tasks, this might free this tool
     if MainThreadID=ThreadID then
     begin
       {$ifdef LCL}
@@ -806,7 +805,7 @@ begin
       end;
       {$endif}
     end;
-    // still running => wait
+    // still running => wait a bit to prevent cpu cycle burning
     Sleep(10);
   until false;
 end;
@@ -816,10 +815,13 @@ begin
   result:='Executing: '+Process.Executable+'. With params: '+CmdLineParams+' (working dir: '+ Process.CurrentDirectory +')';
 end;
 
-procedure TExternalTool.ExecuteAndWait;
+function TExternalTool.ExecuteAndWait:integer;
 begin
+  result:=-1;
   Execute;
   WaitForExit;
+  //result:=ExitCode;
+  result:=ExitStatus;
 end;
 
 { TExternalToolThread }
@@ -950,7 +952,6 @@ begin
 
       ok:=false;
       try
-        // now execute
         Tool.Process.PipeBufferSize:=Max(Tool.Process.PipeBufferSize,64*1024);
         Tool.Process.Execute;
         ok:=true;
@@ -1030,6 +1031,7 @@ begin
 
       {$ifndef THREADEDEXECUTE}
       {$ifdef LCL}
+      // Show normal cursor again, if needed
       if Application.MainForm.Cursor=crHourGlass then
       begin
         Application.MainForm.Cursor:=crDefault;
