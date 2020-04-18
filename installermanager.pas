@@ -424,11 +424,8 @@ type
 implementation
 
 uses
-  strutils
-  {$ifdef linux}
-  ,processutils
-  {$endif}
-  ;
+  StrUtils,
+  processutils;
 
 { TFPCupManager }
 

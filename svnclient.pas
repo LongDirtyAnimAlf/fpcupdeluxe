@@ -172,6 +172,7 @@ begin
     if rv<>0 then
     begin
       FRepoExecutable := '';
+      ThreadLog('SVN client found, but error code during check: '+InttoStr(rv),etError);
     end;
   end
   else
@@ -279,12 +280,14 @@ begin
     end
     else
     {$ENDIF}
-    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, True);
 
     FReturnOutput := Output;
 
     if (ReturnCode = 0) then break else
     begin
+      ThreadLog('SVN client error return code: '+InttoStr(ReturnCode),etWarning);
+
       Inc(RetryAttempt);
 
       //Give everybody a chance to relax ;)
@@ -428,12 +431,13 @@ begin
 
     if (ReturnCode <> 0) then
     begin
-      RepoInfo:='SVN client error return code: '+InttoStr(ReturnCode);
+      ThreadLog('SVN client error return code: '+InttoStr(ReturnCode),etError);
     end;
 
     if (Pos('An obstructing working copy was found', Output) > 0) then
     begin
-      RepoInfo:='SVN reported than an obstructing working copy was found.';
+      ThreadLog('SVN reported than an obstructing working copy was found.',etError);
+      ThreadLog('Please try to resolve.',etError);
       FReturnCode := -1;
       exit;
     end;

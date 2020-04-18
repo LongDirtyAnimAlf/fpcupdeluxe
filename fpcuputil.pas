@@ -86,17 +86,6 @@ uses
 
 Const
   MAXCONNECTIONRETRIES=2;
-  {$ifdef LCL}
-  BeginSnippet='fpcupdeluxe:'; //helps identify messages as coming from fpcupdeluxe instead of make etc
-  {$else}
-  {$ifndef FPCONLY}
-  BeginSnippet='fpclazup:'; //helps identify messages as coming from fpclazup instead of make etc
-  {$else}
-  BeginSnippet='fpcup:'; //helps identify messages as coming from fpcup instead of make etc
-  {$endif}
-  {$endif}
-  Seriousness: array [TEventType] of string = ('custom:', 'info:', 'WARNING:', 'ERROR:', 'debug:');
-
 
 type
   //callback = class
@@ -148,6 +137,7 @@ type
     FCurrentFile: string;
     FFlat:boolean;
     procedure DoOnFile(Sender : TObject; Const AFileName : string);
+    procedure DoOnProgress(Sender : TObject; Const Pct : Double);
   public
     function DoUnZip(const ASrcFile, ADstDir: String; Files: array of string):boolean;
     property Flat:boolean read FFlat write FFlat default False;
@@ -182,7 +172,7 @@ type
     FHTTPProxyUser: string;
     FHTTPProxyPassword: string;
     StoredTickCount:QWord;
-    aFilename:string;
+    FFilename:string;
     procedure parseFTPHTMLListing(F:TStream;filelist:TStringList);
     procedure DoOnWriteStream(Sender: TObject; APos: Int64);
     procedure SetUserAgent(AValue:string);virtual;abstract;
@@ -408,7 +398,7 @@ implementation
 
 uses
   {$ifdef LCL}
-  Forms,Controls,
+  Forms,//Controls,
   {$endif}
   {$ifdef Darwin}
   MacTypes,
@@ -474,8 +464,8 @@ type
   private
     FOnWriteStream: TOnWriteStream;
   public
+    destructor Destroy; override;
     function Write(const Buffer; Count: LongInt): LongInt; override;
-    procedure DoProgress;
   published
     property OnWriteStream: TOnWriteStream read FOnWriteStream write FOnWriteStream;
   end;
@@ -1086,7 +1076,7 @@ end;
 {$ELSE}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 begin
-  infoln('Not creating desktop shortcut: don''t know how to do this.');
+  ThreadLog('Not creating desktop shortcut: don''t know how to do this.');
 end;
 {$ENDIF UNIX}
 {$ENDIF DARWIN}
@@ -1731,6 +1721,8 @@ var
   aFile:TDownloadStream;
 begin
   result:=false;
+
+  aDownLoader.FFileName:=ExtractFileName(TargetFile);
   aFile:=TDownloadStream.Create(TargetFile,fmCreate);
   try
     if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
@@ -3116,8 +3108,8 @@ begin
       if (ExpectOutput <> '') and (AnsiPos(ExpectOutput, Output) = 0) then
       begin
         // This is not a warning/error message as sometimes we can use multiple different versions of executables
-        //if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +
-        //  ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
+        if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application. ' +
+          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
         OperationSucceeded := false;
       end
       else
@@ -3128,19 +3120,19 @@ begin
     end
     else
     begin
-      //if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',Level);
+      if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',Level);
       OperationSucceeded := false;
     end;
   except
     on E: Exception do
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      //if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
+      if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
       OperationSucceeded := false;
     end;
   end;
-  //if OperationSucceeded then
-  //  infoln('Found valid ' + ExeName + ' application.',etDebug);
+  if OperationSucceeded then
+    ThreadLog('Found valid ' + ExeName + ' application.',etDebug);
   Result := OperationSucceeded;
 end;
 
@@ -3807,25 +3799,39 @@ begin
   FCurrentFile:=ExtractFileName(AFileName);
   if FTotalFileCnt>50000 then
   begin
-    //if (FFileCnt MOD 5000)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
+    if (FFileCnt MOD 5000)=0 then ThreadLog('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt));
   end
   else
   if FTotalFileCnt>5000 then
   begin
-    //if (FFileCnt MOD 500)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
+    if (FFileCnt MOD 500)=0 then ThreadLog('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt));
   end
   else
   if FTotalFileCnt>500 then
   begin
-    //if (FFileCnt MOD 50)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
+    if (FFileCnt MOD 50)=0 then ThreadLog('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt));
   end
   else
   if FTotalFileCnt>50 then
   begin
-    //if (FFileCnt MOD 5)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
+    if (FFileCnt MOD 5)=0 then ThreadLog('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt));
+  end
+  else
+    ThreadLog('Extracted #'+InttoStr(FFileCnt)+'. File '+FCurrentFile+' out of #'+InttoStr(FTotalFileCnt));
+  {$ifdef LCL}
+  Application.ProcessMessages;
+  {$endif}
+end;
+
+procedure TNormalUnzipper.DoOnProgress(Sender : TObject; Const Pct : Double);
+begin
+  if Pct=100.0 then
+  begin
+    ThreadLog('Extracted #all. Ready.');
+    {$ifdef LCL}
+    Application.ProcessMessages;
+    {$endif}
   end;
-  //else
-  //  infoln('Extracted '+FCurrentFile+'. #'+InttoStr(FFileCnt)+' out of #'+InttoStr(FTotalFileCnt),etInfo);
 end;
 
 function TNormalUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;
@@ -3849,6 +3855,7 @@ begin
         FUnZipper.FileName := ASrcFile;
         FUnZipper.OutputPath := ADstDir;
         FUnZipper.OnStartFile:= @DoOnFile;
+        //FUnZipper.OnProgress:= @DoOnProgress;
         FFileList.Clear;
         if Length(Files)>0 then
           for i := 0 to high(Files) do
@@ -3891,11 +3898,11 @@ begin
         except
           on E:EFCreateError do
           begin
-            //infoln('TNormalUnzipper: Could not create file.',etError);
+            ThreadLog('TNormalUnzipper: Could not create file.',etError);
           end
           else
           begin
-            //infoln('TNormalUnzipper: Unknown exception error.',etError);
+            ThreadLog('TNormalUnzipper: Unknown exception error.',etError);
           end;
         end;
         { Flat option only available in FPC >= 3.1 }
@@ -3956,11 +3963,11 @@ begin
       except
         on E:EZipError do
         begin
-          //infoln('TNormalUnzipper: Could not unzip file.',etError);
+          ThreadLog('TNormalUnzipper: Could not unzip file.',etError);
         end
         else
         begin
-          //infoln('TNormalUnzipper: Unknown exception error.',etError);
+          ThreadLog('TNormalUnzipper: Unknown exception error.',etError);
         end;
       end;
     finally
@@ -3991,13 +3998,13 @@ end;
 procedure TLogger.WriteLog(Message: string; ToConsole: Boolean);
 begin
   FLog.Info(Message);
-  //if ToConsole then infoln(Message,etInfo);
+  if ToConsole then ThreadLog(Message);
 end;
 
 procedure TLogger.WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);
 begin
   FLog.Log(EventType, Message);
-  //if ToConsole then infoln(Message,EventType);
+  if ToConsole then ThreadLog(Message,EventType);
 end;
 
 constructor TLogger.Create;
@@ -4112,11 +4119,22 @@ begin
     result:=Format('%d %s',[hi,_B[b]]);
 end;
 begin
+  if (APos=-1) then
+  begin
+    ThreadLog('Download progress '+FFileName+': download ready !');
+    {$ifdef LCL}
+    Application.ProcessMessages;
+    {$endif}
+  end
+  else
   //Show progress only every 5 seconds
   if GetUpTickCount>StoredTickCount+5000 then
   begin
-    //infoln('Download progress '+aFileName+': '+KB(APos),etInfo);
+    ThreadLog('Download progress '+FFileName+': '+KB(APos));
     StoredTickCount:=GetUpTickCount;
+    {$ifdef LCL}
+    Application.ProcessMessages;
+    {$endif}
   end;
 end;
 
@@ -4164,29 +4182,23 @@ begin
 end;
 
 procedure TUseNativeDownLoader.DoHeaders(Sender : TObject);
-{$ifndef LCL}
 var
   I : Integer;
-{$endif}
 begin
-  {$ifndef LCL}
-  writeln('Response headers received:');
+  ThreadLog('Response headers received:');
   with (Sender as TFPHTTPClient) do
     for I:=0 to ResponseHeaders.Count-1 do
-      writeln(ResponseHeaders[i]);
-  {$endif}
+      ThreadLog(ResponseHeaders[i]);
 end;
 
 procedure TUseNativeDownLoader.DoProgress(Sender: TObject; const ContentLength, CurrentPos: Int64);
 begin
-  {$ifndef LCL}
   If (ContentLength=0) then
-    writeln('Reading headers : ',CurrentPos,' Bytes.')
+    ThreadLog('Reading headers : '+InttoStr(CurrentPos)+' Bytes.')
   else If (ContentLength=-1) then
-    writeln('Reading data (no length available) : ',CurrentPos,' Bytes.')
+    ThreadLog('Reading data (no length available) : '+InttoStr(CurrentPos)+' Bytes.')
   else
-    writeln('Reading data : ',CurrentPos,' Bytes of ',ContentLength);
-  {$endif}
+    ThreadLog('Reading data : '+InttoStr(CurrentPos)+' Bytes of '+InttoStr(ContentLength));
 end;
 
 procedure TUseNativeDownLoader.DoPassword(Sender: TObject; var RepeatRequest: Boolean);
@@ -4246,9 +4258,7 @@ end;
 procedure TUseNativeDownLoader.ShowRedirect(ASender: TObject; const ASrc: String;
   var ADest: String);
 begin
-  {$ifndef LCL}
-  writeln('Following redirect from ',ASrc,'  ==> ',ADest);
-  {$endif}
+  ThreadLog('Following redirect from '+ASrc+'  ==> '+ADest);
 end;
 
 procedure TUseNativeDownLoader.SetContentType(AValue:string);
@@ -4486,6 +4496,7 @@ var
   aFile:TDownloadStream;
 begin
   result:=false;
+  FFileName:=ExtractFileName(filename);
   aFile:=TDownloadStream.Create(filename,fmCreate);
   try
     result:=Download(URL,aFile);
@@ -4592,7 +4603,7 @@ begin
 
   if (NOT FCURLOk) AND (NOT FWGETOk) then
   begin
-    //infoln('Could not initialize either libcurl or wget: expect severe failures !',etError);
+    ThreadLog('Could not initialize either libcurl or wget.',etError);
   end;
 
   UserAgent:=CURLUSERAGENT;
@@ -5003,6 +5014,7 @@ var
   aFile:TDownloadStream;
 begin
   result:=false;
+  FFileName:=ExtractFileName(filename);
   try
     aFile:=TDownloadStream.Create(filename,fmCreate);
     try
@@ -5033,16 +5045,18 @@ end;
 {$ENDIF ENABLEWGET}
 
 { TDownloadStream }
-procedure TDownloadStream.DoProgress;
+destructor TDownloadStream.Destroy;
 begin
   if Assigned(FOnWriteStream) then
-    FOnWriteStream(Self, Self.Position);
+    FOnWriteStream(Self, -1);
+  inherited Destroy;
 end;
 
 function TDownloadStream.Write(const Buffer; Count: LongInt): LongInt;
 begin
   Result:= inherited Write(Buffer, Count);
-  DoProgress;
+  if Assigned(FOnWriteStream) then
+    FOnWriteStream(Self, Self.Position);
 end;
 
 procedure FinaGitHubStore;

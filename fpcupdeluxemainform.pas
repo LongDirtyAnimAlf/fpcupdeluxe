@@ -1647,6 +1647,20 @@ begin
     end;
   end;
 
+  if (NOT Special) AND ExistWordInString(PChar(s),'Extracted #',[soDown]) then
+  begin
+    BG      := clBlack;
+    FG      := clSilver;
+    Special := True;
+  end;
+
+  if (NOT Special) AND ExistWordInString(PChar(s),'Download progress ',[soDown]) then
+  begin
+    BG      := clBlack;
+    FG      := TColor($0045FF);
+    Special := True;
+  end;
+
   if (NOT Special) AND ExistWordInString(PChar(s),BeginSnippet,[soWholeWord,soDown]) then
   begin
     if ExistWordInString(PChar(s),Seriousness[etInfo],[soWholeWord,soDown]) then
@@ -1654,16 +1668,7 @@ begin
       FG      := clYellow;
       BG      := clBlack;
       Special := True;
-      if ExistWordInString(PChar(s),'Extracted ',[soDown]) then
-      begin
-        FG      := clSilver;
-      end;
-      if ExistWordInString(PChar(s),'Download progress',[soDown]) then
-      begin
-        FG      := TColor($0045FF);
-      end;
     end;
-
     if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soDown]) then
     begin
       FG      := clFuchsia;

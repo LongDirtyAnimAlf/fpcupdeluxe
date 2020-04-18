@@ -145,6 +145,8 @@ const
     );
   {$endif}
 
+  Seriousness: array [TEventType] of string = ('custom:', 'info:', 'WARNING:', 'ERROR:', 'debug:');
+
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
   FPCSnipMagic='# If you don''t want so much verbosity use'; //denotes end of standard fpc.cfg
