@@ -10,15 +10,9 @@ interface
 
 uses
   Classes, SysUtils,
-  {$ifdef THREADEDEXECUTE}
-  LMessages,
-  {$endif}
   Process;
 
 const
-  {$ifdef THREADEDEXECUTE}
-  WM_THREADINFO = LM_USER + 2010;
-  {$endif}
   {$IFDEF MSWINDOWS}
   PATHVARNAME = 'Path'; //Name for path environment variable
   {$ELSE}
@@ -206,9 +200,10 @@ uses
   {$ifdef LCL}
   Forms,
   Controls, // for crHourGlass
-  {$endif}
   {$ifdef THREADEDEXECUTE}
   LCLIntf,
+  LMessages,
+  {$endif}
   {$endif}
   Pipes,
   Math,
@@ -217,13 +212,14 @@ uses
 
 {$ifdef THREADEDEXECUTE}
 procedure ThreadLog(Msg: string);
+const
+  WM_THREADINFO = LM_USER + 2010;
 var
   PInfo: PChar;
 begin
   PInfo := StrAlloc(Length(Msg)+1);
   StrCopy(PInfo, PChar(Msg));
-  Application.MainForm.Handle;
-  PostMessage(Application.MainForm.Handle, WM_THREADINFO, NativeUInt(PInfo), 0);
+  if (Assigned(Application) AND Assigned(Application.MainForm)) then PostMessage(Application.MainForm.Handle, WM_THREADINFO, {%H-}NativeUInt(PInfo), 0);
 end;
 {$endif}
 
@@ -931,10 +927,11 @@ var
   ErrMsg: String;
   ok: Boolean;
   HasOutput: Boolean;
-  i:integer;
+  ProcessCounter:integer;
 begin
   SetLength({%H-}Buf,4096);
   ErrorFrameCount:=0;
+  ProcessCounter:=0;
   fLines:=TStringList.Create;
   try
     try
@@ -1006,9 +1003,9 @@ begin
           {$ifndef THREADEDEXECUTE}
           {$ifdef LCL}
           Sleep(10);
-          if (i<100) then Inc(i);
+          if (ProcessCounter<100) then Inc(ProcessCounter);
           // process message queue after 50ms
-          if ((i DIV 5)=0) then
+          if ((ProcessCounter DIV 5)=0) then
           begin
             try
               Application.ProcessMessages;
@@ -1018,7 +1015,7 @@ begin
             if Application.Terminated then Break;
           end;
           // set cursor after 1 second of execution time
-          if (i=99) then Application.MainForm.Cursor:=crHourGlass;
+          if (ProcessCounter=99) then Application.MainForm.Cursor:=crHourGlass;
           {$endif}
           {$else}
           Sleep(50);
