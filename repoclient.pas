@@ -69,6 +69,7 @@ type
     FModuleName: string;
     FExportOnly: boolean;
     FForceLocal: boolean;
+    FRepoInfo:string;
     //Performs a checkout/initial download
     //Note: it's often easier to call CheckOutOrUpdate
     procedure CheckOut(UseForce:boolean=false); virtual;
@@ -146,6 +147,7 @@ type
     property ForceLocal: boolean read FForceLocal write FForceLocal;
     property ValidClient: boolean read GetValidClient;
     property RepoExecutableName: string read GetRepoExecutableName;
+    property RepoInfo: string read FRepoInfo;
     constructor Create;
     destructor Destroy; override;
   end;

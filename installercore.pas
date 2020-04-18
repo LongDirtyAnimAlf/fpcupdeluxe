@@ -515,6 +515,7 @@ type
     function CreateRevision(ModuleName,aRevision:string): boolean;
     // Uninstall module
     function UnInstallModule(ModuleName: string): boolean; virtual;
+    procedure infoln(Message: string; const Level: TEventType=etInfo);
     constructor Create;
     destructor Destroy; override;
   end;
@@ -528,6 +529,12 @@ type
 implementation
 
 uses
+  {$ifdef LCL}
+  //For messaging to MainForm: no writeln
+  Forms,
+  LMessages,
+  LCLIntf,
+  {$endif}
   FileUtil
   {$IFDEF UNIX}
   ,LazFileUtils
@@ -3479,54 +3486,6 @@ begin
   infoln(infotext+'Entering ...',etDebug);
 end;
 
-constructor TInstaller.Create;
-begin
-  inherited Create;
-
-  FCrossInstaller:=nil;
-
-  FExternalTool:=TExternalTool.Create(nil);
-  FExternalToolResult:=0;
-
-  FCPUCount  := GetLogicalCpuCount;
-
-  FSVNClient := TSVNClient.Create;
-  FGitClient := TGitClient.Create;
-  FHGClient  := THGClient.Create;
-
-  FShell := '';
-
-  // List of binutils that can be downloaded:
-  // CreateBinutilsList;
-  FNeededExecutablesChecked:=false;
-  FCleanModuleSuccess:=false;
-
-  // Set up verbose log: will be done in dumpoutput
-  // as it depends on verbosity etc
-  //FLogVerbose: TLogger.Create;
-  FErrorLog := TStringList.Create;
-
-  FCrossCPU_Target:=TCPU.cpuNone;
-  FCrossOS_Target:=TOS.osNone;
-  FCrossOS_SubArch:='';
-
-  FMajorVersion := -1;
-  FMinorVersion := -1;
-  FReleaseVersion := -1;
-  FPatchVersion := -1;
-
-  FMUSL:=false;
-  FSolarisOI:=false;
-
-  {$ifdef Linux}
-  FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';
-  FMUSL:=(FileExists(FMUSLLinker) AND IsLinuxMUSL);
-  if FMUSL then infoln('Fpcupdeluxe: We have a MUSL Linux version !',etInfo);
-  {$endif}
-
-  GetSanityCheck;
-end;
-
 function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
 var
   aUseWget:boolean;
@@ -3660,6 +3619,99 @@ begin
      else result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;
 
+
+procedure TInstaller.infoln(Message: string; const Level: TEventType=etInfo);
+  procedure WriteInfo(Msg: string);
+  {$ifdef LCL}
+  const
+    WM_THREADINFO = LM_USER + 2010;
+  var
+    PInfo: PChar;
+  begin
+    PInfo := StrAlloc(Length(Msg)+1);
+    StrCopy(PInfo, PChar(Msg));
+    Application.MainForm.Handle;
+    PostMessage(Application.MainForm.Handle, WM_THREADINFO, NativeUInt(PInfo), 0);
+  end;
+  {$else}
+  begin
+    {$ifndef NOCONSOLE}
+    writeln(Msg);
+    {$endif NOCONSOLE}
+  end;
+  {$endif}
+begin
+  // Note: these strings should remain as is so any fpcupgui highlighter can pick it up
+  if (Level<>etDebug) then
+    begin
+      if AnsiPos(LineEnding, Message)>0 then WriteInfo(''); //Write an empty line before multiline messagse
+      WriteInfo(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
+      {$IFDEF MSWINDOWS}
+      Sleep(1);
+      {$ENDIF}
+    end
+  else
+    begin
+    {$IFDEF DEBUG}
+    {DEBUG conditional symbol is defined using
+    Project Options/Other/Custom Options using -dDEBUG}
+    if AnsiPos(LineEnding, Message)>0 then WriteInfo(''); //Write an empty line before multiline messagse
+    WriteInfo(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
+    {$IFDEF MSWINDOWS}
+    Sleep(1);
+    {$ENDIF}
+    {$ENDIF}
+    end;
+end;
+
+constructor TInstaller.Create;
+begin
+  inherited Create;
+
+  FCrossInstaller:=nil;
+
+  FExternalTool:=TExternalTool.Create(nil);
+  FExternalToolResult:=0;
+
+  FCPUCount  := GetLogicalCpuCount;
+
+  FSVNClient := TSVNClient.Create;
+  FGitClient := TGitClient.Create;
+  FHGClient  := THGClient.Create;
+
+  FShell := '';
+
+  // List of binutils that can be downloaded:
+  // CreateBinutilsList;
+  FNeededExecutablesChecked:=false;
+  FCleanModuleSuccess:=false;
+
+  // Set up verbose log: will be done in dumpoutput
+  // as it depends on verbosity etc
+  //FLogVerbose: TLogger.Create;
+  FErrorLog := TStringList.Create;
+
+  FCrossCPU_Target:=TCPU.cpuNone;
+  FCrossOS_Target:=TOS.osNone;
+  FCrossOS_SubArch:='';
+
+  FMajorVersion := -1;
+  FMinorVersion := -1;
+  FReleaseVersion := -1;
+  FPatchVersion := -1;
+
+  FMUSL:=false;
+  FSolarisOI:=false;
+
+  {$ifdef Linux}
+  FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';
+  FMUSL:=(FileExists(FMUSLLinker) AND IsLinuxMUSL);
+  if FMUSL then infoln('Fpcupdeluxe: We have a MUSL Linux version !',etInfo);
+  {$endif}
+
+  GetSanityCheck;
+end;
+
 destructor TInstaller.Destroy;
 begin
   if Assigned(FLogVerbose) then
@@ -3673,7 +3725,6 @@ begin
   FCrossInstaller:=nil;
   inherited Destroy;
 end;
-
 
 end.
 

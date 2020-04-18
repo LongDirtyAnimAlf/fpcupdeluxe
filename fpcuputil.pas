@@ -332,8 +332,6 @@ function GetWindowsAppDataFolder: string;
 {$ENDIF MSWINDOWS}
 //check if there is at least one directory between Dir and root
 function ParentDirectoryIsNotRoot(Dir:string):boolean;
-// Shows non-debug messages on screen (no logging); also shows debug messages if DEBUG defined
-procedure infoln(Message: string; const Level: TEventType=etInfo);
 // Moves file if it exists, overwriting destination file
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
 // Correct line-endings
@@ -858,32 +856,26 @@ begin
   result:=IncludeTrailingPathDelimiter(result);
 end;
 
-
 function SaveFileFromResource(filename,resourcename:string):boolean;
 var
   fs:Tfilestream;
 begin
   result:=false;
-  try
-    if FileExists(filename) then SysUtils.DeleteFile(filename);
-    with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
-    try
-      try
-        fs:=Tfilestream.Create(filename,fmCreate);
-        Savetostream(fs);
-      finally
-        fs.Free;
-      end;
-    finally
-      Free;
-    end;
-    result:=FileExists(filename);
-  except
-    on E: Exception do
-      infoln('File from resource creation error: '+E.Message,etError);
-  end;
-end;
 
+  if FileExists(filename) then SysUtils.DeleteFile(filename);
+  with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
+  try
+    try
+      fs:=Tfilestream.Create(filename,fmCreate);
+      Savetostream(fs);
+    finally
+      fs.Free;
+    end;
+  finally
+    Free;
+  end;
+  result:=FileExists(filename);
+end;
 
 function SaveInisFromResource(filename,resourcename:string):boolean;
 var
@@ -899,77 +891,70 @@ var
 begin
   result:=false;
 
-  try
-    if NOT FileExists(filename) then
+ if NOT FileExists(filename) then
+ begin
+   result:=SaveFileFromResource(filename,resourcename);
+ end
+ else
+ begin
+   // create memory stream of resource
+   ms:=TMemoryStream.Create;
+   try
+     with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
+     try
+       Savetostream(ms);
+     finally
+       Free;
+    end;
+    ms.Position:=0;
+
+    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+    Ini:=TMemIniFile.Create(ms);
+    {$ELSE}
+    Ini:=TIniFile.Create(ms);
+    {$ENDIF}
+
+    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+    Ini.Options:=[ifoStripQuotes];
+    {$ELSE}
+    ini.StripQuotes:=true;
+    {$ENDIF}
+    NewIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
+    Ini.Free;
+
+    Ini:=TMemIniFile.Create(filename);
+    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+    Ini.Options:=[ifoStripQuotes];
+    {$ELSE}
+    ini.StripQuotes:=true;
+    {$ENDIF}
+    OldIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
+    Ini.Free;
+
+    if OldIniVersion<>NewIniVersion then
     begin
-      result:=SaveFileFromResource(filename,resourcename);
-    end
-    else
-    begin
-      // create memory stream of resource
-      ms:=TMemoryStream.Create;
-      try
-        with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
+      BackupFileName:=ChangeFileExt(filename,'.bak');
+      while FileExists(BackupFileName) do BackupFileName := BackupFileName + 'k';
+      FileUtil.CopyFile(filename,BackupFileName);
+      if SysUtils.DeleteFile(filename) then
+      begin
+        ms.Position:=0;
+        fs := TFileStream.Create(filename,fmCreate);
         try
-          Savetostream(ms);
+          fs.CopyFrom(ms, ms.Size);
         finally
-          Free;
-       end;
-       ms.Position:=0;
-
-       {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-       Ini:=TMemIniFile.Create(ms);
-       {$ELSE}
-       Ini:=TIniFile.Create(ms);
-       {$ENDIF}
-
-       {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-       Ini.Options:=[ifoStripQuotes];
-       {$ELSE}
-       ini.StripQuotes:=true;
-       {$ENDIF}
-       NewIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
-       Ini.Free;
-
-       Ini:=TMemIniFile.Create(filename);
-       {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-       Ini.Options:=[ifoStripQuotes];
-       {$ELSE}
-       ini.StripQuotes:=true;
-       {$ENDIF}
-       OldIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
-       Ini.Free;
-
-       if OldIniVersion<>NewIniVersion then
-       begin
-         BackupFileName:=ChangeFileExt(filename,'.bak');
-         while FileExists(BackupFileName) do BackupFileName := BackupFileName + 'k';
-         FileUtil.CopyFile(filename,BackupFileName);
-         if SysUtils.DeleteFile(filename) then
-         begin
-           ms.Position:=0;
-           fs := TFileStream.Create(filename,fmCreate);
-           try
-             fs.CopyFrom(ms, ms.Size);
-           finally
-             FreeAndNil(fs);
-           end;
-         end;
-       end;
-
-      finally
-        ms.Free;
+          FreeAndNil(fs);
+        end;
       end;
-
     end;
 
-    result:=FileExists(filename);
+   finally
+     ms.Free;
+   end;
 
-  except
-    on E: Exception do
-      infoln('File creation error: '+E.Message,etError);
-  end;
+ end;
 
+ result:=FileExists(filename);
 end;
 
 {$IFDEF MSWINDOWS}
@@ -1072,8 +1057,6 @@ begin
 
     if OperationSucceeded=false then
     begin
-      infoln('CreateDesktopShortcut: xdg-desktop-icon failed to create shortcut to '+Target,etWarning);
-      infoln('CreateDesktopShortcut: going to create shortcut manually',etWarning);
       aDirectory:='/usr/share/applications';
       if false then // skip global
       //if DirectoryExists(aDirectory) then
@@ -1115,9 +1098,6 @@ var
   ScriptText: TStringList;
   ScriptFile: string;
 begin
-  {$IFDEF MSWINDOWS}
-  infoln('Todo: write me (CreateHomeStartLink)!', etDebug);
-  {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //create dir if it doesn't exist
   ForceDirectoriesSafe(ExtractFilePath(IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+ShortcutName));
@@ -1133,8 +1113,6 @@ begin
       ScriptText.SaveToFile(ScriptFile);
       FpChmod(ScriptFile, &755); //rwxr-xr-x
     except
-      on E: Exception do
-        infoln('CreateHomeStartLink: could not create link: '+E.Message,etWarning);
     end;
   finally
     ScriptText.Free;
@@ -1746,10 +1724,6 @@ begin
 
   if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   result:=aDownLoader.getStream(URL,DataStream);
-  if (NOT result) then
-  begin
-    infoln('Error while trying to stream download '+URL,etDebug);
-  end;
 end;
 
 function DownloadBase(aDownLoader:TBasicDownloader;URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
@@ -1775,7 +1749,6 @@ begin
   end;
   if (NOT result) then
   begin
-    infoln('Error while trying to file download '+URL,etDebug);
     if FileExists(TargetFile) then SysUtils.DeleteFile(TargetFile); // delete stale targetfile
   end;
 end;
@@ -1813,8 +1786,6 @@ begin
     URI.Host:='netix.dl.sourceforge.net';
     aURL:=P+'://'+URI.Host+URI.Path+URI.Document
   end else aURL:=URL;
-
-  infoln('WinINet downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
 
   if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
     NetHandle := InternetOpen(FPCUPUSERAGENT, INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0)
@@ -1934,7 +1905,6 @@ begin
   if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
-  infoln('PowerShell downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
   //result:=(ExecuteCommand('powershell -command "[Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; (new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
   //result:=(ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
 
@@ -1962,7 +1932,6 @@ begin
   if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
-  infoln('BitsAdmin downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
   //result:=(ExecuteCommand('bitsadmin.exe /SetMinRetryDelay "JobName" 1', Output, False)=0);
   //result:=(ExecuteCommand('bitsadmin.exe /SetNoProgressTimeout "JobName" 1', Output, False)=0);
   result:=(ExecuteCommand('bitsadmin.exe /transfer "JobName" '+URL+' '+TargetFile, Output, False)=0);
@@ -1994,7 +1963,6 @@ begin
     finally
       aDownLoader.Destroy;
     end;
-    if (NOT result) then infoln('FPCUP downloader failure.',etDebug);
   end;
 
   {$ifdef Windows}
@@ -2002,7 +1970,6 @@ begin
   if (NOT result) then
   begin
     result:=DownloadByWinINet(URL,DataStream);
-    if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
   end;
 
   //Fourth resort: use BitsAdmin
@@ -2011,7 +1978,6 @@ begin
   begin
     SysUtils.Deletefile(TargetFile);
     result:=DownloadByBitsAdmin(URL,TargetFile);
-    if (NOT result) then infoln('Windows BitsAdmin downloader failure.',etDebug);
   end;
   }
   {$endif}
@@ -2022,7 +1988,6 @@ begin
     aDownLoader:=TWGetDownLoader.Create;
     try
       result:=DownloadBase(aDownLoader,URL,DataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-      if (NOT result) then infoln('FPCUP force wget downloader failure.',etDebug);
     finally
       aDownLoader.Destroy;
     end;
@@ -2048,7 +2013,6 @@ begin
     finally
       aDownLoader.Destroy;
     end;
-    if (NOT result) then infoln('FPCUP native downloader failure.',etDebug);
   end;
 
   {$ifdef MSWindows}
@@ -2060,7 +2024,6 @@ begin
     begin
       SysUtils.Deletefile(TargetFile);
       result:=DownloadByWinINet(URL,TargetFile);
-      if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
     end;
   end;
 
@@ -2069,7 +2032,6 @@ begin
   begin
     SysUtils.Deletefile(TargetFile);
     result:=DownloadByPowerShell(URL,TargetFile);
-    if (NOT result) then infoln('Windows PowerShell downloader failure.',etDebug);
   end;
 
   if CheckWin32Version(6,2) then
@@ -2079,7 +2041,6 @@ begin
     begin
       SysUtils.Deletefile(TargetFile);
       result:=DownloadByWinINet(URL,TargetFile);
-      if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
     end;
   end;
 
@@ -2090,7 +2051,6 @@ begin
     begin
       SysUtils.Deletefile(TargetFile);
       result:=DownloadByBitsAdmin(URL,TargetFile);
-      if (NOT result) then infoln('Windows BitsAdmin downloader failure.',etDebug);
     end;
   end;
 
@@ -2106,7 +2066,6 @@ begin
     finally
       aDownLoader.Destroy;
     end;
-    if (NOT result) then infoln('FPCUP wget downloader failure.',etDebug);
   end;
 
   if (NOT result) then SysUtils.Deletefile(TargetFile);
@@ -2136,7 +2095,6 @@ begin
     begin
       if (aStore.URL=aURL) then
       begin
-        infoln('GetGitHubFileList :We have a cache for GitHub URL: '+aURL,etDebug);
         if (aStore.FileList.Count>0) then
         begin
           for Content in aStore.FileList do fileurllist.Add(Content);
@@ -2147,16 +2105,12 @@ begin
     end;
   end;
 
-  infoln('GetGitHubFileList :No cache for GitHub URL: '+aURL,etDebug);
-  infoln('GetGitHubFileList :Creating cache for GitHub URL: '+aURL,etDebug);
-
   SetLength(GitHubFileListCache,Length(GitHubFileListCache)+1);
   with GitHubFileListCache[High(GitHubFileListCache)] do
   begin
     URL:=aURL;
     FileList:=TStringList.Create;
   end;
-  infoln('GetGitHubFileList :Created cache for GitHub URL: '+aURL,etDebug);
 
   if (NOT result) then
   begin
@@ -2374,36 +2328,7 @@ begin
   }
     result:=GetWindowsFolderOld(CSIDL_LOCAL_APPDATA);
 end;
-
-
 {$ENDIF MSWINDOWS}
-
-procedure infoln(Message: string; const Level: TEventType=etInfo);
-begin
-{$IFNDEF NOCONSOLE}
-  // Note: these strings should remain as is so any fpcupgui highlighter can pick it up
-  if (Level<>etDebug) then
-    begin
-      if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
-      writeln(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
-      {$IFDEF MSWINDOWS}
-      Sleep(1);
-      {$ENDIF}
-    end
-  else
-    begin
-    {$IFDEF DEBUG}
-    {DEBUG conditional symbol is defined using
-    Project Options/Other/Custom Options using -dDEBUG}
-    if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
-    writeln(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
-    {$IFDEF MSWINDOWS}
-    Sleep(1);
-    {$ENDIF}
-    {$ENDIF}
-    end;
-{$ENDIF NOCONSOLE}
-end;
 
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
 // We might (in theory) be moving files across partitions so we cannot use renamefile
@@ -2618,108 +2543,130 @@ begin
   FoundLinkFile:=false;
   result:='';
 
-  try
-    //start with a very simple filesearch.
-
-    for i:=Low(SEARCHDIRS) to High(SEARCHDIRS) do
+  for i:=Low(SEARCHDIRS) to High(SEARCHDIRS) do
+  begin
+    s1:=SEARCHDIRS[i];
+    if FileExists(s1+LINKFILE) then FoundLinkFile:=true;
+    if FoundLinkFile then
     begin
-      s1:=SEARCHDIRS[i];
-      if FileExists(s1+LINKFILE) then FoundLinkFile:=true;
-      if FoundLinkFile then
+      result:=s1;
+      break;
+    end;
+  end;
+
+  if FoundLinkFile then exit;
+
+  try
+    Output:='';
+    ReturnCode:=ExecuteCommand('gcc -print-prog-name=cc1', Output, false);
+
+    if (ReturnCode=0) then
+    begin
+      s1:=Trim(Output);
+      if FileExists(s1) then
       begin
-        result:=s1;
-        break;
+        s2:=ExtractFileDir(s1);
+        if FileExists(s2+DirectorySeparator+LINKFILE) then
+        begin
+          result:=s2;
+          FoundLinkFile:=true;
+        end;
       end;
     end;
 
-    if FoundLinkFile then exit;
-
-    try
+    if (NOT FoundLinkFile) then
+    begin
       Output:='';
-      ReturnCode:=ExecuteCommand('gcc -print-prog-name=cc1', Output, false);
+      ReturnCode:=ExecuteCommand('gcc -print-search-dirs', Output, false);
+      if (ReturnCode=0) then
+      begin
+        Output:=TrimRight(Output);
+        if Length(Output)>0 then
+        begin
+          OutputLines:=TStringList.Create;
+          try
+            OutputLines.Text:=Output;
+            if OutputLines.Count>0 then
+            begin
+              for i:=0 to (OutputLines.Count-1) do
+              begin
+                s1:=OutputLines.Strings[i];
+                j:=Pos('libraries:',s1);
+                if j=1 then
+                begin
+                  j:=Pos(DirectorySeparator,s1);
+                  if j>0 then
+                  begin
+                    Delete(s1,1,j-1);
+                    LinkFiles := TStringList.Create;
+                    try
+                      LinkFiles.StrictDelimiter:=true;
+                      LinkFiles.Delimiter:=':';
+                      LinkFiles.DelimitedText:=s1;
+                      if LinkFiles.Count>0 then
+                      begin
+                        for j:=0 to (LinkFiles.Count-1) do
+                        begin
+                          s2:=ExcludeTrailingPathDelimiter(LinkFiles.Strings[j]);
+                          //s2:=ExtractFileDir(LinkFiles.Strings[j]);
+                          if FileExists(s2+DirectorySeparator+LINKFILE) then
+                          begin
+                            result:=s2;
+                            FoundLinkFile:=true;
+                            break;
+                          end;
+                        end;
+                      end;
+                    finally
+                      LinkFiles.Free;
+                    end;
+                  end;
+                  break;
+                end;
+              end;
+            end;
+          finally
+            OutputLines.Free;
+          end;
+        end;
+      end;
+    end;
+
+    if (NOT FoundLinkFile) then
+    begin
+
+      Output:='';
+      ReturnCode:=ExecuteCommand('gcc -v', Output, false);
 
       if (ReturnCode=0) then
       begin
-        s1:=Trim(Output);
-        if FileExists(s1) then
+
+        s1:='COLLECT_LTO_WRAPPER=';
+        i:=Ansipos(s1, Output);
+        if (i>0) then
         begin
-          s2:=ExtractFileDir(s1);
+          s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+          // find space as delimiter
+          i:=Ansipos(' ', s2);
+          // find lf as delimiter
+          j:=Ansipos(#10, s2);
+          if (j>0) AND (j<i) then i:=j;
+          // find cr as delimiter
+          j:=Ansipos(#13, s2);
+          if (j>0) AND (j<i) then i:=j;
+          if (i>0) then delete(s2,i,MaxInt);
+          s2:=ExtractFileDir(s2);
           if FileExists(s2+DirectorySeparator+LINKFILE) then
           begin
             result:=s2;
             FoundLinkFile:=true;
           end;
         end;
-      end;
 
-      if (NOT FoundLinkFile) then
-      begin
-        Output:='';
-        ReturnCode:=ExecuteCommand('gcc -print-search-dirs', Output, false);
-        if (ReturnCode=0) then
+        if (NOT FoundLinkFile) then
         begin
-          Output:=TrimRight(Output);
-          if Length(Output)>0 then
-          begin
-            OutputLines:=TStringList.Create;
-            try
-              OutputLines.Text:=Output;
-              if OutputLines.Count>0 then
-              begin
-                for i:=0 to (OutputLines.Count-1) do
-                begin
-                  s1:=OutputLines.Strings[i];
-                  j:=Pos('libraries:',s1);
-                  if j=1 then
-                  begin
-                    j:=Pos(DirectorySeparator,s1);
-                    if j>0 then
-                    begin
-                      Delete(s1,1,j-1);
-                      LinkFiles := TStringList.Create;
-                      try
-                        LinkFiles.StrictDelimiter:=true;
-                        LinkFiles.Delimiter:=':';
-                        LinkFiles.DelimitedText:=s1;
-                        if LinkFiles.Count>0 then
-                        begin
-                          for j:=0 to (LinkFiles.Count-1) do
-                          begin
-                            s2:=ExcludeTrailingPathDelimiter(LinkFiles.Strings[j]);
-                            //s2:=ExtractFileDir(LinkFiles.Strings[j]);
-                            if FileExists(s2+DirectorySeparator+LINKFILE) then
-                            begin
-                              result:=s2;
-                              FoundLinkFile:=true;
-                              break;
-                            end;
-                          end;
-                        end;
-                      finally
-                        LinkFiles.Free;
-                      end;
-                    end;
-                    break;
-                  end;
-                end;
-              end;
-            finally
-              OutputLines.Free;
-            end;
-          end;
-        end;
-      end;
-
-      if (NOT FoundLinkFile) then
-      begin
-
-        Output:='';
-        ReturnCode:=ExecuteCommand('gcc -v', Output, false);
-
-        if (ReturnCode=0) then
-        begin
-
-          s1:='COLLECT_LTO_WRAPPER=';
+          s1:=' --libdir=';
+          //s1:=' --libexecdir=';
           i:=Ansipos(s1, Output);
           if (i>0) then
           begin
@@ -2733,123 +2680,89 @@ begin
             j:=Ansipos(#13, s2);
             if (j>0) AND (j<i) then i:=j;
             if (i>0) then delete(s2,i,MaxInt);
-            s2:=ExtractFileDir(s2);
-            if FileExists(s2+DirectorySeparator+LINKFILE) then
-            begin
-              result:=s2;
-              FoundLinkFile:=true;
-            end;
+            result:=IncludeTrailingPathDelimiter(s2);
           end;
 
-          if (NOT FoundLinkFile) then
+          i:=Ansipos('gcc', result);
+          if i=0 then result:=result+'gcc'+DirectorySeparator;
+
+          s1:=' --build=';
+          i:=Ansipos(s1, Output);
+          if i=0 then
           begin
-            s1:=' --libdir=';
-            //s1:=' --libexecdir=';
+            s1:=' --target=';
             i:=Ansipos(s1, Output);
-            if (i>0) then
-            begin
-              s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
-              // find space as delimiter
-              i:=Ansipos(' ', s2);
-              // find lf as delimiter
-              j:=Ansipos(#10, s2);
-              if (j>0) AND (j<i) then i:=j;
-              // find cr as delimiter
-              j:=Ansipos(#13, s2);
-              if (j>0) AND (j<i) then i:=j;
-              if (i>0) then delete(s2,i,MaxInt);
-              result:=IncludeTrailingPathDelimiter(s2);
-            end;
+          end;
+          if (i>0) then
+          begin
+            s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+            // find space as delimiter
+            i:=Ansipos(' ', s2);
+            // find lf as delimiter
+            j:=Ansipos(#10, s2);
+            if (j>0) AND (j<i) then i:=j;
+            // find cr as delimiter
+            j:=Ansipos(#13, s2);
+            if (j>0) AND (j<i) then i:=j;
+            if (i>0) then delete(s2,i,MaxInt);
+            result:=result+s2+DirectorySeparator;
+          end;
 
-            i:=Ansipos('gcc', result);
-            if i=0 then result:=result+'gcc'+DirectorySeparator;
-
-            s1:=' --build=';
-            i:=Ansipos(s1, Output);
-            if i=0 then
+          s1:='gcc version ';
+          i:=Ansipos(s1, Output);
+          if (i>0) then
+          begin
+            s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+            // find space as delimiter
+            i:=Ansipos(' ', s2);
+            // find lf as delimiter
+            j:=Ansipos(#10, s2);
+            if (j>0) AND (j<i) then i:=j;
+            // find cr as delimiter
+            j:=Ansipos(#13, s2);
+            if (j>0) AND (j<i) then i:=j;
+            if (i>0) then delete(s2,i,MaxInt);
+            result:=result+s2;
+            if FileExists(result+DirectorySeparator+LINKFILE) then
             begin
-              s1:=' --target=';
-              i:=Ansipos(s1, Output);
-            end;
-            if (i>0) then
-            begin
-              s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
-              // find space as delimiter
-              i:=Ansipos(' ', s2);
-              // find lf as delimiter
-              j:=Ansipos(#10, s2);
-              if (j>0) AND (j<i) then i:=j;
-              // find cr as delimiter
-              j:=Ansipos(#13, s2);
-              if (j>0) AND (j<i) then i:=j;
-              if (i>0) then delete(s2,i,MaxInt);
-              result:=result+s2+DirectorySeparator;
-            end;
-
-            s1:='gcc version ';
-            i:=Ansipos(s1, Output);
-            if (i>0) then
-            begin
-              s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
-              // find space as delimiter
-              i:=Ansipos(' ', s2);
-              // find lf as delimiter
-              j:=Ansipos(#10, s2);
-              if (j>0) AND (j<i) then i:=j;
-              // find cr as delimiter
-              j:=Ansipos(#13, s2);
-              if (j>0) AND (j<i) then i:=j;
-              if (i>0) then delete(s2,i,MaxInt);
-              result:=result+s2;
-              if FileExists(result+DirectorySeparator+LINKFILE) then
-              begin
-                FoundLinkFile:=true;
-              end;
+              FoundLinkFile:=true;
             end;
           end;
         end;
       end;
-
-    except
-      // ignore errors
     end;
 
-    //In case of errors or failures, do a brute force search of gcc link file
-    if (NOT FoundLinkFile) then
-    begin
-      {$IF (defined(BSD)) and (not defined(Darwin))}
-      result:='/usr/local/lib/gcc';
-      {$else}
-      result:='/usr/lib/gcc';
-      {$endif}
+  except
+    // ignore errors
+  end;
 
-      if DirectoryExists(result) then
-      begin
-        LinkFiles := TStringList.Create;
-        try
-          FindAllFiles(LinkFiles, result, '*.o', true);
-          for i:=0 to (LinkFiles.Count-1) do
+  //In case of errors or failures, do a brute force search of gcc link file
+  if (NOT FoundLinkFile) then
+  begin
+    {$IF (defined(BSD)) and (not defined(Darwin))}
+    result:='/usr/local/lib/gcc';
+    {$else}
+    result:='/usr/lib/gcc';
+    {$endif}
+
+    if DirectoryExists(result) then
+    begin
+      LinkFiles := TStringList.Create;
+      try
+        FindAllFiles(LinkFiles, result, '*.o', true);
+        for i:=0 to (LinkFiles.Count-1) do
+        begin
+          if Pos(DirectorySeparator+LINKFILE,LinkFiles[i])>0 then
           begin
-            if Pos(DirectorySeparator+LINKFILE,LinkFiles[i])>0 then
-            begin
-              result:=ExtractFileDir(LinkFiles[i]);
-              FoundLinkFile:=true;
-              break;
-            end;
+            result:=ExtractFileDir(LinkFiles[i]);
+            FoundLinkFile:=true;
+            break;
           end;
-        finally
-          LinkFiles.Free;
         end;
+      finally
+        LinkFiles.Free;
       end;
     end;
-
-  finally
-    {$IF (not defined(Solaris)) and (not defined(Darwin))}
-    if (NOT FoundLinkFile) then
-    begin
-      infoln('GetStartupObjects: Could not find ' + LINKFILE + ' on system. Expect linking warnings/errors.',etWarning);
-    end;
-    {$ENDIF}
   end;
 
 end;
@@ -3162,9 +3075,7 @@ begin
   result:=true;
   if (NOT DirectoryExists(Dir)) then
   begin
-    //infoln('Non existing directory: '+Dir+'. Going to create it.', etInfo);
     result:=ForceDirectories(Dir);
-    if (NOT result) then infoln('Could not create directory: '+Dir, etWarning);
   end;
 end;
 
@@ -3200,16 +3111,13 @@ begin
     {$ELSE}
     ResultCode := ExecuteCommand(Executable + ' ' + Parameters, Output, False);
     {$ENDIF}
-    {$IFDEF DEBUG}
-    infoln(Executable + ': Result code was: ' + IntToStr(ResultCode),etDebug);
-    {$ENDIF}
     if ResultCode >= 0 then //Not all non-0 result codes are errors. There's no way to tell, really
     begin
       if (ExpectOutput <> '') and (AnsiPos(ExpectOutput, Output) = 0) then
       begin
         // This is not a warning/error message as sometimes we can use multiple different versions of executables
-        if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +
-          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
+        //if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +
+        //  ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
         OperationSucceeded := false;
       end
       else
@@ -3220,24 +3128,19 @@ begin
     end
     else
     begin
-      {$IFDEF DEBUG}
-      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',etDebug);
-      {$ELSE}
-      // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',Level);
-      {$ENDIF}
+      //if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',Level);
       OperationSucceeded := false;
     end;
   except
     on E: Exception do
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
+      //if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
       OperationSucceeded := false;
     end;
   end;
-  if OperationSucceeded then
-    infoln('Found valid ' + ExeName + ' application.',etDebug);
+  //if OperationSucceeded then
+  //  infoln('Found valid ' + ExeName + ' application.',etDebug);
   Result := OperationSucceeded;
 end;
 
@@ -3877,7 +3780,6 @@ var
 begin
   result:=true;
   if FStarted then exit;
-  infoln('TThreadedUnzipper: Going to extract files from ' + ASrcFile + ' into ' + ADstDir,etInfo);
   FUnZipper.Clear;
   FUnZipper.OnPercent:=10;
   FUnZipper.FileName := ASrcFile;
@@ -3905,25 +3807,25 @@ begin
   FCurrentFile:=ExtractFileName(AFileName);
   if FTotalFileCnt>50000 then
   begin
-    if (FFileCnt MOD 5000)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
+    //if (FFileCnt MOD 5000)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
   end
   else
   if FTotalFileCnt>5000 then
   begin
-    if (FFileCnt MOD 500)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
+    //if (FFileCnt MOD 500)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
   end
   else
   if FTotalFileCnt>500 then
   begin
-    if (FFileCnt MOD 50)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
+    //if (FFileCnt MOD 50)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
   end
   else
   if FTotalFileCnt>50 then
   begin
-    if (FFileCnt MOD 5)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
-  end
-  else
-    infoln('Extracted '+FCurrentFile+'. #'+InttoStr(FFileCnt)+' out of #'+InttoStr(FTotalFileCnt),etInfo);
+    //if (FFileCnt MOD 5)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
+  end;
+  //else
+  //  infoln('Extracted '+FCurrentFile+'. #'+InttoStr(FFileCnt)+' out of #'+InttoStr(FTotalFileCnt),etInfo);
 end;
 
 function TNormalUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;
@@ -3932,7 +3834,6 @@ var
   x:cardinal;
   s:string;
 begin
-  infoln('TNormalUnzipper: Going to extract files from ' + ASrcFile + ' into ' + ADstDir,etInfo);
   result:=false;
   FUnzipper := TUnzipper.Create;
   try
@@ -3990,11 +3891,11 @@ begin
         except
           on E:EFCreateError do
           begin
-            infoln('TNormalUnzipper: Could not create file.',etError);
+            //infoln('TNormalUnzipper: Could not create file.',etError);
           end
           else
           begin
-            infoln('TNormalUnzipper: Unknown exception error.',etError);
+            //infoln('TNormalUnzipper: Unknown exception error.',etError);
           end;
         end;
         { Flat option only available in FPC >= 3.1 }
@@ -4055,11 +3956,11 @@ begin
       except
         on E:EZipError do
         begin
-          infoln('TNormalUnzipper: Could not unzip file.',etError);
+          //infoln('TNormalUnzipper: Could not unzip file.',etError);
         end
         else
         begin
-          infoln('TNormalUnzipper: Unknown exception error.',etError);
+          //infoln('TNormalUnzipper: Unknown exception error.',etError);
         end;
       end;
     finally
@@ -4090,13 +3991,13 @@ end;
 procedure TLogger.WriteLog(Message: string; ToConsole: Boolean);
 begin
   FLog.Info(Message);
-  if ToConsole then infoln(Message,etInfo);
+  //if ToConsole then infoln(Message,etInfo);
 end;
 
 procedure TLogger.WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);
 begin
   FLog.Log(EventType, Message);
-  if ToConsole then infoln(Message,EventType);
+  //if ToConsole then infoln(Message,EventType);
 end;
 
 constructor TLogger.Create;
@@ -4214,7 +4115,7 @@ begin
   //Show progress only every 5 seconds
   if GetUpTickCount>StoredTickCount+5000 then
   begin
-    infoln('Download progress '+aFileName+': '+KB(APos),etInfo);
+    //infoln('Download progress '+aFileName+': '+KB(APos),etInfo);
     StoredTickCount:=GetUpTickCount;
   end;
 end;
@@ -4263,23 +4164,29 @@ begin
 end;
 
 procedure TUseNativeDownLoader.DoHeaders(Sender : TObject);
-Var
+{$ifndef LCL}
+var
   I : Integer;
+{$endif}
 begin
+  {$ifndef LCL}
   writeln('Response headers received:');
   with (Sender as TFPHTTPClient) do
     for I:=0 to ResponseHeaders.Count-1 do
       writeln(ResponseHeaders[i]);
+  {$endif}
 end;
 
 procedure TUseNativeDownLoader.DoProgress(Sender: TObject; const ContentLength, CurrentPos: Int64);
 begin
+  {$ifndef LCL}
   If (ContentLength=0) then
     writeln('Reading headers : ',CurrentPos,' Bytes.')
   else If (ContentLength=-1) then
     writeln('Reading data (no length available) : ',CurrentPos,' Bytes.')
   else
     writeln('Reading data : ',CurrentPos,' Bytes of ',ContentLength);
+  {$endif}
 end;
 
 procedure TUseNativeDownLoader.DoPassword(Sender: TObject; var RepeatRequest: Boolean);
@@ -4314,6 +4221,7 @@ begin
       H:=Copy(H,1,Pos('"',H)-1);
     end;
 
+    {$ifndef LCL}
     writeln('Authorization required !');
     {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
     if Length(H)>1 then
@@ -4331,13 +4239,16 @@ begin
       end;
     end;
     {$ENDIF}
+    {$endif LCL}
   end;
 end;
 
 procedure TUseNativeDownLoader.ShowRedirect(ASender: TObject; const ASrc: String;
   var ADest: String);
 begin
+  {$ifndef LCL}
   writeln('Following redirect from ',ASrc,'  ==> ',ADest);
+  {$endif}
 end;
 
 procedure TUseNativeDownLoader.SetContentType(AValue:string);
@@ -4629,7 +4540,6 @@ begin
   if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
-  infoln('Native downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
 
   if (DataStream is TDownloadStream) then
   begin
@@ -4834,12 +4744,10 @@ begin
   result:=false;
   {$ifdef ENABLECURL}
   result:=LibCurlDownload(URL,DataStream);
-  if (result) then infoln('LibCurl FTP file download success !!!', etDebug);
   {$endif}
   if (NOT result) then
   begin
     result:=WGetDownload(URL,DataStream);
-    if (result) then infoln('Wget FTP file download success !', etDebug);
   end;
 end;
 
@@ -4848,12 +4756,10 @@ begin
   result:=false;
   {$ifdef ENABLECURL}
   result:=LibCurlDownload(URL,DataStream);
-  if (result) then infoln('LibCurl HTTP file download success !!!', etDebug);
   {$endif}
   if (NOT result) then
   begin
     result:=WGetDownload(URL,DataStream);
-    if (result) then infoln('Wget HTTP file download success !', etDebug);
   end;
 end;
 
@@ -5037,12 +4943,10 @@ begin
   result:=false;
   {$ifdef ENABLECURL}
   result:=LibCurlFTPFileList(URL,filelist);
-  if (result) then infoln('LibCurl FTP filelist success !!!!', etDebug);
   {$endif}
   if (NOT result) then
   begin
     result:=WGetFTPFileList(URL,filelist);
-    if (result) then infoln('Wget FTP filelist success !!!!', etDebug);
   end;
 end;
 
@@ -5054,7 +4958,6 @@ begin
 
   if (NOT FWGETOk) then
   begin
-    infoln('No Wget binary found: download will fail !!', etDebug);
     exit;
   end;
 
@@ -5080,7 +4983,6 @@ begin
   result:=false;
   URI:=ParseURI(URL);
   P:=URI.Protocol;
-  infoln('Wget downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
 
   if (DataStream is TDownloadStream) then
   begin

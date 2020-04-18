@@ -2207,7 +2207,6 @@ begin
       begin
         if (result='') then
         begin
-          infoln('InstallerUniversal (GetAlias): no source alias found: using fpcup default',etInfo);
           if aDictionary='fpcURL' then result:=FPCBASESVNURL+'/svn/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
           {$ifndef FPCONLY}
           if aDictionary='lazURL' then result:=FPCBASESVNURL+'/svn/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);

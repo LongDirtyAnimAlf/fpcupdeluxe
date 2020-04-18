@@ -222,6 +222,7 @@ type
     FSequencer: TSequencer;
     FSolarisOI:boolean;
     FMUSL:boolean;
+    FRunInfo:string;
     {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
     procedure SetLazarusDirectory(AValue: string);
@@ -238,6 +239,8 @@ type
     procedure SetLogFileName(AValue: string);
     procedure SetMakeDirectory(AValue: string);
     function  GetTempDirectory:string;
+    function  GetRunInfo:string;
+    procedure SetRunInfo(aValue:string);
   protected
     FShortcutCreated:boolean;
     FLog:TLogger;
@@ -339,6 +342,8 @@ type
     property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
     property SolarisOI:boolean read FSolarisOI write FSolarisOI;
     property MUSL:boolean read FMUSL write FMUSL;
+
+    property RunInfo:string read GetRunInfo write SetRunInfo;
 
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
@@ -737,7 +742,7 @@ begin
 
     CloseFile(TxtFile);
 
-  end else infoln('Tried to get CPU OS combo from source, but failed.',etInfo);
+  end;
 end;
 
 
@@ -795,38 +800,48 @@ begin
 
     CloseFile(TxtFile);
 
-  end else infoln('Tried to get subarchs from '+MAKEFILENAME+', but no '+MAKEFILENAME+' found',etWarning);
+  end;
 end;
 
 
+function TFPCupManager.GetRunInfo:string;
+begin
+  result:=FRunInfo;
+  FRunInfo:='';
+end;
+
+procedure TFPCupManager.SetRunInfo(aValue:string);
+begin
+  if (Length(FRunInfo)>0) then
+    FRunInfo:=FRunInfo+LineEnding+aValue
+  else
+    FRunInfo:=aValue;
+end;
 
 
 function TFPCupManager.Run: boolean;
 var
   aSequence:string;
-  {$IFDEF MSWINDOWS}
-  Major:integer=0;
-  Minor:integer=0;
-  Build:integer=0;
-  {$ENDIF}
 begin
   result:=false;
+
+  FRunInfo:='';
 
   FShortcutCreated:=false;
 
   if
-    (lowercase(FSequencer.FParent.CrossCPU_Target)=GetTargetCPU)
+    (FSequencer.FParent.CrossCPU_Target=GetTCPU(GetTargetCPU))
     AND
-    (lowercase(FSequencer.FParent.CrossOS_Target)=GetTargetOS)
+    (FSequencer.FParent.CrossOS_Target=GetTOS(GetTargetOS))
   then
   begin
     //if (NOT FSequencer.FParent.MUSL) then
     {$ifdef Linux}
-    if (NOT (Self.MUSL AND (GetTargetOS='linux'))) then
+    if (NOT (Self.MUSL AND (GetTOS(GetTargetOS)=TOS.linux))) then
     {$endif}
     begin
-      infoln('No crosscompiling to own target !',etError);
-      infoln('Native [CPU-OS] version is already installed !!',etError);
+      RunInfo:='No crosscompiling to own target !';
+      RunInfo:='Native [CPU-OS] version is already installed !!';
       exit;
     end;
   end;
@@ -838,29 +853,11 @@ begin
     WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,true);
   except
     // Writing to log failed, probably duplicate run. Inform user and get out.
-    {$IFNDEF NOCONSOLE}
-    writeln('***ERROR***');
-    writeln('Could not open log file '+FLog.LogFile+' for writing.');
-    writeln('Perhaps another fpcup is running?');
-    writeln('Aborting.');
-    {$ENDIF}
-    halt(2);
+    RunInfo:='***ERROR***';
+    RunInfo:='Could not open log file '+FLog.LogFile+' for writing.';
+    RunInfo:='Perhaps another fpcup is running?';
+    exit;
   end;
-
-  infoln('InstallerManager: current sequence: '+LineEnding+FSequencer.Text,etDebug);
-
-  // Some diagnostic info
-  {$IFDEF MSWINDOWS}
-  if Verbose then
-    if GetWin32Version(Major,Minor,Build) then
-    begin
-      infoln('Windows major version: '+IntToStr(Major),etInfo);
-      infoln('Windows minor version: '+IntToStr(Minor),etInfo);
-      infoln('Windows build number:  '+IntToStr(Build),etInfo);
-    end
-    else
-      infoln('Could not retrieve Windows version using GetWin32Version.',etWarning);
-  {$ENDIF}
 
   try
     if SkipModules<>'' then
@@ -890,13 +887,11 @@ begin
       aSequence:=_DEFAULTSIMPLE;
       {$ENDIF}
 
-      infoln('InstallerManager: going to run sequencer for sequence: '+aSequence,etDebug);
       result:=FSequencer.Run(aSequence);
 
       if (FIncludeModules<>'') and (result) then
       begin
         // run specified additional modules using the only mechanism
-        infoln('InstallerManager: going to run sequencer for include modules '+FIncludeModules,etDebug);
         FSequencer.CreateOnly(FIncludeModules);
         result:=FSequencer.Run(_ONLY);
       end;
@@ -961,25 +956,21 @@ end;
 
 function TSequencer.DoCheckModule(ModuleName: string): boolean;
 begin
-  infoln('TSequencer: DoCheckModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and FInstaller.CheckModule(ModuleName);
 end;
 
 function TSequencer.DoBuildModule(ModuleName: string): boolean;
 begin
-  infoln('TSequencer: DoBuildModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and FInstaller.BuildModule(ModuleName);
 end;
 
 function TSequencer.DoCleanModule(ModuleName: string): boolean;
 begin
-  infoln('TSequencer: DoCleanModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and FInstaller.CleanModule(ModuleName);
 end;
 
 function TSequencer.DoConfigModule(ModuleName: string): boolean;
 begin
-  infoln('TSequencer: DoConfigModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and FInstaller.ConfigModule(ModuleName);
 end;
 
@@ -1011,7 +1002,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     result:=true;
     if FParent.ShortCutNameLazarus<>EmptyStr then
     begin
-      infoln('TSequencer.DoExec (Lazarus): creating desktop shortcut:',etInfo);
+      //infoln('TSequencer.DoExec (Lazarus): creating desktop shortcut:',etInfo);
       try
         // Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
         InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
@@ -1030,7 +1021,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
         FParent.FShortcutCreated:=true;
       except
         // Ignore problems creating shortcut
-        infoln('CreateLazarusScript: Error creating shortcuts/links to Lazarus. Continuing.',etWarning);
+        //infoln('CreateLazarusScript: Error creating shortcuts/links to Lazarus. Continuing.',etWarning);
       end;
     end;
   end;
@@ -1039,7 +1030,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   result:=true;
   if FParent.ShortCutNameLazarus<>EmptyStr then
   begin
-    infoln('TSequencer.DoExec (Lazarus): deleting desktop shortcut:',etInfo);
+    //infoln('TSequencer.DoExec (Lazarus): deleting desktop shortcut:',etInfo);
     try
       //Delete shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       {$IFDEF MSWINDOWS}
@@ -1253,7 +1244,6 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   {$endif linux}
   {$endif}
 begin
-  infoln('TSequencer: DoExec for function '+FunctionName+' called.',etDebug);
   if FunctionName=_CREATEFPCUPSCRIPT then
     result:=CreateFpcupScript
   {$ifndef FPCONLY}
@@ -1276,13 +1266,11 @@ end;
 
 function TSequencer.DoGetModule(ModuleName: string): boolean;
 begin
-  infoln('TSequencer: DoGetModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and FInstaller.GetModule(ModuleName);
 end;
 
 function TSequencer.DoSetCPU(aCPU: string): boolean;
 begin
-  infoln('TSequencer: DoSetCPU for CPU '+aCPU+' called.',etDebug);
   if aCPU=GetTargetCPU
      then FParent.CrossCPU_Target:=TCPU.cpuNone
      else FParent.CrossCPU_Target:=GetTCPU(aCPU);
@@ -1292,7 +1280,6 @@ end;
 
 function TSequencer.DoSetOS(aOS: string): boolean;
 begin
-  infoln('TSequencer: DoSetOS for OS '+aOS+' called.',etDebug);
   if aOS=GetTargetOS
      then FParent.CrossOS_Target:=TOS.osNone
      else FParent.CrossOS_Target:=GetTOS(aOS);
@@ -1303,7 +1290,6 @@ end;
 {$ifndef FPCONLY}
 function TSequencer.DoResetLCL: boolean;
 begin
-  infoln('TSequencer: called DoReSetLCL',etDebug);
   ResetAllExecuted(true);
   result:=true;
 end;
@@ -1311,7 +1297,6 @@ end;
 
 function TSequencer.DoUnInstallModule(ModuleName: string): boolean;
 begin
-  infoln('TSequencer: DoUninstallModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and FInstaller.UnInstallModule(ModuleName);
 end;
 
@@ -1755,6 +1740,7 @@ begin
     begin
       result:=false;
       FParent.WritelnLog(etError,localinfotext+'No sequences loaded while trying to find sequence name ' + SequenceName);
+      FParent.RunInfo:=localinfotext+'No sequences loaded while trying to find sequence name ' + SequenceName;
       exit;
     end;
     // --clean or --install ??
@@ -1777,12 +1763,11 @@ begin
       // Don't run sequence if already run
       case SeqAttr^.Executed of
         ESFailed : begin
-          infoln(localinfotext+'Already ran sequence name '+SequenceName+' ending in failure. Not running again.',etWarning);
+          FParent.RunInfo:=localinfotext+'Already ran sequence name '+SequenceName+' ending in failure. Not running again.';
           result:=false;
           exit;
           end;
         ESSucceeded : begin
-          infoln(localinfotext+'Already succesfully ran sequence name '+SequenceName+'. Not running again.',etInfo);
           exit;
           end;
         end;
@@ -1794,12 +1779,6 @@ begin
       // run sequence until end or failure
       while true do
       begin
-        //For debugging state machine sequence:
-        {$IFDEF DEBUG}
-        infoln(localinfotext+'State machine running sequence '+SequenceName,etDebug);
-        infoln(localinfotext+'State machine [instr]: '+GetEnumNameSimple(TypeInfo(TKeyword),Ord(FStateMachine[InstructionPointer].instr)),etDebug);
-        infoln(localinfotext+'State machine [param]: '+FStateMachine[InstructionPointer].param,etDebug);
-        {$ENDIF DEBUG}
         case FStateMachine[InstructionPointer].instr of
           SMdeclare     :;
           SMdeclareHidden :;
@@ -1832,6 +1811,7 @@ begin
             '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
             ', param: '+FStateMachine[InstructionPointer].param);
           {$ENDIF DEBUG}
+          FParent.RunInfo:=localinfotext+'Failure running '+BeginSnippet+' error executing sequence '+SequenceName;
           exit; //failure, bail out
         end;
         InstructionPointer:=InstructionPointer+1;
@@ -1846,9 +1826,9 @@ begin
     begin
       result:=false;  // sequence not found
       FParent.WritelnLog(localinfotext+'Failed to load sequence :' + SequenceName);
+      FParent.RunInfo:=localinfotext+'Failed to load sequence :' + SequenceName;
     end;
   finally
-    infoln(localinfotext+'Run '+SequenceName+' ready.',etDebug);
     if Assigned(FInstaller) then
     begin
       FInstaller.Destroy;
@@ -1872,6 +1852,7 @@ begin
   for idx:=0 to FParent.FModuleList.Count -1 do
     PSequenceAttributes(FParent.FModuleList.Objects[idx])^.Executed:=ESFailed;
 
+  FParent.RunInfo:='Process forcefully interrupted by user.';
 end;
 
 constructor TSequencer.Create(aParent:TFPCupManager);

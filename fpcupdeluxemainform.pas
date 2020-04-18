@@ -153,7 +153,7 @@ type
     FVerbosity:boolean;
     MessageTrigger:boolean;
     FPCupManager:TFPCupManager;
-    oldoutput: TextFile;
+    //oldoutput: TextFile;
     sInstallDir:string;
     sStatus:string;
     {$ifdef EnableLanguages}
@@ -532,10 +532,13 @@ begin
   radgrpOS.Items.Strings[radgrpOS.Items.IndexOf(GetOS(TOS.wince))]:='i-sim';
   {$endif Darwin}
 
+
+  (*
   oldoutput := System.Output;
   AssignSynEdit(System.Output, CommandOutputScreen);
   Reset(System.Input);
   Rewrite(System.Output);
+  *)
 
   {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
   aTarget:=GetLCLWidgetTypeName;
@@ -683,11 +686,13 @@ begin
   {$endif}
 
   (* using CloseFile will ensure that all pending output is flushed *)
+  (*
   //if (TTextRec(oldoutput).Handle=UnusedHandle) then
   begin
     CloseFile(System.Output);
     System.Output := oldoutput;
   end;
+  *)
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
@@ -3316,7 +3321,7 @@ begin
         end
         else
         begin
-          AddMessage('Building cross-tools failed ... ??? ... aborting.');
+          AddMessage('Building cross-tools failed. Aborting.');
         end;
 
       end;
@@ -3870,8 +3875,9 @@ begin
         if (NOT MissingTools) then
         begin
           StatusMessage.Text:='Hmmm, something went wrong ... have a good look at the command screen !';
+          AddMessage(FPCupManager.RunInfo);
           {$ifdef RemoteLog}
-          aDataClient.UpInfo.LogEntry:=memoSummary.Text;
+          aDataClient.UpInfo.LogEntry:=memoSummary.Text+LineEnding+FPCupManager.RunInfo;
           aDataClient.SendData;
           {$endif}
         end
@@ -4140,18 +4146,27 @@ begin
 end;
 
 procedure TForm1.AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
+var
+  aMessageStrings:TStrings;
 begin
-  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-  CommandOutputScreen.Append(aMessage);
-  {$ELSE}
-  CommandOutputScreen.Lines.Append(aMessage);
-  {$ENDIF}
+  if Length(aMessage)=0 then
+    CommandOutputScreen.Lines.Append('')
+  else
+  begin
+    aMessageStrings:=TStringList.Create;
+    try
+      aMessageStrings.Text:=aMessage;
+      CommandOutputScreen.Lines.AddStrings(aMessageStrings);
+      if UpdateStatus then StatusMessage.Text:=aMessageStrings[0];
+    finally
+      aMessageStrings.Free;
+    end;
+  end;
   CommandOutputScreen.CaretX:=0;
   CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
-  if UpdateStatus then StatusMessage.Text:=aMessage;
   {$ifdef usealternateui}
   alternateui_AddMessage(amessage,updatestatus);
-  {$endif}  
+  {$endif}
   Application.ProcessMessages;
 end;
 

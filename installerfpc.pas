@@ -197,6 +197,7 @@ type
     function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
     destructor Destroy; override;
+    function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
     procedure SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);override;
     property CrossCompilerName: string read FCrossCompilerName;
   end;
@@ -217,133 +218,6 @@ uses
     ,math
   {$ENDIF}
   ;
-
-function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
-// Adds snippet to fpc.cfg file or replaces if if first line of snippet is present
-// Returns success (snippet inserted or added) or failure
-const
-  INFOTEXT='FPCCrossInstaller (InsertFPCCFGSnippet: '+FPCCONFIGFILENAME+'): ';
-var
-  ConfigText: TStringList;
-  i:integer;
-  SnipBegin,SnipEnd,SnipEndLastResort: integer;
-  SnippetText: TStringList;
-  s:string;
-begin
-  result:=false;
-
-  ConfigText:=TStringList.Create;
-  {$IF FPC_FULLVERSION > 30100}
-  //ConfigText.DefaultEncoding:=TEncoding.ASCII;
-  {$ENDIF}
-  SnippetText:=TStringList.Create;
-  try
-    SnippetText.Text:=Snippet;
-    ConfigText.LoadFromFile(FPCCFG);
-
-    // Look for exactly this string (first snippet-line always contains Magic + OS and CPU combo):
-    i:=StringListStartsWith(ConfigText,SnippetText.Strings[0]);
-
-    if (i<>-1) then
-    begin
-      SnipBegin:=i;
-
-      SnipEnd:=MaxInt;
-      SnipEndLastResort:=MaxInt;
-
-      i:=StringListStartsWith(ConfigText,SnipMagicEnd,SnipBegin);
-      if (i<>-1) then
-        SnipEnd:=i // got you !!
-      else
-        begin
-          // in case of failure, find beginning of next (magic) config segment
-          i:=StringListStartsWith(ConfigText,SnipMagicBegin,SnipBegin);
-          if (i<>-1) then SnipEndLastResort:=i-1; // got you !!
-        end;
-
-      if SnipEnd=MaxInt then
-      begin
-        //apparently snippet was not closed correct
-        if SnipEndLastResort<>MaxInt then
-        begin
-          SnipEnd:=SnipEndLastResort;
-          infoln(INFOTEXT+'Existing snippet was not closed correct. Will continue, but please check your '+FPCCONFIGFILENAME+'.',etWarning);
-        end;
-      end;
-      if SnipEnd=MaxInt then
-      begin
-        //apparently snippet was not closed at all: severe error
-        infoln(INFOTEXT+'Existing snippet was not closed at all. Please check your '+FPCCONFIGFILENAME+' for '+SnipMagicEnd+'.',etError);
-        exit;
-      end;
-
-      // Do we have a snipped with a CPU define
-      i:=StringListStartsWith(SnippetText,'#IFDEF CPU');
-      if (i<>-1) then
-      begin
-        s:=SnippetText[i];
-        // Check detailed CPU setting
-        for i:=SnipBegin to SnipEnd do
-        begin
-          // do we have a CPU define ...
-          if ConfigText.Strings[i]=s then
-          begin
-            result:=true;
-            break;
-          end;
-        end;
-      end else result:=true;
-    end;
-
-    if result then
-    begin
-      // Replace snippet
-      infoln(INFOTEXT+'Found existing snippet in '+FPCCFG+'. Replacing it with new version.',etInfo);
-      for i:=SnipBegin to SnipEnd do ConfigText.Delete(SnipBegin);
-    end
-    else
-    begin
-      // Add snippet
-      infoln(INFOTEXT+'Adding settings into '+FPCCFG+'.',etInfo);
-      if ConfigText[ConfigText.Count-1]<>'' then ConfigText.Add('');
-      SnipBegin:=ConfigText.Count;
-    end;
-
-    if (SnippetText.Count>1) then
-    begin
-      for i:=0 to (SnippetText.Count-1) do
-      begin
-        ConfigText.Insert(SnipBegin,SnippetText.Strings[i]);
-        Inc(SnipBegin);
-      end;
-
-      //{$ifndef Darwin}
-      {$ifdef MSWINDOWS}
-      // remove pipeline assembling for Darwin when cross-compiling !!
-      // for FPC >= rev 42302 this is not needed anymore: DoPipe:=false; by default on non-unix !!
-      SnipBegin:=ConfigText.IndexOf('# use pipes instead of temporary files for assembling');
-      if SnipBegin>-1 then
-      begin
-        if ConfigText.Strings[SnipBegin+1]<>'#IFNDEF FPC_CROSSCOMPILING' then
-        begin
-          ConfigText.Insert(SnipBegin+1,'#IFNDEF FPC_CROSSCOMPILING');
-          ConfigText.Insert(SnipBegin+3,'#ENDIF');
-        end;
-      end;
-      {$endif}
-    end;
-
-    ConfigText.SaveToFile(FPCCFG);
-
-    result:=true;
-  finally
-    ConfigText.Free;
-    SnippetText.Free;
-  end;
-
-  infoln(INFOTEXT+'Inserting snippet in '+FPCCFG+' done.',etInfo);
-end;
-
 
 // remove stale compiled files
 procedure RemoveStaleBuildDirectories(aBaseDir,aCPU,aOS:string);
@@ -499,6 +373,132 @@ end;
 destructor TFPCCrossInstaller.Destroy;
 begin
   inherited Destroy;
+end;
+
+function TFPCCrossInstaller.InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
+// Adds snippet to fpc.cfg file or replaces if if first line of snippet is present
+// Returns success (snippet inserted or added) or failure
+const
+  FPCCFGINFOTEXT='FPCCrossInstaller (InsertFPCCFGSnippet: '+FPCCONFIGFILENAME+'): ';
+var
+  ConfigText: TStringList;
+  i:integer;
+  SnipBegin,SnipEnd,SnipEndLastResort: integer;
+  SnippetText: TStringList;
+  s:string;
+begin
+  result:=false;
+
+  ConfigText:=TStringList.Create;
+  {$IF FPC_FULLVERSION > 30100}
+  //ConfigText.DefaultEncoding:=TEncoding.ASCII;
+  {$ENDIF}
+  SnippetText:=TStringList.Create;
+  try
+    SnippetText.Text:=Snippet;
+    ConfigText.LoadFromFile(FPCCFG);
+
+    // Look for exactly this string (first snippet-line always contains Magic + OS and CPU combo):
+    i:=StringListStartsWith(ConfigText,SnippetText.Strings[0]);
+
+    if (i<>-1) then
+    begin
+      SnipBegin:=i;
+
+      SnipEnd:=MaxInt;
+      SnipEndLastResort:=MaxInt;
+
+      i:=StringListStartsWith(ConfigText,SnipMagicEnd,SnipBegin);
+      if (i<>-1) then
+        SnipEnd:=i // got you !!
+      else
+        begin
+          // in case of failure, find beginning of next (magic) config segment
+          i:=StringListStartsWith(ConfigText,SnipMagicBegin,SnipBegin);
+          if (i<>-1) then SnipEndLastResort:=i-1; // got you !!
+        end;
+
+      if SnipEnd=MaxInt then
+      begin
+        //apparently snippet was not closed correct
+        if SnipEndLastResort<>MaxInt then
+        begin
+          SnipEnd:=SnipEndLastResort;
+          infoln(FPCCFGINFOTEXT+'Existing snippet was not closed correct. Will continue, but please check your '+FPCCONFIGFILENAME+'.',etWarning);
+        end;
+      end;
+      if SnipEnd=MaxInt then
+      begin
+        //apparently snippet was not closed at all: severe error
+        infoln(FPCCFGINFOTEXT+'Existing snippet was not closed at all. Please check your '+FPCCONFIGFILENAME+' for '+SnipMagicEnd+'.',etError);
+        exit;
+      end;
+
+      // Do we have a snipped with a CPU define
+      i:=StringListStartsWith(SnippetText,'#IFDEF CPU');
+      if (i<>-1) then
+      begin
+        s:=SnippetText[i];
+        // Check detailed CPU setting
+        for i:=SnipBegin to SnipEnd do
+        begin
+          // do we have a CPU define ...
+          if ConfigText.Strings[i]=s then
+          begin
+            result:=true;
+            break;
+          end;
+        end;
+      end else result:=true;
+    end;
+
+    if result then
+    begin
+      // Replace snippet
+      infoln(FPCCFGINFOTEXT+'Found existing snippet in '+FPCCFG+'. Replacing it with new version.',etInfo);
+      for i:=SnipBegin to SnipEnd do ConfigText.Delete(SnipBegin);
+    end
+    else
+    begin
+      // Add snippet
+      infoln(FPCCFGINFOTEXT+'Adding settings into '+FPCCFG+'.',etInfo);
+      if ConfigText[ConfigText.Count-1]<>'' then ConfigText.Add('');
+      SnipBegin:=ConfigText.Count;
+    end;
+
+    if (SnippetText.Count>1) then
+    begin
+      for i:=0 to (SnippetText.Count-1) do
+      begin
+        ConfigText.Insert(SnipBegin,SnippetText.Strings[i]);
+        Inc(SnipBegin);
+      end;
+
+      //{$ifndef Darwin}
+      {$ifdef MSWINDOWS}
+      // remove pipeline assembling for Darwin when cross-compiling !!
+      // for FPC >= rev 42302 this is not needed anymore: DoPipe:=false; by default on non-unix !!
+      SnipBegin:=ConfigText.IndexOf('# use pipes instead of temporary files for assembling');
+      if SnipBegin>-1 then
+      begin
+        if ConfigText.Strings[SnipBegin+1]<>'#IFNDEF FPC_CROSSCOMPILING' then
+        begin
+          ConfigText.Insert(SnipBegin+1,'#IFNDEF FPC_CROSSCOMPILING');
+          ConfigText.Insert(SnipBegin+3,'#ENDIF');
+        end;
+      end;
+      {$endif}
+    end;
+
+    ConfigText.SaveToFile(FPCCFG);
+
+    result:=true;
+  finally
+    ConfigText.Free;
+    SnippetText.Free;
+  end;
+
+  infoln(FPCCFGINFOTEXT+'Inserting snippet in '+FPCCFG+' done.',etInfo);
 end;
 
 procedure TFPCCrossInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);

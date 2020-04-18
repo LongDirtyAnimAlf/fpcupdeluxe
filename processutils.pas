@@ -3,7 +3,7 @@ unit processutils;
 {$mode objfpc}{$H+}
 
 {$ifdef LCL}
-{.$define THREADEDEXECUTE}
+{$define THREADEDEXECUTE}
 {$endif}
 
 interface
@@ -740,6 +740,7 @@ begin
   finally
     LeaveCriticalSection;
   end;
+  (*
   if NeedProcTerminate and (Process<>nil) then
   begin
     Process.Terminate(AbortedExitCode);
@@ -749,6 +750,7 @@ begin
     Process.WaitOnExit(5000);
     {$ENDIF}
   end;
+  *)
 end;
 
 function TExternalTool.CanFree: boolean;
@@ -783,6 +785,7 @@ end;
 procedure TExternalTool.WaitForExit;
 begin
   repeat
+    //if Thread=nil then exit;
     EnterCriticalSection;
     try
       if Stage=etsDestroying then exit;
@@ -822,6 +825,7 @@ begin
   WaitForExit;
   //result:=ExitCode;
   result:=ExitStatus;
+  //result:=(ErrorMessage='') and (not Terminated) and (ExitStatus=0);
 end;
 
 { TExternalToolThread }
@@ -976,7 +980,8 @@ begin
       OutputLine:='';
       StdErrLine:='';
       LastUpdate:=GetTickCount64;
-      while (Tool<>nil) and (Tool.Stage=etsRunning) do begin
+      while (Tool<>nil) and (Tool.Stage=etsRunning) do
+      begin
         if Tool.ReadStdOutBeforeErr then begin
           HasOutput:=ReadInputPipe(Tool.Process.Output,OutputLine,false)
                   or ReadInputPipe(Tool.Process.Stderr,StdErrLine,true);
@@ -1027,6 +1032,16 @@ begin
       begin
         Tool.AddOutputLines(fLines);
         fLines.Clear;
+      end;
+
+      if (Tool<>nil) and (Tool.FStage=etsWaitingForStop) then
+      begin
+        Tool.Process.Terminate(AbortedExitCode);
+        {$IF FPC_FULLVERSION < 30300}
+        Tool.Process.WaitOnExit;
+        {$ELSE}
+        Tool.Process.WaitOnExit(5000);
+        {$ENDIF}
       end;
 
       {$ifndef THREADEDEXECUTE}

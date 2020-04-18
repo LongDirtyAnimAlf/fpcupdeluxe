@@ -172,7 +172,6 @@ begin
     if rv<>0 then
     begin
       FRepoExecutable := '';
-      infoln('SVN client found, but error code during check: '+InttoStr(rv),etError);
     end;
   end
   else
@@ -260,7 +259,6 @@ begin
     {$IFDEF UNIX}
     if ExecuteSpecialDue2EmptyString then
     begin
-      if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);
       //FReturnCode := ExecuteProcess(FRepoExecutable,Command,[]);
       //FReturnCode := FpExecL(FRepoExecutable,[Command]);
       //FReturnCode := FpExecL('/bin/sh',['-c',Command]);
@@ -273,10 +271,6 @@ begin
         try
           TempOutputSL.LoadFromFile(TempOutputFile);
           Output:=TempOutputSL.ToString;
-          if Verbose then
-          begin
-            for i:=0 to (TempOutputSL.Count-1) do infoln(TempOutputSL[i]);
-          end;
         finally
           TempOutputSL.Free();
         end;
@@ -291,8 +285,6 @@ begin
 
     if (ReturnCode = 0) then break else
     begin
-      infoln('SVN client error return code: '+InttoStr(ReturnCode),etWarning);
-
       Inc(RetryAttempt);
 
       //Give everybody a chance to relax ;)
@@ -411,7 +403,6 @@ begin
     {$IFDEF UNIX}
     if ExecuteSpecialDue2EmptyString then
     begin
-      if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);
       //FReturnCode := ExecuteProcess(FRepoExecutable,Command,[]);
       //FReturnCode := FpExecL(FRepoExecutable,[Command]);
       //FReturnCode := FpExecL('/bin/sh',['-c',Command]);
@@ -424,10 +415,6 @@ begin
         try
           TempOutputSL.LoadFromFile(TempOutputFile);
           Output:=TempOutputSL.ToString;
-          if Verbose then
-          begin
-            for i:=0 to (TempOutputSL.Count-1) do infoln(TempOutputSL[i]);
-          end;
         finally
           TempOutputSL.Free();
         end;
@@ -441,14 +428,13 @@ begin
 
     if (ReturnCode <> 0) then
     begin
-      infoln('SVN client error return code: '+InttoStr(ReturnCode),etError);
+      FRepoInfo:='SVN client error return code: '+InttoStr(ReturnCode);
     end;
 
     if (Pos('An obstructing working copy was found', Output) > 0) then
     begin
-      infoln('SVN reported than an obstructing working copy was found.',etError);
-      infoln('Please try to resolve.',etError);
-      //FReturnCode := -1;
+      FRepoInfo:='SVN reported than an obstructing working copy was found.';
+      FReturnCode := -1;
       exit;
     end;
 
@@ -477,7 +463,6 @@ begin
         {$IFDEF UNIX}
         if ExecuteSpecialDue2EmptyString then
         begin
-          if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);
           //FReturnCode := ExecuteProcess(FRepoExecutable,Command,[]);
           //FReturnCode := FpExecL(FRepoExecutable,[Command]);
           //FReturnCode := FpExecL('/bin/sh',['-c',Command]);
@@ -490,10 +475,6 @@ begin
             try
               TempOutputSL.LoadFromFile(TempOutputFile);
               Output:=TempOutputSL.ToString;
-              if Verbose then
-              begin
-                for i:=0 to (TempOutputSL.Count-1) do infoln(TempOutputSL[i]);
-              end;
             finally
               TempOutputSL.Free();
             end;
@@ -584,7 +565,7 @@ begin
     exit;
   end;
 
-  infoln('Getting diff between current sources and online sources of ' + LocalRepository,etInfo);
+  FRepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
 
   aProcess:=nil;
 
@@ -615,7 +596,7 @@ begin
     aFile := ChangeFileExt(GetTempFileName(GetTempDir(false),'FPCUPTMP'),'diff');
     aProcess.Process.CurrentDirectory:=LocalRepository;
     aProcess.Process.Parameters.Add(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x --ignore-space-change'+' . > ' + aFile);
-    infoln(aProcess.GetExeInfo,etInfo);
+    FRepoInfo:=aProcess.GetExeInfo;
     try
       aProcess.ExecuteAndWait;
       FReturnCode:=aProcess.ExitCode;
@@ -938,7 +919,6 @@ begin
               {$IFDEF UNIX}
               if ExecuteSpecialDue2EmptyString then
               begin
-                if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);
                 //FReturnCode := ExecuteProcess(FRepoExecutable,Command,[]);
                 //FReturnCode := FpExecL(FRepoExecutable,[Command]);
                 //FReturnCode := FpExecL('/bin/sh',['-c',Command]);
@@ -951,10 +931,6 @@ begin
                   try
                     TempOutputSL.LoadFromFile(TempOutputFile);
                     Output:=TempOutputSL.ToString;
-                    if Verbose then
-                    begin
-                      for i:=0 to (TempOutputSL.Count-1) do infoln(TempOutputSL[i]);
-                    end;
                   finally
                     TempOutputSL.Free;
                   end;

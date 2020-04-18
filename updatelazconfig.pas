@@ -361,7 +361,6 @@ end;
 
 procedure TConfig.Save;
 begin
-  infoln('TConfig: Saving configchanges into '+FFilename,etDebug);
   WriteXMLFile(Doc,FFilename);
 end;
 

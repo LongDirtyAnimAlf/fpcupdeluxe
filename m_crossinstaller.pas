@@ -36,7 +36,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils,fpcuputil;
+  Classes, SysUtils;
 
 const
   ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
@@ -201,7 +201,8 @@ var
 implementation
 
 uses
-  StrUtils;
+  StrUtils,
+  fpcuputil;
 
 function GetCPU(aCPU:TCPU):string;
 begin
@@ -321,20 +322,20 @@ end;
 
 procedure TCrossInstaller.SearchLibraryInfo(found:boolean; const extrainfo:string='');
 begin
-  if found then
-    infoln(CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo)
-  else
-    infoln(CrossModuleName + ': Searched but did not find any library !!', etError);
-  if Length(extrainfo)>0 then infoln(CrossModuleName + ' libs : '+extrainfo, etInfo);
+  //if found then
+  //  infoln(CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo)
+  //else
+  //  infoln(CrossModuleName + ': Searched but did not find any library !!', etError);
+  //if Length(extrainfo)>0 then infoln(CrossModuleName + ' libs : '+extrainfo, etInfo);
 end;
 
 procedure TCrossInstaller.SearchBinUtilsInfo(found:boolean; const extrainfo:string='');
 begin
-  if found then
-    infoln(CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo)
-  else
-    infoln(CrossModuleName + ': Searched but did not find any binary utilities !!', etError);
-  if Length(extrainfo)>0 then infoln(CrossModuleName + ' bins : '+extrainfo, etInfo);
+  //if found then
+  //  infoln(CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo)
+  //else
+  //  infoln(CrossModuleName + ': Searched but did not find any binary utilities !!', etError);
+  //if Length(extrainfo)>0 then infoln(CrossModuleName + ' bins : '+extrainfo, etInfo);
 end;
 
 
@@ -394,13 +395,6 @@ begin
   if LibsOrBins
      then info:='library'
      else info:='binutil(s)';
-
-  if result then
-    infoln(CrossModuleName + ': found '+info+' '+LookFor+
-      ' in directory '+sd, etDebug)
-  else
-    infoln(CrossModuleName + ': searched but did not find '+info+' '+LookFor+
-      ' in directory '+sd, etDebug);
 end;
 
 
@@ -522,12 +516,14 @@ end;
 
 procedure TCrossInstaller.ShowInfo(info: string = ''; Level: TEventType = etInfo);
 begin
+  (*
   if Length(info)>0 then infoln(CrossModuleName+': '+info,Level)
   {$ifndef LCL}
   else infoln(CrossModuleName+' crosscompiler loading',etDebug);
   {$else}
   ;
   {$endif}
+  *)
 end;
 
 procedure TCrossInstaller.Reset;
