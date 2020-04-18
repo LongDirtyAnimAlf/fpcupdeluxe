@@ -1681,7 +1681,7 @@ begin
          UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
 
          // check for default values
-         if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
+         if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
             then LocalPatchCmd:=FPatchCmd + ' -p0 -i '
             else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
 
@@ -1871,7 +1871,7 @@ begin
 
         UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
 
-        if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
+        if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
            then LocalPatchCmd:=FPatchCmd + ' -p0 -i '
            else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
         CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
@@ -1901,7 +1901,7 @@ begin
             end;
             if CheckoutOrUpdateReturnCode=0 then
             begin
-              if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
+              if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
                  then LocalPatchCmd:=FPatchCmd + ' -p0 --binary -i '
                  else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
               CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
@@ -3363,7 +3363,7 @@ begin
           end else j:=0;
 
           // check for default values
-          if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
+          if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
             {$IF defined(BSD) and not defined(DARWIN)}
             then LocalPatchCmd:=FPatchCmd + ' -p' + InttoStr(j) + ' -N -i '
             {$else}

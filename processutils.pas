@@ -280,22 +280,15 @@ begin
         aTool.Environment.SetVar(PATHVARNAME, PrependPath);
     end;
 
-    CommandToList(Commandline,aTool.Process.Parameters);
-
-    If aTool.Process.Parameters.Count>0 then
-    begin
-      aTool.Process.Executable:=aTool.Process.Parameters[0];
-      aTool.Process.Parameters.Delete(0);
+    aTool.Process.CommandLine:=Commandline;
+    repeat
       i:=aTool.Process.Parameters.IndexOf('emptystring');
       if (i<>-1) then aTool.Process.Parameters.Strings[i]:='""';
-    end;
+    until (i=-1);
 
-    aTool.ExecuteAndWait;
+    result:=aTool.ExecuteAndWait;
 
     Output:=aTool.WorkerOutput.Text;
-
-    Result:=aTool.ExitCode;
-
   finally
     aTool.Free;
   end;
@@ -782,7 +775,7 @@ end;
 procedure TExternalTool.WaitForExit;
 begin
   repeat
-    //if Thread=nil then exit;
+    if Thread=nil then exit;
     EnterCriticalSection;
     try
       if Stage=etsDestroying then exit;

@@ -918,7 +918,7 @@ begin
   FSolarisOI:=false;
   FMUSL:=false;
 
-  FPatchCmd:='patch';
+  FPatchCmd:='patch'+GetExeExt;
 
   FModuleList:=TStringList.Create;
   FModuleEnabledList:=TStringList.Create;
