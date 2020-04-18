@@ -193,6 +193,7 @@ type
   // PrependPath is prepended to existing path. If empty, keep current path
   function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; PrependPath: string; Verbose:boolean): integer; overload;
 
+  procedure ThreadLog(Msg: string);
 
 implementation
 
@@ -210,8 +211,8 @@ uses
   FileUtil,
   LazFileUtils;
 
-{$ifdef THREADEDEXECUTE}
 procedure ThreadLog(Msg: string);
+{$ifdef THREADEDEXECUTE}
 const
   WM_THREADINFO = LM_USER + 2010;
 var
@@ -220,6 +221,10 @@ begin
   PInfo := StrAlloc(Length(Msg)+1);
   StrCopy(PInfo, PChar(Msg));
   if (Assigned(Application) AND Assigned(Application.MainForm)) then PostMessage(Application.MainForm.Handle, WM_THREADINFO, {%H-}NativeUInt(PInfo), 0);
+end;
+{$else}
+begin
+  writeln(Msg);
 end;
 {$endif}
 
@@ -530,11 +535,7 @@ begin
       end;
       if Verbose then
       begin
-        {$ifdef THREADEDEXECUTE}
         ThreadLog(LineStr);
-        {$else}
-        writeln(LineStr);
-        {$endif}
       end;
     end;
   finally

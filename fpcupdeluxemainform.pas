@@ -168,9 +168,9 @@ type
     sConsentWarning:boolean;
     aDataClient:TDataClient;
     {$endif}
-    procedure HandleThreadInfo(var Msg: TLMessage); message WM_THREADINFO;
-    procedure InitFpcupdeluxe({%H-}Data: PtrInt);
-    procedure CheckForUpdates({%H-}Data: PtrInt);
+    procedure HandleInfo(var Msg: TLMessage); message WM_THREADINFO;
+    procedure InitFpcupdeluxe({%H-}Data: PtrInt=0);
+    procedure CheckForUpdates({%H-}Data: PtrInt=0);
     function  AutoUpdateCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
@@ -216,7 +216,7 @@ implementation
 uses
   InterfaceBase, // for WidgetSet
   LCLType, // for MessageBox
-  lclintf, // for OpenURL
+  LCLIntf, // for OpenURL
   IniFiles,
   StrUtils,
   {$ifdef EnableLanguages}
@@ -235,8 +235,7 @@ uses
   installerUniversal,
   m_crossinstaller, // for checking of availability of fpc[laz]up[deluxe] cross-compilers
   fpcuputil,
-  processutils,
-  synedittext;
+  processutils;
 
 //{$I message.inc}
 
@@ -652,7 +651,8 @@ begin
     // must be done here, to enable local storage/access of some setttings !!
     Form2:=TForm2.Create(Form1);
     Form3:=TForm3.Create(Form1);
-    Application.QueueAsyncCall(@InitFpcupdeluxe,0);
+    InitFpcupdeluxe;
+    //Application.QueueAsyncCall(@InitFpcupdeluxe,0);
   end
   else
   begin
@@ -4263,7 +4263,7 @@ begin
   end;
 end;
 
-procedure TForm1.HandleThreadInfo(var Msg: TLMessage);
+procedure TForm1.HandleInfo(var Msg: TLMessage);
 var
   MsgStr: PChar;
   MsgPasStr: string;

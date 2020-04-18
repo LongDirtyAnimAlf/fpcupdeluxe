@@ -291,7 +291,7 @@ begin
   if ExportOnly then exit;
   if NOT ValidClient then exit;
 
-  FRepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
+  RepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
 
   //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --no-prefix -p ', LocalRepository, Result, Verbose);

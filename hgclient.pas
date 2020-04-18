@@ -224,7 +224,7 @@ begin
   result:='';
   FReturnCode := 0;
   if NOT ValidClient then exit;
-  FRepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
+  RepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff --git ', LocalRepository, Result, Verbose);
   //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff ', LocalRepository, Result, Verbose);
 end;

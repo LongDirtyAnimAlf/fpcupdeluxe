@@ -428,12 +428,12 @@ begin
 
     if (ReturnCode <> 0) then
     begin
-      FRepoInfo:='SVN client error return code: '+InttoStr(ReturnCode);
+      RepoInfo:='SVN client error return code: '+InttoStr(ReturnCode);
     end;
 
     if (Pos('An obstructing working copy was found', Output) > 0) then
     begin
-      FRepoInfo:='SVN reported than an obstructing working copy was found.';
+      RepoInfo:='SVN reported than an obstructing working copy was found.';
       FReturnCode := -1;
       exit;
     end;
@@ -565,7 +565,7 @@ begin
     exit;
   end;
 
-  FRepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
+  RepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
 
   aProcess:=nil;
 
@@ -596,7 +596,7 @@ begin
     aFile := ChangeFileExt(GetTempFileName(GetTempDir(false),'FPCUPTMP'),'diff');
     aProcess.Process.CurrentDirectory:=LocalRepository;
     aProcess.Process.Parameters.Add(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x --ignore-space-change'+' . > ' + aFile);
-    FRepoInfo:=aProcess.GetExeInfo;
+    RepoInfo:=aProcess.GetExeInfo;
     try
       aProcess.ExecuteAndWait;
       FReturnCode:=aProcess.ExitCode;

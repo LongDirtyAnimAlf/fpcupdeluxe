@@ -3619,33 +3619,13 @@ begin
      else result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;
 
-
 procedure TInstaller.infoln(Message: string; const Level: TEventType=etInfo);
-  procedure WriteInfo(Msg: string);
-  {$ifdef LCL}
-  const
-    WM_THREADINFO = LM_USER + 2010;
-  var
-    PInfo: PChar;
-  begin
-    PInfo := StrAlloc(Length(Msg)+1);
-    StrCopy(PInfo, PChar(Msg));
-    Application.MainForm.Handle;
-    PostMessage(Application.MainForm.Handle, WM_THREADINFO, NativeUInt(PInfo), 0);
-  end;
-  {$else}
-  begin
-    {$ifndef NOCONSOLE}
-    writeln(Msg);
-    {$endif NOCONSOLE}
-  end;
-  {$endif}
 begin
   // Note: these strings should remain as is so any fpcupgui highlighter can pick it up
   if (Level<>etDebug) then
     begin
-      if AnsiPos(LineEnding, Message)>0 then WriteInfo(''); //Write an empty line before multiline messagse
-      WriteInfo(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
+      if AnsiPos(LineEnding, Message)>0 then ThreadLog(''); //Write an empty line before multiline messagse
+      ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
       {$IFDEF MSWINDOWS}
       Sleep(1);
       {$ENDIF}
@@ -3655,8 +3635,8 @@ begin
     {$IFDEF DEBUG}
     {DEBUG conditional symbol is defined using
     Project Options/Other/Custom Options using -dDEBUG}
-    if AnsiPos(LineEnding, Message)>0 then WriteInfo(''); //Write an empty line before multiline messagse
-    WriteInfo(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
+    if AnsiPos(LineEnding, Message)>0 then ThreadLog(''); //Write an empty line before multiline messagse
+    ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
     {$IFDEF MSWINDOWS}
     Sleep(1);
     {$ENDIF}

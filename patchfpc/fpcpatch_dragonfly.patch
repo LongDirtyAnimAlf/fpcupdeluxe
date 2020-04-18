@@ -1,6 +1,8 @@
---- C:/fpclazbydeluxe/trunklatest/fpcsrc/rtl/dragonfly/Makefile.txt	Sat Apr 18 08:09:14 2020
-+++ C:/fpclazbydeluxe/trunklatest/fpcsrc/rtl/dragonfly/Makefile	Sat Apr 18 08:04:30 2020
-@@ -3319,33 +3319,45 @@
+Index: rtl/dragonfly/Makefile
+===================================================================
+--- rtl/dragonfly/Makefile	(revision 44749)
++++ rtl/dragonfly/Makefile	(working copy)
+@@ -3319,26 +3319,37 @@
  	$(AS) -o $(UNITTARGETDIRPREFIX)dllprt0$(OEXT) $(CPU_TARGET)/dllprt0.as
  $(SYSTEMUNIT)$(PPUEXT) : $(BSDINC)/$(SYSTEMUNIT).pp unxconst.inc $(SYSDEPS)
  	$(COMPILER) $(FPC_SYSTEM_OPT) -Us -Sg $(BSDINC)/$(SYSTEMUNIT).pp
@@ -40,6 +42,7 @@
  sysutils$(PPUEXT) : $(UNIXINC)/sysutils.pp $(wildcard $(OBJPASDIR)/sysutils/*.inc) \
  		    objpas$(PPUEXT) unix$(PPUEXT) errors$(PPUEXT) sysconst$(PPUEXT)
  	$(COMPILER) -Fi$(OBJPASDIR)/sysutils $(UNIXINC)/sysutils.pp
+@@ -3345,7 +3356,8 @@
  rtlconsts$(PPUEXT) : $(OBJPASDIR)/rtlconsts.pp
  	$(COMPILER) $(OBJPASDIR)/rtlconsts.pp
  classes$(PPUEXT) : $(UNIXINC)/classes.pp $(wildcard $(OBJPASDIR)/classes/*.inc) \

@@ -342,9 +342,7 @@ type
     property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
     property SolarisOI:boolean read FSolarisOI write FSolarisOI;
     property MUSL:boolean read FMUSL write FMUSL;
-
     property RunInfo:string read GetRunInfo write SetRunInfo;
-
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
     function CheckValidCPUOS: boolean;

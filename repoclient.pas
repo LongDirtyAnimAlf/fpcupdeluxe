@@ -70,6 +70,8 @@ type
     FExportOnly: boolean;
     FForceLocal: boolean;
     FRepoInfo:string;
+    function  GetRepoInfo:string;
+    procedure SetRepoInfo(aValue:string);
     //Performs a checkout/initial download
     //Note: it's often easier to call CheckOutOrUpdate
     procedure CheckOut(UseForce:boolean=false); virtual;
@@ -124,7 +126,7 @@ type
     // If using http transport, an http proxy can be used. Proxy password (optional)
     property HTTPProxyPassword: string read FHTTPProxyPassword write FHTTPProxyPassword;
     // Shows list of files that have been modified locally (and not committed)
-    procedure LocalModifications(var FileList: TStringList); virtual;
+    procedure LocalModifications({%H-}var FileList: TStringList); virtual;
     // Checks to see if local directory is a valid repository for the repository URL given (if any)
     function LocalRepositoryExists: boolean; virtual;
     // Local directory that has a repository/checkout.
@@ -147,7 +149,7 @@ type
     property ForceLocal: boolean read FForceLocal write FForceLocal;
     property ValidClient: boolean read GetValidClient;
     property RepoExecutableName: string read GetRepoExecutableName;
-    property RepoInfo: string read FRepoInfo;
+    property RepoInfo:string read GetRepoInfo write SetRepoInfo;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -328,6 +330,20 @@ function TRepoClient.LocalRepositoryExists: boolean;
 begin
   result:=False;
   raise Exception.Create('TRepoClient descendants must implement LocalRepositoryExists by themselves.');
+end;
+
+function TRepoClient.GetRepoInfo:string;
+begin
+  result:=FRepoInfo;
+  FRepoInfo:='';
+end;
+
+procedure TRepoClient.SetRepoInfo(aValue:string);
+begin
+  if (Length(FRepoInfo)>0) then
+    FRepoInfo:=FRepoInfo+LineEnding+aValue
+  else
+    FRepoInfo:=aValue;
 end;
 
 constructor TRepoClient.Create;
