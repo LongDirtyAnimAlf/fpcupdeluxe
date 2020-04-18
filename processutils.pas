@@ -775,7 +775,6 @@ end;
 procedure TExternalTool.WaitForExit;
 begin
   repeat
-    if Thread=nil then exit;
     EnterCriticalSection;
     try
       if Stage=etsDestroying then exit;
@@ -800,6 +799,7 @@ begin
     end;
     // still running => wait a bit to prevent cpu cycle burning
     Sleep(10);
+    //if Thread=nil then exit;
   until false;
 end;
 
