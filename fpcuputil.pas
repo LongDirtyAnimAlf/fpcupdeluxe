@@ -137,7 +137,7 @@ type
     FCurrentFile: string;
     FFlat:boolean;
     procedure DoOnFile(Sender : TObject; Const AFileName : string);
-    procedure DoOnProgress(Sender : TObject; Const Pct : Double);
+    procedure DoOnProgressEx(Sender : TObject; Const ATotPos, ATotSize: Int64);
   public
     function DoUnZip(const ASrcFile, ADstDir: String; Files: array of string):boolean;
     property Flat:boolean read FFlat write FFlat default False;
@@ -3823,14 +3823,16 @@ begin
   {$endif}
 end;
 
-procedure TNormalUnzipper.DoOnProgress(Sender : TObject; Const Pct : Double);
+procedure TNormalUnzipper.DoOnProgressEx(Sender : TObject; Const ATotPos, ATotSize: Int64);
 begin
-  if Pct=100.0 then
+  if ATotPos=ATotSize then
   begin
-    ThreadLog('Extracted #all. Ready.');
+    ThreadLog('Extracted #all. Ready extracting.');
     {$ifdef LCL}
     Application.ProcessMessages;
     {$endif}
+    // Do this once ...
+    if Assigned(FUnZipper) then FUnZipper.OnProgressEx:=nil;
   end;
 end;
 
@@ -3855,7 +3857,7 @@ begin
         FUnZipper.FileName := ASrcFile;
         FUnZipper.OutputPath := ADstDir;
         FUnZipper.OnStartFile:= @DoOnFile;
-        //FUnZipper.OnProgress:= @DoOnProgress;
+        FUnZipper.OnProgressEx:= @DoOnProgressEx;
         FFileList.Clear;
         if Length(Files)>0 then
           for i := 0 to high(Files) do

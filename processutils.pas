@@ -191,16 +191,11 @@ type
   end;
 
   // Convenience functions
-  // Runs command, returns result code. Negative codes are processutils internal error codes
+
   function ExecuteCommand(Commandline: string; Verbose:boolean): integer; overload;
-  // Runs command, returns result code. Negative codes are processutils internal error codes
   function ExecuteCommand(Commandline: string; out Output:string; Verbose:boolean): integer; overload;
-  // Runs command, returns result code. Negative codes are processutils internal error codes
   function ExecuteCommandInDir(Commandline, Directory: string; Verbose:boolean): integer; overload;
-  // Runs command, returns result code. Negative codes are processutils internal error codes
   function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; Verbose:boolean): integer; overload;
-  // Runs command, returns result code. Negative codes are processutils internal error codes
-  // PrependPath is prepended to existing path. If empty, keep current path
   function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; PrependPath: string; Verbose:boolean): integer; overload;
 
   procedure ThreadLog(const aMsg: string;{%H-}const aEvent:TEventType=etInfo);

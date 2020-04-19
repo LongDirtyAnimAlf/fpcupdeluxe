@@ -3512,6 +3512,7 @@ end;
 
 function TInstaller.GetSanityCheck:boolean;
 begin
+  result:=false;
   if IsFPCInstaller then
   begin
 
