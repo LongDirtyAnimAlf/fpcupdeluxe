@@ -48,7 +48,7 @@ uses
 implementation
 
 uses
-  processutils,fpcuputil;
+  process,fpcuputil;
 
 type
 
@@ -192,7 +192,7 @@ begin
     // Now also allow for empty binutilsprefix in the right directory:
     if (NOT result) then
     begin
-      ExecuteCommand('objdump -i', s, False);
+      RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut],swoHide);
       if AnsiPos('elf32-i386', s) <> 0 then
       begin
         s:=Which('objdump');

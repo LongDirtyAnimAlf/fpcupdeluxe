@@ -225,7 +225,7 @@ begin
   result:=false;
   FLazarusNeedsRebuild:=false;
 
-  Processor.Process.Executable := Make;
+  Processor.CmdLineExe := Make;
   Processor.Process.Parameters.Clear;
   {$IFDEF MSWINDOWS}
   if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
@@ -293,7 +293,7 @@ begin
   Processor.Process.Parameters.Add('useride');
 
   try
-    WritelnLog(infotext+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+    WritelnLog(infotext+Processor.CmdLineExe+'. Params: '+Processor.Process.Parameters.CommaText, true);
     ProcessorResult:=Processor.ExecuteAndWait;
     result := (ProcessorResult=0);
     if result then
@@ -648,7 +648,7 @@ begin
        else WritelnLog(localinfotext+'Installing '+PackageName+' version '+lpkversion.AsString,True);
   end;
 
-  Processor.Process.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
+  Processor.CmdLineExe := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
 
   RegisterPackageFeature:=false;
 
@@ -1217,7 +1217,7 @@ begin
       CommandToList(exec,Processor.Process.Parameters);
       If Processor.Process.Parameters.Count>0 then
       begin
-        Processor.Process.Executable:=Processor.Process.Parameters[0];
+        Processor.CmdLineExe:=Processor.Process.Parameters[0];
         Processor.Process.Parameters.Delete(0);
       end;
 

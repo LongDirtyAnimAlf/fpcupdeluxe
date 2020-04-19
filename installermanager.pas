@@ -1852,6 +1852,7 @@ end;
 
 constructor TSequencer.Create(aParent:TFPCupManager);
 begin
+  inherited Create;
   FParent:=aParent;
 end;
 

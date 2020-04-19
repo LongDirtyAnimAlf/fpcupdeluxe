@@ -224,7 +224,7 @@ begin
   PATCHFILE: Optional: name of FPC patch file for the FPC sources. If not needed: don't enter it or use ""
   CHMHELPFILES: Optional: directory containing CHM help files to be included in the installer (see A.7). If not needed: don't enter it or use ""
   }
-  Processor.Process.Executable := IncludeTrailingPathDelimiter(InstallerBatchDir)+'create_installer.bat';
+  Processor.CmdLineExe := IncludeTrailingPathDelimiter(InstallerBatchDir)+'create_installer.bat';
   // MUST be set to create_installer.bat otherwise it can't find the fpcbuild/lazbuild scripts
   Processor.Process.CurrentDirectory:=IncludeTrailingPathDelimiter(InstallerBatchDir);
   Processor.Process.Parameters.Clear;
@@ -236,12 +236,12 @@ begin
   Processor.Process.Parameters.Add('""'); //an empty parameter as IDE_WIDGETSET
   Processor.Process.Parameters.Add('""'); //an empty parameter as PATCHFILE
   Processor.Process.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
-  if FVerbose then WritelnLog(ClassName+': Running '+Processor.Process.Executable,true);
+  if FVerbose then WritelnLog(ClassName+': Running '+Processor.CmdLineExe,true);
   ProcessorResult:=Processor.ExecuteAndWait;
   if (ProcessorResult <> 0) then
   begin
     result := False;
-    WritelnLog(ClassName+': Failed to create installer; '+Processor.Process.Executable+' returned '+IntToStr(ProcessorResult)+LineEnding+
+    WritelnLog(ClassName+': Failed to create installer; '+Processor.CmdLineExe+' returned '+IntToStr(ProcessorResult)+LineEnding+
       'Installer log at '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log',true);
   end
   else

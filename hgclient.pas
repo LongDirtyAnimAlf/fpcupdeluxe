@@ -37,8 +37,7 @@ interface
 
 uses
   Classes, SysUtils,
-  processutils,
-  FileUtil {Requires LCL}, repoclient;
+  repoclient;
 
 const
   // Custom return codes
@@ -62,7 +61,6 @@ type
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
-    function Execute(Command: string): integer; override;
     function GetDiffAll: string; override;
     function FindRepoExecutable: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
@@ -70,16 +68,17 @@ type
     procedure Log(var Log: TStringList); override;
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
     procedure Revert; override;
-    constructor Create;
-    destructor Destroy; override;
   end;
 
 
 implementation
 
 uses
-  fpcuputil,
-  strutils;
+  FileUtil {Requires LCL},
+  StrUtils,
+  installerCore,
+  processutils,
+  fpcuputil;
 
 
 { ThgClient }
@@ -124,7 +123,7 @@ begin
   if FileExists(FRepoExecutable) then
   begin
     // Check for valid hg executable
-    if ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose) <> 0 then
+    if TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose) <> 0 then
     begin
       // File exists, but is not a valid hg client
       FRepoExecutable := '';
@@ -166,7 +165,7 @@ begin
     Command := ' '+GetProxyCommand+' clone -r tip ' + Repository + ' ' + LocalRepository
   else
     Command := ' '+GetProxyCommand+' clone -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
-  FReturnCode := ExecuteCommand(RepoExecutable + Command, Output, FVerbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommand(RepoExecutable + Command, Output, FVerbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   if (ReturnCode <> 0) then
@@ -174,7 +173,7 @@ begin
     while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode := ExecuteCommand(RepoExecutable + Command, Output, FVerbose); //attempt again
+      FReturnCode := TInstaller(FParent).ExecuteCommand(RepoExecutable + Command, Output, FVerbose); //attempt again
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -208,15 +207,9 @@ end;
 function THGClient.Commit(Message: string): boolean;
 begin
   inherited Commit(Message);
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+GetProxyCommand+' commit --message '+Message, LocalRepository, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+GetProxyCommand+' commit --message '+Message, LocalRepository, Verbose);
   //todo: do pushafter to push to remote repo?
   Result:=(FReturnCode=0);
-end;
-
-function THGClient.Execute(Command: string): integer;
-begin
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command+' '+GetProxyCommand+' ', LocalRepository, Verbose);
-  Result := FReturnCode;
 end;
 
 function THGClient.GetDiffAll: string;
@@ -225,21 +218,21 @@ begin
   FReturnCode := 0;
   if NOT ValidClient then exit;
   RepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff --git ', LocalRepository, Result, Verbose);
-  //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff ', LocalRepository, Result, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff --git ', LocalRepository, Result, Verbose);
+  //FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff ', LocalRepository, Result, Verbose);
 end;
 
 procedure THGClient.Log(var Log: TStringList);
 var
   s: string = '';
 begin
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' log ', LocalRepository, s, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' log ', LocalRepository, s, Verbose);
   Log.Text := s;
 end;
 
 procedure THGClient.Revert;
 begin
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' revert --all --no-backup ', LocalRepository, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' revert --all --no-backup ', LocalRepository, Verbose);
 end;
 
 procedure THGClient.Update;
@@ -255,7 +248,7 @@ begin
   else
     Command := ' '+GetProxyCommand+' pull --update -r ' + FDesiredRevision;
   //todo: check if this desired revision works
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+Command, FLocalRepository, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+Command, FLocalRepository, Verbose);
 end;
 
 procedure THGClient.ParseFileList(const CommandOutput: string;
@@ -304,7 +297,7 @@ var
   Output: string = '';
 begin
   //quiet: hide untracked files; only show modified/added/removed/deleted files, not clean files
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' status --modified --added --removed --deleted --quiet ',
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' status --modified --added --removed --deleted --quiet ',
     FLocalRepository, Output, Verbose);
   FileList.Clear;
   AllFiles := TStringList.Create;
@@ -324,14 +317,14 @@ var
 begin
   Result := false;
   //svn info=>hg summary;
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' summary ', FLocalRepository, Output, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' summary ', FLocalRepository, Output, Verbose);
   if Pos('branch:', Output) > 0 then
   begin
     // There is an hg repository here.
 
     // Now, repository URL might differ from the one we've set
     // Try to find out remote repo (could also have used hg paths, which gives default = https://bitbucket.org/reiniero/fpcup)
-    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' showconfig paths.default ', FLocalRepository, Output, Verbose);
+    FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' showconfig paths.default ', FLocalRepository, Output, Verbose);
     if FReturnCode = 0 then
     begin
       URL := IncludeTrailingSlash(trim(Output));
@@ -373,7 +366,7 @@ begin
   // Only update if we have invalid revision info, in order to minimize hg info calls
   if FLocalRevision = FRET_UNKNOWN_REVISION then
   begin
-    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' identify --id ', FLocalRepository, Output, Verbose);
+    FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' identify --id ', FLocalRepository, Output, Verbose);
     if FReturnCode = 0 then
     begin
       FLocalRevision := copy(trim(Output), 1, HashLength); //ignore any + - changed working copy - at the end of the revision
@@ -400,16 +393,6 @@ begin
   begin
     result:='';
   end;
-end;
-
-constructor THGClient.Create;
-begin
-  inherited Create;
-end;
-
-destructor THGClient.Destroy;
-begin
-  inherited Destroy;
 end;
 
 end.

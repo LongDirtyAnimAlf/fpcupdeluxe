@@ -35,8 +35,7 @@ interface
 
 uses
   Classes, SysUtils,
-  processutils,
-  FileUtil {Requires LCL}, repoclient;
+  repoclient;
 
 const
   // Custom return codes
@@ -63,7 +62,6 @@ type
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
-    function Execute(Command: string): integer; override;
     function GetDiffAll: string; override;
     procedure SwitchURL; override;
     procedure LocalModifications(var FileList: TStringList); override;
@@ -73,16 +71,16 @@ type
     procedure Revert; override;
     procedure Update; override;
     function GetSVNRevision: string;
-    constructor Create;
-    destructor Destroy; override;
   end;
-
 
 implementation
 
 uses
-  fpcuputil,
-  strutils;
+  FileUtil {Requires LCL},
+  StrUtils,
+  installerCore,
+  processutils,
+  fpcuputil;
 
 { TGitClient }
 function TGitClient.GetRepoExecutableName: string;
@@ -141,7 +139,7 @@ begin
   if FileExists(FRepoExecutable) then
   begin
     // Check for valid git executable:
-    if ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose) <> 0 then
+    if TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose) <> 0 then
     begin
       // File exists, but is not a valid git client
       FRepoExecutable := '';
@@ -190,14 +188,14 @@ begin
     {
     TargetFile := SysUtils.GetTempFileName;
     Command := ' archive --format zip --output ' + TargetFile + ' --prefix=/ --remote=' + Repository + ' master';
-    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, FVerbose);
-    FReturnCode := ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TargetFile,FVerbose);
+    FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, FVerbose);
+    FReturnCode := TInstaller(FParent).ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TargetFile,FVerbose);
     SysUtils.DeleteFile(TargetFile);
     }
     if DirectoryExists(IncludeTrailingPathDelimiter(LocalRepository)+'.git') then
     begin
-      ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' fetch --all',LocalRepository, FVerbose);
-      ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard origin/'+aBranch,LocalRepository, FVerbose);
+      TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' fetch --all',LocalRepository, FVerbose);
+      TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard origin/'+aBranch,LocalRepository, FVerbose);
     end
     else
     begin
@@ -219,7 +217,7 @@ begin
 
     Command := Command + ' ' +  Repository + ' ' + LocalRepository;
 
-    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose)
+    FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose)
   end else FReturnCode := 0;
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
@@ -227,11 +225,11 @@ begin
   if (FReturnCode <> 0) then
   begin
     // if we have a proxy, set it now !
-    if Length(GetProxyCommand)>0 then ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, FVerbose);
+    if Length(GetProxyCommand)>0 then TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, FVerbose);
     while (FReturnCode <> 0) and (RetryAttempt < ERRORMAXRETRIES) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose); //attempt again
+      FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose); //attempt again
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -269,19 +267,9 @@ begin
   if ExportOnly then exit;
   if NOT ValidClient then exit;
   inherited Commit(Message);
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message='+Message, LocalRepository, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message='+Message, LocalRepository, Verbose);
   //todo: do push to remote repo?
   Result:=(FReturnCode=0);
-end;
-
-function TGitClient.Execute(Command: string): integer;
-begin
-  Result:=-1;
-  FReturnCode := 0;
-  if NOT ValidClient then exit;
-  if ExportOnly then exit;
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command, LocalRepository, Verbose);
-  Result:= FReturnCode;
 end;
 
 function TGitClient.GetDiffAll: string;
@@ -293,8 +281,8 @@ begin
 
   RepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
 
-  //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --no-prefix -p ', LocalRepository, Result, Verbose);
+  //FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --no-prefix -p ', LocalRepository, Result, Verbose);
 end;
 
 procedure TGitClient.Log(var Log: TStringList);
@@ -305,7 +293,7 @@ begin
   Log.Text := s;
   if ExportOnly then exit;
   if NOT ValidClient then exit;
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ', LocalRepository, s, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ', LocalRepository, s, Verbose);
   Log.Text := s;
 end;
 
@@ -314,8 +302,8 @@ begin
   FReturnCode := 0;
   if ExportOnly then exit;
   if NOT ValidClient then exit;
-  //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --all --no-backup ', LocalRepository, Verbose);
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard ', LocalRepository, Verbose);
+  //FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --all --no-backup ', LocalRepository, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard ', LocalRepository, Verbose);
 end;
 
 procedure TGitClient.Update;
@@ -332,14 +320,14 @@ begin
   // Get updates (equivalent to git fetch and git merge)
   // --all: fetch all remotes
   Command := ' pull --all --recurse-submodules=yes';
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
 
   if FReturnCode = 0 then
   begin
     // Notice that the result of a merge will not be checked out in the submodule,
     //"git submodule update" has to be called afterwards to bring the work tree up to date with the merge result.
     Command := ' submodule update ';
-    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
+    FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
   end;
 
   if (FReturnCode = 0){ and (Length(FDesiredRevision)>0) and (uppercase(trim(FDesiredRevision)) <> 'HEAD')}
@@ -349,7 +337,7 @@ begin
     //git config --system http.sslCAPath /absolute/path/to/git/certificates
     // always reset hard towards desired revision
     Command := ' reset --hard ' + FDesiredRevision;
-    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
+    FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
   end;
 end;
 
@@ -407,18 +395,18 @@ begin
 
   // Actual clone/checkout
   Command := ' remote set-url origin ' +  Repository + ' ' + LocalRepository;
-  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose);
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   if (FReturnCode <> 0) then
   begin
     // if we have a proxy, set it now !
-    if Length(GetProxyCommand)>0 then ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, FVerbose);
+    if Length(GetProxyCommand)>0 then TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, FVerbose);
     while (FReturnCode <> 0) and (RetryAttempt < ERRORMAXRETRIES) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose); //attempt again
+      FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose); //attempt again
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -438,7 +426,7 @@ begin
   FileList.Clear;
   // --porcelain indicate stable output;
   // -z would indicate machine-parsable output but uses ascii 0 to terminate strings, which doesn't match ParseFileList;
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --porcelain --untracked-files=no ',
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --porcelain --untracked-files=no ',
     FLocalRepository, Output, Verbose);
   AllFiles := TStringList.Create;
   try
@@ -464,14 +452,14 @@ begin
   // This will output nothing to stdout and
   // fatal: Not a git repository (or any of the parent directories): .git
   // to std err
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --porcelain ', FLocalRepository, Output, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --porcelain ', FLocalRepository, Output, Verbose);
   if FReturnCode = 0 then
   begin
     // There is a git repository here.
 
     // Now, repository URL might differ from the one we've set
     // Try to find out remote repo
-    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' config remote.origin.url ', FLocalRepository, Output, Verbose);
+    FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' config remote.origin.url ', FLocalRepository, Output, Verbose);
     if FReturnCode = 0 then
     begin
       URL := IncludeTrailingSlash(trim(Output));
@@ -546,7 +534,7 @@ begin
     //todo: find out: without max-count, I can get multiple entries. No idea what these mean!??
     // alternative command: rev-parse --verify "HEAD^0" but that doesn't look as low-level ;)
     try
-      FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' rev-list --max-count=1 HEAD ', FLocalRepository, Output, Verbose);
+      FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' rev-list --max-count=1 HEAD ', FLocalRepository, Output, Verbose);
       if FReturnCode = 0
         then FLocalRevision := trim(Output)
         else FLocalRevision := FRET_UNKNOWN_REVISION; //for compatibility with the svnclient code
@@ -567,7 +555,7 @@ begin
   if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(FLocalRepository) then exit;
-  i:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' log -n 1 --grep=^git-svn-id:',FLocalRepository, Output, FVerbose);
+  i:=TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' log -n 1 --grep=^git-svn-id:',FLocalRepository, Output, FVerbose);
   if (i=0) then
   begin
     OutputSL:=TStringList.Create;
@@ -596,16 +584,6 @@ begin
       OutputSL.Free;
     end;
   end;
-end;
-
-constructor TGitClient.Create;
-begin
-  inherited Create;
-end;
-
-destructor TGitClient.Destroy;
-begin
-  inherited Destroy;
 end;
 
 end.

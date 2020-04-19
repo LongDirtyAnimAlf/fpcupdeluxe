@@ -372,7 +372,7 @@ function LibWhich(aLibrary: string): boolean;
 function Which(const Executable: string): string;
 function IsExecutable(Executable: string):boolean;
 function ForceDirectoriesSafe(Const Dir: RawByteString): Boolean;
-function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
+function CheckExecutable(Executable:string;Parameters:array of string;ExpectOutput: string): boolean;
 function GetJava: string;
 function GetJavac: string;
 function CheckJava: boolean;
@@ -434,13 +434,13 @@ uses
   {$IFDEF ENABLEWGET}
   // for wget downloader
   ,process
+  ,processutils
   // for libc downloader
   {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}
   ,fpcuplibcurl
   {$ENDIF}
   {$ENDIF ENABLEWGET}
   ,NumCPULib  in './numcpulib/NumCPULib.pas'
-  ,processutils
   ;
 
 const
@@ -1009,7 +1009,7 @@ var
   OperationSucceeded: boolean;
   ResultCode: boolean;
   XdgDesktopContent: TStringList;
-  XdgDesktopFile: string;
+  Output,XdgDesktopFile: string;
   aDirectory:string;
 begin
   // Fail by default:
@@ -1040,7 +1040,7 @@ begin
     try
       XdgDesktopContent.SaveToFile(XdgDesktopFile);
       FpChmod(XdgDesktopFile, &711); //rwx--x--x
-      OperationSucceeded:=(ExecuteCommand('xdg-desktop-icon install ' + XdgDesktopFile,false)=0);
+      OperationSucceeded:=RunCommand('xdg-desktop-icon' ,['install',XdgDesktopFile],Output);
     except
       OperationSucceeded:=false;
     end;
@@ -1140,7 +1140,7 @@ begin
   try
     Output:='';
     // -iW does not work on older compilers : use -iV
-    if (ExecuteCommand(CompilerPath+ ' -iV', Output, false)=0) then
+    if RunCommand(CompilerPath,['-iV'], Output,[poUsePipes, poStderrToOutPut],swoHide) then
     //-iVSPTPSOTO
     begin
       Output:=TrimRight(Output);
@@ -1162,7 +1162,7 @@ begin
   if ((CompilerPath='') OR (NOT FileExists(CompilerPath))) then exit;
   try
     Output:='';
-    if (ExecuteCommand(CompilerPath+ ' -iW', Output, false)=0) then
+    if RunCommand(CompilerPath,['-iW'], Output,[poUsePipes, poStderrToOutPut],swoHide) then
     begin
       Output:=TrimRight(Output);
       if Length(Output)>0 then
@@ -1897,14 +1897,14 @@ begin
   if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
-  //result:=(ExecuteCommand('powershell -command "[Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; (new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
-  //result:=(ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+  //result:=(ExecuteCommandCompat('powershell -command "[Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; (new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+  //result:=(ExecuteCommandCompat('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
 
   if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
     P:=FPCUPUSERAGENT
   else
     P:=NORMALUSERAGENT;
-  result:=(ExecuteCommand('powershell -command "$cli = New-Object System.Net.WebClient;$cli.Headers[''User-Agent''] = '''+P+''';$cli.DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+  result:=RunCommand('powershell -command "$cli = New-Object System.Net.WebClient;$cli.Headers[''User-Agent''] = '''+P+''';$cli.DownloadFile('''+URL+''','''+TargetFile+''')"', Output);
 
   if result then
   begin
@@ -1924,9 +1924,9 @@ begin
   if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
-  //result:=(ExecuteCommand('bitsadmin.exe /SetMinRetryDelay "JobName" 1', Output, False)=0);
-  //result:=(ExecuteCommand('bitsadmin.exe /SetNoProgressTimeout "JobName" 1', Output, False)=0);
-  result:=(ExecuteCommand('bitsadmin.exe /transfer "JobName" '+URL+' '+TargetFile, Output, False)=0);
+  //result:=(ExecuteCommandCompat('bitsadmin.exe /SetMinRetryDelay "JobName" 1', Output, False)=0);
+  //result:=(ExecuteCommandCompat('bitsadmin.exe /SetNoProgressTimeout "JobName" 1', Output, False)=0);
+  result:=RunCommand('bitsadmin.exe /transfer "JobName" '+URL+' '+TargetFile, Output);
   if result then
   begin
     result:=FileExists(TargetFile);
@@ -2550,9 +2550,7 @@ begin
 
   try
     Output:='';
-    ReturnCode:=ExecuteCommand('gcc -print-prog-name=cc1', Output, false);
-
-    if (ReturnCode=0) then
+    if RunCommand('gcc',['-print-prog-name=cc1'], Output,[poUsePipes, poStderrToOutPut],swoHide) then
     begin
       s1:=Trim(Output);
       if FileExists(s1) then
@@ -2569,8 +2567,7 @@ begin
     if (NOT FoundLinkFile) then
     begin
       Output:='';
-      ReturnCode:=ExecuteCommand('gcc -print-search-dirs', Output, false);
-      if (ReturnCode=0) then
+      if RunCommand('gcc',['-print-search-dirs'], Output,[poUsePipes, poStderrToOutPut],swoHide) then
       begin
         Output:=TrimRight(Output);
         if Length(Output)>0 then
@@ -2626,11 +2623,8 @@ begin
 
     if (NOT FoundLinkFile) then
     begin
-
       Output:='';
-      ReturnCode:=ExecuteCommand('gcc -v', Output, false);
-
-      if (ReturnCode=0) then
+      if RunCommand('gcc',['-v'], Output,[poUsePipes, poStderrToOutPut],swoHide) then
       begin
 
         s1:='COLLECT_LTO_WRAPPER=';
@@ -2789,13 +2783,13 @@ var
 begin
   result:=false;
   Output:='';
-  ExecuteCommand('getconf GNU_LIBC_VERSION', Output, False);
+  RunCommand('getconf',['GNU_LIBC_VERSION'], Output,[poUsePipes, poStderrToOutPut],swoHide);
   begin
     //exit;
     if AnsiContainsText(Output,'glibc') then exit;
   end;
   Output:='';
-  ExecuteCommand('ldd --version', Output, False);
+  RunCommand('ldd',['--version'], Output,[poUsePipes, poStderrToOutPut],swoHide);
   begin
     if AnsiContainsText(Output,'musl') then result:=true;
   end;
@@ -2843,8 +2837,8 @@ begin
   Output:='';
   s:='';
   j:=0;
-  //if ExecuteCommand('xcodebuild -version -sdk '+aSDK, Output, False) <> 0 then
-  ExecuteCommand('xcodebuild -version -sdk '+aSDK, Output, False);
+  //if ExecuteCommandCompat('xcodebuild -version -sdk '+aSDK, Output, False) <> 0 then
+  ExecuteCommandCompat('xcodebuild -version -sdk '+aSDK, Output, False);
   begin
     i:=Pos(SearchTarget,Output);
     if i>0 then
@@ -2861,7 +2855,7 @@ begin
       //xcodebuild not working ... try something completely different ...
       if aSDK='macosx' then
       begin
-        ExecuteCommand('sw_vers -productVersion', Output, False);
+        ExecuteCommandCompat('sw_vers -productVersion', Output, False);
         if (Length(Output)>0) then
         begin
           i:=1;
@@ -2974,7 +2968,7 @@ function LibWhich(aLibrary: string): boolean;
 var
   Output: string;
 begin
-  ExecuteCommand('sh -c "ldconfig -p | grep '+aLibrary+'"', Output, false);
+  RunCommand('sh -c "ldconfig -p | grep '+aLibrary+'"', Output);
   result:=(Pos(aLibrary,Output)>0);
 end;
 
@@ -3000,7 +2994,7 @@ begin
   {$IFDEF UNIX}
   if (NOT FileExists(result)) then
   begin
-    ExecuteCommand('which '+Executable,Output,false);
+    RunCommand('which',[Executable],Output,[poUsePipes, poStderrToOutPut],swoHide);
     Output:=Trim(Output);
     if ((Output<>'') and FileExists(Output)) then result:=Output;
   end;
@@ -3017,7 +3011,7 @@ begin
   // on the found file.
   // however
   // ExeSearch(Executable) ... if fpAccess (Executable,X_OK)=0 then ..... see http://www.freepascal.org/docs-html/rtl/baseunix/fpaccess.html
-  ExecuteCommand('which '+Executable,Output,false);
+  ExecuteCommandCompat('which '+Executable,Output,false);
   // Remove trailing LF(s) and other control codes:
   while (length(output)>0) and (ord(output[length(output)])<$20) do
     delete(output,length(output),1);
@@ -3088,9 +3082,10 @@ begin
   {$ENDIF}
 end;
 
-function CheckExecutable(Executable, Parameters, ExpectOutput: string; Level: TEventType): boolean;
+function CheckExecutable(const Executable:string; const Parameters:array of String; ExpectOutput: string; Level: TEventType): boolean;
 var
-  ResultCode: longint;
+  //ResultCode: longint;
+  aResult: boolean;
   OperationSucceeded: boolean;
   ExeName: string;
   Output: string;
@@ -3098,12 +3093,8 @@ begin
   try
     Output:='';
     ExeName := ExtractFileName(Executable);
-    {$IFDEF DEBUG}
-    ResultCode := ExecuteCommand(Executable + ' ' + Parameters, Output, True);
-    {$ELSE}
-    ResultCode := ExecuteCommand(Executable + ' ' + Parameters, Output, False);
-    {$ENDIF}
-    if ResultCode >= 0 then //Not all non-0 result codes are errors. There's no way to tell, really
+    aResult := RunCommand(Executable,Parameters, Output,[poUsePipes, poStderrToOutPut],swoHide);
+    if aResult then //Not all non-0 result codes are errors. There's no way to tell, really
     begin
       if (ExpectOutput <> '') and (AnsiPos(ExpectOutput, Output) = 0) then
       begin
@@ -3120,7 +3111,7 @@ begin
     end
     else
     begin
-      if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',Level);
+      if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application.',Level);
       OperationSucceeded := false;
     end;
   except
@@ -3136,7 +3127,7 @@ begin
   Result := OperationSucceeded;
 end;
 
-function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
+function CheckExecutable(Executable:string;Parameters:array of string;ExpectOutput: string): boolean;
 begin
   //result:=IsExecutable(Executable);
   //if result then
@@ -3269,9 +3260,9 @@ end;
 function CheckJava: boolean;
 begin
   {$ifdef Windows}
-  result:=CheckExecutable(GetJava, '-version', '');
+  result:=CheckExecutable(GetJava, ['-version'], '');
   {$else}
-  result:=CheckExecutable('java', '-version', '', etInfo);
+  result:=CheckExecutable('java', ['-version'], '', etInfo);
   {$endif}
 end;
 
@@ -3354,7 +3345,7 @@ begin
   {$ifdef Unix}
     {$ifndef Darwin}
       s:='';
-      if (ExecuteCommand('cat /etc/os-release',s,false)=0) then
+      if RunCommand('cat',['/etc/os-release'],s,[poUsePipes, poStderrToOutPut],swoHide) then
       begin
         if Pos('No such file or directory',s)=0 then
         begin
@@ -3375,7 +3366,7 @@ begin
       if (NOT success) then
       begin
         s:='';
-        if (ExecuteCommand('cat /etc/system-release',s,false)=0) then
+        if RunCommand('cat',['/etc/system-release'],s,[poUsePipes, poStderrToOutPut],swoHide) then
         begin
           if Pos('No such file or directory',s)=0 then
           begin
@@ -3397,7 +3388,7 @@ begin
       if (NOT success) then
       begin
         s:='';
-        if (ExecuteCommand('hostnamectl',s,false)=0) then
+        if RunCommand('hostnamectl',[],s,[poUsePipes, poStderrToOutPut],swoHide) then
         begin
           AllOutput:=TStringList.Create;
           try
@@ -3427,23 +3418,23 @@ begin
       {$ifdef BSD}
       if (t='unknown') then
       begin
-        if (ExecuteCommand('uname -r',s,false)=0)
+        if RunCommand('uname',['-r'],s,[poUsePipes, poStderrToOutPut],swoHide)
            then t := GetTargetOS+' '+lowercase(Trim(s));
       end;
       {$endif}
 
       if (t='unknown') then t := GetTargetOS;
 
-      if (NOT success) then if (ExecuteCommand('uname -r',s,false)=0)
+      if (NOT success) then if RunCommand('uname',['-r'],s,[poUsePipes, poStderrToOutPut],swoHide)
          then t := t+' '+lowercase(Trim(s));
 
     {$else Darwin}
-      if (ExecuteCommand('sw_vers -productName', s, false)=0) then
+      if (ExecuteCommandCompat('sw_vers -productName', s, false)=0) then
       begin
         if Length(s)>0 then t:=Trim(s);
       end;
       if Length(s)=0 then t:=GetTargetOS;
-      if (ExecuteCommand('sw_vers -productVersion', s, false)=0) then
+      if (ExecuteCommandCompat('sw_vers -productVersion', s, false)=0) then
       begin
         if Length(s)>0 then
         begin
@@ -4586,20 +4577,20 @@ begin
     WGETBinary:='wget';
   end;
 
-  FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
+  FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', etCustom);
 
   {$ifdef MSWINDOWS}
   {$ifdef CPU64}
   if (NOT FWGETOk) then
   begin
     WGETBinary:='wget64.exe';
-    FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
+    FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', etCustom);
   end;
   {$endif}
   if (NOT FWGETOk) then
   begin
     WGETBinary:='wget.exe';
-    FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
+    FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', etCustom);
   end;
   {$endif MSWINDOWS}
 
@@ -4814,7 +4805,7 @@ begin
   begin
     aURL:=URL;
     if aURL[Length(aURL)]<>'/' then aURL:=aURL+'/';
-    result:=(ExecuteCommand(WGETBinary+' -q --no-remove-listing --tries='+InttoStr(MaxRetries)+' --spider '+aURL,false)=0);
+    result:=RunCommand(WGETBinary,['-q','--no-remove-listing','--tries='+InttoStr(MaxRetries),'--spider',aURL],s,[poUsePipes, poStderrToOutPut],swoHide);
     if result then
     begin
       {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}  // this is very bad coding ... ;-)
@@ -4975,7 +4966,8 @@ begin
   end;
 
   Output:='';
-  result:=(ExecuteCommand(WGETBinary+' --no-check-certificate --user-agent="'+FUserAgent+'" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
+  result:=RunCommand(WGETBinary,['--no-check-certificate','--user-agent="'+FUserAgent+'"','--tries='+InttoStr(MaxRetries),'--spider',URL],Output,[poUsePipes, poStderrToOutPut],swoHide);
+
   if result then
   begin
     result:=(Pos('Remote file exists',Output)>0);

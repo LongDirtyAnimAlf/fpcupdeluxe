@@ -235,6 +235,7 @@ uses
   installerUniversal,
   m_crossinstaller, // for checking of availability of fpc[laz]up[deluxe] cross-compilers
   fpcuputil,
+  process,
   processutils;
 
 //{$I message.inc}
@@ -2422,7 +2423,7 @@ begin
       {$ifdef Linux}
       if (FPCupManager.CrossOS_Target=TOS.darwin) then
       begin
-        success:=CheckExecutable('clang', '-v', '');
+        success:=CheckExecutable('clang', ['-v'], '');
         if (NOT success) then
         begin
           s:=
@@ -3113,7 +3114,7 @@ begin
                   begin
                     {$ifdef MSWINDOWS}
                     if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
-                    success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',verbose)=0);
+                    success:={%H-}RunCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',s);
                     if (NOT success) then
                     {$endif}
                     begin
@@ -3122,11 +3123,11 @@ begin
                       {$else}
                       UnZipper := 'unrar';
                       {$endif}
-                      success:=CheckExecutable(UnZipper, '-v', '');
+                      success:=CheckExecutable(UnZipper, ['-v'], '');
                       if success then
                       begin
                         if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
-                        success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',verbose)=0);
+                        success:={%H-}RunCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',s);
                       end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
                     end;
                   end;
@@ -3263,7 +3264,7 @@ begin
                   begin
                     {$ifdef MSWINDOWS}
                     if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
-                    success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',verbose)=0);
+                    success:={%H-}RunCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',s);
                     if (NOT success) then
                     {$endif}
                     begin
@@ -3272,11 +3273,11 @@ begin
                       {$else}
                       UnZipper := 'unrar';
                       {$endif}
-                      success:=CheckExecutable(UnZipper, '-v', '');
+                      success:=CheckExecutable(UnZipper, ['-v'], '');
                       if success then
                       begin
                         if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
-                        success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',verbose)=0);
+                        success:={%H-}RunCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',s);
                       end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
                     end;
                   end;

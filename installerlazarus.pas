@@ -327,7 +327,7 @@ begin
       // - doesn't need existing lazbuild (+nogui LCL)
 
       LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt;
-      if CheckExecutable(LazBuildApp, '--help', LAZBUILDNAME) = false then
+      if CheckExecutable(LazBuildApp, ['--help'], LAZBUILDNAME) = false then
       begin
         writelnlog(etWarning, infotext+'Lazbuild could not be found ... using make to cross-build '+ModuleName, true);
         LazBuildApp := '';
@@ -340,7 +340,7 @@ begin
       if Length(LazBuildApp)=0 then
       begin
         // Use make for cross compiling
-        Processor.Process.Executable := Make;
+        Processor.CmdLineExe := Make;
         Processor.Process.Parameters.Clear;
         {$IFDEF MSWINDOWS}
         if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
@@ -408,7 +408,7 @@ begin
       else
       begin
         // Use lazbuild for cross compiling
-        Processor.Process.Executable := LazBuildApp;
+        Processor.CmdLineExe := LazBuildApp;
         Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
         Processor.Process.Parameters.Clear;
         {$IFDEF DEBUG}
@@ -446,12 +446,12 @@ begin
       end;
 
       if FCrossLCL_Platform = '' then
-        infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + ' using ' + ExtractFileName(Processor.Process.Executable), etInfo)
+        infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + ' using ' + ExtractFileName(Processor.CmdLineExe), etInfo)
       else
-        infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + '/' + FCrossLCL_Platform + ' using ' + ExtractFileName(Processor.Process.Executable), etInfo);
+        infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + '/' + FCrossLCL_Platform + ' using ' + ExtractFileName(Processor.CmdLineExe), etInfo);
 
       try
-        writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+        writelnlog(infotext+'Execute: '+Processor.CmdLineExe+'. Params: '+Processor.Process.Parameters.CommaText, true);
         ProcessorResult:=Processor.ExecuteAndWait;
         Result := (ProcessorResult = 0);
         if (not Result) then
@@ -615,7 +615,7 @@ begin
     // Make all (should include lcl & ide), lazbuild, lcl etc
     // distclean was already run; otherwise specify make clean all
     FErrorLog.Clear;
-    Processor.Process.Executable := Make;
+    Processor.CmdLineExe := Make;
     Processor.Process.Parameters.Clear;
     {$IFDEF MSWINDOWS}
     if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
@@ -805,19 +805,19 @@ begin
     end;
 
     try
-      WritelnLog(infotext+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+      WritelnLog(infotext+Processor.CmdLineExe+'. Params: '+Processor.Process.Parameters.CommaText, true);
       ProcessorResult:=Processor.ExecuteAndWait;
       ExitCode := ProcessorResult;
       if ExitCode <> 0 then
       begin
-        WritelnLog(etError, infotext+ExtractFileName(Processor.Process.Executable)+' returned exit status #'+IntToStr(ExitCode), true);
+        WritelnLog(etError, infotext+ExtractFileName(Processor.CmdLineExe)+' returned exit status #'+IntToStr(ExitCode), true);
         OperationSucceeded := false;
         Result := false;
       end;
     except
       on E: Exception do
       begin
-        WritelnLog(etError, infotext+ExtractFileName(Processor.Process.Executable)+' exception.'+LineEnding+'Exception details: '+E.Message, true);
+        WritelnLog(etError, infotext+ExtractFileName(Processor.CmdLineExe)+' exception.'+LineEnding+'Exception details: '+E.Message, true);
         OperationSucceeded := false;
         Result := false;
       end;
@@ -826,7 +826,7 @@ begin
     //Special check for lazbuild as that is known to go wrong
     if (OperationSucceeded) and (ModuleName=_LAZBUILD) then
     begin
-      if CheckExecutable(IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt, '--help', LAZBUILDNAME) = false then
+      if CheckExecutable(IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt, ['--help'], LAZBUILDNAME) = false then
       begin
         WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
         Result := false;
@@ -842,7 +842,7 @@ begin
     // Check for valid lazbuild.
     // Note: we don't check if we have a valid primary config path, but that will come out
     // in the next steps.
-    if CheckExecutable(LazBuildApp, '--help', LAZBUILDNAME) = false then
+    if CheckExecutable(LazBuildApp, ['--help'], LAZBUILDNAME) = false then
     begin
       WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
       Result := false;
@@ -851,7 +851,7 @@ begin
     else
     begin
       // First build IDE using lazbuild... then...
-      Processor.Process.Executable := LazBuildApp;
+      Processor.CmdLineExe := LazBuildApp;
       FErrorLog.Clear;
       Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Process.Parameters.Clear;
@@ -900,13 +900,13 @@ begin
       begin
         infoln(infotext+'Running lazbuild to get IDE with user-specified packages', etInfo);
         try
-          WritelnLog(infotext+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+          WritelnLog(infotext+Processor.CmdLineExe+'. Params: '+Processor.Process.Parameters.CommaText, true);
           ProcessorResult:=Processor.ExecuteAndWait;
           //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
           Processor.Environment.SetVar('FPCDIR',FPCDirStore);
           if ProcessorResult <> 0 then
           begin
-            WritelnLog(etError, infotext+ExtractFileName(Processor.Process.Executable)+' returned error code ' + IntToStr(ProcessorResult) + LineEnding +
+            WritelnLog(etError, infotext+ExtractFileName(Processor.CmdLineExe)+' returned error code ' + IntToStr(ProcessorResult) + LineEnding +
               'Details: ' + FErrorLog.Text, true);
             OperationSucceeded := false;
           end;
@@ -914,7 +914,7 @@ begin
           on E: Exception do
           begin
             OperationSucceeded := false;
-            WritelnLog(etError, infotext+'Exception running '+ExtractFileName(Processor.Process.Executable)+' to get IDE with user-specified packages!' + LineEnding +
+            WritelnLog(etError, infotext+'Exception running '+ExtractFileName(Processor.CmdLineExe)+' to get IDE with user-specified packages!' + LineEnding +
               'Details: ' + E.Message, true);
           end;
         end;
@@ -930,7 +930,7 @@ begin
         end
         else
         begin
-          Processor.Process.Executable := LazBuildApp;
+          Processor.CmdLineExe := LazBuildApp;
           FErrorLog.Clear;
           Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
           Processor.Process.Parameters.Clear;
@@ -958,7 +958,7 @@ begin
 
           infoln(infotext+'Compiling startlazarus to make sure it is present:', etInfo);
           try
-            writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+            writelnlog(infotext+'Execute: '+Processor.CmdLineExe+'. Params: '+Processor.Process.Parameters.CommaText, true);
             ProcessorResult:=Processor.ExecuteAndWait;
             //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
             Processor.Environment.SetVar('FPCDIR',FPCDirStore);
@@ -1319,7 +1319,7 @@ begin
   aFileName:=IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt;
   if FileExists(aFileName) then
   begin
-    Processor.Process.Executable := aFileName;
+    Processor.CmdLineExe := aFileName;
     Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
     Processor.Process.Parameters.Clear;
     Processor.Process.Parameters.Add('--version');
@@ -1576,7 +1576,7 @@ begin
       if length(DebuggerPath)>0 then
       begin
         // we have a gdb ... check version
-        Processor.Process.Executable := DebuggerPath;
+        Processor.CmdLineExe := DebuggerPath;
         Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
 
         Processor.Process.Parameters.Clear;
@@ -1781,7 +1781,7 @@ begin
   {$endif MSWINDOWS}
 
   // Make distclean; we don't care about failure (e.g. directory might be empty etc)
-  Processor.Process.Executable := Make;
+  Processor.CmdLineExe := Make;
   Processor.Process.Parameters.Clear;
   {$IFDEF MSWINDOWS}
   if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
@@ -1890,10 +1890,10 @@ begin
     infoln(infotext+'Running "make '+CleanCommand+'" twice inside '+CleanDirectory,etInfo);
 
   try
-    writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+    writelnlog(infotext+'Execute: '+Processor.CmdLineExe+'. Params: '+Processor.Process.Parameters.CommaText, true);
     ProcessorResult:=Processor.ExecuteAndWait;
     sleep(100); //now do it again:
-    writelnlog(infotext+'Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+    writelnlog(infotext+'Execute: '+Processor.CmdLineExe+'. Params: '+Processor.Process.Parameters.CommaText, true);
     ProcessorResult:=Processor.ExecuteAndWait;
     Result := true;
   except

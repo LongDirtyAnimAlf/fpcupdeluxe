@@ -638,13 +638,13 @@ begin
       if OperationSucceeded then
       begin
         // Only recompile build_lcl_docs.exe if needed
-        if CheckExecutable(BuildLCLDocsExe, '--help', 'build_lcl_docs')=false then
+        if CheckExecutable(BuildLCLDocsExe, ['--help'], 'build_lcl_docs')=false then
         begin
           // Check for valid lazbuild.
           // Note: we don't check if we have a valid primary config path, but that will come out
           // in the next steps.
           LazbuildApp:=IncludeTrailingPathDelimiter(FInstallDirectory)+LAZBUILDNAME+GetExeExt;
-          if CheckExecutable(LazbuildApp, '--help',LAZBUILDNAME)=false then
+          if CheckExecutable(LazbuildApp, ['--help'],LAZBUILDNAME)=false then
           begin
             writelnlog(ModuleName+': No valid lazbuild executable found. Aborting.', true);
             OperationSucceeded:=false;
@@ -654,15 +654,15 @@ begin
           begin
             // We have a working lazbuild; let's hope it works with primary config path as well
             // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
-            Processor.Process.Executable := LazbuildApp;
+            Processor.CmdLineExe := LazbuildApp;
             Processor.Process.Parameters.Clear;
             Processor.Process.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
             Processor.Process.Parameters.Add(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
             infoln(ModuleName+': compiling build_lcl_docs help compiler:',etInfo);
             writelnlog('Building help compiler (also time consuming generation of documents) !!!!!!', true);
-            writelnlog('Execute: '+Processor.Process.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
+            writelnlog('Execute: '+Processor.CmdLineExe+'. Params: '+Processor.Process.Parameters.CommaText, true);
             ProcessorResult:=Processor.ExecuteAndWait;
-            writelnlog('Execute: '+Processor.Process.Executable+' exit code: '+InttoStr(ProcessorResult), true);
+            writelnlog('Execute: '+Processor.CmdLineExe+' exit code: '+InttoStr(ProcessorResult), true);
             if ProcessorResult <> 0 then
             begin
               writelnlog(etError,ModuleName+': error compiling build_lcl_docs docs builder.', true);
@@ -677,21 +677,21 @@ begin
         'bin'+DirectorySeparator+
         GetFPCTarget(true)+DirectorySeparator+
         'fpdoc'+GetExeExt;
-      if (CheckExecutable(FPDocExe, '--help', 'FPDoc')=false) then
+      if (CheckExecutable(FPDocExe, ['--help'], 'FPDoc')=false) then
       begin
       FPDocExe:=FFPCSourceDirectory+
         'utils'+DirectorySeparator+
         'fpdoc'+DirectorySeparator+
         'fpdoc'+GetExeExt;
       end;
-      if (CheckExecutable(FPDocExe, '--help', 'FPDoc')=false) then
+      if (CheckExecutable(FPDocExe, ['--help'], 'FPDoc')=false) then
       begin
         // Try again, in bin directory; newer FPC releases may have migrated to this
         FPDocExes:=FindAllFiles(FFPCBinDirectory+'bin'+DirectorySeparator,
           'fpdoc'+GetExeExt,true);
         try
           if FPDocExes.Count>0 then FPDocExe:=FPDocExes[0]; //take only the first
-          if (CheckExecutable(FPDocExe, '--help', 'FPDoc')=false) then
+          if (CheckExecutable(FPDocExe, ['--help'], 'FPDoc')=false) then
           begin
             writelnlog(etError,ModuleName+': no valid fpdoc executable found ('+FPDocExe+'). Please recompile fpc.', true);
             OperationSucceeded := False;
@@ -708,7 +708,7 @@ begin
       if OperationSucceeded then
       begin
         // Compile Lazarus LCL CHM help
-        Processor.Process.Executable := BuildLCLDocsExe;
+        Processor.CmdLineExe := BuildLCLDocsExe;
         // Make sure directory switched to that of the FPC docs,
         // otherwise paths to source files will not work.
         Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FTargetDirectory);

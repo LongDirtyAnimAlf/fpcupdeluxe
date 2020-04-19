@@ -34,7 +34,7 @@ unit repoclient;
 interface
 
 uses
-  Classes, SysUtils, processutils;
+  Classes, SysUtils;
 
 const
   // Custom return codes; note: keep separate from ProcessEx return codes (processutils.PROC_INTERNALERROR=-1)
@@ -52,6 +52,7 @@ type
 
   TRepoClient = class(TObject)
   protected
+    FParent:TObject;
     FDesiredRevision: string;
     FDesiredBranch: string;
     FHTTPProxyHost: string;
@@ -100,9 +101,6 @@ type
     procedure ExportRepo; virtual;
     // Commits local changes to local and remote repository
     function Commit(Message: string): boolean; virtual;
-    // Executes command and returns result code
-    // Note: caller is responsible for quoting: to do: find out again in processutils what rules apply?!?
-    function Execute(Command: string): integer; virtual;
     // Creates diff of all changes in the local directory versus the remote version
     function GetDiffAll: string; virtual;
     // Shows commit log for local directory
@@ -150,7 +148,7 @@ type
     property ValidClient: boolean read GetValidClient;
     property RepoExecutableName: string read GetRepoExecutableName;
     property RepoInfo:string read GetRepoInfo write SetRepoInfo;
-    constructor Create;
+    constructor Create(aParent:TObject);
     destructor Destroy; override;
   end;
 
@@ -281,11 +279,6 @@ begin
   raise Exception.Create('TRepoClient descendants must implement GetRepoExecutableName by themselves.');
 end;
 
-function TRepoClient.Execute(Command: string): integer;
-begin
-  result:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command, LocalRepository, Verbose);
-end;
-
 function TRepoClient.GetDiffAll: string;
 begin
   raise Exception.Create('TRepoClient descendants must implement GetDiffAll by themselves.');
@@ -346,9 +339,10 @@ begin
     FRepoInfo:=aValue;
 end;
 
-constructor TRepoClient.Create;
+constructor TRepoClient.Create(aParent:TObject);
 begin
   inherited Create;
+  FParent:=aParent;
   FLocalRepository := '';
   FRepositoryURL := '';
   FDesiredRevision := '';

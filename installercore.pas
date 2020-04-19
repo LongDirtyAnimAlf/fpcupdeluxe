@@ -518,6 +518,11 @@ type
     // Uninstall module
     function UnInstallModule(ModuleName: string): boolean; virtual;
     procedure infoln(Message: string; const Level: TEventType=etInfo);
+    function ExecuteCommand(Commandline: string; Verbosity:boolean): integer; overload;
+    function ExecuteCommand(Commandline: string; out Output:string; Verbosity:boolean): integer; overload;
+    function ExecuteCommandInDir(Commandline, Directory: string; Verbosity:boolean): integer; overload;
+    function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; Verbosity:boolean): integer; overload;
+    function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; PrependPath: string; Verbosity:boolean): integer; overload;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -1114,7 +1119,7 @@ begin
       if RepoExecutable <> EmptyStr then
       begin
         // check exe, but do not fail: GIT is not 100% essential !
-        CheckExecutable(RepoExecutable, '--version', '');
+        CheckExecutable(RepoExecutable, ['--version'], '');
       end;
       // do not fail: GIT is not 100% essential !
       OperationSucceeded:=True;
@@ -1176,7 +1181,7 @@ begin
       if RepoExecutable <> EmptyStr then
       begin
         // check exe, but do not fail: HG is not 100% essential !
-        CheckExecutable(RepoExecutable, '--version', '');
+        CheckExecutable(RepoExecutable, ['--version'], '');
       end;
       // do not fail: HG is not 100% essential !
       OperationSucceeded:=True;
@@ -1257,7 +1262,7 @@ begin
         { Used to use bunzip2 --version, but on e.g. Fedora Core
         that returns an error message e.g. can't read from cp
         }
-        OperationSucceeded := CheckExecutable(FBunzip2, '--help', '');
+        OperationSucceeded := CheckExecutable(FBunzip2, ['--help'], '');
         if (NOT OperationSucceeded) then infoln(localinfotext+FBunzip2+' not found.',etDebug);
       end;
     end;
@@ -1267,7 +1272,7 @@ begin
       // Check for valid tar executable, if it is needed
       if FTar <> EmptyStr then
       begin
-        OperationSucceeded := CheckExecutable(FTar, '--version', '');
+        OperationSucceeded := CheckExecutable(FTar, ['--version'], '');
         if (NOT OperationSucceeded) then infoln(localinfotext+FTar+' not found.',etDebug);
       end;
     end;
@@ -1275,7 +1280,7 @@ begin
     {$IFNDEF MSWINDOWS}
     if OperationSucceeded then
     begin
-      OperationSucceeded := CheckExecutable(Make, '-v', '');
+      OperationSucceeded := CheckExecutable(Make, ['-v'], '');
       if (NOT OperationSucceeded) then infoln(localinfotext+Make+' not found.',etError);
     end;
     {$ENDIF}
@@ -3647,6 +3652,87 @@ begin
     end;
 end;
 
+
+function TInstaller.ExecuteCommand(Commandline: string; Verbosity: boolean): integer;
+var
+  s:string='';
+begin
+  Result:=ExecuteCommandInDir(Commandline,'',s,Verbosity);
+end;
+
+function TInstaller.ExecuteCommand(Commandline: string; out Output: string;
+  Verbosity: boolean): integer;
+begin
+  Result:=ExecuteCommandInDir(Commandline,'',Output,Verbosity);
+end;
+
+function TInstaller.ExecuteCommandInDir(Commandline, Directory: string; Verbosity: boolean
+  ): integer;
+var
+  s:string='';
+begin
+  Result:=ExecuteCommandInDir(Commandline,Directory,s,Verbosity);
+end;
+
+function TInstaller.ExecuteCommandInDir(Commandline, Directory: string;
+  out Output: string; Verbosity: boolean): integer;
+begin
+  Result:=ExecuteCommandInDir(CommandLine,Directory,Output,'',Verbosity);
+end;
+
+function TInstaller.ExecuteCommandInDir(Commandline, Directory: string;
+  out Output: string; PrependPath: string; Verbosity: boolean): integer;
+var
+  OldPath: string;
+  OldVerbosity:boolean;
+  i:integer;
+  aTool:TExternalTool;
+begin
+  if Assigned(Processor) then
+    aTool:=Processor
+  else
+    aTool:=TExternalTool.Create(nil);
+
+  OldVerbosity:=aTool.Verbose;
+
+  aTool.Verbose:=Verbosity;
+
+  try
+    //Reset
+    aTool.CmdLineExe:='';
+
+    aTool.Process.CommandLine:=Commandline;
+    repeat
+      i:=aTool.Process.Parameters.IndexOf('emptystring');
+      if (i<>-1) then aTool.Process.Parameters.Strings[i]:='""';
+    until (i=-1);
+
+    if Directory<>'' then
+      aTool.Process.CurrentDirectory:=Directory;
+
+    // Prepend specified PrependPath if needed:
+    if PrependPath<>'' then
+    begin
+      OldPath:=aTool.Environment.GetVar(PATHVARNAME);
+      if OldPath<>'' then
+         aTool.Environment.SetVar(PATHVARNAME, PrependPath+PathSeparator+OldPath)
+      else
+        aTool.Environment.SetVar(PATHVARNAME, PrependPath);
+    end;
+
+    result:=aTool.ExecuteAndWait;
+
+    Output:=aTool.WorkerOutput.Text;
+
+    aTool.Environment.SetVar(PATHVARNAME, OldPath);
+    aTool.Verbose:=OldVerbosity;
+
+  finally
+    if NOT Assigned(Processor) then
+      aTool.Free;
+  end;
+end;
+
 constructor TInstaller.Create;
 begin
   inherited Create;
@@ -3658,9 +3744,9 @@ begin
 
   FCPUCount  := GetLogicalCpuCount;
 
-  FSVNClient := TSVNClient.Create;
-  FGitClient := TGitClient.Create;
-  FHGClient  := THGClient.Create;
+  FSVNClient := TSVNClient.Create(Self);
+  FGitClient := TGitClient.Create(Self);
+  FHGClient  := THGClient.Create(Self);
 
   FShell := '';
 
