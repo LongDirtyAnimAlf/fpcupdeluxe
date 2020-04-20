@@ -654,15 +654,15 @@ begin
           begin
             // We have a working lazbuild; let's hope it works with primary config path as well
             // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
-            Processor.CmdLineExe := LazbuildApp;
+            Processor.Executable := LazbuildApp;
             Processor.Process.Parameters.Clear;
             Processor.Process.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
             Processor.Process.Parameters.Add(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
             infoln(ModuleName+': compiling build_lcl_docs help compiler:',etInfo);
             writelnlog('Building help compiler (also time consuming generation of documents) !!!!!!', true);
-            writelnlog('Execute: '+Processor.CmdLineExe+'. Params: '+Processor.Process.Parameters.CommaText, true);
+            writelnlog('Execute: '+Processor.Executable+'. Params: '+Processor.Process.Parameters.CommaText, true);
             ProcessorResult:=Processor.ExecuteAndWait;
-            writelnlog('Execute: '+Processor.CmdLineExe+' exit code: '+InttoStr(ProcessorResult), true);
+            writelnlog('Execute: '+Processor.Executable+' exit code: '+InttoStr(ProcessorResult), true);
             if ProcessorResult <> 0 then
             begin
               writelnlog(etError,ModuleName+': error compiling build_lcl_docs docs builder.', true);
@@ -708,7 +708,7 @@ begin
       if OperationSucceeded then
       begin
         // Compile Lazarus LCL CHM help
-        Processor.CmdLineExe := BuildLCLDocsExe;
+        Processor.Executable := BuildLCLDocsExe;
         // Make sure directory switched to that of the FPC docs,
         // otherwise paths to source files will not work.
         Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FTargetDirectory);

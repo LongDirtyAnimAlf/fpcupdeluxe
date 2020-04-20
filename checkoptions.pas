@@ -11,7 +11,7 @@ const
   FPCUP_GETHELP=32; //get help
   ERROR_FPCUP_BUILD_FAILED=64; //fpcup ran but build failed
 
-function CheckFPCUPOptions(FInstaller: TFPCupManager):integer;
+function CheckFPCUPOptions(FManager: TFPCupManager):integer;
 
 implementation
 
@@ -25,7 +25,7 @@ uses
  fpcuputil,
  commandline;
 
-function CheckFPCUPOptions(FInstaller: TFPCupManager):integer;
+function CheckFPCUPOptions(FManager: TFPCupManager):integer;
 // Returns -1 for success and further execution of fpcup
 // 0 for success but fpcup should stop (after showing help etc)
 // other codes are error codes
@@ -146,7 +146,7 @@ begin
         sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
         bHaveInstalldir:=true;
       end;
-      FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','binutilsdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
+      FManager.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','binutilsdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
       {$ELSE} //*nix
       if sInstallDir='' then
       begin
@@ -162,66 +162,67 @@ begin
       FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','binutilsdir','')));
       {$ENDIF MSWINDOWS}
 
-      FInstaller.BaseDirectory:=sInstallDir;
-      FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcbootstrapdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
-      FInstaller.FPCInstallDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpc')));
+      FManager.BaseDirectory:=sInstallDir;
+      FManager.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcbootstrapdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
+      FManager.FPCInstallDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpc')));
       bFPCsplit:=Options.GetOptionNoParam('','fpcsplit');
       if bFPCsplit
-               then FInstaller.FPCSourceDirectory:=FInstaller.FPCInstallDirectory+'src'
-               else FInstaller.FPCSourceDirectory:=FInstaller.FPCInstallDirectory;
+               then FManager.FPCSourceDirectory:=FManager.FPCInstallDirectory+'src'
+               else FManager.FPCSourceDirectory:=FManager.FPCInstallDirectory;
+
       {$ifndef FPCONLY}
-      FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','lazdir',IncludeTrailingPathDelimiter(sInstallDir)+'lazarus')));
+      FManager.LazarusDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','lazdir',IncludeTrailingPathDelimiter(sInstallDir)+'lazarus')));
       {
       bLazsplit:=Options.GetOptionNoParam('','lazsplit');
       if bLazsplit
-         then FInstaller.LazarusSourceDirectory:=FInstaller.LazarusDirectory+'src'
-         else FInstaller.LazarusSourceDirectory:=FInstaller.LazarusDirectory;
+         then FManager.LazarusSourceDirectory:=FManager.LazarusDirectory+'src'
+         else FManager.LazarusSourceDirectory:=FManager.LazarusDirectory;
       }
       {$endif}
 
-      FInstaller.SVNExecutable := ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','svnexe','')));
+      FManager.SVNExecutable := ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','svnexe','')));
 
-      FInstaller.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crossbindir','')));
-      FInstaller.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crosslibdir','')));
+      FManager.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crossbindir','')));
+      FManager.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crosslibdir','')));
 
       sLogFile:=Options.GetOption('','logfilename','',true);
       if sLogFile='' then
         {$IFDEF MSWINDOWS}
-        FInstaller.LogFileName:='fpcup.log'
+        FManager.LogFileName:='fpcup.log'
         {$ELSE}
         FInstaller.LogFileName:=SafeExpandFileName('~/fpcup.log')
         {$ENDIF MSWINDOWS}
       else
-        FInstaller.LogFileName:=sLogFile;
+        FManager.LogFileName:=sLogFile;
       // Deal with options coming from ini (e.g. Clean=true)
       try
-        FInstaller.Clean:=Options.GetOption('','clean',false);
+        FManager.Clean:=Options.GetOption('','clean',false);
       except
         on E: ECommandLineError do begin
           // option quite probably did not have an argument
-          FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
+          FManager.Clean:=Options.GetOptionNoParam('','clean',false);
         end;
       end;
-      FInstaller.ConfigFile:=Options.GetOption('','moduleconfig',SafeGetApplicationPath+installerUniversal.CONFIGFILENAME);
+      FManager.ConfigFile:=Options.GetOption('','moduleconfig',SafeGetApplicationPath+installerUniversal.CONFIGFILENAME);
       s:=Options.GetOption('','cputarget','');
-      if (s<>'') then FInstaller.CrossCPU_Target:=GetTCPU(s);
-      FInstaller.CrossOS_SubArch:=Options.GetOption('','subarch','');
-      FInstaller.CrossOPT:=Options.GetOption('','crossopt','');
+      if (s<>'') then FManager.CrossCPU_Target:=GetTCPU(s);
+      FManager.CrossOS_SubArch:=Options.GetOption('','subarch','');
+      FManager.CrossOPT:=Options.GetOption('','crossopt','');
 
       {$ifdef LCL}
       // do not create shortcut for fpc in case of GUI !!
       FInstaller.ShortCutNameFpcup:=EmptyStr;
       {$else}
-      FInstaller.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname',DirectorySeparator);
+      FManager.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname',DirectorySeparator);
       // Find out if the user specified --fpcuplinkname= to explicitly block creation of a link, or just didn't specify anything.
-      if FInstaller.ShortcutNameFPCup=DirectorySeparator then
+      if FManager.ShortcutNameFPCup=DirectorySeparator then
         if bHaveInstallDir then
-          FInstaller.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update'  // sInstallDir has no terminating pathdelimiter!!
+          FManager.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update'  // sInstallDir has no terminating pathdelimiter!!
         else
-          FInstaller.ShortCutNameFpcup:='fpcup_update'; //Nothing to go on, so use default
+          FManager.ShortCutNameFpcup:='fpcup_update'; //Nothing to go on, so use default
       {$endif}
 
-      FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
+      FManager.FPCOPT:=Options.GetOption('','fpcOPT','');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
       if pos('-Fl/usr/local/lib/',FInstaller.FPCOPT)=0 then
@@ -231,9 +232,9 @@ begin
         FInstaller.FPCOPT:=FInstaller.FPCOPT+' -Fl/usr/local/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
-      FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
+      FManager.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
 
-      FInstaller.PatchCmd:=Options.GetOption('','patchcmd','patch',false);
+      FManager.PatchCmd:=Options.GetOption('','patchcmd','patch',false);
 
       // Deal with options coming from ini (e.g. Help=true)
       try
@@ -246,37 +247,37 @@ begin
       end;
 
       try
-        FInstaller.KeepLocalChanges:=Options.GetOption('','keeplocalchanges',false);
+        FManager.KeepLocalChanges:=Options.GetOption('','keeplocalchanges',false);
       except
         on E: ECommandLineError do begin
         // option did not have an argument
-        FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
+        FManager.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
         end;
       end;
 
       try
-        FInstaller.ReApplyLocalChanges:=Options.GetOption('','reapplylocalchanges',false);
+        FManager.ReApplyLocalChanges:=Options.GetOption('','reapplylocalchanges',false);
       except
         on E: ECommandLineError do begin
         // option did not have an argument
-        FInstaller.ReApplyLocalChanges:=Options.GetOptionNoParam('','reapplylocalchanges');
+        FManager.ReApplyLocalChanges:=Options.GetOptionNoParam('','reapplylocalchanges');
         end;
       end;
 
       // changes can only be reapplied (true) when they are stored in a diff when KeepLocalChanges=false
-      if FInstaller.KeepLocalChanges then FInstaller.reapplylocalchanges:=False;
+      if FManager.KeepLocalChanges then FManager.reapplylocalchanges:=False;
       {$ifndef FPCONLY}
-      FInstaller.ShortCutNameLazarus:=Options.GetOption('','lazlinkname',DirectorySeparator);
+      FManager.ShortCutNameLazarus:=Options.GetOption('','lazlinkname',DirectorySeparator);
       // Find out if the user specified --shortcutnamelazarus= to explicitly block creation of a link, or just didn't specify anything.
-      if (FInstaller.ShortCutNameLazarus=DirectorySeparator) then
+      if (FManager.ShortCutNameLazarus=DirectorySeparator) then
         if bHaveInstalldir then
-          FInstaller.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(sInstallDir)  // sInstallDir has no terminating pathdelimiter!!
-        else if UpperCase(ExtractFileName(FInstaller.LazarusDirectory))='LAZARUS' then
-          FInstaller.ShortCutNameLazarus:='Lazarus_fpcup' // default installdir, default lazarus dir
+          FManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(sInstallDir)  // sInstallDir has no terminating pathdelimiter!!
+        else if UpperCase(ExtractFileName(FManager.LazarusDirectory))='LAZARUS' then
+          FManager.ShortCutNameLazarus:='Lazarus_fpcup' // default installdir, default lazarus dir
         else
-          FInstaller.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FInstaller.LazarusDirectory);
+          FManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FManager.LazarusDirectory);
 
-      FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','');
+      FManager.LazarusOPT:=Options.GetOption('','lazOPT','');
 
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
@@ -293,60 +294,60 @@ begin
         FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/X11R6/lib -Fl/usr/X11R7/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
-      FInstaller.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
-      FInstaller.CrossLCL_Platform:=Options.GetOption('','lclplatform','');
+      FManager.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
+      FManager.CrossLCL_Platform:=Options.GetOption('','lclplatform','');
       {$endif}
-      FInstaller.IncludeModules:=Options.GetOption('','include','',false);
-      FInstaller.SkipModules:=Options.GetOption('','skip','',false);
-      FInstaller.OnlyModules:=Options.GetOption('','only','',false);
+      FManager.IncludeModules:=Options.GetOption('','include','',false);
+      FManager.SkipModules:=Options.GetOption('','skip','',false);
+      FManager.OnlyModules:=Options.GetOption('','only','',false);
 
       if (NOT Options.GetOptionNoParam('','includehelp')) then
       begin
-        if Length(FInstaller.SkipModules)>0 then FInstaller.SkipModules:=FInstaller.SkipModules+',';
-        FInstaller.SkipModules:=FInstaller.SkipModules+_HELPFPC;
+        if Length(FManager.SkipModules)>0 then FManager.SkipModules:=FManager.SkipModules+',';
+        FManager.SkipModules:=FManager.SkipModules+_HELPFPC;
         {$ifndef FPCONLY}
-        FInstaller.SkipModules:=FInstaller.SkipModules+','+_HELPLAZARUS;
+        FManager.SkipModules:=FManager.SkipModules+','+_HELPLAZARUS;
         {$endif}
       end
       else
       begin
-        if Length(FInstaller.IncludeModules)>0 then FInstaller.IncludeModules:=FInstaller.IncludeModules+',';
-        FInstaller.IncludeModules:=FInstaller.IncludeModules+_LHELP;
+        if Length(FManager.IncludeModules)>0 then FManager.IncludeModules:=FManager.IncludeModules+',';
+        FManager.IncludeModules:=FManager.IncludeModules+_LHELP;
       end;
 
-      FInstaller.FPCPatches:=Options.GetOption('','fpcpatch','',false);
+      FManager.FPCPatches:=Options.GetOption('','fpcpatch','',false);
       {$ifndef FPCONLY}
-      FInstaller.LazarusPatches:=Options.GetOption('','lazpatch','',false);
+      FManager.LazarusPatches:=Options.GetOption('','lazpatch','',false);
       {$endif}
       s:=Options.GetOption('','ostarget','');
-      if (s<>'') then FInstaller.CrossOS_Target:=GetTOS(s);
+      if (s<>'') then FManager.CrossOS_Target:=GetTOS(s);
       {$ifndef FPCONLY}
       s:=Options.GetOption('','primary-config-path','');
       if (s='') then
         // If we have no input from the user, let's create a name based on the directory where
         // Lazarus is to be installed
-        FInstaller.LazarusPrimaryConfigPath:=
-          IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FInstaller.LazarusDirectory))
+        FManager.LazarusPrimaryConfigPath:=
+          IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FManager.LazarusDirectory))
       else
-        FInstaller.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
+        FManager.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
       {$endif}
-      FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall',true);
+      FManager.Uninstall:=Options.GetOptionNoParam('','uninstall',true);
       // do not add to default options:
-      FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
+      FManager.Verbose:=Options.GetOptionNoParam('','verbose',false);
       {$ifdef DEBUG}
       FInstaller.Verbose:=True;
       {$endif}
 
       // getfullrepo is a depreciated option ... left here for compatibility only
       Options.GetOptionNoParam('','getfullrepo',false);
-      FInstaller.ExportOnly:=(Options.GetOptionNoParam('','getfilesonly'));
+      FManager.ExportOnly:=(Options.GetOptionNoParam('','getfilesonly'));
       if (Options.GetOptionNoParam('','rebuildonly')) then
       begin
-        FInstaller.OnlyModules:='FPCCleanAndBuildOnly,LazCleanAndBuildOnly';
+        FManager.OnlyModules:='FPCCleanAndBuildOnly,LazCleanAndBuildOnly';
       end;
-      FInstaller.NoJobs:=Options.GetOptionNoParam('','disablejobs');
-      FInstaller.UseGitClient:=Options.GetOptionNoParam('','usegitclient',false);
-      FInstaller.UseWget:=Options.GetOptionNoParam('','usewget');
+      FManager.NoJobs:=Options.GetOptionNoParam('','disablejobs');
+      FManager.UseGitClient:=Options.GetOptionNoParam('','usegitclient',false);
+      FManager.UseWget:=Options.GetOptionNoParam('','usewget');
       // do not add to default options:
       bVersion:=Options.GetOptionNoParam('','version',false);
       bNoConfirm:=Options.GetOptionNoParam('','noconfirm',true);
@@ -362,12 +363,12 @@ begin
         exit;
       end
     end;
-    FInstaller.LoadFPCUPConfig;
+    FManager.LoadFPCUPConfig;
     //load URLs after LoadFPCUPConfig so we're sure we have loaded/parsed the URL aliases
     try
-      FInstaller.FPCURL:=Options.GetOption('','fpcURL',installerUniversal.GetAlias('fpcURL','stable'));
+      FManager.FPCURL:=Options.GetOption('','fpcURL',installerUniversal.GetAlias('fpcURL','stable'));
       {$ifndef FPCONLY}
-      FInstaller.LazarusURL:=Options.GetOption('','lazURL',installerUniversal.GetAlias('lazURL','stable'));
+      FManager.LazarusURL:=Options.GetOption('','lazURL',installerUniversal.GetAlias('lazURL','stable'));
       {$endif}
     except
       on E:Exception do
@@ -387,54 +388,54 @@ begin
     //ftp_proxy=ftp://username:password@myproxy.ril.com:port/
     try
       // Get option from specified options
-      FInstaller.HTTPProxyHost:=Options.GetOption('','httpproxy','',true);
+      FManager.HTTPProxyHost:=Options.GetOption('','httpproxy','',true);
 
       // If no option specified, try environment variable
       // Note we don't save these options to persistent options -
       // they should remain part of the environment
-      if (FInstaller.HTTPProxyHost='') and (GetEnvironmentVariable('http_proxy')<>'') then
+      if (FManager.HTTPProxyHost='') and (GetEnvironmentVariable('http_proxy')<>'') then
       begin
-        FInstaller.HTTPProxyHost:=GetEnvironmentVariable('http_proxy');
+        FManager.HTTPProxyHost:=GetEnvironmentVariable('http_proxy');
       end;
 
       // Strip out trailing /
-      if copy(FInstaller.HTTPProxyHost,length(FInstaller.HTTPProxyHost),1)='/' then
-        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,1,length(FInstaller.HTTPProxyHost)-1);
+      if copy(FManager.HTTPProxyHost,length(FManager.HTTPProxyHost),1)='/' then
+        FManager.HTTPProxyHost:=copy(FManager.HTTPProxyHost,1,length(FManager.HTTPProxyHost)-1);
 
       // Extract port - search backwards to allow passwords with :
-      i:=rpos(':',FInstaller.HTTPProxyHost);
+      i:=rpos(':',FManager.HTTPProxyHost);
       // Don't pick up : from any username:password segment
       if (i=0) or
-        (rpos('@',FInstaller.HTTPProxyHost)>i) then
-        if pos('https://',FInstaller.HTTPProxyHost)=1 then
-          FInstaller.HTTPProxyPort:=443
+        (rpos('@',FManager.HTTPProxyHost)>i) then
+        if pos('https://',FManager.HTTPProxyHost)=1 then
+          FManager.HTTPProxyPort:=443
         else
-          FInstaller.HTTPProxyPort:=8080 {seems like a good default}
+          FManager.HTTPProxyPort:=8080 {seems like a good default}
       else
       begin
-        FInstaller.HTTPProxyPort:=strtointdef(copy(FInstaller.HTTPProxyHost,i+1,length(FInstaller.HTTPProxyHost)),8080);
-        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,1,i-1);
+        FManager.HTTPProxyPort:=strtointdef(copy(FManager.HTTPProxyHost,i+1,length(FManager.HTTPProxyHost)),8080);
+        FManager.HTTPProxyHost:=copy(FManager.HTTPProxyHost,1,i-1);
       end;
 
       // Strip out http/https
-      if pos('https://',FInstaller.HTTPProxyHost)=1 then
-        FInstaller.HTTPProxyHost:=copy(Finstaller.HTTPProxyHost,length('https://')+1,length(FInstaller.HTTPProxyHost));
-      if pos('http://',FInstaller.HTTPProxyHost)=1 then
-        FInstaller.HTTPProxyHost:=copy(Finstaller.HTTPProxyHost,length('http://')+1,length(FInstaller.HTTPProxyHost));
+      if pos('https://',FManager.HTTPProxyHost)=1 then
+        FManager.HTTPProxyHost:=copy(FManager.HTTPProxyHost,length('https://')+1,length(FManager.HTTPProxyHost));
+      if pos('http://',FManager.HTTPProxyHost)=1 then
+        FManager.HTTPProxyHost:=copy(FManager.HTTPProxyHost,length('http://')+1,length(FManager.HTTPProxyHost));
 
       // Extract out username/password
       // Search from ending of string to front to catch last @ in case password has @
-      i:=rpos('@',FInstaller.HTTPProxyHost);
+      i:=rpos('@',FManager.HTTPProxyHost);
       if i>0 then
       begin
-        FInstaller.HTTPProxyUser:=copy(FInstaller.HTTPProxyHost,1,i-1);
-        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,i+1,length(FInstaller.HTTPProxyHost));
+        FManager.HTTPProxyUser:=copy(FManager.HTTPProxyHost,1,i-1);
+        FManager.HTTPProxyHost:=copy(FManager.HTTPProxyHost,i+1,length(FManager.HTTPProxyHost));
         // Extract out password
-        i:=pos(':',FInstaller.HTTPProxyUser);
+        i:=pos(':',FManager.HTTPProxyUser);
         if i>0 then
         begin
-          FInstaller.HTTPProxyPassword:=copy(FInstaller.HTTPProxyUser,i+1,length(FInstaller.HTTPProxyUser));
-          FInstaller.HTTPProxyUser:=copy(FInstaller.HTTPProxyUser,1,i-1);
+          FManager.HTTPProxyPassword:=copy(FManager.HTTPProxyUser,i+1,length(FManager.HTTPProxyUser));
+          FManager.HTTPProxyUser:=copy(FManager.HTTPProxyUser,1,i-1);
         end;
       end;
     except
@@ -459,16 +460,16 @@ begin
         LeftOverOptions:=TStringList.Create;
         for i:=0 to Options.RestArguments.Count-1 do begin
           iCurrentOption:=LeftOverOptions.Add(copy(Options.RestArguments[i],length('--')+1,length(Options.RestArguments[i])));
-          if (FInstaller.ModulePublishedList.IndexOfName(LeftOverOptions.Names[iCurrentOption])<>-1) then
+          if (FManager.ModulePublishedList.IndexOfName(LeftOverOptions.Names[iCurrentOption])<>-1) then
             case (uppercase(LeftOverOptions.ValueFromIndex[iCurrentOption])) of
               '-1','1','TRUE','YES','INSTALL','ENABLE', 'ON': begin
                 if CheckIncludeModule(LeftOverOptions.Names[iCurrentOption])
-                   then FInstaller.IncludeModules:=FInstaller.IncludeModules+','+LeftOverOptions.Names[iCurrentOption]
-                   else FInstaller.SkipModules:=FInstaller.SkipModules+','+LeftOverOptions.Names[iCurrentOption];
+                   then FManager.IncludeModules:=FManager.IncludeModules+','+LeftOverOptions.Names[iCurrentOption]
+                   else FManager.SkipModules:=FManager.SkipModules+','+LeftOverOptions.Names[iCurrentOption];
                 LeftOverOptions.Delete(iCurrentOption);
               end;
               '0','FALSE','NO','UNINSTALL','REMOVE','DISABLE', 'OFF': begin
-                FInstaller.SkipModules:=FInstaller.SkipModules+','+LeftOverOptions.Names[iCurrentOption];
+                FManager.SkipModules:=FManager.SkipModules+','+LeftOverOptions.Names[iCurrentOption];
                 LeftOverOptions.Delete(iCurrentOption);
               end
             else
@@ -476,10 +477,10 @@ begin
             end;
         end;
         // Fix up any added initial commas
-        if copy(FInstaller.IncludeModules,1,1)=',' then
-          FInstaller.IncludeModules:=copy(FInstaller.IncludeModules,2,Length(FInstaller.IncludeModules));
-        if copy(FInstaller.SkipModules,1,1)=',' then
-          FInstaller.SkipModules:=copy(FInstaller.SkipModules,2,Length(FInstaller.SkipModules));
+        if copy(FManager.IncludeModules,1,1)=',' then
+          FManager.IncludeModules:=copy(FManager.IncludeModules,2,Length(FManager.IncludeModules));
+        if copy(FManager.SkipModules,1,1)=',' then
+          FManager.SkipModules:=copy(FManager.SkipModules,2,Length(FManager.SkipModules));
 
         if LeftOverOptions.Count>0 then
         begin
@@ -513,37 +514,37 @@ begin
         FInstaller.MakeDirectory:='';
       {$ENDIF MSWINDOWS}
 
-      FInstaller.PersistentOptions:=Options.PersistentOptions;
+      FManager.PersistentOptions:=Options.PersistentOptions;
 
       {$ifndef LCL}
 
       writeln('Options:');
-      if FInstaller.Clean then
+      if FManager.Clean then
       begin
         writeln('Running --clean: cleaning environment.');
       end;
-      if FInstaller.HTTPProxyHost<>'' then
+      if FManager.HTTPProxyHost<>'' then
       begin
-        writeln('HTTP proxy host:  '+FInstaller.HTTPProxyHost);
-        writeln('HTTP proxy port:  '+IntToStr(FInstaller.HTTPProxyPort));
-        writeln('HTTP proxy user:  '+FInstaller.HTTPProxyUser);
+        writeln('HTTP proxy host:  '+FManager.HTTPProxyHost);
+        writeln('HTTP proxy port:  '+IntToStr(FManager.HTTPProxyPort));
+        writeln('HTTP proxy user:  '+FManager.HTTPProxyUser);
         writeln('HTTP proxy pass:  <SECURITY:REDACTED>');
       end;
       {$IFDEF MSWINDOWS}
       // Makes no sense on other platforms
-      writeln('Binutils/make dir:  '+FInstaller.MakeDirectory);
+      writeln('Binutils/make dir:  '+FManager.MakeDirectory);
       {$ENDIF MSWINDOWS}
-      writeln('Base directory:     '+FInstaller.BaseDirectory);
-      writeln('Bootstrap dir:      '+FInstaller.BootstrapCompilerDirectory);
-      writeln('FPC URL:            '+FInstaller.FPCURL);
-      writeln('FPC options:        '+FInstaller.FPCOPT);
-      writeln('FPC directory:      '+FInstaller.FPCInstallDirectory);
+      writeln('Base directory:     '+FManager.BaseDirectory);
+      writeln('Bootstrap dir:      '+FManager.BootstrapCompilerDirectory);
+      writeln('FPC URL:            '+FManager.FPCURL);
+      writeln('FPC options:        '+FManager.FPCOPT);
+      writeln('FPC directory:      '+FManager.FPCInstallDirectory);
       {$ifndef FPCONLY}
-      writeln('Lazarus URL:        '+FInstaller.LazarusURL);
-      writeln('Lazarus options:    '+FInstaller.LazarusOPT);
-      writeln('Lazarus directory:  '+FInstaller.LazarusDirectory);
+      writeln('Lazarus URL:        '+FManager.LazarusURL);
+      writeln('Lazarus options:    '+FManager.LazarusOPT);
+      writeln('Lazarus directory:  '+FManager.LazarusDirectory);
       {$endif}
-      if FInstaller.KeepLocalChanges then
+      if FManager.KeepLocalChanges then
       begin
         writeln('Keep changes:       yes');
       end
@@ -551,7 +552,7 @@ begin
       begin
         writeln('Keep changes:       no');
       end;
-      if FInstaller.ReApplyLocalChanges then
+      if FManager.ReApplyLocalChanges then
       begin
         writeln('Re-apply changes:   yes');
       end
@@ -559,16 +560,16 @@ begin
       begin
         writeln('Re-apply changes:   no');
       end;
-      writeln('Log file name:      '+FInstaller.LogFileName);
+      writeln('Log file name:      '+FManager.LogFileName);
 
-      For i:=0 to FInstaller.ModuleEnabledList.Count-1 do
+      For i:=0 to FManager.ModuleEnabledList.Count-1 do
         begin
-        writeln('Standard modules:   '+FInstaller.ModuleEnabledList[i]);
+        writeln('Standard modules:   '+FManager.ModuleEnabledList[i]);
         end;
-      if FInstaller.IncludeModules<>'' then
-        writeln('Add. modules:       '+FInstaller.IncludeModules);
+      if FManager.IncludeModules<>'' then
+        writeln('Add. modules:       '+FManager.IncludeModules);
 
-      if FInstaller.ExportOnly then
+      if FManager.ExportOnly then
       begin
         writeln('');
         writeln('INFO: FPCUP will not download repos. It will only get the files !!!');
@@ -579,7 +580,7 @@ begin
         writeln('WARNING: FPCUP will download full repositories !!!');
       end;
 
-      if (Pos('trunk',FInstaller.FPCURL)>0) {$ifndef FPCONLY}OR (Pos('trunk',FInstaller.LazarusURL)>0) {$endif} then
+      if (Pos('trunk',FManager.FPCURL)>0) {$ifndef FPCONLY}OR (Pos('trunk',FManager.LazarusURL)>0) {$endif} then
       begin
         writeln('');
         writeln('******************************************************************');
@@ -604,16 +605,16 @@ begin
         writeln('');
       end;
 
-      if (Pos('-g ',FInstaller.FPCOPT)>0)
+      if (Pos('-g ',FManager.FPCOPT)>0)
          then writeln('FPC is compiled with debug (-g) !');
       {$ifndef FPCONLY}
-      if (Pos('-g ',FInstaller.LazarusOPT)>0)
+      if (Pos('-g ',FManager.LazarusOPT)>0)
          then writeln('Lazarus is compiled with debug (-g) !');
       {$endif}
       writeln('');
 
       // Remove password from output
-      if FInstaller.HTTPProxyPassword='' then
+      if FManager.HTTPProxyPassword='' then
       begin
         writeln('Effective parameters:   ');
         writeln(trim(sAllParameters));
@@ -622,7 +623,7 @@ begin
         {$ELSE}
         writeln('Persistent parameters (can be saved in shell script):');
         {$ENDIF}
-        writeln(trim(FInstaller.PersistentOptions));
+        writeln(trim(FManager.PersistentOptions));
       end
       else
       begin
@@ -631,15 +632,15 @@ begin
         writeln('');
         writeln('Effective parameters:   ');
         writeln(trim(StringReplace(sAllParameters,
-          FInstaller.HTTPProxyPassword,
+          FManager.HTTPProxyPassword,
           '<SECURITY:REDACTED>',
           [rfReplaceAll,rfIgnoreCase])));
         writeln('Persistent parameters:  ');
-        writeln(trim(StringReplace(FInstaller.PersistentOptions,
-          FInstaller.HTTPProxyPassword,
+        writeln(trim(StringReplace(FManager.PersistentOptions,
+          FManager.HTTPProxyPassword,
           '<SECURITY:REDACTED>',
           [rfReplaceAll,rfIgnoreCase])));
-        if FInstaller.Verbose then
+        if FManager.Verbose then
         begin
           writeln('');
           writeln('WARNING: proxy password will appear in screen output!');
@@ -648,24 +649,24 @@ begin
       end;
 
       // User could have specified relative paths so we're normalizing them.
-      if (FInstaller.FPCDesiredRevision<>'') then
-        writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCDesiredRevision);
+      if (FManager.FPCDesiredRevision<>'') then
+        writeln('WARNING: Reverting FPC to revision '+FManager.FPCDesiredRevision);
       {$ifndef FPCONLY}
-      if (FInstaller.LazarusDesiredRevision<>'') then
-        writeln('WARNING: Reverting Lazarus to revision '+FInstaller.LazarusDesiredRevision);
+      if (FManager.LazarusDesiredRevision<>'') then
+        writeln('WARNING: Reverting Lazarus to revision '+FManager.LazarusDesiredRevision);
       {$endif}
-      if FInstaller.SkipModules<>'' then
-        writeln('WARNING: Skipping installation/update of '+FInstaller.SkipModules);
-      if FInstaller.OnlyModules<>'' then
-        writeln('WARNING: Limiting installation/update to '+FInstaller.OnlyModules);
+      if FManager.SkipModules<>'' then
+        writeln('WARNING: Skipping installation/update of '+FManager.SkipModules);
+      if FManager.OnlyModules<>'' then
+        writeln('WARNING: Limiting installation/update to '+FManager.OnlyModules);
 
-      if FInstaller.Uninstall then
+      if FManager.Uninstall then
       begin
         writeln('');
         writeln('WARNING: UNINSTALLING !!!');
         writeln('');
       end
-      else if FInstaller.Clean then
+      else if FManager.Clean then
       begin
         writeln('');
         writeln('WARNING: CLEANING !!!');

@@ -125,7 +125,7 @@ type
 
     // process
     property Process: TProcess read FProcess;
-    property CmdLineExe: string read FCmdLineExe write SetCmdLineExe;
+    property Executable: string read FCmdLineExe write SetCmdLineExe;
     property CmdLineParams: string read GetCmdLineParams write SetCmdLineParams;
     property Stage: TExternalToolStage read FStage;
     procedure Execute; virtual; abstract;
@@ -315,8 +315,16 @@ end;
 { TAbstractExternalTool }
 
 function TAbstractExternalTool.GetCmdLineParams: string;
+var
+  i: Integer;
 begin
-  Result:=MergeCmdLineParams(Process.Parameters);
+  Result:='';
+  if Process.Parameters=nil then exit;
+  for i:=0 to Pred(Process.Parameters.Count) do
+  begin
+    if i>0 then Result+=' ';
+    Result:=Result+Process.Parameters[i];
+  end;
 end;
 
 procedure TAbstractExternalTool.SetCmdLineParams(aParams: string);
@@ -334,26 +342,8 @@ end;
 
 procedure TAbstractExternalTool.SetCmdLineExe(aExe: string);
 begin
-  {$ifdef THREADEDEXECUTE}
-  if Assigned(FProcess) then
-  begin
-    FProcess.Destroy;
-  end;
-  FProcess:=nil;
-  {$endif}
-  if NOT Assigned(FProcess) then
-  begin
-    FProcess:=DefaultTProcess.Create(nil);
-    //Process.Options:= [{poRunIdle,}poUsePipes{$ifdef Windows},poStderrToOutPut{$endif}];
-    Process.Options := FProcess.Options +[poRunIdle,poUsePipes, poStderrToOutPut]-[poRunSuspended,poWaitOnExit];
-    {$ifdef LCL}
-    Process.ShowWindow := swoHide;
-    {$endif}
-    //poRunIdle
-    Process.RunCommandSleepTime:=10; // rest the default sleep time to 0 (context switch only)
-    Process.OnRunCommandEvent:=@RunEvent;
-  end;
-  FProcess.Executable:=aExe;
+  FCmdLineExe:=aExe;
+  Process.Executable:=FCmdLineExe;
 end;
 
 procedure TAbstractExternalTool.SetTitle(const AValue: string);
@@ -364,12 +354,15 @@ end;
 
 procedure TAbstractExternalTool.RunEvent(Sender,Context : TObject;Status:TRunCommandEventCode;const Message:string);
 begin
-  {$ifdef LCL}
   if MainThreadID=ThreadID then
   begin
+    //if IsMultiThread then
+    {$ifdef LCL}
     Application.ProcessMessages;
+    {$else}
+    CheckSynchronize(0);
+    {$endif}
   end;
-  {$endif}
   if status=RunCommandIdle then
     sleep(Process.RunCommandSleepTime);
 end;
@@ -388,7 +381,6 @@ begin
   inherited Create(AOwner);
   FStage:=etsInit;
   InitCriticalSection(FCritSec);
-  CmdLineExe:='';
 end;
 
 destructor TAbstractExternalTool.Destroy;
@@ -484,7 +476,7 @@ begin
       if IsMultiThread then
       begin
       end;
-      if Verbose then
+      if Verbose {OR (NOT IsMultiThread)} then
       begin
         ThreadLog(LineStr);
       end;
@@ -520,6 +512,19 @@ constructor TExternalTool.Create(aOwner: TComponent);
 begin
   inherited Create(aOwner);
   FWorkerOutput:=TStringList.Create;
+  FProcess:=TProcess.Create(nil);
+  //FProcess:=DefaultTProcess.Create(nil);
+  //Process.Options:= [poUsePipes{$IFDEF Windows},poStderrToOutPut{$ENDIF}];
+  //Process.Options := FProcess.Options +[poUsePipes, poStderrToOutPut];
+  Process.Options:= [{poWaitOnExit,}poRunIdle,poUsePipes{$ifdef Windows},poStderrToOutPut{$endif}];
+  //Process.Options := FProcess.Options +[poRunIdle,poUsePipes, poStderrToOutPut]-[poRunSuspended,poWaitOnExit];
+  {$ifdef LCL}
+  FProcess.ShowWindow := swoHide;
+  {$endif}
+
+  Process.RunCommandSleepTime:=10; // rest the default sleep time to 0 (context switch only)
+  Process.OnRunCommandEvent:=@RunEvent;
+
   FVerbose:=true;
 end;
 
@@ -751,30 +756,28 @@ end;
 procedure TExternalTool.WaitForExit;
 begin
   repeat
-    EnterCriticalSection;
     try
-      if Stage=etsDestroying then exit;
-      if (Stage=etsStopped) then exit;
-    finally
-      LeaveCriticalSection;
-    end;
-    if MainThreadID=ThreadID then
-    begin
-      {$ifdef THREADEDEXECUTE}
-      {$ifdef LCL}
-      begin
-        try
-          Application.ProcessMessages;
-        except
-          Application.HandleException(Application);
-        end;
+      EnterCriticalSection;
+      try
+        if Stage=etsDestroying then break;
+        if (Stage=etsStopped) then break;
+        // still running => wait a bit to prevent cpu cycle burning
+      finally
+        LeaveCriticalSection;
       end;
-      {$endif}
-      {$endif}
-      //TExternalToolsBase(Owner).HandleMesages;
+    finally
+      if MainThreadID=ThreadID then
+      begin
+        //if IsMultiThread then
+        {$ifdef LCL}
+        Application.ProcessMessages;
+        {$else}
+        CheckSynchronize(0); // if we use Thread.Synchronize
+        {$endif}
+        //TExternalToolsBase(Owner).HandleMesages;
+      end;
     end;
-    // still running => wait a bit to prevent cpu cycle burning
-    Sleep(10);
+    sleep(10)
   until false;
 end;
 

@@ -725,7 +725,7 @@ begin
               SnipMagicEnd);
           end;
 
-          Processor.CmdLineExe := Make;
+          Processor.Executable := Make;
           Processor.Process.Parameters.Clear;
           {$IFDEF MSWINDOWS}
           if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
@@ -1091,9 +1091,9 @@ begin
 
           try
             if CrossOptions='' then
-               infoln(infotext+'Running '+Processor.CmdLineExe+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')',etInfo)
+               infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')',etInfo)
             else
-              infoln(infotext+'Running '+Processor.CmdLineExe+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+') with CROSSOPT: '+CrossOptions,etInfo);
+              infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+') with CROSSOPT: '+CrossOptions,etInfo);
 
             ProcessorResult:=Processor.ExecuteAndWait;
             result:=(ProcessorResult=0);
@@ -1101,7 +1101,7 @@ begin
             if ((NOT result) AND (MakeCycle=st_Packages)) then
             begin
               //Sometimes rerun gives good results (on AIX 32bit especially).
-              infoln(infotext+'Running '+Processor.CmdLineExe+' stage again ... could work !',etInfo);
+              infoln(infotext+'Running '+Processor.Executable+' stage again ... could work !',etInfo);
               ProcessorResult:=Processor.ExecuteAndWait;
               result:=(ProcessorResult=0);
             end;
@@ -1109,7 +1109,7 @@ begin
           except
             on E: Exception do
             begin
-              WritelnLog(infotext+'Running cross compiler fpc '+Processor.CmdLineExe+' generated an exception!'+LineEnding+'Details: '+E.Message,true);
+              WritelnLog(infotext+'Running cross compiler fpc '+Processor.Executable+' generated an exception!'+LineEnding+'Details: '+E.Message,true);
               WritelnLog(infotext+'We are going to try again !',true);
               exit(false);
               //result:=false;
@@ -1139,9 +1139,9 @@ begin
           {$endif win64}
           FCompiler:='////\\\Error trying to compile FPC\|!';
           if result then
-            infoln(infotext+'Running cross compiler fpc '+Processor.CmdLineExe+' for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
+            infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
           else
-            infoln(infotext+'Running cross compiler fpc '+Processor.CmdLineExe+' for '+GetFPCTarget(false)+' failed with an error code.',etError);
+            infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code.',etError);
         end
         else
         begin
@@ -1429,7 +1429,7 @@ begin
     infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
   end;
 
-  Processor.CmdLineExe := Make;
+  Processor.Executable := Make;
   Processor.Process.Parameters.Clear;
   {$IFDEF MSWINDOWS}
   if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
@@ -1581,13 +1581,13 @@ begin
   if ModuleName=_MAKEFILECHECKFPC then
   begin
     Processor.Process.Parameters.Add('fpc_baseinfo');
-    infoln(infotext+'Running '+Processor.CmdLineExe+' fpc_baseinfo for '+ModuleName,etInfo);
+    infoln(infotext+'Running '+Processor.Executable+' fpc_baseinfo for '+ModuleName,etInfo);
   end
   else
   begin
     Processor.Process.Parameters.Add('all');
     Processor.Process.Parameters.Add('install');
-    infoln(infotext+'Running '+Processor.CmdLineExe+' all install for '+ModuleName,etInfo);
+    infoln(infotext+'Running '+Processor.Executable+' all install for '+ModuleName,etInfo);
   end;
 
   try
@@ -1597,13 +1597,13 @@ begin
     if ProcessorResult <> 0 then
     begin
       OperationSucceeded := False;
-      WritelnLog(etError, infotext+'Error running '+Processor.CmdLineExe+' for '+ModuleName+' failed with exit code '+IntToStr(ProcessorResult)+LineEnding+'. Details: '+FErrorLog.Text,true);
+      WritelnLog(etError, infotext+'Error running '+Processor.Executable+' for '+ModuleName+' failed with exit code '+IntToStr(ProcessorResult)+LineEnding+'. Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
     begin
       OperationSucceeded := False;
-      WritelnLog(etError, infotext+'Running fpc '+Processor.CmdLineExe+' for '+ModuleName+' failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
+      WritelnLog(etError, infotext+'Running fpc '+Processor.Executable+' for '+ModuleName+' failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
     end;
   end;
 
@@ -2837,7 +2837,7 @@ var
     Processor.Process.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('-o');
     Processor.Process.Parameters.Add('' + aFile + '');
-    infoln(infotext+'Creating '+ExtractFileName(aFile)+': '+Processor.CmdLineExe+' '+StringReplace(Processor.Process.Parameters.CommaText,',',' ',[rfReplaceAll]));
+    infoln(infotext+'Creating '+ExtractFileName(aFile)+': '+Processor.Executable+' '+StringReplace(Processor.Process.Parameters.CommaText,',',' ',[rfReplaceAll]));
     try
       ProcessorResult:=Processor.ExecuteAndWait;
       result:=(ProcessorResult=0);
@@ -3167,7 +3167,7 @@ begin
 
     if (OperationSucceeded) then
     begin
-      Processor.CmdLineExe:=FPCMkCfg;
+      Processor.Executable:=FPCMkCfg;
       Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FInstallDirectory);
 
       s2:= ExtractFilePath(FPCMkCfg)+FPFILENAME+GetExeExt;
@@ -3665,7 +3665,7 @@ begin
   begin
     for RunTwice in boolean do
     try
-      Processor.CmdLineExe:=Make;
+      Processor.Executable:=Make;
       Processor.Process.Parameters.Clear;
       {$IFDEF MSWINDOWS}
       if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
@@ -3708,11 +3708,11 @@ begin
 
       if (NOT CrossCompiling) then
       begin
-        if (NOT RunTwice) then infoln(infotext+'Running '+Processor.CmdLineExe+' distclean twice',etInfo);
+        if (NOT RunTwice) then infoln(infotext+'Running '+Processor.Executable+' distclean twice',etInfo);
       end
       else
       begin
-        if (NOT RunTwice) then infoln(infotext+'Running '+Processor.CmdLineExe+' distclean twice for target '+CrossInstaller.RegisterName,etInfo);
+        if (NOT RunTwice) then infoln(infotext+'Running '+Processor.Executable+' distclean twice for target '+CrossInstaller.RegisterName,etInfo);
       end;
       try
         writelnlog(infotext+Processor.GetExeInfo, true);
@@ -3726,7 +3726,7 @@ begin
         on E: Exception do
         begin
           result:=false;
-          WritelnLog(etError, infotext+'Running '+Processor.CmdLineExe+' distclean failed with an exception!'+LineEnding+'Details: '+E.Message,true);
+          WritelnLog(etError, infotext+'Running '+Processor.Executable+' distclean failed with an exception!'+LineEnding+'Details: '+E.Message,true);
         end;
       end;
     finally
@@ -3736,7 +3736,7 @@ begin
   else
   begin
     result:=true;
-    infoln(infotext+'Running '+Processor.CmdLineExe+' distclean failed: could not find cleanup compiler. Will try again later',etInfo);
+    infoln(infotext+'Running '+Processor.Executable+' distclean failed: could not find cleanup compiler. Will try again later',etInfo);
   end;
 
   if (NOT CrossCompiling) then

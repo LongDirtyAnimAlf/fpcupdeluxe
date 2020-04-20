@@ -287,6 +287,7 @@ type
     procedure SetSourceDirectory(value:string);
     function GetShell: string;
     function GetMake: string;
+    procedure SetVerbosity(aValue:boolean);
     procedure SetHTTPProxyHost(AValue: string);
     procedure SetHTTPProxyPassword(AValue: string);
     procedure SetHTTPProxyPort(AValue: integer);
@@ -480,7 +481,7 @@ type
     property SoftFloat: boolean write FSoftFloat;
     property OnlinePatching: boolean write FOnlinePatching;
     // display and log in temp log file all sub process output
-    property Verbose: boolean write FVerbose;
+    property Verbose: boolean write SetVerbosity;
     // use wget as downloader ??
     property UseWget: boolean write FUseWget;
     // get cross-installer
@@ -539,10 +540,11 @@ uses
   {$ifdef LCL}
   //For messaging to MainForm: no writeln
   Forms,
-  LMessages,
+  //LMessages,
   LCLIntf,
   {$endif}
-  FileUtil
+  FileUtil,
+  process
   {$IFDEF UNIX}
   ,LazFileUtils
   {$ENDIF UNIX}
@@ -764,6 +766,11 @@ begin
   Result := FShell;
 end;
 
+procedure TInstaller.SetVerbosity(aValue:boolean);
+begin
+  FVerbose:=aValue;
+  if Assigned(Processor) then Processor.Verbose:=FVerbose;
+end;
 
 procedure TInstaller.SetHTTPProxyHost(AValue: string);
 begin
@@ -3687,45 +3694,62 @@ var
   OldVerbosity:boolean;
   i:integer;
   aTool:TExternalTool;
+  FParameters:TStrings;
 begin
+
+  result:=0;
+
   if Assigned(Processor) then
     aTool:=Processor
   else
     aTool:=TExternalTool.Create(nil);
 
-  OldVerbosity:=aTool.Verbose;
-
-  aTool.Verbose:=Verbosity;
-
   try
-    //Reset
-    aTool.CmdLineExe:='';
+    aTool.Process.Executable:='';
+    aTool.Process.Parameters.Clear;
 
-    aTool.Process.CommandLine:=Commandline;
-    repeat
-      i:=aTool.Process.Parameters.IndexOf('emptystring');
-      if (i<>-1) then aTool.Process.Parameters.Strings[i]:='""';
-    until (i=-1);
-
-    if Directory<>'' then
-      aTool.Process.CurrentDirectory:=Directory;
-
-    // Prepend specified PrependPath if needed:
-    if PrependPath<>'' then
-    begin
-      OldPath:=aTool.Environment.GetVar(PATHVARNAME);
-      if OldPath<>'' then
-         aTool.Environment.SetVar(PATHVARNAME, PrependPath+PathSeparator+OldPath)
-      else
-        aTool.Environment.SetVar(PATHVARNAME, PrependPath);
+    FParameters:=TStringList.Create;
+    try
+      CommandToList(Commandline,FParameters);
+      if FParameters.Count>0 then
+      begin
+        aTool.Process.Executable:=FParameters[0];
+        repeat
+          i:=FParameters.IndexOf('emptystring');
+          if (i<>-1) then FParameters[i]:='""';
+        until (i=-1);
+        for i:=1 to Pred(FParameters.Count) do
+          aTool.Process.Parameters.Add(FParameters[i]);
+      end;
+    finally
+      FParameters.Free;
     end;
 
-    result:=aTool.ExecuteAndWait;
+    if (Length(aTool.Process.Executable)>0) then
+    begin
+      OldVerbosity:=aTool.Verbose;
+      aTool.Verbose:=Verbosity;
 
-    Output:=aTool.WorkerOutput.Text;
+      if Directory<>'' then
+        aTool.Process.CurrentDirectory:=Directory;
 
-    aTool.Environment.SetVar(PATHVARNAME, OldPath);
-    aTool.Verbose:=OldVerbosity;
+      // Prepend specified PrependPath if needed:
+      if PrependPath<>'' then
+      begin
+        OldPath:=aTool.Environment.GetVar(PATHVARNAME);
+        if OldPath<>'' then
+           aTool.Environment.SetVar(PATHVARNAME, PrependPath+PathSeparator+OldPath)
+        else
+          aTool.Environment.SetVar(PATHVARNAME, PrependPath);
+      end;
+
+      result:=aTool.ExecuteAndWait;
+
+      Output:=aTool.WorkerOutput.Text;
+
+      aTool.Environment.SetVar(PATHVARNAME, OldPath);
+      aTool.Verbose:=OldVerbosity;
+    end;
 
   finally
     if NOT Assigned(Processor) then
