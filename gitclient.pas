@@ -220,6 +220,8 @@ begin
     FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose)
   end else FReturnCode := 0;
 
+  if (ReturnCode=AbortedExitCode) then exit;
+
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   if (FReturnCode <> 0) then
@@ -230,6 +232,7 @@ begin
     begin
       Sleep(500); //Give everybody a chance to relax ;)
       FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose); //attempt again
+      if (ReturnCode=AbortedExitCode) then exit;
       RetryAttempt := RetryAttempt + 1;
     end;
   end;

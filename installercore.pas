@@ -1662,6 +1662,12 @@ begin
       writelnlog(localinfotext+'Local directory: ' + aClient.LocalRepository, true);
       infoln(localinfotext+'Have you specified the wrong directory or a directory with an old repository checkout?',etDebug);
     end;
+    AbortedExitCode:
+    begin
+      FRepositoryUpdated := false;
+      Result := false;
+      writelnlog(etError, localinfotext+'Download aborted.', true);
+    end;
     else
     begin
       // For now, assume it worked even with non-zero result code. We can because
@@ -1845,6 +1851,12 @@ begin
       writelnlog(etError, localinfotext+'Repository URL in local directory and remote repository don''t match.', true);
       writelnlog(localinfotext+'Local directory: ' + FSVNClient.LocalRepository, true);
       infoln(localinfotext+'Have you specified the wrong directory or a directory with an old repository checkout?',etDebug);
+    end;
+    AbortedExitCode:
+    begin
+      FRepositoryUpdated := false;
+      Result := false;
+      writelnlog(etError, localinfotext+'Download aborted.', true);
     end;
     else
     begin
@@ -3707,6 +3719,8 @@ begin
   try
     aTool.Process.Executable:='';
     aTool.Process.Parameters.Clear;
+
+    //aTool.Process.CommandLine:=Commandline;
 
     FParameters:=TStringList.Create;
     try

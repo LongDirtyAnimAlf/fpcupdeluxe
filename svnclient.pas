@@ -278,10 +278,11 @@ begin
     else
     {$ENDIF}
     FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, True);
-
     FReturnOutput := Output;
 
-    if (ReturnCode = 0) then break else
+    if (ReturnCode=AbortedExitCode) then exit;
+
+    if (ReturnCode=0) then break else
     begin
       ThreadLog('SVN client error return code: '+InttoStr(ReturnCode),etWarning);
 
@@ -302,7 +303,8 @@ begin
         if RetryAttempt>CONNECTIONMAXRETRIES then break else
         begin
           // remove locks if any
-          TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose);
+          FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose);
+          if (ReturnCode=AbortedExitCode) then exit;
           // try again
           continue;
         end;
@@ -315,7 +317,8 @@ begin
       if (Pos('E155004', Output) > 0) OR (Pos('E175002', Output) > 0) then
       begin
         // Let's try one time to fix it and don't update FReturnCode here
-        TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //attempt again
+        FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //attempt again
+        if (ReturnCode=AbortedExitCode) then exit;
         // We probably ended up with a local repository where not all files were checked out
         // Let's call update to finalize.
         Update;
@@ -326,7 +329,8 @@ begin
       if Pos('E155036', Output) > 0 then
       begin
         // Let's try one time upgrade to fix it (don't update FReturnCode here)
-        TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' upgrade '+ProxyCommand+' --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //attempt again
+        FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' upgrade '+ProxyCommand+' --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //attempt again
+        if (ReturnCode=AbortedExitCode) then exit;
         // Now update again:
         Update;
       end;
@@ -393,7 +397,9 @@ begin
   {$ENDIF}
 
   // always perform a cleaup before doing anything else ... just to be sure !
-  TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose);
+  FReturnCode:=TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose);
+
+  if (ReturnCode=AbortedExitCode) then exit;
 
   FileList := TStringList.Create;
   try
@@ -426,6 +432,8 @@ begin
     FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
     FReturnOutput := Output;
 
+    if (ReturnCode=AbortedExitCode) then exit;
+
     if (ReturnCode <> 0) then
     begin
       ThreadLog('SVN client error return code: '+InttoStr(ReturnCode),etError);
@@ -455,7 +463,8 @@ begin
         }
         begin
           // Let's try to release locks; don't update FReturnCode
-          TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //attempt again
+          FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //attempt again
+          if (ReturnCode=AbortedExitCode) then exit;
         end;
         //Give everybody a chance to relax ;)
         Sleep(500);
@@ -491,14 +500,18 @@ begin
         ParseFileList(Output, FileList, ['?','!']);
         }
         FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, FReturnOutput, Verbose);
+        if (ReturnCode=AbortedExitCode) then exit;
+
         AfterErrorRetry := AfterErrorRetry + 1;
 
         // last resort measures
         if (AfterErrorRetry = ERRORMAXRETRIES) then
         begin
           //revert local changes to try to cleanup errors ...
-          //TInstaller(FParent).ExecuteCommandCompat(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert -R '+ProxyCommand+' --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //revert changes
-          TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive --remove-unversioned --remove-ignored ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //attempt again
+          //FReturnCode := TInstaller(FParent).ExecuteCommandCompat(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert -R '+ProxyCommand+' --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //revert changes
+          FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive --remove-unversioned --remove-ignored ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //attempt again
+          if (ReturnCode=AbortedExitCode) then exit;
+
         end;
 
       end;
@@ -744,10 +757,12 @@ begin
     Command := ' switch ' + ProxyCommand + Command + ' --force --quiet --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + Repository + ' ' + DoubleQuoteIfNeeded(LocalRepository);
 
   // always perform a cleaup before doing anything else ... just to be sure !
-  TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose);
+  if (ReturnCode=AbortedExitCode) then exit;
 
   FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
   FReturnOutput := Output;
+  if (ReturnCode=AbortedExitCode) then exit;
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;

@@ -3084,47 +3084,40 @@ end;
 
 function CheckExecutable(const Executable:string; const Parameters:array of String; ExpectOutput: string; Level: TEventType): boolean;
 var
-  //ResultCode: longint;
-  aResult: boolean;
-  OperationSucceeded: boolean;
+  aResultCode: longint;
   ExeName: string;
   Output: string;
 begin
+  Result:=false;
   try
     Output:='';
     ExeName := ExtractFileName(Executable);
-    aResult := RunCommand(Executable,Parameters, Output,[poUsePipes, poStderrToOutPut],swoHide);
-    if aResult then //Not all non-0 result codes are errors. There's no way to tell, really
+    RunCommandIndir('',Executable,Parameters, Output, aResultCode,[poUsePipes, poStderrToOutPut],swoHide);
+    if (aResultCode>=0) then //Not all non-0 result codes are errors. There's no way to tell, really
     begin
-      if (ExpectOutput <> '') and (AnsiPos(ExpectOutput, Output) = 0) then
+      if (ExpectOutput <> '') then
       begin
-        // This is not a warning/error message as sometimes we can use multiple different versions of executables
-        if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application. ' +
-          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
-        OperationSucceeded := false;
+        Result := AnsiContainsText(Output, ExpectOutput);
+        if (NOT Result) then
+        begin
+          // This is not a warning/error message as sometimes we can use multiple different versions of executables
+          if Level<>etCustom then
+            ThreadLog(Executable + ' is not a valid ' + ExeName + ' application. ' +
+            ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
+        end;
       end
       else
-      begin
-        // We're not looking for any specific output so we're happy
-        OperationSucceeded := true;
-      end;
-    end
-    else
-    begin
-      if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application.',Level);
-      OperationSucceeded := false;
+        Result := true; //not all non-0 result codes are errors. There's no way to tell, really
     end;
   except
     on E: Exception do
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
       if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
-      OperationSucceeded := false;
     end;
   end;
-  if OperationSucceeded then
+  if Result then
     ThreadLog('Found valid ' + ExeName + ' application.',etDebug);
-  Result := OperationSucceeded;
 end;
 
 function CheckExecutable(Executable:string;Parameters:array of string;ExpectOutput: string): boolean;
