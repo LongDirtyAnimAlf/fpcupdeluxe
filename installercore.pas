@@ -926,16 +926,22 @@ begin
     aURL:=BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
 
     OperationSucceeded:=false;
-    if FSVNClient.ValidClient then
-      OperationSucceeded:=SimpleExportFromSVN('CheckAndGetTools',aURL+'patch.exe',ExcludeTrailingPathDelimiter(FMakeDir));
-    if (NOT OperationSucceeded) then
-      OperationSucceeded:=GetFile(aURL+'patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
+    aLocalClientBinary:=FPatchCmd;
+    if Not FileExists(aLocalClientBinary) then
+      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir) + FPatchCmd;
+    if Not FileExists(aLocalClientBinary) then
+    begin
+      if FSVNClient.ValidClient then
+        OperationSucceeded:=SimpleExportFromSVN('CheckAndGetTools',aURL+'patch.exe',ExcludeTrailingPathDelimiter(FMakeDir));
+      if (NOT OperationSucceeded) then
+        OperationSucceeded:=GetFile(aURL+'patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
 
-    OperationSucceeded:=false;
-    if FSVNClient.ValidClient then
-      OperationSucceeded:=SimpleExportFromSVN('CheckAndGetTools',aURL+'patch.exe.manifest',ExcludeTrailingPathDelimiter(FMakeDir));
-    if (NOT OperationSucceeded) then
-      OperationSucceeded:=GetFile(aURL+'patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
+      OperationSucceeded:=false;
+      if FSVNClient.ValidClient then
+        OperationSucceeded:=SimpleExportFromSVN('CheckAndGetTools',aURL+'patch.exe.manifest',ExcludeTrailingPathDelimiter(FMakeDir));
+      if (NOT OperationSucceeded) then
+        OperationSucceeded:=GetFile(aURL+'patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
+    end;
 
     // do not fail
     OperationSucceeded:=True;

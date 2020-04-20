@@ -194,7 +194,7 @@ begin
       // Clone (first download)
       Checkout;
       // Just to be sure, update as well (Clone may have failed without warning):
-      Update;
+      if (FReturnCode<>AbortedExitCode) then Update;
     end;
   end
   else

@@ -280,7 +280,7 @@ begin
     FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, True);
     FReturnOutput := Output;
 
-    if (ReturnCode=AbortedExitCode) then exit;
+    if (ReturnCode=AbortedExitCode) then break;
 
     if (ReturnCode=0) then break else
     begin
@@ -537,7 +537,7 @@ begin
       // Checkout (first download)
       Checkout;
       // Just to be sure, update as well (checkout may have failed without warning):
-      Update;
+      if (FReturnCode<>AbortedExitCode) then Update;
     end;
   end
   else

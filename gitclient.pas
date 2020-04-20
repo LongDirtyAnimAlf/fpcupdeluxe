@@ -253,7 +253,7 @@ begin
       // Clone (first download)
       Checkout;
       // If we use a desired revision, we'll need to update to that. Doesn't hurt anyway to run this command
-      Update;
+      if (FReturnCode<>AbortedExitCode) then Update;
     end;
   end
   else
