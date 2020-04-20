@@ -87,6 +87,8 @@ type
     ethStopped
     );
 
+  TOnUpdateEvent = procedure(Sender: TObject;Status:TExternalToolStage) of object;
+
   TAbstractExternalTool = class(TComponent)
   private
     FCritSec: TRTLCriticalSection;
@@ -98,11 +100,12 @@ type
     FTitle: string;
     FProcessEnvironment:TProcessEnvironment;
     FCmdLineExe: string;
+    FOnUpdateEvent: TOnUpdateEvent;
     function GetCmdLineParams: string;
     procedure SetCmdLineParams(aParams: string);
     procedure SetCmdLineExe(aExe: string);
     procedure SetTitle(const AValue: string);
-    procedure RunEvent(Sender,Context : TObject;Status:TRunCommandEventCode;const Message:string);
+    procedure UpdateEvent(Sender : TObject;Status:TExternalToolStage);
   protected
     FErrorMessage: string;
     FTerminated: boolean;
@@ -138,6 +141,8 @@ type
     property ReadStdOutBeforeErr: boolean read FReadStdOutBeforeErr write FReadStdOutBeforeErr;
     property Environment:TProcessEnvironment read GetProcessEnvironment;
 
+    Property OnUpdateEvent : TOnUpdateEvent Read FOnUpdateEvent Write FOnUpdateEvent;
+
     // output
     property WorkerOutput: TStringList read FWorkerOutput; // the raw output
   end;
@@ -155,6 +160,7 @@ type
     fLines: TStringList;
     FTool: TExternalTool;
     procedure SetTool(AValue: TExternalTool);
+    function GetFilter(line: string; aVerbosity:boolean):boolean;
   public
     property Tool: TExternalTool read FTool write SetTool;
     {$ifdef THREADEDEXECUTE}
@@ -178,6 +184,7 @@ type
     procedure DoTerminate;
     procedure SyncAutoFree({%H-}aData: PtrInt=0);
   protected
+    FFPCMagic:boolean; // tricky filtering
     procedure DoExecute; override;
     procedure DoStart;
     function CanFree: boolean; override;
@@ -206,6 +213,7 @@ uses
   LCLIntf,
   LMessages,
   {$endif}
+  StrUtils,
   Pipes,
   Math,
   FileUtil,
@@ -352,7 +360,7 @@ begin
   FTitle:=AValue;
 end;
 
-procedure TAbstractExternalTool.RunEvent(Sender,Context : TObject;Status:TRunCommandEventCode;const Message:string);
+procedure TAbstractExternalTool.UpdateEvent(Sender: TObject;Status:TExternalToolStage);
 begin
   if MainThreadID=ThreadID then
   begin
@@ -363,9 +371,11 @@ begin
     CheckSynchronize(0);
     {$endif}
   end;
-  if status=RunCommandIdle then
-    sleep(Process.RunCommandSleepTime);
+  //if status=etsRunning then
+  //  //sleep(Process.RunCommandSleepTime);
+  //  sleep(10);
 end;
+
 
 function TAbstractExternalTool.CanFree: boolean;
 begin
@@ -448,7 +458,6 @@ begin
     if FStage>=etsStopped then exit;
     if Assigned(FProcessEnvironment) then FProcessEnvironment.Destroy;
     FProcessEnvironment:=nil;
-    FVerbose:=True;
     FStage:=etsStopped;
   finally
     LeaveCriticalSection;
@@ -476,7 +485,11 @@ begin
       if IsMultiThread then
       begin
       end;
-      if Verbose {OR (NOT IsMultiThread)} then
+      if Verbose OR FFPCMagic
+      //OR (NOT IsMultiThread)
+      {$ifndef LCL} OR True{$endif}
+      {$ifdef DEBUG} OR True{$endif}
+      then
       begin
         ThreadLog(LineStr);
       end;
@@ -516,15 +529,13 @@ begin
   //FProcess:=DefaultTProcess.Create(nil);
   //Process.Options:= [poUsePipes{$IFDEF Windows},poStderrToOutPut{$ENDIF}];
   //Process.Options := FProcess.Options +[poUsePipes, poStderrToOutPut];
-  Process.Options:= [{poWaitOnExit,}poRunIdle,poUsePipes{$ifdef Windows},poStderrToOutPut{$endif}];
-  //Process.Options := FProcess.Options +[poRunIdle,poUsePipes, poStderrToOutPut]-[poRunSuspended,poWaitOnExit];
+  Process.Options:= [{poWaitOnExit,}poUsePipes{$ifdef Windows},poStderrToOutPut{$endif}];
+  //Process.Options := FProcess.Options +[poUsePipes, poStderrToOutPut]-[poRunSuspended,poWaitOnExit];
   {$ifdef LCL}
   FProcess.ShowWindow := swoHide;
   {$endif}
-
   Process.RunCommandSleepTime:=10; // rest the default sleep time to 0 (context switch only)
-  Process.OnRunCommandEvent:=@RunEvent;
-
+  Self.OnUpdateEvent:=@UpdateEvent;
   FVerbose:=true;
 end;
 
@@ -623,6 +634,27 @@ begin
     exit;
   end;
 
+  //Do we have something FPC like. If so, apply some filtering when not Verbose
+  //Filtering is dome here to limit the amount of thread message traffic
+  //Bit tricky ... ;-)
+  FFPCMagic:=False;
+  if (NOT Verbose) then
+  begin
+    ExeFile:=LowerCase(ExtractFileName(Process.Executable));
+    if
+      ((Pos('fpc',ExeFile)=1)
+      OR
+      (Pos('ppc',ExeFile)=1)
+      OR
+      (Pos('lazbuild',ExeFile)=1)
+      OR
+      (Pos('make',ExeFile)=1))
+    then
+    begin
+      FFPCMagic:=True;
+    end;
+  end;
+
   // init misc
   if Assigned(FProcessEnvironment) then
       Process.Environment:=FProcessEnvironment.EnvironmentList;
@@ -649,12 +681,11 @@ begin
   end;
 
   {$ifdef THREADEDEXECUTE}
-  // start thread
   if Thread=nil then
   begin
     FThread:=TExternalToolThread.Create(true);
     Thread.Tool:=Self;
-    FThread.FreeOnTerminate:=true;
+    Thread.FreeOnTerminate:=true;
   end;
   Thread.Start;
   {$else}
@@ -766,6 +797,8 @@ begin
         LeaveCriticalSection;
       end;
     finally
+      //WakeMainThread;
+      //ThreadSwitch;
       if MainThreadID=ThreadID then
       begin
         //if IsMultiThread then
@@ -798,6 +831,184 @@ end;
 
 
 { TExternalToolThread }
+
+function TExternalToolThread.GetFilter(line: string; aVerbosity:boolean):boolean;
+var
+  s:string;
+begin
+  result:=false;
+
+  // skip stray empty lines
+  //if (Length(line)=0) then exit;
+
+  {$ifdef Darwin}
+  // suppress all setfocus errors on Darwin, always
+  if AnsiContainsText(line,'.setfocus') then exit;
+  {$endif}
+
+  {$ifdef Unix}
+  // suppress all Kb Used messages, always
+  if AnsiContainsText(line,'Kb Used') then exit;
+  {$endif}
+
+  // suppress all SynEdit PaintLock errors, always
+  if AnsiContainsText(line,'PaintLock') then exit;
+
+  // suppress some GIT errors, always
+  if AnsiContainsText(line,'fatal: not a git repository') then exit;
+
+  // suppress some lazbuild errors, always
+  if AnsiContainsText(line,'lazbuild') then
+  begin
+    if AnsiContainsText(line,'only for runtime') then exit;
+    if AnsiContainsText(line,'lpk file expected') then exit;
+  end;
+
+  result:=(NOT aVerbosity);
+
+  if (NOT result) then
+  begin
+    // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
+    // will be a bit redundant , but just to be sure !
+    if (AnsiContainsText(line,'error:'))
+       OR (AnsiContainsText(line,'donalf:'))
+       OR (AnsiContainsText(line,'fatal:'))
+       OR (AnsiContainsText(line,'fpcupdeluxe:'))
+       OR (AnsiContainsText(line,'execute:'))
+       OR (AnsiContainsText(line,'executing:'))
+       OR ((AnsiContainsText(line,'compiling ')) AND (NOT AnsiContainsText(line,'when compiling target')))
+       OR (AnsiContainsText(line,'linking '))
+    then result:=true;
+
+    if (NOT result) then
+    begin
+      // remove hints and other "trivial"* warnings from output
+      // these line are not that interesting for the average user of fpcupdeluxe !
+      if AnsiContainsText(line,'hint: ') then exit;
+      if AnsiContainsText(line,'verbose: ') then exit;
+      if AnsiContainsText(line,'note: ') then exit;
+      if AnsiContainsText(line,'assembling ') then exit;
+      if AnsiContainsText(line,': entering directory ') then exit;
+      if AnsiContainsText(line,': leaving directory ') then exit;
+      // when generating help
+      if AnsiContainsText(line,'illegal XML element: ') then exit;
+      if AnsiContainsText(line,'parsing used unit ') then exit;
+      if AnsiContainsText(line,'extracting ') then exit;
+
+      // during building of lazarus components, default compiler switches cause version and copyright info to be shown
+      // do not know if this is allowed, but this version / copyright info is very redundant as it is shown everytime the compiler is called ...
+      // I stand corrected if this has to be changed !
+      if AnsiContainsText(line,'Copyright (c) 1993-') then exit;
+      if AnsiContainsText(line,'Free Pascal Compiler version ') then exit;
+
+      // harmless make error
+      if AnsiContainsText(line,'make') then
+      begin
+        if AnsiContainsText(line,'error 1') then exit;
+        if AnsiContainsText(line,'(e=1)') then exit;
+        if AnsiContainsText(line,'error 87') then exit;
+        if AnsiContainsText(line,'(e=87)') then exit;
+        //if AnsiContainsText(line,'dependency dropped') then exit;
+      end;
+
+      if AnsiContainsText(line,'~~~~~~~~') then exit;
+      if AnsiContainsText(line,', coalesced') then exit;
+
+      if AnsiContainsText(line,'TODO: ') then exit;
+
+      // When building a java cross-compiler
+      if AnsiContainsText(line,'Generated: ') then exit;
+
+      // filter warnings
+      if AnsiContainsText(line,'warning: ') then
+      begin
+        if AnsiContainsText(line,'is not portable') then exit;
+        if AnsiContainsText(line,'is deprecated') then exit;
+        if AnsiContainsText(line,'implicit string type conversion') then exit;
+        if AnsiContainsText(line,'function result does not seem to be set') then exit;
+        if AnsiContainsText(line,'comparison might be always') then exit;
+        if AnsiContainsText(line,'converting pointers to signed integers') then exit;
+        if AnsiContainsText(line,'does not seem to be initialized') then exit;
+        if AnsiContainsText(line,'an inherited method is hidden') then exit;
+        if AnsiContainsText(line,'with abstract method') then exit;
+        if AnsiContainsText(line,'comment level 2 found') then exit;
+        if AnsiContainsText(line,'did you forget -T') then exit;
+        if AnsiContainsText(line,'is not recommended') then exit;
+        if AnsiContainsText(line,'were not initialized') then exit;
+        if AnsiContainsText(line,'which is not available for the') then exit;
+        if AnsiContainsText(line,'argument unused during compilation') then exit;
+        if AnsiContainsText(line,'invalid unitname') then exit;
+        if AnsiContainsText(line,'procedure type "FAR" ignored') then exit;
+        if AnsiContainsText(line,'duplicate unit') then exit;
+        if AnsiContainsText(line,'is ignored for the current target platform') then exit;
+        if AnsiContainsText(line,'Inlining disabled') then exit;
+        if AnsiContainsText(line,'not yet supported inside inline procedure/function') then exit;
+        if AnsiContainsText(line,'Check size of memory operand') then exit;
+        if AnsiContainsText(line,'User defined: TODO') then exit;
+        if AnsiContainsText(line,'Circular dependency detected when compiling target') then exit;
+        if AnsiContainsText(line,'overriding recipe for target') then exit;
+        if AnsiContainsText(line,'ignoring old recipe for target') then exit;
+        if AnsiContainsText(line,'Case statement does not handle all possible cases') then exit;
+
+        if AnsiContainsText(line,'unreachable code') then exit;
+        if AnsiContainsText(line,'Fix implicit pointer conversions') then exit;
+        if AnsiContainsText(line,'are not related') then exit;
+        if AnsiContainsText(line,'Constructor should be public') then exit;
+        if AnsiContainsText(line,'is experimental') then exit;
+        if AnsiContainsText(line,'This code is not thread-safe') then exit;
+
+        // when generating help
+        if AnsiContainsText(line,'is unknown') then exit;
+        {$ifdef MSWINDOWS}
+        if AnsiContainsText(line,'unable to determine the libgcc path') then exit;
+        {$endif}
+      end;
+      // suppress "trivial"* build commands
+
+      {$ifdef MSWINDOWS}
+      if AnsiContainsText(line,'rm.exe ') then exit;
+      if AnsiContainsText(line,'mkdir.exe ') then exit;
+      if AnsiContainsText(line,'mv.exe ') then exit;
+      if AnsiContainsText(line,'cmp.exe ') then exit;
+      if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then exit;
+      {$endif}
+
+      s:='rm -f ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+      if AnsiContainsText(line,'/'+TrimRight(s)) OR AnsiStartsText(TrimRight(s),line) then exit;
+      s:='rm -rf ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+      if AnsiContainsText(line,'/'+TrimRight(s)) OR AnsiStartsText(TrimRight(s),line) then exit;
+      s:='mkdir ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+      s:='mv ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+      s:='cp ';
+      if ( (AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line)) AND AnsiContainsText(line,'.compiled') ) then exit;
+      s:='grep: ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+
+      if AnsiContainsText(line,'is up to date.') then exit;
+      if AnsiContainsText(line,'searching ') then exit;
+
+      //Remove some Lazarus info
+      if AnsiContainsText(line,'Info: (lazarus)') then exit;
+      if AnsiStartsText('  File=',line) then exit;
+      if AnsiStartsText('  State file=',line) then exit;
+
+      //Remove some not so very interesting info
+      if AnsiContainsText(line,'Writing Resource String Table') then exit;
+      if AnsiContainsText(line,'Nothing to be done') then exit;
+
+      // Some prehistoric FPC errors.
+      if AnsiContainsText(line,'Unknown option.') then exit;
+      if AnsiContainsText(line,'CreateProcess(') then exit;
+
+      // found modified files
+      result:=true;
+    end;
+  end;
+end;
 
 procedure TExternalToolThread.SetTool(AValue: TExternalTool);
 begin
@@ -880,7 +1091,10 @@ var
         if IsStdErr then
           fLines.AddObject(LineBuf,fLines)
         else
-          fLines.Add(LineBuf);
+        begin
+          if GetFilter(LineBuf,Tool.FFPCMagic) then
+            fLines.Add(LineBuf);
+        end;
         LineBuf:='';
         if (i<Count) and (Buf[i+1] in [#10,#13]) and (Buf[i]<>Buf[i+1])
         then
@@ -976,26 +1190,28 @@ begin
           fLines.Clear;
           LastUpdate:=GetTickCount64;
         end;
-        if (poRunIdle in Tool.Process.Options) and Assigned(Tool.Process.OnRunCommandEvent) then
-        begin
-          Tool.Process.OnRunCommandEvent(self,Nil,RunCommandIdle,'')
-        end
-        else
-          if (not HasOutput) then sleep(50);
+
+        if Assigned(Tool.OnUpdateEvent) then Tool.OnUpdateEvent(self,Tool.Stage);
+
+        if (not HasOutput) then
+          sleep(50);
+        //else
+        //  sleep(0);// allow context swith
       end;
       // add rest of output
 
       if (OutputLine<>'') then fLines.Add(OutputLine);
       if (StdErrLine<>'') then fLines.Add(StdErrLine);
 
-      if (Tool<>nil) and (fLines.Count>0) then
+      if (Tool<>nil) then
       begin
-        Tool.AddOutputLines(fLines);
-        fLines.Clear;
+        if (fLines.Count>0) then
+        begin
+          Tool.AddOutputLines(fLines);
+          fLines.Clear;
+        end;
+        if Assigned(Tool.OnUpdateEvent) then Tool.OnUpdateEvent(self,Tool.Stage);
       end;
-
-      if (Tool<>nil) and (poRunIdle in Tool.Process.Options) and Assigned(Tool.Process.OnRunCommandEvent) then
-         Tool.Process.OnRunCommandEvent(self,Nil,RunCommandFinished,'');
 
       try
         if Tool.Stage>=etsStopped then exit;

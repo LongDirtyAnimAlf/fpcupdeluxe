@@ -770,6 +770,9 @@ procedure TInstaller.SetVerbosity(aValue:boolean);
 begin
   FVerbose:=aValue;
   if Assigned(Processor) then Processor.Verbose:=FVerbose;
+  if Assigned(FSVNClient) then FSVNClient.Verbose:=FVerbose;
+  if Assigned(FGitClient) then FGitClient.Verbose:=FVerbose;
+  if Assigned(FHGClient) then FHGClient.Verbose:=FVerbose;
 end;
 
 procedure TInstaller.SetHTTPProxyHost(AValue: string);

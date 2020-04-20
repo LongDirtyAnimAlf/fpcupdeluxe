@@ -1443,7 +1443,8 @@ begin
   Processor.Process.Parameters.Add('PP='+FCompiler);
 
   {$IFDEF DEBUG}
-  Processor.Process.Parameters.Add('-d');
+  //To debug Makefile itself
+  //Processor.Process.Parameters.Add('-d');
   {$ENDIF}
   Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
   Processor.Process.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
