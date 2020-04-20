@@ -156,7 +156,6 @@ type
 
   TFPCupManager=class(TObject)
   private
-    FResultSet:TResultSet;
     FSVNExecutable: string;
     FHTTPProxyHost: string;
     FHTTPProxyPassword: string;
@@ -252,7 +251,6 @@ type
     procedure WritelnLog(EventType: TEventType;msg:string;ToConsole:boolean=true);overload;
  public
     property ShortcutCreated:boolean read FShortcutCreated;
-    property ResultSet: TResultSet read FResultSet;
     property Sequencer: TSequencer read FSequencer;
    {$ifndef FPCONLY}
     property ShortCutNameLazarus: string read FShortCutNameLazarus write FShortCutNameLazarus; //Name of the shortcut that points to the fpcup-installed Lazarus
@@ -274,14 +272,14 @@ type
     property Clean: boolean read FClean write FClean;
     property ConfigFile: string read FConfigFile write FConfigFile;
     property CrossCPU_Target:TCPU read FCrossCPU_Target write FCrossCPU_Target;
+    property CrossOS_Target:TOS read FCrossOS_Target write FCrossOS_Target;
+    property CrossOS_SubArch:string read FCrossOS_SubArch write FCrossOS_SubArch;
     // Widgetset for which the user wants to compile the LCL (not the IDE).
     // Empty if default LCL widgetset used for current platform
     {$ifndef FPCONLY}
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
     {$endif}
     property CrossOPT:string read FCrossOPT write FCrossOPT;
-    property CrossOS_Target:TOS read FCrossOS_Target write FCrossOS_Target;
-    property CrossOS_SubArch:string read FCrossOS_SubArch write FCrossOS_SubArch;
     property CrossToolsDirectory:string read FCrossToolsDirectory write SetCrossToolsDirectory;
     property CrossLibraryDirectory:string read FCrossLibraryDirectory write SetCrossLibraryDirectory;
     property FPCSourceDirectory: string read FFPCSourceDirectory write SetFPCSourceDirectory;
@@ -347,6 +345,7 @@ type
     function LoadFPCUPConfig:boolean;
     function CheckValidCPUOS: boolean;
     function ParseSubArchsFromSource: TStringList;
+
     // Stop talking. Do it! Returns success status
     function Run: boolean;
 
@@ -841,8 +840,6 @@ begin
     end;
   end;
 
-  FResultSet:=[];
-
   try
     WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',true);
     WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,true);
@@ -891,7 +888,6 @@ begin
         result:=FSequencer.Run(_ONLY);
       end;
     end;
-    //FResultSet:=FSequencer.FInstaller;
   finally
     if assigned(FSequencer.FSkipList) then FSequencer.FSkipList.Free;
     FSequencer.FSkipList:=nil;
@@ -1472,7 +1468,7 @@ begin
   begin
     FInstaller.BaseDirectory:=FParent.BaseDirectory;
     FInstaller.TempDirectory:=FParent.TempDirectory;
-    FInstaller.SVNClient.RepoExecutable := FParent.SVNExecutable;
+    if (Length(FParent.SVNExecutable)>0) then FInstaller.SVNClient.RepoExecutable:=FParent.SVNExecutable;
     {$IFDEF MSWINDOWS}
     FInstaller.SVNClient.ForceLocal:=FParent.ForceLocalRepoClient;
     FInstaller.GitClient.ForceLocal:=FParent.ForceLocalRepoClient;
