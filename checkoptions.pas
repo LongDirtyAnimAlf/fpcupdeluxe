@@ -234,7 +234,7 @@ begin
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FManager.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
 
-      FManager.PatchCmd:=Options.GetOption('','patchcmd','patch',false);
+      //FManager.PatchCmd:=Options.GetOption('','patchcmd','patch',false);
 
       // Deal with options coming from ini (e.g. Help=true)
       try
@@ -517,7 +517,6 @@ begin
       FManager.PersistentOptions:=Options.PersistentOptions;
 
       {$ifndef LCL}
-
       writeln('Options:');
       if FManager.Clean then
       begin

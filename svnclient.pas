@@ -165,11 +165,13 @@ begin
   // If file exists, check for valid svn executable
   if FileExists(FRepoExecutable) then
   begin
-    rv:=TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose);
-    if rv<>0 then
+    //rv:=TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', False);
+    //if rv<>0 then
+    if (NOT CheckExecutable(RepoExecutable, ['--version'], '')) then
     begin
       FRepoExecutable := '';
-      ThreadLog('SVN client found, but error code during check: '+InttoStr(rv),etError);
+      //ThreadLog('SVN client found, but error code during check: '+InttoStr(rv),etError);
+      ThreadLog('SVN client found, but error code during check !',etError);
     end;
   end
   else

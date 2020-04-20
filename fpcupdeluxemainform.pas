@@ -1492,6 +1492,19 @@ begin
       BG      := clBlack;
       Special := True;
     end;
+    if ExistWordInString(PChar(s),Seriousness[etError],[soWholeWord,soDown]) then
+    begin
+      FG      := clRed;
+      BG      := clBlue;
+      Special := True;
+    end;
+  end;
+
+  if (NOT Special) AND ExistWordInString(PChar(s),'Found valid',[soWholeWord,soDown]) then
+  begin
+    FG      := clOlive;
+    BG      := clBlack;
+    Special := True;
   end;
 
   if (NOT Special) AND ExistWordInString(PChar(s),'executing:',[soWholeWord,soDown]) then

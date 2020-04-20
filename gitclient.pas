@@ -89,8 +89,9 @@ begin
   result := 'git';
 end;
 
-
 function TGitClient.FindRepoExecutable: string;
+var
+  rv:integer;
 begin
   Result := FRepoExecutable;
   // Look in path
@@ -139,10 +140,13 @@ begin
   if FileExists(FRepoExecutable) then
   begin
     // Check for valid git executable:
-    if TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose) <> 0 then
+    //rv:=TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', False);
+    //if rv<>0 then
+    if (NOT CheckExecutable(RepoExecutable, ['--version'], '')) then
     begin
-      // File exists, but is not a valid git client
       FRepoExecutable := '';
+      //ThreadLog('GIT client found, but error code during check: '+InttoStr(rv),etError);
+      ThreadLog('GIT client found, but error code during check !',etError);
     end;
   end
   else

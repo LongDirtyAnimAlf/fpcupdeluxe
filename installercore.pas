@@ -1371,12 +1371,13 @@ begin
     // Check for proper make executable
     if OperationSucceeded then
     try
-      ExecuteCommand(Make + ' -v', s1, False);
-      if AnsiPos('GNU Make', s1) = 0 then
+      if (NOT CheckExecutable(Make, ['-v'], 'GNU Make')) then
       begin
-        ExecuteCommand(Make + ' -v', s1, True);
-        infoln(s2+'Found make binary here: '+Make+'. But it is not GNU Make.',etError);
-        OperationSucceeded := false;
+        if CheckExecutable(Make, ['-v'], '') then
+        begin
+          infoln(s2+'Found make binary here: '+Make+'. But it is not GNU Make.',etError);
+          OperationSucceeded := false;
+        end;
       end
       else
       begin

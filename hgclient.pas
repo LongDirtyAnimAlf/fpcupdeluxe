@@ -89,6 +89,8 @@ begin
 end;
 
 function THGClient.FindRepoExecutable: string;
+var
+  rv:integer;
 begin
   Result := FRepoExecutable;
   // Look in path
@@ -123,10 +125,13 @@ begin
   if FileExists(FRepoExecutable) then
   begin
     // Check for valid hg executable
-    if TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose) <> 0 then
+    //rv:=TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', False);
+    //if rv<>0 then
+    if (NOT CheckExecutable(RepoExecutable, ['--version'], '')) then
     begin
-      // File exists, but is not a valid hg client
       FRepoExecutable := '';
+      //ThreadLog('HG client found, but error code during check: '+InttoStr(rv),etError);
+      ThreadLog('HG client found, but error code during check !',etError);
     end;
   end
   else
