@@ -73,8 +73,8 @@ function TAny_AIXPowerPC64.GetLibs(Basepath:string): boolean;
 const
   StaticLibName='libc.a';
 begin
-
   result:=FLibsFound;
+
   if result then exit;
 
   // begin simple: check presence of library file in basedir

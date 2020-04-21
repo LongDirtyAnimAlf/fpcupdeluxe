@@ -66,8 +66,8 @@ var
   found:boolean;
   }
 begin
-
   result:=FLibsFound;
+
   if result then exit;
 
   // begin simple: check presence of library file in basedir

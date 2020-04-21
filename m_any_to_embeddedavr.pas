@@ -81,8 +81,8 @@ var
   {$endif}
 begin
   // AVR-embedded does not need libs by default, but user can add them.
-
   result:=FLibsFound;
+
   if result then exit;
 
   if length(FSubArch)>0
@@ -122,8 +122,8 @@ begin
 
   if result then
   begin
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
+    FLibsFound:=True;
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
     SearchLibraryInfo(result);
   end;
   if not result then
@@ -131,6 +131,7 @@ begin
     //libs path is optional; it can be empty
     ShowInfo('Libspath ignored; it is optional for this cross compiler.');
     FLibsPath:='';
+    FLibsFound:=True;
     result:=true;
   end;
 end;
@@ -230,7 +231,6 @@ begin
       ShowInfo('Did not find any -Cp architecture parameter; using -Cp'+FSubArch+' and SUBARCH='+FSubArch+'.');
     end else aOption:=Trim(FCrossOpts[i]);
     AddFPCCFGSnippet(aOption);
-
   end;
 end;
 

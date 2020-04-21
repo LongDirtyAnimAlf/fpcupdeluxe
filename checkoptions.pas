@@ -91,7 +91,7 @@ begin
               for iCurrentOption:=0 to LeftOverOptions.Count-1 do
               begin
                 // Found the parameter
-                if pos('--'+lowercase(LeftOverOptions[iCurrentOption]),
+                if Pos('--'+lowercase(LeftOverOptions[iCurrentOption]),
                   lowercase(Options.Params[i]))=1 then
                 begin
                   case (uppercase(Options.Params.ValueFromIndex[i])) of
@@ -225,9 +225,9 @@ begin
       FManager.FPCOPT:=Options.GetOption('','fpcOPT','');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
-      if pos('-Fl/usr/local/lib/',FInstaller.FPCOPT)=0 then
+      if Pos('-Fl/usr/local/lib/',FInstaller.FPCOPT)=0 then
       begin
-        infoln('FPC options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
+        Infoln('FPC options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
         FInstaller.FPCOPT:=FInstaller.FPCOPT+' -Fl/usr/local/lib';
       end;
@@ -283,13 +283,13 @@ begin
       //todo: check for other BSDs
       if (pos('-Fl/usr/local/lib/',FInstaller.LazarusOPT)=0) then
       begin
-        infoln('Lazarus options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
+        Infoln('Lazarus options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
         FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/local/lib';
       end;
       if (pos('-Fl/usr/X11R6/lib',FInstaller.LazarusOPT)=0) then
       begin
-        infoln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
+        Infoln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
         FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/X11R6/lib -Fl/usr/X11R7/lib';
       end;
@@ -407,7 +407,7 @@ begin
       // Don't pick up : from any username:password segment
       if (i=0) or
         (rpos('@',FManager.HTTPProxyHost)>i) then
-        if pos('https://',FManager.HTTPProxyHost)=1 then
+        if Pos('https://',FManager.HTTPProxyHost)=1 then
           FManager.HTTPProxyPort:=443
         else
           FManager.HTTPProxyPort:=8080 {seems like a good default}
@@ -418,9 +418,9 @@ begin
       end;
 
       // Strip out http/https
-      if pos('https://',FManager.HTTPProxyHost)=1 then
+      if Pos('https://',FManager.HTTPProxyHost)=1 then
         FManager.HTTPProxyHost:=copy(FManager.HTTPProxyHost,length('https://')+1,length(FManager.HTTPProxyHost));
-      if pos('http://',FManager.HTTPProxyHost)=1 then
+      if Pos('http://',FManager.HTTPProxyHost)=1 then
         FManager.HTTPProxyHost:=copy(FManager.HTTPProxyHost,length('http://')+1,length(FManager.HTTPProxyHost));
 
       // Extract out username/password

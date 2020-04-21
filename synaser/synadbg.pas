@@ -57,7 +57,7 @@ unit synadbg;
 interface
 
 uses
-  blcksock, synsock, synautil, classes, sysutils, synafpc;
+  blcksock, synsock, synautil, classes, SysUtils, synafpc;
 
 type
   TSynaDebug = class(TObject)

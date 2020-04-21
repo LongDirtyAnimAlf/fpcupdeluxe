@@ -74,8 +74,8 @@ var
   delphiversion,ndkversion,platform:byte;
   PresetLibPath:string;
 begin
-
   result:=FLibsFound;
+
   if result then exit;
 
   // begin simple: check presence of library file in basedir
@@ -197,7 +197,7 @@ begin
   end
   else
   begin
-    //infoln(FCrossModuleName + ': Please fill '+SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
+    //Infoln(FCrossModuleName + ': Please fill '+SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
     //' with Android libs, e.g. from the Android NDK. See http://wiki.lazarus.freepascal.org/Android.'
     //,etError);
     FAlreadyWarned:=true;

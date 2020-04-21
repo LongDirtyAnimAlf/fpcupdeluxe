@@ -842,9 +842,9 @@ end;
 procedure TBlockSerial.GetComNr(Value: string);
 begin
   FComNr := PortIsClosed;
-  if pos('COM', uppercase(Value)) = 1 then
+  if Pos('COM', uppercase(Value)) = 1 then
     FComNr := StrToIntdef(copy(Value, 4, Length(Value) - 3), PortIsClosed + 1) - 1;
-  if pos('/DEV/TTYS', uppercase(Value)) = 1 then
+  if Pos('/DEV/TTYS', uppercase(Value)) = 1 then
     FComNr := StrToIntdef(copy(Value, 10, Length(Value) - 9), PortIsClosed - 1);
 end;
 
@@ -1336,7 +1336,7 @@ begin
       end
       else
       begin
-        x := pos(Terminator, s);
+        x := Pos(Terminator, s);
         tl := l;
       end;
     if (FMaxLineLength <> 0) and (system.Length(s) > FMaxLineLength) then

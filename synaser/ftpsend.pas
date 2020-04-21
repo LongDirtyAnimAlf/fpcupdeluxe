@@ -1594,13 +1594,13 @@ begin
   Result := false;
   if FileName <> '' then
   begin
-    if pos('?', VMSFilename) > 0 then
+    if Pos('?', VMSFilename) > 0 then
       Exit;
-    if pos('*', VMSFilename) > 0 then
+    if Pos('*', VMSFilename) > 0 then
       Exit;
   end;
   if VMSFileName <> '' then
-    if pos(';', VMSFilename) <= 0 then
+    if Pos(';', VMSFilename) <= 0 then
       Exit;
   if (FileName = '') and (VMSFileName = '') then
     Exit;
@@ -1673,7 +1673,7 @@ begin
   if YearTime <> '' then
   begin
     YearTime := ReplaceString(YearTime, '-', ':');
-    if pos(':', YearTime) > 0 then
+    if Pos(':', YearTime) > 0 then
     begin
       if (GetTimeFromstr(YearTime) = -1) then
         Exit;
@@ -1775,7 +1775,7 @@ begin
   end;
   if YearTime <> '' then
   begin
-    if pos(':', YearTime) > 0 then
+    if Pos(':', YearTime) > 0 then
     begin
       YearTime := TrimSP(YearTime);
       mhours := StrToIntDef(Separateleft(YearTime, ':'), 0);

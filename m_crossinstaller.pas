@@ -134,14 +134,14 @@ type
   public
     // In your descendent, implement this function: you can download libraries or check for their existence for normal cross compile libs:
     function GetLibs(Basepath:string):boolean;virtual; abstract;
+    // In your descendent, implement this function: you can download cross compile binutils or check for their existence
+    function GetBinUtils(Basepath:string):boolean;virtual;
     {$ifndef FPCONLY}
     // In your descendent, implement this function when needed: you can download libraries or check for their existence for Lazarus LCL cross compile libs:
     // Note: the libraries should be presumably under the basepath using the Lazarus naming convention??
     function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual;
     {$endif}
     procedure AddFPCCFGSnippet(aSnip: string);
-    // In your descendent, implement this function: you can download cross compile binutils or check for their existence
-    function GetBinUtils(Basepath:string):boolean;virtual;
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
     procedure SetCrossOpt(CrossOpts: string);
     // Pass subarch if any
@@ -194,6 +194,7 @@ function GetTOS(aOS:string):TOS;
 function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
 
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
+function GetExeExt: string;
 
 var
   CrossInstallers:TStringList=nil;
@@ -277,6 +278,15 @@ begin
   else result.OS:=GetTOS(aOS);
 end;
 
+function GetExeExt: string;
+begin
+  {$IFDEF WINDOWS}
+  Result:='.exe';
+  {$ELSE}
+  Result:='';
+  {$ENDIF}
+end;
+
 { TCrossInstaller }
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 begin
@@ -323,19 +333,19 @@ end;
 procedure TCrossInstaller.SearchLibraryInfo(found:boolean; const extrainfo:string='');
 begin
   //if found then
-  //  infoln(CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo)
+  //  Infoln(CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo)
   //else
-  //  infoln(CrossModuleName + ': Searched but did not find any library !!', etError);
-  //if Length(extrainfo)>0 then infoln(CrossModuleName + ' libs : '+extrainfo, etInfo);
+  //  Infoln(CrossModuleName + ': Searched but did not find any library !!', etError);
+  //if Length(extrainfo)>0 then Infoln(CrossModuleName + ' libs : '+extrainfo, etInfo);
 end;
 
 procedure TCrossInstaller.SearchBinUtilsInfo(found:boolean; const extrainfo:string='');
 begin
   //if found then
-  //  infoln(CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo)
+  //  Infoln(CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo)
   //else
-  //  infoln(CrossModuleName + ': Searched but did not find any binary utilities !!', etError);
-  //if Length(extrainfo)>0 then infoln(CrossModuleName + ' bins : '+extrainfo, etInfo);
+  //  Infoln(CrossModuleName + ': Searched but did not find any binary utilities !!', etError);
+  //if Length(extrainfo)>0 then Infoln(CrossModuleName + ' bins : '+extrainfo, etInfo);
 end;
 
 
@@ -517,9 +527,9 @@ end;
 procedure TCrossInstaller.ShowInfo(info: string = ''; Level: TEventType = etInfo);
 begin
   (*
-  if Length(info)>0 then infoln(CrossModuleName+': '+info,Level)
+  if Length(info)>0 then Infoln(CrossModuleName+': '+info,Level)
   {$ifndef LCL}
-  else infoln(CrossModuleName+' crosscompiler loading',etDebug);
+  else Infoln(CrossModuleName+' crosscompiler loading',etDebug);
   {$else}
   ;
   {$endif}

@@ -59,6 +59,7 @@ end;
 function Tany_Amigam68k.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
+
   if result then exit;
 
   // begin simple: check presence of library file in basedir

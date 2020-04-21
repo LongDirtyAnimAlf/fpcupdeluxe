@@ -116,7 +116,7 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    infoln(FCrossModuleName + ': found libspath '+FLibsPath,etInfo);
+    Infoln(FCrossModuleName + ': found libspath '+FLibsPath,etInfo);
   end;
 end;
 
@@ -146,12 +146,12 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
+    Infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
-    infoln(FCrossModuleName + ': found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    Infoln(FCrossModuleName + ': found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 

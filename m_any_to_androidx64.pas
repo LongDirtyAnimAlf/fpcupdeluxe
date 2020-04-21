@@ -200,7 +200,7 @@ begin
   end
   else
   begin
-    //infoln(FCrossModuleName + ': Please fill '+SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
+    //Infoln(FCrossModuleName + ': Please fill '+SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
     //' with Android libs, e.g. from the Android NDK. See http://wiki.lazarus.freepascal.org/Android.'
     //,etError);
     FAlreadyWarned:=true;

@@ -59,6 +59,7 @@ end;
 function Tany_Aros386.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
+
   if result then exit;
 
   // begin simple: check presence of library file in basedir
@@ -72,6 +73,7 @@ begin
 
   if result then
   begin
+    FLibsFound:=True;
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
     AddFPCCFGSnippet('-Xr/usr/lib');
   end
@@ -80,10 +82,9 @@ begin
     //no libs yet: go on without them
     ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
     FLibsPath:='';
+    FLibsFound:=True;
+    result:=True;
   end;
-
-  FLibsFound:=True;
-  result:=FLibsFound;
 end;
 
 {$ifndef FPCONLY}

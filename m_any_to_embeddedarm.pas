@@ -60,8 +60,8 @@ const
   LibName='libgcc.a';  // is this correct ??
 begin
   // Arm-embedded does not need libs by default, but user can add them.
-
   result:=FLibsFound;
+
   if result then exit;
 
   if length(FSubArch)>0
@@ -78,6 +78,7 @@ begin
 
   if result then
   begin
+    FLibsFound:=True;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
     SearchLibraryInfo(result);
@@ -87,6 +88,7 @@ begin
     //libs path is optional; it can be empty
     ShowInfo('Libspath ignored; it is optional for this cross compiler.');
     FLibsPath:='';
+    FLibsFound:=True;
     result:=true;
   end;
 end;

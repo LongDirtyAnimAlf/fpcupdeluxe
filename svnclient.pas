@@ -849,7 +849,7 @@ begin
     // Output from info command can include:
     // URL: http://svn.freepascal.org/svn/fpc/branches/fixes_3_0
     // Repository URL might differ from the one we've set though
-    URLPos := pos(URLTarget, Output) + URLLen;
+    URLPos := Pos(URLTarget, Output) + URLLen;
     URL := IncludeTrailingSlash(trim(copy(Output, (URLPos), Posex(LineEnding, Output, URLPos) - URLPos)));
     if FRepositoryURL = '' then
     begin

@@ -1133,21 +1133,21 @@ begin
   begin
     if amessage<>'' then
     begin
-      if pos('pcbootstrap',amessage)>0 then alternateui_update_bar(0)
+      if Pos('pcbootstrap',amessage)>0 then alternateui_update_bar(0)
       else
-        if pos('ompiling',amessage)>0 then alternateui_update_bar(1)
+        if Pos('ompiling',amessage)>0 then alternateui_update_bar(1)
         else
-          if pos('inking',amessage)>0 then alternateui_update_bar(2)
+          if Pos('inking',amessage)>0 then alternateui_update_bar(2)
           else
-            if pos('ake',amessage)>0 then alternateui_update_bar(3)
+            if Pos('ake',amessage)>0 then alternateui_update_bar(3)
             else
-              if pos('nstall',amessage)>0 then alternateui_update_bar(4)
+              if Pos('nstall',amessage)>0 then alternateui_update_bar(4)
               else
-                if pos('xecuting',amessage)>0 then alternateui_update_bar(5)
+                if Pos('xecuting',amessage)>0 then alternateui_update_bar(5)
                 else
-                  if pos('pcsrc',amessage)>0 then alternateui_update_bar(6)
+                  if Pos('pcsrc',amessage)>0 then alternateui_update_bar(6)
                   else
-                    if pos('xtracted',amessage)>0 then alternateui_update_bar(7)
+                    if Pos('xtracted',amessage)>0 then alternateui_update_bar(7)
                     else
                       alternateui_update_bar(8);
 
@@ -1487,7 +1487,7 @@ begin
 
   // Memorize Title
   alternateui_Form1_title:=Form1.Caption;
-  if pos('base',alternateui_form1_title)>0 then alternateui_title:=StringReplace(alternateui_form1_title,'base','('+AlternateUi_Version+' [B v'+AlternateUiButton_Version+']) base',[rfReplaceAll])
+  if Pos('base',alternateui_form1_title)>0 then alternateui_title:=StringReplace(alternateui_form1_title,'base','('+AlternateUi_Version+' [B v'+AlternateUiButton_Version+']) base',[rfReplaceAll])
   else alternateui_title:=StringReplace(alternateui_form1_title,'for','('+AlternateUi_Version+' [B v'+AlternateUiButton_Version+']) for',[rfReplaceAll]);
 
   // create a button on Form1 to activate interface

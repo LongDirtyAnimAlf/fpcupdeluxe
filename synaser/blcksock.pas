@@ -2444,7 +2444,7 @@ begin
       end
       else
       begin
-        x := pos(Terminator, s);
+        x := Pos(Terminator, s);
         tl := l;
       end;
     if (FMaxLineLength <> 0) and (Length(s) > FMaxLineLength) then

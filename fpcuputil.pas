@@ -432,14 +432,12 @@ uses
   ,unix,baseunix
   {$ENDIF}
   {$IFDEF ENABLEWGET}
-  // for wget downloader
-  ,process
-  ,processutils
-  // for libc downloader
-  {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}
+  {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS) AND NOT DEFINED(AMIGA)}
   ,fpcuplibcurl
   {$ENDIF}
   {$ENDIF ENABLEWGET}
+  ,process
+  ,processutils
   ,NumCPULib  in './numcpulib/NumCPULib.pas'
   ;
 
@@ -2838,7 +2836,7 @@ begin
   s:='';
   j:=0;
   //if ExecuteCommandCompat('xcodebuild -version -sdk '+aSDK, Output, False) <> 0 then
-  ExecuteCommandCompat('xcodebuild -version -sdk '+aSDK, Output, False);
+  RunCommand('xcodebuild',['-version','-sdk',aSDK], Output);
   begin
     i:=Pos(SearchTarget,Output);
     if i>0 then
@@ -2855,7 +2853,7 @@ begin
       //xcodebuild not working ... try something completely different ...
       if aSDK='macosx' then
       begin
-        ExecuteCommandCompat('sw_vers -productVersion', Output, False);
+        RunCommand('sw_vers',['-productVersion'], Output);
         if (Length(Output)>0) then
         begin
           i:=1;
@@ -3065,7 +3063,7 @@ begin
   end;
 end;
 
-//Adapted from sysutils; Unix/Linux only
+//Adapted from SysUtils; Unix/Linux only
 Function XdgConfigHome: String;
 { Follows base-dir spec,
   see [http://freedesktop.org/Standards/basedir-spec].
@@ -3422,12 +3420,12 @@ begin
          then t := t+' '+lowercase(Trim(s));
 
     {$else Darwin}
-      if (ExecuteCommandCompat('sw_vers -productName', s, false)=0) then
+      if RunCommand('sw_vers',['-productName'], s) then
       begin
         if Length(s)>0 then t:=Trim(s);
       end;
       if Length(s)=0 then t:=GetTargetOS;
-      if (ExecuteCommandCompat('sw_vers -productVersion', s, false)=0) then
+      if RunCommand('sw_vers',['-productVersion'], s) then
       begin
         if Length(s)>0 then
         begin

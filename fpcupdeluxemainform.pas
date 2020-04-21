@@ -2588,6 +2588,8 @@ begin
         if Form2.IncludeLCL then AddMessage('Skipping build of LCL for this target: not supported (yet).');
       end;
 
+      FPCupManager.OnlyModules:='LCL';
+
       s:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
       s:=Trim(s);
       if Length(s)>0 then
@@ -3985,7 +3987,7 @@ begin
   except
     on E: Exception do
     begin
-      //infoln(installerUniversal.DELUXEFILENAME+': File creation error: '+E.Message,etError);
+      //Infoln(installerUniversal.DELUXEFILENAME+': File creation error: '+E.Message,etError);
     end;
   end;
 
@@ -4059,7 +4061,7 @@ begin
 
   if Length(aLocalTarget)=0 then exit;
 
-  if pos('://',aLocalTarget)=0 then
+  if Pos('://',aLocalTarget)=0 then
   begin
     // translate keyword into a real URL
     if aEdit=RealFPCURL then aLocalTarget:=installerUniversal.GetAlias('fpcURL',aLocalTarget);

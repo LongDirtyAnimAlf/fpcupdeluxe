@@ -158,7 +158,7 @@ var
   InstallerBatchDir: string; //directory where installer batch script is; will contain log and output dir with installer
 begin
   // todo: split up, move to config, perhaps make dirs properties etc
-  infoln('TWinInstaller: creating Lazarus installer. This may take a while...',etInfo);
+  Infoln('TWinInstaller: creating Lazarus installer. This may take a while...',etInfo);
 
   // Basedirectory = install directory from fpcup.ini/universal module.
   // We use it to put SVN repos needed for building.
@@ -191,7 +191,7 @@ begin
   FInstallerBuildDir:=IncludeTrailingPathDelimiter(GetTempDirName)+'lazinstaller';
   if DirectoryExists(FInstallerBuildDir) then
   begin
-    infoln('Deleting temporary Lazarus installer build directory '+FInstallerBuildDir+' before running installer creator.',etInfo);
+    Infoln('Deleting temporary Lazarus installer build directory '+FInstallerBuildDir+' before running installer creator.',etInfo);
     DeleteDirectory(FInstallerBuildDir,false);
   end;
 
@@ -249,7 +249,7 @@ begin
     // Batch file ended, but no idea if it actually was succesful because it does not return result codes.
     // So removing the log
     //DeleteFile(IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log');
-    infoln('TWinInstaller: finished running the installer creator. If it worked, the installer is in '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'output',etInfo);
+    Infoln('TWinInstaller: finished running the installer creator. If it worked, the installer is in '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'output',etInfo);
     result := True;
   end;
 end;

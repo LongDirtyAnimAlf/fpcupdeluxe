@@ -62,7 +62,7 @@ interface
 
 uses
 {$IFDEF FPC}
-  dynlibs, sysutils;
+  dynlibs, SysUtils;
 {$ELSE}
   {$IFDEF MSWINDOWS}
   Windows;
@@ -135,12 +135,12 @@ procedure Sleep(milliseconds: Cardinal);
 begin
 {$IFDEF MSWINDOWS}
   {$IFDEF FPC}
-  sysutils.sleep(milliseconds);
+  SysUtils.sleep(milliseconds);
   {$ELSE}
   windows.sleep(milliseconds);
   {$ENDIF}
 {$ELSE}
-  sysutils.sleep(milliseconds);
+  SysUtils.sleep(milliseconds);
 {$ENDIF}
 
 end;

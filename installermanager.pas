@@ -479,7 +479,7 @@ end;
 procedure TFPCupManager.SetFPCURL(AValue: string);
 begin
   if FFPCURL=AValue then Exit;
-  if pos('://',AValue)>0 then
+  if Pos('://',AValue)>0 then
     FFPCURL:=AValue
   else
     FFPCURL:=installerUniversal.GetAlias('fpcURL',AValue);
@@ -507,7 +507,7 @@ end;
 procedure TFPCupManager.SetLazarusURL(AValue: string);
 begin
   if FLazarusURL=AValue then Exit;
-  if pos('://',AValue)>0 then
+  if Pos('://',AValue)>0 then
     FLazarusURL:=AValue
   else
     FLazarusURL:=installerUniversal.GetAlias('lazURL',AValue);
@@ -869,11 +869,11 @@ begin
       aSequence:=_DEFAULT;
       {$ifdef win32}
       // Run Windows specific cross compiler or regular version
-      if pos(_CROSSWIN,SkipModules)=0 then aSequence:='Defaultwin32';
+      if Pos(_CROSSWIN,SkipModules)=0 then aSequence:='Defaultwin32';
       {$endif}
       {$ifdef win64}
       //not yet
-      //if pos(_CROSSWIN,SkipModules)=0 then aSequence:='Defaultwin64';
+      //if Pos(_CROSSWIN,SkipModules)=0 then aSequence:='Defaultwin64';
       {$endif}
       {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
       aSequence:=_DEFAULTSIMPLE;
@@ -993,7 +993,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     result:=true;
     if FParent.ShortCutNameLazarus<>EmptyStr then
     begin
-      //infoln('TSequencer.DoExec (Lazarus): creating desktop shortcut:',etInfo);
+      //Infoln('TSequencer.DoExec (Lazarus): creating desktop shortcut:',etInfo);
       try
         // Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
         InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
@@ -1012,7 +1012,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
         FParent.FShortcutCreated:=true;
       except
         // Ignore problems creating shortcut
-        //infoln('CreateLazarusScript: Error creating shortcuts/links to Lazarus. Continuing.',etWarning);
+        //Infoln('CreateLazarusScript: Error creating shortcuts/links to Lazarus. Continuing.',etWarning);
       end;
     end;
   end;
@@ -1021,7 +1021,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   result:=true;
   if FParent.ShortCutNameLazarus<>EmptyStr then
   begin
-    //infoln('TSequencer.DoExec (Lazarus): deleting desktop shortcut:',etInfo);
+    //Infoln('TSequencer.DoExec (Lazarus): deleting desktop shortcut:',etInfo);
     try
       //Delete shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       {$IFDEF MSWINDOWS}
