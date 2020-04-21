@@ -302,7 +302,7 @@ begin
 
   if Assigned(CrossInstaller) then
   begin
-    CrossInstaller.Reset;
+    //CrossInstaller.Reset;
 
     // Actually not using crossopts - they're only for building an FPC compiler; the
     // relevant options should have been written as a snippet to fpc.cfg and picked
@@ -333,7 +333,6 @@ begin
         WritelnLog(etWarning, infotext+'Lazbuild could not be found ... using make to cross-build '+ModuleName, true);
         LazBuildApp := '';
       end;
-      LazBuildApp := '';
 
       // Since April 2012, LCL requires lazutils which requires registration
       // https://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
@@ -349,6 +348,8 @@ begin
         if Length(LazBuildApp)=0 then
         begin
           // Use make for cross compiling
+          // Check unwanted forced update through ViaMakefile and .compiled
+
           Processor.Executable := Make;
           Processor.Process.Parameters.Clear;
           {$IFDEF MSWINDOWS}
@@ -402,22 +403,21 @@ begin
           if Length(Options)>0 then Processor.Process.Parameters.Add('OPT='+Options);
 
           Processor.Process.Parameters.Add('--directory=' + FSourceDirectory);
+          //Processor.Process.Parameters.Add('--directory=' + ConcatPaths([FSourceDirectory,'lcl']));
 
           if FCrossLCL_Platform <> '' then
-          begin
             Processor.Process.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
-            Processor.Process.Parameters.Add('registration');
-            Processor.Process.Parameters.Add('lazutils');
-            Processor.Process.Parameters.Add('lcl');
-            Processor.Process.Parameters.Add('basecomponents');
-          end
-          else
-          begin
-            Processor.Process.Parameters.Add('registration');
-            Processor.Process.Parameters.Add('lazutils');
-            Processor.Process.Parameters.Add('lcl');
-            Processor.Process.Parameters.Add('basecomponents');
-          end;
+
+          Processor.Process.Parameters.Add('registration');
+          Processor.Process.Parameters.Add('lazutils');
+          Processor.Process.Parameters.Add('lcl');
+          Processor.Process.Parameters.Add('basecomponents');
+
+          //Processor.Process.Parameters.Add('cleanintf');
+          //Processor.Process.Parameters.Add('intf');
+
+          //Processor.Process.Parameters.Add('all');
+          //Processor.Process.Parameters.Add('compiled');
         end
         else
         begin
@@ -432,10 +432,16 @@ begin
           // Quiet:=ConsoleVerbosity<=-3;
           Processor.Process.Parameters.Add('--quiet');
           {$ENDIF}
+
+          (*
+          //Still not clear if jobs can be enabled for Lazarus lazbuild builds ... :-|
           if (FNoJobs) then
             Processor.Process.Parameters.Add('--max-process-count=1')
           else
             Processor.Process.Parameters.Add('--max-process-count='+InttoStr(GetLogicalCpuCount));
+          *)
+          Processor.Process.Parameters.Add('--max-process-count=1');
+
           Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
 
           // Apparently, the .compiled file, that are used to check for a rebuild, do not contain a cpu setting if cpu and cross-cpu do not differ !!
@@ -665,7 +671,7 @@ begin
     Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
     {$endif}
 
-    Processor.Process.Parameters.Add('CFGFILE=' + ExtractFilePath(FCompiler)+'fpc.cfg');
+    //Processor.Process.Parameters.Add('CFGFILE=' + ExtractFilePath(FCompiler)+'fpc.cfg');
 
     if FCrossLCL_Platform <> '' then
       Processor.Process.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
@@ -716,10 +722,11 @@ begin
     case ModuleName of
       _USERIDE:
       begin
+        (*
         Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
         Processor.Process.Parameters.Add('useride');
         Infoln(infotext+'Running: make useride', etInfo);
-        (*
+        *)
         s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
         if FileExists(s) then
         begin
@@ -740,7 +747,6 @@ begin
           Processor.Process.Parameters.Add('ide');
           Infoln(infotext+'Running: make registration lazutils lcl basecomponents ide', etInfo);
         end;
-        *)
       end;
       _IDE:
       begin

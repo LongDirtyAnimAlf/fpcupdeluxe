@@ -2799,6 +2799,8 @@ function GetLogicalCpuCount: integer;
 var
   TotalMBMemory:DWord;
 begin
+  result:=1;
+
   { Uses NumCPULib Library }
   { Copyright (c) 2019 Ugochukwu Mmaduekwe }
   { Github Repository https://github.com/Xor-el }
@@ -2822,6 +2824,9 @@ begin
   begin
     result:=1;
   end;
+
+  if (result<1) then result:=1;
+  if (result>16) then result:=16;
 end;
 
 {$ifdef Darwin}

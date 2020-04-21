@@ -3017,7 +3017,7 @@ begin
     if (Pos('ppc386.exe',FCompiler)>0) OR (GetCompilerTargetOS(FCompiler)='win32') then //need to build ppcx64 before
     begin
       Infoln('We have ppc386. We need ppcx64. So make it !',etInfo);
-      Processor.CmdLineExe := Make;
+      Processor.Executable := Make;
       Processor.Process.Parameters.Clear;
       {$IFDEF MSWINDOWS}
       if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
@@ -3038,7 +3038,7 @@ begin
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      Infoln(infotext+'Running '+Processor.CmdLineExe+' cycle for Windows FPC64:',etInfo);
+      Infoln(infotext+'Running '+Processor.GetExeInfo+' cycle for Windows FPC64:',etInfo);
       ProcessorResult:=Processor.ExecuteAndWait;
       if ProcessorResult <> 0 then
       begin

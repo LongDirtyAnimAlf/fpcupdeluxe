@@ -2588,7 +2588,7 @@ begin
         if Form2.IncludeLCL then AddMessage('Skipping build of LCL for this target: not supported (yet).');
       end;
 
-      FPCupManager.OnlyModules:='LCL';
+      //FPCupManager.OnlyModules:='LCL';
 
       s:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
       s:=Trim(s);
