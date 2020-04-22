@@ -2588,6 +2588,7 @@ begin
         if Form2.IncludeLCL then AddMessage('Skipping build of LCL for this target: not supported (yet).');
       end;
 
+      //For testing
       //FPCupManager.OnlyModules:='LCL';
 
       s:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
@@ -3705,8 +3706,6 @@ begin
 
   aDataClient.UpInfo.UpInstallDir:=FPCupManager.BaseDirectory;
   {$endif}
-
-  sleep(1000);
 
   try
     result:=FPCupManager.Run;

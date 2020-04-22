@@ -338,10 +338,8 @@ begin
       // https://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
       //https://lists.lazarus-ide.org/pipermail/lazarus/2012-April/138168.html
 
-
       OldPath:=GetPath;
       try
-
         //Add FPC binary path to path
         SetPath(ExtractFilePath(FCompiler),false,true);
 
@@ -376,11 +374,6 @@ begin
           Processor.Process.Parameters.Add('FPCMAKE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt);
           Processor.Process.Parameters.Add('PPUMOVE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'ppumove'+GetExeExt);
 
-
-          //Options:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
-          //if FileExists(Options) then Processor.Process.Parameters.Add('CFGFILE=' + Options);
-          Processor.Process.Parameters.Add('CFGFILE=' + ExtractFilePath(FCompiler)+'fpc.cfg');
-
           {$ifdef Windows}
           Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
           Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
@@ -392,8 +385,12 @@ begin
           Processor.Process.Parameters.Add('OS_TARGET=' + CrossInstaller.TargetOSName);
           Processor.Process.Parameters.Add('CPU_TARGET=' + CrossInstaller.TargetCPUName);
 
-          //Set options
-          Options := STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
+          //Set standard options
+          Options := STANDARDCOMPILERVERBOSITYOPTIONS;
+          //Always limit the search for fpc.cfg to our own fpc.cfg
+          Options := Options+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
+          // Add remaining options
+          Options := Options+' '+FCompilerOptions;
 
           while Pos('  ',Options)>0 do
           begin
@@ -408,16 +405,13 @@ begin
           if FCrossLCL_Platform <> '' then
             Processor.Process.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
+          //Processor.Process.Parameters.Add('all');
+
           Processor.Process.Parameters.Add('registration');
           Processor.Process.Parameters.Add('lazutils');
           Processor.Process.Parameters.Add('lcl');
           Processor.Process.Parameters.Add('basecomponents');
 
-          //Processor.Process.Parameters.Add('cleanintf');
-          //Processor.Process.Parameters.Add('intf');
-
-          //Processor.Process.Parameters.Add('all');
-          //Processor.Process.Parameters.Add('compiled');
         end
         else
         begin
@@ -654,6 +648,7 @@ begin
       Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
     Processor.Process.Parameters.Add('FPC=' + FCompiler);
     Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+    Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
     Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
     //Processor.Process.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
     //Processor.Process.Parameters.Add('--directory=.');
@@ -671,13 +666,20 @@ begin
     Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
     {$endif}
 
-    //Processor.Process.Parameters.Add('CFGFILE=' + ExtractFilePath(FCompiler)+'fpc.cfg');
-
     if FCrossLCL_Platform <> '' then
       Processor.Process.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
-    //Set options
-    s:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
+    // add the ide config build file when it is there
+    s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
+    if FileExists(s) then
+      Processor.Process.Parameters.Add('CFGFILE=' + s);
+
+    //Set standard options
+    s:=STANDARDCOMPILERVERBOSITYOPTIONS;
+    //Always limit the search for fpc.cfg to our own fpc.cfg
+    s:=s+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
+    // Add remaining options
+    s:=s+' '+FCompilerOptions;
 
     //Lazbuild MUST be build without giving any extra optimization options
     //At least on Linux anything else gives errors when trying to use lazbuild ... :-(
@@ -722,17 +724,13 @@ begin
     case ModuleName of
       _USERIDE:
       begin
-        (*
-        Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
-        Processor.Process.Parameters.Add('useride');
-        Infoln(infotext+'Running: make useride', etInfo);
-        *)
         s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
         if FileExists(s) then
         begin
-          //Set config-file
+          // this uses lazbuild as per definition in the Lazarus Makefile
+          // to prevent errors, limit the amount of jobs to 1
           Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
-          Processor.Process.Parameters.Add('CFGFILE=' + s);
+          Processor.Process.Parameters.Add('--jobs=1');
           Processor.Process.Parameters.Add('useride');
           Infoln(infotext+'Running: make useride', etInfo);
         end
@@ -804,11 +802,8 @@ begin
       begin
         if LCLCrossActionNeeded then
         begin
-          // first: Processor.Process.Parameters.Add('-C lcl'+DirectorySeparator+'interfaces'+DirectorySeparator+FCrossLCL_Platform);
-          // followed by: make ideintf basecomponents bigidecomponents LCL_PLATFORM=qt
           Processor.Process.Parameters.Add('-C lcl');
           Processor.Process.Parameters.Add('intf');
-          //Processor.Process.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
           Infoln(infotext+'Running: make -C lcl intf', etInfo);
         end
         else
