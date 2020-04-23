@@ -199,7 +199,7 @@ type
     procedure setCredentials(user,pass:string);virtual;
     procedure setProxy(host:string;port:integer;user,pass:string);virtual;
     function getFile(const URL,aFilename:string):boolean;virtual;abstract;
-    function getStream(const URL:string; DataStream:TStream):boolean;virtual;abstract;
+    function getStream(const URL:string; aDataStream:TStream):boolean;virtual;abstract;
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;virtual;abstract;
     function checkURL(const URL:string):boolean;virtual;abstract;
   end;
@@ -217,9 +217,9 @@ type
     procedure DoHeaders(Sender : TObject);
     procedure DoPassword(Sender: TObject; var {%H-}RepeatRequest: Boolean);
     procedure ShowRedirect({%H-}ASender : TObject; Const ASrc : String; Var ADest : String);
-    function Download(const URL: String; DataStream:TStream):boolean;
-    function FTPDownload(Const URL: String; DataStream:TStream):boolean;
-    function HTTPDownload(Const URL : String; DataStream:TStream):boolean;
+    function Download(const URL: String; aDataStream:TStream):boolean;
+    function FTPDownload(Const URL: String; aDataStream:TStream):boolean;
+    function HTTPDownload(Const URL : String; aDataStream:TStream):boolean;
   protected
     procedure SetUserAgent(AValue:string);override;
     procedure SetContentType(AValue:string);override;
@@ -230,7 +230,7 @@ type
     destructor Destroy; override;
     procedure setProxy(host:string;port:integer;user,pass:string);override;
     function getFile(const URL,aFilename:string):boolean;override;
-    function getStream(const URL:string; DataStream:TStream):boolean;override;
+    function getStream(const URL:string; aDataStream:TStream):boolean;override;
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
   end;
@@ -243,15 +243,15 @@ type
     FWGETOk:boolean;
     //WGETBinary:string;
     procedure AddHeader(const aHeader,aValue:String);
-    function  WGetDownload(Const URL : String; DataStream : TStream):boolean;
+    function  WGetDownload(Const URL : String; aDataStream : TStream):boolean;
     {$ifdef ENABLECURL}
-    function  LibCurlDownload(Const URL : String; DataStream : TStream):boolean;
+    function  LibCurlDownload(Const URL : String; aDataStream : TStream):boolean;
     function  LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
     {$endif}
     function  WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
-    function  Download(const URL: String; DataStream: TStream):boolean;
-    function  FTPDownload(Const URL : String; DataStream : TStream):boolean;
-    function  HTTPDownload(Const URL : String; DataStream : TStream):boolean;
+    function  Download(const URL: String; aDataStream: TStream):boolean;
+    function  FTPDownload(Const URL : String; aDataStream : TStream):boolean;
+    function  HTTPDownload(Const URL : String; aDataStream : TStream):boolean;
   protected
     procedure SetContentType(AValue:string);override;
     procedure SetUserAgent(AValue:string);override;
@@ -262,7 +262,7 @@ type
     constructor Create;override;
     constructor Create(aWGETBinary:string);
     function getFile(const URL,aFilename:string):boolean;override;
-    function getStream(const URL:string; DataStream:TStream):boolean;override;
+    function getStream(const URL:string; aDataStream:TStream):boolean;override;
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
   end;
@@ -313,7 +313,7 @@ function ReleaseCandidateFromUrl(aURL:string): integer;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
-function Download(UseWget:boolean; URL: string; DataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
+function Download(UseWget:boolean; URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 function GetSVNFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 {$IFDEF MSWINDOWS}
@@ -1704,7 +1704,7 @@ begin
   Result:=true;
 end;
 
-function DownloadBase(aDownLoader:TBasicDownloader;URL: string; DataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
+function DownloadBase(aDownLoader:TBasicDownloader;URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 begin
   result:=false;
 
@@ -1719,12 +1719,13 @@ begin
   {$endif}
 
   if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-  result:=aDownLoader.getStream(URL,DataStream);
+  result:=aDownLoader.getStream(URL,aDataStream);
 end;
 
 function DownloadBase(aDownLoader:TBasicDownloader;URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 var
   aFile:TDownloadStream;
+  i:integer;
 begin
   result:=false;
 
@@ -1736,7 +1737,7 @@ begin
     begin
       aDownLoader.UserAgent:=FPCUPUSERAGENT;
       aDownLoader.ContentType:='application/json';
-      aDownLoader.Accept:='';
+      //aDownLoader.Accept:='';
     end
     else
     begin
@@ -1744,11 +1745,11 @@ begin
       //aDownLoader.UserAgent:='Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2725.0 Safari/537.36';
       aDownLoader.ContentType:='';
       //aDownLoader.Accept:='text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
-      aDownLoader.Accept:='*/*';
+      //aDownLoader.Accept:='*/*';
     end;
     result:=DownloadBase(aDownLoader,URL,aFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   finally
-    aFile.Destroy;
+    aFile.Free;
   end;
   if (NOT result) then
   begin
@@ -1758,7 +1759,7 @@ end;
 
 
 {$ifdef MSWindows}
-function DownloadByWinINet(URL: string; DataStream: TSTream): boolean;
+function DownloadByWinINet(URL: string; aDataStream: TSTream): boolean;
 const
   URLMAGIC='/download';
 var
@@ -1829,7 +1830,7 @@ begin
             if InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer)-1, {%H-}BytesRead) then
             begin
               if (BytesRead = 0) then Break;
-              DataStream.Write(Buffer, BytesRead);
+              aDataStream.Write(Buffer, BytesRead);
             end
             else
             if InternetQueryDataAvailable(UrlHandle, {%H-}BytesRead, 0, 0) then
@@ -1842,12 +1843,12 @@ begin
           while InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer), {%H-}BytesRead) do
           begin
             if (BytesRead = 0) then Break;
-            DataStream.Write(Buffer, BytesRead);
+            aDataStream.Write(Buffer, BytesRead);
           end;
           }
           //Buffer[0] := 0;
-          //DataStream.Write(Buffer, 1);
-          result:=(DataStream.Size>1);
+          //aDataStream.Write(Buffer, 1);
+          result:=(aDataStream.Size>1);
         end;
       end;
     finally
@@ -1952,7 +1953,7 @@ begin
 end;
 {$endif MSWindows}
 
-function Download(UseWget:boolean; URL: string; DataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
+function Download(UseWget:boolean; URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 var
   aDownLoader:TBasicDownLoader;
 begin
@@ -1969,7 +1970,7 @@ begin
         aDownLoader.UserAgent:=FPCUPUSERAGENT;
         aDownLoader.ContentType:='application/json';
       end;
-      result:=DownloadBase(aDownLoader,URL,DataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+      result:=DownloadBase(aDownLoader,URL,aDataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
     finally
       aDownLoader.Destroy;
     end;
@@ -1979,7 +1980,7 @@ begin
   //Third resort: use Windows INet
   if (NOT result) then
   begin
-    result:=DownloadByWinINet(URL,DataStream);
+    result:=DownloadByWinINet(URL,aDataStream);
   end;
 
   //Fourth resort: use BitsAdmin
@@ -1997,7 +1998,7 @@ begin
   begin
     aDownLoader:=TWGetDownLoader.Create;
     try
-      result:=DownloadBase(aDownLoader,URL,DataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+      result:=DownloadBase(aDownLoader,URL,aDataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
     finally
       aDownLoader.Destroy;
     end;
@@ -4424,7 +4425,7 @@ begin
   end;
 end;
 
-function TUseNativeDownLoader.FTPDownload(Const URL: String; DataStream:TStream):boolean;
+function TUseNativeDownLoader.FTPDownload(Const URL: String; aDataStream:TStream):boolean;
 var
   URI : TURI;
   aPort:integer;
@@ -4432,7 +4433,7 @@ var
 begin
   result:=false;
 
-  if DataStream=nil then exit;
+  if aDataStream=nil then exit;
 
   URI:=ParseURI(URL);
   aPort:=URI.Port;
@@ -4443,7 +4444,7 @@ begin
   try
     with aFTPClient do
     begin
-      DirectFile := False;
+      DirectFile := True;
       DirectFileName := URI.Path+URI.Document;
       TargetHost := URI.Host;
       TargetPort := InttoStr(aPort);
@@ -4468,11 +4469,11 @@ begin
         Sock.HTTPTunnelPass:=HTTPProxyPassword;
       end;
     end;
-    DataStream.Position:=0;
-    DataStream.Size:=0;
+    aDataStream.Position:=0;
+    aDataStream.Size:=0;
     if aFTPClient.Login then
     begin
-      Result := aFTPClient.RetrieveStream(DataStream, true);
+      Result := aFTPClient.RetrieveStream(aDataStream, true);
       aFTPClient.Logout;
     end;
   finally
@@ -4480,7 +4481,7 @@ begin
   end;
 end;
 
-function TUseNativeDownLoader.HTTPDownload(Const URL : String; DataStream: TStream):boolean;
+function TUseNativeDownLoader.HTTPDownload(Const URL : String; aDataStream: TStream):boolean;
 var
   tries:byte;
   response: Integer;
@@ -4488,16 +4489,16 @@ begin
   result:=false;
   tries:=0;
 
-  if DataStream=nil then exit;
+  if aDataStream=nil then exit;
 
   with aFPHTTPClient do
   begin
       repeat
         try
-          DataStream.Position:=0;
-          DataStream.Size:=0;
-          Get(URL,DataStream);
-          //HTTPMethod('GET',URL,DataStream,[200,301,302,303,307,308]);
+          aDataStream.Position:=0;
+          aDataStream.Size:=0;
+          Get(URL,aDataStream);
+          //HTTPMethod('GET',URL,aDataStream,[200,301,302,303,307,308]);
           response:=ResponseStatusCode;
           result:=(response=200);
           //result:=(response>=100) and (response<300);
@@ -4535,9 +4536,9 @@ begin
   if (NOT result) then SysUtils.DeleteFile(aFilename);
 end;
 
-function TUseNativeDownLoader.getStream(const URL:string; DataStream:TStream):boolean;
+function TUseNativeDownLoader.getStream(const URL:string; aDataStream:TStream):boolean;
 begin
-  result:=Download(URL,DataStream);
+  result:=Download(URL,aDataStream);
 end;
 
 function TUseNativeDownLoader.checkURL(const URL:string):boolean;
@@ -4568,7 +4569,7 @@ begin
   end;
 end;
 
-function TUseNativeDownLoader.Download(const URL: String; DataStream:TStream):boolean;
+function TUseNativeDownLoader.Download(const URL: String; aDataStream:TStream):boolean;
 const
   URLMAGIC='/download';
 Var
@@ -4581,18 +4582,18 @@ begin
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
 
-  if (DataStream is TDownloadStream) then
+  if (aDataStream is TDownloadStream) then
   begin
-    (DataStream as TDownloadStream).FOnWriteStream:=@DoOnWriteStream;
+    (aDataStream as TDownloadStream).FOnWriteStream:=@DoOnWriteStream;
     StoredTickCount:=GetUpTickCount;
   end;
 
   If CompareText(P,'ftp')=0 then
-    result:=FTPDownload(URL,DataStream)
+    result:=FTPDownload(URL,aDataStream)
   else if CompareText(P,'http')=0 then
-    result:=HTTPDownload(URL,DataStream)
+    result:=HTTPDownload(URL,aDataStream)
   else if CompareText(P,'https')=0 then
-    result:=HTTPDownload(URL,DataStream);
+    result:=HTTPDownload(URL,aDataStream);
 end;
 {$endif}
 
@@ -4657,7 +4658,7 @@ begin
 end;
 
 
-function TUseWGetDownloader.WGetDownload(Const URL : String; DataStream : TStream):boolean;
+function TUseWGetDownloader.WGetDownload(Const URL : String; aDataStream : TStream):boolean;
 var
   Buffer : Array[0..4096] of byte;
   Count : Integer;
@@ -4673,9 +4674,9 @@ begin
     while Running do
     begin
       Count:=Output.Read(Buffer,SizeOf(Buffer));
-      if (Count>0) then DataStream.WriteBuffer(Buffer,Count);
+      if (Count>0) then aDataStream.WriteBuffer(Buffer,Count);
     end;
-    result:=((ExitStatus=0) AND (DataStream.Size>0));
+    result:=((ExitStatus=0) AND (aDataStream.Size>0));
   finally
     Free;
   end;
@@ -4690,7 +4691,7 @@ begin
   end;
 end;
 
-function TUseWGetDownloader.LibCurlDownload(Const URL : String; DataStream : TStream):boolean;
+function TUseWGetDownloader.LibCurlDownload(Const URL : String; aDataStream : TStream):boolean;
 var
   hCurl : pCurl;
   res: CURLcode;
@@ -4738,7 +4739,7 @@ begin
         {$endif}
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(DataStream));
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(aDataStream));
         if (Length(FUserAgent)>0) then if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,pointer(FUserAgent));
 
         curl_headers := nil;
@@ -4755,7 +4756,7 @@ begin
         if ( (res=CURLE_OK) AND (response<>0) AND (response<>404) ) then
         begin
           res:=curl_easy_perform(hCurl);
-          result:=((res=CURLE_OK) AND (DataStream.Size>0));
+          result:=((res=CURLE_OK) AND (aDataStream.Size>0));
         end else result:=false;
 
         try
@@ -4779,27 +4780,27 @@ end;
 {$endif ENABLECURL}
 
 
-function TUseWGetDownloader.FTPDownload(Const URL : String; DataStream : TStream):boolean;
+function TUseWGetDownloader.FTPDownload(Const URL : String; aDataStream : TStream):boolean;
 begin
   result:=false;
   {$ifdef ENABLECURL}
-  result:=LibCurlDownload(URL,DataStream);
+  result:=LibCurlDownload(URL,aDataStream);
   {$endif}
   if (NOT result) then
   begin
-    result:=WGetDownload(URL,DataStream);
+    result:=WGetDownload(URL,aDataStream);
   end;
 end;
 
-function TUseWGetDownloader.HTTPDownload(Const URL : String; DataStream : TStream):boolean;
+function TUseWGetDownloader.HTTPDownload(Const URL : String; aDataStream : TStream):boolean;
 begin
   result:=false;
   {$ifdef ENABLECURL}
-  result:=LibCurlDownload(URL,DataStream);
+  result:=LibCurlDownload(URL,aDataStream);
   {$endif}
   if (NOT result) then
   begin
-    result:=WGetDownload(URL,DataStream);
+    result:=WGetDownload(URL,aDataStream);
   end;
 end;
 
@@ -5025,7 +5026,7 @@ begin
   end;
 end;
 
-function TUseWGetDownloader.Download(const URL: String; DataStream: TStream):boolean;
+function TUseWGetDownloader.Download(const URL: String; aDataStream: TStream):boolean;
 Var
   URI : TURI;
   P : String;
@@ -5034,18 +5035,18 @@ begin
   URI:=ParseURI(URL);
   P:=URI.Protocol;
 
-  if (DataStream is TDownloadStream) then
+  if (aDataStream is TDownloadStream) then
   begin
-    (DataStream as TDownloadStream).FOnWriteStream:=@DoOnWriteStream;
+    (aDataStream as TDownloadStream).FOnWriteStream:=@DoOnWriteStream;
     StoredTickCount:=GetUpTickCount;
   end;
 
   If CompareText(P,'ftp')=0 then
-    result:=FTPDownload(URL,DataStream)
+    result:=FTPDownload(URL,aDataStream)
   else if CompareText(P,'http')=0 then
-    result:=HTTPDownload(URL,DataStream)
+    result:=HTTPDownload(URL,aDataStream)
   else if CompareText(P,'https')=0 then
-    result:=HTTPDownload(URL,DataStream);
+    result:=HTTPDownload(URL,aDataStream);
 end;
 
 function TUseWGetDownloader.getFile(const URL,aFilename:string):boolean;
@@ -5067,14 +5068,14 @@ begin
   if (NOT result) then SysUtils.DeleteFile(aFilename);
 end;
 
-function TUseWGetDownloader.getStream(const URL:string;DataStream:TStream):boolean;
+function TUseWGetDownloader.getStream(const URL:string; aDataStream:TStream):boolean;
 begin
   result:=false;
-  if DataStream=nil then exit;
+  if aDataStream=nil then exit;
   try
-    DataStream.Position:=0;
-    DataStream.Size:=0;
-    result:=Download(URL,DataStream);
+    aDataStream.Position:=0;
+    aDataStream.Size:=0;
+    result:=Download(URL,aDataStream);
   except
     result:=False;
   end;
