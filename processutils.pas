@@ -839,7 +839,7 @@ begin
   result:=false;
 
   // skip stray empty lines
-  //if (Length(line)=0) then exit;
+  if (Length(line)=0) then exit;
 
   {$ifdef Darwin}
   // suppress all setfocus errors on Darwin, always
@@ -1273,7 +1273,11 @@ begin
     aMessage:=aMsg;
   PInfo := StrAlloc(Length(aMessage)+1);
   StrCopy(PInfo, PChar(aMessage));
-  if (Assigned(Application) AND Assigned(Application.MainForm)) then PostMessage(Application.MainForm.Handle, WM_THREADINFO, {%H-}NativeUInt(PInfo), 0);
+  if (Assigned(Application) AND Assigned(Application.MainForm)) then
+  begin
+    PostMessage(Application.MainForm.Handle, WM_THREADINFO, {%H-}NativeUInt(PInfo), 0);
+    //Application.ProcessMessages;
+  end;
 end;
 {$else}
 begin

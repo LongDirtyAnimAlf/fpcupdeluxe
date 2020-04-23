@@ -302,6 +302,8 @@ begin
 
   if Assigned(CrossInstaller) then
   begin
+    //No need to Reset
+    //Just use the values as available
     //CrossInstaller.Reset;
 
     // Actually not using crossopts - they're only for building an FPC compiler; the
@@ -340,8 +342,8 @@ begin
 
       OldPath:=GetPath;
       try
-        //Add FPC binary path to path
-        SetPath(ExtractFilePath(FCompiler),false,true);
+        //Add (prepend) FPC binary path to path
+        SetPath(ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim,true,false);
 
         if Length(LazBuildApp)=0 then
         begin
@@ -669,11 +671,6 @@ begin
     if FCrossLCL_Platform <> '' then
       Processor.Process.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
-    // add the ide config build file when it is there
-    s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
-    if FileExists(s) then
-      Processor.Process.Parameters.Add('CFGFILE=' + s);
-
     //Set standard options
     s:=STANDARDCOMPILERVERBOSITYOPTIONS;
     //Always limit the search for fpc.cfg to our own fpc.cfg
@@ -724,13 +721,21 @@ begin
     case ModuleName of
       _USERIDE:
       begin
+        Processor.Process.Parameters.Add('useride');
+        s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
+        //if FileExists(s) then
+          Processor.Process.Parameters.Add('CFGFILE=' + s);
+        Infoln(infotext+'Running: make useride', etInfo);
+        (*
         s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
         if FileExists(s) then
         begin
           // this uses lazbuild as per definition in the Lazarus Makefile
           // to prevent errors, limit the amount of jobs to 1
           Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
-          Processor.Process.Parameters.Add('--jobs=1');
+          // Add the ide config build file when it is there
+          Processor.Process.Parameters.Add('CFGFILE=' + s);
+          //Processor.Process.Parameters.Add('--jobs=4');
           Processor.Process.Parameters.Add('useride');
           Infoln(infotext+'Running: make useride', etInfo);
         end
@@ -745,6 +750,7 @@ begin
           Processor.Process.Parameters.Add('ide');
           Infoln(infotext+'Running: make registration lazutils lcl basecomponents ide', etInfo);
         end;
+        *)
       end;
       _IDE:
       begin
