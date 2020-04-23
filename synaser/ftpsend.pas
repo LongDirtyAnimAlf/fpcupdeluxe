@@ -1050,9 +1050,11 @@ const
 var
   Buffer: Pointer;
   Count: longint;
-  SourceSize, DestSize: DWord;
+  DestSize: DWord;
 begin
   Result := False;
+  DestSize:=0;
+
   if aStream=nil then
     Exit;
   if not DataSocket then
@@ -1096,8 +1098,6 @@ begin
     FDSock.CloseSocket;
     FreeMem(Buffer);
   end;
-
-  //Result := DataRead(aStream);
 
   if not FDirectFile then
     aStream.Position := 0;

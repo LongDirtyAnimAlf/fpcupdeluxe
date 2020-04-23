@@ -4139,10 +4139,13 @@ begin
     {$endif}
   end
   else
-  //Show progress only every 5 seconds
-  if GetUpTickCount>StoredTickCount+5000 then
+  //Show progress only every 2 seconds
+  if GetUpTickCount>StoredTickCount+2000 then
   begin
-    ThreadLog('Download progress '+FileNameOnly+': '+KB(APos));
+    if StoredTickCount=0 then
+      ThreadLog('Download progress '+FileNameOnly+': Starting download.')
+    else
+      ThreadLog('Download progress '+FileNameOnly+': '+KB(APos));
     StoredTickCount:=GetUpTickCount;
     {$ifdef LCL}
     Application.ProcessMessages;
@@ -4444,8 +4447,8 @@ begin
   try
     with aFTPClient do
     begin
-      DirectFile := True;
-      DirectFileName := URI.Path+URI.Document;
+      //DirectFile := False;
+      //DirectFileName := URI.Path+URI.Document;
       TargetHost := URI.Host;
       TargetPort := InttoStr(aPort);
       if FUsername <> '' then
@@ -4585,7 +4588,7 @@ begin
   if (aDataStream is TDownloadStream) then
   begin
     (aDataStream as TDownloadStream).FOnWriteStream:=@DoOnWriteStream;
-    StoredTickCount:=GetUpTickCount;
+    StoredTickCount:=0;
   end;
 
   If CompareText(P,'ftp')=0 then
@@ -5038,7 +5041,7 @@ begin
   if (aDataStream is TDownloadStream) then
   begin
     (aDataStream as TDownloadStream).FOnWriteStream:=@DoOnWriteStream;
-    StoredTickCount:=GetUpTickCount;
+    StoredTickCount:=0;
   end;
 
   If CompareText(P,'ftp')=0 then
@@ -5083,10 +5086,12 @@ end;
 {$ENDIF ENABLEWGET}
 
 { TDownloadStream }
+
 destructor TDownloadStream.Destroy;
 begin
   if Assigned(FOnWriteStream) then
     FOnWriteStream(Self, -1);
+  FileFlush(Handle);
   inherited Destroy;
 end;
 
