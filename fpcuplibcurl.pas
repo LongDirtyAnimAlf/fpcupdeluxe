@@ -23,7 +23,7 @@
 unit fpcuplibcurl;
 
 {$ifdef win32}
-{$define libcurlstatic}
+{.$define libcurlstatic}
 {$endif}
 
 {$ifdef libcurlstatic}

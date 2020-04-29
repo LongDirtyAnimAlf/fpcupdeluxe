@@ -61,6 +61,10 @@ unit fpcuputil;
 {.$undef ENABLEWGET}
 {$endif}
 
+{$ifdef libcurlstatic}
+{$undef ENABLENATIVE}
+{$endif}
+
 {$if not defined(ENABLEWGET) and not defined(ENABLENATIVE)}
 {$error No downloader defined !!! }
 {$endif}
@@ -4862,7 +4866,6 @@ begin
       begin
         aTFTPList:=TFTPList.Create;
         try
-          aTFTPList:=TFTPList.Create;
           aTFTPList.Lines.LoadFromFile(WGETFTPLISTFILE);
           aTFTPList.ParseLines;
           for i := 0 to aTFTPList.Count -1 do
