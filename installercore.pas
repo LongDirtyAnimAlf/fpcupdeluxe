@@ -904,9 +904,7 @@ begin
     end;
 
     if (NOT IsSSLloaded) then
-      Infoln(localinfotext+'Could not init SSL interface.',etWarning)
-    else
-      Infoln(localinfotext+'Init SSL interface success.',etInfo);
+      Infoln(localinfotext+'Could not init SSL interface.',etWarning);
 
 
     FWget:=Which('wget');
@@ -1212,9 +1210,8 @@ begin
     begin
       // Check for proper assembler
       try
-        if ExecuteCommand('as --version', Output, False) <> 0 then
+        if NOT CheckExecutable('as', ['--version'], '') then
         begin
-          ExecuteCommand('as --version', Output, True);
           Infoln(localinfotext+'Missing assembler as. Please install the developer tools.',etError);
           OperationSucceeded := false;
         end;
@@ -1378,10 +1375,6 @@ begin
           Infoln(s2+'Found make binary here: '+Make+'. But it is not GNU Make.',etError);
           OperationSucceeded := false;
         end;
-      end
-      else
-      begin
-        Infoln(s2+'Found GNU make binary here: '+Make+'.',etInfo);
       end;
     except
       // ignore errors, this is only an extra check
@@ -1392,22 +1385,15 @@ begin
     if OperationSucceeded then
     try
       s3:=Which('ld');
-      ExecuteCommand(s3+ ' -v', s1, False);
-      if AnsiPos('GNU ld', s1) = 0 then
+      if (NOT CheckExecutable(s3, ['-v'], 'GNU ld')) then
       begin
-        ExecuteCommand(s3 + ' -v', s1, True);
         Infoln(s2+'Found ld binary here: '+s3+'. But it is not GNU ld. Expect errors',etWarning);
         s3:=Which('ld.bfd');
-        ExecuteCommand(s3+ ' -v', s1, False);
-        if AnsiPos('GNU ld', s1) = 1 then
+        if (NOT CheckExecutable(s3, ['-v'], 'GNU ld')) then
         begin
           Infoln(s2+'Found GNU ld.bfd binary here: '+s3+'. Could be used through symlinking.',etWarning);
         end;
         OperationSucceeded := true;
-      end
-      else
-      begin
-        Infoln(s2+'Found GNU ld binary here: '+s1+'.',etInfo);
       end;
     except
       // ignore errors, this is only an extra check
@@ -1655,12 +1641,8 @@ begin
   Output:=Output+'.';
   Infoln(Output,etInfo);
 
-
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   aClient.CheckOutOrUpdate;
-
-  //add a dummy newline for better output parsing of command results
-  writeln;
 
   ReturnCode := aClient.ReturnCode;
   case ReturnCode of

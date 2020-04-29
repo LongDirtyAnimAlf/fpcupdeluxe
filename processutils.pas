@@ -957,6 +957,8 @@ begin
         if AnsiContainsText(line,'is experimental') then exit;
         if AnsiContainsText(line,'This code is not thread-safe') then exit;
 
+        if AnsiContainsText(line,'Range check error while') then exit;
+
         // when generating help
         if AnsiContainsText(line,'is unknown') then exit;
         {$ifdef MSWINDOWS}

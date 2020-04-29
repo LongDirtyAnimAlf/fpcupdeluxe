@@ -23,22 +23,25 @@
 unit fpcuplibcurl;
 
 {$ifdef win32}
-{.$define libcurlstatic}
+{$define libcurlstatic}
 {$endif}
 
 {$ifdef libcurlstatic}
 {$ifdef win32}
-  {$linklib .\libs\win32\libcrypto.a}
-  {$linklib .\libs\win32\libssl.a}
-  {$linklib .\libs\win32\libcurl.a}
-  {$linklib .\libs\win32\libadvapi32.a}
-  {$linklib .\libs\win32\libws2_32.a}
-  //{$linklib .\libs\win32\libmingwex.a} // for _stroll and ___mingw_basename
-  {$linklib .\libs\win32\libmsvcrt.a}
-  //{$linklib .\libs\win32\libmsvcr100.a} // for __assert
-  {$linklib .\libs\win32\libkernel32.a}
-  {$linklib .\libs\win32\libcrypt32.a}
-  //{$linklib .\libs\win32\libgcc.a} for ___divdi3, ___umoddi3, ___udivdi3
+  {$linklib libcurl.a}
+  {$linklib libwinpthread.a}
+  {$linklib libssl.a}
+  {$linklib libcrypto.a}
+  {$linklib libadvapi32.a}
+  {$linklib libws2_32.a}
+  {$linklib libmingwex.a} // for _stroll and ___mingw_basename
+  {$linklib libmsvcrt.a}
+  {$linklib libuser32.a}
+  {$linklib libkernel32.a}
+  {$linklib libz.a}
+  {$linklib libgcc.a}// for ___divdi3, ___umoddi3, ___udivdi3
+//___udivmoddi4
+//___divmoddi4
 {$endif}
 {$endif}
 
@@ -734,7 +737,10 @@ const
 
   {$ifdef libcurlstatic}
   function  divdi3(num,den:int64):int64; cdecl;
+
+  function  moddi3(num, den: int64): int64; cdecl;
   function  umoddi3(num,den:uint64):uint64; cdecl;
+
   function  udivdi3(num,den:uint64):uint64; cdecl;
   function  strtoll(str,endptr:pansichar;base:longint):int64; cdecl;
   function  mingw_basename(str:pansichar):pansichar; cdecl;
@@ -907,6 +913,11 @@ end;
 function divdi3(num,den:int64):int64; cdecl; [public, alias: '___divdi3'];
 begin
  result:=num div den;
+end;
+
+function moddi3(num, den: int64): int64; cdecl; public alias: '___moddi3';
+begin
+  result := num mod den;
 end;
 
 function umoddi3(num,den:uint64):uint64; cdecl; [public, alias: '___umoddi3'];

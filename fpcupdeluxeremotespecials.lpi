@@ -502,6 +502,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+      <Libraries Value="libs\win32"/>
       <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>

@@ -1184,8 +1184,8 @@ begin
     if j>0 then
     begin
       {$IFDEF MSWINDOWS}
-      j:=Pos(LAZBUILDNAME+'.exe',lowerCase(exec));
-      if j>0 then exec:=StringReplace(exec,LAZBUILDNAME+'.exe',LAZBUILDNAME,[rfIgnoreCase]);
+      j:=Pos(LAZBUILDNAME+GetExeExt,lowerCase(exec));
+      if (j<1) then exec:=StringReplace(exec,LAZBUILDNAME,LAZBUILDNAME+GetExeExt,[rfIgnoreCase]);
       {$ENDIF}
 
       //Set lazbuild options
@@ -1200,7 +1200,7 @@ begin
       else
         s:=s+' --max-process-count='+InttoStr(GetLogicalCpuCount);
       if FLCL_Platform<>'' then s:=s+' --ws=' + FLCL_Platform;
-      exec:=StringReplace(exec,LAZBUILDNAME,LAZBUILDNAME+' '+s,[rfIgnoreCase]);
+      exec:=StringReplace(exec,LAZBUILDNAME+GetExeExt,LAZBUILDNAME+GetExeExt+' '+s,[rfIgnoreCase]);
     end;
     {$endif}
 
@@ -1232,7 +1232,7 @@ begin
         {$ifndef FPCONLY}
         // If it is likely user used lazbuid to compile a package, assume
         // it is design-time (except when returning an runtime message) and mark IDE for rebuild
-        if (pos(LAZBUILDNAME,lowerCase(exec))>0) and
+        if (pos(LAZBUILDNAME+GetExeExt,lowerCase(exec))>0) and
           (pos('.lpk',lowercase(exec))>0) and
           (pos('only for runtime',lowercase(s))=0)
         then

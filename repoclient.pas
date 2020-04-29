@@ -251,6 +251,11 @@ end;
 function TRepoClient.GetValidClient:boolean;
 begin
   result:=( (Length(FRepoExecutable)<>0) AND (FileExists(FRepoExecutable)) );
+  if (NOT result) then
+  begin
+    FindRepoExecutable;
+    result:=( (Length(FRepoExecutable)<>0) AND (FileExists(FRepoExecutable)) );
+  end;
 end;
 
 procedure TRepoClient.CheckOut(UseForce:boolean=false);
@@ -351,7 +356,8 @@ begin
   FReturnOutput := '';
   FRepoExecutable := '';
   FForceLocal := False;
-  FindRepoExecutable;
+  //FForceLocal := TInstaller(FParent).ForceLocal;
+  //FindRepoExecutable;
 end;
 
 destructor TRepoClient.Destroy;
