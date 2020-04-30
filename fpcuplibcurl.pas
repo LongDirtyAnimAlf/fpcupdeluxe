@@ -22,26 +22,15 @@
 {$mode objfpc}
 unit fpcuplibcurl;
 
-{$ifdef win32}
-{.$define libcurlstatic}
-{$endif}
-
 {$ifdef libcurlstatic}
-{$ifdef win32}
+{$ifdef mswindows}
   {$linklib libcurl.a}
-  {$linklib libwinpthread.a}
-  {$linklib libssl.a}
-  {$linklib libcrypto.a}
   {$linklib libadvapi32.a}
   {$linklib libws2_32.a}
-  {$linklib libmingwex.a} // for _stroll and ___mingw_basename
   {$linklib libmsvcrt.a}
-  {$linklib libuser32.a}
+  {$linklib libcrypt32.a}
   {$linklib libkernel32.a}
   {$linklib libz.a}
-  {$linklib libgcc.a}// for ___divdi3, ___umoddi3, ___udivdi3
-//___udivmoddi4
-//___divmoddi4
 {$endif}
 {$endif}
 
@@ -76,6 +65,9 @@ const
   External_library='libcurl'; {Setup as you need}
 
 Type
+  CharSetType = set of Char;
+  PCharSetType = ^CharSetType;
+
   Pcurl_calloc_callback  = ^curl_calloc_callback;
   Pcurl_closepolicy  = ^curl_closepolicy;
   Pcurl_forms  = ^curl_forms;
@@ -740,10 +732,13 @@ const
 
   function  moddi3(num, den: int64): int64; cdecl;
   function  umoddi3(num,den:uint64):uint64; cdecl;
-
   function  udivdi3(num,den:uint64):uint64; cdecl;
+  function  udivmoddi4(num,den:uint64;rem:puint64):uint64; cdecl;
+  function  divmoddi4(num,den:int64;rem:pint64):int64; cdecl;
   function  strtoll(str,endptr:pansichar;base:longint):int64; cdecl;
+  function  strtok_r(str:pansichar;delim:PCharSetType;save:ppansichar):pchar; cdecl;
   function  mingw_basename(str:pansichar):pansichar; cdecl;
+  function  basename(str:pansichar):pansichar; cdecl;
   procedure chkstk_ms; cdecl;
   procedure assert(const str1:pansichar; const str2:pansichar; anum:longint); cdecl;
   {$endif}
@@ -930,6 +925,19 @@ begin
  result:=num div den;
 end;
 
+function udivmoddi4(num,den:uint64;rem:puint64):uint64; cdecl; [public, alias: '___udivmoddi4'];
+begin
+ result:=num div den;
+ rem^:=(num mod den);
+end;
+
+function divmoddi4(num,den:int64;rem:pint64):int64; cdecl; [public, alias: '___divmoddi4'];
+begin
+ result:=num div den;
+ rem^:=(num mod den);
+end;
+
+
 function strtoll(str,endptr:pansichar;base:longint):int64; cdecl; [alias: '_strtoll'];
 var s:longint;
 begin
@@ -944,8 +952,24 @@ begin
    'a'..'z': result:=(result*base)+((byte(ansichar(str^))-byte(ansichar('a')))+$a);
    'A'..'Z': result:=(result*base)+((byte(ansichar(str^))-byte(ansichar('A')))+$a);
   end;
-  inc(str^);
+  inc(str);
  end;
+end;
+
+function strtok_r(str:pansichar;delim:PCharSetType;save:ppansichar):pchar; cdecl; [alias: '_strtok_r'];
+begin
+  if (str=nil) then str:=save^;
+  if (str<>nil) then
+  begin
+    //while (str^<>#0) and (str^<>delim^) do inc(str);
+    while (str^<>#0) and (str^ in delim^) do inc(str);
+    if (str^<>#0) then
+      result := str
+    else
+      result:=nil;
+  end
+  else
+    result:=nil;
 end;
 
 function malloc(size:longint):pointer; cdecl; external name 'malloc';
@@ -962,6 +986,20 @@ begin
   move(s,result^,l);
   result[l]:=#0;
 end;
+
+function basename(str:pansichar):pansichar; cdecl; [public, alias: '_basename'];
+var
+  l:integer;
+  s:string;
+begin
+  s:=str;
+  s:=ExtractFileName(s);
+  l:=length(s);
+  result:=malloc(l+1);
+  move(s,result^,l);
+  result[l]:=#0;
+end;
+
 
 procedure chkstk_ms; cdecl; [public, alias: '___chkstk_ms'];
 begin

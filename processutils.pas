@@ -791,7 +791,7 @@ begin
       EnterCriticalSection;
       try
         if Stage=etsDestroying then break;
-        if (Stage=etsStopped) then break;
+        if Stage=etsStopped then break;
         // still running => wait a bit to prevent cpu cycle burning
       finally
         LeaveCriticalSection;

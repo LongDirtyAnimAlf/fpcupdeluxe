@@ -3707,13 +3707,12 @@ begin
       end;
       Processor.Process.Parameters.Add('distclean');
 
-      if (NOT CrossCompiling) then
+      if (NOT RunTwice) then
       begin
-        if (NOT RunTwice) then Infoln(infotext+'Running '+Processor.Executable+' distclean twice',etInfo);
-      end
-      else
-      begin
-        if (NOT RunTwice) then Infoln(infotext+'Running '+Processor.Executable+' distclean twice for target '+CrossInstaller.RegisterName,etInfo);
+        if (NOT CrossCompiling) then
+          Infoln(infotext+'Running '+Processor.Executable+' distclean twice',etInfo)
+        else
+          Infoln(infotext+'Running '+Processor.Executable+' distclean twice for target '+CrossInstaller.RegisterName,etInfo);
       end;
       try
         WritelnLog(infotext+Processor.GetExeInfo, true);
@@ -3740,79 +3739,83 @@ begin
     Infoln(infotext+'Running '+Processor.Executable+' distclean failed: could not find cleanup compiler. Will try again later',etInfo);
   end;
 
-  if (NOT CrossCompiling) then
+  if FCleanModuleSuccess then
   begin
-    Infoln(infotext+'Deleting some FPC package config files.', etInfo);
-    //DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGFILENAME);
-    DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
-    {$IFDEF UNIX}
-    // Delete any fpc.sh shell scripts
-    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+'fpc.sh');
-    {$ENDIF UNIX}
-  end;
-
-  {$IFDEF UNIX}
-  // Delete units
-  // Alf: does this work and is it still needed: todo check
-  DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'units');
-  DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'lib/fpc/'+GetFPCVersion+'/units');
-  {$ENDIF UNIX}
-
-  {$IFDEF MSWINDOWS}
-  // delete the units directory !!
-  // this is needed due to the fact that make distclean will not cleanout this units directory
-  // make distclean will only remove the results of a make, not a make install
-  DeleteDirectoryEx(IncludeTrailingPathDelimiter(FSourceDirectory)+'units'+DirectorySeparator+CPUOS_Signature);
-  {$ENDIF}
-
-
-  // finally ... if something is still still still floating around ... delete it !!
-  DeleteList := TStringList.Create;
-  try
-    (*
-    FindAllFiles(DeleteList,FSourceDirectory, '*.ppu; *.a; *.o', True);
-    if DeleteList.Count > 0 then
-    begin
-      for FileCounter := 0 to (DeleteList.Count-1) do
-      begin
-        if Pos(CPUOS_Signature,DeleteList.Strings[FileCounter])>0 then DeleteFile(DeleteList.Strings[FileCounter]);
-      end;
-    end;
-    *)
-
-    // delete stray unit and (static) object files, if any !!
-    DeleteList.Add('.ppu');
-    DeleteList.Add('.a');
-    DeleteList.Add('.o');
-    DeleteFilesExtensionsSubdirs(FSourceDirectory,DeleteList,CPUOS_Signature);
-
-    DeleteList.Clear;
-
-    // delete stray executables, if any !!
-    FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler', '*'+GetExeExt, False);
     if (NOT CrossCompiling) then
     begin
-      FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'utils', '*'+GetExeExt, False);
-      FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'utils', '*'+GetExeExt, True);
+      Infoln(infotext+'Deleting some FPC package config files.', etInfo);
+      //DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGFILENAME);
+      DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
+      {$IFDEF UNIX}
+      // Delete any fpc.sh shell scripts
+      Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+'fpc.sh');
+      {$ENDIF UNIX}
     end;
-    if DeleteList.Count > 0 then
-    begin
-      for FileCounter := 0 to (DeleteList.Count-1) do
+
+    {$IFDEF UNIX}
+    // Delete units
+    // Alf: does this work and is it still needed: todo check
+    DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'units');
+    DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'lib/fpc/'+GetFPCVersion+'/units');
+    {$ENDIF UNIX}
+
+    {$IFDEF MSWINDOWS}
+    // delete the units directory !!
+    // this is needed due to the fact that make distclean will not cleanout this units directory
+    // make distclean will only remove the results of a make, not a make install
+    DeleteDirectoryEx(IncludeTrailingPathDelimiter(FSourceDirectory)+'units'+DirectorySeparator+CPUOS_Signature);
+    {$ENDIF}
+
+
+    // finally ... if something is still still still floating around ... delete it !!
+    DeleteList := TStringList.Create;
+    try
+      (*
+      FindAllFiles(DeleteList,FSourceDirectory, '*.ppu; *.a; *.o', True);
+      if DeleteList.Count > 0 then
       begin
-        if IsExecutable(DeleteList.Strings[FileCounter]) then
+        for FileCounter := 0 to (DeleteList.Count-1) do
         begin
-          if Pos(MAKEFILENAME,DeleteList.Strings[FileCounter])=0 then
+          if Pos(CPUOS_Signature,DeleteList.Strings[FileCounter])>0 then DeleteFile(DeleteList.Strings[FileCounter]);
+        end;
+      end;
+      *)
+
+      // delete stray unit and (static) object files, if any !!
+      DeleteList.Add('.ppu');
+      DeleteList.Add('.a');
+      DeleteList.Add('.o');
+      DeleteFilesExtensionsSubdirs(FSourceDirectory,DeleteList,CPUOS_Signature);
+
+      DeleteList.Clear;
+
+      // delete stray executables, if any !!
+      FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler', '*'+GetExeExt, False);
+      if (NOT CrossCompiling) then
+      begin
+        FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'utils', '*'+GetExeExt, False);
+        FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'utils', '*'+GetExeExt, True);
+      end;
+      if DeleteList.Count > 0 then
+      begin
+        for FileCounter := 0 to (DeleteList.Count-1) do
+        begin
+          if IsExecutable(DeleteList.Strings[FileCounter]) then
           begin
-            Infoln(infotext+'Deleting [stray] executable: '+DeleteList.Strings[FileCounter],etInfo);
-            DeleteFile(DeleteList.Strings[FileCounter]);
+            if Pos(MAKEFILENAME,DeleteList.Strings[FileCounter])=0 then
+            begin
+              Infoln(infotext+'Deleting [stray] executable: '+DeleteList.Strings[FileCounter],etInfo);
+              DeleteFile(DeleteList.Strings[FileCounter]);
+            end;
           end;
         end;
       end;
-    end;
 
-  finally
-    DeleteList.Free;
+    finally
+      DeleteList.Free;
+    end;
   end;
+
 end;
 
 function TFPCInstaller.ConfigModule(ModuleName: string): boolean;

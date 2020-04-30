@@ -79,12 +79,14 @@ uses
   {$ifdef darwin}
   ns_url_request,
   {$endif}
+  {$ifndef libcurlstatic}
   {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}
   {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30000)}
   opensslsockets,
   {$ENDIF}
   openssl,
   {$ENDIF}
+  {$endif}
   //fpftpclient,
   eventlog;
 
@@ -247,12 +249,14 @@ type
     FWGETOk:boolean;
     //WGETBinary:string;
     procedure AddHeader(const aHeader,aValue:String);
+    {$ifndef libcurlstatic}
     function  WGetDownload(Const URL : String; aDataStream : TStream):boolean;
+    function  WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
+    {$endif}
     {$ifdef ENABLECURL}
     function  LibCurlDownload(Const URL : String; aDataStream : TStream):boolean;
     function  LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
     {$endif}
-    function  WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
     function  Download(const URL: String; aDataStream: TStream):boolean;
     function  FTPDownload(Const URL : String; aDataStream : TStream):boolean;
     function  HTTPDownload(Const URL : String; aDataStream : TStream):boolean;
@@ -3144,6 +3148,10 @@ begin
       if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
     end;
   end;
+  if ExeName='wget' then
+  begin
+    ExeName:='';
+  end;
   if Result then
     ThreadLog('Found valid ' + ExeName + ' application.',etDebug);
 end;
@@ -4616,11 +4624,11 @@ begin
   FCURLOk:=LoadCurlLibrary;
   {$endif}
 
+  {$ifndef libcurlstatic}
   if (Length(WGETBinary)=0) OR (NOT FileExists(WGETBinary)) then
   begin
     WGETBinary:='wget';
   end;
-
   FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', etCustom);
 
   {$ifdef MSWINDOWS}
@@ -4637,6 +4645,7 @@ begin
     FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', etCustom);
   end;
   {$endif MSWINDOWS}
+  {$endif libcurlstatic}
 
   if (NOT FCURLOk) AND (NOT FWGETOk) then
   begin
@@ -4664,7 +4673,7 @@ begin
   }
 end;
 
-
+{$ifndef libcurlstatic}
 function TUseWGetDownloader.WGetDownload(Const URL : String; aDataStream : TStream):boolean;
 var
   Buffer : Array[0..4096] of byte;
@@ -4688,13 +4697,60 @@ begin
     Free;
   end;
 end;
+function TUseWGetDownloader.WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
+const
+  WGETFTPLISTFILE='.listing';
+var
+  aURL:string;
+  s:string;
+  i:integer;
+  URI : TURI;
+  P : String;
+  {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}  // this is very bad coding ... ;-)
+  aTFTPList:TFTPList;
+  {$ENDIF}
+begin
+  result:=false;
+  if (NOT FWGETOk) then exit;
+
+  URI:=ParseURI(URL);
+  P:=URI.Protocol;
+  if CompareText(P,'ftp')=0 then
+  begin
+    aURL:=URL;
+    if aURL[Length(aURL)]<>'/' then aURL:=aURL+'/';
+    result:=RunCommand(WGETBinary,['-q','--no-remove-listing','--tries='+InttoStr(MaxRetries),'--spider',aURL],s,[poUsePipes, poStderrToOutPut],swoHide);
+    if result then
+    begin
+      {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}  // this is very bad coding ... ;-)
+      if FileExists(WGETFTPLISTFILE) then
+      begin
+        aTFTPList:=TFTPList.Create;
+        try
+          aTFTPList.Lines.LoadFromFile(WGETFTPLISTFILE);
+          aTFTPList.ParseLines;
+          for i := 0 to aTFTPList.Count -1 do
+          begin
+            s := aTFTPList[i].FileName;
+            filelist.Add(s);
+          end;
+          SysUtils.DeleteFile(WGETFTPLISTFILE);
+        finally
+          aTFTPList.Free;
+        end;
+      end;
+      {$ENDIF}
+    end;
+  end;
+end;
+{$endif}
 
 {$ifdef ENABLECURL}
 function DoWrite(Ptr : Pointer; Size : size_t; nmemb: size_t; Data : Pointer) : size_t;cdecl;
 begin
   if Data=nil then result:=0 else
   begin
-    result:=TStream(Data).Write(Ptr^,Size*nmemb);
+    result:=TDownloadStream(Data).Write(Ptr^,Size*nmemb);
   end;
 end;
 
@@ -4793,10 +4849,12 @@ begin
   {$ifdef ENABLECURL}
   result:=LibCurlDownload(URL,aDataStream);
   {$endif}
+  {$ifndef libcurlstatic}
   if (NOT result) then
   begin
     result:=WGetDownload(URL,aDataStream);
   end;
+  {$endif}
 end;
 
 function TUseWGetDownloader.HTTPDownload(Const URL : String; aDataStream : TStream):boolean;
@@ -4805,10 +4863,12 @@ begin
   {$ifdef ENABLECURL}
   result:=LibCurlDownload(URL,aDataStream);
   {$endif}
+  {$ifndef libcurlstatic}
   if (NOT result) then
   begin
     result:=WGetDownload(URL,aDataStream);
   end;
+  {$endif}
 end;
 
 procedure TUseWGetDownloader.SetContentType(AValue:string);
@@ -4832,54 +4892,6 @@ begin
   if AValue<>FAccept then
   begin
     FAccept:=AValue;
-  end;
-end;
-
-
-function TUseWGetDownloader.WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
-const
-  WGETFTPLISTFILE='.listing';
-var
-  aURL:string;
-  s:string;
-  i:integer;
-  URI : TURI;
-  P : String;
-  {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}  // this is very bad coding ... ;-)
-  aTFTPList:TFTPList;
-  {$ENDIF}
-begin
-  result:=false;
-  if (NOT FWGETOk) then exit;
-
-  URI:=ParseURI(URL);
-  P:=URI.Protocol;
-  if CompareText(P,'ftp')=0 then
-  begin
-    aURL:=URL;
-    if aURL[Length(aURL)]<>'/' then aURL:=aURL+'/';
-    result:=RunCommand(WGETBinary,['-q','--no-remove-listing','--tries='+InttoStr(MaxRetries),'--spider',aURL],s,[poUsePipes, poStderrToOutPut],swoHide);
-    if result then
-    begin
-      {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}  // this is very bad coding ... ;-)
-      if FileExists(WGETFTPLISTFILE) then
-      begin
-        aTFTPList:=TFTPList.Create;
-        try
-          aTFTPList.Lines.LoadFromFile(WGETFTPLISTFILE);
-          aTFTPList.ParseLines;
-          for i := 0 to aTFTPList.Count -1 do
-          begin
-            s := aTFTPList[i].FileName;
-            filelist.Add(s);
-          end;
-          SysUtils.DeleteFile(WGETFTPLISTFILE);
-        finally
-          aTFTPList.Free;
-        end;
-      end;
-      {$ENDIF}
-    end;
   end;
 end;
 
@@ -4925,7 +4937,10 @@ begin
             end
             else
             begin
-              if Pos('ftp.freepascal.org',URL)>0 then UserPass:='anonymous:fpc@example.com';
+              if URI.Host='ftp.freepascal.org' then
+              begin
+                UserPass:='anonymous:fpc@example.com';
+              end;
             end;
             if Length(UserPass)>0 then if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_USERPWD, pointer(UserPass));
 
@@ -5000,10 +5015,12 @@ begin
   {$ifdef ENABLECURL}
   result:=LibCurlFTPFileList(URL,filelist);
   {$endif}
+  {$ifndef libcurlstatic}
   if (NOT result) then
   begin
     result:=WGetFTPFileList(URL,filelist);
   end;
+  {$endif}
 end;
 
 function TUseWGetDownloader.checkURL(const URL:string):boolean;

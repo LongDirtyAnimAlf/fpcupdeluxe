@@ -390,7 +390,9 @@ type
     // Download make.exe, patch.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
     function DownloadSVN: boolean;
+    {$ifndef libcurlstatic}
     function DownloadOpenSSL: boolean;
+    {$endif}
     function DownloadWget: boolean;
     function DownloadFreetype: boolean;
     function DownloadZlib: boolean;
@@ -551,6 +553,7 @@ uses
   {$IF NOT DEFINED(HAIKU) AND NOT DEFINED(AROS) AND NOT DEFINED(MORPHOS)}
   //,ssl_openssl
   // for runtime init of openssl
+  {$ifndef libcurlstatic}
   {$IFDEF MSWINDOWS}
   //,blcksock, ssl_openssl_lib
   ,openssl
@@ -559,6 +562,7 @@ uses
   ,opensslsockets
   {$ENDIF}
   {$ENDIF}
+  {$endif}
   ;
 
 { TInstaller }
@@ -874,6 +878,7 @@ begin
     // Download('ftp://ftp.equation.com/make/'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make), Make);
     {$endif}
 
+    {$ifndef libcurlstatic}
     if OperationSucceeded then
     begin
       // always get ssl libs if they are not there: sometimes system wide libs do not work
@@ -905,8 +910,9 @@ begin
 
     if (NOT IsSSLloaded) then
       Infoln(localinfotext+'Could not init SSL interface.',etWarning);
+    {$endif}
 
-
+    {$ifndef libcurlstatic}
     FWget:=Which('wget');
     if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + 'wget\wget.exe';
     if Not FileExists(FWget) then
@@ -919,6 +925,7 @@ begin
     end;
     //Set static wget binary location
     TUseWGetDownloader.WGETBinary:=FWget;
+    {$endif}
 
     // Get patch binary from default binutils URL
     aURL:=BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
@@ -2253,6 +2260,7 @@ begin
   Result := OperationSucceeded;
 end;
 
+{$ifndef libcurlstatic}
 function TInstaller.DownloadOpenSSL: boolean;
 var
   OperationSucceeded: boolean;
@@ -2260,6 +2268,8 @@ var
   OpenSSLFileName,aSourceURL: string;
   i:integer;
 begin
+
+
   result:=false;
   OperationSucceeded := false;
 
@@ -2373,7 +2383,8 @@ begin
   end;
 
   result := OperationSucceeded;
- end;
+end;
+{$endif}
 
 function TInstaller.DownloadWget: boolean;
 const
