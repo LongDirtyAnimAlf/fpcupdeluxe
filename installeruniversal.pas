@@ -233,9 +233,7 @@ begin
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
   {
   //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
-  if (FNoJobs) then
-    Processor.Process.Parameters.Add('--jobs=1')
-  else
+  if (NOT FNoJobs) then
     Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
   Processor.Process.Parameters.Add('FPC=' + FCompiler);
   Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
@@ -688,7 +686,7 @@ begin
   if (FNoJobs) then
     Processor.Process.Parameters.Add('--max-process-count=1')
   else
-    Processor.Process.Parameters.Add('--max-process-count='+InttoStr(GetLogicalCpuCount));
+    Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
   Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
   Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);
   Processor.Process.Parameters.Add('--os=' + GetTargetOS);
@@ -1199,7 +1197,7 @@ begin
       if (FNoJobs) then
         s:=s+' --max-process-count=1'
       else
-        s:=s+' --max-process-count='+InttoStr(GetLogicalCpuCount);
+        s:=s+' --max-process-count='+InttoStr(FCPUCount);
       if FLCL_Platform<>'' then s:=s+' --ws=' + FLCL_Platform;
       exec:=StringReplace(exec,LAZBUILDNAME+GetExeExt,LAZBUILDNAME+GetExeExt+' '+s,[rfIgnoreCase]);
     end;

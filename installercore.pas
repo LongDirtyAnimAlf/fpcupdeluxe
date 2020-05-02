@@ -1416,11 +1416,9 @@ end;
 procedure TInstaller.CreateBinutilsList(aVersion:string);
 // Windows-centric
 const
-  //SourceURL_gdb = LAZARUSBINARIES+'/i386-win32/gdb/bin/';
-  //SourceURL_gdb = 'https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2064%20bits/Alternative%20GDB/GDB%208.1/gdb.exe/download';
-  //SourceURL_gdbserver = 'https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2064%20bits/Alternative%20GDB/GDB%208.1/gdbserver.exe/download';
+  SourceURL_gdb_default = LAZARUSBINARIES+'/i386-win32/gdb/bin/';
   SourceURL_gdb = FPCUPGITREPO+'/releases/download/gdb/';
-  //SourceURL64_gdb = LAZARUSBINARIES+'/x86_64-win64/gdb/bin/';
+  SourceURL64_gdb_default = LAZARUSBINARIES+'/x86_64-win64/gdb/bin/';
   SourceURL64_gdb = FPCUPGITREPO+'/releases/download/gdb/';
   SourceURL_QT = LAZARUSBINARIES+'/i386-win32/qt/';
   SourceURL_QT5 = LAZARUSBINARIES+'/i386-win32/qt5/';
@@ -1497,9 +1495,9 @@ begin
   AddNewUtil('cp' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('diff' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('gdate' + GetExeExt,aSourceURL,'',ucBinutil);
-  //AddNewUtil('gdb' + GetExeExt,aSourceURL_gdb,'',ucDebugger);
+  //AddNewUtil('gdb' + GetExeExt,aSourceURL_gdb_default,'',ucDebugger);
   // just add default 32 bit debugger for all usercases as a binutil !
-  AddNewUtil('gdb' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('gdb' + GetExeExt,SourceURL_gdb_default,'',ucBinutil);
   AddNewUtil('libexpat-1.dll',aSourceURL,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -1533,8 +1531,8 @@ begin
   AddNewUtil('diff' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('gdate' + GetExeExt,aSourceURL64,'',ucBinutil);
   // just add default 64 bit debugger for all usercases as a binutil !
-  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucBinutil);
-  //AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucBinutil);
+  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucBinutil);
+  //AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall.exe.manifest',aSourceURL64,'',ucBinutil);

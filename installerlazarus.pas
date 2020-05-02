@@ -30,8 +30,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
-{.$define lazarus_parallel_make} {for make --jobs= support; for now Lazarus does not seem to support parallel make -> error 512}
-
 interface
 
 uses
@@ -359,9 +357,7 @@ begin
 
           {
           //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
-          if (FNoJobs) then
-            Processor.Process.Parameters.Add('--jobs=1')
-          else
+          if (NOT FNoJobs) then
             Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
 
           Processor.Process.Parameters.Add('FPC=' + FCompiler);
@@ -429,14 +425,10 @@ begin
           Processor.Process.Parameters.Add('--quiet');
           {$ENDIF}
 
-          (*
-          //Still not clear if jobs can be enabled for Lazarus lazbuild builds ... :-|
           if (FNoJobs) then
             Processor.Process.Parameters.Add('--max-process-count=1')
           else
-            Processor.Process.Parameters.Add('--max-process-count='+InttoStr(GetLogicalCpuCount));
-          *)
-          Processor.Process.Parameters.Add('--max-process-count=1');
+            Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
 
           Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
 
@@ -644,9 +636,7 @@ begin
     Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
     {
     //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
-    if (FNoJobs) then
-      Processor.Process.Parameters.Add('--jobs=1')
-    else
+    if (NOT FNoJobs) then
       Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
     Processor.Process.Parameters.Add('FPC=' + FCompiler);
     Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
@@ -721,6 +711,7 @@ begin
     case ModuleName of
       _USERIDE:
       begin
+        Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
         Processor.Process.Parameters.Add('useride');
         s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
         //if FileExists(s) then
@@ -732,11 +723,9 @@ begin
         if FileExists(s) then
         begin
           // this uses lazbuild as per definition in the Lazarus Makefile
-          // to prevent errors, limit the amount of jobs to 1
           Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
           // Add the ide config build file when it is there
           Processor.Process.Parameters.Add('CFGFILE=' + s);
-          //Processor.Process.Parameters.Add('--jobs=4');
           Processor.Process.Parameters.Add('useride');
           Infoln(infotext+'Running: make useride', etInfo);
         end
@@ -900,10 +889,12 @@ begin
       // Quiet:=ConsoleVerbosity<=-3;
       Processor.Process.Parameters.Add('--quiet');
       {$ENDIF}
+
       if (FNoJobs) then
         Processor.Process.Parameters.Add('--max-process-count=1')
       else
-        Processor.Process.Parameters.Add('--max-process-count='+InttoStr(GetLogicalCpuCount));
+        Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
+
       Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
       Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);
       Processor.Process.Parameters.Add('--os=' + GetTargetOS);
@@ -976,10 +967,12 @@ begin
           {$ELSE}
           Processor.Process.Parameters.Add('--quiet');
           {$ENDIF}
+
           if (FNoJobs) then
             Processor.Process.Parameters.Add('--max-process-count=1')
           else
-            Processor.Process.Parameters.Add('--max-process-count='+InttoStr(GetLogicalCpuCount));
+            Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
+
           Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
           Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);
           Processor.Process.Parameters.Add('--os=' + GetTargetOS);
@@ -1826,9 +1819,7 @@ begin
     Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
     {
     //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
-    if (FNoJobs) then
-      Processor.Process.Parameters.Add('--jobs=1')
-    else
+    if (NOT FNoJobs) then
       Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
     Processor.Process.Parameters.Add('FPC=' + FCompiler);
     Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));

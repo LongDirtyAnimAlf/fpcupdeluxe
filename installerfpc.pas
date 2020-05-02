@@ -733,9 +733,7 @@ begin
           Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
           {
           //Still not clear if jobs can be enabled for crosscompiler builds ... :-|
-          if (FNoJobs) then
-            Processor.Process.Parameters.Add('--jobs=1')
-          else
+          if (NOT FNoJobs) then
             Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
           }
           Processor.Process.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
@@ -1435,9 +1433,7 @@ begin
   if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
   {$ENDIF}
   FErrorLog.Clear;
-  if (FNoJobs) then
-    Processor.Process.Parameters.Add('--jobs=1')
-  else
+  if (NOT FNoJobs) then
     Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
   //Processor.Process.Parameters.Add('FPC='+FCompiler);
   Processor.Process.Parameters.Add('PP='+FCompiler);
@@ -3017,9 +3013,7 @@ begin
       {$ENDIF}
       Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Process.Parameters.Add('compiler_cycle');
-      if (FNoJobs) then
-        Processor.Process.Parameters.Add('--jobs=1')
-      else
+      if (NOT FNoJobs) then
         Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
       Processor.Process.Parameters.Add('FPC='+FCompiler);
       Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
@@ -3054,9 +3048,7 @@ begin
       Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Process.Parameters.Clear;
       Processor.Process.Parameters.Add('compiler_cycle');
-      if (FNoJobs) then
-        Processor.Process.Parameters.Add('--jobs=1')
-      else
+      if (NOT FNoJobs) then
         Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
       Processor.Process.Parameters.Add('FPC='+FCompiler);
       Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
@@ -3667,11 +3659,8 @@ begin
       if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
       {$ENDIF}
       Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
-      if (FNoJobs) then
-        Processor.Process.Parameters.Add('--jobs=1')
-      else
+      if (NOT FNoJobs) then
         Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-      Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
       Processor.Process.Parameters.Add('FPC='+aCleanupCompiler);
       Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
       Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);

@@ -3479,11 +3479,7 @@ begin
   MissingCrossLibs:=false;
   MissingTools:=false;
 
-  {$ifdef win64}
-  FPCupManager.NoJobs:=true;
-  {$else}
   FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
-  {$endif}
 
   FPCupManager.SoftFloat:=Form2.UseSoftFloat;
   FPCupManager.OnlinePatching:=Form2.OnlinePatching;

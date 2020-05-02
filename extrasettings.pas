@@ -474,6 +474,10 @@ begin
   SplitFPC:=true;
   MakeJobs:=true;
 
+  {$ifdef win64}
+  MakeJobs:=False;
+  {$endif}
+
   SetInstallDir;// for backwards compatibility
 
   //{$IF (defined(MSWINDOWS)) OR (defined(Darwin)) OR (defined(OpenBSD))}
