@@ -2311,8 +2311,8 @@ var
           RequiredModules +
           _CLEANMODULE + ModuleName +_SEP +
           _GETMODULE + ModuleName +_SEP +
-          _BUILDMODULE + ModuleName +_SEP +
           _CONFIGMODULE + ModuleName +_SEP +
+          _BUILDMODULE + ModuleName +_SEP +
           _END +
 
           Declaration + ModuleName + _CLEAN + _SEP +
@@ -2321,8 +2321,8 @@ var
 
           Declaration + ModuleName + _BUILD + _ONLY + _SEP +
           _CLEANMODULE + ModuleName +_SEP +
-          _BUILDMODULE + ModuleName +_SEP +
           _CONFIGMODULE + ModuleName +_SEP +
+          _BUILDMODULE + ModuleName +_SEP +
           _END+
 
           Declaration + ModuleName + _UNINSTALL + _SEP +
