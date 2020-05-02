@@ -390,7 +390,7 @@ type
     // Download make.exe, patch.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
     function DownloadSVN: boolean;
-    {$ifndef libcurlstatic}
+    {$ifndef USEONLYCURL}
     function DownloadOpenSSL: boolean;
     {$endif}
     function DownloadWget: boolean;
@@ -553,7 +553,7 @@ uses
   {$IF NOT DEFINED(HAIKU) AND NOT DEFINED(AROS) AND NOT DEFINED(MORPHOS)}
   //,ssl_openssl
   // for runtime init of openssl
-  {$ifndef libcurlstatic}
+  {$ifndef USEONLYCURL}
   {$IFDEF MSWINDOWS}
   //,blcksock, ssl_openssl_lib
   ,openssl
@@ -774,45 +774,47 @@ procedure TInstaller.SetVerbosity(aValue:boolean);
 begin
   FVerbose:=aValue;
   if Assigned(Processor) then Processor.Verbose:=FVerbose;
-  if Assigned(FSVNClient) then FSVNClient.Verbose:=FVerbose;
-  if Assigned(FGitClient) then FGitClient.Verbose:=FVerbose;
-  if Assigned(FHGClient) then FHGClient.Verbose:=FVerbose;
+  {
+  if Assigned(SVNClient) then SVNClient.Verbose:=FVerbose;
+  if Assigned(GitClient) then GitClient.Verbose:=FVerbose;
+  if Assigned(HGClient) then HGClient.Verbose:=FVerbose;
+  }
 end;
 
 procedure TInstaller.SetHTTPProxyHost(AValue: string);
 begin
   if FHTTPProxyHost=AValue then Exit;
   FHTTPProxyHost:=AValue;
-  FGitClient.HTTPProxyHost:=FHTTPProxyHost;
-  FHGClient.HTTPProxyHost:=FHTTPProxyHost;
-  FSVNClient.HTTPProxyHost:=FHTTPProxyHost;
+  if Assigned(GitClient) then GitClient.HTTPProxyHost:=FHTTPProxyHost;
+  if Assigned(HGClient) then HGClient.HTTPProxyHost:=FHTTPProxyHost;
+  if Assigned(SVNClient) then SVNClient.HTTPProxyHost:=FHTTPProxyHost;
 end;
 
 procedure TInstaller.SetHTTPProxyPassword(AValue: string);
 begin
   if FHTTPProxyPassword=AValue then Exit;
   FHTTPProxyPassword:=AValue;
-  FGitClient.HTTPProxyPassword:=FHTTPProxyPassword;
-  FHGClient.HTTPProxyPassword:=FHTTPProxyPassword;
-  FSVNClient.HTTPProxyPassword:=FHTTPProxyPassword;
+  if Assigned(GitClient) then GitClient.HTTPProxyPassword:=FHTTPProxyPassword;
+  if Assigned(HGClient) then HGClient.HTTPProxyPassword:=FHTTPProxyPassword;
+  if Assigned(SVNClient) then SVNClient.HTTPProxyPassword:=FHTTPProxyPassword;
 end;
 
 procedure TInstaller.SetHTTPProxyPort(AValue: integer);
 begin
   if FHTTPProxyPort=AValue then Exit;
   FHTTPProxyPort:=AValue;
-  FGitClient.HTTPProxyPort:=FHTTPProxyPort;
-  FHGClient.HTTPProxyPort:=FHTTPProxyPort;
-  FSVNClient.HTTPProxyPort:=FHTTPProxyPort;
+  if Assigned(GitClient) then GitClient.HTTPProxyPort:=FHTTPProxyPort;
+  if Assigned(HGClient) then HGClient.HTTPProxyPort:=FHTTPProxyPort;
+  if Assigned(SVNClient) then SVNClient.HTTPProxyPort:=FHTTPProxyPort;
 end;
 
 procedure TInstaller.SetHTTPProxyUser(AValue: string);
 begin
   if FHTTPProxyUser=AValue then Exit;
   FHTTPProxyUser:=AValue;
-  FGitClient.HTTPProxyUser:=FHTTPProxyUser;
-  FHGClient.HTTPProxyUser:=FHTTPProxyUser;
-  FSVNClient.HTTPProxyUser:=FHTTPProxyUser;
+  if Assigned(GitClient) then GitClient.HTTPProxyUser:=FHTTPProxyUser;
+  if Assigned(HGClient) then HGClient.HTTPProxyUser:=FHTTPProxyUser;
+  if Assigned(SVNClient) then SVNClient.HTTPProxyUser:=FHTTPProxyUser;
 end;
 
 function TInstaller.CheckAndGetTools: boolean;
@@ -878,7 +880,7 @@ begin
     // Download('ftp://ftp.equation.com/make/'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make), Make);
     {$endif}
 
-    {$ifndef libcurlstatic}
+    {$ifndef USEONLYCURL}
     if OperationSucceeded then
     begin
       // always get ssl libs if they are not there: sometimes system wide libs do not work
@@ -912,7 +914,7 @@ begin
       Infoln(localinfotext+'Could not init SSL interface.',etWarning);
     {$endif}
 
-    {$ifndef libcurlstatic}
+    {$ifndef USEONLYCURL}
     FWget:=Which('wget');
     if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + 'wget\wget.exe';
     if Not FileExists(FWget) then
@@ -936,13 +938,13 @@ begin
       aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir) + FPatchCmd;
     if Not FileExists(aLocalClientBinary) then
     begin
-      if FSVNClient.ValidClient then
+      if SVNClient.ValidClient then
         OperationSucceeded:=SimpleExportFromSVN('CheckAndGetTools',aURL+'patch.exe',ExcludeTrailingPathDelimiter(FMakeDir));
       if (NOT OperationSucceeded) then
         OperationSucceeded:=GetFile(aURL+'patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
 
       OperationSucceeded:=false;
-      if FSVNClient.ValidClient then
+      if SVNClient.ValidClient then
         OperationSucceeded:=SimpleExportFromSVN('CheckAndGetTools',aURL+'patch.exe.manifest',ExcludeTrailingPathDelimiter(FMakeDir));
       if (NOT OperationSucceeded) then
         OperationSucceeded:=GetFile(aURL+'patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
@@ -1058,7 +1060,7 @@ begin
       OperationSucceeded:=True;
     end;
 
-    with FGitClient do
+    with GitClient do
     begin
       OperationSucceeded:=False;
       aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'git\cmd\git.exe';
@@ -1146,7 +1148,7 @@ begin
       OperationSucceeded:=True;
     end;
 
-    with FHGClient do
+    with HGClient do
     begin
       OperationSucceeded:=False;
       aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'hg\hg.exe';
@@ -1232,14 +1234,14 @@ begin
     if OperationSucceeded then
     begin
       // Look for (ini-file) default SVN executable
-      AllThere:=FSVNClient.ValidClient;
+      AllThere:=SVNClient.ValidClient;
 
       {$IFDEF MSWINDOWS}
       if NOT AllThere then
       begin
         // look local (only for Windows: we could have downloaded a SVN client earlier)
         // will look in and below FSVNDirectory
-        FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + FSVNClient.RepoExecutableName + DirectorySeparator;
+        FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + SVNClient.RepoExecutableName + DirectorySeparator;
         AllThere:=FindSVNSubDirs;
       end;
       {$ENDIF}
@@ -1248,13 +1250,13 @@ begin
       begin
         // look system default
         FSVNDirectory := '';
-        AllThere:=Length(FSVNClient.RepoExecutable)<>0;
+        AllThere:=Length(SVNClient.RepoExecutable)<>0;
       end;
 
       {$IFDEF MSWINDOWS}
-      if (NOT AllThere) OR (FSVNClient.ForceLocal) then
+      if (NOT AllThere) OR (SVNClient.ForceLocal) then
       begin
-        FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + FSVNClient.RepoExecutableName + DirectorySeparator;
+        FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + SVNClient.RepoExecutableName + DirectorySeparator;
         AllThere:=FindSVNSubDirs;
         if (NOT AllThere) then
         begin
@@ -1271,7 +1273,7 @@ begin
       begin
         OperationSucceeded := false;
         Infoln(localinfotext+'Could not find SVN executable. Please make sure it is installed.',etError);
-      end else Infoln(localinfotext+'SVN client found: ' + FSVNClient.RepoExecutable+'.',etDebug);
+      end else Infoln(localinfotext+'SVN client found: ' + SVNClient.RepoExecutable+'.',etDebug);
     end;
 
     if OperationSucceeded then
@@ -1566,15 +1568,15 @@ begin
   begin
     if RepoClass is THGClient then
     begin
-      Write(DiffFile, FHGClient.GetDiffAll);
+      Write(DiffFile, HGClient.GetDiffAll);
     end
     else if RepoClass is TGitClient then
     begin
-      Write(DiffFile, FGitClient.GetDiffAll);
+      Write(DiffFile, GitClient.GetDiffAll);
     end
     else if RepoClass is TSVNClient then
     begin
-      Write(DiffFile, FSVNClient.GetDiffAll);
+      Write(DiffFile, SVNClient.GetDiffAll);
     end
     else raise Exception.CreateFmt('Error writing diff file. Technical details: unknown repository object %s passed. Please fix the code.',[RepoClass.ClassName]);
   end
@@ -1611,7 +1613,6 @@ begin
   aClient.LocalRepository := FSourceDirectory;
   aClient.Repository      := FURL;
   aClient.ExportOnly      := FExportOnly;
-  aClient.Verbose         := FVerbose;
 
   aBeforeRevision:=aClient.LocalRevision;
 
@@ -1743,13 +1744,13 @@ end;
 function TInstaller.DownloadFromHG(ModuleName: string; var aBeforeRevision,
   aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 begin
-  result:=DownloadFromBase(FHGClient,ModuleName,aBeforeRevision,aAfterRevision,UpdateWarnings);
+  result:=DownloadFromBase(HGClient,ModuleName,aBeforeRevision,aAfterRevision,UpdateWarnings);
 end;
 
 function TInstaller.DownloadFromGit(ModuleName: string; var aBeforeRevision,
   aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 begin
-  result:=DownloadFromBase(FGitClient,ModuleName,aBeforeRevision,aAfterRevision,UpdateWarnings);
+  result:=DownloadFromBase(GitClient,ModuleName,aBeforeRevision,aAfterRevision,UpdateWarnings);
 end;
 
 function TInstaller.DownloadFromSVN(ModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
@@ -1768,25 +1769,24 @@ begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFromSVN: '+ModuleName+'): ';
 
   // check if we do have a client !!
-  if NOT FSVNClient.ValidClient then
+  if NOT SVNClient.ValidClient then
   begin
-    Infoln(localinfotext+FSVNClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etWarning);
+    Infoln(localinfotext+SVNClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etWarning);
     exit;
   end;
 
   aBeforeRevision              := 'failure';
   aAfterRevision               := 'failure';
-  FSVNClient.ModuleName        := ModuleName;
-  FSVNClient.LocalRepository   := FSourceDirectory;
-  FSVNClient.Repository        := FURL;
-  FSVNClient.ExportOnly        := FExportOnly;
-  FSVNClient.Verbose           := FVerbose;
+  SVNClient.ModuleName        := ModuleName;
+  SVNClient.LocalRepository   := FSourceDirectory;
+  SVNClient.Repository        := FURL;
+  SVNClient.ExportOnly        := FExportOnly;
 
-  RepoExists:=FSVNClient.LocalRepositoryExists;
+  RepoExists:=SVNClient.LocalRepositoryExists;
   if RepoExists then
   begin
-    if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
-      aBeforeRevision := FSVNClient.LocalRevisionWholeRepo
+    if SVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
+      aBeforeRevision := SVNClient.LocalRevisionWholeRepo
     else
       aBeforeRevision := FSVNClient.LocalRevision;
   end
@@ -1794,14 +1794,14 @@ begin
   begin
     // We could insist on the repo existing, but then we wouldn't be able to checkout!!
     WritelnLog('Directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
-    if not(DirectoryExists(FSVNClient.LocalRepository)) then
+    if not(DirectoryExists(SVNClient.LocalRepository)) then
     begin
-      WritelnLog(localinfotext+'Creating directory '+FSVNClient.LocalRepository+' for SVN checkout.');
-      ForceDirectoriesSafe(FSVNClient.LocalRepository);
+      WritelnLog(localinfotext+'Creating directory '+SVNClient.LocalRepository+' for SVN checkout.');
+      ForceDirectoriesSafe(SVNClient.LocalRepository);
     end;
   end;
 
-  if (FSVNClient.LocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) and (FSVNClient.Returncode=FRET_WORKING_COPY_TOO_OLD) then
+  if (SVNClient.LocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) and (SVNClient.Returncode=FRET_WORKING_COPY_TOO_OLD) then
   begin
     WritelnLog(etError, localinfotext+'The working copy in ' + FSourceDirectory + ' was created with an older, incompatible version of svn.', true);
     WritelnLog(etError, localinfotext+'Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
@@ -1811,7 +1811,7 @@ begin
 
   if RepoExists then
   begin
-    FSVNClient.LocalModifications(UpdateWarnings); //Get list of modified files
+    SVNClient.LocalModifications(UpdateWarnings); //Get list of modified files
     DiffFile:='';
     if UpdateWarnings.Count > 0 then
     begin
@@ -1821,7 +1821,7 @@ begin
         DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + aBeforeRevision + '.diff';
         CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,FSVNClient);
         UpdateWarnings.Add(ModuleName + ': reverting before updating.');
-        FSVNClient.Revert; //Remove local changes
+        SVNClient.Revert; //Remove local changes
       end
       else
       begin
@@ -1830,25 +1830,25 @@ begin
     end;
   end;
 
-  FSVNClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
+  SVNClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
 
-  Output:=localinfotext+'Running '+UpperCase(FSVNClient.RepoExecutableName)+' checkout or update';
-  if Length(FSVNClient.DesiredRevision)>0 then
-    Output:=Output+' of revision '+FSVNClient.DesiredRevision;
+  Output:=localinfotext+'Running '+UpperCase(SVNClient.RepoExecutableName)+' checkout or update';
+  if Length(SVNClient.DesiredRevision)>0 then
+    Output:=Output+' of revision '+SVNClient.DesiredRevision;
   Output:=Output+'.';
   Infoln(Output,etInfo);
 
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
-  FSVNClient.CheckOutOrUpdate;
+  SVNClient.CheckOutOrUpdate;
 
-  CheckoutOrUpdateReturnCode := FSVNClient.ReturnCode;
+  CheckoutOrUpdateReturnCode := SVNClient.ReturnCode;
   case CheckoutOrUpdateReturnCode of
     FRET_LOCAL_REMOTE_URL_NOMATCH:
     begin
       FRepositoryUpdated := false;
       Result := false;
       WritelnLog(etError, localinfotext+'Repository URL in local directory and remote repository don''t match.', true);
-      WritelnLog(localinfotext+'Local directory: ' + FSVNClient.LocalRepository, true);
+      WritelnLog(localinfotext+'Local directory: ' + SVNClient.LocalRepository, true);
       Infoln(localinfotext+'Have you specified the wrong directory or a directory with an old repository checkout?',etDebug);
     end;
     AbortedExitCode:
@@ -1866,17 +1866,17 @@ begin
       if FExportOnly then
       begin
         aAfterRevision := FDesiredRevision;
-        if Trim(aAfterRevision)='' then aAfterRevision := FSVNClient.LocalRevisionWholeRepo;
+        if Trim(aAfterRevision)='' then aAfterRevision := SVNClient.LocalRevisionWholeRepo;
       end
       else
       begin
-        if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
-          aAfterRevision := FSVNClient.LocalRevisionWholeRepo
+        if SVNClient.LocalRevision=SVNClient.LocalRevisionWholeRepo then
+          aAfterRevision := SVNClient.LocalRevisionWholeRepo
         else
-          aAfterRevision := FSVNClient.LocalRevision;
+          aAfterRevision := SVNClient.LocalRevision;
       end;
 
-      if (FSVNClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (aBeforeRevision <> FSVNClient.LocalRevision) then
+      if (SVNClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (aBeforeRevision <> SVNClient.LocalRevision) then
         FRepositoryUpdated := true
       else
         FRepositoryUpdated := false;
@@ -1887,7 +1887,7 @@ begin
       if not Result then
       begin
         WritelnLog(localinfotext+'SVN gave error code: '+IntToStr(CheckoutOrUpdateReturnCode));
-        WritelnLog(localinfotext+'SVN gave error message: '+FSVNClient.ReturnOutput);
+        WritelnLog(localinfotext+'SVN gave error message: '+SVNClient.ReturnOutput);
       end;
 
       if Result and FReApplyLocalChanges and (DiffFile<>'') then
@@ -1953,33 +1953,33 @@ begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (SimpleExportFromSVN: '+ModuleName+'): ';
 
   // check if we do have a client !!
-  if NOT FSVNClient.ValidClient then
+  if NOT SVNClient.ValidClient then
   begin
-    Infoln(localinfotext+FSVNClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etWarning);
+    Infoln(localinfotext+SVNClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etWarning);
     exit;
   end;
 
-  FSVNClient.ModuleName       := ModuleName;
-  FSVNClient.LocalRepository  := aLocalPath;
-  FSVNClient.Repository       := aFileURL;
-  FSVNClient.ExportOnly       := true;
-  FSVNClient.DesiredRevision  := '';
+  SVNClient.ModuleName       := ModuleName;
+  SVNClient.LocalRepository  := aLocalPath;
+  SVNClient.Repository       := aFileURL;
+  SVNClient.ExportOnly       := true;
+  SVNClient.DesiredRevision  := '';
   FSVNClient.DesiredBranch    := '';
 
-  if (Length(FSVNClient.LocalRepository)>0) then
+  if (Length(SVNClient.LocalRepository)>0) then
   begin
-    if not(DirectoryExists(FSVNClient.LocalRepository)) then
+    if not(DirectoryExists(SVNClient.LocalRepository)) then
     begin
-      WritelnLog(localinfotext+'Creating directory '+FSVNClient.LocalRepository+' for SVN checkout/export.');
-      ForceDirectoriesSafe(FSVNClient.LocalRepository);
+      WritelnLog(localinfotext+'Creating directory '+SVNClient.LocalRepository+' for SVN checkout/export.');
+      ForceDirectoriesSafe(SVNClient.LocalRepository);
     end;
-    FSVNClient.CheckOutOrUpdate;
-    result:=(FSVNClient.ReturnCode=0);
+    SVNClient.CheckOutOrUpdate;
+    result:=(SVNClient.ReturnCode=0);
   end
   else
   begin
     //only report validity of remote URL
-    result:=FSVNClient.CheckURL;
+    result:=SVNClient.CheckURL;
   end;
 
 end;
@@ -2083,7 +2083,7 @@ begin
       DownloadSuccess:=false;
 
       // FPC owned binutils are always served by SVN, so use SVN client and related.
-      if (FSVNClient.ValidClient) AND (Pos(FPCBASESVNURL,RemotePath)>0) then
+      if (SVNClient.ValidClient) AND (Pos(FPCBASESVNURL,RemotePath)>0) then
       begin
         //first check remote URL
         DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,'');
@@ -2260,7 +2260,7 @@ begin
   Result := OperationSucceeded;
 end;
 
-{$ifndef libcurlstatic}
+{$ifndef USEONLYCURL}
 function TInstaller.DownloadOpenSSL: boolean;
 var
   OperationSucceeded: boolean;
@@ -2280,7 +2280,7 @@ begin
 
   //if (NOT CheckWin32Version(6,2)) then
   begin
-    if FSVNClient.ValidClient then
+    if SVNClient.ValidClient then
     begin
       OpenSSLFileName:='libeay32.dll';
       // First check remote URL
@@ -2368,7 +2368,7 @@ begin
   end;
 
   // Real last resort: direct download OpenSSL from from Lazarus binaries
-  if (NOT OperationSucceeded) AND (NOT FSVNClient.ValidClient) then
+  if (NOT OperationSucceeded) AND (NOT SVNClient.ValidClient) then
   begin
     OpenSSLFileName:='libeay32.dll';
     OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
@@ -2704,12 +2704,12 @@ var
   OperationSucceeded: boolean;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (FindSVNSubDirs): ';
-  SVNFiles := FindAllFiles(FSVNDirectory, FSVNClient.RepoExecutableName + GetExeExt, true);
+  SVNFiles := FindAllFiles(FSVNDirectory, SVNClient.RepoExecutableName + GetExeExt, true);
   try
     if SVNFiles.Count > 0 then
     begin
       // Just get first result.
-      FSVNClient.RepoExecutable := SVNFiles.Strings[0];
+      SVNClient.RepoExecutable := SVNFiles.Strings[0];
       OperationSucceeded := true;
     end
     else
@@ -2737,27 +2737,27 @@ begin
       repeat
         if (searchResult.Attr and faDirectory)=0 then
         begin
-          if SameText(searchResult.Name, FSVNClient.RepoExecutableName + GetExeExt) then
+          if SameText(searchResult.Name, SVNClient.RepoExecutableName + GetExeExt) then
           begin
-            FSVNClient.RepoExecutable:=IncludeTrailingPathDelimiter(dirName)+searchResult.Name;
+            SVNClient.RepoExecutable:=IncludeTrailingPathDelimiter(dirName)+searchResult.Name;
           end;
         end else if (searchResult.Name<>'.') and (searchResult.Name<>'..') then
         begin
           FileSearch(IncludeTrailingPathDelimiter(dirName)+searchResult.Name);
         end;
-      until ( (SysUtils.FindNext(searchResult)<>0) OR (Length(FSVNClient.RepoExecutable)<>0) );
+      until ( (SysUtils.FindNext(searchResult)<>0) OR (Length(SVNClient.RepoExecutable)<>0) );
     finally
       SysUtils.FindClose(searchResult);
     end;
   end;
 end;
 begin
-  FSVNClient.RepoExecutable := '';
-  FSVNClient.RepoExecutable := FileSearch(FSVNDirectory);
-  WritelnLog('SVN search finished. Found: ' + FSVNClient.RepoExecutable);
-  result:=Length(FSVNClient.RepoExecutable)>0;
+  SVNClient.RepoExecutable := '';
+  SVNClient.RepoExecutable := FileSearch(FSVNDirectory);
+  WritelnLog('SVN search finished. Found: ' + SVNClient.RepoExecutable);
+  result:=Length(SVNClient.RepoExecutable)>0;
   if result
-     then WritelnLog('SVN search finished. Found: ' + FSVNClient.RepoExecutable)
+     then WritelnLog('SVN search finished. Found: ' + SVNClient.RepoExecutable)
      else WritelnLog('SVN search failed');
 end;
 }
@@ -2842,12 +2842,12 @@ function TInstaller.GetSuitableRepoClient:TRepoClient;
 begin
   result:=nil;
 
-  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.svn') then result:=FSVNClient;
-  if result=nil then if (Pos('https://svn.',LowerCase(FURL))=1) then result:=FSVNClient;
-  if result=nil then if (Pos('http://svn.',LowerCase(FURL))=1) then result:=FSVNClient;
+  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.svn') then result:=SVNClient;
+  if result=nil then if (Pos('https://svn.',LowerCase(FURL))=1) then result:=SVNClient;
+  if result=nil then if (Pos('http://svn.',LowerCase(FURL))=1) then result:=SVNClient;
 
-  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') then result:=FGitClient;
-  if result=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then result:=FGitClient;
+  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') then result:=GitClient;
+  if result=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then result:=GitClient;
 end;
 
 function TInstaller.GetTempFileNameExt(Prefix,Ext : String) : String;
@@ -2944,15 +2944,15 @@ begin
   aRepoClient:=nil;
 
   // not so elegant check to see what kind of client we need ...
-  if aRepoClient=nil then if (Pos(SVNBASEHTTP,LowerCase(FURL))>0) then aRepoClient:=FSVNClient;
-  if aRepoClient=nil then if (Pos(SVNBASESVN,LowerCase(FURL))>0) then aRepoClient:=FSVNClient;
-  //if aRepoClient=nil then if (Pos(FTPBASEFTP,LowerCase(FURL))>0) then aRepoClient:=FFTPClient;
-  //if aRepoClient=nil then if (Pos(FTPBASEHTTP,LowerCase(FURL))>0) then aRepoClient:=FFTPClient;
-  if aRepoClient=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then aRepoClient:=FGitClient;
-  if aRepoClient=nil then if ( (Pos('hg.code.sf.net',LowerCase(FURL))>0) ) then aRepoClient:=FHGClient;
-  if aRepoClient=nil then if ( (Pos('bitbucket.org',LowerCase(FURL))>0) ) then aRepoClient:=FHGClient;
+  if aRepoClient=nil then if (Pos(SVNBASEHTTP,LowerCase(FURL))>0) then aRepoClient:=SVNClient;
+  if aRepoClient=nil then if (Pos(SVNBASESVN,LowerCase(FURL))>0) then aRepoClient:=SVNClient;
+  //if aRepoClient=nil then if (Pos(FTPBASEFTP,LowerCase(FURL))>0) then aRepoClient:=FTPClient;
+  //if aRepoClient=nil then if (Pos(FTPBASEHTTP,LowerCase(FURL))>0) then aRepoClient:=FTPClient;
+  if aRepoClient=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then aRepoClient:=GitClient;
+  if aRepoClient=nil then if ( (Pos('hg.code.sf.net',LowerCase(FURL))>0) ) then aRepoClient:=HGClient;
+  if aRepoClient=nil then if ( (Pos('bitbucket.org',LowerCase(FURL))>0) ) then aRepoClient:=HGClient;
 
-  //if aRepoClient=nil then aRepoClient:=FSVNClient;
+  //if aRepoClient=nil then aRepoClient:=SVNClient;
 
   // No repo client ...
   if aRepoClient=nil then
@@ -2966,7 +2966,7 @@ begin
     begin
       // Make a best quess
       Infoln(infotext+'Using SVNClient for ' + ModuleName + ' sources !',etWarning);
-      aRepoClient:=FSVNClient;
+      aRepoClient:=SVNClient;
     end;
   end;
 
@@ -3450,7 +3450,7 @@ const
   RevisionIncComment = '// Created by Svn2RevisionInc';
   ConstName = 'RevisionStr';
 var
-  RevisionIncText: Text;
+  //RevisionIncText: Text;
   RevFileName,ConstStart: string;
   RevisionStringList:TStringList;
 begin
@@ -3759,6 +3759,9 @@ begin
         else
           aTool.Environment.SetVar(PATHVARNAME, PrependPath);
       end;
+
+      //if Verbosity then
+        WritelnLog(infotext+aTool.GetExeInfo, true);
 
       result:=aTool.ExecuteAndWait;
 

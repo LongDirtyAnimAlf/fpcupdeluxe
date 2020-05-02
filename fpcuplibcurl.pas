@@ -27,6 +27,12 @@ unit fpcuplibcurl;
 {$ifdef libcurlstatic}
 {$ifdef win32}
   {$linklib libcurl.a}
+
+{$linklib libcrypto.a}
+{$linklib libssl.a}
+{$linklib libssh2.a}
+
+
   {$linklib libadvapi32.a}
   {$linklib libws2_32.a}
   {$linklib libmsvcrt.a}

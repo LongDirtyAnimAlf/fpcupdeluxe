@@ -864,6 +864,8 @@ begin
     if AnsiContainsText(line,'lpk file expected') then exit;
   end;
 
+  if AnsiStartsText('TExternalTool',line) then exit;
+
   result:=(NOT aVerbosity);
 
   if (NOT result) then

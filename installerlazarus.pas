@@ -674,7 +674,7 @@ begin
     //Set standard options
     s:=STANDARDCOMPILERVERBOSITYOPTIONS;
     //Always limit the search for fpc.cfg to our own fpc.cfg
-    s:=s+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
+    //s:=s+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
     // Add remaining options
     s:=s+' '+FCompilerOptions;
 
@@ -726,6 +726,7 @@ begin
         //if FileExists(s) then
           Processor.Process.Parameters.Add('CFGFILE=' + s);
         Infoln(infotext+'Running: make useride', etInfo);
+
         (*
         s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
         if FileExists(s) then

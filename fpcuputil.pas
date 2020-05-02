@@ -63,6 +63,7 @@ unit fpcuputil;
 
 {$ifdef libcurlstatic}
 {$undef ENABLENATIVE}
+{$define USEONLYCURL}
 {$endif}
 
 {$if not defined(ENABLEWGET) and not defined(ENABLENATIVE)}
@@ -79,14 +80,14 @@ uses
   {$ifdef darwin}
   ns_url_request,
   {$endif}
-  {$ifndef libcurlstatic}
+  {$ifndef USEONLYCURL}
   {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}
   {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30000)}
   opensslsockets,
   {$ENDIF}
   openssl,
   {$ENDIF}
-  {$endif}
+  {$endif USEONLYCURL}
   //fpftpclient,
   eventlog;
 
@@ -249,10 +250,10 @@ type
     FWGETOk:boolean;
     //WGETBinary:string;
     procedure AddHeader(const aHeader,aValue:String);
-    {$ifndef libcurlstatic}
+    {$ifndef USEONLYCURL}
     function  WGetDownload(Const URL : String; aDataStream : TStream):boolean;
     function  WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
-    {$endif}
+    {$endif USEONLYCURL}
     {$ifdef ENABLECURL}
     function  LibCurlDownload(Const URL : String; aDataStream : TStream):boolean;
     function  LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
@@ -275,20 +276,24 @@ type
     function checkURL(const URL:string):boolean;override;
   end;
   {$endif}
-  (*
-  {$ifdef ENABLENATIVE}
-  TNativeDownloader = TUseNativeDownLoader;
+
+(*
+*)
+  {$ifdef USEONLYCURL}
+    TNativeDownloader = TUseWGetDownloader;
+    TWGetDownloader = TUseWGetDownloader;
   {$else}
-  TNativeDownloader = TUseWGetDownloader;
-  {$endif}
-  {$ifdef ENABLEWGET}
-  TWGetDownloader = TUseWGetDownloader;
-  {$else}
-  TWGetDownloader = TUseNativeDownLoader;
-  {$endif}
-  *)
-  TNativeDownloader = TUseWGetDownloader;
-  TWGetDownloader = TUseWGetDownloader;
+    {$ifdef ENABLENATIVE}
+    TNativeDownloader = TUseNativeDownLoader;
+    {$else}
+    TNativeDownloader = TUseWGetDownloader;
+    {$endif}
+    {$ifdef ENABLEWGET}
+    TWGetDownloader = TUseWGetDownloader;
+    {$else}
+    TWGetDownloader = TUseNativeDownLoader;
+    {$endif}
+  {$endif USEONLYCURL}
 
 // Create shortcut on desktop to Target file
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
@@ -1989,6 +1994,7 @@ begin
     end;
   end;
 
+  {$ifndef USEONLYCURL}
   {$ifdef Windows}
   //Third resort: use Windows INet
   if (NOT result) then
@@ -2005,6 +2011,7 @@ begin
   end;
   }
   {$endif}
+  {$endif USEONLYCURL}
 
   //Final resort: use wget by force
   if (NOT result) AND (NOT UseWget) then
@@ -2039,6 +2046,7 @@ begin
     end;
   end;
 
+  {$ifndef USEONLYCURL}
   {$ifdef MSWindows}
 
   if (NOT CheckWin32Version(6,2)) then
@@ -2079,6 +2087,7 @@ begin
   end;
 
   {$endif}
+  {$endif USEONLYCURL}
 
   //Final resort: use wget by force
   if (NOT result) AND (NOT UseWget) then
@@ -4637,7 +4646,7 @@ begin
   FCURLOk:=LoadCurlLibrary;
   {$endif}
 
-  {$ifndef libcurlstatic}
+  {$ifndef USEONLYCURL}
   if (Length(WGETBinary)=0) OR (NOT FileExists(WGETBinary)) then
   begin
     WGETBinary:='wget';
@@ -4658,7 +4667,7 @@ begin
     FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', etCustom);
   end;
   {$endif MSWINDOWS}
-  {$endif libcurlstatic}
+  {$endif USEONLYCURL}
 
   if (NOT FCURLOk) AND (NOT FWGETOk) then
   begin
@@ -4686,7 +4695,7 @@ begin
   }
 end;
 
-{$ifndef libcurlstatic}
+{$ifndef USEONLYCURL}
 function TUseWGetDownloader.WGetDownload(Const URL : String; aDataStream : TStream):boolean;
 var
   Buffer : Array[0..4096] of byte;
@@ -4781,7 +4790,7 @@ var
 
   //TestURL : Pchar = 'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip';
   //TestURL : Pchar = 'https://www.google.com';
-  TestURL : Pchar = 'https://github-production-release-asset-2e65be.s3.amazonaws.com/74603442/93575400-14ed-11ea-8b5f-a730911ad37c?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20200430%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20200430T174421Z&X-Amz-Expires=300&X-Amz-Signature=d33b93cfe0a6e0ae22ec2809edee84c67807ef9ce21befe6247a8b46e190e2fd&X-Amz-SignedHeaders=host&actor_id=0&repo_id=74603442&response-content-disposition=attachment%3B%20filename%3DCrossLibsLinuxx64.zip&response-content-type=application%2Foctet-stream';
+  //TestURL : Pchar = 'https://github-production-release-asset-2e65be.s3.amazonaws.com/74603442/93575400-14ed-11ea-8b5f-a730911ad37c?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20200430%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20200430T174421Z&X-Amz-Expires=300&X-Amz-Signature=d33b93cfe0a6e0ae22ec2809edee84c67807ef9ce21befe6247a8b46e190e2fd&X-Amz-SignedHeaders=host&actor_id=0&repo_id=74603442&response-content-disposition=attachment%3B%20filename%3DCrossLibsLinuxx64.zip&response-content-type=application%2Foctet-stream';
 
 begin
   result:=false;
@@ -4826,12 +4835,12 @@ begin
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_2TLS);
         {$endif}
 
-        //if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,PChar(URL));
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,TestURL);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,PChar(URL));
+        //if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,TestURL);
 
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(aDataStream));
-        //if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEHEADER,Pointer(aDataStream));
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEHEADER,Pointer(aDataStream));
 
         //if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSLVERSION,6);
 
@@ -4989,7 +4998,7 @@ begin
   {$ifdef ENABLECURL}
   result:=LibCurlDownload(URL,aDataStream);
   {$endif}
-  {$ifndef libcurlstatic}
+  {$ifndef USEONLYCURL}
   if (NOT result) then
   begin
     result:=WGetDownload(URL,aDataStream);
@@ -5003,7 +5012,7 @@ begin
   {$ifdef ENABLECURL}
   result:=LibCurlDownload(URL,aDataStream);
   {$endif}
-  {$ifndef libcurlstatic}
+  {$ifndef USEONLYCURL}
   if (NOT result) then
   begin
     result:=WGetDownload(URL,aDataStream);
@@ -5041,7 +5050,7 @@ begin
   {$ifdef ENABLECURL}
   result:=LibCurlFTPFileList(URL,filelist);
   {$endif}
-  {$ifndef libcurlstatic}
+  {$ifndef USEONLYCURL}
   if (NOT result) then
   begin
     result:=WGetFTPFileList(URL,filelist);
@@ -5135,7 +5144,7 @@ end;
 
 destructor TDownloadStream.Destroy;
 begin
-  if Assigned(FOnWriteStream) then
+  if Assigned(FOnWriteStream) AND (Self.Size>0) then
     FOnWriteStream(Self, -1);
   FileFlush(Handle);
   inherited Destroy;

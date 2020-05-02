@@ -356,6 +356,7 @@ begin
   FReturnOutput := '';
   FRepoExecutable := '';
   FForceLocal := False;
+  FVerbose := True;
   //FForceLocal := TInstaller(FParent).ForceLocal;
   //FindRepoExecutable;
 end;

@@ -1582,16 +1582,15 @@ begin
   if ModuleName=_MAKEFILECHECKFPC then
   begin
     Processor.Process.Parameters.Add('fpc_baseinfo');
-    Infoln(infotext+'Running '+Processor.Executable+' fpc_baseinfo for '+ModuleName,etInfo);
   end
   else
   begin
     Processor.Process.Parameters.Add('all');
     Processor.Process.Parameters.Add('install');
-    Infoln(infotext+'Running '+Processor.Executable+' all install for '+ModuleName,etInfo);
   end;
 
   try
+    WritelnLog(infotext+Processor.GetExeInfo, true);
     ProcessorResult:=Processor.ExecuteAndWait;
     //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
     //Processor.Environment.SetVar('FPCDIR',FPCDirStore);
@@ -2831,8 +2830,9 @@ var
     Processor.Process.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('-o');
     Processor.Process.Parameters.Add('' + aFile + '');
-    Infoln(infotext+'Creating '+ExtractFileName(aFile)+': '+Processor.Executable+' '+StringReplace(Processor.Process.Parameters.CommaText,',',' ',[rfReplaceAll]));
+    Infoln(infotext+'Creating '+ExtractFileName(aFile));
     try
+      WritelnLog(infotext+Processor.GetExeInfo, true);
       ProcessorResult:=Processor.ExecuteAndWait;
       result:=(ProcessorResult=0);
     except
@@ -3031,7 +3031,8 @@ begin
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      Infoln(infotext+'Running '+Processor.GetExeInfo+' cycle for Windows FPC64:',etInfo);
+      Infoln(infotext+'Perform compiler cycle for Windows FPC64.',etInfo);
+      WritelnLog(infotext+Processor.GetExeInfo, true);
       ProcessorResult:=Processor.ExecuteAndWait;
       if ProcessorResult <> 0 then
       begin
@@ -3067,7 +3068,8 @@ begin
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      Infoln(infotext+'Running '+Processor.GetExeInfo+' cycle for FPC '+TargetCompilerName+' bootstrap compiler only',etInfo);
+      Infoln(infotext+'Perform compiler cycle for Darwin.',etInfo);
+      WritelnLog(infotext+Processor.GetExeInfo, true);
       ProcessorResult:=Processor.ExecuteAndWait;
       if ProcessorResult <> 0 then
       begin

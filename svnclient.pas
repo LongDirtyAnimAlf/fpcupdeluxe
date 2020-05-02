@@ -165,7 +165,7 @@ begin
   // If file exists, check for valid svn executable
   if FileExists(FRepoExecutable) then
   begin
-    //rv:=TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', False);
+    //rv:=TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose);
     //if rv<>0 then
     if (NOT CheckExecutable(RepoExecutable, ['--version'], '')) then
     begin
@@ -279,7 +279,7 @@ begin
     end
     else
     {$ENDIF}
-    FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, True);
+    FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
     FReturnOutput := Output;
 
     if (ReturnCode=AbortedExitCode) then break;
@@ -664,7 +664,7 @@ function TSVNClient.CheckURL: boolean;
 var
   Output:string;
 begin
-  FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, false);
+  FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, Verbose);
   //FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, Output, Verbose);
   //FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls --depth empty '+ Repository, Output, Verbose);
   result:=(FReturnCode=0);

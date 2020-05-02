@@ -48,7 +48,8 @@ uses
 implementation
 
 uses
-  process,fpcuputil;
+  process,
+  fpcuputil;
 
 type
 
@@ -205,11 +206,11 @@ begin
       end;
     end;
     {$ENDIF}
-    {$IFDEF CPUX32}
+    {$IFDEF CPUX86}
     // Now also allow for empty binutilsprefix in the right directory:
     if (NOT result) then
     begin
-      ExecuteCommand('objdump -i', s, False);
+      RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut],swoHide);
       if AnsiPos('elf64-x86-64', s) <> 0 then
       begin
         s:=Which('objdump');

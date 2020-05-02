@@ -1745,9 +1745,8 @@ begin
         UpdateWarnings:=TStringList.Create;
         try
           FURL:=RemoteURL;
-          FGitClient.ModuleName:=ModuleName;
-          FGitClient.Verbose:=FVerbose;
-          FGitClient.ExportOnly:=FExportOnly;
+          GitClient.ModuleName:=ModuleName;
+          GitClient.ExportOnly:=FExportOnly;
           result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
           SourceOK:=result;
           if UpdateWarnings.Count>0 then
@@ -1771,8 +1770,8 @@ begin
         UpdateWarnings:=TStringList.Create;
         try
           FURL:=RemoteURL;
-          FSVNClient.UserName   := GetValueFromKey('UserName',PackageSettings);
-          FSVNClient.Password   := GetValueFromKey('Password',PackageSettings);
+          SVNClient.UserName   := GetValueFromKey('UserName',PackageSettings);
+          SVNClient.Password   := GetValueFromKey('Password',PackageSettings);
           result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
           SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory+'.svn')) OR FExportOnly);
           if UpdateWarnings.Count>0 then
@@ -1808,9 +1807,8 @@ begin
         UpdateWarnings:=TStringList.Create;
         try
           FUrl:=RemoteURL;
-          FHGClient.ModuleName:=ModuleName;
-          FHGClient.Verbose:=FVerbose;
-          FHGClient.ExportOnly:=FExportOnly;
+          HGClient.ModuleName:=ModuleName;
+          HGClient.ExportOnly:=FExportOnly;
           result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
           SourceOK:=result;
           if result=false then
@@ -1881,7 +1879,6 @@ begin
           case UpperCase(SysUtils.ExtractFileExt(aFile)) of
              '.ZIP','.TMP':
                 begin
-                  //ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(FSourceDirectory)+' '+aFile,FVerbose);
                   with TNormalUnzipper.Create do
                   begin
                     try
