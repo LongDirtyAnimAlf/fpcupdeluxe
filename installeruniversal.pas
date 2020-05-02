@@ -700,6 +700,7 @@ begin
     Processor.Process.Parameters.Add('--add-package');
   Processor.Process.Parameters.Add(DoubleQuoteIfNeeded(PackageAbsolutePath));
   try
+    WritelnLog(infotext+Processor.GetExeInfo, true);
     ProcessorResult:=Processor.ExecuteAndWait;
     result := (ProcessorResult=0);
     // runtime packages will return false, but output will have info about package being "only for runtime"
@@ -1222,7 +1223,10 @@ begin
       end;
 
       Processor.Process.CurrentDirectory:=Workingdir;
+
+      WritelnLog(infotext+Processor.GetExeInfo, true);
       ProcessorResult:=Processor.ExecuteAndWait;
+
       s:=Processor.WorkerOutput.Text;
       j:=ProcessorResult;
 
