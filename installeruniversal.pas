@@ -1860,7 +1860,7 @@ begin
         begin
           WritelnLog(infotext+'Download ok',True);
 
-          if ModuleName='lamw-gradle' then
+          if (ModuleName='lamw-gradle') OR (ModuleName='mORMot-gradle') then
           begin
             //store info
             aName:=infotext;

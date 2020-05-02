@@ -2364,18 +2364,11 @@ begin
             aCompilerList.Clear;
 
             result:=aDownLoader.getFTPFileList(s,aCompilerList);
-
             if (NOT result) then
             begin
-              Infoln(localinfotext+'Could not get compiler list from ' + s + '. Trying again.',etWarning);
-              sleep(100);
-              result:=aDownLoader.getFTPFileList(s,aCompilerList);
-            end;
-
-            if (NOT result) then
-            begin
-              Infoln(localinfotext+'Could not get compiler list from ' + s + '. Final try.',etWarning);
+              Infoln(localinfotext+'Could not get compiler list from ' + s + '. Trying again. Final try.',etInfo);
               sleep(500);
+              aCompilerList.Clear;
               result:=aDownLoader.getFTPFileList(s,aCompilerList);
             end;
 

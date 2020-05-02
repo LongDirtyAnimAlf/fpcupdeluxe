@@ -2659,7 +2659,10 @@ begin
       if length(FPCupManager.SkipModules)>0 then aDataClient.AddExtraData('Skip',FPCupManager.SkipModules);
       {$endif}
 
-      success:=RealRun;
+      //success:=RealRun;
+
+      success:=False;
+      MissingCrossLibs:=True;
 
       if {(Sender<>nil) AND} (NOT success) then
       begin
@@ -3034,6 +3037,15 @@ begin
                 DownloadURL:=FPCUPGITREPOAPI+'/tags/'+LibsURL;
 
                 AddMessage('Looking for libs in: '+DownloadURL, True);
+
+
+                TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+'yolo.txt';
+                DownloadURL:='https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/crosslibs_v1.2/CrossLibsLinuxx64.zip';
+                SysUtils.DeleteFile(TargetFile);
+                success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+
+                sleep(2000);
+                halt;
 
                 success:=false;
                 aList:=TStringList.Create;

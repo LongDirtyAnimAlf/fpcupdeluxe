@@ -69,9 +69,9 @@ const
   FTPBASEFTP            = 'ftp://ftp.';
 
   FPCBASESVNURL         = SVNBASEHTTP+'freepascal.org';
-  FTPBASEURL            = FTPBASEFTP+'freepascal.org/pub/';
-  FPCFTPURL             = FTPBASEURL+'fpc/';
-  LAZARUSFTPURL         = FTPBASEURL+'lazarus/';
+  FTPBASEURL            = FTPBASEFTP+'freepascal.org';
+  FPCFTPURL             = FTPBASEURL+'/pub/fpc/';
+  LAZARUSFTPURL         = FTPBASEURL+'/pub/lazarus/';
 
   FPCFTPSNAPSHOTURL     = FPCFTPURL+'snapshot/';
 

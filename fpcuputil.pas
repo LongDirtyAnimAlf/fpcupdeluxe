@@ -275,7 +275,7 @@ type
     function checkURL(const URL:string):boolean;override;
   end;
   {$endif}
-
+  (*
   {$ifdef ENABLENATIVE}
   TNativeDownloader = TUseNativeDownLoader;
   {$else}
@@ -286,6 +286,9 @@ type
   {$else}
   TWGetDownloader = TUseNativeDownLoader;
   {$endif}
+  *)
+  TNativeDownloader = TUseWGetDownloader;
+  TWGetDownloader = TUseWGetDownloader;
 
 // Create shortcut on desktop to Target file
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
@@ -448,6 +451,7 @@ uses
   {$IFDEF ENABLEWGET}
   {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS) AND NOT DEFINED(AMIGA)}
   ,fpcuplibcurl
+  //,libcurl
   {$ENDIF}
   {$ENDIF ENABLEWGET}
   ,process
@@ -475,11 +479,12 @@ type
   TDownloadStream = class(TFileStream)
   private
     FOnWriteStream: TOnWriteStream;
+    procedure SetOnWriteStream(aValue:TOnWriteStream);
   public
     destructor Destroy; override;
     function Write(const Buffer; Count: LongInt): LongInt; override;
   published
-    property OnWriteStream: TOnWriteStream read FOnWriteStream write FOnWriteStream;
+    property OnWriteStream: TOnWriteStream read FOnWriteStream write SetOnWriteStream;
   end;
 
   //PTGitHubStore = ^TGitHubStore;
@@ -4143,6 +4148,14 @@ begin
     result:=Format('%d %s',[hi,_B[b]]);
 end;
 begin
+  if (APos=0) then
+  begin
+    ThreadLog('Download progress '+FileNameOnly+': starting.');
+    {$ifdef LCL}
+    Application.ProcessMessages;
+    {$endif}
+  end
+  else
   if (APos=-1) then
   begin
     ThreadLog('Download progress '+FileNameOnly+': download ready !');
@@ -4401,7 +4414,7 @@ begin
       end
       else
       begin
-        if Pos('ftp.freepascal.org',URL)>0 then
+        if URI.Host='ftp.freepascal.org' then
         begin
           Username := 'anonymous';
           Password := 'fpc@example.com';
@@ -4470,7 +4483,7 @@ begin
       end
       else
       begin
-        if Pos('ftp.freepascal.org',URL)>0 then
+        if URI.Host='ftp.freepascal.org' then
         begin
           Username := 'anonymous';
           Password := 'fpc@example.com';
@@ -4750,12 +4763,14 @@ function DoWrite(Ptr : Pointer; Size : size_t; nmemb: size_t; Data : Pointer) : 
 begin
   if Data=nil then result:=0 else
   begin
-    result:=TDownloadStream(Data).Write(Ptr^,Size*nmemb);
+    //result:=TStream(Data).Write(PAnsiChar(Ptr)^,Size*nmemb);
+    result:=TStream(Data).Write(Ptr^,Size*nmemb);
   end;
 end;
 
 function TUseWGetDownloader.LibCurlDownload(Const URL : String; aDataStream : TStream):boolean;
 var
+  URI : TURI;
   hCurl : pCurl;
   res: CURLcode;
   UserPass:string;
@@ -4763,10 +4778,17 @@ var
   location:string;
   response:sizeint;
   curl_headers: pointer;
+
+  //TestURL : Pchar = 'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip';
+  //TestURL : Pchar = 'https://www.google.com';
+  TestURL : Pchar = 'https://github-production-release-asset-2e65be.s3.amazonaws.com/74603442/93575400-14ed-11ea-8b5f-a730911ad37c?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20200430%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20200430T174421Z&X-Amz-Expires=300&X-Amz-Signature=d33b93cfe0a6e0ae22ec2809edee84c67807ef9ce21befe6247a8b46e190e2fd&X-Amz-SignedHeaders=host&actor_id=0&repo_id=74603442&response-content-disposition=attachment%3B%20filename%3DCrossLibsLinuxx64.zip&response-content-type=application%2Foctet-stream';
+
 begin
   result:=false;
 
   if (NOT FCURLOk) then exit;
+
+  URI:=ParseURI(URL);
 
   if LoadCurlLibrary then
   begin
@@ -4775,7 +4797,7 @@ begin
 
     try
       try
-       hCurl:= curl_easy_init();
+       hCurl:=curl_easy_init();
        if Assigned(hCurl) then
        begin
         res:=CURLE_OK;
@@ -4787,23 +4809,33 @@ begin
         end
         else
         begin
-          if Pos('ftp.freepascal.org',URL)>0 then UserPass:='anonymous:fpc@example.com';
+          if URI.Host='ftp.freepascal.org' then
+          begin
+            UserPass:='anonymous:fpc@example.com';
+          end;
         end;
         if Length(UserPass)>0 then if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_USERPWD, pointer(UserPass));
 
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_TCP_KEEPALIVE,1);
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_FOLLOWLOCATION, 1);
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_MAXREDIRS,5);
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_NOPROGRESS,1);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_TCP_KEEPALIVE,True);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_FOLLOWLOCATION,True);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_MAXREDIRS,10);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_NOPROGRESS,True);
         {$ifdef MSWINDOWS}
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSL_VERIFYPEER, 0);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSL_VERIFYPEER,False);
         {$else}
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_2TLS);
         {$endif}
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
+
+        //if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,PChar(URL));
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,TestURL);
+
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(aDataStream));
-        if (Length(FUserAgent)>0) then if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,pointer(FUserAgent));
+        //if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEHEADER,Pointer(aDataStream));
+
+        //if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSLVERSION,6);
+
+        if (Length(FUserAgent)>0) then if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,PChar(FUserAgent));
 
         curl_headers := nil;
         {
@@ -4814,13 +4846,9 @@ begin
         end;
         }
 
-        //check the URL
+        if res=CURLE_OK then res:=curl_easy_perform(hCurl);
         if res=CURLE_OK then res:=curl_easy_getinfo(hCurl,CURLINFO_RESPONSE_CODE, @response);
-        if ( (res=CURLE_OK) AND (response<>0) AND (response<>404) ) then
-        begin
-          res:=curl_easy_perform(hCurl);
-          result:=((res=CURLE_OK) AND (aDataStream.Size>0));
-        end else result:=false;
+        result:=((res=CURLE_OK) {AND (response=200)} AND (aDataStream.Size>0));
 
         try
           if Assigned(curl_headers) then
@@ -4837,6 +4865,118 @@ begin
       end;
     except
       // swallow libcurl exceptions
+    end;
+  end;
+end;
+function TUseWGetDownloader.LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
+var
+  hCurl : pCurl;
+  res: CURLcode;
+  URI : TURI;
+  s : String;
+  aTFTPList:TFTPList;
+  F:TMemoryStream;
+  i:integer;
+  response:sizeint;
+  UserPass :string;
+begin
+  result:=false;
+  if (NOT FCURLOk) then exit;
+
+  URI:=ParseURI(URL);
+  s:=URI.Protocol;
+  if CompareText(s,'ftp')=0 then
+  begin
+    if LoadCurlLibrary then
+    begin
+
+      curl_global_init(CURL_GLOBAL_ALL);
+
+      try
+       try
+        hCurl:= curl_easy_init();
+        if Assigned(hCurl) then
+        begin
+
+          res:=CURLE_OK;
+
+          F:=TMemoryStream.Create;
+          try
+
+            UserPass:='';
+            if FUsername <> '' then
+            begin
+              UserPass:=FUsername+':'+FPassword;
+            end
+            else
+            begin
+              if URI.Host='ftp.freepascal.org' then
+              begin
+                UserPass:='anonymous:fpc@example.com';
+              end;
+            end;
+            if Length(UserPass)>0 then if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_USERPWD, pointer(UserPass));
+
+            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
+            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
+            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(F));
+
+            {$ifdef MSWINDOWS}
+            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSL_VERIFYPEER,False);
+            {$endif}
+
+            if res=CURLE_OK then res:=curl_easy_perform(hCurl);
+            if res=CURLE_OK then res:=curl_easy_getinfo(hCurl,CURLINFO_RESPONSE_CODE, @response);
+            result:=((res=CURLE_OK) {AND (response=200)});
+
+            // libcurl correct exit ?
+            if result then
+            begin
+              // do we have data ?
+              if (F.Size>0) then
+              begin
+                F.Position:=0;
+                aTFTPList:=TFTPList.Create;
+                try
+                  aTFTPList:=TFTPList.Create;
+                  aTFTPList.Lines.LoadFromStream(F);
+
+                  if aTFTPList.Lines.Count>0 then
+                  begin
+                    // do we have a HTML listing (due to a proxy) ?
+                    if Pos('<!DOCTYPE HTML',UpperCase(aTFTPList.Lines.Strings[0]))=1 then
+                    begin
+                      parseFTPHTMLListing(F,filelist);
+                    end
+                    else
+                    begin
+                      // parse the pure FTP response
+                      aTFTPList.ParseLines;
+                      for i := 0 to aTFTPList.Count -1 do
+                      begin
+                        s := aTFTPList[i].FileName;
+                        filelist.Add(s);
+                      end;
+                    end;
+                  end;
+                finally
+                  aTFTPList.Free;
+                end;
+              end;
+            end;
+
+          finally
+            F.Free;
+          end;
+
+        end;
+       finally
+        if Assigned(hCurl) then curl_easy_cleanup(hCurl);
+       end;
+
+      except
+        // swallow libcurl exceptions
+      end;
     end;
   end;
 end;
@@ -4894,120 +5034,6 @@ begin
     FAccept:=AValue;
   end;
 end;
-
-{$ifdef ENABLECURL}
-function TUseWGetDownloader.LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
-var
-  hCurl : pCurl;
-  res: CURLcode;
-  URI : TURI;
-  s : String;
-  aTFTPList:TFTPList;
-  F:TMemoryStream;
-  i:integer;
-  UserPass :string;
-begin
-  result:=false;
-  if (NOT FCURLOk) then exit;
-
-  URI:=ParseURI(URL);
-  s:=URI.Protocol;
-  if CompareText(s,'ftp')=0 then
-  begin
-    if LoadCurlLibrary then
-    begin
-
-      //curl_global_init(CURL_GLOBAL_ALL);
-
-      try
-       try
-        hCurl:= curl_easy_init();
-        if Assigned(hCurl) then
-        begin
-
-          res:=CURLE_OK;
-
-          F:=TMemoryStream.Create;
-          try
-
-            UserPass:='';
-            if FUsername <> '' then
-            begin
-              UserPass:=FUsername+':'+FPassword;
-            end
-            else
-            begin
-              if URI.Host='ftp.freepascal.org' then
-              begin
-                UserPass:='anonymous:fpc@example.com';
-              end;
-            end;
-            if Length(UserPass)>0 then if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_USERPWD, pointer(UserPass));
-
-            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
-            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
-            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(F));
-
-            {$ifdef MSWINDOWS}
-            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSL_VERIFYPEER, 0);
-            {$endif}
-
-            if res=CURLE_OK then res:=curl_easy_perform(hCurl);
-
-            result:=(res=CURLE_OK);
-
-            // libcurl correct exit ?
-            if result then
-            begin
-              // do we have data ?
-              if (F.Size>0) then
-              begin
-                F.Position:=0;
-                aTFTPList:=TFTPList.Create;
-                try
-                  aTFTPList:=TFTPList.Create;
-                  aTFTPList.Lines.LoadFromStream(F);
-
-                  if aTFTPList.Lines.Count>0 then
-                  begin
-                    // do we have a HTML listing (due to a proxy) ?
-                    if Pos('<!DOCTYPE HTML',UpperCase(aTFTPList.Lines.Strings[0]))=1 then
-                    begin
-                      parseFTPHTMLListing(F,filelist);
-                    end
-                    else
-                    begin
-                      // parse the pure FTP response
-                      aTFTPList.ParseLines;
-                      for i := 0 to aTFTPList.Count -1 do
-                      begin
-                        s := aTFTPList[i].FileName;
-                        filelist.Add(s);
-                      end;
-                    end;
-                  end;
-                finally
-                  aTFTPList.Free;
-                end;
-              end;
-            end;
-
-          finally
-            F.Free;
-          end;
-
-        end;
-       finally
-        if Assigned(hCurl) then curl_easy_cleanup(hCurl);
-       end;
-
-      except
-        // swallow libcurl exceptions
-      end;
-    end;
-  end;
-end;
-{$endif ENABLECURL}
 
 function TUseWGetDownloader.getFTPFileList(const URL:string; filelist:TStringList):boolean;
 begin
@@ -5113,6 +5139,13 @@ begin
     FOnWriteStream(Self, -1);
   FileFlush(Handle);
   inherited Destroy;
+end;
+
+procedure TDownloadStream.SetOnWriteStream(aValue:TOnWriteStream);
+begin
+  FOnWriteStream:=aValue;
+  if Assigned(FOnWriteStream) then
+    FOnWriteStream(Self, 0);
 end;
 
 function TDownloadStream.Write(const Buffer; Count: LongInt): LongInt;
