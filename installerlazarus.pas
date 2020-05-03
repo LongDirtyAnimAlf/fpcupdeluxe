@@ -242,8 +242,6 @@ type
     destructor Destroy; override;
   end;
 
-type
-
   { TLazarusNativeInstaller }
 
   TLazarusNativeInstaller = class(TLazarusInstaller)
@@ -254,8 +252,6 @@ type
     constructor Create;
     destructor Destroy; override;
   end;
-
-type
 
   { TLazarusCrossInstaller }
 

@@ -135,13 +135,17 @@ type
     function ConfigModule(ModuleName:string): boolean; override;
     // Install/update sources (e.g. via svn)
     function GetModule(ModuleName:string): boolean; override;
-    // Gets the list of required modules for ModuleName
-    function GetModuleRequirements(ModuleName:string; var RequirementList:TStringList): boolean;
     // Uninstall module
     function UnInstallModule(ModuleName:string): boolean; override;
-    constructor Create;
-    destructor Destroy; override;
   end;
+
+  { TmORMotPXLInstaller }
+
+  TmORMotPXLInstaller = class(TUniversalInstaller)
+  protected
+    function BuildModule(ModuleName: string): boolean; override;
+  end;
+
 
   // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
   function GetModuleEnabledList(var ModuleList:TStringList):boolean;
@@ -185,6 +189,8 @@ Const
   MAXINSTRUCTIONS=255;
   MAXEMPTYINSTRUCTIONS=5;
   MAXRECURSIONS=10;
+  LOCATIONMAGIC='Workingdir';
+  INSTALLMAGIC='Installdir';
 
 var
   CurrentConfigFile:string;
@@ -749,8 +755,6 @@ function TUniversalInstaller.RemovePackages(sl: TStringList): boolean;
 const
   // The command that will be processed:
   Directive='AddPackage';
-  LOCATIONMAGIC='Workingdir';
-  INSTALLMAGIC='Installdir';
 var
   Failure: boolean;
   i:integer;
@@ -816,8 +820,6 @@ function TUniversalInstaller.AddPackages(sl:TStringList): boolean;
 const
   // The command that will be processed:
   Directive='AddPackage';
-  LOCATIONMAGIC='Workingdir';
-  INSTALLMAGIC='Installdir';
   NAMEMAGIC='Name';
 var
   i:integer;
@@ -1036,12 +1038,16 @@ begin
 
             s:='PathToAndroidSDK';
             s2:='';
-            {$ifdef Linux}
-            s2:=ReadString('NewProject',s,'/usr/lib/android-sdk');
-            {$endif}
             {$ifdef MSWindows}
-            s2:=ReadString('NewProject',s,ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']));
+            s2:=ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']);
+            if (NOT DirectoryExists(s2)) then
+              s2:=ConcatPaths([GetUserDir,'AppData','Local','Android','Sdk']);
+            {$else}
+            s2:=ConcatPaths(['usr','lib','android-sdk']);
+            if (NOT DirectoryExists(s2)) then
+              s2:=ConcatPaths([GetUserDir,'Android','Sdk']);
             {$endif}
+            s2:=ReadString('NewProject',s,s2);
             if DirectoryExists(s2) then WriteString('NewProject',s,s2);
 
           finally
@@ -1828,6 +1834,20 @@ begin
       end;
 
       RemoteURL:=GetValueFromKey('ArchiveURL',PackageSettings);
+
+      if (RemoteURL<>'') AND (NOT SourceOK) then
+      begin
+        if (NOT DirectoryIsEmpty(ExcludeTrailingPathDelimiter(FSourceDirectory))) then
+        begin
+          Infoln(localinfotext+ModuleName+' sources are already there. Using these. Skipping download.',etWarning);
+          Infoln(localinfotext+ModuleName+' sources are already there.',etInfo);
+          Infoln(localinfotext+'Sources: '+FSourceDirectory,etInfo);
+          Infoln(localinfotext+'Build-process will continue with existing sources.',etInfo);
+          Infoln(localinfotext+'Delete directory yourself if new sources are desired.',etInfo);
+          SourceOK:=True;
+        end;
+      end;
+
       if (RemoteURL<>'') AND (NOT SourceOK) then
       begin
         Infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
@@ -2027,14 +2047,6 @@ begin
   if result then PatchModule(ModuleName);
 end;
 
-function TUniversalInstaller.GetModuleRequirements(ModuleName: string;
-  var RequirementList: TStringList): boolean;
-begin
-//todo: what are we supposed to do with Requirementslist?
-  result:=InitModule;
-  if not result then exit;
-end;
-
 // Runs all UnInstallExecute<n> commands inside a specified module
 function TUniversalInstaller.UnInstallModule(ModuleName: string): boolean;
 {$ifndef FPCONLY}
@@ -2127,16 +2139,98 @@ begin
   {$endif}
 end;
 
-constructor TUniversalInstaller.Create;
-begin
-  inherited Create;
-end;
+{ TmORMotPXLInstaller }
 
-destructor TUniversalInstaller.Destroy;
+function TmORMotPXLInstaller.BuildModule(ModuleName: string): boolean;
+var
+  Workingdir,aFile:string;
+  s,s2,aValue:string;
+  idx:integer;
+  sl:TStringList;
+  FilesList:TStrings;
+  FileContents:TStrings;
 begin
-  inherited Destroy;
-end;
+  result:=inherited;
 
+  //Perform some extra magic for this module
+
+  idx:=UniModuleList.IndexOf(ModuleName);
+  if idx>=0 then
+  begin
+    sl:=TStringList(UniModuleList.Objects[idx]);
+
+    Workingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
+    if Workingdir='' then Workingdir:=GetValueFromKey(INSTALLMAGIC,sl);
+    Workingdir:=FixPath(Workingdir);
+
+    if DirectoryExists(Workingdir) then
+    begin
+
+      FilesList:=TStringList.Create;
+      try
+        // Try to set java JDK path
+        s:=SafeExpandFileName(ExtractFilePath(GetJavac)+'..');
+        if DirectoryExists(s) then
+        begin
+          s:=StringReplace(s,'\','/',[rfReplaceAll]);
+          FilesList.Clear;
+          FindAllFiles(FilesList,Workingdir, 'gradle.properties', true);
+          for idx:=0 to Pred(FilesList.Count) do
+          begin
+            aFile:=FilesList[idx];
+            Infoln(infotext+'Processing file: '+aFile,etInfo);
+            FileContents:=TStringList.Create;
+            try
+              FileContents.LoadFromFile(aFile);
+              FileContents.Values['org.gradle.java.home']:=s;
+              FileContents.SaveToFile(aFile);
+            finally
+              FileContents.Free;
+            end;
+          end;
+        end;
+
+        //Process Gradle settings
+        s:=ConcatPaths([Workingdir,'..','mORMot-gradle','gradle-6.3']);
+        s2:=SafeExpandFileName(s);
+
+        s:='';
+        {$ifdef MSWindows}
+        s:=ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']);
+        if (NOT DirectoryExists(s)) then
+          s:=ConcatPaths([GetUserDir,'AppData','Local','Android','Sdk']);
+        {$else}
+        s:=ConcatPaths(['usr','lib','android-sdk']);
+        if (NOT DirectoryExists(s)) then
+          s:=ConcatPaths([GetUserDir,'Android','Sdk']);
+        {$endif}
+
+        FilesList.Clear;
+        FindAllFiles(FilesList,Workingdir, 'gradle-local-*.bat;gradle-local-*.sh', true);
+        for idx:=0 to Pred(FilesList.Count) do
+        begin
+          aFile:=FilesList[idx];
+          Infoln(infotext+'Processing file: '+aFile,etInfo);
+          FileContents:=TStringList.Create;
+          try
+            FileContents.LoadFromFile(aFile);
+            if DirectoryExists(s2) then
+              FileContents.Values['set GRADLE_HOME']:=s2;
+            if DirectoryExists(s) then
+              FileContents.Values['set PATH']:='%PATH%;%GRADLE_HOME%\bin;'+IncludeTrailingPathDelimiter(s)+'platform-tools';
+            FileContents.SaveToFile(aFile);
+          finally
+            FileContents.Free;
+          end;
+        end;
+
+      finally
+        FilesList.Free;
+      end;
+
+    end;
+  end;
+end;
 
 procedure ClearUniModuleList;
 var

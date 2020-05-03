@@ -1439,7 +1439,7 @@ begin
       CrossCompiling:=false;
       if assigned(FInstaller) then
       begin
-        if (FInstaller is TUniversalInstaller) and
+        if (FInstaller.InheritsFrom(TUniversalInstaller)) and
           (FCurrentModule=ModuleName) then
         begin
           exit; //all fine, continue with current FInstaller
@@ -1447,7 +1447,12 @@ begin
         else
           FInstaller.free; // get rid of old FInstaller
       end;
-      FInstaller:=TUniversalInstaller.Create;
+
+      if ModuleName='mORMotPXL' then
+        FInstaller:=TmORMotPXLInstaller.Create
+      else
+        FInstaller:=TUniversalInstaller.Create;
+
       FCurrentModule:=ModuleName;
       //assign properties
       (FInstaller as TUniversalInstaller).FPCInstallDir:=FParent.FPCInstallDirectory;

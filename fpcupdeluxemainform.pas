@@ -1906,22 +1906,15 @@ end;
 
 procedure TForm1.btnInstallModuleClick(Sender: TObject);
 var
-  //i:integer;
+  i:integer;
   modules:string;
 begin
   //Form3.ShowModal;
 
   DisEnable(Sender,False);
 
+   // for i:=1 to 100 do
   try
-    {
-    if Form3.ModalResult=mrYes then
-    begin
-
-    end;
-    exit;
-    }
-
     if listModules.SelCount=0 then
     begin
       AddMessage('Please select a module / package.');
@@ -1988,7 +1981,12 @@ begin
         {$endif}
       end;
 
-      RealRun;
+      if (NOT RealRun) then
+      begin
+        //AddMessage('Run: '+InttoStr(i));
+        //break;
+
+      end;
     end;
   finally
     FPCupManager.ExportOnly:=(NOT Form2.Repo);

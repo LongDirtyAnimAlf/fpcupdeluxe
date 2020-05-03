@@ -272,9 +272,6 @@ type
 
   { TInstaller }
 
-  //TBaseFPCInstaller = class;
-  //TBaseLazarusInstaller = class;
-
   TInstaller = class(TObject)
   private
     FKeepLocalChanges: boolean;
