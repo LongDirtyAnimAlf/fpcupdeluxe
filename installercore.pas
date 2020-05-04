@@ -1477,13 +1477,13 @@ begin
   AddNewUtil('nm' + GetExeExt,aSourceURL,'',ucBinutil);
 
   // add win32/64 gdb from lazarus
-  //AddNewUtil('gdb' + GetExeExt,SourceURL_gdb,'',ucDebugger32);
-  //AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucDebugger64);
+  AddNewUtil('gdb' + GetExeExt,SourceURL_gdb_default,'',ucDebugger32);
+  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucDebugger64);
   //AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger64);
 
   // add win32/64 gdb from fpcup
-  AddNewUtil('i386-win32-gdb.zip',SourceURL_gdb,'',ucDebugger32);
-  AddNewUtil('x86_64-win64-gdb.zip',SourceURL64_gdb,'',ucDebugger64);
+  //AddNewUtil('i386-win32-gdb.zip',SourceURL_gdb,'',ucDebugger32);
+  //AddNewUtil('x86_64-win64-gdb.zip',SourceURL64_gdb,'',ucDebugger64);
 
   {$ifdef win32}
   AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -1492,9 +1492,8 @@ begin
   AddNewUtil('cp' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('diff' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('gdate' + GetExeExt,aSourceURL,'',ucBinutil);
-  //AddNewUtil('gdb' + GetExeExt,aSourceURL_gdb_default,'',ucDebugger);
   // just add default 32 bit debugger for all usercases as a binutil !
-  AddNewUtil('gdb' + GetExeExt,SourceURL_gdb_default,'',ucBinutil);
+  AddNewUtil('gdb' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('libexpat-1.dll',aSourceURL,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL,'',ucBinutil);

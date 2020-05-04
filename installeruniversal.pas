@@ -2143,11 +2143,11 @@ end;
 
 function TmORMotPXLInstaller.BuildModule(ModuleName: string): boolean;
 var
-  Workingdir,aFile:string;
-  s,s2,aValue:string;
+  Workingdir,aFile,SDKDir,NDKDir:string;
+  s:string;
   idx:integer;
   sl:TStringList;
-  FilesList:TStrings;
+  FilesList:TStringList;
   FileContents:TStrings;
 begin
   result:=inherited;
@@ -2165,10 +2165,11 @@ begin
 
     if DirectoryExists(Workingdir) then
     begin
-
       FilesList:=TStringList.Create;
+
       try
-        // Try to set java JDK path
+
+        //Process Java JDK settings
         s:=SafeExpandFileName(ExtractFilePath(GetJavac)+'..');
         if DirectoryExists(s) then
         begin
@@ -2190,20 +2191,28 @@ begin
           end;
         end;
 
-        //Process Gradle settings
-        s:=ConcatPaths([Workingdir,'..','mORMot-gradle','gradle-6.3']);
-        s2:=SafeExpandFileName(s);
+        SDKDir:='';
+        NDKDir:='';
 
-        s:='';
         {$ifdef MSWindows}
-        s:=ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']);
-        if (NOT DirectoryExists(s)) then
-          s:=ConcatPaths([GetUserDir,'AppData','Local','Android','Sdk']);
+        SDKDir:=ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']);
+        if (NOT DirectoryExists(SDKDir)) then
+          SDKDir:=ConcatPaths([GetUserDir,'AppData','Local','Android','Sdk']);
         {$else}
-        s:=ConcatPaths(['usr','lib','android-sdk']);
-        if (NOT DirectoryExists(s)) then
-          s:=ConcatPaths([GetUserDir,'Android','Sdk']);
+        SDKDir:=ConcatPaths(['usr','lib','android-sdk']);
+        if (NOT DirectoryExists(SDKDir)) then
+          SDKDir:=ConcatPaths([GetUserDir,'Android','Sdk']);
         {$endif}
+
+        NDKDir:=ConcatPaths([SDKDir,'ndk']);
+        FilesList.Clear;
+        FindAllDirectories(FilesList,NDKDir,False);
+        if FilesList.Count>0 then
+        begin
+          FilesList.Sorted:=True;
+          //Get the highest = latest = best I guess ... ;-)
+          NDKDir:=FilesList[FilesList.Count-1];
+        end;
 
         FilesList.Clear;
         FindAllFiles(FilesList,Workingdir, 'gradle-local-*.bat;gradle-local-*.sh', true);
@@ -2214,16 +2223,65 @@ begin
           FileContents:=TStringList.Create;
           try
             FileContents.LoadFromFile(aFile);
-            if DirectoryExists(s2) then
-              FileContents.Values['set GRADLE_HOME']:=s2;
+
+            //Process Gradle settings
+            s:=ConcatPaths([Workingdir,'..','mORMot-gradle','gradle-6.3']);
+            s:=SafeExpandFileName(s);
             if DirectoryExists(s) then
-              FileContents.Values['set PATH']:='%PATH%;%GRADLE_HOME%\bin;'+IncludeTrailingPathDelimiter(s)+'platform-tools';
+            begin
+              FileContents.Values['set GRADLE_HOME']:=s;
+              s:='%PATH%;%GRADLE_HOME%\bin'
+            end else s:='%PATH%';
+
+            //Process SDK settings
+            if DirectoryExists(SDKDir) then
+              FileContents.Values['set PATH']:=s+';'+ConcatPaths([SDKDir,'platform-tools'])
+            else
+              FileContents.Values['set PATH']:=s;
+
             FileContents.SaveToFile(aFile);
           finally
             FileContents.Free;
           end;
         end;
 
+        FilesList.Clear;
+        FindAllFiles(FilesList,Workingdir, 'local.properties', true);
+        for idx:=0 to Pred(FilesList.Count) do
+        begin
+          aFile:=FilesList[idx];
+          Infoln(infotext+'Processing file: '+aFile,etInfo);
+          FileContents:=TStringList.Create;
+          try
+            FileContents.LoadFromFile(aFile);
+
+            //Process SDK settings
+            if DirectoryExists(SDKDir) then
+            begin
+              s:=IncludeTrailingPathDelimiter(SDKDir);
+              {$ifdef MSWindows}
+              s:=StringReplace(s,'\','\\',[rfReplaceAll]);
+              s:=StringReplace(s,':','\:',[]);
+              {$endif}
+              FileContents.Values['sdk.dir']:=s;
+            end;
+
+            //Process NDK settings
+            if DirectoryExists(NDKDir) then
+            begin
+              s:=IncludeTrailingPathDelimiter(NDKDir);
+              {$ifdef MSWindows}
+              s:=StringReplace(s,'\','\\',[rfReplaceAll]);
+              s:=StringReplace(s,':','\:',[]);
+              {$endif}
+              FileContents.Values['ndk.dir']:=s;
+            end;
+
+            FileContents.SaveToFile(aFile);
+          finally
+            FileContents.Free;
+          end;
+        end;
       finally
         FilesList.Free;
       end;
