@@ -3754,11 +3754,8 @@ begin
           aTool.Environment.SetVar(PATHVARNAME, PrependPath);
       end;
 
-      //if Verbosity then
-        WritelnLog(infotext+aTool.GetExeInfo, true);
-
+      WritelnLog(infotext+aTool.GetExeInfo, true);
       result:=aTool.ExecuteAndWait;
-
       Output:=aTool.WorkerOutput.Text;
 
       aTool.Environment.SetVar(PATHVARNAME, OldPath);

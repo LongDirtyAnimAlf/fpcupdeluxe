@@ -290,13 +290,21 @@ var
   idx:integer;
   s:string;
 begin
-  if (Length(VarName)=0) OR (Length(VarValue)=0) then exit;
+  if (Length(VarName)=0) then exit;
   idx:=GetVarIndex(VarName);
-  s:=trim(Varname)+'='+trim(VarValue);
-  if idx>=0 then
-    FEnvironmentList[idx]:=s
+  if (idx>=0) AND (Length(VarValue)=0) then
+  begin
+    FEnvironmentList.Delete(idx);
+  end
   else
-    FEnvironmentList.Add(s);
+  if (Length(VarValue)>0) then
+  begin
+    s:=trim(Varname)+'='+trim(VarValue);
+    if idx>=0 then
+      FEnvironmentList[idx]:=s
+    else
+      FEnvironmentList.Add(s);
+  end;
 end;
 
 constructor TProcessEnvironment.Create;

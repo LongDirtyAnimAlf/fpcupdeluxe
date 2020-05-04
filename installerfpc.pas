@@ -642,7 +642,7 @@ begin
         begin
           s1:='';
           {$ifdef Darwin}
-          s1:=GetSDKVersion('macosx');
+          s1:=GetDarwinSDKVersion('macosx');
           if CompareVersionStrings(s1,'10.8')>=0 then
           begin
             s1:='10.8';
@@ -662,11 +662,11 @@ begin
           {$ifdef Darwin}
           if (CrossInstaller.TargetCPU=TCPU.aarch64) OR (CrossInstaller.TargetCPU=TCPU.arm) then
           begin
-            s1:=GetSDKVersion('iphoneos');
+            s1:=GetDarwinSDKVersion('iphoneos');
           end
           else
           begin
-            s1:=GetSDKVersion('iphonesimulator');
+            s1:=GetDarwinSDKVersion('iphonesimulator');
           end;
           {$endif}
           if Length(s1)>0 then
@@ -1504,7 +1504,7 @@ begin
 
   {$IFDEF DARWIN}
   //Add minimum required OSX version to prevent "crti not found" errors.
-  s2:=GetSDKVersion('macosx');
+  s2:=GetDarwinSDKVersion('macosx');
   if CompareVersionStrings(s2,'10.8')>=0 then
   begin
     s2:='10.8';
@@ -2749,7 +2749,7 @@ begin
     // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
     s:='';
     {$ifdef Darwin}
-    s1:=GetSDKVersion('macosx');
+    s1:=GetDarwinSDKVersion('macosx');
     if CompareVersionStrings(s1,'10.14')>=0 then
     begin
       s:=PathSeparator+'/Library/Developer/CommandLineTools/usr/bin';
@@ -3500,7 +3500,7 @@ begin
         {$ENDIF UNIX}
 
         {$ifdef Darwin}
-        s:=GetSDKVersion('macosx');
+        s:=GetDarwinSDKVersion('macosx');
         if Length(s)>0 then
         begin
           ConfigText.Append('# Add minimum required OSX version for native compiling');

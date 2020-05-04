@@ -577,6 +577,9 @@ function TLazarusNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   i,j,ExitCode: integer;
   s,s2,LazBuildApp,FPCDirStore: string;
+  {$ifdef MSWindows}
+  OldPath:string;
+  {$endif}
   OperationSucceeded: boolean;
   LazarusConfig: TUpdateLazConfig;
 begin
@@ -825,6 +828,16 @@ begin
 
     try
       WritelnLog(infotext+Processor.GetExeInfo, true);
+
+      {$ifdef MSWindows}
+      //Prepend Make binary directory to PATH to prevent pickup of strange tools
+      OldPath:=Processor.Environment.GetVar(PATHVARNAME);
+      if OldPath<>'' then
+         Processor.Environment.SetVar(PATHVARNAME, ExtractFileDir(Make)+PathSeparator+OldPath)
+      else
+        Processor.Environment.SetVar(PATHVARNAME, ExtractFileDir(Make));
+      {$endif}
+
       ProcessorResult:=Processor.ExecuteAndWait;
       ExitCode := ProcessorResult;
       if ExitCode <> 0 then
@@ -833,6 +846,11 @@ begin
         OperationSucceeded := false;
         Result := false;
       end;
+
+      {$ifdef MSWindows}
+      Processor.Environment.SetVar(PATHVARNAME, OldPath);
+      {$endif}
+
     except
       on E: Exception do
       begin

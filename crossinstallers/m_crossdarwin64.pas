@@ -1,6 +1,6 @@
-unit m_crossdarwinpowerpc;
+unit m_crossdarwin64;
 
-{ Cross compiles from Darwin i386 to Darwin powerpc
+{  Cross compiles from Darwin x86/32 bit to Darwin x86_64 code
 }
 
 
@@ -18,9 +18,9 @@ uses
 
 type
 
-{ TDarwinpowerpc }
+{ TDarwin64 }
 
-TDarwinpowerpc = class(TCrossInstaller)
+TDarwin64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -30,18 +30,19 @@ public
   destructor Destroy; override;
 end;
 
-{ TDarwinpowerpc }
+{ TWin32 }
 
-function TDarwinpowerpc.GetLibs(Basepath:string): boolean;
+function TDarwin64.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
   if result then exit;
+
   FLibsPath:='';
   result:=true;
   FLibsFound:=true;
 end;
 
-function TDarwinpowerpc.GetBinUtils(Basepath:string): boolean;
+function TDarwin64.GetBinUtils(Basepath:string): boolean;
 var
   aOption:string;
 begin
@@ -49,42 +50,50 @@ begin
   if result then exit;
 
   FBinUtilsPath:='';
-  FBinUtilsPrefix:=''; // we have the "native" names, no prefix
+  FBinUtilsPrefix:='';
 
   result:=true;
   FBinsFound:=true;
-  aOption:=GetSDKVersion('macosx');
-  if Length(aOption)>0 then AddFPCCFGSnippet('-WM'+aOption);
+
+  aOption:=GetDarwinSDKVersion'macosx');
+  if Length(aOption)>0 then
+  begin
+    if CompareVersionStrings(aOption,'10.8')>=0 then
+    begin
+      aOption:='10.8';
+    end;
+    AddFPCCFGSnippet('-WM'+aOption);
+  end;
 end;
 
-constructor TDarwinpowerpc.Create;
+constructor TDarwin64.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwin32';
-  FTargetCPU:=TCPU.powerpc;
+  FTargetCPU:=TCPU.x86_64;
   FTargetOS:=TOS.darwin;
   Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor TDarwinpowerpc.Destroy;
+destructor TDarwin64.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$IFDEF Darwin}
-{$IFDEF CPUX86}
+{$IFNDEF CPUX86_64}
 
 var
-  Darwinpowerpc:TDarwinpowerpc;
+  darwin64:TDarwin64;
 
 initialization
-  Darwinpowerpc:=TDarwinpowerpc.Create;
-  RegisterCrossCompiler(Darwinpowerpc.RegisterName,Darwinpowerpc);
+  darwin64:=TDarwin64.Create;
+  RegisterCrossCompiler(darwin64.RegisterName,darwin64);
 
 finalization
-  Darwinpowerpc.Destroy;
+  darwin64.Destroy;
 {$ENDIF}
 {$ENDIF}
 end.

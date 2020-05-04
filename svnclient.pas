@@ -664,9 +664,9 @@ function TSVNClient.CheckURL: boolean;
 var
   Output:string;
 begin
-  FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, Verbose);
-  //FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, Output, Verbose);
-  //FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls --depth empty '+ Repository, Output, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, False);
+  //FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, Output, False);
+  //FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls --depth empty '+ Repository, Output, False);
   result:=(FReturnCode=0);
   //result:=(Output=GetFileNameFromURL(Repository));
 end;

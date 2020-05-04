@@ -1,36 +1,8 @@
-unit m_crossdarwin386iphonesim;
+unit m_crossdarwinaarch64;
 
-{
-Cross compiles from Darwin to Darwin i386 iphone simulator
-
-Copyright (C) 2013 Reinier Olislagers
-Copyright (C) 2017 DonAlfredo
-
-This library is free software; you can redistribute it and/or modify it
-under the terms of the GNU Library General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at your
-option) any later version with the following modification:
-
-As a special exception, the copyright holders of this library give you
-permission to link this library with independent modules to produce an
-executable, regardless of the license terms of these independent modules,and
-to copy and distribute the resulting executable under terms of your choice,
-provided that you also meet, for each linked independent module, the terms
-and conditions of the license of that module. An independent module is a
-module which is not derived from or based on this library. If you modify
-this library, you may extend this exception to your version of the library,
-but you are not obligated to do so. If you do not wish to do so, delete this
-exception statement from your version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License
-for more details.
-
-You should have received a copy of the GNU Library General Public License
-along with this library; if not, write to the Free Software Foundation,
-Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+{ Cross compiles from Darwin to Darwin aarch64 (iphone)
 }
+
 
 {$mode objfpc}{$H+}
 
@@ -45,7 +17,7 @@ uses
   fpcuputil;
 
 const
-  SDKNAME='iPhoneSimulator';
+  SDKNAME='iPhoneOS';
 
   SDKLOCATIONS:array[0..4] of string = (
     '/Applications/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
@@ -66,9 +38,9 @@ const
 
 type
 
-{ TDarwin386iphonesim }
+{ TDarwinaarch64 }
 
-TDarwin386iphonesim = class(TCrossInstaller)
+TDarwinaarch64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -78,9 +50,12 @@ public
   destructor Destroy; override;
 end;
 
-{ TDarwin386iphonesim }
+{ TDarwinaarch64 }
 
-function TDarwin386iphonesim.GetLibs(Basepath:string): boolean;
+function TDarwinaarch64.GetLibs(Basepath:string): boolean;
+var
+  aOption:string;
+  i:integer;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -101,6 +76,17 @@ begin
 
   if FLibsFound then
   begin
+    {
+    i:=StringListContains(FCrossOpts,'-isysroot');
+    if i=-1 then
+    begin
+      aOption:='-ao"-isysroot '+ExcludeTrailingPathDelimiter(FLibsPath)+'"';
+      FCrossOpts.Add(aOption+' ');
+      ShowInfo('Did not find sysroot parameter; using '+aOption+'.');
+    end else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
+    }
+
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
   end else FLibsPath:='';
@@ -110,15 +96,17 @@ begin
   FLibsFound:=true;
 end;
 
-function TDarwin386iphonesim.GetBinUtils(Basepath:string): boolean;
+function TDarwinaarch64.GetBinUtils(Basepath:string): boolean;
 var
   aOption:string;
+  i:integer;
 begin
   result:=inherited;
   if result then exit;
 
   FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
+
   result:=false;
   FBinsFound:=false;
 
@@ -139,7 +127,17 @@ begin
     AddFPCCFGSnippet('-FD'+FBinUtilsPath);{search this directory for compiler utilities}
   end else FBinUtilsPath:='';
 
-  aOption:=GetSDKVersion(LowerCase(SDKNAME));
+  // Set some defaults if user hasn't specified otherwise
+  i:=StringListStartsWith(FCrossOpts,'-Ca');
+  if i=-1 then
+  begin
+    aOption:='-CaAARCH64IOS';
+    FCrossOpts.Add(aOption+' ');
+    ShowInfo('Did not find any -Ca architecture parameter; using '+aOption+'.');
+  end else aOption:=Trim(FCrossOpts[i]);
+  AddFPCCFGSnippet(aOption);
+
+  aOption:=GetDarwinSDKVersion(LowerCase(SDKNAME));
   if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
 
   // Never fail
@@ -147,32 +145,32 @@ begin
   FBinsFound:=true;
 end;
 
-constructor TDarwin386iphonesim.Create;
+constructor TDarwinaarch64.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TDarwin32';
-  FTargetCPU:=TCPU.i386;
-  FTargetOS:=TOS.iphonesim;
+  FCrossModuleNamePrefix:='TDarwinAny';
+  FTargetCPU:=TCPU.aarch64;
+  FTargetOS:=TOS.darwin;
   Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor TDarwin386iphonesim.Destroy;
+destructor TDarwinaarch64.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$IFDEF Darwin}
 var
-  Darwin386iphonesim:TDarwin386iphonesim;
+  Darwinaarch64:TDarwinaarch64;
 
 initialization
-  Darwin386iphonesim:=TDarwin386iphonesim.Create;
-  RegisterCrossCompiler(Darwin386iphonesim.RegisterName,Darwin386iphonesim);
+  Darwinaarch64:=TDarwinaarch64.Create;
+  RegisterCrossCompiler(Darwinaarch64.RegisterName,Darwinaarch64);
 
 finalization
-  Darwin386iphonesim.Destroy;
+  Darwinaarch64.Destroy;
 {$ENDIF}
 end.
 

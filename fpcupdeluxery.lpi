@@ -35,7 +35,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -78,7 +78,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -113,7 +113,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -149,7 +149,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -180,7 +180,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -214,7 +214,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -248,7 +248,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -282,7 +282,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger\mORMot\CrossPlatform;logger;logger\mORMot;logger\mORMot\SQLite3;alternateui"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -404,7 +404,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-      <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;alternateui;logger;logger\mORMot;logger\mORMot\SQLite3;logger\mORMot\CrossPlatform"/>
+      <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;alternateui;logger;logger\mORMot;logger\mORMot\SQLite3;logger\mORMot\CrossPlatform"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>

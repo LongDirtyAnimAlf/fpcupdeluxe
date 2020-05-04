@@ -1,6 +1,6 @@
-unit m_crossdarwinaarch64;
+unit m_crossdarwinarm;
 
-{ Cross compiles from Darwin to Darwin aarch64 (iphone)
+{ Cross compiles from Darwin to Darwin arm (iphone)
 }
 
 
@@ -35,12 +35,11 @@ const
     '~/fpcupdeluxe/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain'
   );
 
-
 type
 
-{ TDarwinaarch64 }
+{ TDarwinARM }
 
-TDarwinaarch64 = class(TCrossInstaller)
+TDarwinARM = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -50,9 +49,9 @@ public
   destructor Destroy; override;
 end;
 
-{ TDarwinaarch64 }
+{ TDarwinARM }
 
-function TDarwinaarch64.GetLibs(Basepath:string): boolean;
+function TDarwinARM.GetLibs(Basepath:string): boolean;
 var
   aOption:string;
   i:integer;
@@ -86,7 +85,6 @@ begin
     end else aOption:=Trim(FCrossOpts[i]);
     AddFPCCFGSnippet(aOption);
     }
-
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
   end else FLibsPath:='';
@@ -96,7 +94,7 @@ begin
   FLibsFound:=true;
 end;
 
-function TDarwinaarch64.GetBinUtils(Basepath:string): boolean;
+function TDarwinARM.GetBinUtils(Basepath:string): boolean;
 var
   aOption:string;
   i:integer;
@@ -127,17 +125,7 @@ begin
     AddFPCCFGSnippet('-FD'+FBinUtilsPath);{search this directory for compiler utilities}
   end else FBinUtilsPath:='';
 
-  // Set some defaults if user hasn't specified otherwise
-  i:=StringListStartsWith(FCrossOpts,'-Ca');
-  if i=-1 then
-  begin
-    aOption:='-CaAARCH64IOS';
-    FCrossOpts.Add(aOption+' ');
-    ShowInfo('Did not find any -Ca architecture parameter; using '+aOption+'.');
-  end else aOption:=Trim(FCrossOpts[i]);
-  AddFPCCFGSnippet(aOption);
-
-  aOption:=GetSDKVersion(LowerCase(SDKNAME));
+  aOption:=GetDarwinSDKVersion(LowerCase(SDKNAME));
   if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
 
   // Never fail
@@ -145,32 +133,32 @@ begin
   FBinsFound:=true;
 end;
 
-constructor TDarwinaarch64.Create;
+constructor TDarwinARM.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwinAny';
-  FTargetCPU:=TCPU.aarch64;
+  FTargetCPU:=TCPU.arm;
   FTargetOS:=TOS.darwin;
   Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor TDarwinaarch64.Destroy;
+destructor TDarwinARM.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$IFDEF Darwin}
 var
-  Darwinaarch64:TDarwinaarch64;
+  DarwinARM:TDarwinARM;
 
 initialization
-  Darwinaarch64:=TDarwinaarch64.Create;
-  RegisterCrossCompiler(Darwinaarch64.RegisterName,Darwinaarch64);
+  DarwinARM:=TDarwinARM.Create;
+  RegisterCrossCompiler(DarwinARM.RegisterName,DarwinARM);
 
 finalization
-  Darwinaarch64.Destroy;
+  DarwinARM.Destroy;
 {$ENDIF}
 end.
 

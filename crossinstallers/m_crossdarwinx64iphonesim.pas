@@ -1,8 +1,36 @@
-unit m_crossdarwinarm;
+unit m_crossdarwinx64iphonesim;
 
-{ Cross compiles from Darwin to Darwin arm (iphone)
+{
+Cross compiles from Darwin to Darwin x64 bit iphone simulator
+
+Copyright (C) 2013 Reinier Olislagers
+Copyright (C) 2017 DonAlfredo
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at your
+option) any later version with the following modification:
+
+As a special exception, the copyright holders of this library give you
+permission to link this library with independent modules to produce an
+executable, regardless of the license terms of these independent modules,and
+to copy and distribute the resulting executable under terms of your choice,
+provided that you also meet, for each linked independent module, the terms
+and conditions of the license of that module. An independent module is a
+module which is not derived from or based on this library. If you modify
+this library, you may extend this exception to your version of the library,
+but you are not obligated to do so. If you do not wish to do so, delete this
+exception statement from your version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License
+for more details.
+
+You should have received a copy of the GNU Library General Public License
+along with this library; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
-
 
 {$mode objfpc}{$H+}
 
@@ -17,7 +45,7 @@ uses
   fpcuputil;
 
 const
-  SDKNAME='iPhoneOS';
+  SDKNAME='iPhoneSimulator';
 
   SDKLOCATIONS:array[0..4] of string = (
     '/Applications/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
@@ -37,9 +65,9 @@ const
 
 type
 
-{ TDarwinARM }
+{ TDarwin64iphonesim }
 
-TDarwinARM = class(TCrossInstaller)
+TDarwin64iphonesim = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -49,12 +77,9 @@ public
   destructor Destroy; override;
 end;
 
-{ TDarwinARM }
+{ TDarwin64iphonesim }
 
-function TDarwinARM.GetLibs(Basepath:string): boolean;
-var
-  aOption:string;
-  i:integer;
+function TDarwin64iphonesim.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -75,16 +100,6 @@ begin
 
   if FLibsFound then
   begin
-    {
-    i:=StringListContains(FCrossOpts,'-isysroot');
-    if i=-1 then
-    begin
-      aOption:='-ao"-isysroot '+ExcludeTrailingPathDelimiter(FLibsPath)+'"';
-      FCrossOpts.Add(aOption+' ');
-      ShowInfo('Did not find sysroot parameter; using '+aOption+'.');
-    end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
-    }
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
   end else FLibsPath:='';
@@ -94,10 +109,9 @@ begin
   FLibsFound:=true;
 end;
 
-function TDarwinARM.GetBinUtils(Basepath:string): boolean;
+function TDarwin64iphonesim.GetBinUtils(Basepath:string): boolean;
 var
   aOption:string;
-  i:integer;
 begin
   result:=inherited;
   if result then exit;
@@ -125,7 +139,7 @@ begin
     AddFPCCFGSnippet('-FD'+FBinUtilsPath);{search this directory for compiler utilities}
   end else FBinUtilsPath:='';
 
-  aOption:=GetSDKVersion(LowerCase(SDKNAME));
+  aOption:=GetDarwinSDKVersion(LowerCase(SDKNAME));
   if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
 
   // Never fail
@@ -133,32 +147,32 @@ begin
   FBinsFound:=true;
 end;
 
-constructor TDarwinARM.Create;
+constructor TDarwin64iphonesim.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TDarwinAny';
-  FTargetCPU:=TCPU.arm;
-  FTargetOS:=TOS.darwin;
+  FCrossModuleNamePrefix:='TDarwin64';
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.iphonesim;
   Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor TDarwinARM.Destroy;
+destructor TDarwin64iphonesim.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$IFDEF Darwin}
 var
-  DarwinARM:TDarwinARM;
+  Darwin64iphonesim:TDarwin64iphonesim;
 
 initialization
-  DarwinARM:=TDarwinARM.Create;
-  RegisterCrossCompiler(DarwinARM.RegisterName,DarwinARM);
+  Darwin64iphonesim:=TDarwin64iphonesim.Create;
+  RegisterCrossCompiler(Darwin64iphonesim.RegisterName,Darwin64iphonesim);
 
 finalization
-  DarwinARM.Destroy;
+  Darwin64iphonesim.Destroy;
 {$ENDIF}
 end.
 

@@ -1,7 +1,7 @@
-unit m_crossdarwinx64iphonesim;
+unit m_crossdarwin386iphonesim;
 
 {
-Cross compiles from Darwin to Darwin x64 bit iphone simulator
+Cross compiles from Darwin to Darwin i386 iphone simulator
 
 Copyright (C) 2013 Reinier Olislagers
 Copyright (C) 2017 DonAlfredo
@@ -63,11 +63,12 @@ const
     '~/fpcupdeluxe/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain'
   );
 
+
 type
 
-{ TDarwin64iphonesim }
+{ TDarwin386iphonesim }
 
-TDarwin64iphonesim = class(TCrossInstaller)
+TDarwin386iphonesim = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -77,9 +78,9 @@ public
   destructor Destroy; override;
 end;
 
-{ TDarwin64iphonesim }
+{ TDarwin386iphonesim }
 
-function TDarwin64iphonesim.GetLibs(Basepath:string): boolean;
+function TDarwin386iphonesim.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -109,7 +110,7 @@ begin
   FLibsFound:=true;
 end;
 
-function TDarwin64iphonesim.GetBinUtils(Basepath:string): boolean;
+function TDarwin386iphonesim.GetBinUtils(Basepath:string): boolean;
 var
   aOption:string;
 begin
@@ -118,7 +119,6 @@ begin
 
   FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
-
   result:=false;
   FBinsFound:=false;
 
@@ -139,7 +139,7 @@ begin
     AddFPCCFGSnippet('-FD'+FBinUtilsPath);{search this directory for compiler utilities}
   end else FBinUtilsPath:='';
 
-  aOption:=GetSDKVersion(LowerCase(SDKNAME));
+  aOption:=GetDarwinSDKVersion(LowerCase(SDKNAME));
   if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
 
   // Never fail
@@ -147,32 +147,32 @@ begin
   FBinsFound:=true;
 end;
 
-constructor TDarwin64iphonesim.Create;
+constructor TDarwin386iphonesim.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TDarwin64';
-  FTargetCPU:=TCPU.x86_64;
+  FCrossModuleNamePrefix:='TDarwin32';
+  FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.iphonesim;
   Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor TDarwin64iphonesim.Destroy;
+destructor TDarwin386iphonesim.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$IFDEF Darwin}
 var
-  Darwin64iphonesim:TDarwin64iphonesim;
+  Darwin386iphonesim:TDarwin386iphonesim;
 
 initialization
-  Darwin64iphonesim:=TDarwin64iphonesim.Create;
-  RegisterCrossCompiler(Darwin64iphonesim.RegisterName,Darwin64iphonesim);
+  Darwin386iphonesim:=TDarwin386iphonesim.Create;
+  RegisterCrossCompiler(Darwin386iphonesim.RegisterName,Darwin386iphonesim);
 
 finalization
-  Darwin64iphonesim.Destroy;
+  Darwin386iphonesim.Destroy;
 {$ENDIF}
 end.
 

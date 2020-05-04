@@ -1037,16 +1037,7 @@ begin
             WriteString('NewProject',s,s2);
 
             s:='PathToAndroidSDK';
-            s2:='';
-            {$ifdef MSWindows}
-            s2:=ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']);
-            if (NOT DirectoryExists(s2)) then
-              s2:=ConcatPaths([GetUserDir,'AppData','Local','Android','Sdk']);
-            {$else}
-            s2:=ConcatPaths(['usr','lib','android-sdk']);
-            if (NOT DirectoryExists(s2)) then
-              s2:=ConcatPaths([GetUserDir,'Android','Sdk']);
-            {$endif}
+            s2:=GetAndroidSDKDir;
             s2:=ReadString('NewProject',s,s2);
             if DirectoryExists(s2) then WriteString('NewProject',s,s2);
 
@@ -2191,28 +2182,8 @@ begin
           end;
         end;
 
-        SDKDir:='';
-        NDKDir:='';
-
-        {$ifdef MSWindows}
-        SDKDir:=ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']);
-        if (NOT DirectoryExists(SDKDir)) then
-          SDKDir:=ConcatPaths([GetUserDir,'AppData','Local','Android','Sdk']);
-        {$else}
-        SDKDir:=ConcatPaths(['usr','lib','android-sdk']);
-        if (NOT DirectoryExists(SDKDir)) then
-          SDKDir:=ConcatPaths([GetUserDir,'Android','Sdk']);
-        {$endif}
-
-        NDKDir:=ConcatPaths([SDKDir,'ndk']);
-        FilesList.Clear;
-        FindAllDirectories(FilesList,NDKDir,False);
-        if FilesList.Count>0 then
-        begin
-          FilesList.Sorted:=True;
-          //Get the highest = latest = best I guess ... ;-)
-          NDKDir:=FilesList[FilesList.Count-1];
-        end;
+        SDKDir:=GetAndroidSDKDir;
+        NDKDir:=GetAndroidNDKDir;
 
         FilesList.Clear;
         FindAllFiles(FilesList,Workingdir, 'gradle-local-*.bat;gradle-local-*.sh', true);

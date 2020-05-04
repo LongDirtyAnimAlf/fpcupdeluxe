@@ -382,8 +382,10 @@ function IsLinuxMUSL:boolean;
 {$ENDIF UNIX}
 function GetLogicalCpuCount: integer;
 {$ifdef Darwin}
-function GetSDKVersion(aSDK: string):string;
+function GetDarwinSDKVersion(aSDK: string):string;
 {$endif}
+function GetAndroidSDKDir:string;
+function GetAndroidNDKDir:string;
 function CompareVersionStrings(s1,s2: string): longint;
 function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
 function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
@@ -2873,7 +2875,7 @@ begin
 end;
 
 {$ifdef Darwin}
-function GetSDKVersion(aSDK: string):string;
+function GetDarwinSDKVersion(aSDK: string):string;
 const
   SearchTarget='SDKVersion: ';
 var
@@ -2917,6 +2919,59 @@ begin
   result:=Trim(s);
 end;
 {$endif}
+
+function GetAndroidSDKDir:string;
+begin
+  result:='';
+  {$ifdef MSWindows}
+  result:=ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']);
+  if (NOT DirectoryExists(result)) then
+    result:=ConcatPaths([GetUserDir,'AppData','Local','Android','Sdk']);
+  {$else}
+  {$ifdef Darwin}
+  result:=ConcatPaths([GetUserDir,'Library','Android','Sdk']);
+  if (NOT DirectoryExists(result)) then
+    result:=ConcatPaths([GetUserDir,'Library','Android','sdk']);
+  if (NOT DirectoryExists(result)) then
+    result:=ConcatPaths(['Library','Android','Sdk']);
+  if (NOT DirectoryExists(result)) then
+    result:=ConcatPaths(['Library','Android','sdk']);
+  {$else}
+  result:=ConcatPaths(['usr','lib','android-sdk']);
+  if (NOT DirectoryExists(result)) then
+    result:=ConcatPaths([GetUserDir,'Android','Sdk']);
+  if (NOT DirectoryExists(result)) then
+    result:=ConcatPaths([GetUserDir,'Android','sdk']);
+  {$endif}
+  {$endif}
+  if (NOT DirectoryExists(result)) then
+    result:='';
+end;
+
+function GetAndroidNDKDir:string;
+var
+  aSDKDir,aNDKDir:string;
+  FilesList:TStringList;
+begin
+  result:='';
+  aSDKDir:=GetAndroidSDKDir;
+  if DirectoryExists(aSDKDir) then
+  begin
+    aNDKDir:=ConcatPaths([aSDKDir,'ndk']);
+    FilesList:=TStringList.Create;
+    try
+      FindAllDirectories(FilesList,aNDKDir,False);
+      if FilesList.Count>0 then
+      begin
+        FilesList.Sorted:=True;
+        //Get the highest version = latest = best I guess ... ;-)
+        result:=FilesList[FilesList.Count-1];
+      end;
+    finally
+      FilesList.Free;
+    end;
+  end;
+end;
 
 // 1on1 copy from unit cutils from the fpc compiler;
 function CompareVersionStrings(s1,s2: string): longint;
