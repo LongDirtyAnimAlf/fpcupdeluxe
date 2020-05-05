@@ -518,11 +518,16 @@ type
     // Uninstall module
     function UnInstallModule(ModuleName: string): boolean; virtual;
     procedure Infoln(Message: string; const Level: TEventType=etInfo);
+
     function ExecuteCommand(Commandline: string; Verbosity:boolean): integer; overload;
     function ExecuteCommand(Commandline: string; out Output:string; Verbosity:boolean): integer; overload;
+    function ExecuteCommand(const ExeName:String;const Arguments:array of String;Verbosity:boolean):integer;
+    function ExecuteCommand(const ExeName:String;const Arguments:array of String;out Output:string;Verbosity:boolean):integer;overload;
     function ExecuteCommandInDir(Commandline, Directory: string; Verbosity:boolean): integer; overload;
     function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; Verbosity:boolean): integer; overload;
     function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; PrependPath: string; Verbosity:boolean): integer; overload;
+    function ExecuteCommandInDir(const ExeName:String;const Arguments:array of String;const Directory:String;out Output:string; PrependPath: string;Verbosity:boolean):integer;overload;
+
     constructor Create;
     destructor Destroy; override;
   end;
@@ -816,7 +821,6 @@ end;
 
 function TInstaller.CheckAndGetTools: boolean;
 var
-  AllThere: boolean;
   OperationSucceeded: boolean;
   aURL,aLocalClientBinary,Output: string;
 begin
@@ -910,6 +914,39 @@ begin
     if (NOT IsSSLloaded) then
       Infoln(localinfotext+'Could not init SSL interface.',etWarning);
     {$endif}
+
+    with SVNClient do
+    begin
+      OperationSucceeded:=False;
+      // try to find systemwide SVN
+      {$IFDEF MSWINDOWS}
+      if (NOT ForceLocal) then
+      {$ENDIF MSWINDOWS}
+      begin
+        OperationSucceeded:=ValidClient;
+      end;
+      {$IFDEF MSWINDOWS}
+      // try to find fpcupdeluxe SVN
+      FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir)+'svn';
+      if (NOT OperationSucceeded) then
+        OperationSucceeded:=FindSVNSubDirs;
+      if (NOT OperationSucceeded) then
+      begin
+        Infoln(localinfotext+'Going to download SVN',etInfo);
+        // Download will look in and below FSVNDirectory
+        // and set FSVNClient.SVNExecutable if succesful
+        OperationSucceeded:=DownloadSVN;
+      end;
+      {$ENDIF MSWINDOWS}
+      if OperationSucceeded then FSVNDirectory:=ExtractFileDir(RepoExecutable);
+    end;
+
+    // Regardless of platform, SVN should now be either set up correctly or we should give up.
+    if (NOT OperationSucceeded) then
+      Infoln(localinfotext+'Could not find SVN executable. Please make sure it is installed.',etError)
+    else
+      Infoln(localinfotext+'SVN client found: ' + SVNClient.RepoExecutable+'.',etDebug);
+
 
     {$ifndef USEONLYCURL}
     FWget:=Which('wget');
@@ -1060,12 +1097,11 @@ begin
     with GitClient do
     begin
       OperationSucceeded:=False;
-      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'git\cmd\git.exe';
+      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'git'+DirectorySeparator+'cmd'+DirectorySeparator+RepoExecutableName+GetExeExt;
       // try to find systemwide GIT
       if (NOT ForceLocal) then
       begin
-        RepoExecutable:=Which(RepoExecutableName+'.exe');
-        OperationSucceeded:=FileExists(RepoExecutable);
+        OperationSucceeded:=ValidClient;
       end;
       // try to find fpcupdeluxe GIT
       if (NOT OperationSucceeded) then
@@ -1133,7 +1169,7 @@ begin
               //if (NOT FileExists(aURL+'bin\curl-ca-bundle.crt')) then FileUtil.CopyFile(aURL+'ssl\certs\ca-bundle.crt',aURL+'bin\curl-ca-bundle.crt');
             end;
           end;
-          if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+'.exe';
+          if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+GetExeExt;
         end;
       end;
       if RepoExecutable <> EmptyStr then
@@ -1148,12 +1184,11 @@ begin
     with HGClient do
     begin
       OperationSucceeded:=False;
-      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'hg\hg.exe';
+      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'hg'+DirectorySeparator+RepoExecutableName+GetExeExt;
       // try to find systemwide HG
       if (NOT ForceLocal) then
       begin
-        RepoExecutable:=Which(RepoExecutableName+'.exe');
-        OperationSucceeded:=FileExists(RepoExecutable);
+        OperationSucceeded:=ValidClient;
       end;
       // try to find fpcupdeluxe HG
       if (NOT OperationSucceeded) then
@@ -1196,7 +1231,7 @@ begin
             OperationSucceeded:=FileExists(aLocalClientBinary);
           end;
         end;
-        if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+'.exe';
+        if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+GetExeExt;
       end;
       if RepoExecutable <> EmptyStr then
       begin
@@ -1206,8 +1241,7 @@ begin
       // do not fail: HG is not 100% essential !
       OperationSucceeded:=True;
     end;
-
-    {$ENDIF}
+    {$ENDIF MSWINDOWS}
 
 
     {$IF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))} //Linux,FreeBSD,NetBSD,OpenBSD, but not OSX
@@ -1227,51 +1261,6 @@ begin
       end;
     end;
     {$ENDIF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))}
-
-    if OperationSucceeded then
-    begin
-      // Look for (ini-file) default SVN executable
-      AllThere:=SVNClient.ValidClient;
-
-      {$IFDEF MSWINDOWS}
-      if NOT AllThere then
-      begin
-        // look local (only for Windows: we could have downloaded a SVN client earlier)
-        // will look in and below FSVNDirectory
-        FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + SVNClient.RepoExecutableName + DirectorySeparator;
-        AllThere:=FindSVNSubDirs;
-      end;
-      {$ENDIF}
-
-      if NOT AllThere then
-      begin
-        // look system default
-        FSVNDirectory := '';
-        AllThere:=Length(SVNClient.RepoExecutable)<>0;
-      end;
-
-      {$IFDEF MSWINDOWS}
-      if (NOT AllThere) OR (SVNClient.ForceLocal) then
-      begin
-        FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + SVNClient.RepoExecutableName + DirectorySeparator;
-        AllThere:=FindSVNSubDirs;
-        if (NOT AllThere) then
-        begin
-          Infoln(localinfotext+'Going to download SVN',etInfo);
-          // Download will look in and below FSVNDirectory
-          // and set FSVNClient.SVNExecutable if succesful
-          AllThere := DownloadSVN;
-        end;
-      end;
-      {$ENDIF}
-
-      // Regardless of platform, SVN should now be either set up correctly or we should give up.
-      if NOT AllThere then
-      begin
-        OperationSucceeded := false;
-        Infoln(localinfotext+'Could not find SVN executable. Please make sure it is installed.',etError);
-      end else Infoln(localinfotext+'SVN client found: ' + SVNClient.RepoExecutable+'.',etDebug);
-    end;
 
     if OperationSucceeded then
     begin
@@ -3682,6 +3671,18 @@ begin
   Result:=ExecuteCommandInDir(Commandline,'',Output,Verbosity);
 end;
 
+function TInstaller.ExecuteCommand(const ExeName:String;const Arguments:array of String;Verbosity:boolean):integer;
+var
+  s:string='';
+begin
+  result:=ExecuteCommandInDir(ExeName,Arguments,'',s,'',Verbosity);
+end;
+
+function TInstaller.ExecuteCommand(const ExeName:String;const Arguments:array of String;out Output:string;Verbosity:boolean):integer;
+begin
+  result:=ExecuteCommandInDir(ExeName,Arguments,'',Output,'',Verbosity);
+end;
+
 function TInstaller.ExecuteCommandInDir(Commandline, Directory: string; Verbosity: boolean
   ): integer;
 var
@@ -3754,7 +3755,65 @@ begin
           aTool.Environment.SetVar(PATHVARNAME, PrependPath);
       end;
 
-      WritelnLog(infotext+aTool.GetExeInfo, true);
+      if Verbosity then
+        WritelnLog(infotext+aTool.GetExeInfo, true);
+      result:=aTool.ExecuteAndWait;
+      Output:=aTool.WorkerOutput.Text;
+
+      aTool.Environment.SetVar(PATHVARNAME, OldPath);
+      aTool.Verbose:=OldVerbosity;
+    end;
+
+  finally
+    if NOT Assigned(Processor) then
+      aTool.Free;
+  end;
+end;
+
+function TInstaller.ExecuteCommandInDir(const ExeName:String;const Arguments:array of String;const Directory:String;out Output:string; PrependPath: string;Verbosity:boolean):integer;
+var
+  OldPath: string;
+  OldVerbosity:boolean;
+  i:integer;
+  aTool:TExternalTool;
+begin
+  result:=0;
+
+  if Assigned(Processor) then
+    aTool:=Processor
+  else
+    aTool:=TExternalTool.Create(nil);
+
+  try
+    aTool.Process.Executable:=ExeName;
+    aTool.Process.Parameters.Clear;
+    if (Length(Arguments)>0) then aTool.Process.Parameters.AddStrings(Arguments);
+
+    repeat
+      i:=aTool.Process.Parameters.IndexOf('emptystring');
+      if (i<>-1) then aTool.Process.Parameters[i]:='""';
+    until (i=-1);
+
+    if (Length(aTool.Process.Executable)>0) then
+    begin
+      OldVerbosity:=aTool.Verbose;
+      aTool.Verbose:=Verbosity;
+
+      if Directory<>'' then
+        aTool.Process.CurrentDirectory:=Directory;
+
+      // Prepend specified PrependPath if needed:
+      if PrependPath<>'' then
+      begin
+        OldPath:=aTool.Environment.GetVar(PATHVARNAME);
+        if OldPath<>'' then
+           aTool.Environment.SetVar(PATHVARNAME, PrependPath+PathSeparator+OldPath)
+        else
+          aTool.Environment.SetVar(PATHVARNAME, PrependPath);
+      end;
+
+      if Verbosity then
+        WritelnLog(infotext+aTool.GetExeInfo, true);
       result:=aTool.ExecuteAndWait;
       Output:=aTool.WorkerOutput.Text;
 
@@ -3785,8 +3844,6 @@ begin
 
   FShell := '';
 
-  // List of binutils that can be downloaded:
-  // CreateBinutilsList;
   FNeededExecutablesChecked:=false;
   FCleanModuleSuccess:=false;
 

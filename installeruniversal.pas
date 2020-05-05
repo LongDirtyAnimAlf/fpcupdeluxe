@@ -224,7 +224,7 @@ end;
 {$ifndef FPCONLY}
 function TUniversalInstaller.RebuildLazarus:boolean;
 var
-  s:string;
+  OldPath,s:string;
   LazarusConfig: TUpdateLazConfig;
   i,j:integer;
 begin
@@ -298,6 +298,17 @@ begin
 
   try
     WritelnLog(infotext+Processor.GetExeInfo, true);
+
+    {$ifdef MSWindows}
+    //Prepend FPC binary directory to PATH to prevent pickup of strange tools
+    OldPath:=Processor.Environment.GetVar(PATHVARNAME);
+    s:=ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)]);
+    if OldPath<>'' then
+       Processor.Environment.SetVar(PATHVARNAME, s+PathSeparator+OldPath)
+    else
+      Processor.Environment.SetVar(PATHVARNAME, s);
+    {$endif}
+
     ProcessorResult:=Processor.ExecuteAndWait;
     result := (ProcessorResult=0);
     if result then
@@ -307,6 +318,11 @@ begin
     else
       WritelnLog(etError,infotext+'Failure trying to rebuild Lazarus. '+LineEnding+
         'Details: '+FErrorLog.Text,true);
+
+    {$ifdef MSWindows}
+    Processor.Environment.SetVar(PATHVARNAME, OldPath);
+    {$endif}
+
   except
     on E: Exception do
     begin

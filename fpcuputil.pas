@@ -3088,6 +3088,16 @@ begin
 
   result:=FindDefaultExecutablePath(Executable);
 
+  (*
+  {$IFDEF MsWindows}
+  if ExtractFileExt(Executable)='' then begin
+    Result:=Executable+'.exe';
+    if FileExists(Result) then exit;
+  end;
+  {$ENDIF}
+  *)
+
+
   {$IFNDEF FREEBSD}
   if (NOT FileIsExecutable(result)) then result:='';
   {$ENDIF}

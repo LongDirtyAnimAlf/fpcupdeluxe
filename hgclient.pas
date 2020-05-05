@@ -96,7 +96,7 @@ begin
   // Look in path
   // Windows: will also look for <hgName>.exe
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName);
+    FRepoExecutable := Which(RepoExecutableName+GetExeExt);
 
 {$IFDEF MSWINDOWS}
   // Some popular locations for Tortoisehg:
@@ -222,7 +222,6 @@ begin
   result:='';
   FReturnCode := 0;
   if NOT ValidClient then exit;
-  RepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
   FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff --git ', LocalRepository, Result, Verbose);
   //FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff ', LocalRepository, Result, Verbose);
 end;

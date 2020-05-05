@@ -97,7 +97,7 @@ begin
   // Look in path
   // Windows: will also look for <gitName>.exe
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName);
+    FRepoExecutable := Which(RepoExecutableName+GetExeExt);
 
   {$IFDEF MSWINDOWS}
   // Git on Windows can be a .cmd file
@@ -285,9 +285,6 @@ begin
   FReturnCode := 0;
   if ExportOnly then exit;
   if NOT ValidClient then exit;
-
-  RepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
-
   //FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
   FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --no-prefix -p ', LocalRepository, Result, Verbose);
 end;

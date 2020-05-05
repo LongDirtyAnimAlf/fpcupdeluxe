@@ -289,6 +289,7 @@ var
   Options: string;
   LazBuildApp: string;
   OldPath:string;
+  s:string;
 begin
   Result:=inherited;
 
@@ -334,143 +335,151 @@ begin
       // https://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
       //https://lists.lazarus-ide.org/pipermail/lazarus/2012-April/138168.html
 
-      OldPath:=GetPath;
+      if Length(LazBuildApp)=0 then
+      begin
+        // Use make for cross compiling
+        // Check unwanted forced update through ViaMakefile and .compiled
+
+        Processor.Executable := Make;
+        Processor.Process.Parameters.Clear;
+        {$IFDEF MSWINDOWS}
+        if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
+        {$ENDIF}
+        Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
+
+        {
+        //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
+        if (NOT FNoJobs) then
+          Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
+
+        Processor.Process.Parameters.Add('FPC=' + FCompiler);
+        Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+        Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+        Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
+        Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+        Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+        //Make sure our FPC units can be found by Lazarus
+        Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
+        //Make sure Lazarus does not pick up these tools from other installs
+        Processor.Process.Parameters.Add('FPCMAKE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt);
+        Processor.Process.Parameters.Add('PPUMOVE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'ppumove'+GetExeExt);
+
+        {$ifdef Windows}
+        Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
+        Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+        {$endif}
+
+        Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
+        Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
+
+        Processor.Process.Parameters.Add('OS_TARGET=' + CrossInstaller.TargetOSName);
+        Processor.Process.Parameters.Add('CPU_TARGET=' + CrossInstaller.TargetCPUName);
+
+        //Set standard options
+        Options := STANDARDCOMPILERVERBOSITYOPTIONS;
+        //Always limit the search for fpc.cfg to our own fpc.cfg
+        Options := Options+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
+        // Add remaining options
+        Options := Options+' '+FCompilerOptions;
+
+        while Pos('  ',Options)>0 do
+        begin
+          Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
+        end;
+        Options:=Trim(Options);
+        if Length(Options)>0 then Processor.Process.Parameters.Add('OPT='+Options);
+
+        Processor.Process.Parameters.Add('--directory=' + FSourceDirectory);
+        //Processor.Process.Parameters.Add('--directory=' + ConcatPaths([FSourceDirectory,'lcl']));
+
+        if FCrossLCL_Platform <> '' then
+          Processor.Process.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
+
+        //Processor.Process.Parameters.Add('all');
+
+        Processor.Process.Parameters.Add('registration');
+        Processor.Process.Parameters.Add('lazutils');
+        Processor.Process.Parameters.Add('lcl');
+        Processor.Process.Parameters.Add('basecomponents');
+
+      end
+      else
+      begin
+        // Use lazbuild for cross compiling
+        Processor.Executable := LazBuildApp;
+        Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
+        Processor.Process.Parameters.Clear;
+        {$IFDEF DEBUG}
+        Processor.Process.Parameters.Add('--verbose');
+        {$ELSE}
+        // See compileroptions.pp
+        // Quiet:=ConsoleVerbosity<=-3;
+        Processor.Process.Parameters.Add('--quiet');
+        {$ENDIF}
+
+        if (FNoJobs) then
+          Processor.Process.Parameters.Add('--max-process-count=1')
+        else
+          Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
+
+        Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
+
+        // Apparently, the .compiled file, that are used to check for a rebuild, do not contain a cpu setting if cpu and cross-cpu do not differ !!
+        // So, use this test to prevent a rebuild !!!
+        if (GetTargetCPU<>CrossInstaller.TargetCPUName) then
+          Processor.Process.Parameters.Add('--cpu=' + CrossInstaller.TargetCPUName);
+
+        // See above: the same for OS !
+        if (GetTargetOS<>CrossInstaller.TargetOSName) then
+          Processor.Process.Parameters.Add('--os=' + CrossInstaller.TargetOSName);
+
+        if FCrossLCL_Platform <> '' then
+          Processor.Process.Parameters.Add('--ws=' + FCrossLCL_Platform);
+
+        Processor.Process.Parameters.Add(ConcatPaths(['packager','registration'])+DirectorySeparator+'fcl.lpk');
+        Processor.Process.Parameters.Add(ConcatPaths(['components','lazutils'])+DirectorySeparator+'lazutils.lpk');
+        Processor.Process.Parameters.Add(ConcatPaths(['lcl','interfaces'])+DirectorySeparator+'lcl.lpk');
+        // Also add the basecomponents !
+        Processor.Process.Parameters.Add(ConcatPaths(['components','synedit'])+DirectorySeparator+'synedit.lpk');
+        Processor.Process.Parameters.Add(ConcatPaths(['components','lazcontrols'])+DirectorySeparator+'lazcontrols.lpk');
+        Processor.Process.Parameters.Add(ConcatPaths(['components','ideintf'])+DirectorySeparator+'ideintf.lpk');
+      end;
+
+      if FCrossLCL_Platform = '' then
+        Infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + ' using ' + ExtractFileName(Processor.Executable), etInfo)
+      else
+        Infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + '/' + FCrossLCL_Platform + ' using ' + ExtractFileName(Processor.Executable), etInfo);
+
       try
-        //Add (prepend) FPC binary path to path
-        SetPath(ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim,true,false);
+        WritelnLog(infotext+Processor.GetExeInfo, true);
 
-        if Length(LazBuildApp)=0 then
-        begin
-          // Use make for cross compiling
-          // Check unwanted forced update through ViaMakefile and .compiled
-
-          Processor.Executable := Make;
-          Processor.Process.Parameters.Clear;
-          {$IFDEF MSWINDOWS}
-          if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
-          {$ENDIF}
-          Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
-
-          {
-          //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
-          if (NOT FNoJobs) then
-            Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
-
-          Processor.Process.Parameters.Add('FPC=' + FCompiler);
-          Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
-          Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
-          Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
-          Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-          Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-          //Make sure our FPC units can be found by Lazarus
-          Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
-          //Make sure Lazarus does not pick up these tools from other installs
-          Processor.Process.Parameters.Add('FPCMAKE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt);
-          Processor.Process.Parameters.Add('PPUMOVE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'ppumove'+GetExeExt);
-
-          {$ifdef Windows}
-          Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-          Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
-          {$endif}
-
-          Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
-          Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
-
-          Processor.Process.Parameters.Add('OS_TARGET=' + CrossInstaller.TargetOSName);
-          Processor.Process.Parameters.Add('CPU_TARGET=' + CrossInstaller.TargetCPUName);
-
-          //Set standard options
-          Options := STANDARDCOMPILERVERBOSITYOPTIONS;
-          //Always limit the search for fpc.cfg to our own fpc.cfg
-          Options := Options+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
-          // Add remaining options
-          Options := Options+' '+FCompilerOptions;
-
-          while Pos('  ',Options)>0 do
-          begin
-            Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
-          end;
-          Options:=Trim(Options);
-          if Length(Options)>0 then Processor.Process.Parameters.Add('OPT='+Options);
-
-          Processor.Process.Parameters.Add('--directory=' + FSourceDirectory);
-          //Processor.Process.Parameters.Add('--directory=' + ConcatPaths([FSourceDirectory,'lcl']));
-
-          if FCrossLCL_Platform <> '' then
-            Processor.Process.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
-
-          //Processor.Process.Parameters.Add('all');
-
-          Processor.Process.Parameters.Add('registration');
-          Processor.Process.Parameters.Add('lazutils');
-          Processor.Process.Parameters.Add('lcl');
-          Processor.Process.Parameters.Add('basecomponents');
-
-        end
+        {$ifdef MSWindows}
+        //Prepend FPC binary directory to PATH to prevent pickup of strange tools
+        OldPath:=Processor.Environment.GetVar(PATHVARNAME);
+        s:=ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)]);
+        if OldPath<>'' then
+           Processor.Environment.SetVar(PATHVARNAME, s+PathSeparator+OldPath)
         else
+          Processor.Environment.SetVar(PATHVARNAME, s);
+        {$endif}
+
+        ProcessorResult:=Processor.ExecuteAndWait;
+        Result := (ProcessorResult = 0);
+        if (not Result) then
+          WritelnLog(etError,infotext+'Error compiling LCL for ' + GetFPCTarget(false) + ' ' + FCrossLCL_Platform + LineEnding +
+            'Details: ' + FErrorLog.Text, true);
+
+        {$ifdef MSWindows}
+        Processor.Environment.SetVar(PATHVARNAME, OldPath);
+        {$endif}
+
+      except
+        on E: Exception do
         begin
-          // Use lazbuild for cross compiling
-          Processor.Executable := LazBuildApp;
-          Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
-          Processor.Process.Parameters.Clear;
-          {$IFDEF DEBUG}
-          Processor.Process.Parameters.Add('--verbose');
-          {$ELSE}
-          // See compileroptions.pp
-          // Quiet:=ConsoleVerbosity<=-3;
-          Processor.Process.Parameters.Add('--quiet');
-          {$ENDIF}
-
-          if (FNoJobs) then
-            Processor.Process.Parameters.Add('--max-process-count=1')
-          else
-            Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
-
-          Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
-
-          // Apparently, the .compiled file, that are used to check for a rebuild, do not contain a cpu setting if cpu and cross-cpu do not differ !!
-          // So, use this test to prevent a rebuild !!!
-          if (GetTargetCPU<>CrossInstaller.TargetCPUName) then
-            Processor.Process.Parameters.Add('--cpu=' + CrossInstaller.TargetCPUName);
-
-          // See above: the same for OS !
-          if (GetTargetOS<>CrossInstaller.TargetOSName) then
-            Processor.Process.Parameters.Add('--os=' + CrossInstaller.TargetOSName);
-
-          if FCrossLCL_Platform <> '' then
-            Processor.Process.Parameters.Add('--ws=' + FCrossLCL_Platform);
-
-          Processor.Process.Parameters.Add(ConcatPaths(['packager','registration'])+DirectorySeparator+'fcl.lpk');
-          Processor.Process.Parameters.Add(ConcatPaths(['components','lazutils'])+DirectorySeparator+'lazutils.lpk');
-          Processor.Process.Parameters.Add(ConcatPaths(['lcl','interfaces'])+DirectorySeparator+'lcl.lpk');
-          // Also add the basecomponents !
-          Processor.Process.Parameters.Add(ConcatPaths(['components','synedit'])+DirectorySeparator+'synedit.lpk');
-          Processor.Process.Parameters.Add(ConcatPaths(['components','lazcontrols'])+DirectorySeparator+'lazcontrols.lpk');
-          Processor.Process.Parameters.Add(ConcatPaths(['components','ideintf'])+DirectorySeparator+'ideintf.lpk');
+          Result := false;
+          WritelnLog(etError,infotext+'Exception compiling LCL for ' + GetFPCTarget(false) + LineEnding +
+            'Details: ' + E.Message, true);
         end;
-
-        if FCrossLCL_Platform = '' then
-          Infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + ' using ' + ExtractFileName(Processor.Executable), etInfo)
-        else
-          Infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + '/' + FCrossLCL_Platform + ' using ' + ExtractFileName(Processor.Executable), etInfo);
-
-        try
-          WritelnLog(infotext+Processor.GetExeInfo, true);
-          ProcessorResult:=Processor.ExecuteAndWait;
-          Result := (ProcessorResult = 0);
-          if (not Result) then
-            WritelnLog(etError,infotext+'Error compiling LCL for ' + GetFPCTarget(false) + ' ' + FCrossLCL_Platform + LineEnding +
-              'Details: ' + FErrorLog.Text, true);
-        except
-          on E: Exception do
-          begin
-            Result := false;
-            WritelnLog(etError,infotext+'Exception compiling LCL for ' + GetFPCTarget(false) + LineEnding +
-              'Details: ' + E.Message, true);
-          end;
-        end;
-      finally
-        SetPath(OldPath,false,false);
       end;
 
 
@@ -830,12 +839,13 @@ begin
       WritelnLog(infotext+Processor.GetExeInfo, true);
 
       {$ifdef MSWindows}
-      //Prepend Make binary directory to PATH to prevent pickup of strange tools
+      //Prepend FPC binary directory to PATH to prevent pickup of strange tools
       OldPath:=Processor.Environment.GetVar(PATHVARNAME);
+      s:=ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)]);
       if OldPath<>'' then
-         Processor.Environment.SetVar(PATHVARNAME, ExtractFileDir(Make)+PathSeparator+OldPath)
+         Processor.Environment.SetVar(PATHVARNAME, s+PathSeparator+OldPath)
       else
-        Processor.Environment.SetVar(PATHVARNAME, ExtractFileDir(Make));
+        Processor.Environment.SetVar(PATHVARNAME, s);
       {$endif}
 
       ProcessorResult:=Processor.ExecuteAndWait;

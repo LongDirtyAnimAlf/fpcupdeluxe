@@ -114,12 +114,12 @@ begin
 
   while True do
   begin
-
     // Look in path
     // Windows: will also look for <SVNName>.exe
-    if not FileExists(FRepoExecutable)
-       then FRepoExecutable := Which(RepoExecutableName)
-       else break;
+    if not FileExists(FRepoExecutable) then
+      FRepoExecutable := Which(RepoExecutableName+GetExeExt)
+    else
+      break;
 
     {$IFDEF MSWINDOWS}
     // Some popular locations for SlikSVN, Subversion, and TortoiseSVN:
@@ -167,7 +167,7 @@ begin
   begin
     //rv:=TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose);
     //if rv<>0 then
-    if (NOT CheckExecutable(RepoExecutable, ['--version'], '')) then
+    if (NOT CheckExecutable(FRepoExecutable, ['--version'], '')) then
     begin
       FRepoExecutable := '';
       //ThreadLog('SVN client found, but error code during check: '+InttoStr(rv),etError);
@@ -575,8 +575,6 @@ begin
     exit;
   end;
 
-  RepoInfo:='Getting diff between current sources and online sources of ' + LocalRepository;
-
   aProcess:=nil;
 
   {$ifdef  MSWINDOWS}
@@ -606,7 +604,6 @@ begin
     aFile := ChangeFileExt(GetTempFileName(GetTempDir(false),'FPCUPTMP'),'diff');
     aProcess.Process.CurrentDirectory:=LocalRepository;
     aProcess.Process.Parameters.Add(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x --ignore-space-change'+' . > ' + aFile);
-    RepoInfo:=aProcess.GetExeInfo;
     try
       aProcess.ExecuteAndWait;
       FReturnCode:=aProcess.ExitCode;
@@ -664,7 +661,7 @@ function TSVNClient.CheckURL: boolean;
 var
   Output:string;
 begin
-  FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, False);
+  FReturnCode := TInstaller(FParent).ExecuteCommand(FRepoExecutable,['ls',Repository], False);
   //FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, Output, False);
   //FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls --depth empty '+ Repository, Output, False);
   result:=(FReturnCode=0);
@@ -793,7 +790,8 @@ begin
     exit;
   end;
 
-  FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' status '+GetProxyCommand+' --depth infinity ' + DoubleQuoteIfNeeded(LocalRepository), Output, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommand(FRepoExecutable,['status','--depth','infinity',LocalRepository], Output, Verbose);
+
   FReturnOutput := Output;
   FileList.Clear;
   AllFiles := TStringList.Create;
@@ -824,7 +822,7 @@ begin
     exit;
   end;
 
-  FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info ' + DoubleQuoteIfNeeded(LocalRepository), Output, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommand(FRepoExecutable,['info',LocalRepository],Output,False);
   FReturnOutput := Output;
 
   // If command fails due to wrong version, try again
@@ -833,11 +831,11 @@ begin
     // svn: E155036: Please see the 'svn upgrade' command
     // svn: E155036: The working copy is too old to work with client. You need to upgrade the working copy first
     // Let's try one time upgrade to fix it (don't update FReturnCode here)
-    if Pos('E155036', Output) > 0 then TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' upgrade --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose);
+    if Pos('E155036', Output) > 0 then TInstaller(FParent).ExecuteCommand(FRepoExecutable,['upgrade','--non-interactive',LocalRepository],False);
     //Give everybody a chance to relax ;)
     Sleep(500);
     //attempt again
-    FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info ' + DoubleQuoteIfNeeded(LocalRepository), Output, Verbose);
+    FReturnCode := TInstaller(FParent).ExecuteCommand(FRepoExecutable,['info',LocalRepository],Output,False);
     FReturnOutput := Output;
   end;
 
@@ -951,7 +949,7 @@ begin
               end
               else
               {$ENDIF}
-              FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+              FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, False);
             end
             else
             begin
@@ -961,7 +959,8 @@ begin
               exit;
             end;
        end
-       else FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info ' + DoubleQuoteIfNeeded(LocalRepository), Output, Verbose);
+       else FReturnCode := TInstaller(FParent).ExecuteCommand(FRepoExecutable,['info',LocalRepository],Output,False);
+
 
     FReturnOutput := Output;
     // Could have used svnversion but that would have meant calling yet another command...
