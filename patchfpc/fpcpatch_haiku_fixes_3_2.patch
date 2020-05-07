@@ -1,0 +1,271 @@
+Index: compiler/systems/t_haiku.pas
+===================================================================
+--- compiler/systems/t_haiku.pas	(revision 45305)
++++ compiler/systems/t_haiku.pas	(working copy)
+@@ -45,6 +45,7 @@
+ 
+     tlinkerhaiku=class(texternallinker)
+     private
++      LdScriptResponseFile : boolean;
+       Function  WriteResponseFile(isdll:boolean;makelib:boolean) : Boolean;
+     public
+       constructor Create;override;
+@@ -206,11 +207,36 @@
+ 
+ 
+ procedure TLinkerHaiku.SetDefaultInfo;
++const
++{$ifdef i386}      platform_select='-m elf_i386_haiku';{$endif}
++{$ifdef x86_64}    platform_select='-m elf_x86_64_haiku';{$endif}
+ begin
++  //if on Windows or Haiku itself, the bat/sh-file containing the link files may grow too long: use a linker script to circumvent
++  LdScriptResponseFile:=(source_info.system in ([system_i386_haiku,system_x86_64_haiku]+systems_windows));
++
+   with Info do
+    begin
+-     ExeCmd[1]:='ld $OPT $DYNLINK $STATIC $STRIP -L. -o $EXE $CATRES';
+-     DllCmd[1]:='ld $OPT $INIT $FINI $SONAME -shared -L. -o $EXE $CATRES';
++     ExeCmd[1]:='ld '+platform_select+' -shared -Bsymbolic $OPT $DYNLINK $STATIC $STRIP -L. -o $EXE';
++     DllCmd[1]:='ld '+platform_select+' -shared -Bsymbolic $OPT $INIT $FINI $SONAME -L. -o $EXE';
++
++     //use resfile on Windows due to batfile length issues.
++     if LdScriptResponseFile then
++     begin
++       if not(cs_link_pre_binutils_2_19 in current_settings.globalswitches) or
++         (length(sysrootpath)>0) then
++         begin
++           ExeCmd[1]:=ExeCmd[1]+' -T';
++           DllCmd[1]:=DllCmd[1]+' -T';
++         end;
++       ExeCmd[1]:=ExeCmd[1]+' $RES';
++       DllCmd[1]:=DllCmd[1]+' $RES';
++     end
++     else
++     begin
++       ExeCmd[1]:=ExeCmd[1]+' $CATRES';
++       DllCmd[1]:=DllCmd[1]+' $CATRES';
++     end;
++
+      DllCmd[2]:='strip --strip-unneeded $EXE';
+ (*
+      ExeCmd[1]:='sh $RES $EXE $OPT $STATIC $STRIP -L.';
+@@ -278,58 +304,60 @@
+ 
+   { Open link.res file }
+   LinkRes:=TLinkRes.Create(outputexedir+Info.ResName,false);
++  with LinkRes do
++  begin
++
+   {
+   if not isdll then
+-   LinkRes.Add('ld -o $1 $2 $3 $4 $5 $6 $7 $8 $9 \')
++       Add('ld -o $1 $2 $3 $4 $5 $6 $7 $8 $9 \')
+   else
+-   LinkRes.Add('ld -o $1 -e 0 $2 $3 $4 $5 $6 $7 $8 $9\');
++       Add('ld -o $1 -e 0 $2 $3 $4 $5 $6 $7 $8 $9\');
+   }
+-  LinkRes.Add('-m');
+-{$ifdef i386}
+-  LinkRes.Add('elf_i386_haiku');
+-{$else i386}
+-  LinkRes.Add('elf_x86_64_haiku');
+-{$endif i386}
+-  LinkRes.Add('-shared');
+-  LinkRes.Add('-Bsymbolic');
+-
+   { Write path to search libraries }
+   HPath:=TCmdStrListItem(current_module.locallibrarysearchpath.First);
+   while assigned(HPath) do
+    begin
+-     LinkRes.Add('-L'+HPath.Str);
++      if LdScriptResponseFile then
++        Add('SEARCH_DIR("'+HPath.Str+'")')
++      else
++        Add('-L'+HPath.Str);
+      HPath:=TCmdStrListItem(HPath.Next);
+    end;
+   HPath:=TCmdStrListItem(LibrarySearchPath.First);
+   while assigned(HPath) do
+    begin
+-     LinkRes.Add('-L'+HPath.Str);
++      if LdScriptResponseFile then
++        Add('SEARCH_DIR("'+HPath.Str+'")')
++      else
++        Add('-L'+HPath.Str);
+      HPath:=TCmdStrListItem(HPath.Next);
+    end;
+ 
++    if LdScriptResponseFile then StartSection('INPUT(');
++
+   { try to add crti and crtbegin if linking to C }
+   if linklibc then
+    begin
+      if librarysearchpath.FindFile('crti.o',false,s) then
+-      LinkRes.AddFileName(s);
++        AddFileName(s);
+      if librarysearchpath.FindFile('crtbegin.o',false,s) then
+-      LinkRes.AddFileName(s);
++        AddFileName(s);
+ {      s:=librarysearchpath.FindFile('start_dyn.o',found)+'start_dyn.o';
+-     if found then LinkRes.AddFileName(s+' \');}
++      if found then AddFileName(s+' \');}
+ 
+      if prtobj<>'' then
+-      LinkRes.AddFileName(FindObjectFile(prtobj,'',false));
++        AddFileName(FindObjectFile(prtobj,'',false));
+ 
+ //     if isdll then
+-//      LinkRes.AddFileName(FindObjectFile('func.o','',false));
++//      AddFileName(FindObjectFile('func.o','',false));
+ 
+      if librarysearchpath.FindFile('init_term_dyn.o',false,s) then
+-      LinkRes.AddFileName(s);
++        AddFileName(s);
+    end
+   else
+    begin
+      if prtobj<>'' then
+-      LinkRes.AddFileName(FindObjectFile(prtobj,'',false));
++        AddFileName(FindObjectFile(prtobj,'',false));
+    end;
+ 
+   { main objectfiles }
+@@ -337,26 +365,31 @@
+    begin
+      s:=ObjectFiles.GetFirst;
+      if s<>'' then
+-      LinkRes.AddFileName(s);
++        AddFileName(s);
+    end;
+ 
+-{  LinkRes.Add('-lroot \');
+-  LinkRes.Add('/boot/develop/tools/gnupro/lib/gcc-lib/i586-beos/2.9-beos-991026/crtend.o \');
+-  LinkRes.Add('/boot/develop/lib/x86/crtn.o \');}
++    if LdScriptResponseFile then EndSection(')');
+ 
++    {  Add('-lroot \');
++      Add('/boot/develop/tools/gnupro/lib/gcc-lib/i586-beos/2.9-beos-991026/crtend.o \');
++      Add('/boot/develop/lib/x86/crtn.o \');}
++
+   { Write staticlibraries }
+   if not StaticLibFiles.Empty then
+    begin
++      if LdScriptResponseFile then Add('GROUP(');
+      While not StaticLibFiles.Empty do
+       begin
+         S:=StaticLibFiles.GetFirst;
+-        LinkRes.AddFileName(s)
++        AddFileName(s)
+       end;
++      if LdScriptResponseFile then Add(')');
+    end;
+ 
+   { Write sharedlibraries like -l<lib> }
+   if not SharedLibFiles.Empty then
+    begin
++      if LdScriptResponseFile then Add('INPUT(');
+      While not SharedLibFiles.Empty do
+       begin
+         S:=SharedLibFiles.GetFirst;
+@@ -365,7 +398,7 @@
+            i:=Pos(target_info.sharedlibext,S);
+            if i>0 then
+             Delete(S,i,255);
+-           LinkRes.Add('-l'+s);
++          Add('-l'+s);
+          end
+         else
+          begin
+@@ -372,28 +405,72 @@
+            linklibc:=true;
+          end;
+       end;
++      if LdScriptResponseFile then Add(')');
+      { be sure that libc is the last lib }
+ {     if linklibc then
+-       LinkRes.Add('-lroot');}
++           Add('-lroot');}
+ {     if linkdynamic and (Info.DynamicLinker<>'') then
+-       LinkRes.AddFileName(Info.DynamicLinker);}
++          AddFileName(Info.DynamicLinker);}
+    end;
+   if isdll then
+-   LinkRes.Add('-lroot');
++    begin
++      if LdScriptResponseFile then Add('INPUT(');
++      Add('-lroot');
++      if LdScriptResponseFile then Add(')');
++    end;
+ 
+   { objects which must be at the end }
+   if linklibc then
+    begin
+      if librarysearchpath.FindFile('crtend.o',false,s) then
+-      LinkRes.AddFileName(s);
++          begin
++            if LdScriptResponseFile then Add('INPUT(');
++            AddFileName(s);
++            if LdScriptResponseFile then Add(')');
++          end;
+      if librarysearchpath.FindFile('crtn.o',false,s) then
+-      LinkRes.AddFileName(s);
++         begin
++            if LdScriptResponseFile then Add('INPUT(');
++            AddFileName(s);
++            if LdScriptResponseFile then Add(')');
+    end;
++    end;
+ 
++    if LdScriptResponseFile then
++    begin
++        { Entry point. Only needed for executables, as for shared libraries we use
++          the -init command line option instead
++
++         The "ENTRY" linkerscript command does not have any effect when augmenting
++         a linker script, so use the command line parameter instead }
++        if (not isdll) then
++          if (not linklibc) then
++            info.ExeCmd[1]:=info.ExeCmd[1]+' -e _dynamic_start'
++          else
++            info.ExeCmd[1]:=info.ExeCmd[1]+' -e _start';
++
++        Add('SECTIONS');
++        Add('{');
++        if not(cs_link_pre_binutils_2_19 in current_settings.globalswitches) then
++          { we can't use ".data", as that would hide the .data from the
++            original linker script in combination with the INSERT at the end }
++          Add('  .fpcdata           :')
++        else
++          Add('  .data           :');
++        Add('  {');
++        Add('    KEEP (*(.fpc .fpc.n_version .fpc.n_links))');
++        Add('  }');
++        Add('  .threadvar : { *(.threadvar .threadvar.* .gnu.linkonce.tv.*) }');
++        Add('}');
++        { this "INSERT" means "merge into the original linker script, even if
++          -T is used" }
++        if not(cs_link_pre_binutils_2_19 in current_settings.globalswitches) then
++          Add('INSERT AFTER .data;');
++    end;
+ { Write and Close response }
+-  linkres.writetodisk;
+-  linkres.free;
+-
++    writetodisk;
++    free;
++   end;
+   WriteResponseFile:=True;
+ end;
+ 
+@@ -501,8 +578,10 @@
+   SplitBinCmd(Info.DllCmd[1],binstr,cmdstr);
+   Replace(cmdstr,'$EXE',maybequoted(current_module.sharedlibfilename));
+   Replace(cmdstr,'$OPT',Info.ExtraOptions);
++  if LdScriptResponseFile then
++    Replace(cmdstr,'$RES',maybequoted(outputexedir+Info.ResName))
++  else
+   Replace(cmdstr,'$CATRES',CatFileContent(outputexedir+Info.ResName));
+-  Replace(cmdstr,'$RES',maybequoted(outputexedir+Info.ResName));
+   Replace(cmdstr,'$STATIC',StaticStr);
+   Replace(cmdstr,'$STRIP',StripStr);
+   Replace(cmdstr,'$DYNLINK',DynLinkStr);

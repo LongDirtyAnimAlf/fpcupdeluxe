@@ -1,0 +1,16 @@
+Index: rtl/inc/mathh.inc
+===================================================================
+--- rtl/inc/mathh.inc	(revision 45305)
++++ rtl/inc/mathh.inc	(working copy)
+@@ -16,7 +16,11 @@
+ 
+ {$if defined(cpui8086) or defined(cpui386) or defined(cpux86_64)}
+     const
++    {$ifdef Haiku}
++      Default8087CW : word = $137F;
++    {$else}
+       Default8087CW : word = $1332;
++    {$endif}
+ 
+     procedure Set8087CW(cw:word);
+     function Get8087CW:word;

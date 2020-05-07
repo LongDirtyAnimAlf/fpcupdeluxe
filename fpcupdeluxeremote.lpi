@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="12"/>
+    <Version Value="11"/>
     <PathDelim Value="\"/>
     <General>
-      <Flags>
-        <CompatibilityMode Value="True"/>
-      </Flags>
       <SessionStorage Value="InProjectDir"/>
+      <MainUnit Value="0"/>
       <Title Value="fpcupdeluxeremote"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -98,7 +96,6 @@
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <DebugInfoType Value="dsDwarf2"/>
               <UseHeaptrc Value="True"/>
             </Debugging>
             <Options>
@@ -765,10 +762,10 @@
       <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot;logger\mORMot\SQLite3;logger\mORMot\CrossPlatform"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <Conditionals Value="if TargetOS=&apos;darwin&apos; then
-   CustomOptions := &apos; -Cg-&apos;;
-if TargetOS=&apos;openbsd&apos; then
-   CustomOptions := &apos; -Cg-&apos;;"/>
+    <Conditionals Value="if TargetOS='darwin' then
+   CustomOptions := ' -Cg-';
+if TargetOS='openbsd' then
+   CustomOptions := ' -Cg-';"/>
     <CodeGeneration>
       <Optimizations>
         <OptimizationLevel Value="2"/>

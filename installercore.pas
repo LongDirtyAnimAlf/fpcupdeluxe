@@ -3141,12 +3141,12 @@ begin
 
           {$if not defined(MSWindows) and not defined(Haiku)}
           //only patch the Haiku build process on Windows and Haiku itself
-          if Pos('fpcpatch_haiku.patch',PatchFilePath)>0 then PatchAccepted:=False;
+          if (Pos('fpcpatch_haiku.patch',PatchFilePath)>0) OR (Pos('fpcpatch_haiku_',PatchFilePath)>0) then PatchAccepted:=False;
           {$endif}
 
           {$ifndef Haiku}
           //only patch the Haiku FPU exception mask on Haiku itself
-          if Pos('fpcpatch_haikufpu.patch',PatchFilePath)>0 then PatchAccepted:=False;
+          if Pos('fpcpatch_haikufpu',PatchFilePath)>0 then PatchAccepted:=False;
           {$endif}
 
           {$ifndef OpenBSD}

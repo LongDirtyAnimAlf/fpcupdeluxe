@@ -53,7 +53,7 @@ begin
 
   result:=true;
   FBinsFound:=true;
-  aOption:=GetDarwinSDKVersion'macosx');
+  aOption:=GetDarwinSDKVersion('macosx');
   if Length(aOption)>0 then AddFPCCFGSnippet('-WM'+aOption);
 end;
 

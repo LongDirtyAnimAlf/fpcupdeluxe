@@ -55,7 +55,7 @@ begin
   result:=true;
   FBinsFound:=true;
 
-  aOption:=GetDarwinSDKVersion'macosx');
+  aOption:=GetDarwinSDKVersion('macosx');
   if Length(aOption)>0 then
   begin
     if CompareVersionStrings(aOption,'10.8')>=0 then

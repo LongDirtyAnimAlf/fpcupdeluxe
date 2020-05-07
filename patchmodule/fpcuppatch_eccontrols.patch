@@ -1,0 +1,38 @@
+--- EC_Controls/eceditbtns.pas	Fri Mar 02 23:35:58 2018
++++ EC_Controls/eceditbtns.pas	Thu May 07 19:13:44 2020
+@@ -2166,7 +2166,7 @@
+           then FAnyButton.Click
+           else if eboInCellEditor in Options then Flags := Flags + [edfEnterWasInKeyDown, edfForceEditingDone];
+       end;
+-    VK_SPACE: if (ssModifier in Shift) or ReadOnly then FAnyButton.Click;
++    VK_SPACE: if (ssModifier in Shift){ or ReadOnly} then FAnyButton.Click;
+   end;
+   inherited KeyDown(Key, Shift);
+ end;
+@@ -2378,7 +2378,7 @@
+ var aColorStr: string;
+ begin
+   aColorStr := ColorToStrLayouted(AColor, ColorLayout, Prefix);
+-  if not ReadOnly then FLastAddedColorStr := aColorStr;
++  {if not ReadOnly then FLastAddedColorStr := aColorStr;}
+   case ItemOrder of
+     eioFixed:
+       begin
+@@ -2443,7 +2443,7 @@
+ procedure TECColorCombo.EditingDone;
+ begin
+   inherited EditingDone;
+-  if not ReadOnly then SetColorText(Text);
++  {if not ReadOnly then SetColorText(Text);}
+ end;
+ 
+ procedure TECColorCombo.EnabledChanged;
+@@ -2489,7 +2489,7 @@
+ procedure TECColorCombo.RealSetText(const AValue: TCaption);
+ begin
+   SetColorText(AValue);
+-  if not Readonly then inherited RealSetText(FLastAddedColorStr);
++  {if not Readonly then inherited RealSetText(FLastAddedColorStr);}
+ end;
+ 
+ procedure TECColorCombo.ResetPrefixesAndLayout(AOldLayout: TColorLayout);
