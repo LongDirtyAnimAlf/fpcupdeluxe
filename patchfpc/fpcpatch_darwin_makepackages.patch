@@ -2,7 +2,7 @@ Index: packages/Makefile
 ===================================================================
 --- packages/Makefile	(revision 43888)
 +++ packages/Makefile	(working copy)
-@@ -1761,6 +1761,11 @@
+@@ -1807,6 +1807,11 @@
  override FPCOPT:=$(filter-out -FU%,$(FPCOPT))
  override FPCOPT:=$(filter-out -FE%,$(FPCOPT))
  override FPCOPT:=$(filter-out $(addprefix -Fu,$(COMPILER_UNITDIR)),$(FPCOPT))# Compose general fpmake-parameters

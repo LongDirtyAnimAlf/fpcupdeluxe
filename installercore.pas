@@ -3750,7 +3750,7 @@ begin
       begin
         OldPath:=aTool.Environment.GetVar(PATHVARNAME);
         if OldPath<>'' then
-           aTool.Environment.SetVar(PATHVARNAME, PrependPath+PathSeparator+OldPath)
+          aTool.Environment.SetVar(PATHVARNAME, PrependPath+PathSeparator+OldPath)
         else
           aTool.Environment.SetVar(PATHVARNAME, PrependPath);
       end;
@@ -3760,7 +3760,9 @@ begin
       result:=aTool.ExecuteAndWait;
       Output:=aTool.WorkerOutput.Text;
 
-      aTool.Environment.SetVar(PATHVARNAME, OldPath);
+      if PrependPath<>'' then
+        aTool.Environment.SetVar(PATHVARNAME, OldPath);
+
       aTool.Verbose:=OldVerbosity;
     end;
 
@@ -3817,7 +3819,9 @@ begin
       result:=aTool.ExecuteAndWait;
       Output:=aTool.WorkerOutput.Text;
 
-      aTool.Environment.SetVar(PATHVARNAME, OldPath);
+      if PrependPath<>'' then
+        aTool.Environment.SetVar(PATHVARNAME, OldPath);
+
       aTool.Verbose:=OldVerbosity;
     end;
 

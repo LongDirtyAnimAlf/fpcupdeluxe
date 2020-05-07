@@ -319,7 +319,7 @@ begin
   {$endif WINDOWS}
   // GetEnvironmentVariableCount is 1 based
   for i:=1 to GetEnvironmentVariableCount do
-    EnvironmentList.Add(trim(GetEnvironmentString(i)));
+    EnvironmentList.Add(TrimLeft(GetEnvironmentString(i)));
 end;
 
 destructor TProcessEnvironment.Destroy;
@@ -930,7 +930,7 @@ begin
       if AnsiContainsText(line,'Generated: ') then exit;
 
       // filter warnings
-      if AnsiContainsText(line,'warning: ') then
+      if AnsiContainsText(line,'warning:') then
       begin
         if AnsiContainsText(line,'is not portable') then exit;
         if AnsiContainsText(line,'is deprecated') then exit;

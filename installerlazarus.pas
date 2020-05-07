@@ -672,7 +672,7 @@ begin
     //Set standard options
     s:=STANDARDCOMPILERVERBOSITYOPTIONS;
     //Always limit the search for fpc.cfg to our own fpc.cfg
-    //s:=s+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
+    s:=s+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
     // Add remaining options
     s:=s+' '+FCompilerOptions;
 
@@ -850,6 +850,7 @@ begin
 
       ProcessorResult:=Processor.ExecuteAndWait;
       ExitCode := ProcessorResult;
+
       if ExitCode <> 0 then
       begin
         WritelnLog(etError, infotext+ExtractFileName(Processor.Executable)+' returned exit status #'+IntToStr(ExitCode), true);
@@ -2227,6 +2228,7 @@ begin
   if result then
   begin
     CreateRevision(ModuleName,ActualRevision);
+    //Version is needed for pathing, so get it here
     s:=GetVersion;
     if s<>'0.0.0' then
     begin

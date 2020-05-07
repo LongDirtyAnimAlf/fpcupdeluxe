@@ -1521,10 +1521,12 @@ begin
   end;
   {$ENDIF}
 
+  //Always add/use the revision.inc file (if it is there)
+  //However, the Makefile forces the setting of REVSTR
+  //So, use our own REVSTR while the Makefile itself does not do its job properly
+  Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
   s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+REVINCFILENAME;
-  if NOT FileExists(s2) then
-    Processor.Process.Parameters.Add('REVSTR='+ActualRevision)
-  else
+  if FileExists(s2) then
     s1:=s1+' -dREVINC';
 
   {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
@@ -3890,7 +3892,7 @@ begin
   if result then
   begin
     CreateRevision(ModuleName,ActualRevision);
-    //Version is neede for pathing, so do it here
+    //Version is needed for pathing, so get it here
     s:=GetVersion;
     if (s<>'0.0.0') then
     begin
