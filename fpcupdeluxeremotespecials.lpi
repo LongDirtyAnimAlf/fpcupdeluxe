@@ -32,7 +32,7 @@
     </i18n>
     <BuildModes Count="12">
       <Item1 Name="default" Default="True"/>
-      <Item2 Name="linux64">
+      <Item2 Name="linux64musl">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -63,7 +63,7 @@
           </Other>
         </CompilerOptions>
       </Item2>
-      <Item3 Name="freebsdx64">
+      <Item3 Name="freebsd11x64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -94,7 +94,7 @@
           </Other>
         </CompilerOptions>
       </Item3>
-      <Item4 Name="solarisx64">
+      <Item4 Name="solarisx64oi">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>

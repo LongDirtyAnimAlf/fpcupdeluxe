@@ -110,7 +110,76 @@
           </Other>
         </CompilerOptions>
       </Item3>
-      <Item4 Name="win64">
+      <Item4 Name="win32">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <Libraries Value="libs\$(TargetOS)"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dRemoteLog"/>
+          </Other>
+        </CompilerOptions>
+      </Item4>
+      <Item5 Name="win32curl">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-curl"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <Libraries Value="libs\$(TargetOS);C:\msys64\mingw32\lib\;C:\msys64\mingw32\i686-w64-mingw32\lib\;C:\msys64\mingw32\lib\gcc\i686-w64-mingw32\9.3.0\"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-curl"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dRemoteLog
+-dlibcurlstatic"/>
+          </Other>
+        </CompilerOptions>
+      </Item5>
+      <Item6 Name="win64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -147,8 +216,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item4>
-      <Item5 Name="linuxi386">
+      </Item6>
+      <Item7 Name="linuxi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -178,8 +247,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item5>
-      <Item6 Name="linux64">
+      </Item7>
+      <Item8 Name="linux64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -209,8 +278,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item6>
-      <Item7 Name="linuxaarch64">
+      </Item8>
+      <Item9 Name="linuxaarch64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -239,8 +308,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item7>
-      <Item8 Name="linuxarm">
+      </Item9>
+      <Item10 Name="linuxarm">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -270,8 +339,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item8>
-      <Item9 Name="linuxarmv6">
+      </Item10>
+      <Item11 Name="linuxarmv6">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -303,8 +372,8 @@
 -CpARMV6"/>
           </Other>
         </CompilerOptions>
-      </Item9>
-      <Item10 Name="linuxi386QT5">
+      </Item11>
+      <Item12 Name="linuxi386QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -337,8 +406,8 @@
 -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item10>
-      <Item11 Name="linuxx64QT5">
+      </Item12>
+      <Item13 Name="linuxx64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -372,8 +441,8 @@
 -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item11>
-      <Item12 Name="linuxppc64">
+      </Item13>
+      <Item14 Name="linuxppc64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -403,8 +472,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item12>
-      <Item13 Name="freebsdi386">
+      </Item14>
+      <Item15 Name="freebsdi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -434,8 +503,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item13>
-      <Item14 Name="freebsdx64">
+      </Item15>
+      <Item16 Name="freebsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -465,8 +534,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item14>
-      <Item15 Name="netbsdx64">
+      </Item16>
+      <Item17 Name="netbsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -496,8 +565,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item15>
-      <Item16 Name="darwinppc64cocoa">
+      </Item17>
+      <Item18 Name="darwinppc64cocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -530,8 +599,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item16>
-      <Item17 Name="solarisx64">
+      </Item18>
+      <Item19 Name="solarisx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -559,70 +628,6 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dRemoteLog"/>
-          </Other>
-        </CompilerOptions>
-      </Item17>
-      <Item18 Name="openbsdi386">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="i386"/>
-            <TargetOS Value="openbsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dRemoteLog
--Cg-"/>
-          </Other>
-        </CompilerOptions>
-      </Item18>
-      <Item19 Name="openbsdx64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="openbsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dRemoteLog
--Cg-"/>
           </Other>
         </CompilerOptions>
       </Item19>

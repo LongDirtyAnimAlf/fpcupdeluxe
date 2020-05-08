@@ -743,8 +743,6 @@ begin
 end;
 
 function TInstaller.GetShell: string;
-var
-  output:string;
 begin
   {$IFDEF MSWINDOWS}
   {$IFDEF CPUX86}
@@ -822,7 +820,9 @@ end;
 function TInstaller.CheckAndGetTools: boolean;
 var
   OperationSucceeded: boolean;
+  {$ifdef MSWINDOWS}
   aURL,aLocalClientBinary,Output: string;
+  {$endif}
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckAndGetTools): ';
 
@@ -1305,7 +1305,7 @@ var
   i: integer;
   {$ENDIF MSWINDOWS}
   OperationSucceeded: boolean;
-  s1,s2,s3: string;
+  s1,s2: string;
 begin
   s2:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
 
@@ -1379,14 +1379,14 @@ begin
     // Check for proper ld executable
     if OperationSucceeded then
     try
-      s3:=Which('ld');
-      if (NOT CheckExecutable(s3, ['-v'], 'GNU ld')) then
+      s1:=Which('ld');
+      if (NOT CheckExecutable(s1, ['-v'], 'GNU ld')) then
       begin
-        Infoln(s2+'Found ld binary here: '+s3+'. But it is not GNU ld. Expect errors',etWarning);
-        s3:=Which('ld.bfd');
-        if (NOT CheckExecutable(s3, ['-v'], 'GNU ld')) then
+        Infoln(s2+'Found ld binary here: '+s1+'. But it is not GNU ld. Expect errors',etWarning);
+        s1:=Which('ld.bfd');
+        if (NOT CheckExecutable(s1, ['-v'], 'GNU ld')) then
         begin
-          Infoln(s2+'Found GNU ld.bfd binary here: '+s3+'. Could be used through symlinking.',etWarning);
+          Infoln(s2+'Found GNU ld.bfd binary here: '+s1+'. Could be used through symlinking.',etWarning);
         end;
         OperationSucceeded := true;
       end;
@@ -1400,15 +1400,15 @@ begin
 end;
 
 procedure TInstaller.CreateBinutilsList(aVersion:string);
-// Windows-centric
+{$ifdef MSWINDOWS}
 const
   SourceURL_gdb_default = LAZARUSBINARIES+'/i386-win32/gdb/bin/';
-  SourceURL_gdb = FPCUPGITREPO+'/releases/download/gdb/';
   SourceURL64_gdb_default = LAZARUSBINARIES+'/x86_64-win64/gdb/bin/';
-  SourceURL64_gdb = FPCUPGITREPO+'/releases/download/gdb/';
   SourceURL_QT = LAZARUSBINARIES+'/i386-win32/qt/';
   SourceURL_QT5 = LAZARUSBINARIES+'/i386-win32/qt5/';
-
+  //SourceURL_gdb = FPCUPGITREPO+'/releases/download/gdb/';
+  //SourceURL64_gdb = FPCUPGITREPO+'/releases/download/gdb/';
+{$endif}
   procedure AddNewUtil(FileName, RootURL, OS: string; Category: TUtilCategory);
   var
     i: integer;
@@ -1420,12 +1420,14 @@ const
     FUtilFiles[i].OS:=OS;
     FUtilFiles[i].Category:=Category;
   end;
+{$ifdef MSWINDOWS}
 var
   aSourceURL:string;
   {$ifdef win64}
   aSourceURL64:string;
   {$endif}
   aTag:string;
+{$endif}
 begin
   SetLength(FUtilFiles,0); //clean out any cruft
 
@@ -1577,7 +1579,6 @@ var
   ReturnCode: integer;
   DiffFile,DiffFileCorrectedPath: String;
   LocalPatchCmd : string;
-  DiffFileSL:TStringList;
   Output:string;
 begin
   Result := false;
@@ -2387,7 +2388,8 @@ const
   {$endif}
 var
   OperationSucceeded: boolean;
-  WgetFile,WgetExe,WgetZip: string;
+  WgetExe: string;
+  //WgetFile,WgetZip: string;
   i:integer;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadWget): ';
@@ -2400,11 +2402,11 @@ begin
   begin
     WgetExe := IncludeTrailingPathDelimiter(FMakeDir)+'wget'+DirectorySeparator+'wget.exe';
 
-    WgetZip := GetTempFileNameExt('FPCUPTMP','zip');
+    //WgetZip := GetTempFileNameExt('FPCUPTMP','zip');
 
     for i:=0 to (Length(NewSourceURL)-1) do
     try
-      WgetFile:=FileNameFromURL(NewSourceURL[i]);
+      //WgetFile:=FileNameFromURL(NewSourceURL[i]);
 
       //always get this file with the native downloader !!
       OperationSucceeded:=GetFile(NewSourceURL[i],WgetExe,true,true);
