@@ -350,7 +350,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
@@ -387,7 +387,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>

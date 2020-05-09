@@ -3653,46 +3653,46 @@ begin
 
   if FileExists(aCleanupCompiler) then
   begin
+    Processor.Executable:=Make;
+    Processor.Process.Parameters.Clear;
+    {$IFDEF MSWINDOWS}
+    if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
+    {$ENDIF}
+    Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+    if (NOT FNoJobs) then
+      Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+    Processor.Process.Parameters.Add('FPC='+aCleanupCompiler);
+    Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+    Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
+    Processor.Process.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
+    Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
+    Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+    Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+    {$IFDEF UNIX}
+    Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
+    {$ENDIF}
+    {$IFDEF MSWINDOWS}
+    Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+    Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+    Processor.Process.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
+    Processor.Process.Parameters.Add('OS_SOURCE='+GetTargetOS);
+    {$ENDIF}
+    if Self is TFPCCrossInstaller then
+    begin  // clean out the correct compiler
+      Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);
+      Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName);
+      //if Length(CrossInstaller.SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
+      if Length(CrossOS_SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossOS_SubArch);
+    end
+    else
+    begin
+      Processor.Process.Parameters.Add('CPU_TARGET='+GetTargetCPU);
+      Processor.Process.Parameters.Add('OS_TARGET='+GetTargetOS);
+    end;
+    Processor.Process.Parameters.Add('distclean');
+
     for RunTwice in boolean do
     try
-      Processor.Executable:=Make;
-      Processor.Process.Parameters.Clear;
-      {$IFDEF MSWINDOWS}
-      if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
-      {$ENDIF}
-      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
-      if (NOT FNoJobs) then
-        Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-      Processor.Process.Parameters.Add('FPC='+aCleanupCompiler);
-      Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
-      Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
-      Processor.Process.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
-      Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
-      Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-      Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-      {$IFDEF UNIX}
-      Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
-      {$ENDIF}
-      {$IFDEF MSWINDOWS}
-      Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-      Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      Processor.Process.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
-      Processor.Process.Parameters.Add('OS_SOURCE='+GetTargetOS);
-      {$ENDIF}
-      if Self is TFPCCrossInstaller then
-      begin  // clean out the correct compiler
-        Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);
-        Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName);
-        //if Length(CrossInstaller.SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
-        if Length(CrossOS_SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossOS_SubArch);
-      end
-      else
-      begin
-        Processor.Process.Parameters.Add('CPU_TARGET='+GetTargetCPU);
-        Processor.Process.Parameters.Add('OS_TARGET='+GetTargetOS);
-      end;
-      Processor.Process.Parameters.Add('distclean');
-
       if (NOT RunTwice) then
       begin
         if (NOT CrossCompiling) then

@@ -169,6 +169,9 @@ type
     {$endif}
     procedure HandleInfo(var Msg: TLMessage); message WM_THREADINFO;
     procedure InitFpcupdeluxe({%H-}Data: PtrInt=0);
+    {$ifdef RemoteLog}
+    procedure InitConsent({%H-}Data: PtrInt=0);
+    {$endif}
     procedure CheckForUpdates({%H-}Data: PtrInt=0);
     function  AutoUpdateCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
@@ -318,8 +321,6 @@ var
   aTarget:string;
 begin
   MessageTrigger:=false;
-
-  DisEnable(nil,False);
 
   {$ifdef EnableLanguages}
   sLanguage:='en';
@@ -483,7 +484,9 @@ begin
     Form2:=TForm2.Create(Form1);
     Form3:=TForm3.Create(Form1);
     InitFpcupdeluxe;
-    //Application.QueueAsyncCall(@InitFpcupdeluxe,0);
+    {$ifdef RemoteLog}
+    Application.QueueAsyncCall(@InitConsent,0);
+    {$endif}
   end
   else
   begin
@@ -2479,6 +2482,16 @@ begin
         end;
       end;
 
+      //freertos predefined settings
+      if (FPCupManager.CrossOS_Target=TOS.freertos) then
+      begin
+        if (FPCupManager.CrossCPU_Target=TCPU.xtensa) then
+        begin
+          FPCupManager.CrossOPT:='-Cplx6 ';
+          FPCupManager.CrossOS_SubArch:='lx6';
+        end;
+      end;
+
       //msdos predefined settings
       if (FPCupManager.CrossOS_Target=TOS.msdos) then
       begin
@@ -2697,6 +2710,7 @@ begin
           if FPCupManager.CrossCPU_Target=TCPU.avr then BinsFileName:='AVR';
           if FPCupManager.CrossCPU_Target=TCPU.i8086 then BinsFileName:='i8086';
           if FPCupManager.CrossCPU_Target=TCPU.m68k then BinsFileName:='m68k';
+          if FPCupManager.CrossCPU_Target=TCPU.xtensa then BinsFileName:='xtensa';
 
           if FPCupManager.CrossOS_Target=TOS.darwin then
           begin
@@ -2724,7 +2738,8 @@ begin
                   if FPCupManager.CrossOS_Target=TOS.netbsd then s:='NetBSD' else
                     if FPCupManager.CrossOS_Target=TOS.aix then s:='AIX' else
                       if FPCupManager.CrossOS_Target=TOS.msdos then s:='MSDos' else
-                        s:=UppercaseFirstChar(GetOS(FPCupManager.CrossOS_Target));
+                        if FPCupManager.CrossOS_Target=TOS.freertos then s:='FreeRTOS' else
+                          s:=UppercaseFirstChar(GetOS(FPCupManager.CrossOS_Target));
 
           if FPCupManager.SolarisOI then s:=s+'OI';
           BinsFileName:=s+BinsFileName;
@@ -4116,15 +4131,7 @@ begin
 end;
 
 procedure TForm1.InitFpcupdeluxe(Data: PtrInt);
-{$ifdef RemoteLog}
-var
-  aModalResult:TModalResult;
-{$endif}
 begin
-  // FPC cross-quirck : GetDistro (ExecuteCommand) gives errors if used in CreateForm
-  {$ifdef RemoteLog}
-  aDataClient.UpInfo.UpDistro:=GetDistro;
-  {$endif}
   InitFPCupManager;
   {$ifdef EnableLanguages}
   TransLate(sLanguage);
@@ -4133,12 +4140,17 @@ begin
   // This must only be called once.
   If Not Alternate_ui_created then alternateui_Create_Controls;
   {$endif}
-  {$ifdef RemoteLog}
+  if Form2.GetUpdates then Application.QueueAsyncCall(@CheckForUpdates,0);
+end;
+
+{$ifdef RemoteLog}
+procedure TForm1.InitConsent(Data: PtrInt);
+var
+  aModalResult:TModalResult;
+begin
+  aDataClient.UpInfo.UpDistro:=GetDistro;
   if (sConsentWarning) OR (Form2.SendInfo) then
   begin
-    AddMessage('Fpcupdeluxe logging info:');
-    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml',true);
-    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes');
     if (sConsentWarning) then
     begin
       aModalResult:=(MessageDlg(
@@ -4156,10 +4168,16 @@ begin
          else Form2.SendInfo:=False;
     end;
   end;
-  {$endif}
-  DisEnable(nil,True);
-  if Form2.GetUpdates then Application.QueueAsyncCall(@CheckForUpdates,0);
+
+  if (Form2.SendInfo) then
+  begin
+    AddMessage('Fpcupdeluxe logging info:');
+    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml',true);
+    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes');
+  end;
+
 end;
+{$endif}
 
 procedure TForm1.CheckForUpdates(Data: PtrInt);
 var

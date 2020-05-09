@@ -246,7 +246,7 @@ type
 
 const
   ppcSuffix : array[TCPU] of string=(
-    'none','386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','68k'
+    'none','386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','68k','xtensa'
   );
 
   ARMArchFPCStr : array[TARMARCH] of string=(
@@ -3641,9 +3641,6 @@ begin
     begin
       if AnsiPos(LineEnding, Message)>0 then ThreadLog(''); //Write an empty line before multiline messagse
       ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
-      {$IFDEF MSWINDOWS}
-      Sleep(1);
-      {$ENDIF}
     end
   else
     begin
@@ -3652,13 +3649,14 @@ begin
     Project Options/Other/Custom Options using -dDEBUG}
     if AnsiPos(LineEnding, Message)>0 then ThreadLog(''); //Write an empty line before multiline messagse
     ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
-    {$IFDEF MSWINDOWS}
-    Sleep(1);
-    {$ENDIF}
     {$ENDIF}
     end;
+ {$ifdef LCL}
+ Application.ProcessMessages;
+ {$else}
+ Sleep(0);
+ {$endif}
 end;
-
 
 function TInstaller.ExecuteCommand(Commandline: string; Verbosity: boolean): integer;
 var

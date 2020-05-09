@@ -3893,33 +3893,48 @@ end;
 {TNormalUnzipper}
 
 procedure TNormalUnzipper.DoOnFile(Sender : TObject; Const AFileName : String);
+var
+  ProcessInfo:boolean;
 begin
   Inc(FFileCnt);
   FCurrentFile:=ExtractFileName(AFileName);
+  ProcessInfo:=false;
+
   if FTotalFileCnt>50000 then
   begin
-    if (FFileCnt MOD 5000)=0 then ThreadLog('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt));
+    ProcessInfo:=((FFileCnt MOD 5000)=0);
   end
   else
   if FTotalFileCnt>5000 then
   begin
-    if (FFileCnt MOD 500)=0 then ThreadLog('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt));
+    ProcessInfo:=((FFileCnt MOD 500)=0);
   end
   else
   if FTotalFileCnt>500 then
   begin
-    if (FFileCnt MOD 50)=0 then ThreadLog('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt));
+    ProcessInfo:=((FFileCnt MOD 50)=0);
   end
   else
   if FTotalFileCnt>50 then
   begin
-    if (FFileCnt MOD 5)=0 then ThreadLog('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt));
+    ProcessInfo:=((FFileCnt MOD 5)=0);
   end
   else
+  begin
     ThreadLog('Extracted #'+InttoStr(FFileCnt)+'. File '+FCurrentFile+' out of #'+InttoStr(FTotalFileCnt));
-  {$ifdef LCL}
-  Application.ProcessMessages;
-  {$endif}
+    {$ifdef LCL}
+    Application.ProcessMessages;
+    {$endif}
+  end;
+
+  if ProcessInfo then
+  begin
+    ThreadLog('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt));
+    {$ifdef LCL}
+    Application.ProcessMessages;
+    {$endif}
+  end;
+
 end;
 
 procedure TNormalUnzipper.DoOnProgressEx(Sender : TObject; Const ATotPos, ATotSize: Int64);
@@ -4225,17 +4240,11 @@ begin
   if (APos=0) then
   begin
     ThreadLog('Download progress '+FileNameOnly+': starting.');
-    {$ifdef LCL}
-    Application.ProcessMessages;
-    {$endif}
   end
   else
   if (APos=-1) then
   begin
     ThreadLog('Download progress '+FileNameOnly+': download ready !');
-    {$ifdef LCL}
-    Application.ProcessMessages;
-    {$endif}
   end
   else
   //Show progress only every 2 seconds
@@ -4246,10 +4255,10 @@ begin
     else
       ThreadLog('Download progress '+FileNameOnly+': '+KB(APos));
     StoredTickCount:=GetUpTickCount;
-    {$ifdef LCL}
-    Application.ProcessMessages;
-    {$endif}
   end;
+  {$ifdef LCL}
+  Application.ProcessMessages;
+  {$endif}
 end;
 
 {$ifdef ENABLENATIVE}
@@ -4313,6 +4322,10 @@ begin
     ThreadLog('Reading data (no length available) : '+InttoStr(CurrentPos)+' Bytes.')
   else
     ThreadLog('Reading data : '+InttoStr(CurrentPos)+' Bytes of '+InttoStr(ContentLength));
+
+  {$ifdef LCL}
+  Application.ProcessMessages;
+  {$endif}
 end;
 
 procedure TUseNativeDownLoader.DoPassword(Sender: TObject; var RepeatRequest: Boolean);

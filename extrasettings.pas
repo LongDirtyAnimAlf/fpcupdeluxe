@@ -506,7 +506,9 @@ begin
   {$endif}
 
   UseSoftFloat:=true;
-  OnlinePatching:=true;
+
+  //Disable OnlinePatching by default starting with 1.6.8p
+  OnlinePatching:=false;
 end;
 
 procedure TForm2.SetInstallDir(const aInstallDir:string='');
@@ -561,7 +563,7 @@ begin
   if e then
   begin
     xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
-    if (xCPUOS.OS=TOS.embedded) then EditCrossSubArch.Enabled:=e;
+    if (xCPUOS.OS=TOS.embedded) OR (xCPUOS.OS=TOS.freertos) then EditCrossSubArch.Enabled:=e;
     if (xCPUOS.CPU=TCPU.arm) then RadioGroupARMArch.Enabled:=e;
     EditLibLocation.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].LibDir;
     EditBinLocation.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].BinDir;
@@ -806,6 +808,7 @@ begin
         if (OS=iphonesim) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
         if (OS=wince) AND (CPU<>arm) then continue;
         if ((OS=win32) OR (OS=win64)) AND ((CPU=arm) OR (CPU=aarch64)) then continue;
+        if (CPU=xtensa) AND ((OS<>linux) AND (OS<>freertos)) then continue;
         if (CPU=powerpc) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=powerpc64) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin) AND (OS<>android)) then continue;

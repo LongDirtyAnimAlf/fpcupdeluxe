@@ -929,6 +929,9 @@ begin
       // When building a java cross-compiler
       if AnsiContainsText(line,'Generated: ') then exit;
 
+      //Linker warning
+      if AnsiContainsText(line,'did you forget -T') then exit;
+
       // filter warnings
       if AnsiContainsText(line,'warning:') then
       begin
@@ -942,7 +945,6 @@ begin
         if AnsiContainsText(line,'an inherited method is hidden') then exit;
         if AnsiContainsText(line,'with abstract method') then exit;
         if AnsiContainsText(line,'comment level 2 found') then exit;
-        if AnsiContainsText(line,'did you forget -T') then exit;
         if AnsiContainsText(line,'is not recommended') then exit;
         if AnsiContainsText(line,'were not initialized') then exit;
         if AnsiContainsText(line,'which is not available for the') then exit;
@@ -959,6 +961,8 @@ begin
         if AnsiContainsText(line,'overriding recipe for target') then exit;
         if AnsiContainsText(line,'ignoring old recipe for target') then exit;
         if AnsiContainsText(line,'Case statement does not handle all possible cases') then exit;
+
+        if AnsiContainsText(line,'(5059)') then exit; //function result not initialized
 
         if AnsiContainsText(line,'unreachable code') then exit;
         if AnsiContainsText(line,'Fix implicit pointer conversions') then exit;
