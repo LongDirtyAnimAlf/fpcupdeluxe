@@ -2144,12 +2144,15 @@ begin
         '.bz2':
         begin
           {$ifdef BSD}
-          OperationSucceeded:=(ExecuteCommand(FTar+' -xjf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' -O *' + CompilerName + GetExeExt,FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar,['-xjf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName+GetExeExt],FVerbose)=0);
           {$else}
-          OperationSucceeded:=(ExecuteCommand(FTar+' -xjf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' --wildcards --no-anchored ' + CompilerName + GetExeExt,FVerbose)=0);
-          if (NOT OperationSucceeded) then
+          if Pos('.tar.',BootstrapFilePath)>0 then
           begin
-            OperationSucceeded:=(ExecuteCommand(FBunzip2+' -dfkq '+BootstrapFilePath,FVerbose)=0);
+            OperationSucceeded:=(ExecuteCommand(FTar,['-xjf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName+GetExeExt],FVerbose)=0);
+          end
+          else
+          begin
+            OperationSucceeded:=(ExecuteCommand(FBunzip2,['-dfkq',BootstrapFilePath],FVerbose)=0);
             if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
           end;
           {$endif}
@@ -2157,9 +2160,9 @@ begin
         '.gz':
         begin
           {$ifdef BSD}
-          OperationSucceeded:=(ExecuteCommand(FTar+' -xzf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' -O *' + CompilerName + GetExeExt,FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar,['-xzf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName+GetExeExt],FVerbose)=0);
           {$else}
-          OperationSucceeded:=(ExecuteCommand(FTar+' -xzf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' --wildcards --no-anchored ' + CompilerName + GetExeExt,FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar,['-xzf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName+GetExeExt],FVerbose)=0);
           {$endif}
         end;
         {$endif UNIX}

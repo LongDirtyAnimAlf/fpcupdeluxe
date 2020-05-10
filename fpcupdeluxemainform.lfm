@@ -1971,12 +1971,12 @@ object Form1: TForm1
     Height = 578
     Top = 35
     Width = 310
-    ActivePage = CrossSheet
+    ActivePage = BasicSheet
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 12
     BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 11
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet

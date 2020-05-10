@@ -4559,8 +4559,7 @@ begin
   try
     with aFTPClient do
     begin
-      //DirectFile := False;
-      //DirectFileName := URI.Path+URI.Document;
+      DirectFile := False; // don't let ftpsend create a file itself
       TargetHost := URI.Host;
       TargetPort := InttoStr(aPort);
       if FUsername <> '' then
@@ -4588,8 +4587,13 @@ begin
     aDataStream.Size:=0;
     if aFTPClient.Login then
     begin
-      Result := aFTPClient.RetrieveStream(aDataStream, true);
+      Result := aFTPClient.RetrieveFile(URI.Path+URI.Document, false);
       aFTPClient.Logout;
+      if Result then
+      begin
+        aFTPClient.DataStream.Position:=0;
+        aDataStream.CopyFrom(aFTPClient.DataStream,aFTPClient.DataStream.Size);
+      end;
     end;
   finally
     aFTPClient.Destroy;
