@@ -719,7 +719,8 @@ begin
     case ModuleName of
       _USERIDE:
       begin
-        Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
+        //Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
+        Processor.Process.Parameters.Add('LAZBUILDJOBS=1');//prevent runtime 217 errors
         Processor.Process.Parameters.Add('useride');
         s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
         //if FileExists(s) then

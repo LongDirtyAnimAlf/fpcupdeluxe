@@ -550,15 +550,16 @@ end;
 procedure TFPCupManager.WritelnLog(msg: string; ToConsole: boolean);
 begin
   // Set up log if it doesn't exist yet
-  FLog.WriteLog(msg,ToConsole);
+  FLog.WriteLog(msg);
+  if ToConsole then if Assigned(Sequencer.Installer) then Sequencer.Installer.Infoln(msg);
 end;
 
 procedure TFPCupManager.WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean);
 begin
   // Set up log if it doesn't exist yet
-  FLog.WriteLog(EventType,msg,ToConsole);
+  FLog.WriteLog(EventType,msg);
+  if ToConsole then if Assigned(Sequencer.Installer) then Sequencer.Installer.Infoln(msg,EventType);
 end;
-
 
 function TFPCupManager.LoadFPCUPConfig: boolean;
 begin
@@ -841,8 +842,8 @@ begin
   end;
 
   try
-    WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',true);
-    WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,true);
+    WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',false);
+    WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,false);
   except
     // Writing to log failed, probably duplicate run. Inform user and get out.
     RunInfo:='***ERROR***';

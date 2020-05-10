@@ -13,6 +13,8 @@ uses
   Process;
 
 const
+  Seriousness: array [TEventType] of string = ('custom:', 'info:', 'WARNING:', 'ERROR:', 'debug:');
+
   {$ifdef LCL}
   BeginSnippet='fpcupdeluxe:'; //helps identify messages as coming from fpcupdeluxe instead of make etc
   {$else}
@@ -1277,16 +1279,26 @@ var
   aMessage:string;
   PInfo: PChar;
 begin
-  if aEvent=etError then
-    aMessage:=BeginSnippet+' '+'ERROR: '+aMsg
-  else
-  if aEvent=etWarning then
-    aMessage:=BeginSnippet+' '+'WARNING: '+aMsg
-  else
-  if aEvent=etCustom then
-    aMessage:=BeginSnippet+' '+aMsg
-  else
-    aMessage:=aMsg;
+  if (Length(aMsg)>0) then
+  begin
+    {
+    if aEvent<>etCustom then
+      aMessage:=BeginSnippet+' '+Seriousness[aEvent]+' '+ aMsg
+    else
+      aMessage:=BeginSnippet+' '+aMsg;
+    }
+    if aEvent=etError then
+      aMessage:=BeginSnippet+' '+'ERROR: '+aMsg
+    else
+    if aEvent=etWarning then
+      aMessage:=BeginSnippet+' '+'WARNING: '+aMsg
+    else
+    if aEvent=etCustom then
+      aMessage:=BeginSnippet+' '+aMsg
+    else
+      aMessage:=aMsg;
+  end else aMessage:='';
+
   PInfo := StrAlloc(Length(aMessage)+1);
   StrCopy(PInfo, PChar(aMessage));
   if (Assigned(Application) AND Assigned(Application.MainForm)) then

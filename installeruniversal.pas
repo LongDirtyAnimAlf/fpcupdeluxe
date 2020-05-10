@@ -293,7 +293,8 @@ begin
 
   if Length(s)>0 then Processor.Process.Parameters.Add('OPT='+s);
 
-  Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
+  //Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
+  Processor.Process.Parameters.Add('LAZBUILDJOBS=1');//prevent runtime 217 errors
   Processor.Process.Parameters.Add('useride');
 
   try

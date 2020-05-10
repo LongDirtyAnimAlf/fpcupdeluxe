@@ -158,9 +158,9 @@ type
     procedure SetLogFile(AValue: string);
   public
     // Write to log and optionally console with seriousness etInfo
-    procedure WriteLog(Message: string; ToConsole: Boolean=true);overload;
+    procedure WriteLog(Message: string);overload;
     // Write to log and optionally console with specified seriousness
-    procedure WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);overload;
+    procedure WriteLog(EventType: TEventType;Message: string);overload;
     property LogFile: string read GetLogFile write SetLogFile ;
     constructor Create;
     destructor Destroy; override;
@@ -4111,16 +4111,14 @@ begin
   end;
 end;
 
-procedure TLogger.WriteLog(Message: string; ToConsole: Boolean);
+procedure TLogger.WriteLog(Message: string);
 begin
   FLog.Info(Message);
-  if ToConsole then ThreadLog(Message);
 end;
 
-procedure TLogger.WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);
+procedure TLogger.WriteLog(EventType: TEventType;Message: string);
 begin
   FLog.Log(EventType, Message);
-  if ToConsole then ThreadLog(Message,EventType);
 end;
 
 constructor TLogger.Create;

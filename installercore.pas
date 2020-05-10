@@ -145,8 +145,6 @@ const
     );
   {$endif}
 
-  Seriousness: array [TEventType] of string = ('custom:', 'info:', 'WARNING:', 'ERROR:', 'debug:');
-
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
   FPCSnipMagic='# If you don''t want so much verbosity use'; //denotes end of standard fpc.cfg
@@ -1614,14 +1612,15 @@ begin
     aClient.LocalModifications(UpdateWarnings); //Get list of modified files
     if UpdateWarnings.Count > 0 then
     begin
-      UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
+      UpdateWarnings.Insert(0, {BeginSnippet+' '+}ModuleName + ': WARNING: found modified files.');
       if FKeepLocalChanges=false then
       begin
         DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + aBeforeRevision + '.diff';
         CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,aClient);
-        UpdateWarnings.Add(ModuleName + ': reverting to original before updating.');
+        UpdateWarnings.Add({BeginSnippet+' '+}ModuleName + ': reverting to original before updating.');
         aClient.Revert; //Remove local changes
-      end else UpdateWarnings.Add(ModuleName + ': leaving modified files as is before updating.');
+      end
+      else UpdateWarnings.Add({BeginSnippet+' '+}ModuleName + ': leaving modified files as is before updating.');
     end;
   end;
 
@@ -1799,18 +1798,15 @@ begin
     DiffFile:='';
     if UpdateWarnings.Count > 0 then
     begin
-      UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
+      UpdateWarnings.Insert(0, {BeginSnippet+' '+}ModuleName + ': WARNING: found modified files.');
       if FKeepLocalChanges=false then
       begin
         DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + aBeforeRevision + '.diff';
         CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,FSVNClient);
-        UpdateWarnings.Add(ModuleName + ': reverting before updating.');
+        UpdateWarnings.Add({BeginSnippet+' '+}ModuleName + ': reverting before updating.');
         SVNClient.Revert; //Remove local changes
       end
-      else
-      begin
-        UpdateWarnings.Add(ModuleName + ': leaving modified files as is before updating.');
-      end;
+      else UpdateWarnings.Add({BeginSnippet+' '+}ModuleName + ': leaving modified files as is before updating.');
     end;
   end;
 
@@ -2791,16 +2787,18 @@ procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);
 begin
   if Assigned(FLog) then
   begin
-    FLog.WriteLog(msg,ToConsole);
+    FLog.WriteLog(msg);
   end;
+  if ToConsole then Infoln(msg);
 end;
 
 procedure TInstaller.WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean);
 begin
   if Assigned(FLog) then
   begin
-    FLog.WriteLog(EventType,msg,ToConsole);
+    FLog.WriteLog(EventType,msg);
   end;
+  if ToConsole then Infoln(msg,EventType);
 end;
 
 
@@ -3638,19 +3636,19 @@ procedure TInstaller.Infoln(Message: string; const Level: TEventType=etInfo);
 begin
   // Note: these strings should remain as is so any fpcupgui highlighter can pick it up
   if (Level<>etDebug) then
-    begin
-      if AnsiPos(LineEnding, Message)>0 then ThreadLog(''); //Write an empty line before multiline messagse
-      ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
-    end
+  begin
+    if AnsiPos(LineEnding, Message)>0 then ThreadLog(''); //Write an empty line before multiline messagse
+    ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
+  end
   else
-    begin
+  begin
     {$IFDEF DEBUG}
     {DEBUG conditional symbol is defined using
     Project Options/Other/Custom Options using -dDEBUG}
     if AnsiPos(LineEnding, Message)>0 then ThreadLog(''); //Write an empty line before multiline messagse
     ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
     {$ENDIF}
-    end;
+  end;
  {$ifdef LCL}
  Application.ProcessMessages;
  {$else}

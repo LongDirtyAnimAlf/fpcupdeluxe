@@ -1096,6 +1096,8 @@ begin
             ProcessorResult:=Processor.ExecuteAndWait;
             result:=(ProcessorResult=0);
 
+            if ProcessorResult=AbortedExitCode then break;
+
             if ((NOT result) AND (MakeCycle=st_Packages)) then
             begin
               //Sometimes rerun gives good results (on AIX 32bit especially).
@@ -3695,7 +3697,7 @@ begin
     Processor.Process.Parameters.Add('distclean');
 
     for RunTwice in boolean do
-    try
+    begin
       if (NOT RunTwice) then
       begin
         if (NOT CrossCompiling) then
@@ -3718,8 +3720,6 @@ begin
           WritelnLog(etError, infotext+'Running '+Processor.Executable+' distclean failed with an exception!'+LineEnding+'Details: '+E.Message,true);
         end;
       end;
-    finally
-      FCleanModuleSuccess:=result;
     end;
   end
   else
@@ -3727,6 +3727,8 @@ begin
     result:=true;
     Infoln(infotext+'Running '+Processor.Executable+' distclean failed: could not find cleanup compiler. Will try again later',etInfo);
   end;
+
+  if result then FCleanModuleSuccess:=true;
 
   if FCleanModuleSuccess then
   begin
