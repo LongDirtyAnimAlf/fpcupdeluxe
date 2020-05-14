@@ -874,9 +874,21 @@ begin
     if AnsiContainsText(line,'lpk file expected') then exit;
   end;
 
-  if AnsiStartsText('TExternalTool',line) then exit;
+  //Makefile error we are not interested in
+  if AnsiContainsText(line,'CreateProcess(') then exit;
 
   result:=(NOT aVerbosity);
+
+  if (NOT result) then
+  begin
+    //Harmless Jasmin error(s)
+    if AnsiContainsText(line,'Badly formatted number') then exit;
+    if AnsiContainsText(line,'system.j:') then exit;
+    if AnsiStartsText('^',line) then exit;
+
+    //Harmless linker warning
+    if AnsiContainsText(line,'did you forget -T') then exit;
+  end;
 
   if (NOT result) then
   begin
@@ -894,6 +906,9 @@ begin
 
     if (NOT result) then
     begin
+      //Exttools debugging
+      if AnsiStartsText('TExternalTool',line) then exit;
+
       // remove hints and other "trivial"* warnings from output
       // these line are not that interesting for the average user of fpcupdeluxe !
       if AnsiContainsText(line,'hint: ') then exit;
@@ -930,9 +945,6 @@ begin
 
       // When building a java cross-compiler
       if AnsiContainsText(line,'Generated: ') then exit;
-
-      //Linker warning
-      if AnsiContainsText(line,'did you forget -T') then exit;
 
       // filter warnings
       if AnsiContainsText(line,'warning:') then
@@ -1020,7 +1032,6 @@ begin
 
       // Some prehistoric FPC errors.
       if AnsiContainsText(line,'Unknown option.') then exit;
-      if AnsiContainsText(line,'CreateProcess(') then exit;
 
       // found modified files
       result:=true;
@@ -1106,11 +1117,11 @@ var
       if Buf[i] in [#10,#13] then
       begin
         LineBuf:=LineBuf+copy(Buf,StartPos,i-StartPos);
-        if IsStdErr then
-          fLines.AddObject(LineBuf,fLines)
-        else
+        if GetFilter(LineBuf,Tool.FFPCMagic) then
         begin
-          if GetFilter(LineBuf,Tool.FFPCMagic) then
+          if IsStdErr then
+            fLines.AddObject(LineBuf,fLines)
+          else
             fLines.Add(LineBuf);
         end;
         LineBuf:='';

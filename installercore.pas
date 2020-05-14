@@ -1758,8 +1758,8 @@ begin
     exit;
   end;
 
-  aBeforeRevision              := 'failure';
-  aAfterRevision               := 'failure';
+  aBeforeRevision             := 'failure';
+  aAfterRevision              := 'failure';
   SVNClient.ModuleName        := ModuleName;
   SVNClient.LocalRepository   := FSourceDirectory;
   SVNClient.Repository        := FURL;
@@ -2597,11 +2597,12 @@ function TInstaller.DownloadJasmin: boolean;
 const
   JASMINVERSION = '2.4';
   TARGETNAME='jasmin.jar';
-  SOURCEURL : array [0..1] of string = (
+  SOURCEURL : array [0..4] of string = (
     'https://sourceforge.net/projects/jasmin/files/jasmin/jasmin-'+JASMINVERSION+'/jasmin-'+JASMINVERSION+'.zip/download',
-    'https://github.com/davidar/jasmin/archive/'+JASMINVERSION+'.zip'
-    //http://www.java2s.com/Code/JarDownload/jasmin/jasmin.jar.zip
-    //http://www.java2s.com/Code/JarDownload/jasmin/jasmin-3.0.3.jar.zip
+    'https://github.com/davidar/jasmin/archive/'+JASMINVERSION+'.zip',
+    'ftp://ftp.freepascal.org/pub/fpc/contrib/jvm/fpcjvmutilities.zip',
+    'https://www.java2s.com/Code/JarDownload/jasmin/jasmin.jar.zip',
+    'https://www.java2s.com/Code/JarDownload/jasmin/jasmin-3.0.3.jar.zip'
     );
 var
   OperationSucceeded: boolean;

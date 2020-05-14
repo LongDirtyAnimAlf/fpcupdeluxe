@@ -795,7 +795,7 @@ begin
               begin
                 // copy over the [cross-]compiler
                 s1:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+GetCompilerName(CrossInstaller.TargetCPU);
-                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+GetCrossCompilerName(CrossInstaller.TargetCPU);
+                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+CrossCompilerName;
                 if FileExists(s1) then
                 begin
                   Infoln(infotext+'Copy [cross-]compiler ('+ExtractFileName(s1)+') into: '+ExtractFilePath(s2),etInfo);
@@ -813,7 +813,7 @@ begin
             end;
             st_Rtl:
             begin
-              s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+              s1:=CrossCompilerName;
               s2:=IncludeTrailingPathDelimiter(FBinPath)+s1;
               if (NOT FileExists(s2)) then
                 s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
@@ -822,7 +822,7 @@ begin
             end;
             st_RtlInstall:
             begin
-              s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+              s1:=CrossCompilerName;
               s2:=IncludeTrailingPathDelimiter(FBinPath)+s1;
               if (NOT FileExists(s2)) then
                 s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
@@ -834,7 +834,7 @@ begin
               {$ifdef Darwin}
               if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
               {$endif}
-              s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+              s1:=CrossCompilerName;
               s2:=IncludeTrailingPathDelimiter(FBinPath)+s1;
               if (NOT FileExists(s2)) then
                 s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
@@ -843,7 +843,7 @@ begin
             end;
             st_PackagesInstall:
             begin
-              s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+              s1:=CrossCompilerName;
               s2:=IncludeTrailingPathDelimiter(FBinPath)+s1;
               if (NOT FileExists(s2)) then
                 s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
@@ -864,7 +864,7 @@ begin
               begin
                 Infoln(infotext+'Building native compiler for '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+'.',etInfo);
                 Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
-                //s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+                //s1:=CrossCompilerName;
                 //Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
                 Processor.Process.Parameters.Add('-C');
                 Processor.Process.Parameters.Add('compiler');
@@ -935,14 +935,12 @@ begin
                Options:=Options+' -dFPC_USE_LIBC';
           {$endif}
 
-          {
           s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+REVINCFILENAME;
           if FileExists(s2) then
           begin
-            Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
+            if (ActualRevision<>'failure') then Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
             Options:=Options+' -dREVINC';
           end;
-          }
 
           {$ifdef solaris}
           {$IF defined(CPUX64) OR defined(CPUX86)}
@@ -1110,6 +1108,7 @@ begin
 
             if ProcessorResult=AbortedExitCode then break;
 
+            {$ifndef crosssimple}
             if ((NOT result) AND (MakeCycle=st_Packages)) then
             begin
               //Sometimes rerun gives good results (on AIX 32bit especially).
@@ -1117,6 +1116,33 @@ begin
               ProcessorResult:=Processor.ExecuteAndWait;
               result:=(ProcessorResult=0);
             end;
+
+            {$IFDEF UNIX}
+            if (result) AND (MakeCycle=st_CompilerInstall) then
+            begin
+              s2:=ConcatPaths([FSourceDirectory,'compiler',CrossCompilerName]);
+              //The compiler gets installed here
+              //s2:=ConcatPaths([FInstallDirectory,'lib','bin',GetFPCVersion,CrossCompilerName]);
+              {$ifdef Darwin}
+              // on Darwin, the normal compiler names are used for the final cross-target compiler !!
+              // very tricky !
+              s1:=ConcatPaths([FBinPath,GetCompilerName(CrossInstaller.TargetCPU)]);
+              {$else}
+              s1:=ConcatPaths([FBinPath,CrossCompilerName]);
+              {$endif}
+
+              //fpSymlink(pchar(s2),pchar(s1));
+
+              // copy over the cross-compiler towards the FPC bin-directory, with the right compilername.
+              if FileExists(s2) then
+              begin
+                Infoln(infotext+'Copy cross-compiler ('+CrossCompilerName+') into: '+FBinPath,etInfo);
+                FileUtil.CopyFile(s2,s1);
+                fpChmod(s1,&755);
+              end;
+            end;
+            {$ENDIF UNIX}
+            {$endif crosssimple}
 
           except
             on E: Exception do
@@ -1130,10 +1156,9 @@ begin
 
           if (not result) then break;
 
-          if MakeCycle=st_NativeCompiler then
-             Infoln(infotext+'Building native compiler for finished.',etInfo)
-
         end;// loop over MakeCycle
+
+        if result then Infoln(infotext+'Building native compiler for '+GetFPCTarget(false)+' finished.',etInfo);
 
         if (not result) then
         begin
@@ -1157,26 +1182,27 @@ begin
         end
         else
         begin
-          {$IFDEF UNIX}
 
+          {$ifdef crosssimple}
+          {$IFDEF UNIX}
+          s2:=ConcatPaths([FSourceDirectory,'compiler',CrossCompilerName]);
+          //s2:=ConcatPaths([FInstallDirectory,'lib','bin',GetFPCVersion,CrossCompilerName]);
           {$ifdef Darwin}
           // on Darwin, the normal compiler names are used for the final cross-target compiler !!
           // very tricky !
-          s1:=GetCompilerName(CrossInstaller.TargetCPU);
+          s1:=ConcatPaths([FBinPath,GetCompilerName(CrossInstaller.TargetCPU)]);
           {$else}
-          s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+          s1:=ConcatPaths([FBinPath,CrossCompilerName]);
           {$endif}
-
           // copy over the cross-compiler towards the FPC bin-directory, with the right compilername.
-          if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+CrossCompilerName) then
+          if FileExists(s2) then
           begin
             Infoln(infotext+'Copy cross-compiler ('+CrossCompilerName+') into: '+FBinPath,etInfo);
-            FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+CrossCompilerName,
-              IncludeTrailingPathDelimiter(FBinPath)+s1);
-            fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s1,&755);
+            FileUtil.CopyFile(s2,s1);
+            fpChmod(s1,&755);
           end;
-
           {$ENDIF}
+          {$endif crosssimple}
 
           // delete cross-compiler in source-directory
           SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+CrossCompilerName);
