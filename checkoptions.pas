@@ -159,7 +159,7 @@ begin
         sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
         bHaveInstalldir:=true;
       end;
-      FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','binutilsdir','')));
+      FManager.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','binutilsdir','')));
       {$ENDIF MSWINDOWS}
 
       FManager.BaseDirectory:=sInstallDir;
@@ -190,7 +190,7 @@ begin
         {$IFDEF MSWINDOWS}
         FManager.LogFileName:='fpcup.log'
         {$ELSE}
-        FInstaller.LogFileName:=SafeExpandFileName('~/fpcup.log')
+        FManager.LogFileName:=SafeExpandFileName('~/fpcup.log')
         {$ENDIF MSWINDOWS}
       else
         FManager.LogFileName:=sLogFile;
@@ -225,11 +225,11 @@ begin
       FManager.FPCOPT:=Options.GetOption('','fpcOPT','');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
-      if Pos('-Fl/usr/local/lib/',FInstaller.FPCOPT)=0 then
+      if Pos('-Fl/usr/local/lib/',FManager.FPCOPT)=0 then
       begin
-        Infoln('FPC options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
-          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
-        FInstaller.FPCOPT:=FInstaller.FPCOPT+' -Fl/usr/local/lib';
+        //Infoln('FPC options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
+        //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
+        FManager.FPCOPT:=FManager.FPCOPT+' -Fl/usr/local/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FManager.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
@@ -281,17 +281,17 @@ begin
 
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
-      if (pos('-Fl/usr/local/lib/',FInstaller.LazarusOPT)=0) then
+      if (pos('-Fl/usr/local/lib/',FManager.LazarusOPT)=0) then
       begin
-        Infoln('Lazarus options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
-          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
-        FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/local/lib';
+        //Infoln('Lazarus options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
+        //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
+        FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/local/lib';
       end;
-      if (pos('-Fl/usr/X11R6/lib',FInstaller.LazarusOPT)=0) then
+      if (pos('-Fl/usr/X11R6/lib',FManager.LazarusOPT)=0) then
       begin
-        Infoln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
-          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
-        FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/X11R6/lib -Fl/usr/X11R7/lib';
+        //Infoln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
+        //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
+        FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/X11R6/lib -Fl/usr/X11R7/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FManager.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
@@ -510,8 +510,8 @@ begin
     begin
       {$IFNDEF MSWINDOWS}
       // Binutils should be in path on non-Windows...
-      if FInstaller.MakeDirectory<>'' then
-        FInstaller.MakeDirectory:='';
+      if FManager.MakeDirectory<>'' then
+        FManager.MakeDirectory:='';
       {$ENDIF MSWINDOWS}
 
       FManager.PersistentOptions:=Options.PersistentOptions;

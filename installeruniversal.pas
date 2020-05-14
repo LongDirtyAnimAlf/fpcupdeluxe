@@ -887,6 +887,7 @@ begin
 
       if Workingdir='' then Workingdir:=BaseWorkingdir;
 
+      {$ifndef FPCONLY}
       if (LowerCase(ModuleName)='lamw-gradle') then
       begin
         //perform some auto magic install stuff
@@ -913,6 +914,7 @@ begin
           Free;
         end;
       end;
+      {$endif}
 
       //Limit iterration;
       if ReadyCounter>MAXEMPTYINSTRUCTIONS then break;
@@ -1238,7 +1240,6 @@ begin
 
       WritelnLog(infotext+Processor.GetExeInfo, true);
       ProcessorResult:=Processor.ExecuteAndWait;
-
       s:=Processor.WorkerOutput.Text;
       j:=ProcessorResult;
 

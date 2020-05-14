@@ -65,7 +65,7 @@ type
 
   TAboutForm = class(TForm)
     CloseButton: TBitBtn;
-    BuildDateLabel: TLABEL;
+    BuildDateLabel: TLabel;
     AboutMemo: TMemo;
     DocumentationLabel: TLabel;
     ForumLabel: TLabel;
@@ -103,6 +103,11 @@ implementation
 
 {$R *.lfm}
 
+uses
+  InterfaceBase;
+
+{$i revision.inc}
+
 function ShowAboutForm: TModalResult;
 var
   AboutForm: TAboutForm;
@@ -137,10 +142,19 @@ procedure TAboutForm.AboutFormCreate(Sender:TObject);
 begin
   Notebook.PageIndex:=0;
   LogoImage.Picture.LoadFromResourceName(HInstance, 'splash_logo', TPortableNetworkGraphic);
-  VersionLabel.Caption := '';
+  VersionLabel.Caption :='FPCUPdeluxe V'+DELUXEVERSION+' build '+RevisionStr;
+;
   //RevisionLabel.Caption := '';
   BuildDateLabel.Caption := 'Build-date: '+GetLocalizedBuildDate;
-  FPCVersionLabel.Caption:= '';
+
+  FPCVersionLabel.Caption:= Format('%s-%s-%s, fpc %s', [
+    LowerCase({$I %FPCTARGETOS%}),
+    {$I %FPCTARGETCPU%},
+    GetLCLWidgetTypeName,
+    {$I %FPCVersion%}
+    ]);
+
+
   PlatformLabel.Caption:= '';
 
   // Reinier Olislagers
@@ -149,7 +163,7 @@ begin
   //VersionPage.Caption:='';
   //AboutPage.Caption:='';
 
-  VersionLabel.Font.Color:= clWhite;
+  //VersionLabel.Font.Color:= clWhite;
 
   Constraints.MinWidth:= 460;
   Constraints.MinHeight:= 380;

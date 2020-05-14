@@ -5,12 +5,12 @@ object AboutForm: TAboutForm
   Width = 460
   ActiveControl = Notebook
   BorderIcons = [biSystemMenu, biMaximize]
-  Caption = 'About Lazarus'
+  Caption = 'About fpcupdeluxe'
   ClientHeight = 376
   ClientWidth = 460
   OnCreate = AboutFormCreate
   Position = poScreenCenter
-  LCLVersion = '1.7'
+  LCLVersion = '2.0.9.0'
   object Notebook: TPageControl
     Left = 0
     Height = 326
@@ -41,16 +41,13 @@ object AboutForm: TAboutForm
         AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = LogoImage
         AnchorSideBottom.Side = asrBottom
-        Left = 199
+        Left = 201
         Height = 15
         Top = 186
-        Width = 54
+        Width = 51
         Alignment = taCenter
         Caption = 'Version #:'
-        Font.Color = clSilver
-        Font.Style = [fsBold]
         ParentColor = False
-        ParentFont = False
       end
       object BuildDateLabel: TLabel
         AnchorSideLeft.Control = LogoImage
@@ -64,9 +61,7 @@ object AboutForm: TAboutForm
         Alignment = taCenter
         BorderSpacing.Around = 6
         Caption = 'Date:'
-        Font.Color = clSilver
         ParentColor = False
-        ParentFont = False
       end
       object PlatformLabel: TLabel
         AnchorSideLeft.Control = LogoImage
@@ -78,9 +73,7 @@ object AboutForm: TAboutForm
         Width = 74
         BorderSpacing.Around = 6
         Caption = 'PlatformLabel'
-        Font.Color = clSilver
         ParentColor = False
-        ParentFont = False
       end
       object FPCVersionLabel: TLabel
         AnchorSideLeft.Control = LogoImage
@@ -93,9 +86,7 @@ object AboutForm: TAboutForm
         Width = 102
         BorderSpacing.Around = 6
         Caption = 'FPCUPVersionLabel'
-        Font.Color = clSilver
         ParentColor = False
-        ParentFont = False
       end
     end
     object AboutPage: TTabSheet
