@@ -814,13 +814,19 @@ begin
             st_Rtl:
             begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+              s2:=IncludeTrailingPathDelimiter(FBinPath)+s1;
+              if (NOT FileExists(s2)) then
+                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
+              Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('rtl');
             end;
             st_RtlInstall:
             begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+              s2:=IncludeTrailingPathDelimiter(FBinPath)+s1;
+              if (NOT FileExists(s2)) then
+                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
+              Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('rtl_install');
             end;
             st_Packages:
@@ -829,13 +835,19 @@ begin
               if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
               {$endif}
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+              s2:=IncludeTrailingPathDelimiter(FBinPath)+s1;
+              if (NOT FileExists(s2)) then
+                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
+              Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('packages');
             end;
             st_PackagesInstall:
             begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+              s2:=IncludeTrailingPathDelimiter(FBinPath)+s1;
+              if (NOT FileExists(s2)) then
+                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
+              Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('packages_install');
             end;
             st_NativeCompiler:
