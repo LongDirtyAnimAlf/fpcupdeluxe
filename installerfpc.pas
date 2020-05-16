@@ -711,7 +711,8 @@ begin
                 s1:=s1+CrossInstaller.FPCCFGSnippet+LineEnding;
 
               if (CrossInstaller.TargetOS=TOS.java) then
-                s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units','$FPCTARGET','rtl','org','freepascal','rtl'])+LineEnding;
+                //s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units','$FPCTARGET','rtl','org','freepascal','rtl'])+LineEnding;
+                s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl'])+LineEnding;
 
               if (Length(s1)=0) then s1:='# Dummy (blank) config for auto-detect cross-compilers'+LineEnding;
             end;
@@ -737,7 +738,7 @@ begin
               s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl']);
               s2:=IncludeTrailingPathDelimiter(s1)+'System.class';
               s1:=IncludeTrailingPathDelimiter(s1)+'system.class';
-              if (NOT FileExists(s1) then FileUtil.CopyFile(s2,s1);
+              if (NOT FileExists(s1)) then FileUtil.CopyFile(s2,s1);
             end;
             {$endif}
 
@@ -3310,9 +3311,7 @@ begin
             {$ifdef MSWINDOWS}
             Processor.Process.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(FInstallDirectory));
             {$ELSE}
-            //Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([FInstallDirectory,'lib','fpc','{CompilerVersion}'])+PathDelim);
-            //It seems that CompilerVersion is added by this utility itself ... :-|
-            Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([FInstallDirectory,'lib','fpc']));
+            Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([FInstallDirectory,'lib','fpc'])+PathDelim+'{CompilerVersion}'+PathDelim);
             {$ENDIF}
 
             Processor.Process.Parameters.Add('-d');
