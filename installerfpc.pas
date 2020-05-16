@@ -704,10 +704,16 @@ begin
             //Add config snippet
             if (MakeCycle=High(TSTEPS)) then
             begin
+              s1:='';
               Infoln(infotext+'Adding '+FPCCONFIGFILENAME+' config snippet for target '+CrossInstaller.RegisterName,etInfo);
-              if CrossInstaller.FPCCFGSnippet<>''
-                 then s1:=CrossInstaller.FPCCFGSnippet+LineEnding
-                 else s1:='# Dummy (blank) config for auto-detect cross-compilers'+LineEnding;
+
+              if CrossInstaller.FPCCFGSnippet<>'' then
+                s1:=s1+CrossInstaller.FPCCFGSnippet+LineEnding;
+
+              if (CrossInstaller.TargetOS=TOS.java) then
+                s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units','$FPCTARGET','rtl','org','freepascal','rtl'])+LineEnding;
+
+              if (Length(s1)=0) then s1:='# Dummy (blank) config for auto-detect cross-compilers'+LineEnding;
             end;
 
             //Edit dedicated settings of config snippet
@@ -723,6 +729,18 @@ begin
               '#ENDIF'+LineEnding+
               '#ENDIF'+LineEnding+
               SnipMagicEnd);
+
+            {$ifdef UNIX}
+            //Correct for some case errors on Unixes
+            if (CrossInstaller.TargetOS=TOS.java) then
+            begin
+              s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl']);
+              s2:=IncludeTrailingPathDelimiter(s1)+'System.class';
+              s1:=IncludeTrailingPathDelimiter(s1)+'system.class';
+              if (NOT FileExists(s1) then FileUtil.CopyFile(s2,s1);
+            end;
+            {$endif}
+
           end;
 
           Processor.Executable := Make;
@@ -882,8 +900,8 @@ begin
           begin
             if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
             begin
-              Infoln(infotext+'Skipping build step '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+' for '+CrossInstaller.TargetCPUName+'.',etInfo);
-              continue;
+              //Infoln(infotext+'Skipping build step '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+' for '+CrossInstaller.TargetCPUName+'.',etInfo);
+              //continue;
             end;
           end;
 
@@ -1446,7 +1464,7 @@ begin
     if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYPARSE,s1);
 
     {$IFDEF UNIX}
-    s1:=IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc/'+GetFPCVersion;
+    s1:=ConcatPaths([FInstallDirectory,'lib','fpc',GetFPCVersion]);
     ForceDirectoriesSafe(s1);
     s1:=s1+'/lexyacc';
     DeleteFile(s1);
@@ -2148,7 +2166,7 @@ begin
 
     BootstrapFileExt:=FileNameAllExt(BootstrapFilePath);
 
-    case ExtractFileExt(BootstrapFileExt) of
+    case BootstrapFileExt of
         '.zip':
         begin
           with TNormalUnzipper.Create do
@@ -2206,6 +2224,13 @@ begin
          OperationSucceeded:=(ExecuteCommand(FBunzip2,['-dfkq',BootstrapFilePath],FVerbose)=0);
          if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
         end;
+
+        '.gz':
+        begin
+         OperationSucceeded:=(ExecuteCommand(FGunzip,['-d',BootstrapFilePath],FVerbose)=0);
+         if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.gz','',[]);
+        end;
+
 
         {$endif UNIX}
 
@@ -3285,7 +3310,9 @@ begin
             {$ifdef MSWINDOWS}
             Processor.Process.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(FInstallDirectory));
             {$ELSE}
-            Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([FInstallDirectory,'lib','fpc','{CompilerVersion}'])+PathDelim);
+            //Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([FInstallDirectory,'lib','fpc','{CompilerVersion}'])+PathDelim);
+            //It seems that CompilerVersion is added by this utility itself ... :-|
+            Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([FInstallDirectory,'lib','fpc']));
             {$ENDIF}
 
             Processor.Process.Parameters.Add('-d');

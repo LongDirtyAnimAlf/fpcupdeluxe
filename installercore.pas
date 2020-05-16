@@ -347,6 +347,7 @@ type
     FUseWget: boolean;
     FTar: string;
     FBunzip2: string;
+    FGunzip: string;
     F7zip: string;
     FWget: string;
     FUnrar: string;
@@ -723,19 +724,20 @@ begin
 end;
 
 function TInstaller.GetMake: string;
+const
+  {$if (defined(BSD) and not defined(DARWIN)) or (defined(Solaris))}
+  GNUMake='gmake';
+  {$else}
+  GNUMake='make';
+  {$endif}
 begin
   if FMake = '' then
     {$IFDEF MSWINDOWS}
-    FMake := IncludeTrailingPathDelimiter(FMakeDir) + 'make' + GetExeExt;
+    //Only use our own make !!
+    FMake := IncludeTrailingPathDelimiter(FMakeDir) + GNUMake + '.exe';
     {$ELSE}
-    {$IF (defined(BSD) and not defined(DARWIN)) or (defined(Solaris))}
-    FMake := 'gmake'; //GNU make; assume in path
-    //FMake := FindDefaultExecutablePath('gmake');
-    {$else}
-    // Linux, OSX
-    FMake := 'make'; //assume in path
-    //FMake := FindDefaultExecutablePath('make');
-    {$ENDIF}
+    FMake:=Which(GNUMake);
+    if FMake='' then raise Exception.CreateFmt('%s not found. Please install GNU make.',[GNUMake]);
     {$ENDIF MSWINDOWS}
   Result := FMake;
 end;
@@ -834,6 +836,7 @@ begin
     {$IFDEF MSWINDOWS}
     // Need to do it here so we can pick up make path.
     FBunzip2 := '';
+    FGunzip := '';
     FTar := '';
     FUnrar := '';
     F7zip := '';
@@ -841,7 +844,12 @@ begin
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
     FBunzip2 := 'bunzip2';
-    if FMUSL then FBunzip2 := 'unzip';
+    FGunzip := 'gunzip';
+    if FMUSL then
+    begin
+      FBunzip2 := 'unzip';
+      FGunzip := 'unzip';
+    end;
     FTar := 'tar';
     F7zip := '7za';
     FWget := 'wget';
@@ -850,12 +858,14 @@ begin
     {$IFDEF BSD} //OSX, *BSD
     {$IFDEF DARWIN}
     FBunzip2 := ''; //not really necessary now
+    FGunzip := ''; //not really necessary now
     FTar := 'bsdtar'; //gnutar is not available by default on Mavericks
     F7zip := '7za';
     FWget := 'wget';
     FUnrar := 'unrar';
     {$ELSE} //FreeBSD, OpenBSD, NetBSD
     FBunzip2 := 'bunzip2';
+    FGunzip := 'gunzip';
     FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
     F7zip := '7za';
     FWget := 'wget';
@@ -1281,6 +1291,29 @@ begin
         end;
       end;
     end;
+
+    if OperationSucceeded then
+    begin
+      // Check for valid gunzip executable, if it is needed
+      if FGunzip <> EmptyStr then
+      begin
+        if (NOT FMUSL) then
+        begin
+          OperationSucceeded := CheckExecutable(FGunzip, ['--help'], '');
+          if (NOT OperationSucceeded) then
+          begin
+            Infoln(localinfotext+FGunzip+' not found.',etDebug);
+            FGunzip:='gzip';
+            OperationSucceeded := CheckExecutable(FGunzip, ['--help'], '');
+            if (NOT OperationSucceeded) then
+            begin
+              Infoln(localinfotext+'No .gz uncompressor found.',etInfo);
+            end;
+          end;
+        end;
+      end;
+    end;
+
 
     if OperationSucceeded then
     begin
@@ -2607,9 +2640,9 @@ const
   JASMINVERSION = '2.4';
   TARGETNAME='jasmin.jar';
   SOURCEURL : array [0..4] of string = (
+    'ftp://ftp.freepascal.org/pub/fpc/contrib/jvm/fpcjvmutilities.zip',
     'https://sourceforge.net/projects/jasmin/files/jasmin/jasmin-'+JASMINVERSION+'/jasmin-'+JASMINVERSION+'.zip/download',
     'https://github.com/davidar/jasmin/archive/'+JASMINVERSION+'.zip',
-    'ftp://ftp.freepascal.org/pub/fpc/contrib/jvm/fpcjvmutilities.zip',
     'https://www.java2s.com/Code/JarDownload/jasmin/jasmin.jar.zip',
     'https://www.java2s.com/Code/JarDownload/jasmin/jasmin-3.0.3.jar.zip'
     );
@@ -2664,7 +2697,8 @@ begin
     with TNormalUnzipper.Create do
     begin
       try
-        OperationSucceeded:=DoUnZip(SourceZip,ZipDir,[]);
+        //OperationSucceeded:=DoUnZip(SourceZip,ZipDir,[]);
+        OperationSucceeded:=DoUnZip(SourceZip,ZipDir,[TARGETNAME]);
       finally
         Free;
       end;
@@ -2673,7 +2707,7 @@ begin
     if OperationSucceeded then
     begin
       //MoveFile
-      SourceBin:=ZipDir+DirectorySeparator+'jasmin-' + JASMINVERSION + DirectorySeparator+TARGETNAME;
+      SourceBin:=ZipDir{+DirectorySeparator+'jasmin-' + JASMINVERSION} + DirectorySeparator+TARGETNAME;
       OperationSucceeded := MoveFile(SourceBin,TargetBin);
       if (NOT OperationSucceeded) then
       begin
@@ -2681,10 +2715,12 @@ begin
       end
       else OperationSucceeded := FileExists(TargetBin);
     end;
+
+    SysUtils.Deletefile(SourceZip);
+    DeleteDirectoryEx(ZipDir+DirectorySeparator);
+
   end;
 
-  SysUtils.Deletefile(SourceZip);
-  DeleteDirectoryEx(ZipDir+DirectorySeparator);
   Result:=true; //never fail
 end;
 

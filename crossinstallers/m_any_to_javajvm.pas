@@ -73,11 +73,23 @@ begin
 
   FLibsPath:='';
 
-  //FLibsPath:='where is jasmin.jar'
-  //for now, jasmin.jar will be downloaded into normal bin-dir !!
-  ShowInfo('Libspath ignored; jasmin.jar will be downloaded into normal bin-dir.');
+  ShowInfo('Libspath ignored; jasmin.jar will be downloaded into normal bin-dir.',etInfo);
   result:=True;
-  FLibsFound:=True;
+
+  if result then
+  begin
+    FLibsFound:=True;
+    //This has to be added, but unfortunately, we do not know the location of it right here : do it in TFPCCrossInstaller.BuildModuleCustom
+    //AddFPCCFGSnippet('-Fu'+'InstallDir\fpc\units\jvm-java\rtl\org\freepascal\rtl');
+  end
+  else
+  begin
+    //no libs yet: go on without them
+    ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
+    FLibsFound:=True;
+    result:=True;
+  end;
+
 end;
 
 {$ifndef FPCONLY}

@@ -803,7 +803,7 @@ begin
     result:=SysConfigDir
   else
   begin
-    result:=GetEnvironmentVariable('HOME');
+    result:=SysUtils.GetEnvironmentVariable('HOME');
     if (result='') then
       result:=SafeExpandFileName('~/.config')
     else
@@ -860,7 +860,7 @@ begin
     result:=SysConfigDir
   else
   begin
-    result:=GetEnvironmentVariable('HOME');
+    result:=SysUtils.GetEnvironmentVariable('HOME');
     if (result='') then
       result:=SafeExpandFileName('~/.cache')
     else
@@ -1442,7 +1442,7 @@ begin
   if aDirectory='' then exit;
   if aDirectory=DirectorySeparator then exit;
   {$ifndef Windows}
-  s:=LowerCase(IncludeTrailingPathDelimiter(GetEnvironmentVariable('HOME')));
+  s:=LowerCase(IncludeTrailingPathDelimiter(SysUtils.GetEnvironmentVariable('HOME')));
   if s=aDirectory then exit;
   s:=IncludeTrailingPathDelimiter(s);
   if s=aDirectory then exit;
@@ -3070,34 +3070,36 @@ function LibWhich(aLibrary: string): boolean;
 var
   Output: string;
 begin
-  RunCommand('sh -c "ldconfig -p | grep '+aLibrary+'"', Output);
+  //RunCommand('sh -c "ldconfig -p | grep '+aLibrary+'"', Output);
+  RunCommand('sh',['-c','"ldconfig -p | grep '+aLibrary+'"'],Output,[poUsePipes, poStderrToOutPut],swoHide);
   result:=(Pos(aLibrary,Output)>0);
 end;
 
 function Which(const Executable: string): string;
 var
+  ExeName,FoundExe:string;
+  {$IFDEF UNIX}
   Output: string;
+  {$ENDIF}
 begin
-  (*
-  {$IFDEF Windows}
-  if ExtractFileExt(Executable)='' then
-     result:=ExeSearch(Executable+'.exe',SysUtils.GetEnvironmentVariable('PATH'))
-  else
-  {$ENDIF}
-  result:=ExeSearch(Executable,SysUtils.GetEnvironmentVariable('PATH'));
-  *)
+  result:='';
 
-  result:=FindDefaultExecutablePath(Executable);
+  ExeName:=Executable;
 
-  (*
-  {$IFDEF MsWindows}
-  if ExtractFileExt(Executable)='' then begin
-    Result:=Executable+'.exe';
-    if FileExists(Result) then exit;
+  {$ifdef Windows}
+  if ExtractFileExt(ExeName)='' then ExeName:=ExeName+'.exe';
+  {$endif}
+
+  if FileExists(ExeName) then result:=ExeName else
+  begin
+    FoundExe := ExeSearch(ExeName, '');
+    if (NOT FileExists(FoundExe)) then
+      FoundExe:=ExeSearch(ExeName,SysUtils.GetEnvironmentVariable(PATHVARNAME));
+    if FileExists(FoundExe) then
+      result:=FoundExe
+    else
+      result:=FindDefaultExecutablePath(ExeName);
   end;
-  {$ENDIF}
-  *)
-
 
   {$IFNDEF FREEBSD}
   if (NOT FileIsExecutable(result)) then result:='';
@@ -3106,7 +3108,7 @@ begin
   {$IFDEF UNIX}
   if (NOT FileExists(result)) then
   begin
-    RunCommand('which',[Executable],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    RunCommand('which',[ExeName],Output,[poUsePipes, poStderrToOutPut],swoHide);
     Output:=Trim(Output);
     if ((Output<>'') and FileExists(Output)) then result:=Output;
   end;
@@ -3184,7 +3186,7 @@ Function XdgConfigHome: String;
   Always ends with PathDelim. }
 begin
   {$ifdef UNIX}
-  Result:=GetEnvironmentVariable('XDG_CONFIG_HOME');
+  Result:=SysUtils.GetEnvironmentVariable('XDG_CONFIG_HOME');
   if (Result='') then
     Result:=IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+'.config'+DirectorySeparator
   else
