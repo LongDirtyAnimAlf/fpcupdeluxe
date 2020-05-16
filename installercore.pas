@@ -1265,11 +1265,20 @@ begin
       // Check for valid bunzip2 executable, if it is needed
       if FBunzip2 <> EmptyStr then
       begin
-        { Used to use bunzip2 --version, but on e.g. Fedora Core
-        that returns an error message e.g. can't read from cp
-        }
-        OperationSucceeded := CheckExecutable(FBunzip2, ['--help'], '');
-        if (NOT OperationSucceeded) then Infoln(localinfotext+FBunzip2+' not found.',etDebug);
+        if (NOT FMUSL) then
+        begin
+          OperationSucceeded := CheckExecutable(FBunzip2, ['--help'], '');
+          if (NOT OperationSucceeded) then
+          begin
+            Infoln(localinfotext+FBunzip2+' not found.',etDebug);
+            FBunzip2:='bzip2';
+            OperationSucceeded := CheckExecutable(FBunzip2, ['--help'], '');
+            if (NOT OperationSucceeded) then
+            begin
+              Infoln(localinfotext+'No .bz2 uncompressor found.',etInfo);
+            end;
+          end;
+        end;
       end;
     end;
 
@@ -3121,7 +3130,7 @@ begin
         if NOT PatchUniversal then
         begin
           s:=FileNameFromURL(PatchFilePath);
-          s:=ExtractFileNameOnly(s);
+          s:=FileNameWithoutExt(s);
           s:=VersionFromUrl(s);
           PatchVersion:=CalculateNumericalVersion(s);
 

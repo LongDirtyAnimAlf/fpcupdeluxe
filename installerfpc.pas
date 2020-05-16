@@ -2106,7 +2106,7 @@ end;
 function TFPCInstaller.DownloadBootstrapCompiler: boolean;
 var
   BootstrapFileArchiveDir: string;
-  BootstrapFilePath: string;
+  BootstrapFilePath,BootstrapFileExt: string;
   CompilerName:string;
   OperationSucceeded: boolean;
 begin
@@ -2146,8 +2146,9 @@ begin
     //Download was successfull
     //Process result
 
-    case ExtractFileExt(BootstrapFilePath) of
+    BootstrapFileExt:=FileNameAllExt(BootstrapFilePath);
 
+    case ExtractFileExt(BootstrapFileExt) of
         '.zip':
         begin
           with TNormalUnzipper.Create do
@@ -2162,7 +2163,7 @@ begin
         end;
 
         {$ifdef MSWINDOWS}
-        '.gz','.bz2':
+        '.tar.gz','.tar.bz2':
         begin
           //& cmd.exe '/C 7z x "somename.tar.gz" -so | 7z e -aoa -si -ttar -o"somename"'
           OperationSucceeded:=(ExecuteCommand(F7zip+' x -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath,FVerbose)=0);
@@ -2181,31 +2182,33 @@ begin
         {$endif MSWINDOWS}
 
         {$ifdef UNIX}
+
+        '.tbz2','.tbz','.tar.bz2':
+        begin
+          {$ifdef BSD}
+          OperationSucceeded:=(ExecuteCommand(FTar,['-jxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName+GetExeExt],FVerbose)=0);
+          {$else}
+          OperationSucceeded:=(ExecuteCommand(FTar,['-jxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName+GetExeExt],FVerbose)=0);
+          {$endif}
+        end;
+
+        '.tar.gz':
+        begin
+          {$ifdef BSD}
+          OperationSucceeded:=(ExecuteCommand(FTar,['-zxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName+GetExeExt],FVerbose)=0);
+          {$else}
+          OperationSucceeded:=(ExecuteCommand(FTar,['-zxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName+GetExeExt],FVerbose)=0);
+          {$endif}
+        end;
+
         '.bz2':
         begin
-          {$ifdef BSD}
-          OperationSucceeded:=(ExecuteCommand(FTar,['-xjf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName+GetExeExt],FVerbose)=0);
-          {$else}
-          if Pos('.tar.',BootstrapFilePath)>0 then
-          begin
-            OperationSucceeded:=(ExecuteCommand(FTar,['-xjf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName+GetExeExt],FVerbose)=0);
-          end
-          else
-          begin
-            OperationSucceeded:=(ExecuteCommand(FBunzip2,['-dfkq',BootstrapFilePath],FVerbose)=0);
-            if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
-          end;
-          {$endif}
+         OperationSucceeded:=(ExecuteCommand(FBunzip2,['-dfkq',BootstrapFilePath],FVerbose)=0);
+         if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
         end;
-        '.gz':
-        begin
-          {$ifdef BSD}
-          OperationSucceeded:=(ExecuteCommand(FTar,['-xzf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName+GetExeExt],FVerbose)=0);
-          {$else}
-          OperationSucceeded:=(ExecuteCommand(FTar,['-xzf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName+GetExeExt],FVerbose)=0);
-          {$endif}
-        end;
+
         {$endif UNIX}
+
     end;
 
     // Find a bootstrapper somewhere inside the download directory

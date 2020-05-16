@@ -564,7 +564,7 @@ begin
   result:=false;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InstallPackage): ';
 
-  PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
+  PackageName:=FileNameWithoutExt(PackagePath);
 
   // Convert any relative path to absolute path, if it's not just a file/package name:
   if ExtractFileName(PackagePath)=PackagePath then
@@ -1292,7 +1292,7 @@ var
 begin
   result:=false;
 
-  PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
+  PackageName:=FileNameWithoutExt(PackagePath);
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (UnInstallPackage: '+PackageName+'): ';
 

@@ -400,7 +400,9 @@ function CheckExecutable(Executable:string;Parameters:array of string;ExpectOutp
 function GetJava: string;
 function GetJavac: string;
 function CheckJava: boolean;
-function ExtractFileNameOnly(const AFilename: string): string;
+function FileNameWithoutExt(const AFilename: string): string;
+function FileNameWithoutAllExt(const AFilename: string): string;
+function FileNameAllExt(const AFilename: string): string;
 function DoubleQuoteIfNeeded(s: string): string;
 function UppercaseFirstChar(s: String): String;
 function DirectoryIsEmpty(Directory: string): Boolean;
@@ -416,7 +418,6 @@ Function Pos(Const Substr : string; Const Source : string; Offset : Sizeint = 1)
 {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30000)}
 Function CharInSet(Ch:AnsiChar;Const CSet : TSysCharSet) : Boolean; inline;
 {$ENDIF}
-
 
 implementation
 
@@ -3374,23 +3375,42 @@ begin
   {$endif}
 end;
 
+function FileNameWithoutExt(const AFilename: string): string;
+var
+  s1,s2:string;
+begin
+  result:='';
+  s1:=ExtractFileName(AFilename);
+  s2:=ExtractFileExt(AFilename);
+  result:=copy(s1,1,Length(s1)-Length(s2));
+end;
 
-function ExtractFileNameOnly(const AFilename: string): string;
+function FileNameWithoutAllExt(const AFilename: string): string;
 var
   StartPos: Integer;
   ExtPos: Integer;
 begin
-  StartPos:=length(AFilename)+1;
-  while (StartPos>1)
-  and not (AFilename[StartPos-1] in AllowDirectorySeparators)
-  {$IFDEF Windows}and (AFilename[StartPos-1]<>':'){$ENDIF}
+  result:='';
+  StartPos:=length(AFilename);
+  while (StartPos>0)
+  and not (AFilename[StartPos] in (AllowDirectorySeparators+AllowDriveSeparators))
   do
     dec(StartPos);
-  ExtPos:=length(AFilename);
-  while (ExtPos>=StartPos) and (AFilename[ExtPos]<>'.') do
-    dec(ExtPos);
-  if (ExtPos<StartPos) then ExtPos:=length(AFilename)+1;
-  Result:=copy(AFilename,StartPos,ExtPos-StartPos);
+  Inc(StartPos);
+  ExtPos:=(StartPos);
+  while (ExtPos<=length(AFilename)) and (AFilename[ExtPos]<>ExtensionSeparator) do
+    inc(ExtPos);
+  result:=copy(AFilename,StartPos,ExtPos-StartPos);
+end;
+
+function FileNameAllExt(const AFilename: string): string;
+var
+  s1,s2:string;
+begin
+  result:='';
+  s1:=ExtractFileName(AFilename);
+  s2:=FileNameWithoutAllExt(AFilename);
+  result:=copy(s1,Length(s2)+1,MaxInt);
 end;
 
 function DoubleQuoteIfNeeded(s: string): string;
