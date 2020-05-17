@@ -99,9 +99,8 @@ type
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
-    procedure btnUpdateLazarusMakefilesClick(Sender: TObject);
-    procedure TagSelectionChange(Sender: TObject; User: boolean
-      );
+    procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
+    procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick(Sender: TObject);
     procedure InstallClick(Sender: TObject);
     procedure BitBtnHaltClick({%H-}Sender: TObject);
@@ -1783,8 +1782,7 @@ begin
   end;
 end;
 
-procedure TForm1.TagSelectionChange(Sender: TObject;
-  User: boolean);
+procedure TForm1.TagSelectionChange(Sender: TObject;User: boolean);
 begin
   MemoAddTag.Lines.Clear;
   MemoAddTag.Lines.Add(TListBox(Sender).GetSelectedText);

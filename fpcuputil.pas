@@ -95,45 +95,7 @@ Const
   MAXCONNECTIONRETRIES=2;
 
 type
-  //callback = class
-  //  class procedure Status (Sender: TObject; Reason: THookSocketReason; const Value: String);
-  //end;
-
-  {TThreadedUnzipper}
-
-  TOnZipProgress = procedure(Sender: TObject; FPercent: double) of object;
-  TOnZipFile = procedure(Sender: TObject; AFileName : string; FileCount,TotalFileCount:cardinal) of object;
-  TOnZipCompleted = TNotifyEvent;
-
-  TThreadedUnzipper = class(TThread)
-  private
-    FStarted: Boolean;
-    FErrMsg: String;
-    FUnZipper: TUnZipper;
-    FPercent: double;
-    FFileCount: cardinal;
-    FFileList:TStrings;
-    FTotalFileCount: cardinal;
-    FCurrentFile: string;
-    FOnZipProgress: TOnZipProgress;
-    FOnZipFile: TOnZipFile;
-    FOnZipCompleted: TOnZipCompleted;
-    procedure DoOnProgress(Sender : TObject; Const Pct : Double);
-    procedure DoOnFile(Sender : TObject; Const AFileName : string);
-    procedure DoOnZipProgress;
-    procedure DoOnZipFile;
-    procedure DoOnZipCompleted;
-  protected
-    procedure Execute; override;
-  public
-    constructor Create;
-    destructor Destroy; override;
-    function DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;
-  published
-    property OnZipProgress: TOnZipProgress read FOnZipProgress write FOnZipProgress;
-    property OnZipFile: TOnZipFile read FOnZipFile write FOnZipFile;
-    property OnZipCompleted: TOnZipCompleted read FOnZipCompleted write FOnZipCompleted;
-  end;
+  {TNormalUnzipper}
 
   TNormalUnzipper = class(TObject)
   private
@@ -147,6 +109,7 @@ type
     procedure DoOnProgressEx(Sender : TObject; Const ATotPos, ATotSize: Int64);
   public
     function DoUnZip(const ASrcFile, ADstDir: String; Files: array of string):boolean;
+    function DoBUnZip2(const SourceFile, TargetFile: string):boolean;
     property Flat:boolean read FFlat write FFlat default False;
   end;
 
@@ -464,6 +427,7 @@ uses
   {$ENDIF ENABLEWGET}
   ,process
   ,processutils
+  ,bzip2stream
   ,NumCPULib  in './numcpulib/NumCPULib.pas'
   ;
 
@@ -3758,160 +3722,6 @@ begin
   {$ENDIF}
 end;
 
-{TThreadedUnzipper}
-
-procedure TThreadedUnzipper.DoOnZipProgress;
-begin
-  if Assigned(FOnZipProgress) then
-    FOnZipProgress(Self, FPercent);
-end;
-
-procedure TThreadedUnzipper.DoOnZipFile;
-begin
-  if Assigned(FOnZipFile) then
-    FOnZipFile(Self, FCurrentFile, FFileCount, FTotalFileCount);
-end;
-
-procedure TThreadedUnzipper.DoOnZipCompleted;
-begin
-  if Assigned(FOnZipCompleted) then
-    FOnZipCompleted(Self);
-end;
-
-procedure TThreadedUnzipper.Execute;
-var
-  x:cardinal;
-  s:string;
-begin
-  try
-    FUnZipper.Examine;
-
-    {$ifdef MSWINDOWS}
-    // on windows, .files (hidden files) cannot be created !!??
-    // still to check on non-windows
-    if FFileList.Count=0 then
-    begin
-      for x:=0 to FUnZipper.Entries.Count-1 do
-      begin
-        { UTF8 features are only available in FPC >= 3.1 }
-        {$IF FPC_FULLVERSION > 30100}
-        if FUnZipper.UseUTF8
-          then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
-          else
-        {$endif}
-          s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
-
-        if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
-        if (Length(s)>0) AND (s[1]='.') then continue;
-        FFileList.Append(s);
-      end;
-    end;
-    {$endif}
-
-    if FFileList.Count=0
-      then FTotalFileCount:=FUnZipper.Entries.Count
-      else FTotalFileCount:=FFileList.Count;
-
-    if FFileList.Count=0
-      then FUnZipper.UnZipAllFiles
-      else FUnZipper.UnZipFiles(FFileList);
-
-  except
-    on E: Exception do
-    begin
-      FErrMsg := E.Message;
-      //Synchronize(@DoOnZipError);
-    end;
-  end;
-  Synchronize(@DoOnZipCompleted);
-end;
-
-constructor TThreadedUnzipper.Create;
-begin
-  inherited Create(True);
-  FreeOnTerminate := True;
-  FUnZipper := TUnZipper.Create;
-  FFileList := TStringList.Create;
-  FStarted := False;
-end;
-
-destructor TThreadedUnzipper.Destroy;
-begin
-  if Assigned(FFileList) then
-  begin
-    FFileList.Destroy;
-    FFileList:=nil;
-  end;
-  if Assigned(FUnZipper) then
-  begin
-    FUnZipper.Destroy;
-    FUnZipper:=nil;
-  end;
-  inherited Destroy;
-end;
-
-
-procedure TThreadedUnzipper.DoOnProgress(Sender : TObject; Const Pct : Double);
-begin
-  FPercent:=Pct;
-  if FTotalFileCount<=100 then Synchronize(@DoOnZipProgress);
-end;
-
-procedure TThreadedUnzipper.DoOnFile(Sender : TObject; Const AFileName : String);
-begin
-  Inc(FFileCount);
-  if FTotalFileCount>100
-     then FCurrentFile:='files'
-     else FCurrentFile:=ExtractFileName(AFileName);
-  if FTotalFileCount>50000 then
-  begin
-    if (FFileCount MOD 1000)=0 then Synchronize(@DoOnZipFile);
-  end
-  else
-  if FTotalFileCount>5000 then
-  begin
-    if (FFileCount MOD 100)=0 then Synchronize(@DoOnZipFile);
-  end
-  else
-  if FTotalFileCount>500 then
-  begin
-    if (FFileCount MOD 10)=0 then Synchronize(@DoOnZipFile);
-  end
-  else
-  if FTotalFileCount>100 then
-  begin
-    if (FFileCount MOD 2)=0 then Synchronize(@DoOnZipFile);
-  end
-  else
-    Synchronize(@DoOnZipFile);
-end;
-
-
-function TThreadedUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;
-var
-  i:word;
-begin
-  result:=true;
-  if FStarted then exit;
-  FUnZipper.Clear;
-  FUnZipper.OnPercent:=10;
-  FUnZipper.FileName := ASrcFile;
-  FUnZipper.OutputPath := ADstDir;
-  FUnZipper.OnProgress := @DoOnProgress;
-  FUnZipper.OnStartFile:= @DoOnFile;
-  if Length(Files)>0 then
-  begin
-    FFileList := TStringList.Create;
-    for i := 0 to high(Files) do
-      FFileList.Append(Files[i]);
-  end;
-  FPercent:=0;
-  FFileCount:=0;
-  FTotalFileCount:=0;
-  FStarted := True;
-  Start;
-end;
-
 {TNormalUnzipper}
 
 procedure TNormalUnzipper.DoOnFile(Sender : TObject; Const AFileName : String);
@@ -3970,6 +3780,51 @@ begin
     // Do this once ...
     if Assigned(FUnZipper) then FUnZipper.OnProgressEx:=nil;
   end;
+end;
+
+function TNormalUnzipper.DoBUnZip2(const SourceFile, TargetFile: string):boolean;
+var
+  InFile:TFileStream;
+  Decompressed:TDecompressBzip2Stream;
+  OutFile:TDownloadStream;
+  Buffer: Pointer;
+  i: integer;
+const buffersize=$2000;
+begin
+  result:=false; //fail by default
+
+  ThreadLog('TNormalUnzipper: Unzipping (bunzip2) '+ExtractFileName(SourceFile));
+
+  InFile:=TFileStream.Create(SourceFile, fmOpenRead);
+  try
+    try
+      Decompressed:=TDecompressBzip2Stream.Create(InFile);
+    except
+      // So[5mething went wrong, e.g. invalid format
+      // Now get out of function with result false
+      exit;
+    end;
+    OutFile:=TDownloadStream.Create(TargetFile,fmCreate);
+    try
+      //We don't have seek on the TDecompressBzip2stream, so can't use
+      //CopyFrom...
+      //Decompressed.CopyFrom(InFile, InFile.Size);
+      GetMem(Buffer,BufferSize);
+      repeat
+        i:=Decompressed.Read(buffer^,BufferSize);
+        if i>0 then
+          OutFile.WriteBuffer(buffer^,i);
+      until i<BufferSize;
+      result:=true;
+    finally
+      Decompressed.Free;
+      OutFile.Free;
+    end;
+  finally
+    InFile.Free;
+  end;
+
+  ThreadLog('TNormalUnzipper: Unzipping (bunzip2) '+ExtractFileName(SourceFile)+' ready.');
 end;
 
 function TNormalUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;

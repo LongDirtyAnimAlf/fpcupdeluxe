@@ -1,3 +1,16 @@
+Index: compiler/systems/t_bsd.pas
+===================================================================
+--- compiler/systems/t_bsd.pas	(revision 45373)
++++ compiler/systems/t_bsd.pas	(working copy)
+@@ -167,7 +167,7 @@
+ var
+   LdProgram: string='ld';
+ begin
+-  if target_info.system in (systems_openbsd+[system_x86_64_dragonfly]) then
++  if target_info.system in (systems_openbsd+systems_freebsd+[system_x86_64_dragonfly]) then
+     LdProgram:='ld.bfd';
+   LibrarySuffix:=' ';
+   LdSupportsNoResponseFile := (target_info.system in ([system_m68k_netbsd]+systems_darwin));
 Index: rtl/bsd/ostypes.inc
 ===================================================================
 --- rtl/bsd/ostypes.inc	Fri Nov 22 12:24:02 2019

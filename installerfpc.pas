@@ -2181,6 +2181,19 @@ begin
           end;
         end;
 
+        '.bz2':
+        begin
+          with TNormalUnzipper.Create do
+          begin
+            try
+              OperationSucceeded:=DoBUnZip2(BootstrapFilePath,IncludeTrailingPathDelimiter(BootstrapFileArchiveDir)+CompilerName);
+              if OperationSucceeded then BootstrapFilePath:=IncludeTrailingPathDelimiter(BootstrapFileArchiveDir)+CompilerName;
+            finally
+              Free;
+            end;
+          end;
+        end;
+
         {$ifdef MSWINDOWS}
         '.tar.gz','.tar.bz2':
         begin
@@ -2193,7 +2206,7 @@ begin
             BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
             if ExtractFileExt(BootstrapFilePath)='.tar' then
             begin
-              OperationSucceeded:=(ExecuteCommand(F7zip+' e -aoa -ttar -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath+' '+CompilerName+GetExeExt+' -r',FVerbose)=0);
+              OperationSucceeded:=(ExecuteCommand(F7zip+' e -aoa -ttar -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath+' '+CompilerName+' -r',FVerbose)=0);
               if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.tar','',[]);
             end;
           end;
@@ -2205,26 +2218,28 @@ begin
         '.tbz2','.tbz','.tar.bz2':
         begin
           {$ifdef BSD}
-          OperationSucceeded:=(ExecuteCommand(FTar,['-jxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName+GetExeExt],FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar,['-jxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName],FVerbose)=0);
           {$else}
-          OperationSucceeded:=(ExecuteCommand(FTar,['-jxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName+GetExeExt],FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar,['-jxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName],FVerbose)=0);
           {$endif}
         end;
 
         '.tar.gz':
         begin
           {$ifdef BSD}
-          OperationSucceeded:=(ExecuteCommand(FTar,['-zxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName+GetExeExt],FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar,['-zxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName],FVerbose)=0);
           {$else}
-          OperationSucceeded:=(ExecuteCommand(FTar,['-zxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName+GetExeExt],FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar,['-zxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName],FVerbose)=0);
           {$endif}
         end;
 
+        (*
         '.bz2':
         begin
          OperationSucceeded:=(ExecuteCommand(FBunzip2,['-dfkq',BootstrapFilePath],FVerbose)=0);
          if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
         end;
+        *)
 
         '.gz':
         begin
@@ -3788,14 +3803,13 @@ begin
         end;
       end;
     end;
+    if result then FCleanModuleSuccess:=true;
   end
   else
   begin
     result:=true;
     Infoln(infotext+'Running '+Processor.Executable+' distclean failed: could not find cleanup compiler. Will try again later',etInfo);
   end;
-
-  if result then FCleanModuleSuccess:=true;
 
   if FCleanModuleSuccess then
   begin

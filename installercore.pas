@@ -600,7 +600,8 @@ var
   FPCCfg,aDir,s   : string;
   ConfigText      : TStringList;
   SnipBegin,i     : integer;
-  aCPU,aOS,aArch  : string;
+  aCPU,aOS        : string;
+  aArch           : string;
 begin
   result:=false;
 
@@ -1272,28 +1273,6 @@ begin
 
     if OperationSucceeded then
     begin
-      // Check for valid bunzip2 executable, if it is needed
-      if FBunzip2 <> EmptyStr then
-      begin
-        if (NOT FMUSL) then
-        begin
-          OperationSucceeded := CheckExecutable(FBunzip2, ['--help'], '');
-          if (NOT OperationSucceeded) then
-          begin
-            Infoln(localinfotext+FBunzip2+' not found.',etDebug);
-            FBunzip2:='bzip2';
-            OperationSucceeded := CheckExecutable(FBunzip2, ['--help'], '');
-            if (NOT OperationSucceeded) then
-            begin
-              Infoln(localinfotext+'No .bz2 uncompressor found.',etInfo);
-            end;
-          end;
-        end;
-      end;
-    end;
-
-    if OperationSucceeded then
-    begin
       // Check for valid gunzip executable, if it is needed
       if FGunzip <> EmptyStr then
       begin
@@ -1313,7 +1292,6 @@ begin
         end;
       end;
     end;
-
 
     if OperationSucceeded then
     begin
