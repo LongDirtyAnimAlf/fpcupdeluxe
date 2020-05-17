@@ -644,7 +644,7 @@ begin
     exit;
   end;
 
-  //Do we have something FPC like. If so, apply some filtering when not Verbose
+  //Do we have something FPC or Lazarus or fpcupdeluxe like. If so, apply some filtering when not Verbose
   //Filtering is dome here to limit the amount of thread message traffic
   //Bit tricky ... ;-)
   FFPCMagic:=False;
@@ -652,13 +652,15 @@ begin
   begin
     ExeFile:=LowerCase(ExtractFileName(Process.Executable));
     if
-      ((Pos('fpc',ExeFile)=1)
-      OR
-      (Pos('ppc',ExeFile)=1)
-      OR
-      (Pos('lazbuild',ExeFile)=1)
-      OR
-      (Pos('make',ExeFile)=1))
+      (
+      (Pos('fpc',ExeFile)=1)
+      OR (Pos('ppc',ExeFile)=1)
+      OR (Pos('lazbuild',ExeFile)=1)
+      OR (Pos('make',ExeFile)=1)
+      OR (Pos('gmake',ExeFile)=1)
+      //OR (Pos('svn',ExeFile)=1)
+      //OR (Pos('git',ExeFile)=1)
+      )
     then
     begin
       FFPCMagic:=True;

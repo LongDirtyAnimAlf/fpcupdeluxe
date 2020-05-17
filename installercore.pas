@@ -346,7 +346,6 @@ type
     FVerbose: boolean;
     FUseWget: boolean;
     FTar: string;
-    FBunzip2: string;
     FGunzip: string;
     F7zip: string;
     FWget: string;
@@ -836,7 +835,6 @@ begin
 
     {$IFDEF MSWINDOWS}
     // Need to do it here so we can pick up make path.
-    FBunzip2 := '';
     FGunzip := '';
     FTar := '';
     FUnrar := '';
@@ -844,11 +842,9 @@ begin
     FWget := '';
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
-    FBunzip2 := 'bunzip2';
     FGunzip := 'gunzip';
     if FMUSL then
     begin
-      FBunzip2 := 'unzip';
       FGunzip := 'unzip';
     end;
     FTar := 'tar';
@@ -858,14 +854,12 @@ begin
     {$ENDIF LINUX}
     {$IFDEF BSD} //OSX, *BSD
     {$IFDEF DARWIN}
-    FBunzip2 := ''; //not really necessary now
     FGunzip := ''; //not really necessary now
     FTar := 'bsdtar'; //gnutar is not available by default on Mavericks
     F7zip := '7za';
     FWget := 'wget';
     FUnrar := 'unrar';
     {$ELSE} //FreeBSD, OpenBSD, NetBSD
-    FBunzip2 := 'bunzip2';
     FGunzip := 'gunzip';
     FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
     F7zip := '7za';

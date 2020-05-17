@@ -2233,20 +2233,11 @@ begin
           {$endif}
         end;
 
-        (*
-        '.bz2':
-        begin
-         OperationSucceeded:=(ExecuteCommand(FBunzip2,['-dfkq',BootstrapFilePath],FVerbose)=0);
-         if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
-        end;
-        *)
-
         '.gz':
         begin
          OperationSucceeded:=(ExecuteCommand(FGunzip,['-d',BootstrapFilePath],FVerbose)=0);
          if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.gz','',[]);
         end;
-
 
         {$endif UNIX}
 
