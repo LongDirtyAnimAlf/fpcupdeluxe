@@ -1266,13 +1266,16 @@ begin
     while (i > 0) and (not CharInSet(VersionSnippet[i],['\','/'])) do Dec(i);
     VersionSnippet := Copy(VersionSnippet, i + 1, MaxInt);
 
-    // find first occurence of _# and delete everything before it
     // if url contains a version, this version always starts with first _#
-
     i:=0;
     repeat
       Inc(i);
-    until (i>=(Length(VersionSnippet)-1)) OR ((VersionSnippet[i]='_') AND (CharInSet(VersionSnippet[i+1],['0'..'9'])));
+      if (CharInSet(VersionSnippet[i],['0'..'9'])) then
+      begin
+        if (i>1) AND (VersionSnippet[i-1]='_') then break;
+      end;
+      if (i=Length(VersionSnippet)) then break;
+    until false;
 
     Delete(VersionSnippet,1,i);
     // ignore release candidate numbering
