@@ -140,6 +140,7 @@ uses
   m_crosswinx64,
   m_crosswinarm64,
   {$endif win32}
+  {$else}
   m_anyinternallinker_to_win386,
   m_anyinternallinker_to_winarm64,
   m_anyinternallinker_to_winx64,
