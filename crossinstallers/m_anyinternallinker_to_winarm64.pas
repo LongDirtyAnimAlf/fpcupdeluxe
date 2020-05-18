@@ -15,7 +15,7 @@ uses
 implementation
 
 uses
-  fpcuputil;
+  LazFileUtils,fpcuputil;
 
 type
 
@@ -44,7 +44,6 @@ end;
 
 function Tanyinternallinker_winarm64.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile: string;
   ClangBin:string;
 begin
   result:=inherited;
@@ -53,9 +52,22 @@ begin
   FBinUtilsPrefix:='';
   FBinUtilsPath:='';
 
-  ClangBin:=Which('clang'+GetExeExt);
+  ClangBin:='clang';
+  ClangBin:=Which(ClangBin+GetExeExt);
 
   result:=FileExists(ClangBin);
+
+  if result then
+  begin
+    if FileIsSymlink(ClangBin) then
+    begin
+      try
+        ClangBin:=GetPhysicalFilename(ClangBin,pfeException);
+        FBinUtilsPath:=ExtractFilePath(ClangBin);
+      except
+      end;
+    end;
+  end;
 
   SearchBinUtilsInfo(result);
 
@@ -67,7 +79,10 @@ begin
   end
   else
   begin
-    ShowInfo('Clang not found. Clang is needed as assembler. Please install clang first.',etError);
+    ShowInfo('Clang not found. Clang is needed as assembler. Please install clang.',etError);
+    ShowInfo('Will continue, but expect errors.',etError);
+    result:=True;
+    FAlreadyWarned:=True;
   end;
 end;
 
@@ -78,7 +93,7 @@ begin
   FTargetCPU:=TCPU.aarch64;
   FTargetOS:=TOS.win64;
   Reset;
-  FAlreadyWarned:=false;
+  FAlreadyWarned:=False;
   ShowInfo;
 end;
 

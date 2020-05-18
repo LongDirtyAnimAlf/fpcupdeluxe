@@ -2266,7 +2266,9 @@ begin
       {$if (defined(UNIX)) and (not defined(Darwin))}
       if (FPCupManager.CrossOS_Target=TOS.darwin) OR ( (FPCupManager.CrossOS_Target=TOS.win64) AND (FPCupManager.CrossCPU_Target=TCPU.aarch64) ) then
       begin
-        success:=CheckExecutable('clang', ['-v'], '');
+        success:=false;
+        s:=Which('clang');
+        if FileExists(s) then success:=CheckExecutable(s, ['-v'], '');
         if (NOT success) then
         begin
           s:=

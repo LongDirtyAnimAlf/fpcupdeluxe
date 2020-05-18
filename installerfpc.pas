@@ -1131,9 +1131,9 @@ begin
             if ((NOT result) AND (MakeCycle=st_Packages)) then
             begin
               //Sometimes rerun gives good results (on AIX 32bit especially).
-              Infoln(infotext+'Running '+Processor.Executable+' stage again ... could work !',etInfo);
-              ProcessorResult:=Processor.ExecuteAndWait;
-              result:=(ProcessorResult=0);
+              //Infoln(infotext+'Running '+Processor.Executable+' stage again ... could work !',etInfo);
+              //ProcessorResult:=Processor.ExecuteAndWait;
+              //result:=(ProcessorResult=0);
             end;
 
             {$IFDEF UNIX}
