@@ -966,7 +966,7 @@ begin
     // Could have used svnversion but that would have meant calling yet another command...
     // Get the part after "Revision:"...
     // unless we're in a branch/tag where we need "Last Changed Rev: "
-    if FReturnCode = 0 then
+    if ( (FReturnCode=0) AND (Length(Output)>0) ) then
     begin
       // Use regex to try and extract from localized SVNs:
       // match exactly 2 occurences of the revision regex.
