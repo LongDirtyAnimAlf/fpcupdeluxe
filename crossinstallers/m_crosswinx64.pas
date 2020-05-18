@@ -1,4 +1,4 @@
-unit m_crosswin64;
+unit m_crosswinx64;
 { Cross compiles from Windows x86/32 bit to Windows x64
 Copyright (C) 2012-2013 Reinier Olislagers
 
@@ -38,9 +38,9 @@ uses
 implementation
 type
 
-{ TWin64 }
+{ TWinx64 }
 
-TWin64 = class(TCrossInstaller)
+TWinx64 = class(TCrossInstaller)
 private
 
 public
@@ -50,9 +50,9 @@ public
   destructor Destroy; override;
 end;
 
-{ TWin64 }
+{ TWinx64 }
 
-function TWin64.GetLibs(Basepath:string): boolean;
+function TWinx64.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -61,7 +61,7 @@ begin
   FLibsFound:=true;
 end;
 
-function TWin64.GetBinUtils(Basepath:string): boolean;
+function TWinx64.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
   if result then exit;
@@ -71,7 +71,7 @@ begin
   FBinsFound:=true;
 end;
 
-constructor TWin64.Create;
+constructor TWinx64.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TWin32';
@@ -81,21 +81,22 @@ begin
   ShowInfo;
 end;
 
-destructor TWin64.Destroy;
+destructor TWinx64.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$IFDEF WIN32}
 var
-  Win64:TWin64;
+  Winx64:TWinx64;
 
 initialization
-  Win64:=TWin64.Create;
-  RegisterCrossCompiler(Win64.RegisterName,Win64);
+  Winx64:=TWinx64.Create;
+  RegisterCrossCompiler(Winx64.RegisterName,Winx64);
 
 finalization
-  Win64.Destroy;
+  Winx64.Destroy;
+
 {$ENDIF WIN32}
 end.
 

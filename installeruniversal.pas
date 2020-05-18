@@ -1765,7 +1765,7 @@ begin
           GitClient.ModuleName:=ModuleName;
           GitClient.ExportOnly:=FExportOnly;
           result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-          SourceOK:=result;
+          SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') OR FExportOnly);
           if UpdateWarnings.Count>0 then
           begin
             WritelnLog(UpdateWarnings.Text);
@@ -1790,7 +1790,7 @@ begin
           SVNClient.UserName   := GetValueFromKey('UserName',PackageSettings);
           SVNClient.Password   := GetValueFromKey('Password',PackageSettings);
           result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-          SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory+'.svn')) OR FExportOnly);
+          SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.svn') OR FExportOnly);
           if UpdateWarnings.Count>0 then
           begin
             WritelnLog(UpdateWarnings.Text);

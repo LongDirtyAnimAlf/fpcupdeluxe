@@ -109,6 +109,8 @@ begin
   FBinUtilsPath:='';
 
   result:=CheckJava;
+
+
   if result then
   begin
     FBinsFound:=true;

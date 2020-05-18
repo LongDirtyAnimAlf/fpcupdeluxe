@@ -620,13 +620,16 @@ object Form1: TForm1
   object InstallDirEdit: TEdit
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = btnInstallDirSelect
     Left = 12
     Height = 23
     Hint = 'Directory to install FPC and Lazarus'
     Top = 4
-    Width = 208
+    Width = 201
+    Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 12
     BorderSpacing.Top = 4
+    BorderSpacing.Right = 6
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
@@ -636,10 +639,13 @@ object Form1: TForm1
     AnchorSideLeft.Control = InstallDirEdit
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = InstallDirEdit
-    Left = 226
+    AnchorSideRight.Control = PageControl1
+    AnchorSideRight.Side = asrBottom
+    Left = 219
     Height = 25
     Top = 4
     Width = 103
+    Anchors = [akTop, akRight]
     AutoSize = True
     BorderSpacing.Left = 6
     Caption = 'Set install path'

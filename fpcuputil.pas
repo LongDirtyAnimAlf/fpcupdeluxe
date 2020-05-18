@@ -4122,8 +4122,8 @@ begin
     ThreadLog('Download progress '+FileNameOnly+': download ready !');
   end
   else
-  //Show progress only every 2 seconds
-  if GetUpTickCount>StoredTickCount+2000 then
+  //Show progress only every 5 seconds
+  if GetUpTickCount>StoredTickCount+5000 then
   begin
     if StoredTickCount=0 then
       ThreadLog('Download progress '+FileNameOnly+': Starting download.')

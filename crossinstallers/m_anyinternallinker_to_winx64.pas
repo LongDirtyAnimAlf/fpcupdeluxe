@@ -1,6 +1,6 @@
-unit m_anyinternallinker_to_win64;
+unit m_anyinternallinker_to_winx64;
 
-{ Cross compiles from Linux, FreeBSD,... to Windows x86_64 code (win64)
+{ Cross compiles from Linux, FreeBSD,... to Windows x86_64 code (winx64)
 Requirements: FPC should have an internal linker
 }
 
@@ -16,9 +16,9 @@ implementation
 
 type
 
-{ Tanyinternallinker_win64 }
+{ Tanyinternallinker_winx64 }
 
-Tanyinternallinker_win64 = class(TCrossInstaller)
+Tanyinternallinker_winx64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -30,7 +30,7 @@ end;
 
 { TWin32 }
 
-function Tanyinternallinker_win64.GetLibs(Basepath:string): boolean;
+function Tanyinternallinker_winx64.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -39,7 +39,7 @@ begin
   FLibsFound:=true;
 end;
 
-function Tanyinternallinker_win64.GetBinUtils(Basepath:string): boolean;
+function Tanyinternallinker_winx64.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
   if result then exit;
@@ -49,7 +49,7 @@ begin
   FBinsFound:=true;
 end;
 
-constructor Tanyinternallinker_win64.Create;
+constructor Tanyinternallinker_winx64.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TAnyinternallinker';
@@ -60,19 +60,19 @@ begin
   ShowInfo;
 end;
 
-destructor Tanyinternallinker_win64.Destroy;
+destructor Tanyinternallinker_winx64.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Anyinternallinker_win64:Tanyinternallinker_win64;
+  Anyinternallinker_winx64:Tanyinternallinker_winx64;
 
 initialization
-  Anyinternallinker_win64:=Tanyinternallinker_win64.Create;
-  RegisterCrossCompiler(Anyinternallinker_win64.RegisterName,Anyinternallinker_win64);
+  Anyinternallinker_winx64:=Tanyinternallinker_winx64.Create;
+  RegisterCrossCompiler(Anyinternallinker_winx64.RegisterName,Anyinternallinker_winx64);
 
 finalization
-  Anyinternallinker_win64.Destroy;
+  Anyinternallinker_winx64.Destroy;
 end.
 

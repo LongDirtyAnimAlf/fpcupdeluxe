@@ -50,7 +50,6 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, Classes, SysUtils,
-  fpcupdeluxemainform,
   //extrasettings,
   //installerManager, installerUniversal,
   //modulesettings, unzipprogress, infounit, fpcuputil,
@@ -74,6 +73,7 @@ uses
   m_any_to_haiku386,
   m_any_to_haikux64,
   m_any_to_dragonflyx64,
+  m_any_to_embeddedaarch64,
   m_any_to_embeddedarm,
   m_any_to_embeddedavr,
   m_any_to_embeddedmipsel,
@@ -137,11 +137,14 @@ uses
   m_crosswin32,
   {$endif win64}
   {$ifdef win32}
-  m_crosswin64,
+  m_crosswinx64,
+  m_crosswinarm64,
   {$endif win32}
-  {$endif MSWINDOWS}
   m_anyinternallinker_to_win386,
-  m_anyinternallinker_to_win64;
+  m_anyinternallinker_to_winarm64,
+  m_anyinternallinker_to_winx64,
+  {$endif MSWINDOWS}
+  fpcupdeluxemainform;
 
 {$R *.res}
 

@@ -438,8 +438,8 @@ begin
   try
     Repo:=ReadBool('General','GetRepo',True);
     PackageRepo:=ReadBool('General','GetPackageRepo',False);
-    IncludeHelp:=ReadBool('General','IncludeHelp',False);
 
+    IncludeHelp:=ReadBool('General','IncludeHelp',False);
     IncludeLCL:=ReadBool('Cross','IncludeLCL',False);
 
     {$ifdef RemoteLog}
@@ -761,8 +761,8 @@ begin
   try
     WriteBool('General','GetRepo',Repo);
     WriteBool('General','GetPackageRepo',PackageRepo);
-    WriteBool('General','IncludeHelp',IncludeHelp);
 
+    WriteBool('General','IncludeHelp',IncludeHelp);
     WriteBool('Cross','IncludeLCL',IncludeLCL);
 
     {$ifdef RemoteLog}

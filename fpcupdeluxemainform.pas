@@ -2036,7 +2036,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.mipsel)) then
+        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>GetCPU(TCPU.mipsel)) then
         begin
           success:=false;
         end;
@@ -2156,6 +2156,7 @@ begin
     begin
       if FPCupManager.CrossCPU_Target=TCPU.i386 then FPCupManager.CrossOS_Target:=TOS.win32;
       if FPCupManager.CrossCPU_Target=TCPU.x86_64 then FPCupManager.CrossOS_Target:=TOS.win64;
+      if FPCupManager.CrossCPU_Target=TCPU.aarch64 then FPCupManager.CrossOS_Target:=TOS.win64;
     end;
 
     if FPCupManager.CrossOS_Target=TOS.osNone then FPCupManager.CrossOS_Target:=GetTOS(s);
@@ -2262,15 +2263,15 @@ begin
   begin
     if Sender<>nil then
     begin
-      {$ifdef Linux}
-      if (FPCupManager.CrossOS_Target=TOS.darwin) then
+      {$if (defined(UNIX)) and (not defined(Darwin))}
+      if (FPCupManager.CrossOS_Target=TOS.darwin) OR ( (FPCupManager.CrossOS_Target=TOS.win64) AND (FPCupManager.CrossCPU_Target=TCPU.aarch64) ) then
       begin
         success:=CheckExecutable('clang', ['-v'], '');
         if (NOT success) then
         begin
           s:=
           'Clang cannot be found !!'+ sLineBreak +
-          'Clang need to be installed to be able to cross-compile towards Darwin !'+ sLineBreak +
+          'Clang need to be installed to be able to cross-compile towards '+GetOS(FPCupManager.CrossOS_Target)+' !'+ sLineBreak +
           'Install clang and retry !!';
           Application.MessageBox(PChar(s), PChar('Missing clang'), MB_ICONERROR);
           memoSummary.Lines.Append('');
@@ -2470,9 +2471,19 @@ begin
             FPCupManager.FPCOPT:='-dFPC_ARMHF '
           else
             FPCupManager.FPCOPT:=s+' ';
-
           FPCupManager.CrossOS_SubArch:='armv6m';
         end;
+        {
+        if (FPCupManager.CrossCPU_Target=TCPU.aarch64) then
+        begin
+          s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+          if Length(s)=0 then
+            FPCupManager.FPCOPT:='-dFPC_ARMHF '
+          else
+            FPCupManager.FPCOPT:=s+' ';
+          FPCupManager.CrossOS_SubArch:='armv6m';
+        end;
+        }
         if (FPCupManager.CrossCPU_Target=TCPU.mipsel) then
         begin
           FPCupManager.CrossOPT:='-Cpmips32 ';
@@ -2737,7 +2748,9 @@ begin
                     if FPCupManager.CrossOS_Target=TOS.aix then s:='AIX' else
                       if FPCupManager.CrossOS_Target=TOS.msdos then s:='MSDos' else
                         if FPCupManager.CrossOS_Target=TOS.freertos then s:='FreeRTOS' else
-                          s:=UppercaseFirstChar(GetOS(FPCupManager.CrossOS_Target));
+                          if FPCupManager.CrossOS_Target=TOS.win32 then s:='Windows' else
+                            if FPCupManager.CrossOS_Target=TOS.win64 then s:='Windows' else
+                              s:=UppercaseFirstChar(GetOS(FPCupManager.CrossOS_Target));
 
           if FPCupManager.SolarisOI then s:=s+'OI';
           BinsFileName:=s+BinsFileName;
@@ -2793,6 +2806,13 @@ begin
               BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[rfIgnoreCase]);
               LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[rfIgnoreCase]);
             end;
+          end;
+
+          //Put all windows stuff (not that much) in a single windows directory
+          if (FPCupManager.CrossOS_Target=TOS.win32) OR (FPCupManager.CrossOS_Target=TOS.win64) then
+          begin
+            BinPath:=StringReplace(BinPath,GetOS(FPCupManager.CrossOS_Target),'windows',[rfIgnoreCase]);
+            LibPath:=StringReplace(LibPath,GetOS(FPCupManager.CrossOS_Target),'windows',[rfIgnoreCase]);
           end;
 
           if FPCupManager.CrossOS_Target=TOS.linux then
