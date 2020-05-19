@@ -394,6 +394,7 @@ begin
   // Fill ARM Arch radiogroup
   for ARMArch := Low(TARMARCH) to High(TARMARCH) do
     RadioGroupARMArch.Items.Add(GetEnumNameSimple(TypeInfo(TARMARCH),Ord(ARMArch)));
+  RadioGroupARMArch.ItemIndex:=0;
 
   with MiscellaneousCheckListBox.Items do
   begin
