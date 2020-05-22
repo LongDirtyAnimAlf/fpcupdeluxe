@@ -2588,22 +2588,26 @@ begin
       if IncludeLCL then
       begin
         FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCL';
+
         if ((FPCupManager.CrossOS_Target=TOS.win32) OR (FPCupManager.CrossOS_Target=TOS.win64)) then
-           FPCupManager.CrossLCL_Platform:='win32' else
+           FPCupManager.CrossLCL_Platform:='win32'
+        else
         if (FPCupManager.CrossOS_Target=TOS.wince) then
-           FPCupManager.CrossLCL_Platform:='wince' else
-        if (FPCupManager.CrossOS_Target=TOS.darwin) then
-           FPCupManager.CrossLCL_Platform:='carbon' else
+           FPCupManager.CrossLCL_Platform:='wince'
+        else
         if ((FPCupManager.CrossOS_Target=TOS.amiga) OR (FPCupManager.CrossOS_Target=TOS.aros) OR (FPCupManager.CrossOS_Target=TOS.morphos)) then
-           FPCupManager.CrossLCL_Platform:='mui' else
+           FPCupManager.CrossLCL_Platform:='mui'
+        else
+        if (FPCupManager.CrossOS_Target=TOS.darwin) then
+        begin
+          if ((FPCupManager.CrossCPU_Target=TCPU.x86_64) OR (FPCupManager.CrossCPU_Target=TCPU.powerpc64)) then
+            FPCupManager.CrossLCL_Platform:='cocoa'
+          else
+            FPCupManager.CrossLCL_Platform:='carbon';
+        end
+        else
         FPCupManager.CrossLCL_Platform:='gtk2';
-        // if Darwin cpu64, only cocoa (but also qt5) will work.
-        if ((FPCupManager.CrossOS_Target=TOS.darwin) AND ((FPCupManager.CrossCPU_Target=TCPU.x86_64) OR (FPCupManager.CrossCPU_Target=TCPU.powerpc64)))
-        {$ifdef LCLQT5}
-        then FPCupManager.CrossLCL_Platform:='qt5';
-        {$else}
-        then FPCupManager.CrossLCL_Platform:='cocoa';
-        {$endif}
+
       end
       else
       begin
@@ -3874,10 +3878,10 @@ begin
 
       aTarget:='stable';
       {$ifdef CPUAARCH64}
-      aTarget:='trunk';
+      aTarget:='fixes';
       {$endif}
       {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
-      aTarget:='trunk';
+      aTarget:='fixes';
       {$ENDIF}
 
       aURL:=installerUniversal.GetAlias('fpcURL',aTarget);
@@ -3887,10 +3891,10 @@ begin
       aURL:=ExcludeTrailingPathDelimiter(aURL);
       FPCTarget:=aURL;
       {$ifdef LCLQT5}
-      aTarget:='trunk';
+      aTarget:='fixes';
       {$endif}
       {$ifdef LCLCOCOA}
-      aTarget:='trunk';
+      aTarget:='fixes';
       {$endif}
       aURL:=installerUniversal.GetAlias('lazURL',aTarget);
       aURL:=ReadString('URL','lazURL',aURL);

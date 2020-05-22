@@ -3150,13 +3150,6 @@ begin
 
           Infoln(localinfotext+'Found online patch: '+PatchFilePath+' with version '+InttoStr(PatchVersion),etDebug);
 
-          {$if defined(Darwin) and defined(LCLQT5)}
-          //disable big hack for now
-          if Pos('lazpatch_darwin_qt5hack',PatchFilePath)>0 then PatchAccepted:=False;
-          {$else}
-          if Pos('darwin_qt5',PatchFilePath)>0 then PatchAccepted:=False;
-          {$endif}
-
           {$if not defined(MSWindows) and not defined(Haiku)}
           //only patch the Haiku build process on Windows and Haiku itself
           if (Pos('fpcpatch_haiku.patch',PatchFilePath)>0) OR (Pos('fpcpatch_haiku_',PatchFilePath)>0) then PatchAccepted:=False;
@@ -3461,7 +3454,7 @@ begin
   RevFileName:='';
 
   if ModuleName=_LAZARUS then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+REVINCFILENAME;
-  if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+  //if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
 
   if Length(RevFileName)>0 then
   begin

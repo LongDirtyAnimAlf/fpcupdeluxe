@@ -954,11 +954,10 @@ begin
                Options:=Options+' -dFPC_USE_LIBC';
           {$endif}
 
-          s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+REVINCFILENAME;
-          if FileExists(s2) then
+          if (Length(ActualRevision)>0) AND (ActualRevision<>'failure') then
           begin
-            if (ActualRevision<>'failure') then Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
-            Options:=Options+' -dREVINC';
+            Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
+            Processor.Process.Parameters.Add('REVINC=force');
           end;
 
           {$ifdef solaris}
@@ -1580,13 +1579,11 @@ begin
   end;
   {$ENDIF}
 
-  //Always add/use the revision.inc file (if it is there)
-  //However, the Makefile forces the setting of REVSTR
-  //So, use our own REVSTR while the Makefile itself does not do its job properly
-  Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
-  s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+REVINCFILENAME;
-  if FileExists(s2) then
-    s1:=s1+' -dREVINC';
+  if (Length(ActualRevision)>0) AND (ActualRevision<>'failure') then
+  begin
+    Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
+    Processor.Process.Parameters.Add('REVINC=force');
+  end;
 
   {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
   if FSoftFloat then
