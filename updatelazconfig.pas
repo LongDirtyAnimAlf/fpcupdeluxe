@@ -187,7 +187,7 @@ procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig
 implementation
 
 uses
-  FileUtil, fpcuputil;
+  fpcuputil;
 
 procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig);
 var

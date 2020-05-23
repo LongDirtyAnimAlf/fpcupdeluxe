@@ -270,8 +270,8 @@ type
 implementation
 
 uses
-  fpcuputil,
   FileUtil,
+  fpcuputil,
   repoclient,
   updatelazconfig;
 

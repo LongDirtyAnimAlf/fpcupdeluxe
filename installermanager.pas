@@ -45,7 +45,8 @@ uses
   {$ifndef FPCONLY}
   installerLazarus,
   {$endif}
-  installerHelp, installerUniversal, fpcuputil, FileUtil
+  installerHelp, installerUniversal,
+  fpcuputil
   {$ifdef UNIX}
   ,dynlibs,Unix
   {$endif UNIX}

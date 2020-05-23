@@ -27,9 +27,10 @@ interface
 
 uses
   Classes, SysUtils,
+  FileUtil,
+  fpcuputil,
   repoclient, GitClient, HGClient, SvnClient,
-  processutils, m_crossinstaller,
-  fpcuputil;
+  processutils, m_crossinstaller;
 
 {$i revision.inc}
 
@@ -545,7 +546,6 @@ uses
   //LMessages,
   LCLIntf,
   {$endif}
-  FileUtil,
   process
   {$IFDEF UNIX}
   ,LazFileUtils

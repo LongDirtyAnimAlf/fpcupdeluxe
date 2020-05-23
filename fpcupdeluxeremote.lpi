@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <PathDelim Value="\"/>
     <General>
+      <Flags>
+        <CompatibilityMode Value="True"/>
+      </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
       <Title Value="fpcupdeluxeremote"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -685,7 +687,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="11">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -718,42 +720,35 @@
         <UnitName Value="AboutFrm"/>
       </Unit4>
       <Unit5>
-        <Filename Value="unzipprogress.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="ProgressForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit5>
-      <Unit6>
         <Filename Value="infounit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="InfoForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit6>
-      <Unit7>
+      </Unit5>
+      <Unit6>
         <Filename Value="modulesettings.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form3"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="fpcup.ini"/>
+        <IsPartOfProject Value="True"/>
       </Unit7>
       <Unit8>
-        <Filename Value="fpcup.ini"/>
+        <Filename Value="settings.ini"/>
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="settings.ini"/>
+        <Filename Value="revision.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="revision.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit10>
-      <Unit11>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit11>
+      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -767,10 +762,10 @@
       <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot;logger\mORMot\SQLite3;logger\mORMot\CrossPlatform"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <Conditionals Value="if TargetOS='darwin' then
-   CustomOptions := ' -Cg-';
-if TargetOS='openbsd' then
-   CustomOptions := ' -Cg-';"/>
+    <Conditionals Value="if TargetOS=&apos;darwin&apos; then
+   CustomOptions := &apos; -Cg-&apos;;
+if TargetOS=&apos;openbsd&apos; then
+   CustomOptions := &apos; -Cg-&apos;;"/>
     <CodeGeneration>
       <Optimizations>
         <OptimizationLevel Value="2"/>

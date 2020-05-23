@@ -207,9 +207,9 @@ implementation
 
 uses
   StrUtils,
+  FileUtil,
   fpcuputil,
-  repoclient,
-  FileUtil
+  repoclient
   {$IFDEF UNIX}
     ,baseunix
     ,LazFileUtils

@@ -194,7 +194,9 @@ end;
 implementation
 
 uses
-  fpcuputil, processutils, FileUtil,
+  FileUtil,
+  fpcuputil,
+  processutils,
   {$ifndef FPCONLY}
   updatelazconfig,
   {$endif}

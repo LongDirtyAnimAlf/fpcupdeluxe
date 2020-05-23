@@ -89,7 +89,6 @@ type
 implementation
 
 uses
-  FileUtil {Requires LCL},
   {$IFDEF UNIX}
   BaseUnix,Unix,
   {$ENDIF}

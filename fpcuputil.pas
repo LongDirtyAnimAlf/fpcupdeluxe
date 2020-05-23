@@ -93,6 +93,12 @@ uses
 
 Const
   MAXCONNECTIONRETRIES=2;
+  {$ifdef Windows}
+  GetExeExt='.exe';
+  {$else}
+  GetExeExt='';
+  {$endif}
+
 
 type
   {TNormalUnzipper}

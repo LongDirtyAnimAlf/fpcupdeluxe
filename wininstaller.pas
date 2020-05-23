@@ -62,7 +62,7 @@ interface
 {$IFDEF MSWINDOWS}
 // for now, keep this Windows-only (should still run on Wine)
 uses
-  Classes, SysUtils, installerCore,registry {Requires LCL}, fpcuputil;
+  Classes, SysUtils, Registry, installerCore;
 
 type
 
@@ -98,9 +98,10 @@ type
 {$ENDIF MSWINDOWS}
 
 implementation
+
 {$IFDEF MSWINDOWS}
 uses
-  FileUtil;
+  fpcuputil;
 
 const
   ClassName = 'TWinInstaller';
@@ -138,7 +139,7 @@ begin
     if CompileCommand<>'' then
       CompileCommand:=StringReplace(UpperCase(CompileCommand),'COMPIL32','ISCC',[rfReplaceAll]);
     if (CompileCommand='') then
-      CompileCommand:=FindDefaultExecutablePath('Compil32.exe');
+      CompileCommand:=Which('Compil32.exe');
     if (CompileCommand='') and (FileExists(ProgramFiles+'\Inno Setup 5\'+CommandLineCompiler)) then
       CompileCommand:=ProgramFiles+'\Inno Setup 5\'+CommandLineCompiler;
     if (CompileCommand='') and (FileExists(ProgramFilesx86+'\Inno Setup 5\'+CommandLineCompiler)) then
@@ -192,7 +193,7 @@ begin
   if DirectoryExists(FInstallerBuildDir) then
   begin
     Infoln('Deleting temporary Lazarus installer build directory '+FInstallerBuildDir+' before running installer creator.',etInfo);
-    DeleteDirectory(FInstallerBuildDir,false);
+    DeleteDirectoryEx(FInstallerBuildDir);
   end;
 
   //Basically a copy from the help installer - without trailing delimiter

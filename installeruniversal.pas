@@ -180,7 +180,9 @@ Const
 implementation
 
 uses
-  StrUtils, typinfo,inifiles, FileUtil, fpcuputil, process;
+  StrUtils, typinfo,inifiles, process,
+  FileUtil,
+  fpcuputil;
 
 Const
   MAXSYSMODULES=250;

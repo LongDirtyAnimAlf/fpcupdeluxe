@@ -76,7 +76,6 @@ type
 implementation
 
 uses
-  FileUtil {Requires LCL},
   StrUtils,
   installerCore,
   processutils,
@@ -101,8 +100,9 @@ begin
 
   {$IFDEF MSWINDOWS}
   // Git on Windows can be a .cmd file
-  if not FileExists(FRepoExecutable) then
-    FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName + '.cmd');
+  //if not FileExists(FRepoExecutable) then
+  //  FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName + '.cmd');
+
   // Git installed via msyswin
   if not FileExists(FRepoExecutable) then
     FRepoExecutable := 'C:\msysgit\bin\' + RepoExecutableName + '.exe';

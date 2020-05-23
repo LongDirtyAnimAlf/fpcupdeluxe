@@ -74,7 +74,6 @@ type
 implementation
 
 uses
-  FileUtil {Requires LCL},
   StrUtils,
   installerCore,
   processutils,
