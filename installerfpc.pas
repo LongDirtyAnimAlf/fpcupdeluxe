@@ -3913,7 +3913,7 @@ begin
 
     UpdateWarnings:=TStringList.Create;
     try
-      if (aRepoClient=FGitClient)
+      if (aRepoClient.ClassType=FGitClient.ClassType)
          then result:=DownloadFromGit(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings)
          else result:=DownloadFromSVN(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings);
       if UpdateWarnings.Count>0 then

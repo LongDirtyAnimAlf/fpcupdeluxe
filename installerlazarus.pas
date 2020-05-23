@@ -30,6 +30,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
+{$DEFINE DISABLELAZBUILDJOBS}
+
 interface
 
 uses
@@ -410,7 +412,11 @@ begin
         Processor.Process.Parameters.Add('--quiet');
         {$ENDIF}
 
+        {$ifdef DISABLELAZBUILDJOBS}
+        if (True) then
+        {$else}
         if (FNoJobs) then
+        {$endif}
           Processor.Process.Parameters.Add('--max-process-count=1')
         else
           Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
@@ -909,7 +915,11 @@ begin
       Processor.Process.Parameters.Add('--quiet');
       {$ENDIF}
 
+      {$ifdef DISABLELAZBUILDJOBS}
+      if (True) then
+      {$else}
       if (FNoJobs) then
+      {$endif}
         Processor.Process.Parameters.Add('--max-process-count=1')
       else
         Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
@@ -987,7 +997,11 @@ begin
           Processor.Process.Parameters.Add('--quiet');
           {$ENDIF}
 
+          {$ifdef DISABLELAZBUILDJOBS}
+          if (True) then
+          {$else}
           if (FNoJobs) then
+          {$endif}
             Processor.Process.Parameters.Add('--max-process-count=1')
           else
             Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
@@ -2017,7 +2031,7 @@ begin
 
     UpdateWarnings:=TStringList.Create;
     try
-      if aRepoClient=FGitClient
+      if (aRepoClient.ClassType=FGitClient.ClassType)
          then result:=DownloadFromGit(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings)
          else result:=DownloadFromSVN(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings);
       if UpdateWarnings.Count>0 then
