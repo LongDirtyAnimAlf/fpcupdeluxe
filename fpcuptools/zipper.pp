@@ -1503,15 +1503,12 @@ Begin
           else
             F.Size:=Info.Size;
           F.DateTime:=FileDateToDateTime(Info.Time);
-          if (F.Attributes = 0) then
-          begin
         {$IFDEF UNIX}
           if fplstat(F.DiskFileName, @UnixInfo) = 0 then
             F.Attributes := UnixInfo.st_mode;
         {$ELSE}
           F.Attributes := Info.Attr;
         {$ENDIF}
-          end;
         finally
           FindClose(Info);
         end
@@ -1744,11 +1741,6 @@ Begin
       MadeBy_Version := LocalHdr.Extract_Version_Reqd;
       if (IsZip64) and (MadeBy_Version<45) then
         MadeBy_Version := 45;
-
-      if Entries[ACount].OS<>0 then
-        MadeBy_Version := MadeBy_Version or (Entries[ACount].OS shl 8)
-      else
-        begin
     {$IFDEF UNIX}
       {$IFDEF DARWIN} //OSX
       MadeBy_Version := MadeBy_Version or (OS_OSX shl 8);
@@ -1759,7 +1751,6 @@ Begin
     {$IFDEF OS2}
       MadeBy_Version := MadeBy_Version or (OS_OS2 shl 8);
     {$ENDIF}
-        end;
       {$warning TODO: find a way to recognize VFAT and NTFS}
       // Copy over extract_version_reqd..extra_field_length
       Move(LocalHdr.Extract_Version_Reqd, Extract_Version_Reqd, 26);

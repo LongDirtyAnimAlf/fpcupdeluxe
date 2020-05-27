@@ -16,4 +16,12 @@ object Form1: TForm1
     OnClick = Button1Click
     TabOrder = 0
   end
+  object Label1: TLabel
+    Left = 45
+    Height = 15
+    Top = 152
+    Width = 44
+    Caption = 'Nothing'
+    ParentColor = False
+  end
 end

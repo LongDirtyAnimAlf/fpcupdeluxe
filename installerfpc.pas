@@ -3613,18 +3613,39 @@ begin
         end;
         {$endif Darwin}
 
-
         {$ifndef FPCONLY}
         {$ifdef LCLQT5}
         ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
         ConfigText.Append('# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)');
         {$ifdef Darwin}
-        ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
-        ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        //ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        //ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+
         ConfigText.Append('-k-rpath');
         ConfigText.Append('-k@executable_path/../Frameworks');
-        ConfigText.Append('-k-rpath');
-        ConfigText.Append('-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+
+        //ConfigText.Append('-k-rpath');
+        //ConfigText.Append('-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+
+        (*
+        ConfigText.Append('-k-framework');
+        ConfigText.Append('-kQt5Pas');
+        ConfigText.Append('-k-framework');
+        ConfigText.Append('-kQtPrintSupport');
+        ConfigText.Append('-k-framework');
+        ConfigText.Append('-kQtWidgets');
+        ConfigText.Append('-k-framework');
+        ConfigText.Append('-kQtGui');
+        ConfigText.Append('-k-framework');
+        ConfigText.Append('-kQtNetwork');
+        ConfigText.Append('-k-framework');
+        ConfigText.Append('-kQtCore');
+        ConfigText.Append('-k-framework');
+        ConfigText.Append('-kOpenGL');
+        ConfigText.Append('-k-framework');
+        ConfigText.Append('-kAGL');
+        *)
+
         {$else Darwin}
         {$ifdef Unix}
         //ConfigText.Append('-k"-rpath=./"');

@@ -2213,23 +2213,10 @@ begin
   begin
     NothingToBeDone:=false;
     {$ifdef Darwin}
+      NothingToBeDone:=(FCrossLCL_Platform='cocoa');
       {$ifdef LCLCARBON}
         NothingToBeDone:=(FCrossLCL_Platform='carbon');
       {$endif}
-      {$ifdef LCLCOCOA}
-        NothingToBeDone:=(FCrossLCL_Platform='cocoa');
-      {$endif}
-      {$ifdef CPU64}
-        {$ifndef LCLQT5}
-          NothingToBeDone:=(FCrossLCL_Platform='cocoa');
-        {$endif}
-      {$endif}
-    {$endif}
-    {$ifdef LCLQT}
-      NothingToBeDone:=(FCrossLCL_Platform='qt');
-    {$endif}
-    {$ifdef LCLQT5}
-      NothingToBeDone:=(FCrossLCL_Platform='qt5');
     {$endif}
   end;
   result:=(NOT NothingToBeDone);

@@ -13,6 +13,7 @@ type
 
   TForm1 = class(TForm)
     Button1: TButton;
+    Label1: TLabel;
     procedure Button1Click(Sender: TObject);
   private
 
@@ -49,6 +50,7 @@ var
   aZipList:TStringList;
   aZipFileEntry:TZipFileEntry;
 begin
+  Label1.Caption:='Processing';
   for aIndex1:=Low(FileList) to High(FileList) do
   begin
     aBaseDir:=ExpandFileName(BaseDir);
@@ -78,23 +80,26 @@ begin
             begin
               aFile3:=ExtractRelativepath(aFile1+'.app',aZipList.Strings[aIndex2]);
               aZipFileEntry:=zipper.Entries.AddFileEntry(aZipList.Strings[aIndex2],aFile3);
-              aZipFileEntry.OS:=OS_OSX;
+              aZipFileEntry.OS:=OS_UNIX;
+              aZipFileEntry.Attributes:=0;
               if aZipList.Strings[aIndex2]=aFile2 then
-                 aZipFileEntry.Attributes:=((UNIX_RUSR or UNIX_WUSR or UNIX_XUSR or UNIX_RGRP or UNIX_XGRP or UNIX_ROTH or UNIX_XOTH){ shl 16})
-              else
-                aZipFileEntry.Attributes:=((UNIX_RUSR or UNIX_WUSR or UNIX_RGRP or UNIX_ROTH) {shl 16});
+                 aZipFileEntry.Attributes:=((UNIX_FILE or UNIX_RUSR or UNIX_WUSR or UNIX_XUSR or UNIX_RGRP or UNIX_XGRP or UNIX_ROTH or UNIX_XOTH) shl 16);
+              {else
+                aZipFileEntry.Attributes:=((UNIX_FILE or UNIX_RUSR or UNIX_WUSR or UNIX_RGRP or UNIX_ROTH) shl 16);}
             end;
             zipper.ZipAllFiles;
+            zipper.Terminate;
           finally
-            FreeAndNil(zipper);
+            zipper.Destroy;
           end;
         end
       finally
         aZipList.Free;
       end;
-      DeleteFile(aFile1);
+      //DeleteFile(aFile1);
     end;
   end;
+  Label1.Caption:='Ready';
 end;
 
 end.

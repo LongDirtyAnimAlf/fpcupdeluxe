@@ -3604,23 +3604,10 @@ begin
 
   // Set default LCL platforms
   {$ifdef Darwin}
+    FPCupManager.CrossLCL_Platform:='cocoa';
     {$ifdef LCLCARBON}
-      FPCupManager.CrossLCL_Platform:='carbon';
+    FPCupManager.CrossLCL_Platform:='carbon';
     {$endif}
-    {$ifdef LCLCOCOA}
-      FPCupManager.CrossLCL_Platform:='cocoa';
-    {$endif}
-    {$ifdef CPU64}
-      {$ifndef LCLQT5}
-        FPCupManager.CrossLCL_Platform:='cocoa';
-      {$endif}
-    {$endif}
-  {$endif}
-  {$ifdef LCLQT}
-    FPCupManager.CrossLCL_Platform:='qt';
-  {$endif}
-  {$ifdef LCLQT5}
-    FPCupManager.CrossLCL_Platform:='qt5';
   {$endif}
 
   {$ifdef RemoteLog}
