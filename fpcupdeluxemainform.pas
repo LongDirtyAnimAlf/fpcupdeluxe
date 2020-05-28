@@ -2586,29 +2586,7 @@ begin
       // AFAIK, on Darwin, LCL Carbon and Cocoa are only for MACOSX
       if (FPCupManager.CrossOS_Target=TOS.darwin) AND ((FPCupManager.CrossCPU_Target=TCPU.arm) OR (FPCupManager.CrossCPU_Target=TCPU.aarch64)) then IncludeLCL:=false;
       if IncludeLCL then
-      begin
-        FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCL';
-
-        if ((FPCupManager.CrossOS_Target=TOS.win32) OR (FPCupManager.CrossOS_Target=TOS.win64)) then
-           FPCupManager.CrossLCL_Platform:='win32'
-        else
-        if (FPCupManager.CrossOS_Target=TOS.wince) then
-           FPCupManager.CrossLCL_Platform:='wince'
-        else
-        if ((FPCupManager.CrossOS_Target=TOS.amiga) OR (FPCupManager.CrossOS_Target=TOS.aros) OR (FPCupManager.CrossOS_Target=TOS.morphos)) then
-           FPCupManager.CrossLCL_Platform:='mui'
-        else
-        if (FPCupManager.CrossOS_Target=TOS.darwin) then
-        begin
-          if ((FPCupManager.CrossCPU_Target=TCPU.x86_64) OR (FPCupManager.CrossCPU_Target=TCPU.powerpc64)) then
-            FPCupManager.CrossLCL_Platform:='cocoa'
-          else
-            FPCupManager.CrossLCL_Platform:='carbon';
-        end
-        else
-        FPCupManager.CrossLCL_Platform:='gtk2';
-
-      end
+        FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCL'
       else
       begin
         if Form2.IncludeLCL then AddMessage('Skipping build of LCL for this target: not supported (yet).');
@@ -3602,14 +3580,6 @@ begin
   FPCupManager.NativeFPCBootstrapCompiler:=(NOT Form2.FpcupBootstrappersOnly);
   FPCupManager.ForceLocalRepoClient:=Form2.ForceLocalRepoClient;
 
-  // Set default LCL platforms
-  {$ifdef Darwin}
-    FPCupManager.CrossLCL_Platform:='cocoa';
-    {$ifdef LCLCARBON}
-    FPCupManager.CrossLCL_Platform:='carbon';
-    {$endif}
-  {$endif}
-
   {$ifdef RemoteLog}
   aDataClient.Enabled:=Form2.SendInfo;
   aDataClient.UpInfo.UpFunction:=ufUnknown;
@@ -3712,6 +3682,37 @@ begin
   ForceDirectoriesSafe(FPCupManager.BaseDirectory);
   //save install settings in install directory
   SetFPCUPSettings(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory));
+
+  {$if defined(LCLQT)}
+  FPCupManager.CrossLCL_Platform:='qt';
+  {$elseif defined(LCLQT5)}
+  FPCupManager.CrossLCL_Platform:='qt5';
+  {$else}
+  if ((FPCupManager.CrossOS_Target=TOS.win32) OR (FPCupManager.CrossOS_Target=TOS.win64)) then
+    FPCupManager.CrossLCL_Platform:='win32'
+  else
+  if (FPCupManager.CrossOS_Target=TOS.wince) then
+    FPCupManager.CrossLCL_Platform:='wince'
+  else
+  if ((FPCupManager.CrossOS_Target=TOS.amiga) OR (FPCupManager.CrossOS_Target=TOS.aros) OR (FPCupManager.CrossOS_Target=TOS.morphos)) then
+    FPCupManager.CrossLCL_Platform:='mui'
+  else
+  if (FPCupManager.CrossOS_Target=TOS.darwin) then
+  begin
+    {$if defined(LCLCARBON)}
+    FPCupManager.CrossLCL_Platform:='carbon';
+    {$elseif defined(LCLCOCOA)}
+    FPCupManager.CrossLCL_Platform:='cocoa';
+    {$else}
+    if ((FPCupManager.CrossCPU_Target=TCPU.x86_64) OR (FPCupManager.CrossCPU_Target=TCPU.powerpc64)) then
+      FPCupManager.CrossLCL_Platform:='cocoa'
+    else
+      FPCupManager.CrossLCL_Platform:='carbon';
+    {$endif}
+  end;
+  else
+    FPCupManager.CrossLCL_Platform:='gtk2';
+ {$endif}
 
   Application.ProcessMessages;
 

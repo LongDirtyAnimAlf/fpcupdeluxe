@@ -3618,14 +3618,14 @@ begin
         ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
         ConfigText.Append('# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)');
         {$ifdef Darwin}
-        //ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
-        //ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
 
         ConfigText.Append('-k-rpath');
         ConfigText.Append('-k@executable_path/../Frameworks');
 
-        //ConfigText.Append('-k-rpath');
-        //ConfigText.Append('-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        ConfigText.Append('-k-rpath');
+        ConfigText.Append('-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
 
         (*
         ConfigText.Append('-k-framework');

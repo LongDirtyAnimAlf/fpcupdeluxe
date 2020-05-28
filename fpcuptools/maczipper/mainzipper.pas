@@ -96,7 +96,7 @@ begin
       finally
         aZipList.Free;
       end;
-      //DeleteFile(aFile1);
+      DeleteFile(aFile1);
     end;
   end;
   Label1.Caption:='Ready';

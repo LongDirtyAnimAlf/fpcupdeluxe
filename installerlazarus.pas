@@ -272,6 +272,12 @@ type
 implementation
 
 uses
+  {$ifdef Darwin}
+  {$ifdef LCLQT5}
+  BaseUnix,
+  LazFileUtils,
+  {$endif}
+  {$endif}
   FileUtil,
   fpcuputil,
   repoclient,
@@ -2002,6 +2008,62 @@ begin
 end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;
+{$ifdef Darwin}
+{$ifdef LCLQT5}
+function CreateQT5Symlinks(aApp:string):boolean;
+var
+  DirectoriesFoundList,FilesFoundList : TStringList;
+  DirCounter,FileCounter:integer;
+  FrameworkDir,FrameworkName,FileToLink:string;
+  success:boolean;
+begin
+  // create symlinks for Frameworks to save space
+  result:=true;
+  DirectoriesFoundList := FindAllDirectories(aApp,False);
+  try
+    for DirCounter := 0 to DirectoriesFoundList.Count -1 do
+    begin
+      FrameworkDir := ExcludeTrailingPathDelimiter(DirectoriesFoundList.Strings[DirCounter]);
+      FrameworkName := ExtractFileNameOnly(FrameworkDir);
+      FilesFoundList := FindAllFiles(FrameworkDir+'/Versions');
+      try
+        for FileCounter := 0 to FilesFoundList.Count -1 do
+        begin
+          FileToLink := FilesFoundList.Strings[FileCounter];
+          if ExtractFileName(FileToLink) = FrameworkName then
+          begin
+            FileToLink:=CreateRelativePath(FileToLink,FrameworkDir);
+
+            // do we already have some sort of file ?
+            if (FileExists(FrameworkDir+'/'+FrameworkName)) then
+            begin
+              // if its not a link, then delete file !! tricky ...
+              if (fpReadLink(FrameworkDir+'/'+FrameworkName) = '') then DeleteFile(FrameworkDir+'/'+FrameworkName);
+            end;
+
+            if (NOT FileExists(FrameworkDir+'/'+FrameworkName)) then
+            begin
+              // create the symlink towards the base framework library
+              success:=(fpSymlink(PChar(FileToLink),PChar(FrameworkDir+'/'+FrameworkName))=0);
+              if NOT success then
+              begin
+                result:=false;
+                Infoln(infotext+'Symlink creation failure for '+FrameworkName,etError);
+              end;
+            end;
+
+          end;
+        end;
+      finally
+        FilesFoundList.Free;
+      end;
+    end;
+  finally
+    DirectoriesFoundList.Free;
+  end;
+end;
+{$endif}
+{$endif}
 var
   UpdateWarnings: TStringList;
   aRepoClient:TRepoClient;
@@ -2081,6 +2143,53 @@ begin
     if (NOT Result) then
       Infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
   end;
+
+  {$ifdef Darwin}
+  {$ifdef LCLQT5}
+  // Only for Darwin
+  // Get Qt bindings if not present yet
+  // I know that this involves a lot of trickery and some dirty work, but it gives the user an öut-of-the-box" experience !
+  // And fpcupdeluxe is there to make the user-experience of FPC and Lazarus an easy one
+  // Note:
+  // Do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
+  // ToDo : check if this presumption is correct
+
+  FilePath:=ExcludeTrailingPathDelimiter(SafeGetApplicationName);
+  Infoln(infotext+'Adding QT5 binary sources (QT5 + QT5Pas Frameworks + libqcocoa) from fpcupdeluxe.app itself.',etInfo);
+
+  // copy QT5 frameworks to Lazarus source directory for future use.
+  if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks') then
+  begin
+    CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks');
+    Infoln(infotext+'Adding QT5 Frameworks to ' + ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks' + ' success.',etInfo);
+  end else Infoln(infotext+'Adding QT5 Frameworks to ' + ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks' + ' failure.',etError);
+
+  // copy QT5 frameworks to lazarus.app ... a bit redundant ... :-(
+  if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Frameworks') then
+  begin
+    CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Frameworks');
+    Infoln(infotext+'Adding QT5 Frameworks to lazarus.app success.',etInfo);
+  end else Infoln(infotext+'Adding QT5 Frameworks to lazarus.app failure.',etError);
+
+  // copy QT5 frameworks to startlazarus.app ... a bit redundant ... :-(
+  if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Frameworks') then
+  begin
+    CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Frameworks');
+    Infoln(infotext+'Adding QT5 Frameworks to startlazarus.app success.',etInfo);
+  end  else Infoln(infotext+'Adding QT5 Frameworks to startlazarus.app failure.',etError);
+  CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app');
+
+  // QT5 quirk: copy QT5 libqcocoa.dylib to lazarus.app
+  if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Plugins')
+    then Infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
+    else Infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etError);
+
+  // QT5 quirk: copy QT5 libqcocoa.dylib to startlazarus.app
+  if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Plugins')
+    then Infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
+    else Infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etError);
+  {$endif}
+  {$endif}
 
   (*
   Errors := 0;
@@ -2213,10 +2322,23 @@ begin
   begin
     NothingToBeDone:=false;
     {$ifdef Darwin}
-      NothingToBeDone:=(FCrossLCL_Platform='cocoa');
       {$ifdef LCLCARBON}
         NothingToBeDone:=(FCrossLCL_Platform='carbon');
       {$endif}
+      {$ifdef LCLCOCOA}
+        NothingToBeDone:=(FCrossLCL_Platform='cocoa');
+      {$endif}
+      {$ifdef CPU64}
+        {$ifndef LCLQT5}
+          NothingToBeDone:=(FCrossLCL_Platform='cocoa');
+        {$endif}
+      {$endif}
+    {$endif}
+    {$ifdef LCLQT}
+      NothingToBeDone:=(FCrossLCL_Platform='qt');
+    {$endif}
+    {$ifdef LCLQT5}
+      NothingToBeDone:=(FCrossLCL_Platform='qt5');
     {$endif}
   end;
   result:=(NOT NothingToBeDone);
