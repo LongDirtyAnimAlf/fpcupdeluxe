@@ -638,7 +638,7 @@ object Form1: TForm1
   object btnInstallDirSelect: TButton
     AnchorSideLeft.Control = InstallDirEdit
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = InstallDirEdit
+    AnchorSideTop.Control = Owner
     AnchorSideRight.Control = PageControl1
     AnchorSideRight.Side = asrBottom
     Left = 219
@@ -648,6 +648,7 @@ object Form1: TForm1
     Anchors = [akTop, akRight]
     AutoSize = True
     BorderSpacing.Left = 6
+    BorderSpacing.Top = 4
     Caption = 'Set install path'
     OnClick = btnInstallDirSelectClick
     TabOrder = 1
@@ -670,15 +671,17 @@ object Form1: TForm1
   object RealLazURL: TEdit
     AnchorSideLeft.Control = RealFPCURL
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = RealFPCURL
+    AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 689
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
-    Width = 351
+    Width = 303
+    Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
+    BorderSpacing.Top = 4
     BorderSpacing.Right = 12
     OnChange = RealURLChange
     OnDblClick = RealURLDblClick

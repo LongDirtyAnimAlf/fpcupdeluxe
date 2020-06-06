@@ -83,9 +83,9 @@ begin
               aZipFileEntry.OS:=OS_UNIX;
               aZipFileEntry.Attributes:=0;
               if aZipList.Strings[aIndex2]=aFile2 then
-                 aZipFileEntry.Attributes:=((UNIX_FILE or UNIX_RUSR or UNIX_WUSR or UNIX_XUSR or UNIX_RGRP or UNIX_XGRP or UNIX_ROTH or UNIX_XOTH) shl 16);
-              {else
-                aZipFileEntry.Attributes:=((UNIX_FILE or UNIX_RUSR or UNIX_WUSR or UNIX_RGRP or UNIX_ROTH) shl 16);}
+                 aZipFileEntry.Attributes:=((UNIX_FILE or UNIX_RUSR or UNIX_WUSR or UNIX_XUSR or UNIX_RGRP or UNIX_XGRP or UNIX_ROTH or UNIX_XOTH) shl 16)
+              else
+                aZipFileEntry.Attributes:=((UNIX_FILE or UNIX_RUSR or UNIX_WUSR or UNIX_RGRP or UNIX_ROTH) shl 16);
             end;
             zipper.ZipAllFiles;
             zipper.Terminate;

@@ -1283,7 +1283,7 @@ begin
       if (i=Length(VersionSnippet)) then break;
     until false;
 
-    Delete(VersionSnippet,1,i);
+    Delete(VersionSnippet,1,(i-1));
     // ignore release candidate numbering
     i := Pos('_RC',VersionSnippet);
     if i>0 then Delete(VersionSnippet,i,MaxInt);

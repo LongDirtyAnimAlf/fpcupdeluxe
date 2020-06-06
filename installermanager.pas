@@ -171,7 +171,7 @@ type
     FConfigFile: string;
     FCrossCPU_Target: TCPU;
     {$ifndef FPCONLY}
-    FCrossLCL_Platform: string; //really LCL widgetset
+    FLCL_Platform: string; //really LCL widgetset
     {$endif}
     FCrossOPT: string;
     FCrossOS_Target: TOS;
@@ -278,7 +278,7 @@ type
     // Widgetset for which the user wants to compile the LCL (not the IDE).
     // Empty if default LCL widgetset used for current platform
     {$ifndef FPCONLY}
-    property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
+    property LCL_Platform:string read FLCL_Platform write FLCL_Platform;
     {$endif}
     property CrossOPT:string read FCrossOPT write FCrossOPT;
     property CrossToolsDirectory:string read FCrossToolsDirectory write SetCrossToolsDirectory;
@@ -1079,9 +1079,9 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     'libqt5x11extras5-dev'
     );
 
-    //qt5-default
-    //qttools5-dev-tools
-    //qttools5-dev
+    //Mint
+    //'qt5-default'
+    //'libqt5x11extras5-dev'
 
     LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so','libgdk-x11-2.0.so');
     QTLIBS:TLibList = ('libQt4Pas.so.1','','','','');
@@ -1246,8 +1246,8 @@ begin
     result:=DeleteLazarusScript
   else if FunctionName=_CHECKDEVLIBS then
   begin
-    FParent.WritelnLog(etInfo,'Checking dev-libs for: '+FParent.CrossLCL_Platform, true);
-    result:=CheckDevLibs(FParent.CrossLCL_Platform)
+    FParent.WritelnLog(etInfo,'Checking dev-libs for: '+FParent.LCL_Platform, true);
+    result:=CheckDevLibs(FParent.LCL_Platform)
   end
   {$endif}
   else
@@ -1384,9 +1384,9 @@ begin
 
     FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
     FInstaller.DesiredBranch:=FParent.LazarusDesiredBranch;
-    // CrossLCL_Platform is only used when building LCL, but the Lazarus module
+    // LCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
-    (FInstaller as TLazarusInstaller).CrossLCL_Platform:=FParent.CrossLCL_Platform;
+    (FInstaller as TLazarusInstaller).LCL_Platform:=FParent.LCL_Platform;
     (FInstaller as TLazarusInstaller).FPCSourceDir:=FParent.FPCSourceDirectory;
     (FInstaller as TLazarusInstaller).FPCInstallDir:=FParent.FPCInstallDirectory;
     (FInstaller as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
@@ -1467,7 +1467,7 @@ begin
       (FInstaller as TUniversalInstaller).LazarusInstallDir:=FParent.FLazarusDirectory;
       (FInstaller as TUniversalInstaller).LazarusCompilerOptions:=FParent.FLazarusOPT;
       (FInstaller as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
-      (FInstaller as TUniversalInstaller).LCL_Platform:=FParent.CrossLCL_Platform;
+      (FInstaller as TUniversalInstaller).LCL_Platform:=FParent.LCL_Platform;
       {$endif}
   end;
 

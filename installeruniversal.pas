@@ -31,7 +31,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
-{$DEFINE DISABLELAZBUILDJOBS}
+{.$DEFINE DISABLELAZBUILDJOBS}
 
 {$modeswitch advancedrecords}
 
@@ -128,7 +128,7 @@ type
     property LazarusSourceDir:string read FLazarusSourceDir write FLazarusSourceDir;
     property LazarusInstallDir:string read FLazarusInstallDir write FLazarusInstallDir;
     // LCL widget set to be built
-    property LCL_Platform: string read FLCL_Platform write FLCL_Platform;
+    property LCL_Platform: string write FLCL_Platform;
     {$endif}
     // Build module
     function BuildModule(ModuleName:string): boolean; override;
@@ -298,8 +298,12 @@ begin
 
   if Length(s)>0 then Processor.Process.Parameters.Add('OPT='+s);
 
-  //Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
+  {$ifdef DISABLELAZBUILDJOBS}
   Processor.Process.Parameters.Add('LAZBUILDJOBS=1');//prevent runtime 217 errors
+  {$else}
+  Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
+  {$endif}
+
   Processor.Process.Parameters.Add('useride');
 
   try
@@ -677,14 +681,17 @@ begin
   Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
 
   RegisterPackageFeature:=false;
-
   // get lazbuild version to see if we can register packages (available from version 1.7 and up)
   Processor.Process.Parameters.Clear;
   Processor.Process.Parameters.Add('--version');
   try
     ProcessorResult:=Processor.ExecuteAndWait;
     result := (ProcessorResult=0);
-    if result then RegisterPackageFeature:=(CalculateNumericalVersion(Processor.WorkerOutput.Text)>=CalculateFullVersion(1,7,0));
+    if result then
+    begin
+      if Processor.WorkerOutput.Count>0 then
+        RegisterPackageFeature:=(CalculateNumericalVersion(Processor.WorkerOutput.Strings[Processor.WorkerOutput.Count-1])>=CalculateFullVersion(1,7,0));
+    end;
   except
     on E: Exception do
     begin
