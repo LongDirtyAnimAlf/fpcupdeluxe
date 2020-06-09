@@ -299,7 +299,7 @@ function ReleaseCandidateFromUrl(aURL:string): integer;
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
 function Download(UseWget:boolean; URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
-function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
+function GetGitHubFileList(aURL:string;fileurllist:TStringList; bWGet:boolean=false; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 function GetSVNFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 {$IFDEF MSWINDOWS}
 function CheckFileSignature(aFilePath: string): boolean;
@@ -2080,9 +2080,8 @@ begin
   if (NOT result) then SysUtils.Deletefile(TargetFile);
 end;
 
-function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
+function GetGitHubFileList(aURL:string;fileurllist:TStringList; bWGet:boolean=false; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 var
-  Http: TFPHTTPClient;
   Ms: TMemoryStream;
   JSONFileList:TStringList;
   Content : string;
@@ -2091,6 +2090,7 @@ var
   JsonArray: TJSONArray;
   i:integer;
   aStore:TGitHubStore;
+  localwget:boolean;
 begin
   result:=false;
 
@@ -2124,9 +2124,12 @@ begin
   if (NOT result) then
   begin
     Ms := TMemoryStream.Create;
-    try
+    localwget:=bWGet;
+
+    repeat
+      Ms.Clear;
       result:=Download(
-            False,
+            localwget,
             aURL,
             Ms,
             HTTPProxyHost,
@@ -2134,19 +2137,7 @@ begin
             HTTPProxyUser,
             HTTPProxyPassword);
 
-      if (NOT result) then
-      begin
-        //retry
-        Ms.Clear;
-        result:=Download(
-              true,
-              aURL,
-              Ms,
-              HTTPProxyHost,
-              HTTPProxyPort,
-              HTTPProxyUser,
-              HTTPProxyPassword);
-      end;
+      Content:='';
       if result then
       begin
         JSONFileList:=TStringList.Create;
@@ -2158,26 +2149,40 @@ begin
           JSONFileList.Free;
         end;
       end;
-    finally
-      Ms.Free;
-    end;
-  end;
 
-  if (Length(Content)=0) OR (NOT result) then exit;
-  Json:=GetJSON(Content);
-  try
-    if Json=Nil then exit;
-    JsonArray:=Json.FindPath('assets') as TJSONArray;
-    i:=JsonArray.Count;
-    while (i>0) do
-    begin
-      Dec(i);
-      JsonObject := JsonArray.Objects[i];
-      fileurllist.Add(JsonObject.Get('browser_download_url'));
-      with GitHubFileListCache[High(GitHubFileListCache)] do FileList.Add(fileurllist[(fileurllist.Count-1)]);
-    end;
-  finally
-    Json.Free;
+      result:=(Length(Content)>0);
+
+      if result then
+      begin
+        try
+          Json:=GetJSON(Content);
+        except
+          Json:=nil;
+        end;
+      end;
+
+      result:=Assigned(Json);
+
+      if result then
+      begin
+        try
+          JsonArray:=Json.FindPath('assets') as TJSONArray;
+          i:=JsonArray.Count;
+          while (i>0) do
+          begin
+            Dec(i);
+            JsonObject := JsonArray.Objects[i];
+            fileurllist.Add(JsonObject.Get('browser_download_url'));
+            with GitHubFileListCache[High(GitHubFileListCache)] do FileList.Add(fileurllist[(fileurllist.Count-1)]);
+          end;
+        finally
+          Json.Free;
+        end;
+      end;
+
+      localwget:=(NOT localwget);
+    until ((NOT localwget) OR (result));
+
   end;
 
 end;
@@ -3203,10 +3208,6 @@ begin
       if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
     end;
   end;
-  if ExeName='wget' then
-  begin
-    ExeName:='';
-  end;
   if Result then
     ThreadLog('Found valid ' + ExeName + ' application.',etDebug);
 end;
@@ -4149,6 +4150,9 @@ end;
 constructor TUseNativeDownLoader.Create;
 begin
   Inherited;
+
+  ThreadLog('Native downloader created.',etDebug);
+
   FMaxRetries:=MAXCONNECTIONRETRIES;
   {$ifdef Darwin}
   // GitHub needs TLS 1.2 .... native FPC client does not support this (through OpenSSL)
@@ -4606,6 +4610,8 @@ end;
 constructor TUseWGetDownloader.Create;
 begin
   Inherited;
+
+  ThreadLog('WGet downloader created.',etDebug);
 
   FCURLOk:=False;
   {$ifdef ENABLECURL}

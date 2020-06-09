@@ -1913,7 +1913,7 @@ begin
 
   DisEnable(Sender,False);
 
-   // for i:=1 to 100 do
+  //for i:=1 to 100 do
   try
     if listModules.SelCount=0 then
     begin
@@ -1952,7 +1952,7 @@ begin
         if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
       end;
       {$ifdef RemoteLog}
-      aDataClient.AddExtraData('module'+InttoStr(1),listModules.Items.Strings[listModules.ItemIndex]);
+      aDataClient.AddExtraData('module'+InttoStr(1),modules);
       {$endif}
     end;
 
@@ -1981,13 +1981,18 @@ begin
         {$endif}
       end;
 
+      RealRun;
+
+      (*
+      AddMessage('Run: '+modules+InttoStr(i));
       if (NOT RealRun) then
       begin
-        //AddMessage('Run: '+InttoStr(i));
-        //break;
-
+        break;
       end;
+      *)
+
     end;
+
   finally
     FPCupManager.ExportOnly:=(NOT Form2.Repo);
     DisEnable(Sender,True);
@@ -2930,7 +2935,7 @@ begin
                 try
                   aList.Clear;
                   try
-                    GetGitHubFileList(DownloadURL,aList,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                    GetGitHubFileList(DownloadURL,aList,FPCupManager.UseWget,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                   except
                     on E : Exception do
                     begin
@@ -3082,7 +3087,7 @@ begin
                 try
                   aList.Clear;
                   try
-                    GetGitHubFileList(DownloadURL,aList,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                    GetGitHubFileList(DownloadURL,aList,FPCupManager.UseWget,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                   except
                     on E : Exception do
                     begin

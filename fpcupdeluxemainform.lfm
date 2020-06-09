@@ -561,6 +561,10 @@ object Form1: TForm1
     SelectedColor.ItalicPriority = 50
     SelectedColor.UnderlinePriority = 50
     SelectedColor.StrikeOutPriority = 50
+    ScrollOnEditLeftOptions.ScrollExtraPercent = 20
+    ScrollOnEditLeftOptions.ScrollExtraMax = 10
+    ScrollOnEditRightOptions.ScrollExtraPercent = 30
+    ScrollOnEditRightOptions.ScrollExtraMax = 25
     IncrementColor.Background = clNone
     IncrementColor.Foreground = clNone
     HighlightAllColor.Background = clNone
@@ -3059,7 +3063,7 @@ object Form1: TForm1
     end
     object ModuleSheet: TTabSheet
       Caption = 'Modules'
-      ClientHeight = 441
+      ClientHeight = 550
       ClientWidth = 302
       object listModules: TListBox
         AnchorSideLeft.Control = ModuleSheet
@@ -3068,7 +3072,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = Memo1
         Left = 8
-        Height = 306
+        Height = 415
         Top = 8
         Width = 286
         Anchors = [akTop, akLeft, akRight, akBottom]
@@ -3091,7 +3095,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Install the selected module.'
-        Top = 408
+        Top = 517
         Width = 101
         Anchors = [akLeft, akBottom]
         AutoSize = True
@@ -3111,7 +3115,7 @@ object Form1: TForm1
         Left = 178
         Height = 25
         Hint = 'Uninstall the selected module.'
-        Top = 408
+        Top = 517
         Width = 116
         Anchors = [akRight, akBottom]
         AutoSize = True
@@ -3130,7 +3134,7 @@ object Form1: TForm1
         AnchorSideBottom.Control = btnInstallModule
         Left = 8
         Height = 70
-        Top = 326
+        Top = 435
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Left = 8

@@ -1083,6 +1083,13 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     //'qt5-default'
     //'libqt5x11extras5-dev'
 
+    //CentOS
+    //qt5-qtbase
+    //qt5-qtbase-devel
+    //qt5-qtx11extras
+    //qt5-qtx11extras-devel
+
+
     LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so','libgdk-x11-2.0.so');
     QTLIBS:TLibList = ('libQt4Pas.so.1','','','','');
     QT5LIBS:TLibList = ('libQt5Pas.so.1','','','','');
@@ -1179,7 +1186,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     else
     if (AnsiContainsText(Output,'rhel') OR AnsiContainsText(Output,'centos') OR AnsiContainsText(Output,'scientific') OR AnsiContainsText(Output,'fedora') OR AnsiContainsText(Output,'redhat'))  then
     begin
-      Output:='libx11-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
+      Output:='libX11-devel libXtst libXtst-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
     end
     else
     if AnsiContainsText(Output,'openbsd') then

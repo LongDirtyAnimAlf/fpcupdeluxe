@@ -1998,7 +1998,7 @@ begin
   Infoln(localinfotext+'Getting '+ModuleName+' sources.',etInfo);
 
   FPCArchive := GetTempFileNameExt('FPCUPTMP','zip');
-  result:=GetFile(FURL,FPCArchive,true);
+  result:=GetFile(FURL,FPCArchive);
   if (result AND (NOT FileExists(FPCArchive))) then result:=false;
 
   if result then
@@ -3103,7 +3103,7 @@ begin
     try
       PatchList.Clear;
       try
-        GetGitHubFileList(FPCUPGITREPOSOURCEPATCHESAPI,PatchList,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+        GetGitHubFileList(FPCUPGITREPOSOURCEPATCHESAPI,PatchList,FUseWget,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
       except
         on E : Exception do
         begin

@@ -6,8 +6,10 @@
   <string>English</string>
   <key>CFBundleExecutable</key>
   <string>fpcupdeluxe-x86_64-darwin-cocoa</string>
-  <key>CFBundleName</key>
+  <key>CFBundleIconFile</key>
   <string>fpcupdeluxe</string>
+  <key>CFBundleName</key>
+  <string>fpcupdeluxeremote</string>
   <key>CFBundleIdentifier</key>
   <string>com.company.fpcupdeluxe-x86_64-darwin-cocoa</string>
   <key>CFBundleInfoDictionaryVersion</key>

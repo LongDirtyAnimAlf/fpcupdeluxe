@@ -2153,7 +2153,7 @@ begin
 
     // Delete old compiler in archive directory (if any)
     SysUtils.DeleteFile(BootstrapFileArchiveDir+CompilerName);
-    if (NOT FileExists(BootstrapFilePath)) then OperationSucceeded:=GetFile(FBootstrapCompilerURL,BootstrapFilePath,true);
+    if (NOT FileExists(BootstrapFilePath)) then OperationSucceeded:=GetFile(FBootstrapCompilerURL,BootstrapFilePath);
     if OperationSucceeded then OperationSucceeded:=FileExists(BootstrapFilePath);
   end;
 
@@ -2560,7 +2560,7 @@ begin
         try
           aCompilerList.Clear;
           try
-            GetGitHubFileList(FPCUPGITREPOBOOTSTRAPPERAPI,aCompilerList,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+            GetGitHubFileList(FPCUPGITREPOBOOTSTRAPPERAPI,aCompilerList,FUseWget,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
           except
             on E : Exception do
             begin
