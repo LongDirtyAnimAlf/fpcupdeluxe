@@ -77,13 +77,17 @@ uses
   typinfo,
   zipper,
   fphttpclient, // for github api file list and others
+
   {$ifdef darwin}
   ns_url_request,
   {$endif}
   {$ifndef USEONLYCURL}
   {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}
   {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30000)}
+  //fpopenssl,
   opensslsockets,
+  //gnutls,
+  //gnutlssockets,
   {$ENDIF}
   openssl,
   {$ENDIF}
@@ -1702,7 +1706,7 @@ function DownloadBase(aDownLoader:TBasicDownloader;URL: string; aDataStream:TStr
 begin
   result:=false;
 
-  if (Length(aDownloader.FilenameOnly)>0) then ThreadLog('Using native downloader to download '+aDownloader.FilenameOnly);
+  //if (Length(aDownloader.FilenameOnly)>0) then ThreadLog('Using native downloader to download '+aDownloader.FilenameOnly);
 
   {$ifdef mswindows}
   if (Pos('/openssl',URL)>0) AND (Pos('.zip',URL)>0) then
@@ -2082,8 +2086,7 @@ end;
 
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; bWGet:boolean=false; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 var
-  Ms: TMemoryStream;
-  JSONFileList:TStringList;
+  Ss: TStringStream;
   Content : string;
   Json : TJSONData;
   JsonObject : TJSONObject;
@@ -2123,31 +2126,27 @@ begin
 
   if (NOT result) then
   begin
-    Ms := TMemoryStream.Create;
     localwget:=bWGet;
-
     repeat
-      Ms.Clear;
-      result:=Download(
+      Ss := TStringStream.Create('');
+      try
+        Ss.Clear;
+        Ss.Position:=0;
+        Ss.Size:=0;
+        result:=
+          Download(
             localwget,
             aURL,
-            Ms,
+            Ss,
             HTTPProxyHost,
             HTTPProxyPort,
             HTTPProxyUser,
-            HTTPProxyPassword);
-
-      Content:='';
-      if result then
-      begin
-        JSONFileList:=TStringList.Create;
-        try
-          Ms.Position:=0;
-          JSONFileList.LoadFromStream(Ms);
-          Content:=JSONFileList.Text;
-        finally
-          JSONFileList.Free;
-        end;
+            HTTPProxyPassword
+          );
+        Content:='';
+        if result then Content:=Ss.DataString;
+      finally
+        Ss.Free;
       end;
 
       result:=(Length(Content)>0);
@@ -3594,92 +3593,86 @@ var
   Releases     : TJSONArray;
   NewVersion   : boolean;
   i            : integer;
-  Ms           : TMemoryStream;
-  JSONFileList : TStringList;
+  Ss           : TStringStream;
   Content      : string;
-  Success:boolean;
-
+  Success      : boolean;
 begin
   Success:=false;
   NewVersion:=false;
   result:='';
   if (Length(aURL)>0) then
   begin
-    Ms := TMemoryStream.Create;
+    Ss := TStringStream.Create('');
     try
-      Success:=Download(False,aURL,Ms);
-      if Success then
+      Success:=Download(False,aURL,Ss);
+      if (NOT Success) then
       begin
-        JSONFileList:=TStringList.Create;
-        try
-          Ms.Position:=0;
-          JSONFileList.LoadFromStream(Ms);
-          Content:=JSONFileList.Text;
-        finally
-          JSONFileList.Free;
-        end;
+        Ss.Clear;
+        Ss.Position:=0;
+        Success:=Download(True,aURL,Ss);
       end;
+      if Success then Content:=Ss.DataString;
     finally
-      Ms.Free;
+      Ss.Free;
     end;
 
     if Success then
     begin
       if (Length(Content)>0) then
       begin
-        Json:=GetJSON(Content);
         try
-          if JSON=Nil then exit;
-          try
-            JsonObject := TJSONObject(Json);
-            // Example ---
-            // tag_name: "1.6.2b"
-            // name: "Release v1.6.2b of fpcupdeluxe"
-            s:=JsonObject.Get('tag_name');
-            if CalculateNumericalVersion(s)>CalculateNumericalVersion(DELUXEVERSION) then NewVersion:=True;
-            if CalculateNumericalVersion(s)=CalculateNumericalVersion(DELUXEVERSION) then
+          Json:=GetJSON(Content);
+        except
+          Json:=nil;
+        end;
+        if JSON=nil then exit;
+        try
+          JsonObject := TJSONObject(Json);
+          // Example ---
+          // tag_name: "1.6.2b"
+          // name: "Release v1.6.2b of fpcupdeluxe"
+          s:=JsonObject.Get('tag_name');
+          if CalculateNumericalVersion(s)>CalculateNumericalVersion(DELUXEVERSION) then NewVersion:=True;
+          if CalculateNumericalVersion(s)=CalculateNumericalVersion(DELUXEVERSION) then
+          begin
+            if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
+          end;
+          if NewVersion then
+          begin
+            s:=JsonObject.Get('prerelease');//Should be False
+            NewVersion:=(s='False');
+          end;
+          //YES !!!
+          if NewVersion then
+          begin
+            //Assets is an array of binaries belonging to a release
+            Releases:=JsonObject.Get('assets',TJSONArray(nil));
+            for i:=0 to (Releases.Count-1) do
             begin
-              if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
-            end;
-            if NewVersion then
-            begin
-              s:=JsonObject.Get('prerelease');//Should be False
-              NewVersion:=(s='False');
-            end;
-            //YES !!!
-            if NewVersion then
-            begin
-              //Assets is an array of binaries belonging to a release
-              Releases:=JsonObject.Get('assets',TJSONArray(nil));
-              for i:=0 to (Releases.Count-1) do
+              JsonObject := TJSONObject(Releases[i]);
+              // Example ---
+              // browser_download_url: "https://github.com/newpascal/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
+              // name: "fpcupdeluxe-aarch64-linux"
+              // created_at: "2018-10-14T06:58:44Z"
+              s:=JsonObject.Get('name');
+              aFile:='fpcupdeluxe-'+GetTargetCPUOS;
+              {$ifdef Darwin}
+              {$ifdef LCLCARBON}
+              aFile:=aFile+'-carbon';
+              {$endif}
+              {$ifdef LCLCOCOA}
+              aFile:=aFile+'-cocoa';
+              {$endif}
+              {$endif}
+              {$if defined(LCLQT) or defined(LCLQT5)}
+              aFile:=aFile+'-qt5';
+              {$endif}
+              if (Pos(aFile,s)=1) then
               begin
-                JsonObject := TJSONObject(Releases[i]);
-                // Example ---
-                // browser_download_url: "https://github.com/newpascal/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
-                // name: "fpcupdeluxe-aarch64-linux"
-                // created_at: "2018-10-14T06:58:44Z"
-                s:=JsonObject.Get('name');
-                aFile:='fpcupdeluxe-'+GetTargetCPUOS;
-                {$ifdef Darwin}
-                {$ifdef LCLCARBON}
-                aFile:=aFile+'-carbon';
-                {$endif}
-                {$ifdef LCLCOCOA}
-                aFile:=aFile+'-cocoa';
-                {$endif}
-                {$endif}
-                {$if defined(LCLQT) or defined(LCLQT5)}
-                aFile:=aFile+'-qt5';
-                {$endif}
-                if (Pos(aFile,s)=1) then
-                begin
-                  result:=JsonObject.Get('browser_download_url');
-                  break;
-                end;
+                result:=JsonObject.Get('browser_download_url');
+                break;
               end;
             end;
-          except
-            //Swallow exceptions in case of failures: not important
           end;
         finally
           Json.Free;
@@ -4812,7 +4805,7 @@ begin
 
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(aDataStream));
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEHEADER,Pointer(aDataStream));
+        //if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEHEADER,Pointer(aDataStream));
 
         //if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSLVERSION,6);
 
