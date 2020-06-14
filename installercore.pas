@@ -2386,14 +2386,16 @@ const
   NewSourceURL : array [0..0] of string = (
     //'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/wget-64.zip',
     //'https://eternallybored.org/misc/wget/1.19.4/64/wget.exe'
-    'https://eternallybored.org/misc/wget/1.20/64/wget.exe'
+    //'https://eternallybored.org/misc/wget/1.20/64/wget.exe'
+    'https://eternallybored.org/misc/wget/1.20.3/64/wget.exe'
     );
   {$endif}
   {$ifdef win32}
   NewSourceURL : array [0..0] of string = (
     //'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/wget-32.zip',
     //'https://eternallybored.org/misc/wget/1.19.4/32/wget.exe'
-    'https://eternallybored.org/misc/wget/1.20/32/wget.exe'
+    //'https://eternallybored.org/misc/wget/1.20/32/wget.exe'
+    'https://eternallybored.org/misc/wget/1.20.3/32/wget.exe'
     );
   {$endif}
 var

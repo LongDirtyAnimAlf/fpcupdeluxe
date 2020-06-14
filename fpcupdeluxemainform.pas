@@ -2,7 +2,6 @@ unit fpcupdeluxemainform;
 
 {$mode objfpc}{$H+}
 
-
 interface
 
 uses
@@ -1120,7 +1119,11 @@ end;
 procedure TForm1.CommandOutputScreenMouseWheel(Sender: TObject; Shift: TShiftState;
   WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 begin
+  {$ifdef Darwin}
+  if ssModifier in Shift then
+  {$else}
   if ssCtrl in Shift then
+  {$endif}
   begin
     if (WheelDelta>0) AND (CommandOutputScreen.Font.Size<48) then CommandOutputScreen.Font.Size:=CommandOutputScreen.Font.Size+1;
     if (WheelDelta<0)  AND (CommandOutputScreen.Font.Size>2) then CommandOutputScreen.Font.Size:=CommandOutputScreen.Font.Size-1;

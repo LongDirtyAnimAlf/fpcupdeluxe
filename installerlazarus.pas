@@ -1599,6 +1599,7 @@ begin
       // Check for newer user-installed debugger (e.g. from ports tree
       // The system gdb is ancient (gdb 6.1.1 in FreeBSD 9) and does not work well with Laz
       DebuggerPath := '/usr/local/bin/gdb';
+      if (NOT FileExists(DebuggerPath)) OR (NOT CheckExecutable(DebuggerPath, ['--version'], 'GNU gdb')) then DebuggerPath := '/usr/libexec/gdb';
       if (NOT FileExists(DebuggerPath)) OR (NOT CheckExecutable(DebuggerPath, ['--version'], 'GNU gdb')) then DebuggerPath := which('gdb');
 
       {$IF (defined(Darwin))}

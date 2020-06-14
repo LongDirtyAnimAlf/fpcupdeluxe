@@ -1059,7 +1059,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     'make',
     'gcc',
     'build-essential',
-    //'coreutils',
+    //'openssl-dev',
     'binutils',
     'gdb',
     'patch',
