@@ -954,6 +954,12 @@ begin
                Options:=Options+' -dFPC_USE_LIBC';
           {$endif}
 
+          if (Length(ActualRevision)=0) OR (ActualRevision='failure') then
+          begin
+            s2:=GetRevision(ModuleName);
+            if Length(s2)>0 then FActualRevision:=s2;
+          end;
+
           if (Length(ActualRevision)>0) AND (ActualRevision<>'failure') then
           begin
             Processor.Process.Parameters.Add('REVSTR='+ActualRevision);

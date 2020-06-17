@@ -513,7 +513,9 @@ type
     function CheckModule(ModuleName: string): boolean; virtual;
     // Patch sources
     function PatchModule(ModuleName: string): boolean;
+    //Source revision
     function CreateRevision(ModuleName,aRevision:string): boolean;
+    function GetRevision(ModuleName:string): string;
     // Uninstall module
     function UnInstallModule(ModuleName: string): boolean; virtual;
     procedure Infoln(Message: string; const Level: TEventType=etInfo);
@@ -3502,6 +3504,39 @@ begin
     *)
   end;
 
+end;
+
+function TInstaller.GetRevision(ModuleName:string): string;
+const
+  ConstName = 'RevisionStr';
+var
+  RevFileName,RevString: string;
+  RevisionStringList:TStringList;
+begin
+  result:='';
+
+  RevFileName:='';
+
+  //if ModuleName=_LAZARUS then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+REVINCFILENAME;
+  if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+
+  if FileExists(RevFileName) then
+  begin
+    RevisionStringList:=TStringList.Create;
+    try
+      RevisionStringList.LoadFromFile(RevFileName);
+      if (RevisionStringList.Count>0) then
+      begin
+        if ModuleName=_FPC then
+        begin
+          RevString:=RevisionStringList.Strings[0];
+          result:=AnsiDequotedStr(RevString,'''');
+        end;
+      end;
+    finally
+      RevisionStringList.Free;
+    end;
+  end;
 end;
 
 function TInstaller.UnInstallModule(ModuleName: string): boolean;
