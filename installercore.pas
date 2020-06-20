@@ -35,11 +35,12 @@ uses
 {$i revision.inc}
 
 const
-  DEFAULTFPCVERSION     = '3.0.4';
-  DEFAULTLAZARUSVERSION = '2.0.6';
+  DEFAULTFPCVERSION     = '3.2.0';
+  DEFAULTLAZARUSVERSION = '2.0.8';
 
   FPCTRUNKVERSION       = '3.3.1';
   FPCTRUNKBOOTVERSION   = '3.0.4';
+  //FPCTRUNKBOOTVERSION   = '3.2.0';
   LAZARUSTRUNKVERSION   = '2.1.0';
 
   DEFAULTFREEBSDVERSION = 11;
@@ -3529,8 +3530,9 @@ begin
       begin
         if ModuleName=_FPC then
         begin
-          RevString:=RevisionStringList.Strings[0];
-          result:=AnsiDequotedStr(RevString,'''');
+          RevString:=Trim(RevisionStringList.Strings[0]);
+          RevString:=AnsiDequotedStr(RevString,'''');
+          result:=AnsiDequotedStr(RevString,'"');
         end;
       end;
     finally
