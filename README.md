@@ -37,14 +37,14 @@ All use permitted, also commercial, but no warranties, express or implied.
 Prerequisites
 =============
 
-- Windows  
-=========
-- none
-- If needed, the tool will download all needed binaries (bootstrap compiler, binutils, svn executable)
-- In order to compile programs correctly with GTK widgetset under Windows, you can use the following bundle:   http://www.tarnyko.net/dl/gtk.htm
+Windows  
+------------
+  - none
+  - If needed, the tool will download all needed binaries (bootstrap compiler, binutils, svn executable)
+  - In order to compile programs correctly with GTK widgetset under Windows, you can use the following bundle:   http://www.tarnyko.net/dl/gtk.htm
 
-- Linux  
-=======
+Linux  
+------------
 - GNU make
 - the binutils (make etc); e.g. in a package called build-essential
 - bunzip2 (probably present in most distributions)
@@ -54,17 +54,18 @@ Prerequisites
 - gdb is not needed for building FPC/Lazarus but needed for debugging 
   your Lazarus programs 
 - libX11, libgdk_pixbuf-2.0, libpango-1.0, libgdk-x11-2.0
+
 E.g. on Debian or Ubuntu, do something like:
 ```
 sudo apt install make binutils build-essential gdb subversion zip unzip libx11-dev libgtk2.0-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev
 ```
 
-- Apple OSX  
-===========
+Apple OSX  
+------------
 - Xcode and Xcode command line tools
 
-- FreeBSD 9+  
-=============
+FreeBSD 9+  
+------------
 - none, but *strongly recommended* to use a newer gdb than the 6.1 version 
 supplied with the system, e.g. by
 cd /usr/ports/devel/gdb
