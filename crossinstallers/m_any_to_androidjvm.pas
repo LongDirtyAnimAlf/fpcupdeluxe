@@ -41,12 +41,12 @@ Adapt (add) for other setups
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils;
 
 implementation
 
 uses
-  FileUtil, fpcuputil;
+  FileUtil, m_crossinstaller, fpcuputil;
 
 type
 

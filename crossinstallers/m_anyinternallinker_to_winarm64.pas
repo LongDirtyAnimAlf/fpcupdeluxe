@@ -10,12 +10,12 @@ Requirements: FPC should have an internal linker
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils;
 
 implementation
 
 uses
-  LazFileUtils,fpcuputil;
+  FileUtil, LazFileUtils, m_crossinstaller, fpcuputil;
 
 type
 

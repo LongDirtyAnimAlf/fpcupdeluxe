@@ -41,9 +41,13 @@ Also looks for android cross compiler bin and bin without any prefix
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
+  Classes, SysUtils;
 
 implementation
+
+uses
+  FileUtil, m_crossinstaller, fpcuputil;
+
 type
 
 { Tany_linuxarm }

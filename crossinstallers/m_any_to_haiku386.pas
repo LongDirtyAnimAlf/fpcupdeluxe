@@ -41,9 +41,12 @@ Adapt (add) for other setups
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fileutil;
+  Classes, SysUtils;
 
 implementation
+
+uses
+  FileUtil, m_crossinstaller;
 
 type
 

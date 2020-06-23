@@ -49,9 +49,12 @@ avr-embedded-strip.exe
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
+  Classes, SysUtils;
 
 implementation
+
+uses
+  FileUtil, m_crossinstaller, fpcuputil;
 
 type
 

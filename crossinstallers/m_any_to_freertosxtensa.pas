@@ -33,9 +33,13 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
+  Classes, SysUtils;
 
 implementation
+
+uses
+  FileUtil, m_crossinstaller, fpcuputil;
+
 type
 
 { TAny_FreeRTOSXtensa }

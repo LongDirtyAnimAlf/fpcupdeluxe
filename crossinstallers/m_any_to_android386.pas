@@ -33,14 +33,16 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils;
+
+implementation
+
+uses
   StrUtils,
   {$IFDEF UNIX}
   baseunix,
   {$ENDIF}
-  m_crossinstaller,fileutil,fpcuputil;
-
-implementation
+  FileUtil, m_crossinstaller, fpcuputil;
 
 const
   ARCH='i386';
