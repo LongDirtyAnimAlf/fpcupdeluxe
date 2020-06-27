@@ -1030,6 +1030,7 @@ begin
     XdgDesktopContent.Add('Name='+ShortcutName);
     XdgDesktopContent.Add('GenericName=Lazarus IDE with Free Pascal Compiler');
     XdgDesktopContent.Add('Category=Application;IDE;Development;GUIDesigner;Programming;');
+    XdgDesktopContent.Add('Categories=Application;IDE;Development;GUIDesigner;Programming;');
     XdgDesktopContent.Add('Keywords=editor;Pascal;IDE;FreePascal;fpc;Design;Designer;');
     //XdgDesktopContent.Add('StartupWMClass=Lazarus');
     //XdgDesktopContent.Add('MimeType=text/x-pascal;');
