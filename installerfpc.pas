@@ -2953,7 +2953,7 @@ begin
 
   s2:=GetVersion;
   s:=GetCompilerInDir(FInstallDirectory);
-  if FileExists(s) then VersionSnippet:=CompilerVersion(s);
+  VersionSnippet:=CompilerVersion(s);
   if VersionSnippet='0.0.0' then VersionSnippet:=s2;
   if VersionSnippet<>'0.0.0' then
   begin
@@ -3976,7 +3976,11 @@ begin
     if (SourceVersion<>'0.0.0') then
     begin
       s:=GetRevisionFromVersion(ModuleName,SourceVersion);
-      if (Length(s)>0) then FActualRevision:=s;
+      if (Length(s)>0) then
+      begin
+        FActualRevision:=s;
+        FPreviousRevision:=s;
+      end;
     end
     else
     begin
@@ -4005,10 +4009,10 @@ begin
         UpdateWarnings.Add('Location: '+FBaseDirectory);
         UpdateWarnings.Add('');
       end;
-      UpdateWarnings.Add('FPC update at: '+DateTimeToStr(now));
-      UpdateWarnings.Add('FPC URL: '+aRepoClient.Repository);
-      UpdateWarnings.Add('FPC previous revision: '+PreviousRevision);
-      UpdateWarnings.Add('FPC new revision: '+ActualRevision);
+      UpdateWarnings.Add(ModuleName+' update at: '+DateTimeToStr(now));
+      if aRepoClient<>nil then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
+      UpdateWarnings.Add(ModuleName+' previous revision: '+PreviousRevision);
+      UpdateWarnings.Add(ModuleName+' new revision: '+ActualRevision);
       UpdateWarnings.Add('');
       UpdateWarnings.SaveToFile(s);
     finally
@@ -4018,7 +4022,6 @@ begin
     CreateRevision(ModuleName,ActualRevision);
 
     if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
-
   end
   else
   begin

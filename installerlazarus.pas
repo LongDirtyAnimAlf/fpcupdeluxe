@@ -1503,7 +1503,6 @@ begin
     end;
   end;
 
-
   Result := BuildModuleCustom(ModuleName);
 end;
 
@@ -2080,16 +2079,19 @@ var
   UpdateWarnings: TStringList;
   aRepoClient:TRepoClient;
   s:string;
+  SourceVersion:string;
   {$ifdef BSD}
   FilePath:string;
   {$endif}
 begin
-  Result := inherited;
-  Result := InitModule;
+  result:=inherited;
+  result:=InitModule;
 
-  if not Result then exit;
+  if (not result) then exit;
 
   FPreviousRevision:='unknown';
+
+  SourceVersion:='0.0.0';
 
   aRepoClient:=GetSuitableRepoClient;
 
@@ -2097,7 +2099,7 @@ begin
   begin
     Infoln(infotext+'Using FTP for download of ' + ModuleName + ' sources.',etWarning);
     result:=DownloadFromFTP(ModuleName);
-    if result then CreateRevision(ModuleName,'unknown');
+    FActualRevision:=FPreviousRevision;
   end
   else
   begin
@@ -2116,20 +2118,36 @@ begin
       UpdateWarnings.Free;
     end;
 
-    if NOT aRepoClient.ExportOnly then
+  end;
+
+  if result then
+  begin
+    SourceVersion:=GetVersion;
+
+    if (SourceVersion<>'0.0.0') then
     begin
-      if FRepositoryUpdated then
+      s:=GetRevisionFromVersion(ModuleName,SourceVersion);
+      if (Length(s)>0) then
       begin
-        Infoln(infotext+ModuleName + ' was at revision: '+PreviousRevision,etInfo);
-        Infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo);
-      end
-      else
-      begin
-        Infoln(infotext+ModuleName + ' is at revision: '+ActualRevision,etInfo);
-        Infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
+        FActualRevision:=s;
+        FPreviousRevision:=s;
       end;
+    end
+    else
+    begin
+      Infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;
 
+    if FRepositoryUpdated then
+    begin
+      Infoln(infotext+ModuleName + ' was at revision: '+PreviousRevision,etInfo);
+      Infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo);
+    end
+    else
+    begin
+      Infoln(infotext+ModuleName + ' is at revision: '+ActualRevision,etInfo);
+      Infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
+    end;
     UpdateWarnings:=TStringList.Create;
     try
       s:=SafeExpandFileName(SafeGetApplicationPath+'fpcuprevisions.log');
@@ -2142,143 +2160,133 @@ begin
         UpdateWarnings.Add('Location: '+FBaseDirectory);
         UpdateWarnings.Add('');
       end;
-      UpdateWarnings.Add('Lazarus update at: '+DateTimeToStr(now));
-      UpdateWarnings.Add('Lazarus URL: '+aRepoClient.Repository);
-      UpdateWarnings.Add('Lazarus previous revision: '+PreviousRevision);
-      UpdateWarnings.Add('Lazarus new revision: '+ActualRevision);
+      UpdateWarnings.Add(ModuleName+' update at: '+DateTimeToStr(now));
+      if aRepoClient<>nil then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
+      UpdateWarnings.Add(ModuleName+' previous revision: '+PreviousRevision);
+      UpdateWarnings.Add(ModuleName+' new revision: '+ActualRevision);
       UpdateWarnings.Add('');
       UpdateWarnings.SaveToFile(s);
     finally
       UpdateWarnings.Free;
     end;
 
-    if (NOT Result) then
-      Infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
-  end;
+    CreateRevision(ModuleName,ActualRevision);
 
-  {$ifdef Darwin}
-  {$ifdef LCLQT5}
-  // Only for Darwin
-  // Get Qt bindings if not present yet
-  // I know that this involves a lot of trickery and some dirty work, but it gives the user an öut-of-the-box" experience !
-  // And fpcupdeluxe is there to make the user-experience of FPC and Lazarus an easy one
-  // Note:
-  // Do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
-  // ToDo : check if this presumption is correct
+    if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
 
-  FilePath:=ExcludeTrailingPathDelimiter(SafeGetApplicationName);
-  Infoln(infotext+'Adding QT5 binary sources (QT5 + QT5Pas Frameworks + libqcocoa) from fpcupdeluxe.app itself.',etInfo);
+    {$ifdef Darwin}
+    {$ifdef LCLQT5}
+    // Only for Darwin
+    // Get Qt bindings if not present yet
+    // I know that this involves a lot of trickery and some dirty work, but it gives the user an öut-of-the-box" experience !
+    // And fpcupdeluxe is there to make the user-experience of FPC and Lazarus an easy one
+    // Note:
+    // Do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
+    // ToDo : check if this presumption is correct
 
-  // copy QT5 frameworks to Lazarus source directory for future use.
-  if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks') then
-  begin
-    CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks');
-    Infoln(infotext+'Adding QT5 Frameworks to ' + ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks' + ' success.',etInfo);
-  end else Infoln(infotext+'Adding QT5 Frameworks to ' + ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks' + ' failure.',etInfo);
+    FilePath:=ExcludeTrailingPathDelimiter(SafeGetApplicationName);
+    Infoln(infotext+'Adding QT5 binary sources (QT5 + QT5Pas Frameworks + libqcocoa) from fpcupdeluxe.app itself.',etInfo);
 
-  // copy QT5 frameworks to lazarus.app ... a bit redundant ... :-(
-  if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Frameworks') then
-  begin
-    CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Frameworks');
-    Infoln(infotext+'Adding QT5 Frameworks to lazarus.app success.',etInfo);
-  end else Infoln(infotext+'Adding QT5 Frameworks to lazarus.app failure.',etInfo);
-
-  // copy QT5 frameworks to startlazarus.app ... a bit redundant ... :-(
-  if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Frameworks') then
-  begin
-    CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Frameworks');
-    Infoln(infotext+'Adding QT5 Frameworks to startlazarus.app success.',etInfo);
-  end else Infoln(infotext+'Adding QT5 Frameworks to startlazarus.app failure.',etInfo);
-  CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app');
-
-  (*
-  // QT5 quirk: copy QT5 libqcocoa.dylib to lazarus.app
-  if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Plugins')
-    then Infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
-    else Infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etInfo);
-
-  // QT5 quirk: copy QT5 libqcocoa.dylib to startlazarus.app
-  if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Plugins')
-    then Infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
-    else Infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etInfo);
-  *)
-
-  // copy QT5 plugins to lazarus.app ... a bit redundant ... :-(
-  if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Plugins')
-    then Infoln(infotext+'Adding QT5 plugins success.',etInfo)
-    else Infoln(infotext+'Adding QT5 plugins failure.',etInfo);
-
-  // copy QT5 plugins to startlazarus.app ... a bit redundant ... :-(
-  if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Plugins')
-    then Infoln(infotext+'Adding QT5 plugins success.',etInfo)
-    else Infoln(infotext+'Adding QT5 plugins failure.',etInfo);
-
-  {$endif}
-  {$endif}
-
-  (*
-  Errors := 0;
-  if (Result) and (Uppercase(FCrossLCL_Platform) = 'QT') then
-  begin
-    for Counter := low(FUtilFiles) to high(FUtilFiles) do
+    // copy QT5 frameworks to Lazarus source directory for future use.
+    if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks') then
     begin
-      if (FUtilFiles[Counter].Category = ucQtFile) and not
-        (FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + FUtilFiles[Counter].FileName)) then
+      CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks');
+      Infoln(infotext+'Adding QT5 Frameworks to ' + ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks' + ' success.',etInfo);
+    end else Infoln(infotext+'Adding QT5 Frameworks to ' + ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks' + ' failure.',etInfo);
+
+    // copy QT5 frameworks to lazarus.app ... a bit redundant ... :-(
+    if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Frameworks') then
+    begin
+      CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Frameworks');
+      Infoln(infotext+'Adding QT5 Frameworks to lazarus.app success.',etInfo);
+    end else Infoln(infotext+'Adding QT5 Frameworks to lazarus.app failure.',etInfo);
+
+    // copy QT5 frameworks to startlazarus.app ... a bit redundant ... :-(
+    if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Frameworks') then
+    begin
+      CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Frameworks');
+      Infoln(infotext+'Adding QT5 Frameworks to startlazarus.app success.',etInfo);
+    end else Infoln(infotext+'Adding QT5 Frameworks to startlazarus.app failure.',etInfo);
+    CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app');
+
+    (*
+    // QT5 quirk: copy QT5 libqcocoa.dylib to lazarus.app
+    if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Plugins')
+      then Infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
+      else Infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etInfo);
+
+    // QT5 quirk: copy QT5 libqcocoa.dylib to startlazarus.app
+    if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Plugins')
+      then Infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
+      else Infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etInfo);
+    *)
+
+    // copy QT5 plugins to lazarus.app ... a bit redundant ... :-(
+    if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Plugins')
+      then Infoln(infotext+'Adding QT5 plugins success.',etInfo)
+      else Infoln(infotext+'Adding QT5 plugins failure.',etInfo);
+
+    // copy QT5 plugins to startlazarus.app ... a bit redundant ... :-(
+    if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Plugins')
+      then Infoln(infotext+'Adding QT5 plugins success.',etInfo)
+      else Infoln(infotext+'Adding QT5 plugins failure.',etInfo);
+
+    {$endif}
+    {$endif}
+
+    (*
+    Errors := 0;
+    if (Result) and (Uppercase(FCrossLCL_Platform) = 'QT') then
+    begin
+      for Counter := low(FUtilFiles) to high(FUtilFiles) do
       begin
-        Infoln(infotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FSourceDirectory, etDebug);
-        try
-          if Download(FUseWget, FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName, IncludeTrailingPathDelimiter(FSourceDirectory) +
-            FUtilFiles[Counter].FileName, FHTTPProxyHost, FHTTPProxyPort, FHTTPProxyUser,
-            FHTTPProxyPassword) = false then
-          begin
-            Errors := Errors + 1;
-            Infoln(infotext+'Error downloading Qt-related file to ' + IncludeTrailingPathDelimiter(FSourceDirectory) +
-              FUtilFiles[Counter].FileName, eterror);
-          end;
-        except
-          on E: Exception do
-          begin
-            Result := false;
-            Infoln(infotext+'Error downloading Qt-related files: ' + E.Message, etError);
-            exit; //out of function.
+        if (FUtilFiles[Counter].Category = ucQtFile) and not
+          (FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + FUtilFiles[Counter].FileName)) then
+        begin
+          Infoln(infotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FSourceDirectory, etDebug);
+          try
+            if Download(FUseWget, FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName, IncludeTrailingPathDelimiter(FSourceDirectory) +
+              FUtilFiles[Counter].FileName, FHTTPProxyHost, FHTTPProxyPort, FHTTPProxyUser,
+              FHTTPProxyPassword) = false then
+            begin
+              Errors := Errors + 1;
+              Infoln(infotext+'Error downloading Qt-related file to ' + IncludeTrailingPathDelimiter(FSourceDirectory) +
+                FUtilFiles[Counter].FileName, eterror);
+            end;
+          except
+            on E: Exception do
+            begin
+              Result := false;
+              Infoln(infotext+'Error downloading Qt-related files: ' + E.Message, etError);
+              exit; //out of function.
+            end;
           end;
         end;
       end;
-    end;
 
-    if Errors > 0 then
+      if Errors > 0 then
+      begin
+        Result := false;
+        WritelnLog(infotext+IntToStr(Errors) + ' errors downloading Qt-related files.', true);
+      end;
+    end;
+    *)
+
+    {$ifdef BSD}
+    FilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide/include/';
+    if (NOT DirectoryExists(FilePath+'dragonfly')) then
     begin
-      Result := false;
-      WritelnLog(infotext+IntToStr(Errors) + ' errors downloading Qt-related files.', true);
+      if DirCopy(FilePath+'netbsd',FilePath+'dragonfly')
+        then Infoln(infotext+'Adding dragonfly include file for IDE.',etInfo)
+        else Infoln(infotext+'Adding dragonfly include file for IDE failure.',etError);
     end;
-  end;
-  *)
+    {$endif}
 
-  {$ifdef BSD}
-  FilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide/include/';
-  if (NOT DirectoryExists(FilePath+'dragonfly')) then
+  end
+  else
   begin
-    if DirCopy(FilePath+'netbsd',FilePath+'dragonfly')
-      then Infoln(infotext+'Adding dragonfly include file for IDE.',etInfo)
-      else Infoln(infotext+'Adding dragonfly include file for IDE failure.',etError);
+    Infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
   end;
-  {$endif}
-
-  if result then
-  begin
-    CreateRevision(ModuleName,ActualRevision);
-    //Version is needed for pathing, so get it here
-    s:=GetVersion;
-    if s<>'0.0.0' then
-    begin
-      PatchModule(ModuleName);
-    end
-    else
-    begin
-      Infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
-    end;
-  end;
-
 end;
 
 function TLazarusInstaller.CheckModule(ModuleName: string): boolean;
