@@ -1260,15 +1260,24 @@ begin
   if Pos('newpascal',URL)>0 then result:='trunk' else
   if Pos('freepascal.git',URL)>0 then result:='trunk' else
   if Pos('lazarus.git',URL)>0 then result:='trunk' else
+  //if Pos('fpcsource_3_2_0.git',URL)>0 then result:='3.2.0' else
   begin
 
     VersionSnippet := UpperCase(URL);
+
     i := Length(VersionSnippet);
 
     // remove trailing delimiter
     if (i>0) and CharInSet(VersionSnippet[i],['\','/']) then
     begin
       Dec(i);
+      SetLength(VersionSnippet,i);
+    end;
+
+    // remove git trailer
+    if (i>0) and (RightStr(VersionSnippet,4)='.GIT') then
+    begin
+      Dec(i,4);
       SetLength(VersionSnippet,i);
     end;
 

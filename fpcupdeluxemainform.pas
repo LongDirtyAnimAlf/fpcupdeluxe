@@ -3926,15 +3926,17 @@ begin
       Form2.FPCBranch:=ReadString('General','FPCBranch','');
       Form2.LazarusBranch:=ReadString('General','LazarusBranch','');
 
-      Form2.SplitFPC:=ReadBool('General','SplitFPC',True);
-      Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
+      Form2.SplitFPC:=ReadBool('General','SplitFPC',Form2.SplitFPC);
+      Form2.SplitLazarus:=ReadBool('General','SplitLazarus',Form2.SplitLazarus);
 
-      Form2.UseWget:=ReadBool('General','UseWget',False);
-      Form2.MakeJobs:=ReadBool('General','MakeJobs',True);
+      Form2.UseWget:=ReadBool('General','UseWget',Form2.UseWget);
+      Form2.MakeJobs:=ReadBool('General','MakeJobs',Form2.MakeJobs);
+
       Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
       Form2.UpdateOnly:=ReadBool('General','UpdateOnly',False);
-      Form2.UseSoftFloat:=ReadBool('General','UseSoftFloat',True);
-      Form2.OnlinePatching:=ReadBool('General','OnlinePatching',True);
+
+      Form2.UseSoftFloat:=ReadBool('General','UseSoftFloat',Form2.UseSoftFloat);
+      Form2.OnlinePatching:=ReadBool('General','OnlinePatching',Form2.OnlinePatching);
 
       Form2.SystemFPC:=ReadBool('General','SystemFPC',False);
 
@@ -3945,7 +3947,7 @@ begin
 
       Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
 
-      Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',False);
+      Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
 
     finally
       Free;

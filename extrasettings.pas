@@ -487,15 +487,6 @@ begin
   UseWget:=False;
   {$endif}
 
-  {$ifdef CPUAARCH64}
-  // disable some features
-  GroupBox4.Enabled:=False;
-  {$endif CPUAARCH64}
-  {$ifdef CPUARM}
-  // disable some features
-  GroupBox4.Enabled:=False;
-  {$endif CPUARM}
-
   {$ifndef RemoteLog}
   SendInfo:=False;
   SetCheckEnabled(CaptionCheckSendInfo,False);
@@ -507,6 +498,13 @@ begin
   {$endif}
 
   UseSoftFloat:=true;
+
+  {$IF defined(CPUAARCH64) OR defined(CPUARM) OR defined(Haiku)}
+  // disable some features
+  GroupBox4.Enabled:=False;
+  UseSoftFloat:=false;
+  SetCheckEnabled(CaptionUseSoftFloat80bit,False);
+  {$endif}
 
   //Disable OnlinePatching by default starting with 1.6.8p
   OnlinePatching:=false;

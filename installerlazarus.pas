@@ -1970,11 +1970,15 @@ begin
       if result then
         Sleep(200)
       else
+      begin
+        // Do not fail if we are cleaning Lazarus itself
+        if ModuleName=_LAZARUS then result:=true;
         break;
+      end;
     except
       on E: Exception do
       begin
-        Result := false;
+        result := false;
         WritelnLog(infotext+'Failed with an exception!' + LineEnding + 'Details: ' + E.Message, true);
       end;
     end;

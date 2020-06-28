@@ -758,9 +758,15 @@ begin
           Processor.Process.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
           Processor.Process.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
-          Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
           Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+
+          {$IFDEF UNIX}
+          s1:=ConcatPaths([FInstallDirectory,'lib','fpc',GetFPCVersion]);
+          {$ELSE}
+          s1:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+          {$ENDIF UNIX}
+          Processor.Process.Parameters.Add('FPCDIR=' + s1);
 
           {$IFDEF MSWINDOWS}
           if ChosenCompiler=GetCompilerInDir(FInstallDirectory) then
@@ -1435,7 +1441,6 @@ var
   {$IFDEF UNIX}
   s3:string;
   {$ENDIF}
-
   //FPCDirStore:string;
 begin
   result:=inherited;
@@ -1508,7 +1513,17 @@ begin
   {$ENDIF}
   Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
   Processor.Process.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
-  Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
+  Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+  Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+
+  //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
+  //The paths are fixed in the FPC sources. Try to set the default path here [FPCDIR], so yylex.cod and yyparse.cod can be found.
+  {$IFDEF UNIX}
+  s1:=ConcatPaths([FInstallDirectory,'lib','fpc',GetFPCVersion]);
+  {$ELSE}
+  s1:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+  {$ENDIF UNIX}
+  Processor.Process.Parameters.Add('FPCDIR=' + s1);
 
   //Makefile could pickup FPCDIR setting, so try to set it for fpcupdeluxe
   //FPCDirStore:=Processor.Environment.GetVar('FPCDIR');
@@ -1518,8 +1533,6 @@ begin
   //Todo: to be investigated
   //Processor.Process.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
 
-  Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-  Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   {$IFDEF UNIX}
   Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
   {$ELSE}
@@ -3918,6 +3931,7 @@ var
   UpdateWarnings: TStringList;
   aRepoClient:TRepoClient;
   s:string;
+  SourceVersion:string;
 begin
   result:=inherited;
   result:=InitModule;
@@ -3926,13 +3940,15 @@ begin
 
   FPreviousRevision:='unknown';
 
+  SourceVersion:='0.0.0';
+
   aRepoClient:=GetSuitableRepoClient;
 
   if aRepoClient=nil then
   begin
     Infoln(infotext+'Using FTP for download of ' + ModuleName + ' sources.',etWarning);
     result:=DownloadFromFTP(ModuleName);
-    if result then CreateRevision(ModuleName,'unknown');
+    FActualRevision:=FPreviousRevision;
   end
   else
   begin
@@ -3951,58 +3967,62 @@ begin
       UpdateWarnings.Free;
     end;
 
-    if NOT aRepoClient.ExportOnly then
-    begin
-      if FRepositoryUpdated then
-      begin
-        Infoln(infotext+ModuleName + ' was at revision: '+PreviousRevision,etInfo);
-        Infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo);
-      end
-      else
-      begin
-        Infoln(infotext+ModuleName + ' is at revision: '+ActualRevision,etInfo);
-        Infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
-      end;
-      UpdateWarnings:=TStringList.Create;
-      try
-        s:=SafeExpandFileName(SafeGetApplicationPath+'fpcuprevisions.log');
-        if FileExists(s) then
-          UpdateWarnings.LoadFromFile(s)
-        else
-        begin
-          UpdateWarnings.Add('New install.');
-          UpdateWarnings.Add('Date: '+DateTimeToStr(now));
-          UpdateWarnings.Add('Location: '+FBaseDirectory);
-          UpdateWarnings.Add('');
-        end;
-        UpdateWarnings.Add('FPC update at: '+DateTimeToStr(now));
-        UpdateWarnings.Add('FPC URL: '+aRepoClient.Repository);
-        UpdateWarnings.Add('FPC previous revision: '+PreviousRevision);
-        UpdateWarnings.Add('FPC new revision: '+ActualRevision);
-        UpdateWarnings.Add('');
-        UpdateWarnings.SaveToFile(s);
-      finally
-        UpdateWarnings.Free;
-      end;
-    end;
-
-    if (NOT Result) then
-      Infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
   end;
 
   if result then
   begin
-    CreateRevision(ModuleName,ActualRevision);
-    //Version is needed for pathing, so get it here
-    s:=GetVersion;
-    if (s<>'0.0.0') then
+    SourceVersion:=GetVersion;
+
+    if (SourceVersion<>'0.0.0') then
     begin
-      PatchModule(ModuleName);
+      s:=GetRevisionFromVersion(ModuleName,SourceVersion);
+      if (Length(s)>0) then FActualRevision:=s;
     end
     else
     begin
       Infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;
+
+    if FRepositoryUpdated then
+    begin
+      Infoln(infotext+ModuleName + ' was at revision: '+PreviousRevision,etInfo);
+      Infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo);
+    end
+    else
+    begin
+      Infoln(infotext+ModuleName + ' is at revision: '+ActualRevision,etInfo);
+      Infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
+    end;
+    UpdateWarnings:=TStringList.Create;
+    try
+      s:=SafeExpandFileName(SafeGetApplicationPath+'fpcuprevisions.log');
+      if FileExists(s) then
+        UpdateWarnings.LoadFromFile(s)
+      else
+      begin
+        UpdateWarnings.Add('New install.');
+        UpdateWarnings.Add('Date: '+DateTimeToStr(now));
+        UpdateWarnings.Add('Location: '+FBaseDirectory);
+        UpdateWarnings.Add('');
+      end;
+      UpdateWarnings.Add('FPC update at: '+DateTimeToStr(now));
+      UpdateWarnings.Add('FPC URL: '+aRepoClient.Repository);
+      UpdateWarnings.Add('FPC previous revision: '+PreviousRevision);
+      UpdateWarnings.Add('FPC new revision: '+ActualRevision);
+      UpdateWarnings.Add('');
+      UpdateWarnings.SaveToFile(s);
+    finally
+      UpdateWarnings.Free;
+    end;
+
+    CreateRevision(ModuleName,ActualRevision);
+
+    if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
+
+  end
+  else
+  begin
+    Infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
   end;
 end;
 
