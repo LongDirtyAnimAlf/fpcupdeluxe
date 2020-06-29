@@ -879,6 +879,11 @@ begin
   //Makefile error we are not interested in
   if AnsiContainsText(line,'CreateProcess(') then exit;
 
+  //Haiku error we are not interested in
+  {$ifdef Haiku}
+  if AnsiStartsText('runtime_loader:',line) then exit;
+  {$endif}
+
   result:=(NOT aVerbosity);
 
   if (NOT result) then

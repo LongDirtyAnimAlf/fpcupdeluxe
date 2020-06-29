@@ -1011,8 +1011,13 @@ var
   Output,XdgDesktopFile: string;
   aDirectory:string;
 begin
+  {$ifdef Haiku}
+  exit;
+  {$endif}
+
   // Fail by default:
   OperationSucceeded:=false;
+
   XdgDesktopFile:=IncludeTrailingPathDelimiter(GetTempDir(false))+'fpcup-'+shortcutname+'.desktop';
   XdgDesktopContent:=TStringList.Create;
   try
@@ -2576,6 +2581,17 @@ begin
       break;
     end;
   end;
+
+  {$ifdef Haiku}
+    {$ifdef CPUX86}
+    if (NOT FoundLinkFile) then
+    begin
+      s1:='/boot/system/develop/lib/x86/';
+      if FileExists(s1+'crti.o') then FoundLinkFile:=true;
+      if FoundLinkFile then result:=s1;
+    end;
+    {$endif}
+  {$endif}
 
   if FoundLinkFile then exit;
 

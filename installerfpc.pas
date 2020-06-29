@@ -1622,6 +1622,12 @@ begin
     {$endif}
   {$endif}
 
+  {$ifdef Haiku}
+    {$ifdef CPUX86}
+      s1:=s1+' -XR/boot/system/lib/x86 -FD/boot/system/bin/x86/ -Fl/boot/system/develop/lib/x86';
+    {$endif}
+  {$endif}
+
   s1:=Trim(s1);
   Processor.Process.Parameters.Add('OPT='+s1);
 
@@ -3583,6 +3589,14 @@ begin
         ConfigText.Append('-k"-rpath=/usr/pkg/lib"');
         {$endif}
 
+        {$ifdef Haiku}
+          {$ifdef CPUX86}
+            ConfigText.Append('-XR/boot/system/lib/x86');
+            ConfigText.Append('-FD/boot/system/bin/x86/');
+            ConfigText.Append('-Fl/boot/system/develop/lib/x86');
+          {$endif}
+        {$endif}
+
         ConfigText.Append('#ENDIF');
 
         {$ifdef solaris}
@@ -3591,7 +3605,6 @@ begin
         ConfigText.Append('-Xn');
         {$endif}
         {$endif}
-
 
         {$ENDIF UNIX}
 

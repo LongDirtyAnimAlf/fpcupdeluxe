@@ -2019,6 +2019,8 @@ begin
 end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;
+const
+  LIBQT5='libQt5Pas.so';
 {$ifdef Darwin}
 {$ifdef LCLQT5}
 function CreateQT5Symlinks(aApp:string):boolean;
@@ -2080,9 +2082,7 @@ var
   aRepoClient:TRepoClient;
   s:string;
   SourceVersion:string;
-  {$ifdef BSD}
   FilePath:string;
-  {$endif}
 begin
   result:=inherited;
   result:=InitModule;
@@ -2233,6 +2233,41 @@ begin
 
     {$endif}
     {$endif}
+
+    {$ifdef Haiku}
+    {$ifdef LCLQT5}
+    // Only for Haiku
+    // Get Qt bindings if not present yet
+    // I know that this involves a lot of trickery and some dirty work, but it gives the user an öut-of-the-box" experience !
+    // And fpcupdeluxe is there to make the user-experience of FPC and Lazarus an easy one
+    // Note:
+    // Do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
+    // ToDo : check if this presumption is correct
+
+    FilePath:=IncludeTrailingPathDelimiter(SafeGetApplicationName);
+    Infoln(infotext+'Adding QT5Pas library from fpcupdeluxe itself.',etInfo);
+
+    // copy libQt5Pas.so and co
+    if FileExists(FilePath+LIBQT5+'.1.2.8') then
+    begin
+      if (NOT FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1.2.8')) then
+        FileUtil.CopyFile(FilePath+LIBQT5+'.1.2.8',IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1.2.8');
+      if (NOT FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1')) then
+        FileUtil.CopyFile(FilePath+LIBQT5+'.1.2.8',IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1');
+      if (NOT FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5)) then
+        FileUtil.CopyFile(FilePath+LIBQT5+'.1.2.8',IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5);
+    end;
+    if FileExists(FilePath+LIBQT5+'.1') then
+    begin
+      if (NOT FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1')) then
+        FileUtil.CopyFile(FilePath+LIBQT5+'.1',IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1');
+      if (NOT FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5)) then
+        FileUtil.CopyFile(FilePath+LIBQT5+'.1',IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5);
+    end;
+
+    {$endif}
+    {$endif}
+
 
     (*
     Errors := 0;
