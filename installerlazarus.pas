@@ -2226,8 +2226,10 @@ begin
     // Do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
     // ToDo : check if this presumption is correct
 
-    if (NOT LibWhich(LIBQT5)) then
-      Infoln(infotext+'QT5 trickery: adding QT5Pas library from fpcupdeluxe itself.',etInfo);
+    if LibWhich(LIBQT5) then
+      Infoln(infotext+'System wide libQT5Pas found. No trickery needed !!',etInfo)
+    else
+      Infoln(infotext+'QT5 trickery needed: adding QT5Pas library from fpcupdeluxe itself.',etInfo);
 
     FilePath:=SafeGetApplicationPath;
 

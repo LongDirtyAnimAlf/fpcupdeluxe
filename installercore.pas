@@ -2984,7 +2984,7 @@ begin
     end;
   end;
 
-  Infoln(infotext+'checking ' + ModuleName + ' sources with '+aRepoClient.ClassName,etInfo);
+  Infoln(infotext+'Checking ' + ModuleName + ' sources with '+aRepoClient.ClassName,etInfo);
 
   aRepoClient.Verbose:=FVerbose;
   aRepoClient.ExportOnly:=FExportOnly;

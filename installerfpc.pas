@@ -1623,9 +1623,11 @@ begin
   {$endif}
 
   {$ifdef Haiku}
+    s2:='';
     {$ifdef CPUX86}
-      s1:=s1+' -XR/boot/system/lib/x86 -FD/boot/system/bin/x86/ -Fl/boot/system/develop/lib/x86';
+    s2:='/x86';
     {$endif}
+    s1:=s1+' -XR/boot/system/lib'+s2+' -FD/boot/system/bin'+s2+'/ -Fl/boot/system/develop/lib'+s2;
   {$endif}
 
   s1:=Trim(s1);
@@ -1994,8 +1996,8 @@ begin
   {$IFDEF HAIKU}
   {$IFDEF CPUX64}
   // we need at least 3.2.0 for Haiku x86_64
-  //if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';
-  if CalculateNumericalVersion(result)<CalculateNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
+  if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.2.0') then result:='3.2.0';
+  //if CalculateNumericalVersion(result)<CalculateNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
   {$ENDIF}
   {$IFDEF CPUX32}
   // we need at least 3.0.0 for Haiku x32
@@ -3590,12 +3592,14 @@ begin
         {$endif}
 
         {$ifdef Haiku}
+          s:='';
           {$ifdef CPUX86}
-            ConfigText.Append('-XR/boot/system/lib/x86');
-            ConfigText.Append('-FD/boot/system/bin/x86/');
-            ConfigText.Append('-Fl/boot/system/develop/lib/x86');
-            ConfigText.Append('-Fl/boot/system/non-packaged/lib/x86');
+          s:='/x86';
           {$endif}
+          ConfigText.Append('-XR/boot/system/lib'+s);
+          ConfigText.Append('-FD/boot/system/bin'+s+'/');
+          ConfigText.Append('-Fl/boot/system/develop/lib'+s);
+          ConfigText.Append('-Fl/boot/system/non-packaged/lib'+s);
         {$endif}
 
         ConfigText.Append('#ENDIF');
