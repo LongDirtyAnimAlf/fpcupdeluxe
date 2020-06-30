@@ -3684,6 +3684,7 @@ begin
   //if (Pos('github.com/newpascal',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='lazarus';
   if (Pos('github.com/LongDirtyAnimAlf',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='master';
   if (Pos('github.com/LongDirtyAnimAlf',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
+  if (Pos('github.com/LongDirtyAnimAlf/lazarussource',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='master';
 
   // branch and revision overrides from setup+
   s:=Form2.FPCBranch;
@@ -3847,6 +3848,13 @@ begin
   {$IFDEF LINUX}
   if IsLinuxMUSL then AddMessage('Seems we are running on a MUSL Linux.');
   {$ENDIF LINUX}
+
+  {$ifdef LCLQT5}
+  if LibWhich(LIBQT5) then
+    AddMessage('Found system wide libQt5Pas.so and that will be used.')
+  else
+    AddMessage('No system wide libQt5Pas.so found. Some QT5 trickery will be used');
+  {$endif}
 
   Cores:=GetLogicalCpuCount;
   if Cores<>0 then AddMessage('CPU cores used: '+InttoStr(Cores));

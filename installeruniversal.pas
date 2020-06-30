@@ -280,9 +280,10 @@ begin
       {$ifdef LCLQT5}
         // Did we copy the QT5 libs ??
         // If so, add some linker help.
-        if (FileExists(IncludeTrailingPathDelimiter(LazarusInstallDir)+QT5LIBNAME)) then
+        if (NOT LibWhich(LIBQT5)) AND (FileExists(IncludeTrailingPathDelimiter(LazarusInstallDir)+LIBQT5)) then
         begin
           s:=s+' -k"-rpath=./"';
+          s:=s+' -k"-rpath=$$ORIGIN"';
           s:=s+' -k"-rpath=\\$$$$$\\ORIGIN"';
           s:=s+' -Fl'+ExcludeTrailingPathDelimiter(LazarusInstallDir);
         end;

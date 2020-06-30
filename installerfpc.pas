@@ -3594,6 +3594,7 @@ begin
             ConfigText.Append('-XR/boot/system/lib/x86');
             ConfigText.Append('-FD/boot/system/bin/x86/');
             ConfigText.Append('-Fl/boot/system/develop/lib/x86');
+            ConfigText.Append('-Fl/boot/system/non-packaged/lib/x86');
           {$endif}
         {$endif}
 
@@ -3681,9 +3682,19 @@ begin
         {$else Darwin}
         {$ifdef Unix}
         //ConfigText.Append('-k"-rpath=./"');
+
+        //For runtime
         ConfigText.Append('-k-rpath');
         ConfigText.Append('-k./');
+        ConfigText.Append('-k-rpath');
+        ConfigText.Append('-k$$ORIGIN');
+
+        //For linktime
+        ConfigText.Append('-k-rpath-link');
+        ConfigText.Append('-k./');
+
         //ConfigText.Append('-k"-rpath=/usr/local/lib"');
+        //ConfigText.Append('-k"-rpath=$$ORIGIN"');
         //ConfigText.Append('-k"-rpath=\\$$$$$\\ORIGIN"');
         //ConfigText.Append('-k-rpath');
         //ConfigText.Append('-k\\$$$$$\\ORIGIN');

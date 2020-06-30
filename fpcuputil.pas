@@ -3073,9 +3073,48 @@ function LibWhich(aLibrary: string): boolean;
 var
   Output: string;
 begin
-  //RunCommand('sh -c "ldconfig -p | grep '+aLibrary+'"', Output);
-  RunCommand('sh',['-c','"ldconfig -p | grep '+aLibrary+'"'],Output,[poUsePipes, poStderrToOutPut],swoHide);
+  result:=false;
+
+  {$ifdef Haiku}
+  {$ifdef CPUX86}
+  RunCommand('find',['/boot/system/lib/x86','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
   result:=(Pos(aLibrary,Output)>0);
+  if (NOT result) then
+  begin
+    RunCommand('find',['/boot/system/non-packaged/lib/x86','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    result:=(Pos(aLibrary,Output)>0);
+  end;
+  {$endif}
+  if (NOT result) then
+  begin
+    RunCommand('find',['/boot/system/lib','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    result:=(Pos(aLibrary,Output)>0);
+  end;
+  if (NOT result) then
+  begin
+    RunCommand('find',['/boot/system/non-packaged/lib','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    result:=(Pos(aLibrary,Output)>0);
+  end;
+  exit;
+  {$endif}
+
+  {$ifdef Unix}
+  //RunCommand('sh -c "ldconfig -p | grep '+aLibrary+'"', Output);
+  RunCommand('find',['/usr/lib','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
+  result:=(Pos(aLibrary,Output)>0);
+  if (NOT result) then
+  begin
+    RunCommand('find',['/usr/local/lib','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    result:=(Pos(aLibrary,Output)>0);
+  end;
+  if (NOT result) then
+  begin
+    RunCommand('sh',['-c','"ldconfig -p | grep '+aLibrary+'"'],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    result:=(Pos(aLibrary,Output)>0);
+  end;
+  exit;
+  {$endif}
+
 end;
 
 function Which(const Executable: string): string;
@@ -3174,11 +3213,15 @@ begin
 end;
 
 function ForceDirectoriesSafe(Const Dir: RawByteString): Boolean;
+var
+  aDir:RawByteString;
 begin
   result:=true;
-  if (NOT DirectoryExists(Dir)) then
+  aDir:=ExcludeTrailingPathDelimiter(Dir);
+  if Length(aDir)=0 then exit;
+  if (NOT DirectoryExists(aDir)) then
   begin
-    result:=ForceDirectories(Dir);
+    result:=ForceDirectories(aDir);
   end;
 end;
 

@@ -52,7 +52,7 @@ const
 
   FPCMAKECONFIG         = 'fpcmkcfg';
 
-  QT5LIBNAME            = 'libQt5Pas.so.1';
+  LIBQT5                = 'libQt5Pas.so';
 
   FPCPKGFILENAME        = 'fppkg';
   FPCPKGCONFIGFILENAME  = 'fppkg.cfg';

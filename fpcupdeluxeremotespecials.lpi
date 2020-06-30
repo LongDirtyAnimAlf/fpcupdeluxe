@@ -409,9 +409,14 @@ if TargetOS=&apos;openbsd&apos; then
           </Linking>
           <Other>
             <CustomOptions Value="-dRemoteLog
--k&quot;-rpath ./&quot;
--k&quot;-rpath /boot/system/develop/lib/x86&quot;
--k&quot;-rpath ~/config/non-packaged/lib&quot;"/>
+-k&quot;-rpath=./&quot;
+-k&quot;-rpath=$$ORIGIN&quot;
+-k-rpath
+-k/boot/system/lib/x86
+-k-rpath
+-k/boot/system/develop/lib/x86
+-k-rpath
+-k~/config/non-packaged/lib"/>
           </Other>
         </CompilerOptions>
       </Item12>
@@ -446,9 +451,14 @@ if TargetOS=&apos;openbsd&apos; then
           </Linking>
           <Other>
             <CustomOptions Value="-dRemoteLog
--k&quot;-rpath ./&quot;
--k&quot;-rpath /boot/system/develop/lib/x86&quot;
--k&quot;-rpath ~/config/non-packaged/lib&quot;"/>
+-k&quot;-rpath=./&quot;
+-k&quot;-rpath=$$ORIGIN&quot;
+-k-rpath
+-k/boot/system/lib
+-k-rpath
+-k/boot/system/develop/lib
+-k-rpath
+-k~/config/non-packaged/lib"/>
           </Other>
         </CompilerOptions>
       </Item13>

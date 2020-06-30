@@ -609,27 +609,6 @@ begin
 
   LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt;
 
-  {$ifdef Unix}
-    {$ifndef Darwin}
-      {$ifdef LCLQT5}
-        // Check if QT5 library can be found
-        // If not, we add it ourselves (later)
-        if (NOT LibWhich(QT5LIBNAME)) then
-        begin
-          s:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+QT5LIBNAME;
-          if FileExists(s) then
-          begin
-            // Strange: running needs a .so.1 file .... but linking needs a .so file ...
-            s2:=IncludeTrailingPathDelimiter(FInstallDirectory)+QT5LIBNAME;
-            if (NOT FileExists(s2)) then FileUtil.CopyFile(s,s2);
-            Delete(s2,Length(s2)-1,2);
-            if (NOT FileExists(s2)) then FileUtil.CopyFile(s,s2);
-          end;
-        end;
-      {$endif}
-    {$endif}
-  {$endif}
-
   if (ModuleName=_LAZARUS) then
   begin
     Infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
@@ -702,9 +681,11 @@ begin
         {$ifdef LCLQT5}
         // Did we copy the QT5 libs ??
         // If so, add some linker help.
-        if (FileExists(IncludeTrailingPathDelimiter(FInstallDirectory)+QT5LIBNAME)) then
+
+        if (NOT LibWhich(LIBQT5)) AND (FileExists(IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5)) then
         begin
           s:=s+' -k"-rpath=./"';
+          s:=s+' -k"-rpath=$$ORIGIN"';
           s:=s+' -k"-rpath=\\$$$$$\\ORIGIN"';
           s:=s+' -Fl'+ExcludeTrailingPathDelimiter(FInstallDirectory);
         end;
@@ -1710,20 +1691,22 @@ begin
       ForceDirectoriesSafe(DebuggerPath);
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
       {$IFDEF UNIX}
+      {$IFNDEF DARWIN}
       {$IFDEF LCLQT5}
-      if (NOT LibWhich(QT5LIBNAME)) then
+      if (NOT LibWhich(LIBQT5)) then
       begin
-        s:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+QT5LIBNAME;
+        s:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+LIBQT5;
         if FileExists(s) then
         begin
           // Strange: running needs a .so.1 file .... but linking needs a .so file ...
-          s2:=IncludeTrailingPathDelimiter(DebuggerPath)+QT5LIBNAME;
+          s2:=IncludeTrailingPathDelimiter(DebuggerPath)+LIBQT5;
           if (NOT FileExists(s2)) then FileUtil.CopyFile(s,s2);
-          Delete(s2,Length(s2)-1,2);
+          s2:=s2+'.1';
           if (NOT FileExists(s2)) then FileUtil.CopyFile(s,s2);
         end;
       end;
       {$ENDIF LCLQT5}
+      {$ENDIF DARWIN}
       {$ENDIF UNIX}
 
       // Set file history towards default project directory
@@ -2019,8 +2002,6 @@ begin
 end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;
-const
-  LIBQT5='libQt5Pas.so';
 {$ifdef Darwin}
 {$ifdef LCLQT5}
 function CreateQT5Symlinks(aApp:string):boolean;
@@ -2234,40 +2215,96 @@ begin
     {$endif}
     {$endif}
 
-    {$ifdef Haiku}
+    {$ifdef Unix}
+    {$ifndef Darwin}
     {$ifdef LCLQT5}
     // Only for Haiku
-    // Get Qt bindings if not present yet
+    // Get/copy Qt libs if not present yet
     // I know that this involves a lot of trickery and some dirty work, but it gives the user an öut-of-the-box" experience !
     // And fpcupdeluxe is there to make the user-experience of FPC and Lazarus an easy one
     // Note:
     // Do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
     // ToDo : check if this presumption is correct
 
-    FilePath:=IncludeTrailingPathDelimiter(SafeGetApplicationName);
-    Infoln(infotext+'Adding QT5Pas library from fpcupdeluxe itself.',etInfo);
+    if (NOT LibWhich(LIBQT5)) then
+      Infoln(infotext+'QT5 trickery: adding QT5Pas library from fpcupdeluxe itself.',etInfo);
 
-    // copy libQt5Pas.so and co
-    if FileExists(FilePath+LIBQT5+'.1.2.8') then
+    FilePath:=SafeGetApplicationPath;
+
+    {$ifdef Haiku}
+    if (NOT LibWhich(LIBQT5)) then
     begin
-      if (NOT FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1.2.8')) then
-        FileUtil.CopyFile(FilePath+LIBQT5+'.1.2.8',IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1.2.8');
-      if (NOT FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1')) then
-        FileUtil.CopyFile(FilePath+LIBQT5+'.1.2.8',IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1');
-      if (NOT FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5)) then
-        FileUtil.CopyFile(FilePath+LIBQT5+'.1.2.8',IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5);
+      {$ifdef CPUX86}
+      s:='/boot/system/non-packaged/lib/x86/';
+      {$else}
+      s:='/boot/system/non-packaged/lib/';
+      {$endif}
+      ForceDirectoriesSafe(s);
+      if FileExists(FilePath+LIBQT5+'.1') then
+      begin
+        if (NOT FileExists(s+LIBQT5+'.1')) then
+          FileUtil.CopyFile(FilePath+LIBQT5+'.1',s+LIBQT5+'.1');
+        if (NOT FileExists(s+LIBQT5)) then
+          FileUtil.CopyFile(FilePath+LIBQT5+'.1',s+LIBQT5);
+      end;
     end;
-    if FileExists(FilePath+LIBQT5+'.1') then
+    {$endif}
+
+    {$ifdef Unix}
+    if (NOT LibWhich(LIBQT5)) then
     begin
-      if (NOT FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1')) then
-        FileUtil.CopyFile(FilePath+LIBQT5+'.1',IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5+'.1');
-      if (NOT FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5)) then
-        FileUtil.CopyFile(FilePath+LIBQT5+'.1',IncludeTrailingPathDelimiter(FSourceDirectory)+LIBQT5);
+      s:='/usr/local/lib/';
+      if DirectoryExists(s) then
+      begin
+        if FileExists(FilePath+LIBQT5+'.1') then
+        begin
+          if (NOT FileExists(s+LIBQT5+'.1')) then
+            FileUtil.CopyFile(FilePath+LIBQT5+'.1',s+LIBQT5+'.1');
+          if (NOT FileExists(s+LIBQT5)) then
+            FileUtil.CopyFile(FilePath+LIBQT5+'.1',s+LIBQT5);
+        end;
+      end;
+    end;
+    {$endif}
+
+    if (NOT LibWhich(LIBQT5)) then
+    begin
+      s:='1.2.9';
+      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='1.2.8';
+      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='1.2.7';
+      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='1.2.6';
+      if FileExists(FilePath+LIBQT5+s) then
+      begin
+        if (NOT FileExists(IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5+s)) then
+          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5+s);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5+'.1')) then
+          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5+'.1');
+        if (NOT FileExists(IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5)) then
+          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5);
+      end;
+
+      //The below can be trivial, but just in case
+      s:='.1';
+      if FileExists(FilePath+LIBQT5+s) then
+      begin
+        if (NOT FileExists(IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5+s)) then
+          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5+s);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5)) then
+          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5);
+      end;
+      s:='';
+      if FileExists(FilePath+LIBQT5+s) then
+      begin
+        if (NOT FileExists(IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5+s)) then
+          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5+s);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5)) then
+          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(FInstallDirectory)+LIBQT5);
+      end;
     end;
 
     {$endif}
     {$endif}
-
+    {$endif}
 
     (*
     Errors := 0;
