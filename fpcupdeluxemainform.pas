@@ -344,13 +344,13 @@ begin
   btnGetOpenSSL.Visible:=false;
   {$endif}
 
-  {$IF defined(CPUAARCH64) OR defined(CPUARM) OR (DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)) OR defined(Haiku) OR defined(AROS) OR defined(Morphos)}
+  {$IF defined(CPUAARCH64) OR defined(CPUARM) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2)) OR defined(Haiku) OR defined(AROS) OR defined(Morphos)}
   // disable some features
   OldBtn.Visible:=False;
   {DinoBtn.Visible:=False;}
   CrossSheet.TabVisible:=false;
   {$endif}
-  {$IF defined(CPUAARCH64) OR (DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2))}
+  {$IF defined(CPUAARCH64) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2))}
   // disable some features
   FixesBtn.Visible:=False;
   StableBtn.Visible:=False;
