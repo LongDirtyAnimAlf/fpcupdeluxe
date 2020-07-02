@@ -1484,25 +1484,17 @@ begin
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; exit with failure on error
-          if not DeleteDirectoryEx(CurFilename) then
-          begin
-            SysUtils.FindClose(FileInfo);
-            exit;
-          end;
+          if not DeleteDirectoryEx(CurFilename) then break;
         end
         else
         begin
           // File; exit with failure on error
-          if not SysUtils.DeleteFile(CurFilename) then
-          begin
-            SysUtils.FindClose(FileInfo);
-            exit;
-          end;
+          if not SysUtils.DeleteFile(CurFilename) then break;
         end;
       end;
     until SysUtils.FindNext(FileInfo)<>0;
+    SysUtils.FindClose(FileInfo);
   end;
-  SysUtils.FindClose(FileInfo);
   // Remove root directory; exit with failure on error:
   if (not RemoveDir(DirectoryName)) then exit;
   Result:=true;
@@ -1543,11 +1535,7 @@ begin
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; call recursively exit with failure on error
-          if not DeleteFilesSubDirs(CurFilename,Names,OnlyIfPathHas) then
-          begin
-            SysUtils.FindClose(FileInfo);
-            exit;
-          end;
+          if not DeleteFilesSubDirs(CurFilename,Names,OnlyIfPathHas) then break;
         end
         else
         begin
@@ -1563,18 +1551,14 @@ begin
               // Remove read-only file attribute so we can delete it:
               if (FileInfo.Attr and faReadOnly)>0 then
                 FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
-              if not SysUtils.DeleteFile(CurFilename) then
-              begin
-                SysUtils.FindClose(FileInfo);
-                exit;
-              end;
+              if not SysUtils.DeleteFile(CurFilename) then break;
             end;
           end;
         end;
       end;
     until SysUtils.FindNext(FileInfo)<>0;
+    SysUtils.FindClose(FileInfo);
   end;
-  SysUtils.FindClose(FileInfo);
   Result:=true;
 end;
 
@@ -1620,11 +1604,7 @@ begin
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; call recursively exit with failure on error
-          if not DeleteFilesExtensionsSubdirs(CurFilename, Extensions,OnlyIfPathHas) then
-          begin
-            SysUtils.FindClose(FileInfo);
-            exit;
-          end;
+          if not DeleteFilesExtensionsSubdirs(CurFilename, Extensions,OnlyIfPathHas) then break;
         end
         else
         begin
@@ -1639,18 +1619,14 @@ begin
               // Remove read-only file attribute so we can delete it:
               if (FileInfo.Attr and faReadOnly)>0 then
                 FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
-              if not SysUtils.DeleteFile(CurFilename) then
-              begin
-                SysUtils.FindClose(FileInfo);
-                exit;
-              end;
+              if not SysUtils.DeleteFile(CurFilename) then break;
             end;
           end;
         end;
       end;
     until SysUtils.FindNext(FileInfo)<>0;
+    SysUtils.FindClose(FileInfo);
   end;
-  SysUtils.FindClose(FileInfo);
   Result:=true;
 end;
 
@@ -1690,11 +1666,7 @@ begin
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; call recursively exit with failure on error
-          if not DeleteFilesNameSubdirs(CurFilename, OnlyIfNameHas) then
-          begin
-            SysUtils.FindClose(FileInfo);
-            exit;
-          end;
+          if not DeleteFilesNameSubdirs(CurFilename, OnlyIfNameHas) then break;
         end
         else
         begin
@@ -1703,17 +1675,13 @@ begin
             // Remove read-only file attribute so we can delete it:
             if (FileInfo.Attr and faReadOnly)>0 then
               FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
-            if not SysUtils.DeleteFile(CurFilename) then
-            begin
-              SysUtils.FindClose(FileInfo);
-              exit;
-            end;
+            if not SysUtils.DeleteFile(CurFilename) then break;
           end;
         end;
       end;
     until SysUtils.FindNext(FileInfo)<>0;
+    SysUtils.FindClose(FileInfo);
   end;
-  SysUtils.FindClose(FileInfo);
   Result:=true;
 end;
 
@@ -2583,15 +2551,40 @@ begin
   end;
 
   {$ifdef Haiku}
-    {$ifdef CPUX86}
+  if (NOT FoundLinkFile) then
+  begin
+    s1:='/boot/system/develop/tools/x86/lib';
+    if NOT DirectoryExists(s1) then s1:='/boot/system/develop/tools/lib';
+    if DirectoryExists(s1) then
+    begin
+      LinkFiles := TStringList.Create;
+      try
+        FindAllFiles(LinkFiles, s1, '*.o', true);
+        if (LinkFiles.Count>0) then
+        begin
+          for i:=0 to (LinkFiles.Count-1) do
+          begin
+            if Pos(DirectorySeparator+LINKFILE,LinkFiles[i])>0 then
+            begin
+              result:=ExtractFileDir(LinkFiles[i]);
+              FoundLinkFile:=true;
+              break;
+            end;
+          end;
+        end;
+      finally
+        LinkFiles.Free;
+      end;
+    end;
     if (NOT FoundLinkFile) then
     begin
       s1:='/boot/system/develop/lib/x86/';
+      if NOT DirectoryExists(s1) then s1:='/boot/system/develop/lib/';
       if FileExists(s1+'crti.o') then FoundLinkFile:=true;
       if FoundLinkFile then result:=s1;
     end;
-    {$endif}
   {$endif}
+  end;
 
   if FoundLinkFile then exit;
 
@@ -2783,13 +2776,16 @@ begin
       LinkFiles := TStringList.Create;
       try
         FindAllFiles(LinkFiles, result, '*.o', true);
-        for i:=0 to (LinkFiles.Count-1) do
+        if (LinkFiles.Count>0) then
         begin
-          if Pos(DirectorySeparator+LINKFILE,LinkFiles[i])>0 then
+          for i:=0 to (LinkFiles.Count-1) do
           begin
-            result:=ExtractFileDir(LinkFiles[i]);
-            FoundLinkFile:=true;
-            break;
+            if Pos(DirectorySeparator+LINKFILE,LinkFiles[i])>0 then
+            begin
+              result:=ExtractFileDir(LinkFiles[i]);
+              FoundLinkFile:=true;
+              break;
+            end;
           end;
         end;
       finally

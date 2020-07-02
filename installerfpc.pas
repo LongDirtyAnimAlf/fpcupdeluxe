@@ -1312,7 +1312,11 @@ begin
       end;
     end;
 
-    if result then RemoveStaleBuildDirectories(FSourceDirectory,CrossInstaller.TargetCPUName,CrossInstaller.TargetOSName);
+    if result then
+    begin
+      RemoveStaleBuildDirectories(FSourceDirectory,CrossInstaller.TargetCPUName,CrossInstaller.TargetOSName);
+      Infoln(infotext+'Removal of stale build files and directories ready.');
+    end;
 
   end
   else
@@ -3465,6 +3469,14 @@ begin
 
     OperationSucceeded:=FileExists(FPCCfg);
 
+    if OperationSucceeded then
+    begin
+      Infoln(infotext+'Creating/checking default configuration file(s) success.');
+      Infoln(infotext+'Going to tune fpc.cfg to our needs.');
+    end
+    else
+      Infoln(infotext+'No fpc.cfg file created or found. Should not happen. Severe error !!!',etError);
+
     // at this point, a default fpc.cfg should exist
     // modify it to suit fpcup[deluxe]
     if OperationSucceeded then
@@ -3694,8 +3706,8 @@ begin
         ConfigText.Append('-k$$ORIGIN');
 
         //For linktime
-        ConfigText.Append('-k-rpath-link');
-        ConfigText.Append('-k./');
+        //ConfigText.Append('-k-rpath-link');
+        //ConfigText.Append('-k./');
 
         //ConfigText.Append('-k"-rpath=/usr/local/lib"');
         //ConfigText.Append('-k"-rpath=$$ORIGIN"');
@@ -3729,16 +3741,17 @@ begin
         ConfigTextStore.Free;
       end;
 
+      Infoln(infotext+'Tuning of fpc.cfg ready.');
     end;
 
     // do not build pas2js [yet]: separate install ... use the module with rtl
     // if OperationSucceeded then BuildModuleCustom('PAS2JS');
   end;
 
-  RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPU,GetTargetOS);
-
   if OperationSucceeded then
   begin
+    RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPU,GetTargetOS);
+    Infoln(infotext+'Removal of stale build files and directories ready.');
     WritelnLog(infotext+'Update/build/config succeeded.',false);
   end;
   Result := OperationSucceeded;

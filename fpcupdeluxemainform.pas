@@ -399,6 +399,10 @@ begin
   btnGetOpenSSL.Visible:=False;
   {$ENDIF}
 
+  {$ifdef Haiku}
+  MenuItem3.Visible:=False;
+  {$endif}
+
   //Prevent overwriting an existing install when starting with a new fpcupdeluxe install
   If DirectoryExists(sInstallDir) then
     sInstallDir:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+'fpcupdeluxe';
@@ -1500,7 +1504,7 @@ begin
     if ExistWordInString(PChar(s),Seriousness[etError],[soWholeWord,soDown]) then
     begin
       FG      := clRed;
-      BG      := clBlue;
+      BG      := clWhite;
       Special := True;
     end;
   end;
@@ -1528,8 +1532,8 @@ begin
 
   if (NOT Special) AND ((ExistWordInString(PChar(s),'HEAD is now at ',[soDown])) OR (ExistWordInString(PChar(s),'Last Changed ',[soDown]))) then
   begin
-    FG      := clGreen;
-    BG      := clWhite;
+    FG      := clMoneyGreen;
+    BG      := clBlack;
     Special := True;
   end;
 
@@ -3894,6 +3898,8 @@ begin
 
       FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
 
+      //Default FPC target
+
       aTarget:='stable';
       {$ifdef CPUAARCH64}
       aTarget:='fixes';
@@ -3901,6 +3907,9 @@ begin
       {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
       aTarget:='fixes';
       {$ENDIF}
+      {$ifdef Haiku}
+      aTarget:='stable.git';
+      {$endif}
 
       aURL:=installerUniversal.GetAlias('fpcURL',aTarget);
       aURL:=ReadString('URL','fpcURL',aURL);
@@ -3908,19 +3917,32 @@ begin
       if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
       aURL:=ExcludeTrailingPathDelimiter(aURL);
       FPCTarget:=aURL;
+
+
+      //Default Lazarus target
+
       {$ifdef LCLQT5}
       aTarget:='fixes';
       {$endif}
       {$ifdef LCLCOCOA}
       aTarget:='fixes';
       {$endif}
+
+      {$ifdef Haiku}
+      {$ifdef CPUX86}
+      aTarget:='stable.git';
+      {$endif}
+      {$ifdef CPUX86_64}
+      aTarget:='trunk.git';
+      {$endif}
+      {$endif}
+
       aURL:=installerUniversal.GetAlias('lazURL',aTarget);
       aURL:=ReadString('URL','lazURL',aURL);
       // correct for [unsafe] URL in old fpcup.ini
       if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
       aURL:=ExcludeTrailingPathDelimiter(aURL);
       LazarusTarget:=aURL;
-
 
       radgrpCPU.ItemIndex:=ReadInteger('Cross','CPUTarget',radgrpCPU.ItemIndex);
       radgrpOS.ItemIndex:=ReadInteger('Cross','OSTarget',radgrpOS.ItemIndex);
