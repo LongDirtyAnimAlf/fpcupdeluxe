@@ -1465,13 +1465,14 @@ var
   CurSrcDir: String;
   CurFilename: String;
 begin
-  Result:=false;
+  result:=false;
 
   if CheckDirectory(DirectoryName) then exit;
 
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
   if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
+    result:=true;
     repeat
       // Ignore directories and files without name:
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -1484,20 +1485,19 @@ begin
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; exit with failure on error
-          if not DeleteDirectoryEx(CurFilename) then break;
+          if not DeleteDirectoryEx(CurFilename) then result:=false;
         end
         else
         begin
           // File; exit with failure on error
-          if not SysUtils.DeleteFile(CurFilename) then break;
+          if not SysUtils.DeleteFile(CurFilename) then result:=false;
         end;
       end;
-    until SysUtils.FindNext(FileInfo)<>0;
+    until (SysUtils.FindNext(FileInfo)<>0) OR (NOT result);
     SysUtils.FindClose(FileInfo);
   end;
   // Remove root directory; exit with failure on error:
-  if (not RemoveDir(DirectoryName)) then exit;
-  Result:=true;
+  if result then result:=RemoveDir(DirectoryName);
 end;
 
 function DeleteFilesSubDirs(const DirectoryName: string;
@@ -1518,7 +1518,7 @@ var
   CurSrcDir: String;
   CurFilename: String;
 begin
-  Result:=false;
+  result:=false;
 
   if CheckDirectory(DirectoryName) then exit;
 
@@ -1526,6 +1526,7 @@ begin
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
   if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
+    result:=true;
     repeat
       // Ignore directories and files without name:
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -1535,7 +1536,7 @@ begin
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; call recursively exit with failure on error
-          if not DeleteFilesSubDirs(CurFilename,Names,OnlyIfPathHas) then break;
+          if not DeleteFilesSubDirs(CurFilename,Names,OnlyIfPathHas) then result:=false;
         end
         else
         begin
@@ -1551,15 +1552,14 @@ begin
               // Remove read-only file attribute so we can delete it:
               if (FileInfo.Attr and faReadOnly)>0 then
                 FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
-              if not SysUtils.DeleteFile(CurFilename) then break;
+              if not SysUtils.DeleteFile(CurFilename) then result:=false;
             end;
           end;
         end;
       end;
-    until SysUtils.FindNext(FileInfo)<>0;
+    until (SysUtils.FindNext(FileInfo)<>0) OR (NOT result);
     SysUtils.FindClose(FileInfo);
   end;
-  Result:=true;
 end;
 
 function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
@@ -1582,7 +1582,7 @@ var
   CurFilename: String;
   i: integer;
 begin
-  Result:=false;
+  result:=false;
 
   if CheckDirectory(DirectoryName) then exit;
 
@@ -1595,6 +1595,7 @@ begin
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
   if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
+    result:=true;
     repeat
       // Ignore directories and files without name:
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -1604,7 +1605,7 @@ begin
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; call recursively exit with failure on error
-          if not DeleteFilesExtensionsSubdirs(CurFilename, Extensions,OnlyIfPathHas) then break;
+          if not DeleteFilesExtensionsSubdirs(CurFilename, Extensions,OnlyIfPathHas) then result:=false;
         end
         else
         begin
@@ -1619,15 +1620,14 @@ begin
               // Remove read-only file attribute so we can delete it:
               if (FileInfo.Attr and faReadOnly)>0 then
                 FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
-              if not SysUtils.DeleteFile(CurFilename) then break;
+              if not SysUtils.DeleteFile(CurFilename) then result:=false;
             end;
           end;
         end;
       end;
-    until SysUtils.FindNext(FileInfo)<>0;
+    until (SysUtils.FindNext(FileInfo)<>0) OR (NOT result);
     SysUtils.FindClose(FileInfo);
   end;
-  Result:=true;
 end;
 
 function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas: string): boolean;
@@ -1645,7 +1645,7 @@ var
   CurSrcDir: String;
   CurFilename: String;
 begin
-  Result:=false;
+  result:=false;
 
   if CheckDirectory(DirectoryName) then exit;
 
@@ -1657,6 +1657,7 @@ begin
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
   if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
+    result:=true;
     repeat
       // Ignore directories and files without name:
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -1666,7 +1667,7 @@ begin
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and {%H-}faSymLink)=0) {$endif unix} then
         begin
           // Directory; call recursively exit with failure on error
-          if not DeleteFilesNameSubdirs(CurFilename, OnlyIfNameHas) then break;
+          if not DeleteFilesNameSubdirs(CurFilename, OnlyIfNameHas) then result:=false;
         end
         else
         begin
@@ -1675,14 +1676,13 @@ begin
             // Remove read-only file attribute so we can delete it:
             if (FileInfo.Attr and faReadOnly)>0 then
               FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
-            if not SysUtils.DeleteFile(CurFilename) then break;
+            if not SysUtils.DeleteFile(CurFilename) then result:=false;
           end;
         end;
       end;
-    until SysUtils.FindNext(FileInfo)<>0;
+    until (SysUtils.FindNext(FileInfo)<>0) OR (NOT result);
     SysUtils.FindClose(FileInfo);
   end;
-  Result:=true;
 end;
 
 function DownloadBase(aDownLoader:TBasicDownloader;URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
