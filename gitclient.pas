@@ -225,8 +225,10 @@ begin
 
     Command := Command + ' ' +  Repository + ' ' + LocalRepository;
 
-    FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose)
-  end else FReturnCode := 0;
+    FReturnCode := TInstaller(FParent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+    FReturnOutput := Output;
+  end
+  else FReturnCode := 0;
 
   if (ReturnCode=AbortedExitCode) then exit;
 
@@ -317,6 +319,7 @@ end;
 procedure TGitClient.Update;
 var
   Command: string;
+  Output: string = '';
 begin
   FReturnCode := 0;
   if ExportOnly then exit;
@@ -328,7 +331,8 @@ begin
   // Get updates (equivalent to git fetch and git merge)
   // --all: fetch all remotes
   Command := ' pull --all --recurse-submodules=yes';
-  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
+  FReturnCode := TInstaller(FParent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Output, Verbose);
+  FReturnOutput := Output;
 
   if FReturnCode = 0 then
   begin
@@ -499,7 +503,6 @@ begin
     end;
   end;
 end;
-
 
 function TGitClient.GetProxyCommand: string;
 var

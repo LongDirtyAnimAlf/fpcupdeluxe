@@ -2856,12 +2856,23 @@ function TInstaller.GetSuitableRepoClient:TRepoClient;
 begin
   result:=nil;
 
+  // Do we need SVN
   if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.svn') then result:=SVNClient;
-  if result=nil then if (Pos('https://svn.',LowerCase(FURL))=1) then result:=SVNClient;
+  if result=nil then if (Pos(SVNBASEHTTP,LowerCase(FURL))>0) then result:=SVNClient;
   if result=nil then if (Pos('http://svn.',LowerCase(FURL))=1) then result:=SVNClient;
+  if result=nil then if (Pos(SVNBASESVN,LowerCase(FURL))>0) then result:=SVNClient;
 
+  // Do we need GIT
   if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') then result:=GitClient;
   if result=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then result:=GitClient;
+
+  // Do we need HG
+  if result=nil then if ( (Pos('hg.code.sf.net',LowerCase(FURL))>0) ) then result:=HGClient;
+  if result=nil then if ( (Pos('bitbucket.org',LowerCase(FURL))>0) ) then result:=HGClient;
+
+  // Do we need FTP
+  //if result=nil then if (Pos(FTPBASEFTP,LowerCase(FURL))>0) then result:=FTPClient;
+  //if result=nil then if (Pos(FTPBASEHTTP,LowerCase(FURL))>0) then result:=FTPClient;
 end;
 
 function TInstaller.GetTempFileNameExt(Prefix,Ext : String) : String;
@@ -2955,23 +2966,12 @@ begin
   else
     aEvent:=etError;
 
-  aRepoClient:=nil;
-
-  // not so elegant check to see what kind of client we need ...
-  if aRepoClient=nil then if (Pos(SVNBASEHTTP,LowerCase(FURL))>0) then aRepoClient:=SVNClient;
-  if aRepoClient=nil then if (Pos(SVNBASESVN,LowerCase(FURL))>0) then aRepoClient:=SVNClient;
-  //if aRepoClient=nil then if (Pos(FTPBASEFTP,LowerCase(FURL))>0) then aRepoClient:=FTPClient;
-  //if aRepoClient=nil then if (Pos(FTPBASEHTTP,LowerCase(FURL))>0) then aRepoClient:=FTPClient;
-  if aRepoClient=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then aRepoClient:=GitClient;
-  if aRepoClient=nil then if ( (Pos('hg.code.sf.net',LowerCase(FURL))>0) ) then aRepoClient:=HGClient;
-  if aRepoClient=nil then if ( (Pos('bitbucket.org',LowerCase(FURL))>0) ) then aRepoClient:=HGClient;
-
-  //if aRepoClient=nil then aRepoClient:=SVNClient;
+  aRepoClient:=GetSuitableRepoClient;
 
   // No repo client ...
   if aRepoClient=nil then
   begin
-    Infoln(infotext+'Could not determine what repoclient to use for ' + ModuleName + ' sources !',etWarning);
+    Infoln(infotext+'Could not determine what repoclient to use for ' + ModuleName + ' sources !',etError);
     if (IsFPCInstaller OR IsLazarusInstaller) then
     begin
       exit;

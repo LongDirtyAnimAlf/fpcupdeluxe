@@ -2583,8 +2583,8 @@ begin
       if FileExists(s1+'crti.o') then FoundLinkFile:=true;
       if FoundLinkFile then result:=s1;
     end;
-  {$endif}
   end;
+  {$endif}
 
   if FoundLinkFile then exit;
 
@@ -3258,8 +3258,13 @@ begin
         begin
           // This is not a warning/error message as sometimes we can use multiple different versions of executables
           if Level<>etCustom then
-            ThreadLog(Executable + ' is not a valid ' + ExeName + ' application. ' +
-            ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
+          begin
+            if (NOT FileExists(Executable)) then
+              ThreadLog(Executable + ' not found.',Level)
+            else
+              ThreadLog(Executable + ' is not a valid ' + ExeName + ' application. ' +
+              ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
+          end;
         end;
       end
       else
