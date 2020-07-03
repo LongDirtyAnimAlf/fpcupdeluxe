@@ -85,6 +85,7 @@ object Form1: TForm1
     TabOrder = 9
   end
   inline CommandOutputScreen: TSynEdit
+    AnchorSideLeft.Control = StatusMessage
     AnchorSideTop.Control = StatusMessage
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
@@ -1958,6 +1959,7 @@ object Form1: TForm1
     end
   end
   object memoSummary: TMemo
+    AnchorSideLeft.Control = CommandOutputScreen
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Panel1

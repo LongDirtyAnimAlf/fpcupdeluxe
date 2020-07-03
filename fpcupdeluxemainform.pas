@@ -538,9 +538,6 @@ begin
   RealFPCURL.Width:=(w-4);
   RealLazURL.Width:=RealFPCURL.Width;
   RealLazURL.Left:=RealFPCURL.Left+(w+4);
-  {$ifdef usealternateui}
-  alternateui_resize;
-  {$endif}
 end;
 
 procedure TForm1.LazarusVersionLabelClick(Sender: TObject);

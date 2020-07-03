@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <PathDelim Value="\"/>
     <General>
+      <Flags>
+        <CompatibilityMode Value="True"/>
+      </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
       <Title Value="fpcupdeluxery"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -13,12 +15,11 @@
         <DpiAware Value="Per-monitor"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="5">
+      <Resources Count="4">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
         <Resource_3 FileName="patchfpc\openssl.patch" Type="RCDATA" ResourceName="OPENSSL_FPCPATCH"/>
-        <Resource_4 FileName="patchlazarus\darwinqt5hack.patch" Type="RCDATA" ResourceName="DARWINQT5HACK_LAZPATCH"/>
       </Resources>
     </General>
     <i18n>
