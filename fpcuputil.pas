@@ -3066,51 +3066,62 @@ end;
 
 
 function LibWhich(aLibrary: string): boolean;
+{$ifdef Unix}
+const
+  UNIXSEARCHDIRS : array [0..1] of string = (
+  '/usr/lib',
+  '/usr/local/lib'
+  );
+  {$ifdef Haiku}
+  HAIKUSEARCHDIRS : array [0..3] of string = (
+  '/boot/system/lib/x86',
+  '/boot/system/non-packaged/lib/x86',
+  '/boot/system/lib',
+  '/boot/system/non-packaged/lib'
+  );
+  {$endif}
 var
   Output: string;
+  i:integer;
+  sd:string;
+{$endif}
 begin
   result:=false;
 
   {$ifdef Haiku}
-  {$ifdef CPUX86}
-  RunCommand('find',['/boot/system/lib/x86','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
-  result:=(Pos(aLibrary,Output)>0);
-  if (NOT result) then
+  if NOT result then
   begin
-    RunCommand('find',['/boot/system/non-packaged/lib/x86','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
-    result:=(Pos(aLibrary,Output)>0);
+    for i:=Low(HAIKUSEARCHDIRS) to High(HAIKUSEARCHDIRS) do
+    begin
+      sd:=HAIKUSEARCHDIRS[i];
+      {$ifndef CPUX86}
+      if (RightStr(sd,4)='/x86') then continue;
+      {$endif}
+      RunCommand('find',[sd,'-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      result:=(Pos(aLibrary,Output)>0);
+      if result then break;
+    end;
   end;
-  {$endif}
-  if (NOT result) then
-  begin
-    RunCommand('find',['/boot/system/lib','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
-    result:=(Pos(aLibrary,Output)>0);
-  end;
-  if (NOT result) then
-  begin
-    RunCommand('find',['/boot/system/non-packaged/lib','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
-    result:=(Pos(aLibrary,Output)>0);
-  end;
-  exit;
   {$endif}
 
   {$ifdef Unix}
-  //RunCommand('sh -c "ldconfig -p | grep '+aLibrary+'"', Output);
-  RunCommand('find',['/usr/lib','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
-  result:=(Pos(aLibrary,Output)>0);
-  if (NOT result) then
+  if NOT result then
   begin
-    RunCommand('find',['/usr/local/lib','-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
-    result:=(Pos(aLibrary,Output)>0);
+    for i:=Low(UNIXSEARCHDIRS) to High(UNIXSEARCHDIRS) do
+    begin
+      sd:=UNIXSEARCHDIRS[i];
+      RunCommand('find',[sd,'-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      result:=(Pos(aLibrary,Output)>0);
+      if result then break;
+    end;
   end;
+
   if (NOT result) then
   begin
     RunCommand('sh',['-c','"ldconfig -p | grep '+aLibrary+'"'],Output,[poUsePipes, poStderrToOutPut],swoHide);
     result:=(Pos(aLibrary,Output)>0);
   end;
-  exit;
   {$endif}
-
 end;
 
 function Which(const Executable: string): string;
@@ -4214,8 +4225,6 @@ constructor TUseNativeDownLoader.Create;
 begin
   Inherited;
 
-  ThreadLog('Native downloader created.',etDebug);
-
   FMaxRetries:=MAXCONNECTIONRETRIES;
   {$ifdef Darwin}
   // GitHub needs TLS 1.2 .... native FPC client does not support this (through OpenSSL)
@@ -4673,8 +4682,6 @@ end;
 constructor TUseWGetDownloader.Create;
 begin
   Inherited;
-
-  ThreadLog('WGet downloader created.',etDebug);
 
   FCURLOk:=False;
   {$ifdef ENABLECURL}

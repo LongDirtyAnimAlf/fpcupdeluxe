@@ -945,7 +945,11 @@ begin
         OperationSucceeded:=DownloadSVN;
       end;
       {$ENDIF MSWINDOWS}
-      if OperationSucceeded then FSVNDirectory:=ExtractFileDir(RepoExecutable);
+      if OperationSucceeded then
+      begin
+        if (RepoExecutable<>EmptyStr) then OperationSucceeded := CheckExecutable(RepoExecutable, ['--version'], '');
+        if OperationSucceeded then FSVNDirectory:=ExtractFileDir(RepoExecutable);
+      end;
     end;
 
     // Regardless of platform, SVN should now be either set up correctly or we should give up.
@@ -1608,8 +1612,9 @@ begin
     exit;
   end;
 
-  aBeforeRevision := 'failure';
-  aAfterRevision := 'failure';
+  aBeforeRevision         := 'failure';
+  aAfterRevision          := 'failure';
+  //aClient.Verbose         := FVerbose;
   aClient.LocalRepository := FSourceDirectory;
   aClient.Repository      := FURL;
   aClient.ExportOnly      := FExportOnly;
@@ -1779,6 +1784,7 @@ begin
 
   aBeforeRevision             := 'failure';
   aAfterRevision              := 'failure';
+  //SVNClient.Verbose           := FVerbose;
   SVNClient.LocalRepository   := FSourceDirectory;
   SVNClient.Repository        := FURL;
   SVNClient.ExportOnly        := FExportOnly;
@@ -2986,11 +2992,11 @@ begin
 
   Infoln(infotext+'Checking ' + ModuleName + ' sources with '+aRepoClient.ClassName,etInfo);
 
-  aRepoClient.Verbose:=FVerbose;
-  aRepoClient.ExportOnly:=FExportOnly;
-  aRepoClient.ModuleName:=ModuleName;
-  aRepoClient.LocalRepository:=FSourceDirectory;
-  aRepoClient.Repository:=FURL;
+  aRepoClient.Verbose          := FVerbose;
+  aRepoClient.ExportOnly       := FExportOnly;
+  aRepoClient.ModuleName       := ModuleName;
+  aRepoClient.LocalRepository  := FSourceDirectory;
+  aRepoClient.Repository       := FURL;
 
   aRepoClient.LocalRepositoryExists;
   result:=(aRepoClient.ReturnCode<>FRET_LOCAL_REMOTE_URL_NOMATCH);
@@ -3870,7 +3876,7 @@ begin
           aTool.Environment.SetVar(PATHVARNAME, PrependPath);
       end;
 
-      if Verbosity then
+      //if Verbosity then
         WritelnLog(infotext+aTool.GetExeInfo, true);
       result:=aTool.ExecuteAndWait;
       Output:=aTool.WorkerOutput.Text;
@@ -3929,7 +3935,7 @@ begin
           aTool.Environment.SetVar(PATHVARNAME, PrependPath);
       end;
 
-      if Verbosity then
+      //if Verbosity then
         WritelnLog(infotext+aTool.GetExeInfo, true);
       result:=aTool.ExecuteAndWait;
       Output:=aTool.WorkerOutput.Text;
@@ -3961,7 +3967,9 @@ begin
   FGitClient := TGitClient.Create(Self);
   FHGClient  := THGClient.Create(Self);
 
-  FShell := '';
+  FShell        := '';
+  FSVNDirectory := '';
+  FMakeDir      := '';
 
   FNeededExecutablesChecked:=false;
   FCleanModuleSuccess:=false;
@@ -3975,13 +3983,13 @@ begin
   FCrossOS_Target:=TOS.osNone;
   FCrossOS_SubArch:='';
 
-  FMajorVersion := -1;
-  FMinorVersion := -1;
+  FMajorVersion   := -1;
+  FMinorVersion   := -1;
   FReleaseVersion := -1;
-  FPatchVersion := -1;
+  FPatchVersion   := -1;
 
-  FMUSL:=false;
-  FSolarisOI:=false;
+  FMUSL      := false;
+  FSolarisOI := false;
 
   {$ifdef Linux}
   FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';

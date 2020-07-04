@@ -4110,8 +4110,6 @@ begin
   inherited Create;
 
   FCompiler := '';
-  FSVNDirectory := '';
-  FMakeDir :='';
 
   FTargetCompilerName:=GetCompilerName(GetTargetCPU);
 

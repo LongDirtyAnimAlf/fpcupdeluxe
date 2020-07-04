@@ -353,9 +353,11 @@ begin
         if (NOT FNoJobs) then
           Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
 
+        Processor.Process.Parameters.Add('--directory=' + FSourceDirectory);
+        //Processor.Process.Parameters.Add('--directory=' + ConcatPaths([FSourceDirectory,'lcl']));
+
         Processor.Process.Parameters.Add('FPC=' + FCompiler);
         Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
-        Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
         Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
         Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
         Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
@@ -376,10 +378,19 @@ begin
         Processor.Process.Parameters.Add('OS_TARGET=' + CrossInstaller.TargetOSName);
         Processor.Process.Parameters.Add('CPU_TARGET=' + CrossInstaller.TargetCPUName);
 
+        //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
+        //Todo: to be investigated
+        //Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+
         //Set standard options
         Options := STANDARDCOMPILERVERBOSITYOPTIONS;
+
         //Always limit the search for fpc.cfg to our own fpc.cfg
+        //Only needed on Windows. On Linux, we have already our own fpc.sh
+        {$ifdef Windows}
         Options := Options+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
+        {$endif}
+
         // Add remaining options
         Options := Options+' '+FCompilerOptions;
 
@@ -389,9 +400,6 @@ begin
         end;
         Options:=Trim(Options);
         if Length(Options)>0 then Processor.Process.Parameters.Add('OPT='+Options);
-
-        Processor.Process.Parameters.Add('--directory=' + FSourceDirectory);
-        //Processor.Process.Parameters.Add('--directory=' + ConcatPaths([FSourceDirectory,'lcl']));
 
         if FLCL_Platform <> '' then
           Processor.Process.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
@@ -630,13 +638,14 @@ begin
     //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
     if (NOT FNoJobs) then
       Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
-    Processor.Process.Parameters.Add('FPC=' + FCompiler);
-    Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
-    Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
-    Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
+
     //Processor.Process.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
     //Processor.Process.Parameters.Add('--directory=.');
     Processor.Process.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FInstallDirectory));
+
+    Processor.Process.Parameters.Add('FPC=' + FCompiler);
+    Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+    Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     //Make sure our FPC units can be found by Lazarus
@@ -650,13 +659,22 @@ begin
     Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
     {$endif}
 
+    //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
+    //Todo: to be investigated
+    //Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+
     if FLCL_Platform <> '' then
       Processor.Process.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
 
     //Set standard options
     s:=STANDARDCOMPILERVERBOSITYOPTIONS;
+
     //Always limit the search for fpc.cfg to our own fpc.cfg
+    //Only needed on Windows. On Linux, we have already our own fpc.sh
+    {$ifdef Windows}
     s:=s+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
+    {$endif}
+
     // Add remaining options
     s:=s+' '+FCompilerOptions;
 
@@ -1399,6 +1417,7 @@ end;
 function TLazarusInstaller.InitModule: boolean;
 var
   PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
+  SVNPath:string;
 begin
   Result := true;
 
@@ -1431,8 +1450,18 @@ begin
     // at least one ; to be present in the path. If you only have one entry, you
     // can add PathSeparator without problems.
     // https://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
-    SetPath(FBinPath + PathSeparator + PlainBinPath + PathSeparator + FMakeDir + PathSeparator +
-      ExcludeTrailingPathDelimiter(FSVNDirectory) + PathSeparator + ExcludeTrailingPathDelimiter(FInstallDirectory), false, false);
+
+    SVNPath:='';
+    if Length(FSVNDirectory)>0
+       then SVNPath:=PathSeparator+ExcludeTrailingPathDelimiter(FSVNDirectory);
+
+    SetPath(
+      FBinPath + PathSeparator +
+      PlainBinPath + PathSeparator +
+      FMakeDir + PathSeparator +
+      SVNPath +
+      ExcludeTrailingPathDelimiter(FInstallDirectory),
+      false, false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
     SetPath(FBinPath+PathSeparator+
