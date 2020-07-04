@@ -386,7 +386,7 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
+            <Filename Value="deluxebin\haiku\x86\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
@@ -428,7 +428,7 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
+            <Filename Value="deluxebin\haiku\x64\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>

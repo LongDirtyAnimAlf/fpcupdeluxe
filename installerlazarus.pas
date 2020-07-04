@@ -1982,8 +1982,8 @@ begin
         Sleep(200)
       else
       begin
-        // Do not fail if we are cleaning Lazarus itself
-        if ModuleName=_LAZARUS then result:=true;
+        // Do not fail if we are cleaning Lazarus itself or the Packager
+        if (ModuleName=_LAZARUS) OR (ModuleName=_PACKAGER) then result:=true;
         break;
       end;
     except
