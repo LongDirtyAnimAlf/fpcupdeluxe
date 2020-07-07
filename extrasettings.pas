@@ -1183,11 +1183,11 @@ end;
 
 function TForm2.GetAddContext:boolean;
 begin
-  result:=GetCheckState(CaptionCheckEnableOnlinePatching);
+  result:=GetCheckState(CaptionCheckAddContext);
 end;
 procedure TForm2.SetAddContext(value:boolean);
 begin
-  SetCheckState(CaptionCheckEnableOnlinePatching,value);
+  SetCheckState(CaptionCheckAddContext,value);
 end;
 
 

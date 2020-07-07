@@ -1008,7 +1008,8 @@ var
   OperationSucceeded: boolean;
   ResultCode: boolean;
   XdgDesktopContent: TStringList;
-  Output,XdgDesktopFile: string;
+  XdgMimeContent: TStringList;
+  Output,XdgDesktopFile,XdgMimeFile: string;
   aDirectory:string;
 begin
   {$ifdef Haiku}
@@ -1040,9 +1041,9 @@ begin
 
     if AddContext then
     begin
-      XdgDesktopContent.Add('StartupWMClass=Lazarus');
-      XdgDesktopContent.Add('MimeType=text/x-pascal;');
-      XdgDesktopContent.Add('Patterns=*.pas;*.pp;*.p;*.inc;*.lpi;*.lpk;*.lpr;*.lfm;*.lrs;*.lpl;');
+      //XdgDesktopContent.Add('StartupWMClass=Lazarus');
+      XdgDesktopContent.Add('MimeType=application/x-lazarus;');
+      //XdgDesktopContent.Add('Patterns=*.pas;*.pp;*.p;*.inc;*.lpi;*.lpk;*.lpr;*.lfm;*.lrs;*.lpl;');
     end;
 
     // We're going to try and call xdg-desktop-icon/menu
@@ -1056,7 +1057,7 @@ begin
       OperationSucceeded:=false;
     end;
 
-    if (OperationSucceeded=false) then
+    if (NOT OperationSucceeded) then
     begin
       aDirectory:=ConcatPaths(['usr','share','applications']);
       if ( (FpGeteuid=0) AND DirectoryExists(aDirectory) ) then
@@ -1083,7 +1084,52 @@ begin
     end;
   finally
     XdgDesktopContent.Free;
+    OperationSucceeded:=true;
   end;
+
+  if (OperationSucceeded) then
+  begin
+    aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','applications']);
+    OperationSucceeded:=RunCommand('update-desktop-database' ,[aDirectory],Output,[poUsePipes, poStderrToOutPut],swoHide);
+  end;
+
+  if AddContext then
+  begin
+    ThreadLog('Adding context !');
+    {$ifdef LCL}
+    Application.ProcessMessages;
+    {$endif}
+    XdgMimeFile:=IncludeTrailingPathDelimiter(GetTempDir(false))+'fpcup-'+shortcutname+'.xml';
+    XdgMimeContent:=TStringList.Create;
+    try
+      XdgMimeContent.Add('<?xml version="1.0" encoding="UTF-8"?>');
+      XdgMimeContent.Add('<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">');
+      XdgMimeContent.Add('    <mime-type type="application/x-lazarus">');
+      XdgMimeContent.Add('        <comment>Lazarus file</comment>');
+      XdgMimeContent.Add('        <icon name="application-x-lazarus"/>');
+      XdgMimeContent.Add('        <glob-deleteall/>');
+      XdgMimeContent.Add('        <glob pattern="*.lpi"/>');
+      XdgMimeContent.Add('        <glob pattern="*.lpr"/>');
+      XdgMimeContent.Add('        <glob pattern="*.lfm"/>');
+      XdgMimeContent.Add('        <glob pattern="*.pas"/>');
+      XdgMimeContent.Add('        <glob pattern="*.pp"/>');
+      XdgMimeContent.Add('        <glob pattern="*.inc"/>');
+      XdgMimeContent.Add('    </mime-type>');
+      XdgMimeContent.Add('</mime-info>');
+      aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','mime','packages']);
+      ForceDirectoriesSafe(aDirectory);
+      //XdgMimeContent.SaveToFile(aDirectory+DirectorySeparator+'application-x-lazarus.xml');
+      XdgMimeContent.SaveToFile(XdgMimeFile);
+      OperationSucceeded:=RunCommand('xdg-mime' ,['install',XdgMimeFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      OperationSucceeded:=RunCommand('xdg-icon-resource' ,['install','--context','mimetypes','--size','64',ExtractFilePath(Target)+'images/icons/lazarus.ico','application-x-lazarus'],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      SysUtils.DeleteFile(XdgMimeFile);
+    finally
+      XdgMimeContent.Free;
+    end;
+    aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','mime']);
+    OperationSucceeded:=RunCommand('update-mime-database' ,[aDirectory],Output,[poUsePipes, poStderrToOutPut],swoHide);
+  end;
+
 end;
 {$ELSE}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false);
