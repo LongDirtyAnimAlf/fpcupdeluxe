@@ -171,6 +171,9 @@ type
     function GetAllowOnlinePatching:boolean;
     procedure SetAllowOnlinePatching(value:boolean);
 
+    function GetAddContext:boolean;
+    procedure SetAddContext(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -233,6 +236,7 @@ type
     property GetUpdates:boolean read GetCheckUpdates write SetCheckUpdates;
     property UseSoftFloat:boolean read GetUseSoftFloat write SetUseSoftFloat;
     property OnlinePatching:boolean read GetAllowOnlinePatching write SetAllowOnlinePatching;
+    property AddContext:boolean read GetAddContext write SetAddContext;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -306,6 +310,8 @@ resourcestring
   HintCheckEnableOnlinePatching = 'Fpcupdeluxe can patch the sources automagically by using online patches.';
   CaptionCheckEnableOnlinePatching = 'Allow patching of sources by online patches.';
 
+  HintCheckAddContext = 'Double clicking on FPC and LAzarus files will open Lazarus.';
+  CaptionCheckAddContext = 'Add context for FPC and Lazarus files.';
 
 var
   Form2: TForm2;
@@ -416,8 +422,8 @@ begin
     Append(CaptionCheckGetUpdates);
     Append(CaptionUseSoftFloat80bit);
     Append(CaptionCheckEnableOnlinePatching);
+    Append(CaptionCheckAddContext);
   end;
-
 
   for OS := Low(TOS) to High(TOS) do
   begin
@@ -495,6 +501,11 @@ begin
   {$ifndef Windows}
   ForceLocalRepoClient:=False;
   SetCheckEnabled(CaptionCheckForceLocalRepoClient,False);
+  {$endif}
+
+  {$ifdef Windows}
+  AddContext:=False;
+  SetCheckEnabled(CaptionCheckAddContext,False);
   {$endif}
 
   UseSoftFloat:=true;
@@ -1166,6 +1177,15 @@ begin
   result:=GetCheckState(CaptionCheckEnableOnlinePatching);
 end;
 procedure TForm2.SetAllowOnlinePatching(value:boolean);
+begin
+  SetCheckState(CaptionCheckEnableOnlinePatching,value);
+end;
+
+function TForm2.GetAddContext:boolean;
+begin
+  result:=GetCheckState(CaptionCheckEnableOnlinePatching);
+end;
+procedure TForm2.SetAddContext(value:boolean);
 begin
   SetCheckState(CaptionCheckEnableOnlinePatching,value);
 end;

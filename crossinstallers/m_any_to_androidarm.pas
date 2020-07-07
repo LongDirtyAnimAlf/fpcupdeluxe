@@ -285,7 +285,7 @@ begin
           {$IFDEF LINUX}
           if FpGetEUid=0 then PresetBinPath:='/usr/local/';
           {$ENDIF}
-          PresetBinPath:=NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'toolchains'+DirectorySeparator+NDKTOOLCHAINVERSIONS[toolchain]+DirectorySeparator+'prebuilt'+DirectorySeparator;
+          PresetBinPath:=PresetBinPath+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'toolchains'+DirectorySeparator+NDKTOOLCHAINVERSIONS[toolchain]+DirectorySeparator+'prebuilt'+DirectorySeparator;
           PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+
           {$IFDEF MSWINDOWS}
           {$IFDEF CPU64}

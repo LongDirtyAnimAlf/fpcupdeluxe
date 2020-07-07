@@ -38,6 +38,9 @@ uses
 implementation
 
 uses
+  {$ifdef Unix}
+  BaseUnix,
+  {$endif}
   FileUtil, m_crossinstaller, fpcuputil;
 
 type
@@ -58,6 +61,9 @@ end;
 function TAny_FreeRTOSXtensa.GetLibs(Basepath:string): boolean;
 const
   StaticLibName='libc.a';
+var
+  PresetLibPath:string;
+  S:string;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -78,6 +84,22 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName);
 
+
+  if (not result) then
+  begin
+    PresetLibPath:=GetUserDir;
+    {$IFDEF UNIX}
+    //if FpGeteuid=0 then PresetLibPath:='/usr/local/lib';
+    {$ENDIF}
+    PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-esp32-elf']);
+    S:=FindFileInDir(StaticLibName,PresetLibPath);
+    if (Length(S)>0) then
+    begin
+      PresetLibPath:=ExtractFilePath(S);
+      result:=SearchLibrary(PresetLibPath,StaticLibName);
+    end;
+  end;
+
   SearchLibraryInfo(result);
 
   if result then
@@ -90,6 +112,7 @@ end;
 function TAny_FreeRTOSXtensa.GetBinUtils(Basepath:string): boolean;
 var
   AsFile,aOption: string;
+  S,PresetBinPath:string;
   i:integer;
 begin
   result:=inherited;
@@ -103,6 +126,35 @@ begin
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+
+  if (not result) then
+  begin
+    PresetBinPath:=GetUserDir;
+    {$IFDEF LINUX}
+    if FpGetEUid=0 then PresetBinPath:='/usr/local/bin';
+    {$ENDIF}
+    PresetBinPath:=ConcatPaths([PresetBinPath,'.espressif','tools','xtensa-esp32-elf']);
+    S:=FindFileInDir(AsFile,PresetBinPath);
+    if (Length(S)>0) then
+    begin
+      PresetBinPath:=ExtractFilePath(S);
+      result:=SearchBinUtil(PresetBinPath,AsFile);
+    end;
+  end;
+
+  if (not result) then
+  begin
+    PresetBinPath:=Trim(GetEnvironmentVariable('IDF_TOOLS_PATH'));
+    if (Length(PresetBinPath)>0) then
+    begin
+      S:=FindFileInDir(AsFile,PresetBinPath);
+      if (Length(S)>0) then
+      begin
+        PresetBinPath:=ExtractFilePath(S);
+        result:=SearchBinUtil(PresetBinPath,AsFile);
+      end;
+    end;
+  end;
 
   SearchBinUtilsInfo(result);
 

@@ -424,6 +424,11 @@ begin
   if Length(DirName)>0 then sd:=sd+DirectorySeparator+DirName;
   sd:=SafeExpandFileName(sd);
   result:=SearchUtil(sd, LookFor, LibsOrBins);
+  if ((NOT result) AND (NOT LibsOrBins)) then
+  begin
+    sd:=sd+DirectorySeparator+'bin';
+    result:=SearchUtil(sd, LookFor, LibsOrBins);
+  end;
 
   if not result then
   begin
@@ -434,6 +439,11 @@ begin
     if Length(DirName)>0 then sd:=sd+DirectorySeparator+DirName;
     sd:=SafeExpandFileName(sd);
     result:=SearchUtil(sd, LookFor, LibsOrBins);
+    if ((NOT result) AND (NOT LibsOrBins)) then
+    begin
+      sd:=sd+DirectorySeparator+'bin';
+      result:=SearchUtil(sd, LookFor, LibsOrBins);
+    end;
   end;
 
   if not result then
@@ -445,6 +455,11 @@ begin
     if Length(DirName)>0 then sd:=sd+DirectorySeparator+DirName;
     sd:=SafeExpandFileName(sd);
     result:=SearchUtil(sd, LookFor, LibsOrBins);
+    if ((NOT result) AND (NOT LibsOrBins)) then
+    begin
+      sd:=sd+DirectorySeparator+'bin';
+      result:=SearchUtil(sd, LookFor, LibsOrBins);
+    end;
   end;
 
   {$IFDEF UNIX}

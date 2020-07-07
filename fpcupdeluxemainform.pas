@@ -3617,6 +3617,7 @@ begin
   FPCupManager.LazarusPatches:=Form2.LazPatches;
   FPCupManager.NativeFPCBootstrapCompiler:=(NOT Form2.FpcupBootstrappersOnly);
   FPCupManager.ForceLocalRepoClient:=Form2.ForceLocalRepoClient;
+  FPCupManager.Context:=Form2.AddContext;
 
   // Set default Darwin LCL platforms
   {$ifdef Darwin}
@@ -3874,10 +3875,14 @@ begin
   if (MemAvailable<>0) AND (MemAvailable<1500) then
   begin
     AddMessage('Please be warned: memory is very limited for building Lazarus');
-    {$IFDEF LINUX}
+    {$IFDEF UNIX}
     AddMessage('Memory advice: Please add (more) swap space !!');
     AddMessage('Memory advice: To build Lazarus, you will need (at least) 1GB of (swap-)RAM space.');
-    {$ENDIF LINUX}
+    memoSummary.Lines.Append(BeginSnippet+' Most likely, there will not enough RAM (swap) to build Lazarus.');
+    memoSummary.Lines.Append(BeginSnippet+' Expected error: Can''t call the assembler');
+    memoSummary.Lines.Append(BeginSnippet+' Expected error:  Can''t call the resource compiler');
+    memoSummary.Lines.Append(BeginSnippet+' Please add some RAM or swap-space (+1GB) and re-run fpcupdeluxe.');
+    {$ENDIF UNIX}
   end;
 
   AddMessage('');

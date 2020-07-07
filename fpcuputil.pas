@@ -269,7 +269,7 @@ type
   {$endif USEONLYCURL}
 
 // Create shortcut on desktop to Target file
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
+procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false) ;
 // Create shell script in ~ directory that links to Target
 procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 {$IFDEF MSWINDOWS}
@@ -947,7 +947,7 @@ begin
 end;
 
 {$IFDEF MSWINDOWS}
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
+procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false);
 var
   IObject: IUnknown;
   ISLink: IShellLink;
@@ -978,7 +978,7 @@ begin
 end;
 {$ELSE}
 {$IFDEF DARWIN}
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
+procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false);
 begin
   // Create shortcut on Desktop and in Applications
   fpSystem(
@@ -1003,7 +1003,7 @@ begin
 end;
 {$ELSE}
 {$IFDEF UNIX}
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
+procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false);
 var
   OperationSucceeded: boolean;
   ResultCode: boolean;
@@ -1037,35 +1037,42 @@ begin
     XdgDesktopContent.Add('Category=Application;IDE;Development;GUIDesigner;Programming;');
     XdgDesktopContent.Add('Categories=Application;IDE;Development;GUIDesigner;Programming;');
     XdgDesktopContent.Add('Keywords=editor;Pascal;IDE;FreePascal;fpc;Design;Designer;');
-    //XdgDesktopContent.Add('StartupWMClass=Lazarus');
-    //XdgDesktopContent.Add('MimeType=text/x-pascal;');
-    //XdgDesktopContent.Add('Patterns=*.pas;*.pp;*.p;*.inc;*.lpi;*.lpk;*.lpr;*.lfm;*.lrs;*.lpl;');
-    // We're going to try and call xdg-desktop-icon
+
+    if AddContext then
+    begin
+      XdgDesktopContent.Add('StartupWMClass=Lazarus');
+      XdgDesktopContent.Add('MimeType=text/x-pascal;');
+      XdgDesktopContent.Add('Patterns=*.pas;*.pp;*.p;*.inc;*.lpi;*.lpk;*.lpr;*.lfm;*.lrs;*.lpl;');
+    end;
+
+    // We're going to try and call xdg-desktop-icon/menu
     // this may fail if shortcut exists already
     try
       XdgDesktopContent.SaveToFile(XdgDesktopFile);
       FpChmod(XdgDesktopFile, &711); //rwx--x--x
-      OperationSucceeded:=RunCommand('xdg-desktop-icon' ,['install',XdgDesktopFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      OperationSucceeded:=RunCommand('xdg-desktop-icon' ,['install','--novendor',XdgDesktopFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      OperationSucceeded:=RunCommand('xdg-desktop-menu' ,['install','--novendor',XdgDesktopFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
     except
       OperationSucceeded:=false;
     end;
 
-    if OperationSucceeded=false then
+    if (OperationSucceeded=false) then
     begin
-      aDirectory:='/usr/share/applications';
-      if false then // skip global
-      //if DirectoryExists(aDirectory) then
+      aDirectory:=ConcatPaths(['usr','share','applications']);
+      if ( (FpGeteuid=0) AND DirectoryExists(aDirectory) ) then
       begin
-        FileUtil.CopyFile(XdgDesktopFile,aDirectory+'/'+ExtractFileName(XdgDesktopFile));
+        FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile));
       end
       else
       begin
         // Create shortcut directly on User-Desktop
-        aDirectory:=IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+'Desktop';
+        aDirectory:=ConcatPaths([SafeExpandFileName('~'),'Desktop']);
         if DirectoryExists(aDirectory) then
-        begin
-          FileUtil.CopyFile(XdgDesktopFile,aDirectory+'/'+ExtractFileName(XdgDesktopFile));
-        end
+           FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile));
+        // Create user menu item
+        aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','applications']);
+        if DirectoryExists(aDirectory) then
+          FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile));
       end;
     end;
     // Temp file is no longer needed....
@@ -1079,7 +1086,7 @@ begin
   end;
 end;
 {$ELSE}
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
+procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false);
 begin
   ThreadLog('Not creating desktop shortcut: don''t know how to do this.');
 end;

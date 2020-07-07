@@ -201,6 +201,7 @@ type
     FReApplyLocalChanges: boolean;
     {$ifndef FPCONLY}
     FShortCutNameLazarus: string;
+    FContext: boolean;
     {$endif}
     FShortCutNameFpcup: string;
     FSkipModules: string;
@@ -255,6 +256,7 @@ type
     property Sequencer: TSequencer read FSequencer;
    {$ifndef FPCONLY}
     property ShortCutNameLazarus: string read FShortCutNameLazarus write FShortCutNameLazarus; //Name of the shortcut that points to the fpcup-installed Lazarus
+    property Context: boolean read FContext write FContext; //Name of the shortcut that points to the fpcup-installed Lazarus
     {$endif}
     property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup; //Name of the shortcut that points to fpcup
     // Full path+filename of SVN executable. Use empty to search for default locations.
@@ -1009,7 +1011,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
         CreateHomeStartLink('"'+InstalledLazarus+'"','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
         {$ENDIF DARWIN}
         // Desktop shortcut creation will not always work. As a fallback, create the link in the home directory:
-        CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
+        CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus,FParent.Context);
         {$ENDIF UNIX}
         FParent.FShortcutCreated:=true;
       except
@@ -1070,6 +1072,15 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     'libgtk2.0-dev',
     'libcairo2-dev',
     'libcanberra-gtk-module'
+    );
+
+    DEBIAN_LIBS_32 : array [0..5] of string = (
+    'libc6-dev-i386',
+    'gcc-multilib',
+    'libxtst-dev:i386',
+    'libpango1-dev:i386',
+    'libgtk2.0-dev:i386',
+    'libcairo2-dev:i386'
     );
 
     DEBIAN_LIBS_QT5 : array [0..3] of string = (
