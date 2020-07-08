@@ -1099,6 +1099,11 @@ begin
     {$ifdef LCL}
     Application.ProcessMessages;
     {$endif}
+
+    aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','mime']);
+    ForceDirectoriesSafe(aDirectory);
+
+    //Create mime file associations
     XdgMimeFile:=IncludeTrailingPathDelimiter(GetTempDir(false))+'fpcup-'+shortcutname+'.xml';
     XdgMimeContent:=TStringList.Create;
     try
@@ -1118,14 +1123,20 @@ begin
       XdgMimeContent.Add('</mime-info>');
       aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','mime','packages']);
       ForceDirectoriesSafe(aDirectory);
-      //XdgMimeContent.SaveToFile(aDirectory+DirectorySeparator+'application-x-lazarus.xml');
       XdgMimeContent.SaveToFile(XdgMimeFile);
-      OperationSucceeded:=RunCommand('xdg-mime' ,['install',XdgMimeFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
-      OperationSucceeded:=RunCommand('xdg-icon-resource' ,['install','--context','mimetypes','--size','64',ExtractFilePath(Target)+'images/icons/lazarus.ico','application-x-lazarus'],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      OperationSucceeded:=RunCommand('xdg-mime' ,['install','--novendor',XdgMimeFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
       SysUtils.DeleteFile(XdgMimeFile);
     finally
       XdgMimeContent.Free;
     end;
+
+    //Process icon
+    aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','icons']);
+    ForceDirectoriesSafe(aDirectory);
+    //OperationSucceeded:=RunCommand('xdg-icon-resource' ,['install','--novendor','--context','mimetypes','--size','64',ExtractFilePath(Target)+'images/icons/lazarus.ico','application-x-lazarus'],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    OperationSucceeded:=RunCommand('xdg-icon-resource' ,['install','--novendor','--context','mimetypes','--size','64',ExtractFilePath(Target)+'images/icons/lazarus64x64.png','application-x-lazarus'],Output,[poUsePipes, poStderrToOutPut],swoHide);
+
+    //Update mime database
     aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','mime']);
     OperationSucceeded:=RunCommand('update-mime-database' ,[aDirectory],Output,[poUsePipes, poStderrToOutPut],swoHide);
   end;
