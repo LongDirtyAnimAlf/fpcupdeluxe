@@ -2507,7 +2507,7 @@ begin
       begin
         if (FPCupManager.CrossCPU_Target=TCPU.xtensa) then
         begin
-          FPCupManager.CrossOPT:='-Cplx6 ';
+          FPCupManager.CrossOPT:='-Cplx6 -Cfhard ';
           FPCupManager.CrossOS_SubArch:='lx6';
         end;
       end;

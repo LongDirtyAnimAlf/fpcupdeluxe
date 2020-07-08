@@ -84,10 +84,10 @@ type
     Notebook: TPageControl;
     AboutPage: TTabSheet;
     procedure AboutFormCreate(Sender:TObject);
-    procedure URLLabelMouseDown(Sender: TObject; {%H-}Button: TMouseButton;
+    procedure LabelMouseDown(Sender: TObject; {%H-}Button: TMouseButton;
       {%H-}Shift: TShiftState; {%H-}X, {%H-}Y: Integer);
-    procedure URLLabelMouseEnter(Sender: TObject);
-    procedure URLLabelMouseLeave(Sender: TObject);
+    procedure LabelMouseEnter(Sender: TObject);
+    procedure LabelMouseLeave(Sender: TObject);
   private
     Acknowledgements: TScrollingText;
     Contributors: TScrollingText;
@@ -155,7 +155,7 @@ begin
     ]);
 
 
-  PlatformLabel.Caption:= '';
+  PlatformLabel.Caption:= 'https://github.com/newpascal/fpcupdeluxe/releases/latest';
 
   // Reinier Olislagers
   // 4-dec-2014
@@ -182,20 +182,20 @@ begin
   CloseButton.Caption:='Close';
 end;
 
-procedure TAboutForm.URLLabelMouseDown(Sender: TObject;
+procedure TAboutForm.LabelMouseDown(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   OpenURL(TLabel(Sender).Caption);
 end;
 
-procedure TAboutForm.URLLabelMouseLeave(Sender: TObject);
+procedure TAboutForm.LabelMouseLeave(Sender: TObject);
 begin
   TLabel(Sender).Font.Style := [];
   TLabel(Sender).Font.Color := clBlue;
   TLabel(Sender).Cursor := crDefault;
 end;
 
-procedure TAboutForm. URLLabelMouseEnter(Sender: TObject);
+procedure TAboutForm. LabelMouseEnter(Sender: TObject);
 begin
   TLabel(Sender).Font.Style := [fsUnderLine];
   TLabel(Sender).Font.Color := clRed;

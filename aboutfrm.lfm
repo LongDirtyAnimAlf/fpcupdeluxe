@@ -10,7 +10,7 @@ object AboutForm: TAboutForm
   ClientWidth = 460
   OnCreate = AboutFormCreate
   Position = poScreenCenter
-  LCLVersion = '2.0.9.0'
+  LCLVersion = '2.1.0.0'
   object Notebook: TPageControl
     Left = 0
     Height = 326
@@ -73,7 +73,12 @@ object AboutForm: TAboutForm
         Width = 74
         BorderSpacing.Around = 6
         Caption = 'PlatformLabel'
+        Font.Color = clBlue
         ParentColor = False
+        ParentFont = False
+        OnMouseDown = LabelMouseDown
+        OnMouseEnter = LabelMouseEnter
+        OnMouseLeave = LabelMouseLeave
       end
       object FPCVersionLabel: TLabel
         AnchorSideLeft.Control = LogoImage
@@ -119,9 +124,9 @@ object AboutForm: TAboutForm
         Font.Color = clBlue
         ParentColor = False
         ParentFont = False
-        OnMouseDown = URLLabelMouseDown
-        OnMouseEnter = URLLabelMouseEnter
-        OnMouseLeave = URLLabelMouseLeave
+        OnMouseDown = LabelMouseDown
+        OnMouseEnter = LabelMouseEnter
+        OnMouseLeave = LabelMouseLeave
       end
       object DocumentationLabel: TLabel
         AnchorSideLeft.Control = AboutPage
@@ -153,9 +158,9 @@ object AboutForm: TAboutForm
         Font.Color = clBlue
         ParentColor = False
         ParentFont = False
-        OnMouseDown = URLLabelMouseDown
-        OnMouseEnter = URLLabelMouseEnter
-        OnMouseLeave = URLLabelMouseLeave
+        OnMouseDown = LabelMouseDown
+        OnMouseEnter = LabelMouseEnter
+        OnMouseLeave = LabelMouseLeave
       end
       object AboutMemo: TMemo
         AnchorSideLeft.Control = AboutPage
@@ -219,9 +224,9 @@ object AboutForm: TAboutForm
         Font.Color = clBlue
         ParentColor = False
         ParentFont = False
-        OnMouseDown = URLLabelMouseDown
-        OnMouseEnter = URLLabelMouseEnter
-        OnMouseLeave = URLLabelMouseLeave
+        OnMouseDown = LabelMouseDown
+        OnMouseEnter = LabelMouseEnter
+        OnMouseLeave = LabelMouseLeave
       end
       object ReinierLabel: TLabel
         AnchorSideLeft.Control = AboutPage
@@ -251,9 +256,9 @@ object AboutForm: TAboutForm
         Font.Color = clBlue
         ParentColor = False
         ParentFont = False
-        OnMouseDown = URLLabelMouseDown
-        OnMouseEnter = URLLabelMouseEnter
-        OnMouseLeave = URLLabelMouseLeave
+        OnMouseDown = LabelMouseDown
+        OnMouseEnter = LabelMouseEnter
+        OnMouseLeave = LabelMouseLeave
       end
     end
   end

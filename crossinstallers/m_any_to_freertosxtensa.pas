@@ -170,12 +170,22 @@ begin
     if i=-1 then
     begin
       if length(FSubArch)=0 then FSubArch:='lx6';
-      aOption:='-Cplx6 -Cfhard';
+      aOption:='-Cplx6 ';
       FCrossOpts.Add(aOption+' ');
       ShowInfo('Did not find any -Cp architecture parameter; using '+aOption+' and SUBARCH='+FSubArch+'.');
     end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
+    //AddFPCCFGSnippet(aOption);
 
+    i:=StringListStartsWith(FCrossOpts,'-Cf');
+    if i=-1 then
+    begin
+      aOption:='-Cfhard ';
+      FCrossOpts.Add(aOption+' ');
+      ShowInfo('Did not find any -Cf parameter; using '+aOption+'.');
+    end else aOption:=Trim(FCrossOpts[i]);
+    //AddFPCCFGSnippet(aOption);
+
+    AddFPCCFGSnippet('-Wpesp32');
   end;
 end;
 
