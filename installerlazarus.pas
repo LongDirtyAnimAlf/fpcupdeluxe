@@ -464,8 +464,6 @@ begin
         Infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + '/' + FLCL_Platform + ' using ' + ExtractFileName(Processor.Executable), etInfo);
 
       try
-        WritelnLog(infotext+Processor.GetExeInfo, true);
-
         {$ifdef MSWindows}
         //Prepend FPC binary directory to PATH to prevent pickup of strange tools
         OldPath:=Processor.Environment.GetVar(PATHVARNAME);
@@ -844,8 +842,6 @@ begin
     end;
 
     try
-      WritelnLog(infotext+Processor.GetExeInfo, true);
-
       {$ifdef MSWindows}
       //Prepend FPC binary directory to PATH to prevent pickup of strange tools
       OldPath:=Processor.Environment.GetVar(PATHVARNAME);
@@ -962,7 +958,6 @@ begin
       begin
         Infoln(infotext+'Running lazbuild to get IDE with user-specified packages', etInfo);
         try
-          WritelnLog(infotext+Processor.GetExeInfo, true);
           ProcessorResult:=Processor.ExecuteAndWait;
           //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
           Processor.Environment.SetVar('FPCDIR',FPCDirStore);
@@ -1026,7 +1021,6 @@ begin
 
           Infoln(infotext+'Compiling startlazarus to make sure it is present:', etInfo);
           try
-            WritelnLog(infotext+Processor.GetExeInfo, true);
             ProcessorResult:=Processor.ExecuteAndWait;
             //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
             Processor.Environment.SetVar('FPCDIR',FPCDirStore);
@@ -1975,7 +1969,6 @@ begin
     end;
 
     try
-      WritelnLog(infotext+Processor.GetExeInfo, true);
       ProcessorResult:=Processor.ExecuteAndWait;
       result:=(ProcessorResult=0);
       if result then

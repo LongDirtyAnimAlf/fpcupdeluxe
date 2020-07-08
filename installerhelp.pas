@@ -670,7 +670,6 @@ begin
             Processor.Process.Parameters.Add(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
             Infoln(ModuleName+': compiling build_lcl_docs help compiler:',etInfo);
             WritelnLog('Building help compiler (also time consuming generation of documents) !!!!!!', true);
-            WritelnLog(infotext+Processor.GetExeInfo, true);
             ProcessorResult:=Processor.ExecuteAndWait;
             WritelnLog('Execute: '+Processor.Executable+' exit code: '+InttoStr(ProcessorResult), true);
             if ProcessorResult <> 0 then
@@ -754,7 +753,6 @@ begin
         which is picked up by the default Lazarus settings.
         The generated .xct file is an index file for fpdoc cross file links,
         used if you want to link to the chm from other chms.}
-        WritelnLog(Processor.GetExeInfo, true);
         ProcessorResult:=Processor.ExecuteAndWait;
         BuildResult:=ProcessorResult;
         if BuildResult <> 0 then

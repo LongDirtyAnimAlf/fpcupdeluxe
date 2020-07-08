@@ -1675,7 +1675,6 @@ begin
   end;
 
   try
-    WritelnLog(infotext+Processor.GetExeInfo, true);
     ProcessorResult:=Processor.ExecuteAndWait;
     //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
     //Processor.Environment.SetVar('FPCDIR',FPCDirStore);
@@ -2936,7 +2935,6 @@ var
     Processor.Process.Parameters.Add('' + aFile + '');
     Infoln(infotext+'Creating '+ExtractFileName(aFile));
     try
-      WritelnLog(infotext+Processor.GetExeInfo, true);
       ProcessorResult:=Processor.ExecuteAndWait;
       result:=(ProcessorResult=0);
     except
@@ -3134,7 +3132,6 @@ begin
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
       Infoln(infotext+'Perform compiler cycle for Windows FPC64.',etInfo);
-      WritelnLog(infotext+Processor.GetExeInfo, true);
       ProcessorResult:=Processor.ExecuteAndWait;
       if ProcessorResult <> 0 then
       begin
@@ -3169,7 +3166,6 @@ begin
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
       Infoln(infotext+'Perform compiler cycle for Darwin.',etInfo);
-      WritelnLog(infotext+Processor.GetExeInfo, true);
       ProcessorResult:=Processor.ExecuteAndWait;
       if ProcessorResult <> 0 then
       begin
@@ -3852,12 +3848,11 @@ begin
       if (NOT RunTwice) then
       begin
         if (NOT CrossCompiling) then
-          Infoln(infotext+'Running '+Processor.Executable+' distclean twice',etInfo)
+          Infoln(infotext+'Running make distclean twice',etInfo)
         else
-          Infoln(infotext+'Running '+Processor.Executable+' distclean twice for target '+CrossInstaller.RegisterName,etInfo);
+          Infoln(infotext+'Running make distclean twice for target '+CrossInstaller.RegisterName,etInfo);
       end;
       try
-        WritelnLog(infotext+Processor.GetExeInfo, true);
         ProcessorResult:=Processor.ExecuteAndWait;
         result:=(ProcessorResult=0);
         if result then

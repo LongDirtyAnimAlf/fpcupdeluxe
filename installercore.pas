@@ -3408,14 +3408,25 @@ begin
             j:=StrToIntDef(PatchFilePath[j+Length(STRIPMAGIC)],0);
           end else j:=0;
 
+          {$IFDEF MSWINDOWS}
+          Processor.Executable := IncludeTrailingPathDelimiter(FMakeDir) + FPatchCmd;
+          {$ELSE}
+          Processor.Executable := FPatchCmd;
+          {$ENDIF}
+          Processor.Process.Parameters.Clear;
+          Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
+
           // check for default values
-          if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
-            {$IF defined(BSD) and not defined(DARWIN)}
-            then LocalPatchCmd:=FPatchCmd + ' -p' + InttoStr(j) + ' -N -i '
-            {$else}
-            then LocalPatchCmd:=FPatchCmd + ' -p' + InttoStr(j) + ' -N --no-backup-if-mismatch -i '
+          if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt)) then
+          begin
+            Processor.Process.Parameters.Add('-p');
+            Processor.Process.Parameters.Add(InttoStr(j));
+            Processor.Process.Parameters.Add('-N');
+            {$IF not defined(BSD) or defined(DARWIN)}
+            Processor.Process.Parameters.Add('--no-backup-if-mismatch');
             {$endif}
-             else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
+            Processor.Process.Parameters.Add('-i');
+          end;
 
           // always correct for line-endings while patch is very sensitive for that
           PatchFileCorrectedPath:=IncludeTrailingPathDelimiter(GetTempDirName)+ExtractFileName(PatchFilePath);
@@ -3423,11 +3434,11 @@ begin
           begin
             // revert to original file in case of file not found
             if (NOT FileExists(PatchFileCorrectedPath)) then PatchFileCorrectedPath:=PatchFilePath;
-            {$IFDEF MSWINDOWS}
-            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFileCorrectedPath, FSourceDirectory, Output, True);
-            {$ELSE}
-            ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFileCorrectedPath, FSourceDirectory, Output, True);
-            {$ENDIF}
+            Processor.Process.Parameters.Add(PatchFileCorrectedPath);
+
+            //Execute patch command
+            ReturnCode:=Processor.ExecuteAndWait;
+
             // remove the temporary file
             if (PatchFileCorrectedPath<>PatchFilePath) then DeleteFile(PatchFileCorrectedPath);
             if ReturnCode=0  then
@@ -3826,6 +3837,7 @@ var
   i:integer;
   aTool:TExternalTool;
   FParameters:TStrings;
+  ExeName:string;
 begin
 
   result:=0;
@@ -3876,8 +3888,6 @@ begin
           aTool.Environment.SetVar(PATHVARNAME, PrependPath);
       end;
 
-      //if Verbosity then
-        WritelnLog(infotext+aTool.GetExeInfo, true);
       result:=aTool.ExecuteAndWait;
       Output:=aTool.WorkerOutput.Text;
 
@@ -3935,8 +3945,6 @@ begin
           aTool.Environment.SetVar(PATHVARNAME, PrependPath);
       end;
 
-      //if Verbosity then
-        WritelnLog(infotext+aTool.GetExeInfo, true);
       result:=aTool.ExecuteAndWait;
       Output:=aTool.WorkerOutput.Text;
 

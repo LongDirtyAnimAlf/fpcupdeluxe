@@ -651,6 +651,10 @@ begin
   if (NOT Verbose) then
   begin
     ExeFile:=LowerCase(ExtractFileName(Process.Executable));
+
+    // Show exe info to the user.
+    ThreadLog(GetExeInfo,etCustom);
+
     if
       (
       (Pos('fpc',ExeFile)=1)
@@ -658,8 +662,6 @@ begin
       OR (Pos('lazbuild',ExeFile)=1)
       OR (Pos('make',ExeFile)=1)
       OR (Pos('gmake',ExeFile)=1)
-      //OR (Pos('svn',ExeFile)=1)
-      //OR (Pos('git',ExeFile)=1)
       )
     then
     begin
