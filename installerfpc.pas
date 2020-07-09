@@ -2245,7 +2245,7 @@ begin
         '.tbz2','.tbz','.tar.bz2':
         begin
           {$ifdef BSD}
-          OperationSucceeded:=(ExecuteCommand(FTar,['-jxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName],FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar,['-jxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--include','*'+CompilerName],FVerbose)=0);
           {$else}
           OperationSucceeded:=(ExecuteCommand(FTar,['-jxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName],FVerbose)=0);
           {$endif}
@@ -2254,7 +2254,7 @@ begin
         '.tar.gz':
         begin
           {$ifdef BSD}
-          OperationSucceeded:=(ExecuteCommand(FTar,['-zxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'-O','*'+CompilerName],FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar,['-zxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--include','*'+CompilerName],FVerbose)=0);
           {$else}
           OperationSucceeded:=(ExecuteCommand(FTar,['-zxf',BootstrapFilePath,'-C',BootstrapFileArchiveDir,'--wildcards','--no-anchored',CompilerName],FVerbose)=0);
           {$endif}
@@ -2453,6 +2453,7 @@ begin
             if aLocalBootstrapVersion='2.6.4' then aCompilerArchive:='universal-macosx-10.5-ppcuniversal.tar.bz2'; //ppcuniversal
             {$IF defined(CPUX86_64) OR defined(CPUPOWERPC64)}
             if aLocalBootstrapVersion='3.0.0' then aCompilerArchive:='x86_64-macosx-10.7-ppcx64.tar.bz2'; // ppcx64
+            if aLocalBootstrapVersion='3.0.4' then aCompilerArchive:='x86_64-macosx-10.9-ppcx64.tar.bz2'; // ppcx64
             {$ENDIF}
             {$ENDIF}
             {$IFDEF win32}

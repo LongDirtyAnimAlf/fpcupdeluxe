@@ -3508,19 +3508,43 @@ end;
 function FileNameWithoutAllExt(const AFilename: string): string;
 var
   StartPos: Integer;
-  ExtPos: Integer;
+  ExtPos,ExPosCounter: Integer;
 begin
   result:='';
   StartPos:=length(AFilename);
+
+  // Remove trailing separators
+  if (AFilename[StartPos] in (AllowDirectorySeparators+AllowDriveSeparators)) then dec(StartPos);
+  ExtPos:=StartPos;
+
+  // Find first separator from the right
   while (StartPos>0)
   and not (AFilename[StartPos] in (AllowDirectorySeparators+AllowDriveSeparators))
   do
     dec(StartPos);
+
   Inc(StartPos);
-  ExtPos:=(StartPos);
-  while (ExtPos<=length(AFilename)) and (AFilename[ExtPos]<>ExtensionSeparator) do
-    inc(ExtPos);
+  Inc(ExtPos);
+
+  // We now have the filename
   result:=copy(AFilename,StartPos,ExtPos-StartPos);
+
+  StartPos:=length(result);
+  ExtPos:=StartPos;
+  ExPosCounter:=0;
+
+  //Remove at max 2 extension separators
+  //Tricky to say the least
+  repeat
+    if result[StartPos]=ExtensionSeparator then
+    begin
+      ExtPos:=StartPos-1;
+      Inc(ExPosCounter);
+    end;
+    Dec(StartPos);
+  until (ExPosCounter=2) OR (StartPos=0);
+
+  SetLength(result,ExtPos);
 end;
 
 function FileNameAllExt(const AFilename: string): string;
