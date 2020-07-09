@@ -77,7 +77,6 @@ const
   StaticLibName='libc.a';
 begin
   result:=FLibsFound;
-
   if result then exit;
 
   // begin simple: check presence of library file in basedir
@@ -87,20 +86,22 @@ begin
     result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
   // do the same as above, but look for a static lib
-  result:=SearchLibrary(Basepath,StaticLibName);
+  if not result then
+    result:=SearchLibrary(Basepath,StaticLibName);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName);
 
-
   // universal libs: begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
+  if not result then
+    result:=SearchLibrary(Basepath,LIBCNAME);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,'powerpc-'+GetOS(TargetOS),LIBCNAME);
 
   //  universal libs: do the same as above, but look for a static lib
-  result:=SearchLibrary(Basepath,StaticLibName);
+  if not result then
+    result:=SearchLibrary(Basepath,StaticLibName);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,'power-'+GetOS(TargetOS),StaticLibName);

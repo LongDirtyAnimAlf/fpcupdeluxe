@@ -60,7 +60,9 @@ end;
 
 function TAny_FreeRTOSXtensa.GetLibs(Basepath:string): boolean;
 const
-  StaticLibName='libc.a';
+  StaticLibName1='libesp32.a';
+  StaticLibName2='libfreertos.a';
+  StaticLibName3='libc.a';
 var
   PresetLibPath:string;
   S:string;
@@ -72,33 +74,35 @@ begin
      then ShowInfo('Cross-libs: We have a subarch: '+FSubArch)
      else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
+
+
+
+
+
+
+
+
+
+
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LIBCNAME);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
-  // do the same as above, but look for a static lib
-  result:=SearchLibrary(Basepath,StaticLibName);
+  // do the same as above, but look for a static esp lib
+  if not result then
+    result:=SearchLibrary(Basepath,StaticLibName1);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName);
+    result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName1);
 
-
-  if (not result) then
-  begin
-    PresetLibPath:=GetUserDir;
-    {$IFDEF UNIX}
-    //if FpGeteuid=0 then PresetLibPath:='/usr/local/lib';
-    {$ENDIF}
-    PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-esp32-elf']);
-    S:=FindFileInDir(StaticLibName,PresetLibPath);
-    if (Length(S)>0) then
-    begin
-      PresetLibPath:=ExtractFilePath(S);
-      result:=SearchLibrary(PresetLibPath,StaticLibName);
-    end;
-  end;
+  // do the same as above, but look for a static freertos lib
+  if not result then
+    result:=SearchLibrary(Basepath,StaticLibName2);
+  // search local paths based on libbraries provided for or adviced by fpc itself
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName2);
 
   SearchLibraryInfo(result);
 
@@ -107,6 +111,22 @@ begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
   end;
+
+  if (true) then
+  begin
+    PresetLibPath:=GetUserDir;
+    {$IFDEF UNIX}
+    //if FpGeteuid=0 then PresetLibPath:='/usr/local/lib';
+    {$ENDIF}
+    PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-esp32-elf']);
+    S:=FindFileInDir(StaticLibName3,PresetLibPath);
+    if (Length(S)>0) then
+    begin
+      PresetLibPath:=ExtractFilePath(S);
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(PresetLibPath));
+    end;
+  end;
+
 end;
 
 function TAny_FreeRTOSXtensa.GetBinUtils(Basepath:string): boolean;
