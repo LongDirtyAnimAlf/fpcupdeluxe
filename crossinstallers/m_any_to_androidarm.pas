@@ -100,7 +100,7 @@ begin
     result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
   // if binaries already found, search for library belonging to these binaries !!
-  if (not result) AND (Length(FBinUtilsPath)>0) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (Length(FBinUtilsPath)>0) AND (Pos('Error:',FBinUtilsPath)=0) AND (SearchModeUsed=smAuto) then
   begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FBinUtilsPath);
     if ndkversion>0 then
@@ -216,10 +216,17 @@ var
   i:integer;
   {$IFDEF MSWINDOWS}
   delphiversion:byte;
+  WinPath:string;
   {$ENDIF}
 begin
   result:=inherited;
   if result then exit;
+
+  {$IFDEF MSWINDOWS}
+  if IsWindows64
+     then WinPath:='windows-x86_64'
+     else WinPath:='windows';
+  {$ENDIF}
 
   FBinUtilsPrefix:=TargetCPUName+'-linux-'+TargetOSName+'eabi-'; //standard eg in Android NDK 9
 
@@ -231,7 +238,7 @@ begin
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // if libs already found, search for binutils belonging to this lib !!
-  if (not result) AND (Length(FLibsPath)>0) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (Length(FLibsPath)>0) AND (Pos('Error:',FLibsPath)=0) AND (SearchModeUsed=smAuto) then
   begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FLibsPath);
     if ndkversion>0 then
@@ -245,11 +252,7 @@ begin
           PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+'toolchains'+DirectorySeparator+NDKTOOLCHAINVERSIONS[toolchain]+DirectorySeparator+'prebuilt'+DirectorySeparator;
           PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+
           {$IFDEF MSWINDOWS}
-          {$IFDEF CPU64}
-          'windows-x86_64'+
-          {$ELSE}
-          'windows'+
-          {$ENDIF}
+          WinPath+
           {$ENDIF}
           {$IFDEF LINUX}
           {$IFDEF CPU64}
@@ -288,11 +291,7 @@ begin
           PresetBinPath:=PresetBinPath+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'toolchains'+DirectorySeparator+NDKTOOLCHAINVERSIONS[toolchain]+DirectorySeparator+'prebuilt'+DirectorySeparator;
           PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+
           {$IFDEF MSWINDOWS}
-          {$IFDEF CPU64}
-          'windows-x86_64'+
-          {$ELSE}
-          'windows'+
-          {$ENDIF}
+          WinPath+
           {$ENDIF}
           {$IFDEF LINUX}
           {$IFDEF CPU64}
@@ -378,6 +377,29 @@ begin
     end;
   end;
   {$ENDIF}
+
+
+  if (NOT result) then
+  begin
+    PresetBinPath:=IncludeTrailingPathDelimiter(GetUserDir);
+    {$ifdef Darwin}
+    PresetBinPath:=ConcatPaths([PresetBinPath,'Library','Android']);
+    {$endif}
+    {$ifdef Unix}
+    {$ifndef Darwin}
+    PresetBinPath:=ConcatPaths([PresetBinPath,'Android']);
+    {$endif}
+    {$endif}
+    {$ifdef Windows}
+    PresetBinPath:=ConcatPaths([PresetBinPath,'AppData','Local','Android']);
+    {$endif}
+    PresetBinPath:=FindFileInDir(AsFile,PresetBinPath);
+    if (Length(PresetBinPath)>0) then
+    begin
+      PresetBinPath:=ExtractFilePath(PresetBinPath);
+      result:=SearchBinUtil(PresetBinPath,AsFile);
+    end;
+  end;
 
   SearchBinUtilsInfo(result);
 
