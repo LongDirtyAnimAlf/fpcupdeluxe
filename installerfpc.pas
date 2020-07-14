@@ -141,6 +141,7 @@ type
     // Another way to get the compiler version string
     //todo: choose either GetCompilerVersion or GetFPCVersion
     function GetFPCVersion: string;
+    function GetFPCRevision: string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule(aBootstrapVersion:string=''):boolean;
@@ -2356,6 +2357,26 @@ begin
   end;
 end;
 
+function TFPCInstaller.GetFPCRevision: string;
+var
+  testcompiler:string;
+begin
+  result:='unknown';
+
+  testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc1'+GetExeExt;
+
+  if not FileExists(testcompiler) then
+    testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc'+GetExeExt;
+
+  if not FileExists(testcompiler) then
+    testcompiler:=GetCompiler;
+
+  if FileExists(testcompiler) then
+  begin
+    result:=CompilerRevision(testcompiler);
+  end;
+end;
+
 function TFPCInstaller.InitModule(aBootstrapVersion:string):boolean;
 var
   aCompilerList:TStringList;
@@ -3981,7 +4002,7 @@ begin
 
   if (not result) then exit;
 
-  FPreviousRevision:='unknown';
+  FPreviousRevision:=GetFPCRevision;
 
   SourceVersion:='0.0.0';
 

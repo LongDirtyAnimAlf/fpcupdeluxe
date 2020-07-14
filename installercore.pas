@@ -1612,7 +1612,7 @@ begin
     exit;
   end;
 
-  aBeforeRevision         := 'failure';
+  //aBeforeRevision         := 'failure';
   aAfterRevision          := 'failure';
   //aClient.Verbose         := FVerbose;
   aClient.LocalRepository := FSourceDirectory;
@@ -1620,7 +1620,7 @@ begin
   aClient.ExportOnly      := FExportOnly;
   aClient.ModuleName      := aModuleName;
 
-  aBeforeRevision:=aClient.LocalRevision;
+  //aBeforeRevision:=aClient.LocalRevision;
 
   if ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
   begin
@@ -1782,7 +1782,7 @@ begin
     exit;
   end;
 
-  aBeforeRevision             := 'failure';
+  //aBeforeRevision             := 'failure';
   aAfterRevision              := 'failure';
   //SVNClient.Verbose           := FVerbose;
   SVNClient.LocalRepository   := FSourceDirectory;
@@ -3584,7 +3584,7 @@ const
     (Version:'3.0.4';Revision:'37149'),
     (Version:'3.2.0';Revision:'45643')
     );
-  LazarusVersionsTable: array[0..8] of TVersionTable = (
+  LazarusVersionsTable: array[0..9] of TVersionTable = (
     (Version:'1.6.4';Revision:'54278'),
     (Version:'1.8.0';Revision:'56623'),
     (Version:'1.8.2';Revision:'57369'),
@@ -3593,7 +3593,8 @@ const
     (Version:'2.0.2';Revision:'60954'),
     (Version:'2.0.4';Revision:'61665'),
     (Version:'2.0.6';Revision:'62129'),
-    (Version:'2.0.8';Revision:'62944')
+    (Version:'2.0.8';Revision:'62944'),
+    (Version:'2.0.10';Revision:'63526')
     );
 var
   aVersionTable:TVersionTable;

@@ -270,7 +270,7 @@ type
 
 // Create shortcut on desktop to Target file
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false) ;
-// Create shell script in ~ directory that links to Target
+// Create shell script in user directory that links to Target
 procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 {$IFDEF MSWINDOWS}
 // Delete shortcut on desktop
@@ -293,7 +293,7 @@ function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas
 function FileNameFromURL(URL:string):string;
 function StripUrl(URL:string): string;
 function CompilerVersion(CompilerPath: string): string;
-function CompilerRevision(CompilerPath: string): integer;
+function CompilerRevision(CompilerPath: string): string;
 procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build: Integer);
 function CalculateFullVersion(Major,Minor,Release:integer):dword;
 function CalculateNumericalVersion(VersionSnippet: string): word;
@@ -779,7 +779,7 @@ begin
   begin
     result:=SysUtils.GetEnvironmentVariable('HOME');
     if (result='') then
-      result:=SafeExpandFileName('~/.config')
+      result:=SafeExpandFileName(IncludeTrailingPathDelimiter(GetUserDir)+'.config')
     else
       result:=IncludeTrailingPathDelimiter(result) + '.config';
   end;
@@ -836,7 +836,7 @@ begin
   begin
     result:=SysUtils.GetEnvironmentVariable('HOME');
     if (result='') then
-      result:=SafeExpandFileName('~/.cache')
+      result:=SafeExpandFileName(IncludeTrailingPathDelimiter(GetUserDir)+'.cache')
     else
       result:=IncludeTrailingPathDelimiter(result) + '.cache';
   end;
@@ -1057,23 +1057,26 @@ begin
       OperationSucceeded:=false;
     end;
 
-    if (NOT OperationSucceeded) then
+    if (true) then
     begin
       aDirectory:=ConcatPaths(['usr','share','applications']);
       if ( (FpGeteuid=0) AND DirectoryExists(aDirectory) ) then
       begin
-        FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile));
+        FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile),[]);
       end
       else
       begin
         // Create shortcut directly on User-Desktop
-        aDirectory:=ConcatPaths([SafeExpandFileName('~'),'Desktop']);
+        aDirectory:=ConcatPaths([GetUserDir,'Desktop']);
         if DirectoryExists(aDirectory) then
-           FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile));
+           FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile),[]);
         // Create user menu item
-        aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','applications']);
-        if DirectoryExists(aDirectory) then
-          FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile));
+        if (NOT OperationSucceeded) then
+        begin
+          aDirectory:=ConcatPaths([GetUserDir,'.local','share','applications']);
+          if DirectoryExists(aDirectory) then
+            FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile),[]);
+        end;
       end;
     end;
     // Temp file is no longer needed....
@@ -1089,7 +1092,7 @@ begin
 
   if (OperationSucceeded) then
   begin
-    aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','applications']);
+    aDirectory:=ConcatPaths([GetUserDir,'.local','share','applications']);
     OperationSucceeded:=RunCommand('update-desktop-database' ,[aDirectory],Output,[poUsePipes, poStderrToOutPut],swoHide);
   end;
 
@@ -1100,7 +1103,7 @@ begin
     Application.ProcessMessages;
     {$endif}
 
-    aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','mime']);
+    aDirectory:=ConcatPaths([GetUserDir,'.local','share','mime']);
     ForceDirectoriesSafe(aDirectory);
 
     //Create mime file associations
@@ -1121,7 +1124,7 @@ begin
       XdgMimeContent.Add('        <glob pattern="*.inc"/>');
       XdgMimeContent.Add('    </mime-type>');
       XdgMimeContent.Add('</mime-info>');
-      aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','mime','packages']);
+      aDirectory:=ConcatPaths([GetUserDir,'.local','share','mime','packages']);
       ForceDirectoriesSafe(aDirectory);
       XdgMimeContent.SaveToFile(XdgMimeFile);
       OperationSucceeded:=RunCommand('xdg-mime' ,['install','--novendor',XdgMimeFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
@@ -1131,13 +1134,13 @@ begin
     end;
 
     //Process icon
-    aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','icons']);
+    aDirectory:=ConcatPaths([GetUserDir,'.local','share','icons']);
     ForceDirectoriesSafe(aDirectory);
     //OperationSucceeded:=RunCommand('xdg-icon-resource' ,['install','--novendor','--context','mimetypes','--size','64',ExtractFilePath(Target)+'images/icons/lazarus.ico','application-x-lazarus'],Output,[poUsePipes, poStderrToOutPut],swoHide);
     OperationSucceeded:=RunCommand('xdg-icon-resource' ,['install','--novendor','--context','mimetypes','--size','64',ExtractFilePath(Target)+'images/icons/lazarus64x64.png','application-x-lazarus'],Output,[poUsePipes, poStderrToOutPut],swoHide);
 
     //Update mime database
-    aDirectory:=ConcatPaths([SafeExpandFileName('~'),'.local','share','mime']);
+    aDirectory:=ConcatPaths([GetUserDir,'.local','share','mime']);
     OperationSucceeded:=RunCommand('update-mime-database' ,[aDirectory],Output,[poUsePipes, poStderrToOutPut],swoHide);
   end;
 
@@ -1159,11 +1162,11 @@ var
 begin
   {$IFDEF UNIX}
   //create dir if it doesn't exist
-  ForceDirectoriesSafe(ExtractFilePath(IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+ShortcutName));
+  ForceDirectoriesSafe(ExtractFilePath(IncludeTrailingPathDelimiter(GetUserDir)+ShortcutName));
   ScriptText:=TStringList.Create;
   try
     // No quotes here, either, we're not in a shell, apparently...
-    ScriptFile:=IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+ShortcutName;
+    ScriptFile:=IncludeTrailingPathDelimiter(GetUserDir)+ShortcutName;
     SysUtils.DeleteFile(ScriptFile); //Get rid of any existing remnants
     ScriptText.Add('#!/bin/sh');
     ScriptText.Add('# '+BeginSnippet+' home startlink script');
@@ -1222,12 +1225,12 @@ begin
   end;
 end;
 
-function CompilerRevision(CompilerPath: string): integer;
+function CompilerRevision(CompilerPath: string): string;
 var
   Output: string;
   i:integer;
 begin
-  Result:=0;
+  Result:='';
   if ((CompilerPath='') OR (NOT FileExists(CompilerPath))) then exit;
   try
     Output:='';
@@ -1240,7 +1243,7 @@ begin
         if (i>0) then
         begin
           Delete(Output,1,i+1);
-          TryStrToInt(Output,Result);
+          Result:=Trim(Output);
         end;
       end;
     end;
@@ -3305,7 +3308,7 @@ begin
   {$ifdef UNIX}
   Result:=SysUtils.GetEnvironmentVariable('XDG_CONFIG_HOME');
   if (Result='') then
-    Result:=IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+'.config'+DirectorySeparator
+    Result:=IncludeTrailingPathDelimiter(GetUserDir)+'.config'+DirectorySeparator
   else
     Result:=IncludeTrailingPathDelimiter(Result);
   {$ELSE}
