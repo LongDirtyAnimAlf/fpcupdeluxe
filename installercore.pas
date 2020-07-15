@@ -157,7 +157,7 @@ const
 
   _FPC                     = 'FPC';
   _LAZARUS                 = 'Lazarus';
-  _LAZARUSSIMPLE           = 'LazarusSimple';
+  _LAZARUSSIMPLE           = _LAZARUS+'Simple';
 
   _MAKEFILECHECK           = 'MakefileCheck';
   _MAKEFILECHECKFPC        = _MAKEFILECHECK+_FPC;
@@ -171,6 +171,7 @@ const
   _GET                     = 'Get';
   _CONFIG                  = 'Config';
   _BUILD                   = 'Build';
+  _INSTALL                 = 'Install';
   _UNINSTALL               = 'Uninstall';
   _RESET                   = 'Reset';
   _ONLY                    = 'Only';
@@ -213,6 +214,7 @@ const
   _FPCREMOVEONLY           = _FPC+_UNINSTALL+_ONLY;
   _LAZARUSCLEANBUILDONLY   = _LAZARUS+_CLEAN+_BUILD+_ONLY;
   _LAZARUSREMOVEONLY       = _LAZARUS+_UNINSTALL+_ONLY;
+
   _LCLALLREMOVEONLY        = _LCL+'ALL'+_CLEAN+_ONLY;
   _LCLREMOVEONLY           = _LCL+_CLEAN+_ONLY;
   _COMPONENTSREMOVEONLY    = _COMPONENTS+_CLEAN+_ONLY;
@@ -224,6 +226,8 @@ const
   _HELPFPC                 = _HELP+_FPC;
   _HELPLAZARUS             = _HELP+_LAZARUS;
   _LHELP                   = 'lhelp';
+
+  _INSTALLLAZARUS          = _INSTALL+_LAZARUS;
 
   {$ifdef mswindows}
   {$ifdef win32}

@@ -241,7 +241,10 @@ begin
   {$IFDEF MSWINDOWS}
   if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
   {$ENDIF}
-  Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
+
+  Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusSourceDir);
+  Processor.Process.Parameters.Add('--directory=' + Processor.Process.CurrentDirectory);
+
   {
   //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
   if (NOT FNoJobs) then
@@ -249,8 +252,6 @@ begin
   Processor.Process.Parameters.Add('FPC=' + FCompiler);
   Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
   Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
-  //Processor.Process.Parameters.Add('--directory=.');
-  Processor.Process.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(LazarusInstallDir));
   //Make sure our FPC units can be found by Lazarus
   Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
   //Make sure Lazarus does not pick up these tools from other installs
@@ -265,7 +266,7 @@ begin
 
   {$IFDEF MSWINDOWS}
   Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-  Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+  //Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
   {$ENDIF MSWINDOWS}
 
   if FLCL_Platform <> '' then Processor.Process.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);

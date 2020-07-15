@@ -50,6 +50,7 @@ const
     _BUILDMODULE+_STARTLAZARUS+_SEP +
     _DO+_UNIVERSALDEFAULT+_SEP+
     _DO+_HELPLAZARUS+_SEP+
+    _BUILDMODULE+_INSTALLLAZARUS+_SEP +
     _EXECUTE+_CREATELAZARUSSCRIPT+_SEP +
     _END +
 
@@ -59,6 +60,8 @@ const
     _GETMODULE+_LAZARUS+_SEP +
     _CONFIGMODULE+_LAZARUS+_SEP +
     _BUILDMODULE+_LAZARUS+_SEP +
+    _BUILDMODULE+_STARTLAZARUS+_SEP +
+    _BUILDMODULE+_INSTALLLAZARUS+_SEP +
     _EXECUTE+_CREATELAZARUSSCRIPT+_SEP +
     _END +
 
@@ -138,6 +141,7 @@ const
     _GETMODULE+_LAZBUILD+_SEP +
     _BUILDMODULE+_LAZBUILD+_SEP +
     _DO+_LCL+_SEP +
+    _BUILDMODULE+_INSTALLLAZARUS+_SEP +
     _END +
 
     //standard useride build
@@ -368,7 +372,7 @@ begin
         Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
         Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
         Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-        Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory)+'bin');
+        Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory));
         //Make sure our FPC units can be found by Lazarus
         Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
         //Make sure Lazarus does not pick up these tools from other installs
@@ -377,7 +381,7 @@ begin
 
         {$ifdef Windows}
         Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-        Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+        //Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
         {$endif}
 
         Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
@@ -652,7 +656,7 @@ begin
     Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-    Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory)+'bin');
+    Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory));
     //Make sure our FPC units can be found by Lazarus
     Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
     //Make sure Lazarus does not pick up these tools from other installs
@@ -661,7 +665,7 @@ begin
 
     {$ifdef Windows}
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-    Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+    //Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
     {$endif}
 
     //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
@@ -776,7 +780,6 @@ begin
       _LAZARUS:
       begin
         Processor.Process.Parameters.Add('all');
-        //Processor.Process.Parameters.Add('install');
         Infoln(infotext+'Running: make all', etInfo);
       end;
       _STARTLAZARUS:
@@ -832,6 +835,22 @@ begin
           exit;
         end;
       end;
+      _INSTALLLAZARUS:
+      begin
+        if (FInstallDirectory<>FSourceDirectory) then
+        begin
+          Processor.Process.Parameters.Add('install');
+          Infoln(infotext+'Running: make install', etInfo);
+        end
+        else
+        begin
+          Processor.Process.Parameters.Add('--help'); // this should render make harmless
+          WritelnLog(etInfo, infotext+'Skipping install step: Lazarus source and install locations are the same.', true);
+          OperationSucceeded := true;
+          Result := true;
+          exit;
+        end;
+      end;
       _MAKEFILECHECKLAZARUS:
       begin
         Processor.Process.Parameters.Add('fpc_baseinfo');
@@ -849,10 +868,6 @@ begin
     end;
 
     try
-      //If we have separate source and install, always use the install command
-      if (FInstallDirectory<>FSourceDirectory) then
-        Processor.Process.Parameters.Add('install');
-
       {$ifdef MSWindows}
       //Prepend FPC binary directory to PATH to prevent pickup of strange tools
       OldPath:=Processor.Environment.GetVar(PATHVARNAME);
@@ -889,7 +904,7 @@ begin
     //Special check for lazbuild as that is known to go wrong
     if (OperationSucceeded) and (ModuleName=_LAZBUILD) then
     begin
-      if CheckExecutable(IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt, ['--help'], LAZBUILDNAME) = false then
+      if CheckExecutable(IncludeTrailingPathDelimiter(FSourceDirectory) + LAZBUILDNAME + GetExeExt, ['--help'], LAZBUILDNAME) = false then
       begin
         WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
         Result := false;
@@ -1534,12 +1549,6 @@ begin
   Result := inherited;
   Result := true;
 
-  if not DirectoryExists(FInstallDirectory) then
-  begin
-    Infoln(infotext+'No Lazarus install directory.',etError);
-    exit;
-  end;
-
   GetVersion;
 
   //Set GDB as standard debugger
@@ -1550,6 +1559,8 @@ begin
     if ForceDirectoriesSafe(FPrimaryConfigPath) then
       Infoln(infotext+'Created Lazarus primary config directory: ' + FPrimaryConfigPath, etInfo);
   end;
+
+  ForceDirectoriesSafe(FInstallDirectory);
 
   // Lazarus 1.2RC1+ and higher support specifying the primary-config-path that should be used
   // inside the lazarus directory itself.
@@ -1884,10 +1895,10 @@ begin
     Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-    Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory)+'bin');
+    Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory));
     {$ifdef Windows}
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-    Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+    //Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
     {$endif}
     Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
     Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);

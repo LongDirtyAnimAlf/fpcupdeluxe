@@ -535,19 +535,6 @@ var
   {$endif}
 begin
   result:=inherited;
-  // Make crosscompiler using new compiler
-  { Note: command line equivalents for Win32=>Win64 cross compiler:
-  set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
-  make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
-  rem already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
-  make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
-  rem gives bin\i386-win32\ppcrossx64.exe
-
-  Note: make install CROSSINSTALL=1 apparently installs, but does NOT install utilities (ld etc?) for that
-  platform; see posting Jonas Maebe https://lists.freepascal.org/lists/fpc-pascal/2011-August/030084.html
-  make all install CROSSCOMPILE=1??? find out?
-  }
-
   result:=false; //fail by default
 
   if assigned(CrossInstaller) then
@@ -781,7 +768,7 @@ begin
             end;
           end;
           Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-          Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+          //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           {$ELSE}
           Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
           {$ENDIF}
@@ -1558,7 +1545,7 @@ begin
   end;
 
   Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-  Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
   {$ENDIF}
   Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
   Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
@@ -3855,7 +3842,7 @@ begin
     {$ENDIF}
     {$IFDEF MSWINDOWS}
     Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-    Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+    //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
     Processor.Process.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
     Processor.Process.Parameters.Add('OS_SOURCE='+GetTargetOS);
     {$ENDIF}

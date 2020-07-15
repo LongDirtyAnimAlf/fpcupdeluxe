@@ -1382,6 +1382,7 @@ begin
     or (ModuleName=_IDE)
     or (ModuleName=_BIGIDE)
     or (ModuleName=_USERIDE)
+    or (ModuleName=_INSTALLLAZARUS)
     or (ModuleName=_MAKEFILECHECKLAZARUS)
   then
   begin

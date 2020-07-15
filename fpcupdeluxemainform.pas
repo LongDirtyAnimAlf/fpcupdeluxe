@@ -805,16 +805,6 @@ begin
             // build all available compilers
             if (Sender<>nil) then
             begin
-              {$ifdef win32}
-              // On win32, we always build a win64 cross-compiler.
-              // So, if the win32 install is updated, this cross-compiler is also updated already auto-magically.
-              // We can skip it here, in that case.
-              if aOS=GetOS(TOS.win64) then
-              begin
-                Inc(SnipBegin);
-                continue;
-              end;
-              {$endif}
               CommandOutputScreen.ClearAll;
               aResultMessage:='Finished building of cross-compilers.';
               AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS);
@@ -3308,26 +3298,16 @@ begin
 
       if Sender=BitBtnFPCOnly then
       begin
-        {$ifdef win32}
-        //Only auto-install win32 -> win64 crossutils
-        s:=_FPC+','+_FPC+_CROSSWIN;
-        {$else}
         s:=_FPC;
-        {$endif}
       end;
 
       if Sender=BitBtnLazarusOnly then
       begin
-      {$IFDEF win32}
-        //Only auto-install win32 -> win64 crossutils
-        s:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
-      {$ELSE}
         {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
-          s:=_LAZARUSSIMPLE;
+        s:=_LAZARUSSIMPLE;
         {$ELSE}
-          s:=_LAZARUS;
+        s:=_LAZARUS;
         {$ENDIF}
-      {$ENDIF}
       end;
 
       if Sender=BitBtnFPCandLazarus then
