@@ -1678,6 +1678,8 @@ begin
   else
   begin
     Processor.Process.Parameters.Add('all');
+    //If we have separate source and install, always use the install command
+    //if (FInstallDirectory<>FSourceDirectory) then
     Processor.Process.Parameters.Add('install');
   end;
 

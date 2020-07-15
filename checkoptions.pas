@@ -36,7 +36,7 @@ var
   {$ENDIF}
   bHelp,bVersion,bFPCsplit:boolean;
   {$ifndef FPCONLY}
-  //bLazsplit:boolean;
+  bLazsplit:boolean;
   {$ENDIF}
   i, iCurrentOption: integer;
   sAllParameters:string;
@@ -82,7 +82,7 @@ begin
           LeftOverOptions.Add('usewget');
           LeftOverOptions.Add('includehelp');
           LeftOverOptions.Add('fpcsplit');
-          //LeftOverOptions.Add('lazsplit');
+          LeftOverOptions.Add('lazsplit');
           LeftOverOptions.Add('verbose');
           LeftOverOptions.Add('version');
           try
@@ -171,13 +171,11 @@ begin
                else FManager.FPCSourceDirectory:=FManager.FPCInstallDirectory;
 
       {$ifndef FPCONLY}
-      FManager.LazarusDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','lazdir',IncludeTrailingPathDelimiter(sInstallDir)+'lazarus')));
-      {
+      FManager.LazarusInstallDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','lazdir',IncludeTrailingPathDelimiter(sInstallDir)+'lazarus')));
       bLazsplit:=Options.GetOptionNoParam('','lazsplit');
       if bLazsplit
-         then FManager.LazarusSourceDirectory:=FManager.LazarusDirectory+'src'
-         else FManager.LazarusSourceDirectory:=FManager.LazarusDirectory;
-      }
+         then FManager.LazarusSourceDirectory:=FManager.LazarusInstallDirectory+'src'
+         else FManager.LazarusSourceDirectory:=FManager.LazarusInstallDirectory;
       {$endif}
 
       FManager.SVNExecutable := ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','svnexe','')));
@@ -272,10 +270,10 @@ begin
       if (FManager.ShortCutNameLazarus=DirectorySeparator) then
         if bHaveInstalldir then
           FManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(sInstallDir)  // sInstallDir has no terminating pathdelimiter!!
-        else if UpperCase(ExtractFileName(FManager.LazarusDirectory))='LAZARUS' then
+        else if UpperCase(ExtractFileName(FManager.LazarusInstallDirectory))='LAZARUS' then
           FManager.ShortCutNameLazarus:='Lazarus_fpcup' // default installdir, default lazarus dir
         else
-          FManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FManager.LazarusDirectory);
+          FManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FManager.LazarusInstallDirectory);
 
       FManager.LazarusOPT:=Options.GetOption('','lazOPT','');
 
@@ -295,7 +293,7 @@ begin
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FManager.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
-      FManager.CrossLCL_Platform:=Options.GetOption('','lclplatform','');
+      FManager.LCL_Platform:=Options.GetOption('','lclplatform','');
       {$endif}
       FManager.IncludeModules:=Options.GetOption('','include','',false);
       FManager.SkipModules:=Options.GetOption('','skip','',false);
@@ -327,7 +325,7 @@ begin
         // If we have no input from the user, let's create a name based on the directory where
         // Lazarus is to be installed
         FManager.LazarusPrimaryConfigPath:=
-          IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FManager.LazarusDirectory))
+          IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FManager.LazarusInstallDirectory))
       else
         FManager.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
       {$endif}
@@ -541,7 +539,7 @@ begin
       {$ifndef FPCONLY}
       writeln('Lazarus URL:        '+FManager.LazarusURL);
       writeln('Lazarus options:    '+FManager.LazarusOPT);
-      writeln('Lazarus directory:  '+FManager.LazarusDirectory);
+      writeln('Lazarus directory:  '+FManager.LazarusInstallDirectory);
       {$endif}
       if FManager.KeepLocalChanges then
       begin

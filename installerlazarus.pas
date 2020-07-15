@@ -131,6 +131,15 @@ const
     _BUILDMODULE+_LAZBUILD+_SEP +
     _END +
 
+    //special lazbuild standalone build (for docker use)
+    _DECLARE+_LAZBUILDONLY+_SEP +
+    _CLEANMODULE+_LAZBUILD+_SEP +
+    _CHECKMODULE+_LAZBUILD+_SEP +
+    _GETMODULE+_LAZBUILD+_SEP +
+    _BUILDMODULE+_LAZBUILD+_SEP +
+    _DO+_LCL+_SEP +
+    _END +
+
     //standard useride build
     _DECLARE+_USERIDE+_SEP +
     _BUILDMODULE+_LAZBUILD+_SEP +
@@ -347,20 +356,19 @@ begin
         if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
         {$ENDIF}
         Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
+        Processor.Process.Parameters.Add('--directory='+Processor.Process.CurrentDirectory);
 
         {
         //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
         if (NOT FNoJobs) then
           Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
 
-        Processor.Process.Parameters.Add('--directory=' + FSourceDirectory);
-        //Processor.Process.Parameters.Add('--directory=' + ConcatPaths([FSourceDirectory,'lcl']));
-
         Processor.Process.Parameters.Add('FPC=' + FCompiler);
         Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
         Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
         Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
         Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+        Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory)+'bin');
         //Make sure our FPC units can be found by Lazarus
         Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
         //Make sure Lazarus does not pick up these tools from other installs
@@ -632,20 +640,19 @@ begin
     if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
     {$ENDIF}
     Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
+    Processor.Process.Parameters.Add('--directory='+Processor.Process.CurrentDirectory);
+
     {
     //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
     if (NOT FNoJobs) then
       Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
-
-    //Processor.Process.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
-    //Processor.Process.Parameters.Add('--directory=.');
-    Processor.Process.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FInstallDirectory));
 
     Processor.Process.Parameters.Add('FPC=' + FCompiler);
     Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
     Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+    Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory)+'bin');
     //Make sure our FPC units can be found by Lazarus
     Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
     //Make sure Lazarus does not pick up these tools from other installs
@@ -774,7 +781,7 @@ begin
       end;
       _STARTLAZARUS:
       begin
-        if FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + 'startlazarus' + GetExeExt) then
+        if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + 'startlazarus' + GetExeExt) then
         begin
           Infoln(infotext+'StartLazarus already available ... skip building it.', etInfo);
           OperationSucceeded := true;
@@ -786,7 +793,7 @@ begin
       end;
       _LAZBUILD:
       begin
-        if FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt) then
+        if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + LAZBUILDNAME + GetExeExt) then
         begin
           Infoln(infotext+'Lazbuild already available ... skip building it.', etInfo);
           OperationSucceeded := true;
@@ -842,6 +849,10 @@ begin
     end;
 
     try
+      //If we have separate source and install, always use the install command
+      if (FInstallDirectory<>FSourceDirectory) then
+        Processor.Process.Parameters.Add('install');
+
       {$ifdef MSWindows}
       //Prepend FPC binary directory to PATH to prevent pickup of strange tools
       OldPath:=Processor.Environment.GetVar(PATHVARNAME);
@@ -1873,6 +1884,7 @@ begin
     Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+    Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory)+'bin');
     {$ifdef Windows}
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
     Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
@@ -1895,6 +1907,11 @@ begin
     CleanCommand:='';
 
     case ModuleName of
+      _LAZBUILD:
+      begin
+        Processor.Process.Parameters.Add('LCL_PLATFORM=nogui');
+        CleanCommand:='clean';
+      end;
       _IDE:
       begin
         CleanCommand:='cleanide';

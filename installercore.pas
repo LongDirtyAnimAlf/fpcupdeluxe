@@ -218,6 +218,8 @@ const
   _COMPONENTSREMOVEONLY    = _COMPONENTS+_CLEAN+_ONLY;
   _PACKAGERREMOVEONLY      = _PACKAGER+_CLEAN+_ONLY;
 
+  _LAZBUILDONLY            = _LAZBUILD+_ONLY;
+
   _HELP                    = 'Help';
   _HELPFPC                 = _HELP+_FPC;
   _HELPLAZARUS             = _HELP+_LAZARUS;
@@ -301,8 +303,9 @@ type
     function IsLazarusInstaller:boolean;
     function IsUniversalInstaller:boolean;
   protected
-    FBinPath: string; //path where compiler lives
     FCleanModuleSuccess: boolean;
+    FNeededExecutablesChecked: boolean;
+    FBinPath: string; //path where compiler lives
     FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) install itself
     FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
     FInstallDirectory: string; //Top install directory for a product (FPC, Lazarus)
@@ -329,7 +332,6 @@ type
     FMake: string;
     FMakeDir: string; //Binutils/make/patch directory
     FPatchCmd: string;
-    FNeededExecutablesChecked: boolean;
     FGitClient: TGitClient;
     FHGClient: THGClient;
     FSVNClient: TSVNClient;
@@ -1808,6 +1810,10 @@ begin
   end
   else
   begin
+    if (SVNClient.ReturnCode=FRET_LOCAL_REMOTE_URL_NOMATCH) then
+    begin
+    end;
+
     // We could insist on the repo existing, but then we wouldn't be able to checkout!!
     WritelnLog('Directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
     if not(DirectoryExists(SVNClient.LocalRepository)) then

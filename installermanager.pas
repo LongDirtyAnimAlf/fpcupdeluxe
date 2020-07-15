@@ -188,7 +188,8 @@ type
     {$ifndef FPCONLY}
     FLazarusDesiredRevision: string;
     FLazarusDesiredBranch: string;
-    FLazarusDirectory: string;
+    FLazarusSourceDirectory: string;
+    FLazarusInstallDirectory: string;
     FLazarusOPT: string;
     FLazarusPrimaryConfigPath: string;
     FLazarusURL: string;
@@ -226,7 +227,8 @@ type
     FRunInfo:string;
     {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
-    procedure SetLazarusDirectory(AValue: string);
+    procedure SetLazarusSourceDirectory(AValue: string);
+    procedure SetLazarusInstallDirectory(AValue: string);
     procedure SetLazarusURL(AValue: string);
     {$endif}
     function GetLogFileName: string;
@@ -298,7 +300,8 @@ type
     property KeepLocalChanges: boolean read FKeepLocalDiffs write FKeepLocalDiffs;
     property UseSystemFPC:boolean read FUseSystemFPC write FUseSystemFPC;
    {$ifndef FPCONLY}
-    property LazarusDirectory: string read FLazarusDirectory write SetLazarusDirectory;
+    property LazarusSourceDirectory: string read FLazarusSourceDirectory write SetLazarusSourceDirectory;
+    property LazarusInstallDirectory: string read FLazarusInstallDirectory write SetLazarusInstallDirectory;
     property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
     property LazarusURL: string read FLazarusURL write SetLazarusURL;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
@@ -502,9 +505,13 @@ begin
 end;
 
 {$ifndef FPCONLY}
-procedure TFPCupManager.SetLazarusDirectory(AValue: string);
+procedure TFPCupManager.SetLazarusSourceDirectory(AValue: string);
 begin
-  FLazarusDirectory:=SafeExpandFileName(AValue);
+  FLazarusSourceDirectory:=SafeExpandFileName(AValue);
+end;
+procedure TFPCupManager.SetLazarusInstallDirectory(AValue: string);
+begin
+  FLazarusInstallDirectory:=SafeExpandFileName(AValue);
 end;
 
 procedure TFPCupManager.SetLazarusURL(AValue: string);
@@ -1000,7 +1007,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       //Infoln('TSequencer.DoExec (Lazarus): creating desktop shortcut:',etInfo);
       try
         // Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
-        InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
+        InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusInstallDirectory)+'lazarus'+GetExeExt;
         {$IFDEF MSWINDOWS}
         CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
         {$ENDIF MSWINDOWS}
@@ -1395,8 +1402,8 @@ begin
       FInstaller:=TLazarusNativeInstaller.Create;
 
     // source- and install-dir are the same for Lazarus ... could be changed
-    FInstaller.SourceDirectory:=FParent.LazarusDirectory;
-    FInstaller.InstallDirectory:=FParent.LazarusDirectory;
+    FInstaller.SourceDirectory:=FParent.LazarusSourceDirectory;
+    FInstaller.InstallDirectory:=FParent.LazarusInstallDirectory;
 
     FInstaller.CompilerOptions:=FParent.LazarusOPT;
 
@@ -1446,9 +1453,8 @@ begin
         FInstaller.free; // get rid of old FInstaller
     end;
     FInstaller:=THelpLazarusInstaller.Create;
-    FInstaller.SourceDirectory:=FParent.LazarusDirectory;
-    // the same ... may change in the future
-    FInstaller.InstallDirectory:=FParent.LazarusDirectory;
+    FInstaller.SourceDirectory:=FParent.LazarusSourceDirectory;
+    FInstaller.InstallDirectory:=FParent.LazarusInstallDirectory;
     (FInstaller as THelpLazarusInstaller).FPCBinDirectory:=IncludeTrailingPathDelimiter(FParent.FPCInstallDirectory);
     (FInstaller as THelpLazarusInstaller).FPCSourceDirectory:=IncludeTrailingPathDelimiter(FParent.FPCSourceDirectory);
     (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
@@ -1481,8 +1487,8 @@ begin
       FInstaller.CompilerOptions:=FParent.FPCOPT;
       // ... but more importantly, pass Lazarus compiler options needed for IDE rebuild
       {$ifndef FPCONLY}
-      (FInstaller as TUniversalInstaller).LazarusSourceDir:=FParent.FLazarusDirectory;
-      (FInstaller as TUniversalInstaller).LazarusInstallDir:=FParent.FLazarusDirectory;
+      (FInstaller as TUniversalInstaller).LazarusSourceDir:=FParent.FLazarusSourceDirectory;
+      (FInstaller as TUniversalInstaller).LazarusInstallDir:=FParent.FLazarusInstallDirectory;
       (FInstaller as TUniversalInstaller).LazarusCompilerOptions:=FParent.FLazarusOPT;
       (FInstaller as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       (FInstaller as TUniversalInstaller).LCL_Platform:=FParent.LCL_Platform;

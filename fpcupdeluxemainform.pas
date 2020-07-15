@@ -3600,16 +3600,12 @@ begin
      then FPCupManager.FPCSourceDirectory:=FPCupManager.FPCInstallDirectory+'src'
      else FPCupManager.FPCSourceDirectory:=FPCupManager.FPCInstallDirectory;
 
-  FPCupManager.LazarusDirectory:=sInstallDir+'lazarus';
-
-  {
-  // not yet
+  FPCupManager.LazarusInstallDirectory:=sInstallDir+'lazarus';
   if Form2.SplitLazarus
      then FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory+'src'
      else FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory;
-  }
 
-  FPCupManager.LazarusPrimaryConfigPath:=sInstallDir+'config_'+ExtractFileName(FPCupManager.LazarusDirectory);
+  FPCupManager.LazarusPrimaryConfigPath:=sInstallDir+'config_'+ExtractFileName(FPCupManager.LazarusInstallDirectory);
 
   FPCupManager.ExportOnly:=(NOT Form2.Repo);
 
@@ -3726,16 +3722,18 @@ begin
   AddMessage('FPC source directory:  '+FPCupManager.FPCSourceDirectory);
   AddMessage('FPC install directory: '+FPCupManager.FPCInstallDirectory);
 
-  AddMessage('Lazarus URL:           '+FPCupManager.LazarusURL);
-  AddMessage('Lazarus options:       '+FPCupManager.LazarusOPT);
-  AddMessage('Lazarus directory:     '+FPCupManager.LazarusDirectory);
+  AddMessage('Lazarus URL:               '+FPCupManager.LazarusURL);
+  AddMessage('Lazarus options:           '+FPCupManager.LazarusOPT);
+  AddMessage('Lazarus source directory:  '+FPCupManager.LazarusSourceDirectory);
+  AddMessage('Lazarus install directory: '+FPCupManager.LazarusInstallDirectory);
 
   AddMessage('');
   AddMessage('Please stand back and enjoy !');
   AddMessage('');
 
-  //create install directory
+  //Create base install directory, the place the magic happens
   ForceDirectoriesSafe(FPCupManager.BaseDirectory);
+
   //save install settings in install directory
   SetFPCUPSettings(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory));
 
