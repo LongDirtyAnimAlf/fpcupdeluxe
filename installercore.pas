@@ -274,6 +274,7 @@ type
 
   TInstaller = class(TObject)
   private
+    FURL: string;
     FKeepLocalChanges: boolean;
     FReApplyLocalChanges: boolean;
     FCrossInstaller:TCrossInstaller;
@@ -334,7 +335,6 @@ type
     FSVNClient: TSVNClient;
     FSVNDirectory: string;
     FRepositoryUpdated: boolean;
-    FURL: string;
     FSourcePatches: string;
     FMajorVersion: integer; //major part of the version number, e.g. 1 for 1.0.8, or -1 if unknown
     FMinorVersion: integer; //minor part of the version number, e.g. 0 for 1.0.8, or -1 if unknown
@@ -470,7 +470,7 @@ type
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
     // URL for download. HTTP, ftp or svn
-    property URL: string write SetURL;
+    property URL: string read FURL write SetURL;
     // patches
     property SourcePatches: string write FSourcePatches;
     // do not download the repo itself, but only get the files (of master)
@@ -712,19 +712,27 @@ end;
 procedure TInstaller.SetURL(value:string);
 begin
   FURL:=value;
-  FMajorVersion := -1;
-  FMinorVersion := -1;
-  FReleaseVersion := -1;
-  FPatchVersion := -1;
+  if (FURL <> '') and (FURL[Length(FURL)] <> '/') then
+    FURL := FURL + '/';
+  if (IsFPCInstaller OR IsLazarusInstaller) then
+  begin
+    FMajorVersion := -1;
+    FMinorVersion := -1;
+    FReleaseVersion := -1;
+    FPatchVersion := -1;
+  end;
 end;
 
 procedure TInstaller.SetSourceDirectory(value:string);
 begin
   FSourceDirectory:=value;
-  FMajorVersion := -1;
-  FMinorVersion := -1;
-  FReleaseVersion := -1;
-  FPatchVersion := -1;
+  if (IsFPCInstaller OR IsLazarusInstaller) then
+  begin
+    FMajorVersion := -1;
+    FMinorVersion := -1;
+    FReleaseVersion := -1;
+    FPatchVersion := -1;
+  end;
 end;
 
 function TInstaller.GetMake: string;

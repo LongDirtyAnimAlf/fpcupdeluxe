@@ -1779,7 +1779,7 @@ begin
         Infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
         UpdateWarnings:=TStringList.Create;
         try
-          FURL:=RemoteURL;
+          URL:=RemoteURL;
           GitClient.ModuleName:=ModuleName;
           GitClient.ExportOnly:=FExportOnly;
           result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
@@ -1804,7 +1804,7 @@ begin
         Infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
         UpdateWarnings:=TStringList.Create;
         try
-          FURL:=RemoteURL;
+          URL:=RemoteURL;
           SVNClient.UserName   := GetValueFromKey('UserName',PackageSettings);
           SVNClient.Password   := GetValueFromKey('Password',PackageSettings);
           result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
@@ -1841,7 +1841,7 @@ begin
         Infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
         UpdateWarnings:=TStringList.Create;
         try
-          FUrl:=RemoteURL;
+          Url:=RemoteURL;
           HGClient.ModuleName:=ModuleName;
           HGClient.ExportOnly:=FExportOnly;
           result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);

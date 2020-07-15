@@ -2353,7 +2353,7 @@ begin
   else
   begin
     result:=GetVersionFromSource(FSourceDirectory);
-    if result='0.0.0' then result:=GetVersionFromUrl(FURL);
+    if result='0.0.0' then result:=GetVersionFromUrl(URL);
   end;
 end;
 
@@ -2406,7 +2406,7 @@ begin
 
   WritelnLog(localinfotext+'Init:', false);
   WritelnLog(localinfotext+'FPC directory:      ' + FSourceDirectory, false);
-  WritelnLog(localinfotext+'FPC URL:            ' + FURL, false);
+  WritelnLog(localinfotext+'FPC URL:            ' + URL, false);
   WritelnLog(localinfotext+'FPC options:        ' + FCompilerOptions, false);
 
   // set standard bootstrap compilername
@@ -2842,7 +2842,7 @@ begin
 
   WritelnLog(localinfotext+'Init:',false);
   WritelnLog(localinfotext+'Bootstrap compiler dir: '+ExtractFilePath(FCompiler),false);
-  WritelnLog(localinfotext+'FPC URL:                '+FURL,false);
+  WritelnLog(localinfotext+'FPC URL:                '+URL,false);
   WritelnLog(localinfotext+'FPC options:            '+FCompilerOptions,false);
   WritelnLog(localinfotext+'FPC source directory:   '+FSourceDirectory,false);
   WritelnLog(localinfotext+'FPC install directory:  '+FInstallDirectory,false);
@@ -3017,7 +3017,7 @@ begin
     if RequiredBootstrapVersionLow='0.0.0' then
        RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetVersionFromSource(FSourceDirectory));
     if RequiredBootstrapVersionLow='0.0.0' then
-       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetVersionFromUrl(FURL));
+       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetVersionFromUrl(URL));
 
     if RequiredBootstrapVersionLow='0.0.0' then
     begin

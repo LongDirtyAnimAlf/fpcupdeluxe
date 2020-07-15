@@ -51,31 +51,32 @@ type
   { TRepoClient }
 
   TRepoClient = class(TObject)
-  protected
+  private
     FParent:TObject;
+    FRepositoryURL: string;
+    FLocalRepository: string;
     FDesiredRevision: string;
     FDesiredBranch: string;
     FHTTPProxyHost: string;
     FHTTPProxyPassword: string;
     FHTTPProxyPort: integer;
     FHTTPProxyUser: string;
-    FLocalRepository: string;
+    FModuleName: string;
+    FVerbose: boolean;
+    FExportOnly: boolean;
+    FForceLocal: boolean;
+  protected
     FLocalRevision: string;
     FRepoExecutable: string;
     FRepoExecutableName: string;
-    FRepositoryURL: string;
     FReturnCode: integer;
     FReturnOutput: string;
-    FVerbose: boolean;
-    FModuleName: string;
-    FExportOnly: boolean;
-    FForceLocal: boolean;
+    // Makes sure non-empty strings have a / at the end.
+    function IncludeTrailingSlash(AValue: string): string;
     //Performs a checkout/initial download
     //Note: it's often easier to call CheckOutOrUpdate
     procedure CheckOut(UseForce:boolean=false); virtual;
     function GetLocalRevision: string; virtual;
-    // Makes sure non-empty strings have a / at the end.
-    function IncludeTrailingSlash(AValue: string): string; virtual;
     procedure SetDesiredRevision(AValue: string); virtual;
     procedure SetDesiredBranch(AValue: string); virtual;
     procedure SetLocalRepository(AValue: string); virtual;
@@ -92,6 +93,7 @@ type
     //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
     procedure Update; virtual;
   public
+    property Parent:TObject read FParent;
     // Downloads from remote repo: runs checkout if local repository doesn't exist, else does an update
     procedure CheckOutOrUpdate; virtual;
     // Downloads only the whole tree from remote repo ... do not include .svn or .git
@@ -175,10 +177,8 @@ function TRepoClient.IncludeTrailingSlash(AValue: string): string;
 begin
   // Default: either empty string or / already there
   Result := AValue;
-  if (AValue <> '') and (RightStr(AValue, 1) <> '/') then
-  begin
-    Result := AValue + '/';
-  end;
+  if (Result <> '') and (Result[Length(Result)] <> '/') then
+    Result := Result + '/';
 end;
 
 procedure TRepoClient.SetDesiredRevision(AValue: string);

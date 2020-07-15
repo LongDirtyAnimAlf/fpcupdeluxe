@@ -1404,7 +1404,7 @@ begin
   end;
 
   if result='0.0.0' then result:=GetVersionFromSource(FSourceDirectory);
-  if result='0.0.0' then result:=GetVersionFromUrl(FURL);
+  if result='0.0.0' then result:=GetVersionFromUrl(URL);
 end;
 
 
@@ -1422,7 +1422,7 @@ begin
   Infoln(localinfotext+'Entering ...',etDebug);
 
   WritelnLog(localinfotext+'Lazarus directory:      ' + FSourceDirectory, false);
-  WritelnLog(localinfotext+'Lazarus URL:            ' + FURL, false);
+  WritelnLog(localinfotext+'Lazarus URL:            ' + URL, false);
   WritelnLog(localinfotext+'Lazarus options:        ' + FCompilerOptions, false);
   result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
 
