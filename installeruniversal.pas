@@ -252,11 +252,17 @@ begin
   Processor.Process.Parameters.Add('FPC=' + FCompiler);
   Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
   Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
+
+  Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(LazarusInstallDir));
+  Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(LazarusInstallDir));
+  Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(LazarusInstallDir));
+
   //Make sure our FPC units can be found by Lazarus
   Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
+
   //Make sure Lazarus does not pick up these tools from other installs
-  Processor.Process.Parameters.Add('FPCMAKE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt);
-  Processor.Process.Parameters.Add('PPUMOVE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'ppumove'+GetExeExt);
+  Processor.Process.Parameters.Add('FPCMAKE=' + FBinPath+'fpcmake'+GetExeExt);
+  Processor.Process.Parameters.Add('PPUMOVE=' + FBinPath+'ppumove'+GetExeExt);
 
   s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
   //if FileExists(s) then
@@ -266,7 +272,8 @@ begin
 
   {$IFDEF MSWINDOWS}
   Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-  //Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+  {$else}
+  //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
   {$ENDIF MSWINDOWS}
 
   if FLCL_Platform <> '' then Processor.Process.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
@@ -312,7 +319,7 @@ begin
     {$ifdef MSWindows}
     //Prepend FPC binary directory to PATH to prevent pickup of strange tools
     OldPath:=Processor.Environment.GetVar(PATHVARNAME);
-    s:=ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)]);
+    s:=ExcludeTrailingPathDelimiter(FBinPath);
     if OldPath<>'' then
        Processor.Environment.SetVar(PATHVARNAME, s+PathSeparator+OldPath)
     else
@@ -427,7 +434,7 @@ begin
         if macro='BASEDIR' then
           macro:=ExcludeTrailingPathDelimiter(FBaseDirectory)
         else if macro='FPCDIR' then
-          macro:=ExcludeTrailingPathDelimiter(FFPCInstallDir)
+          macro:=ExcludeTrailingPathDelimiter(FPCInstallDir)
         else if macro='FPCBINDIR' then
             macro:=ExcludeTrailingPathDelimiter(FBinPath)
         else if macro='FPCBIN' then
@@ -518,8 +525,6 @@ begin
 end;
 
 function TUniversalInstaller.InitModule: boolean;
-var
-  PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
 begin
   result:=true;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
@@ -532,21 +537,21 @@ begin
   // only download some SVN repositories
   // So.. enable this.
   result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
+
   if not(result) then
     Infoln(localinfotext+'Missing required executables. Aborting.',etError);
 
   // Add fpc architecture bin and plain paths
-  FBinPath:=IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
-  PlainBinPath:=ExcludeTrailingPathDelimiter(FFPCInstallDir);
+  FBinPath:=ConcatPaths([FPCInstallDir,'bin',GetFPCTarget(true)])+DirectorySeparator;
   // Need to remember because we don't always use ProcessEx
-  FPath:=FBinPath+PathSeparator+
+  FPath:=ExcludeTrailingPathDelimiter(FBinPath)+PathSeparator+
   {$IFDEF DARWIN}
   // pwd is located in /bin ... the makefile needs it !!
   // tools are located in /usr/bin ... the makefile needs it !!
   // don't ask, but this is needed when fpcupdeluxe runs out of an .app package ... quirk solved this way .. ;-)
   '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
   {$ENDIF}
-  PlainBinPath+PathSeparator;
+  ExcludeTrailingPathDelimiter(FPCInstallDir)+PathSeparator;
   SetPath(FPath,true,false);
   // No need to build Lazarus IDE again right now; will
   // be changed by buildmodule/configmodule installexecute/

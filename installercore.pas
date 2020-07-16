@@ -287,6 +287,8 @@ type
     FCrossCPU_Target: TCPU; //When cross-compiling: CPU, e.g. x86_64
     FCrossOS_Target: TOS; //When cross-compiling: OS, e.g. win64
     FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
+    FCrossToolsDirectory: string;
+    FCrossLibraryDirectory: string;
     procedure SetURL(value:string);
     procedure SetSourceDirectory(value:string);
     function GetShell: string;
@@ -318,8 +320,6 @@ type
     FCompilerOptions: string; //options passed when compiling (FPC or Lazarus currently)
     FCPUCount: integer; //logical cpu count (i.e. hyperthreading=2cpus)
     FCrossOPT: string; //options passed (only) when cross-compiling
-    FCrossToolsDirectory: string;
-    FCrossLibraryDirectory: string;
     FPreviousRevision: string;
     FDesiredRevision: string;
     FActualRevision: string;
@@ -650,7 +650,7 @@ begin
     aOS:='';
     aArch:='';
 
-    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
+    FPCCfg:=FBinPath+FPCCONFIGFILENAME;
 
     if (NOT FileExists(FPCCfg)) then exit;
 

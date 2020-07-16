@@ -370,9 +370,11 @@ begin
         Processor.Process.Parameters.Add('FPC=' + FCompiler);
         Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
         Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
+
         Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
         Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
         Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory));
+
         //Make sure our FPC units can be found by Lazarus
         Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
         //Make sure Lazarus does not pick up these tools from other installs
@@ -381,7 +383,8 @@ begin
 
         {$ifdef Windows}
         Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-        //Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+        {$else}
+        //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
         {$endif}
 
         Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
@@ -654,9 +657,11 @@ begin
     Processor.Process.Parameters.Add('FPC=' + FCompiler);
     Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
     Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
+
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory));
+
     //Make sure our FPC units can be found by Lazarus
     Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
     //Make sure Lazarus does not pick up these tools from other installs
@@ -665,7 +670,8 @@ begin
 
     {$ifdef Windows}
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-    //Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+    {$else}
+    //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
     {$endif}
 
     //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
@@ -1893,13 +1899,17 @@ begin
       Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
     Processor.Process.Parameters.Add('FPC=' + FCompiler);
     Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(FInstallDirectory));
+
     {$ifdef Windows}
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-    //Processor.Process.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+    {$else}
+    //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
     {$endif}
+
     Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
     Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
 

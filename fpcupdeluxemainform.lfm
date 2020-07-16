@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 409
+  Left = 314
   Height = 740
-  Top = 57
+  Top = 47
   Width = 1004
   Anchors = []
   Caption = 'Form1'
@@ -3652,8 +3652,14 @@ object Form1: TForm1
     Top = 120
   end
   object MainMenu1: TMainMenu
-    Left = 928
-    Top = 216
+    Left = 920
+    Top = 176
+    object MenuFile: TMenuItem
+      Caption = '&File'
+      object MenuItem5: TMenuItem
+        Action = actFileExit
+      end
+    end
     object MenuItem3: TMenuItem
       Caption = 'Issues'
       object MIssuesGitHub: TMenuItem
@@ -3690,6 +3696,15 @@ object Form1: TForm1
     object MenuItem1: TMenuItem
       Caption = 'About'
       OnClick = MenuItem1Click
+    end
+  end
+  object ActionList1: TActionList
+    Left = 920
+    Top = 240
+    object actFileExit: TFileExit
+      Category = 'File'
+      Caption = 'E&xit'
+      Hint = 'Exit'
     end
   end
 end

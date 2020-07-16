@@ -10,7 +10,7 @@ uses
   SynEditMiscClasses, installerManager
   {$ifdef usealternateui},alternateui{$endif}
   ,LMessages
-  ,LCLVersion
+  ,LCLVersion, ActnList, StdActns
   {$ifdef RemoteLog}
   ,mormotdatamodelclient
   {$endif}
@@ -32,6 +32,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ActionList1: TActionList;
     AutoCrossUpdate: TButton;
     BitBtnFPCandLazarus: TBitBtn;
     BitBtnFPCOnly: TBitBtn;
@@ -51,6 +52,7 @@ type
     CheckAutoClear: TCheckBox;
     CreateStartup: TButton;
     ChkMakefileLaz: TButton;
+    actFileExit: TFileExit;
     FPCVersionLabel: TLabel;
     FPCTagLabel: TLabel;
     LazarusVersionLabel: TLabel;
@@ -71,6 +73,8 @@ type
     MChineseCNlanguage: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
+    MenuFile: TMenuItem;
+    MenuItem5: TMenuItem;
     MFPCBugs: TMenuItem;
     MLazarusBugs: TMenuItem;
     MIssuesGitHub: TMenuItem;
@@ -169,6 +173,7 @@ type
     {$ifdef RemoteLog}
     procedure InitConsent({%H-}Data: PtrInt=0);
     {$endif}
+    procedure InitShortCuts;
     procedure CheckForUpdates({%H-}Data: PtrInt=0);
     function  AutoUpdateCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
@@ -392,6 +397,8 @@ begin
 
   sStatus:='Sitting and waiting';
 
+  InitShortCuts;
+
   {$IFDEF MSWINDOWS}
   sInstallDir:='C:\fpcupdeluxe';
   {$ELSE}
@@ -538,6 +545,16 @@ begin
   RealFPCURL.Width:=(w-4);
   RealLazURL.Width:=RealFPCURL.Width;
   RealLazURL.Left:=RealFPCURL.Left+(w+4);
+end;
+
+procedure TForm1.InitShortCuts;
+begin
+{$IFDEF LINUX}
+  actFileExit.ShortCut := KeyToShortCut(VK_Q, [ssCtrl]);
+{$ENDIF}
+{$IFDEF WINDOWS}
+  actFileExit.ShortCut := KeyToShortCut(VK_X, [ssAlt]);
+{$ENDIF}
 end;
 
 procedure TForm1.LazarusVersionLabelClick(Sender: TObject);
