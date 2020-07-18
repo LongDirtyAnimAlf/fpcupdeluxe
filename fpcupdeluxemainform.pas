@@ -6,8 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, Types, Buttons, Menus, ComCtrls, SynEdit, SynEditPopup,
-  SynEditMiscClasses, installerManager
+  ExtCtrls, Types, Buttons, Menus, ComCtrls,
+  SynEdit, SynEditPopup, SynEditMiscClasses,
+  installerManager
   {$ifdef usealternateui},alternateui{$endif}
   ,LMessages
   ,LCLVersion, ActnList, StdActns
@@ -53,6 +54,7 @@ type
     CreateStartup: TButton;
     ChkMakefileLaz: TButton;
     actFileExit: TFileExit;
+    actFileSave: TFileSaveAs;
     FPCVersionLabel: TLabel;
     FPCTagLabel: TLabel;
     LazarusVersionLabel: TLabel;
@@ -75,6 +77,7 @@ type
     MenuItem4: TMenuItem;
     MenuFile: TMenuItem;
     MenuItem5: TMenuItem;
+    MenuItem6: TMenuItem;
     MFPCBugs: TMenuItem;
     MLazarusBugs: TMenuItem;
     MIssuesGitHub: TMenuItem;
@@ -101,6 +104,7 @@ type
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
+    procedure actFileSaveAccept(Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick(Sender: TObject);
@@ -143,7 +147,6 @@ type
     procedure CommandOutputScreenMouseWheel({%H-}Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; {%H-}MousePos: TPoint; var {%H-}Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
-
     {$ifdef usealternateui}
     procedure alternateuibutClick(Sender: TObject);
     procedure alternateuibutEnter(Sender: TObject);
@@ -551,9 +554,11 @@ procedure TForm1.InitShortCuts;
 begin
 {$IFDEF LINUX}
   actFileExit.ShortCut := KeyToShortCut(VK_Q, [ssCtrl]);
+  actFileSave.ShortCut := KeyToShortCut(VK_S, [ssCtrl]);
 {$ENDIF}
 {$IFDEF WINDOWS}
   actFileExit.ShortCut := KeyToShortCut(VK_X, [ssAlt]);
+  actFileSave.ShortCut := KeyToShortCut(VK_S, [ssAlt]);
 {$ENDIF}
 end;
 
@@ -1069,20 +1074,30 @@ begin
   DisEnable(Sender,False);
 
   try
-    PrepareRun;
 
-    if Sender=ChkMakefileLaz then FPCupManager.OnlyModules:=_MAKEFILECHECKLAZARUS;
-    if Sender=ChkMakefileFPC then FPCupManager.OnlyModules:=_MAKEFILECHECKFPC;
+    if (Sender=ChkMakefileLaz) OR (Sender=ChkMakefileFPC) then
+    begin
+      PrepareRun;
+      if Sender=ChkMakefileLaz then FPCupManager.OnlyModules:=_MAKEFILECHECKLAZARUS;
+      if Sender=ChkMakefileFPC then FPCupManager.OnlyModules:=_MAKEFILECHECKFPC;
+      sStatus:='Going to check Makefile.';
+      {$ifdef RemoteLog}
+      aDataClient.UpInfo.UpFunction:=ufCheckMakefile;
+      {$endif}
+      RealRun;
+    end;
 
-    if Sender=CreateStartup then FPCupManager.OnlyModules:=_CREATESCRIPT;
+    if Sender=CreateStartup then
+    begin
+      PrepareRun;
+      FPCupManager.OnlyModules:=_CREATESCRIPT;
+      sStatus:='Going to create startup scripts.';
+      {$ifdef RemoteLog}
+      aDataClient.UpInfo.UpFunction:=ufCreateStartup;
+      {$endif}
+      RealRun;
+    end;
 
-    sStatus:='Going to check Makefile.';
-
-    {$ifdef RemoteLog}
-    aDataClient.UpInfo.UpFunction:=ufCheckMakefile;
-    {$endif}
-
-    RealRun;
   finally
     DisEnable(Sender,True);
   end;
@@ -1801,6 +1816,11 @@ end;
 
 procedure TForm1.btnUpdateLazarusMakefilesClick(Sender: TObject);
 begin
+end;
+
+procedure TForm1.actFileSaveAccept(Sender: TObject);
+begin
+  CommandOutputScreen.Lines.SaveToFile(actFileSave.Dialog.FileName);
 end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);

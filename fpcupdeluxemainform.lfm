@@ -3656,6 +3656,9 @@ object Form1: TForm1
     Top = 176
     object MenuFile: TMenuItem
       Caption = '&File'
+      object MenuItem6: TMenuItem
+        Action = actFileSave
+      end
       object MenuItem5: TMenuItem
         Action = actFileExit
       end
@@ -3705,6 +3708,13 @@ object Form1: TForm1
       Category = 'File'
       Caption = 'E&xit'
       Hint = 'Exit'
+    end
+    object actFileSave: TFileSaveAs
+      Category = 'File'
+      Caption = '&Save log'
+      Dialog.Options = [ofOverwritePrompt, ofCreatePrompt, ofEnableSizing]
+      Hint = 'Save As'
+      OnAccept = actFileSaveAccept
     end
   end
 end

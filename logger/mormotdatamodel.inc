@@ -10,7 +10,8 @@ type
         ufUninstallCross,
         ufInstallModule,
         ufUninstallModule,
-        ufCheckMakefile
+        ufCheckMakefile,
+        ufCreateStartup
       );
 
   // keep it very simple: all in one record !!

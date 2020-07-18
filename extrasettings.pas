@@ -510,6 +510,10 @@ begin
 
   UseSoftFloat:=true;
 
+  //Disable split lazarus by default ... still testing
+  SplitLazarus:=False;
+  SetCheckEnabled(CaptionCheckSplitLazarus,False);
+
   {$IF defined(CPUAARCH64) OR defined(CPUARM) OR defined(Haiku)}
   // disable some features
   GroupBox4.Enabled:=False;
