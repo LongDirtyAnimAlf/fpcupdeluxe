@@ -82,7 +82,7 @@ type
     PlatformLabel: TLabel;
     VersionLabel: TLABEL;
     Notebook: TPageControl;
-    AboutPage: TTabSheet;
+    CreditsPage: TTabSheet;
     procedure AboutFormCreate(Sender:TObject);
     procedure LabelMouseDown(Sender: TObject; {%H-}Button: TMouseButton;
       {%H-}Shift: TShiftState; {%H-}X, {%H-}Y: Integer);
@@ -113,6 +113,7 @@ var
   AboutForm: TAboutForm;
 begin
   AboutForm:=TAboutForm.Create(nil);
+  AboutForm.SetFocusedControl(AboutForm.CloseButton);
   Result:=AboutForm.ShowModal;
   AboutForm.Free;
 end;
@@ -161,7 +162,7 @@ begin
   // 4-dec-2014
 
   //VersionPage.Caption:='';
-  //AboutPage.Caption:='';
+  //CreditsPage.Caption:='';
 
   //VersionLabel.Font.Color:= clWhite;
 

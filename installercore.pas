@@ -2484,9 +2484,18 @@ end;
 
 function TInstaller.DownloadFreetype: boolean;
 const
-  NewSourceURL : array [0..0] of string = (
-    'https://sourceforge.net/projects/gnuwin32/files/freetype/2.3.5-1/freetype-2.3.5-1-bin.zip/download'
+  {$ifdef win64}
+  NewSourceURL : array [0..1] of string = (
+      'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/freetypewin64.zip',
+      'https://sourceforge.net/projects/gnuwin32/files/freetype/2.3.5-1/freetype-2.3.5-1-bin.zip/download',
     );
+  {$endif}
+  {$ifdef win32}
+  NewSourceURL : array [0..1] of string = (
+      'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/freetypewin32.zip',
+      'https://sourceforge.net/projects/gnuwin32/files/freetype/2.3.5-1/freetype-2.3.5-1-bin.zip/download'
+    );
+  {$endif}
 var
   OperationSucceeded: boolean;
   FreetypeDir,FreetypeBin,FreetypZip,FreetypZipDir: string;
@@ -2499,9 +2508,12 @@ begin
   OperationSucceeded := false;
 
   FreetypeDir:=IncludeTrailingPathDelimiter(FInstallDirectory);
-  FreetypeBin:=FreetypeDir+'freetype-6.dll';
 
-  if NOT FileExists(FreetypeBin) then
+  FreetypeBin:='freetype-6.dll';
+  if NOT FileExists(FreetypeDir+FreetypeBin) then
+    FreetypeBin:='freetype.dll';
+
+  if NOT FileExists(FreetypeDir+FreetypeBin) then
   begin
 
     FreetypZip := GetTempFileNameExt('FPCUPTMP','zip');
@@ -2547,13 +2559,13 @@ begin
 
   if OperationSucceeded then
   begin
-    //MoveFile
-    OperationSucceeded := MoveFile(FreetypZipDir+DirectorySeparator+'bin'+DirectorySeparator+'freetype6.dll',FreetypeBin);
+    FreetypeBin:=FindFileInDir(FreetypeBin,ExcludeTrailingPathDelimiter(FreetypZipDir));
+    OperationSucceeded := MoveFile(FreetypeBin,FreetypeDir+ExtractFileName(FreetypeBin));
     if NOT OperationSucceeded then
     begin
-      WritelnLog(etError, localinfotext + 'Could not move freetype6.dll into '+FreetypeBin);
+      WritelnLog(etError, localinfotext + 'Could not move '+FreetypeBin+' into '+FreetypeDir+ExtractFileName(FreetypeBin));
     end
-    else OperationSucceeded := FileExists(FreetypeBin);
+    else OperationSucceeded := FileExists(FreetypeDir+ExtractFileName(FreetypeBin));
   end;
 
   SysUtils.Deletefile(FreetypZip);
