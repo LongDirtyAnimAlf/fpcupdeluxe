@@ -3243,6 +3243,11 @@ begin
               AddMessage('Got all tools now. Building a cross-compiler for '+GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target),True);
               memoSummary.Lines.Append('Got all tools now. Start building cross-compiler.');
               if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
+
+              {$ifdef RemoteLog}
+              aDataClient.UpInfo.UpFunction:=ufInstallCross;
+              {$endif}
+
               RealRun;
             end;
 
@@ -3394,9 +3399,9 @@ begin
     AddMessage(sStatus+' with given options.');
 
     {$ifdef RemoteLog}
+    aDataClient.UpInfo.UpFunction:=ufInstallFPCLAZ;
     if Sender=BitBtnFPCOnly then aDataClient.UpInfo.UpFunction:=ufInstallFPC;
     if Sender=BitBtnLazarusOnly then aDataClient.UpInfo.UpFunction:=ufInstallLAZ;
-    if Sender=BitBtnFPCandLazarus then aDataClient.UpInfo.UpFunction:=ufInstallFPCLAZ;
     {$endif}
 
     RealRun;

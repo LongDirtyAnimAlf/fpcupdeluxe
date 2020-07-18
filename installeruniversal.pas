@@ -2455,17 +2455,28 @@ var
   function CreateModuleSequence(aModuleName:string;IsHidden:boolean=false):string;
   var
     ModuleName,Declaration,RequiredModules:string;
+    RequiredModulesList:TStringList;
+    li:integer;
   begin
     result:='';
     ModuleName:=ini.ReadString(aModuleName,INIKEYWORD_NAME,'');
     if ModuleName<>'' then
     begin
       if IsHidden then Declaration:=_DECLAREHIDDEN else Declaration:=_DECLARE;
-      RequiredModules:=ini.ReadString(aModuleName,Trim(_REQUIRES),'');
-      if RequiredModules<>'' then
-      begin
-        RequiredModules:=_REQUIRES + RequiredModules + _SEP;
-        RequiredModules:=StringReplace(RequiredModules, ',', _SEP+_REQUIRES, [rfReplaceAll,rfIgnoreCase]);
+
+      RequiredModules:='';
+      RequiredModulesList:=TStringList.Create;
+      try
+        RequiredModulesList.AddCommaText(ini.ReadString(aModuleName,Trim(_REQUIRES),''));
+        if (RequiredModulesList.Count>0) then
+        begin
+          for li:=0 to Pred(RequiredModulesList.Count) do
+          begin
+            RequiredModules:=RequiredModules+_REQUIRES+RequiredModulesList.Strings[li]+_SEP;
+          end;
+        end;
+      finally
+        RequiredModulesList.Free;
       end;
 
       result:=
