@@ -2487,7 +2487,7 @@ const
   {$ifdef win64}
   NewSourceURL : array [0..1] of string = (
       'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/freetypewin64.zip',
-      'https://sourceforge.net/projects/gnuwin32/files/freetype/2.3.5-1/freetype-2.3.5-1-bin.zip/download',
+      'https://sourceforge.net/projects/gnuwin32/files/freetype/2.3.5-1/freetype-2.3.5-1-bin.zip/download'
     );
   {$endif}
   {$ifdef win32}
@@ -3919,6 +3919,10 @@ begin
           aTool.Environment.SetVar(PATHVARNAME, PrependPath);
       end;
 
+      WritelnLog(infotext+aTool.GetExeInfo, false);
+      if Verbosity then
+        ThreadLog(aTool.GetExeInfo,etCustom);
+
       result:=aTool.ExecuteAndWait;
       Output:=aTool.WorkerOutput.Text;
 
@@ -3975,6 +3979,10 @@ begin
         else
           aTool.Environment.SetVar(PATHVARNAME, PrependPath);
       end;
+
+      WritelnLog(infotext+aTool.GetExeInfo, false);
+      if Verbosity then
+        ThreadLog(aTool.GetExeInfo,etCustom);
 
       result:=aTool.ExecuteAndWait;
       Output:=aTool.WorkerOutput.Text;
