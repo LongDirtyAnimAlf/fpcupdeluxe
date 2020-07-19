@@ -24,6 +24,7 @@ type
     CrossSubArch:string;
     CrossARMArch:string;
     Compiler:string;
+    Available:boolean;
   end;
 
   TCrossUtils = array[TCPU,TOS] of TCrossUtil;
@@ -213,6 +214,9 @@ type
     function GetCrossARMArch(aCPU:TCPU;aOS:TOS):string;
     function GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS): string;
     function GetCompiler(aCPU:TCPU;aOS:TOS): string;
+    function GetCrossAvailable(xCPUOS:TCPUOS): boolean;
+
+    procedure SetCrossAvailable(xCPUOS:TCPUOS; aValue:boolean);
 
     property Repo:boolean read GetRepo write SetRepo;
     property PackageRepo:boolean read GetPackageRepo write SetPackageRepo;
@@ -438,6 +442,7 @@ begin
       FCrossUtils[CPU,OS].CrossSubArch:='';
       FCrossUtils[CPU,OS].CrossARMArch:='';
       FCrossUtils[CPU,OS].Compiler:='';
+      FCrossUtils[CPU,OS].Available:=false;
     end;
   end;
 
@@ -990,6 +995,16 @@ end;
 function TForm2.GetCompiler(aCPU:TCPU;aOS:TOS): string;
 begin
   result:=FCrossUtils[aCPU,aOS].Compiler;
+end;
+
+procedure TForm2.SetCrossAvailable(xCPUOS:TCPUOS; aValue:boolean);
+begin
+  FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Available:=aValue;
+end;
+
+function TForm2.GetCrossAvailable(xCPUOS:TCPUOS): boolean;
+begin
+  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Available;
 end;
 
 function TForm2.GetCheckIndex(aCaption:string):integer;

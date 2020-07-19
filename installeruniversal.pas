@@ -149,6 +149,13 @@ type
     function BuildModule(ModuleName: string): boolean; override;
   end;
 
+  { TInternetToolsInstaller }
+
+  TInternetToolsInstaller = class(TUniversalInstaller)
+  protected
+    function GetModule(ModuleName: string): boolean; override;
+  end;
+
 
   // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
   function GetModuleEnabledList(var ModuleList:TStringList):boolean;
@@ -2184,6 +2191,8 @@ var
   FileContents:TStrings;
 begin
   result:=inherited;
+  result:=InitModule;
+  if not result then exit;
 
   //Perform some extra magic for this module
 
@@ -2300,6 +2309,55 @@ begin
       end;
 
     end;
+  end;
+end;
+
+function TInternetToolsInstaller.GetModule(ModuleName: string): boolean;
+var
+  Workingdir,FLREDir:string;
+  aSourceFile,aTargetFile:string;
+  idx:integer;
+  sl:TStringList;
+begin
+  result:=inherited;
+  result:=InitModule;
+  if not result then exit;
+
+  //Perform some extra magic for this module
+  //Copy some files from FLRE
+
+  Workingdir:='';
+  FLREDir:='';
+
+  idx:=UniModuleList.IndexOf(ModuleName);
+  if idx>=0 then
+  begin
+    sl:=TStringList(UniModuleList.Objects[idx]);
+    Workingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
+    if Workingdir='' then Workingdir:=GetValueFromKey(INSTALLMAGIC,sl);
+    Workingdir:=FixPath(Workingdir);
+  end;
+
+  idx:=UniModuleList.IndexOf('flre');
+  if idx>=0 then
+  begin
+    sl:=TStringList(UniModuleList.Objects[idx]);
+    FLREDir:=GetValueFromKey(LOCATIONMAGIC,sl);
+    if FLREDir='' then FLREDir:=GetValueFromKey(INSTALLMAGIC,sl);
+    FLREDir:=FixPath(FLREDir);
+  end;
+
+  if DirectoryExists(Workingdir) AND DirectoryExists(FLREDir) then
+  begin
+    aSourceFile:=ConcatPaths([FLREDir,'src'])+DirectorySeparator+'FLRE.pas';
+    aTargetFile:=ConcatPaths([Workingdir,'data'])+DirectorySeparator+'FLRE.pas';
+    if FileExists(aSourceFile) then
+      FileUtil.CopyFile(aSourceFile,aTargetFile,[]);
+
+    aSourceFile:=ConcatPaths([FLREDir,'src'])+DirectorySeparator+'PUCU.pas';
+    aTargetFile:=ConcatPaths([Workingdir,'data'])+DirectorySeparator+'PUCU.pas';
+    if FileExists(aSourceFile) then
+      FileUtil.CopyFile(aSourceFile,aTargetFile,[]);
   end;
 end;
 

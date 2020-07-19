@@ -270,7 +270,7 @@ begin
   result.CPU:=TCPU.cpuNone;
   result.OS:=TOS.osNone;
   result.CPU:=GetTCPU(aCPU);
-  if aOS='windows' then
+  if ( (LowerCase(aOS)='windows') OR (LowerCase(aOS)='mswindows') ) then
   begin
     if result.CPU=TCPU.i386 then result.OS:=TOS.win32;
     if result.CPU=TCPU.x86_64 then result.OS:=TOS.win64;

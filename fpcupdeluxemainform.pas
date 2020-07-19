@@ -685,7 +685,9 @@ begin
   aCPU := GetTargetCPU;
   aSubArch :='';
 
+  //BinPath:=ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',aCPU+'-'+aOS]);
   BinPath:=ConcatPaths([sInstallDir,'fpc','bin',aCPU+'-'+aOS]);
+
   FPCCfg := IncludeTrailingPathDelimiter(BinPath) + FPCCONFIGFILENAME;
 
   result:=false;
@@ -754,6 +756,9 @@ begin
           end;
           }
 
+          if (Sender=nil) then
+            Form2.SetCrossAvailable(GetCPUOSCombo(aCPU,aOS),true);
+
           // try to distinguish between different Solaris versons
           if (aOS=GetOS(TOS.solaris)) then
           begin
@@ -811,13 +816,7 @@ begin
           if aRadiogroup_CPU=GetCPU(TCPU.powerpc) then aRadiogroup_CPU:='ppc';
           if aRadiogroup_CPU=GetCPU(TCPU.powerpc64) then aRadiogroup_CPU:='ppc64';
           if aRadiogroup_OS='iphonesim' then aRadiogroup_OS:='i-sim';
-
-          if (aOS='windows') or (aOS=GetOS(TOS.win32)) or (aOS=GetOS(TOS.win64)) then
-          begin
-            if aCPU=GetCPU(TCPU.i386) then aOS:=GetOS(TOS.win32);
-            if aCPU=GetCPU(TCPU.x86_64) then aOS:=GetOS(TOS.win64);
-            aRadiogroup_OS:='windows';
-          end;
+          if ( (aOS=GetOS(TOS.win32)) or (aOS=GetOS(TOS.win64)) ) then aRadiogroup_OS:='windows';
 
           //this chek is redundant, but ok for a final check ... ;-)
           //if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
@@ -2291,6 +2290,8 @@ begin
       aDataClient.UpInfo.UpFunction:=ufUninstallCross;
       {$endif}
       success:=RealRun;
+      if success then
+        Form2.SetCrossAvailable(FPCupManager.CrossCombo_Target,false);
     finally
       DisEnable(Sender,true);
     end;
@@ -3248,10 +3249,8 @@ begin
               aDataClient.UpInfo.UpFunction:=ufInstallCross;
               {$endif}
 
-              RealRun;
-            end;
-
-            if (NOT success) then AddMessage('No luck in getting then cross-tools ... aborting.');
+              success:= RealRun;
+            end else AddMessage('No luck in getting then cross-tools ... aborting.');
           end;
         end
         else
@@ -3260,6 +3259,9 @@ begin
         end;
 
       end;
+
+      if success then
+        Form2.SetCrossAvailable(FPCupManager.CrossCombo_Target,true);
 
     finally
       DisEnable(Sender,True);

@@ -2389,7 +2389,7 @@ begin
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
 
-  FBinPath:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
+  FBinPath:=ConcatPaths([FInstallDirectory,'bin',GetFPCTarget(true)]);
 
   result:=CheckAndGetTools;
 
