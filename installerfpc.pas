@@ -738,11 +738,14 @@ begin
           if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
           {$ENDIF}
           Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
-          {
+
           //Still not clear if jobs can be enabled for crosscompiler builds ... :-|
           if (NOT FNoJobs) then
+          begin
             Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-          }
+            Processor.Process.Parameters.Add('FPMAKEOPT="-T '+IntToStr(FCPUCount)+'"');
+          end;
+
           Processor.Process.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
           Processor.Process.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
@@ -1497,8 +1500,13 @@ begin
   if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
   {$ENDIF}
   FErrorLog.Clear;
+
   if (NOT FNoJobs) then
+  begin
     Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+    Processor.Process.Parameters.Add('FPMAKEOPT="-T '+IntToStr(FCPUCount)+'"');
+  end;
+
   //Processor.Process.Parameters.Add('FPC='+FCompiler);
   Processor.Process.Parameters.Add('PP='+FCompiler);
 
@@ -3137,7 +3145,10 @@ begin
       Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Process.Parameters.Add('compiler_cycle');
       if (NOT FNoJobs) then
+      begin
         Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+        Processor.Process.Parameters.Add('FPMAKEOPT="-T '+IntToStr(FCPUCount)+'"');
+      end;
       Processor.Process.Parameters.Add('FPC='+FCompiler);
       Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
       Processor.Process.Parameters.Add('OS_SOURCE=win32');
@@ -3171,7 +3182,10 @@ begin
       Processor.Process.Parameters.Clear;
       Processor.Process.Parameters.Add('compiler_cycle');
       if (NOT FNoJobs) then
+      begin
         Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+        Processor.Process.Parameters.Add('FPMAKEOPT="-T '+IntToStr(FCPUCount)+'"');
+      end;
       Processor.Process.Parameters.Add('FPC='+FCompiler);
       Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
       Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
@@ -3829,7 +3843,10 @@ begin
     {$ENDIF}
     Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
     if (NOT FNoJobs) then
+    begin
       Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+      Processor.Process.Parameters.Add('FPMAKEOPT="-T '+IntToStr(FCPUCount)+'"');
+    end;
     Processor.Process.Parameters.Add('FPC='+aCleanupCompiler);
     Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
     Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);

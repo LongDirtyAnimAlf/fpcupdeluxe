@@ -17,22 +17,26 @@ uses
   fpcuputil;
 
 const
-  SDKNAME='iPhoneOS';
+  SDKNAME='$SDK';
+  iSDKNAME='iOS';
+  macSDKNAME='macOS';
 
-  SDKLOCATIONS:array[0..4] of string = (
+  SDKLOCATIONS:array[0..5] of string = (
     '/Applications/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
     '/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
     '~/Desktop/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
     '~/Downloads/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
-    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk'
+    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
+    '/Applications/Xcode-beta.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk'
   );
 
-  TOOLCHAINLOCATIONS:array[0..4] of string = (
+  TOOLCHAINLOCATIONS:array[0..5] of string = (
     '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
     '/Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
     '~/Desktop/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
     '~/Downloads/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
-    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain'
+    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+    '/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain'
   );
 
 
@@ -64,13 +68,31 @@ begin
   result:=false;
   FLibsFound:=false;
 
-  for FLibsPath in SDKLOCATIONS do
+  if (NOT FLibsFound) then
   begin
-    FLibsPath:=ExpandFileName(FLibsPath);
-    if DirectoryExists(FLibsPath) then
+    for FLibsPath in SDKLOCATIONS do
     begin
-      FLibsFound:=true;
-      break;
+      FLibsPath:=ExpandFileName(FLibsPath);
+      FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      if DirectoryExists(FLibsPath) then
+      begin
+        FLibsFound:=true;
+        break;
+      end;
+    end;
+  end;
+
+  if (NOT FLibsFound) then
+  begin
+    for FLibsPath in SDKLOCATIONS do
+    begin
+      FLibsPath:=ExpandFileName(FLibsPath);
+      FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      if DirectoryExists(FLibsPath) then
+      begin
+        FLibsFound:=true;
+        break;
+      end;
     end;
   end;
 
@@ -128,6 +150,10 @@ begin
   end else FBinUtilsPath:='';
 
   // Set some defaults if user hasn't specified otherwise
+  // Update !!
+  // Not valid anymore !!
+  // aarch64 can be iOS or macOS
+  {
   i:=StringListStartsWith(FCrossOpts,'-Ca');
   if i=-1 then
   begin
@@ -136,9 +162,13 @@ begin
     ShowInfo('Did not find any -Ca architecture parameter; using '+aOption+'.');
   end else aOption:=Trim(FCrossOpts[i]);
   AddFPCCFGSnippet(aOption);
+  }
 
-  aOption:=GetDarwinSDKVersion(LowerCase(SDKNAME));
+  aOption:=GetDarwinSDKVersion(LowerCase(iSDKNAME));
   if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
+
+  aOption:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
+  if Length(aOption)>0 then AddFPCCFGSnippet('-WM'+aOption);
 
   // Never fail
   result:=true;
@@ -172,5 +202,6 @@ initialization
 finalization
   Darwinaarch64.Destroy;
 {$ENDIF}
+
 end.
 
