@@ -105,7 +105,7 @@ type
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
-    procedure actFileSaveAccept(Sender: TObject);
+    procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick(Sender: TObject);
@@ -3444,7 +3444,7 @@ begin
     FillChar({%H-}aUri,SizeOf(TURI),0);
     aURI.Protocol:='mailto';
     aURI.Document:='fpcupdeluxe@gmail.com';
-    s:=s+'******************** first 20 lines *************************'+#13#10;
+    s:='******************** first 20 lines *************************'+#13#10;
     i:=0;
     while (i<CommandOutputScreen.Lines.Count) do
     begin
@@ -3464,7 +3464,7 @@ begin
     s:=s+#13#10;
     s:=s+'************************* end ******************************';
     aURI.Params:='subject=Fpcupdeluxe command screen log&body=Please find included part of the command screen output of fpcupdeluxe. You may add more if you want by copy paste of command screen.'+#13#10+#13#10+s;
-    OpenDocument(EncodeURI(aURI));
+    OpenURL(EncodeURI(aURI));
   end;
 end;
 
