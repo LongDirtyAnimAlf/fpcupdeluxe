@@ -2990,25 +2990,25 @@ begin
   if (Self is TFPCCrossInstaller) then
   begin
     VersionSnippet:=CompilerVersion(s);
+    s2:='FPC '+CrossInstaller.RegisterName+' cross-builder: Detected source version FPC (compiler): '
   end
   else
   begin
     VersionSnippet:=GetVersion;
+    s2:='FPC native builder: Detected source version FPC (source): ';
     if VersionSnippet='0.0.0' then
     begin
       VersionSnippet:=CompilerVersion(s);
-      if VersionSnippet<>'0.0.0' then VersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+      if VersionSnippet<>'0.0.0' then
+      begin
+        VersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+        s2:='FPC native builder: Detected source version FPC (compiler): ';
+      end;
     end;
   end;
 
   if VersionSnippet<>'0.0.0' then
-  begin
-    if (Self is TFPCCrossInstaller) then
-      s:='FPC '+CrossInstaller.RegisterName+' cross-builder: Detected source version FPC (compiler): '
-    else
-      s:='FPC native builder: Detected source version FPC: ';
-    Infoln(s+VersionSnippet, etInfo);
-  end;
+    Infoln(s2+VersionSnippet, etInfo);
 
   // if cross-compiling, skip a lot of code
   // trust the previous work done by this code for the native installer!

@@ -58,6 +58,8 @@ Temporary Items
 *.bak
 *.local
 
+*.pot
+
 logger/secrets.inc
 message.inc
 
