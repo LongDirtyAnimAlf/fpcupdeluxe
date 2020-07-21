@@ -743,7 +743,7 @@ begin
           if (NOT FNoJobs) then
           begin
             Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-            Processor.Process.Parameters.Add('FPMAKEOPT="-T '+IntToStr(FCPUCount)+'"');
+            Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
           end;
 
           Processor.Process.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
@@ -1504,7 +1504,7 @@ begin
   if (NOT FNoJobs) then
   begin
     Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-    Processor.Process.Parameters.Add('FPMAKEOPT="-T '+IntToStr(FCPUCount)+'"');
+    Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
   end;
 
   //Processor.Process.Parameters.Add('FPC='+FCompiler);
@@ -3155,7 +3155,7 @@ begin
       if (NOT FNoJobs) then
       begin
         Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-        Processor.Process.Parameters.Add('FPMAKEOPT="-T '+IntToStr(FCPUCount)+'"');
+        Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
       end;
       Processor.Process.Parameters.Add('FPC='+FCompiler);
       Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
@@ -3192,7 +3192,7 @@ begin
       if (NOT FNoJobs) then
       begin
         Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-        Processor.Process.Parameters.Add('FPMAKEOPT="-T '+IntToStr(FCPUCount)+'"');
+        Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
       end;
       Processor.Process.Parameters.Add('FPC='+FCompiler);
       Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
@@ -3853,7 +3853,7 @@ begin
     if (NOT FNoJobs) then
     begin
       Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-      Processor.Process.Parameters.Add('FPMAKEOPT="-T '+IntToStr(FCPUCount)+'"');
+      Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
     end;
     Processor.Process.Parameters.Add('FPC='+aCleanupCompiler);
     Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
