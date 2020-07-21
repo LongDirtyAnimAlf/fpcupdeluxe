@@ -2986,10 +2986,21 @@ begin
     exit(false);
   end;
 
-  s2:=GetVersion;
   s:=GetCompilerInDir(FInstallDirectory);
-  VersionSnippet:=CompilerVersion(s);
-  if VersionSnippet='0.0.0' then VersionSnippet:=s2;
+  if (Self is TFPCCrossInstaller) then
+  begin
+    VersionSnippet:=CompilerVersion(s);
+  end
+  else
+  begin
+    VersionSnippet:=GetVersion;
+    if VersionSnippet='0.0.0' then
+    begin
+      VersionSnippet:=CompilerVersion(s);
+      if VersionSnippet<>'0.0.0' then VersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+    end;
+  end;
+
   if VersionSnippet<>'0.0.0' then
   begin
     if (Self is TFPCCrossInstaller) then
@@ -3012,10 +3023,7 @@ begin
     // So, try something else !
     if RequiredBootstrapVersionLow='0.0.0' then RequiredBootstrapVersionHigh:='0.0.0';
     if RequiredBootstrapVersionLow='0.0.0' then
-       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetVersionFromSource(FSourceDirectory));
-    if RequiredBootstrapVersionLow='0.0.0' then
-       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetVersionFromUrl(URL));
-
+       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetVersion);
     if RequiredBootstrapVersionLow='0.0.0' then
     begin
       Infoln(infotext+'Could not determine required bootstrap compiler version. Should not happen. Aborting.',etError);
