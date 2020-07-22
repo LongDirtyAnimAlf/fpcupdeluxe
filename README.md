@@ -1,9 +1,9 @@
-fpcup / fpclazup / fpcupdeluxe
-
-Original: https://bitbucket.org/reiniero/fpcup/
-Updated : https://github.com/LongDirtyAnimAlf/Reiniero-fpcup
-New (this) : https://github.com/newpascal/fpcupdeluxe
-Wiki : http://wiki.freepascal.org/fpcupdeluxe
+fpcup / fpclazup / fpcupdeluxe<br/>
+<br/>
+Original: https://bitbucket.org/reiniero/fpcup<br/>
+Updated : https://github.com/LongDirtyAnimAlf/Reiniero-fpcup<br/>
+New (this) : https://github.com/newpascal/fpcupdeluxe<br/>
+Wiki : http://wiki.freepascal.org/fpcupdeluxe<br/>
 
 [![GitHub contributors](https://img.shields.io/github/contributors/LongDirtyAnimAlf/fpcupdeluxe)](https://github.com/LongDirtyAnimAlf/fpcupdeluxe/graphs/contributors)
 [![GitHub All Releases](https://img.shields.io/github/downloads/LongDirtyAnimAlf/fpcupdeluxe/total)](https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases)
@@ -12,8 +12,8 @@ Wiki : http://wiki.freepascal.org/fpcupdeluxe
 
 Acknowledgement
 ===========
-As of August 28, 2015, this new repo contains all previous commits by Reinier.
-Many thanks towards user "Arvur" (see forum) for making this possible.
+As of August 28, 2015, this new repo contains all previous commits by Reinier.<br/>
+Many thanks towards user "Arvur" (see forum) for making this possible.<br/>
 Follow the fpcup development on http://forum.lazarus.freepascal.org/index.php/topic,27211.0.html
 
 What is it?
@@ -81,15 +81,15 @@ Fpcupdeluxe has a facility to extend its functionality building and using cross 
 
 Install data collection
 =========================
-Fpcupdeluxe >= 1.6.0a sends some data about its installs towards a central server.
-For this, it uses the famous mORMot framework.
-You can check this data yourself:
-http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml
-http://fpcuplogger.batterybutcher.com:8880/root/getinfojson
-http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes
-http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?Country=China
-http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?FPCVersion=trunk
-
+Fpcupdeluxe >= 1.6.0a sends some data about its installs towards a central server.<br/>
+For this, it uses the famous mORMot framework.<br/>
+You can check this data yourself:<br/>
+http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml<br/>
+http://fpcuplogger.batterybutcher.com:8880/root/getinfojson<br/>
+http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes<br/>
+http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?Country=China<br/>
+http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?FPCVersion=trunk<br/>
+<br/>
 The data collection can be disabled by a setting in setup+
 
 
