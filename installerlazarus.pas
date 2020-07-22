@@ -2153,7 +2153,7 @@ begin
          else result:=DownloadFromSVN(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings);
       if UpdateWarnings.Count>0 then
       begin
-        WritelnLog(UpdateWarnings.Text);
+        WritelnLog(UpdateWarnings);
       end;
     finally
       UpdateWarnings.Free;

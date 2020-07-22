@@ -498,6 +498,7 @@ type
     function GetCrossCompilerName(Cpu_Target:TCPU):string;
     procedure SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);virtual;
     // append line ending and write to log and, if specified, to console
+    procedure WritelnLog(msg: TStrings; ToConsole: boolean = true);overload;
     procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
     procedure WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean = true);overload;
     function GetSuitableRepoClient:TRepoClient;
@@ -1846,10 +1847,10 @@ begin
       begin
         DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + aBeforeRevision + '.diff';
         CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,FSVNClient);
-        UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': reverting before updating.');
+        UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': WARNING: reverting before updating.');
         SVNClient.Revert; //Remove local changes
       end
-      else UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': leaving modified files as is before updating.');
+      else UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': WARNING: leaving modified files as is before updating.');
     end;
   end;
 
@@ -2848,6 +2849,16 @@ begin
   end;
   if FVerbose then
     Infoln(Copy(Self.ClassName,2,MaxInt)+' (SetPath): Set path to: ' + ResultingPath,etDebug);
+end;
+
+procedure TInstaller.WritelnLog(msg: TStrings; ToConsole: boolean = true);
+var
+  idx:integer;
+begin
+  if (msg.Count>0) then
+  begin
+    for idx:=0 to Pred(msg.Count) do WritelnLog(msg.Strings[idx],ToConsole);
+  end;
 end;
 
 procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);

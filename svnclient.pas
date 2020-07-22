@@ -681,7 +681,7 @@ begin
   AllFilesRaw := TStringList.Create;
   try
     AllFilesRaw.Text := CommandOutput;
-    for Counter := 0 to AllFilesRaw.Count - 1 do
+    for Counter := 0 to Pred(AllFilesRaw.Count) do
     begin
       //Some sample files (using svn update and svn status):
 
