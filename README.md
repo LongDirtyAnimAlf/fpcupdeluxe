@@ -7,7 +7,7 @@ Wiki : http://wiki.freepascal.org/fpcupdeluxe<br/>
 
 [![GitHub contributors](https://img.shields.io/github/contributors/LongDirtyAnimAlf/fpcupdeluxe)](https://github.com/LongDirtyAnimAlf/fpcupdeluxe/graphs/contributors)
 [![GitHub All Releases](https://img.shields.io/github/downloads/LongDirtyAnimAlf/fpcupdeluxe/total)](https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases)
-[![GitHub commits since tagged version](https://img.shields.io/github/commits-since/LongDirtyAnimAlf/fpcupdeluxe/1.6.8k)](https://github.com/LongDirtyAnimAlf/fpcupdeluxe/commits/master)
+[![GitHub commits since tagged version](https://img.shields.io/github/commits-since/LongDirtyAnimAlf/fpcupdeluxe/1.8.0d)](https://github.com/LongDirtyAnimAlf/fpcupdeluxe/commits/master)
 [![License](https://img.shields.io/badge/license-zlib%2Flibpng-blue.svg)](LICENSE)
 
 Acknowledgement
