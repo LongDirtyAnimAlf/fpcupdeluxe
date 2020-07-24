@@ -95,6 +95,8 @@ uses
   eventlog;
 
 Const
+  DELUXEKEY='fpcupdeluxeishereforyou';
+
   MAXCONNECTIONRETRIES=2;
   {$ifdef Windows}
   GetExeExt='.exe';
@@ -447,6 +449,8 @@ uses
   ,process
   ,processutils
   ,bzip2stream
+  ,DCPDES
+  ,DCPsha256
   ,NumCPULib  in './numcpulib/NumCPULib.pas'
   ;
 
@@ -463,6 +467,7 @@ const
   {$ENDIF MSWINDOWS}
 
 {$i revision.inc}
+{$i secrets.inc}
 
 type
   TOnWriteStream = procedure(Sender: TObject; APos: Int64) of object;
@@ -3916,9 +3921,27 @@ var
   MIMEPart : TMimePart; // parts of the message
   {$endif}
   {$endif}
-  s    : string;
+  s             : string;
+  Cipher        : TDCP_DES;
+  clearpassword : string;
 begin
   result:=false;
+
+  clearpassword:=password;
+
+  Cipher := TDCP_DES.Create(nil);
+  try
+    {$ifdef SECRETDELUXEKEY}
+    Cipher.InitStr(VERYSECRETDELUXEKEY,TDCP_sha256);
+    {$else}
+    Cipher.InitStr(DELUXEKEY,TDCP_sha256);
+    {$endif}
+    clearpassword:=Cipher.DecryptString(password);
+  finally
+    Cipher.Burn;
+    Cipher.Free;
+  end;
+
   {$if defined(Haiku) OR defined(AROS) OR defined(Morphos) OR defined(Solaris) OR defined(BSD)}
   {%H-}FillChar({%H-}aUri,SizeOf(TURI),0);
   aURI.Protocol:='mailto';
@@ -3954,14 +3977,14 @@ begin
     MIMEPart := Msg.AddPartMultipart('alternative', nil);
     Msg.AddPartText(Body, MIMEPart);
     Msg.EncodeMessage;
-    result:=smtpsend.SendToRaw(From,pTo,Host+':465',Msg.Lines,login,password);
+    result:=smtpsend.SendToRaw(From,pTo,Host+':465',Msg.Lines,login,clearpassword);
   finally
     Msg.Free;
   end;
   {$endif}
   {$else}
   s:=Body.Text;
-  result:=SynCrtSock.SendEmail(Host, From, pTo, Subject, s, '', login, password, '465', '', true);
+  result:=SynCrtSock.SendEmail(Host, From, pTo, Subject, s, '', login, clearpassword, '465', '', true);
   {$endif}
 end;
 

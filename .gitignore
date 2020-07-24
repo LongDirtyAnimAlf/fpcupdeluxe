@@ -61,7 +61,7 @@ Temporary Items
 *.pot
 
 logger/secrets.inc
-message.inc
+secrets.inc
 
 *.log
 libfpcup/

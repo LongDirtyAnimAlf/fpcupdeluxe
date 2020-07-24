@@ -8,9 +8,6 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls,
   Dialogs, CheckLst, m_crossinstaller, installerCore;
 
-Const
-  DELUXEKEY='fpcupdeluxeishereforyou';
-
 type
   TCrossSetting = (fpcup,auto,custom);
 
@@ -469,7 +466,11 @@ begin
       //Cipher:= TDCP_rc4.Create(nil);
       Cipher := TDCP_DES.Create(nil);
       try
+        {$ifdef SECRETDELUXEKEY}
+        Cipher.InitStr(VERYSECRETDELUXEKEY,TDCP_sha256);
+        {$else}
         Cipher.InitStr(DELUXEKEY,TDCP_sha256);
+        {$endif}
         s:=Cipher.DecryptString(s);
       finally
         Cipher.Burn;
@@ -799,7 +800,11 @@ begin
       //Cipher:= TDCP_rc4.Create(nil);
       Cipher := TDCP_DES.Create(nil);
       try
+        {$ifdef SECRETDELUXEKEY}
+        Cipher.InitStr(VERYSECRETDELUXEKEY,TDCP_sha256);
+        {$else}
         Cipher.InitStr(DELUXEKEY,TDCP_sha256);
+        {$endif}
         s:=Cipher.EncryptString(s);
       finally
         Cipher.Burn;
