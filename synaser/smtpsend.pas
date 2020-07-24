@@ -664,9 +664,9 @@ begin
     // SMTP.Sock.SocksIP := '127.0.0.1';
     // SMTP.Sock.SocksPort := '1080';
 // if you need support for upgrade session to TSL/SSL, uncomment next lines:
-    // SMTP.AutoTLS := True;
+    //SMTP.AutoTLS := True;
 // if you need support for TSL/SSL tunnel, uncomment next lines:
-    // SMTP.FullSSL := True;
+    SMTP.FullSSL := True;
     SMTP.TargetHost := Trim(SeparateLeft(SMTPHost, ':'));
     s := Trim(SeparateRight(SMTPHost, ':'));
     if (s <> '') and (s <> SMTPHost) then
@@ -689,6 +689,10 @@ begin
           Result := SMTP.MailData(MailData);
       end;
       SMTP.Logout;
+    end
+    else
+    begin
+      s:=SMTP.ResultString;
     end;
   finally
     SMTP.Free;

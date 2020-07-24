@@ -3247,11 +3247,8 @@ begin
               memoSummary.Lines.Append('Got all tools now. Start building cross-compiler.');
               if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
 
-              {$ifdef RemoteLog}
-              aDataClient.UpInfo.UpFunction:=ufInstallCross;
-              {$endif}
-
               success:= RealRun;
+
             end else AddMessage('No luck in getting then cross-tools ... aborting.');
           end;
         end
@@ -3429,10 +3426,6 @@ begin
 end;
 
 procedure TForm1.btnLogClick(Sender: TObject);
-var
-  aURI: TURI;
-  s:string;
-  i:integer;
 begin
   if (Sender=btnClearLog) then
   begin
@@ -3441,30 +3434,13 @@ begin
   end;
   if (Sender=btnSendLog) then
   begin
-    FillChar({%H-}aUri,SizeOf(TURI),0);
-    aURI.Protocol:='mailto';
-    aURI.Document:='fpcupdeluxe@gmail.com';
-    s:='******************** first 20 lines *************************'+#13#10;
-    i:=0;
-    while (i<CommandOutputScreen.Lines.Count) do
-    begin
-      s:=s+CommandOutputScreen.Lines.Strings[i]+#13#10;
-      if (i>18) then break;
-      Inc(i);
-    end;
-    s:=s+#13#10;
-    s:=s+'******************** last 50 lines *************************'+#13#10;
-    i:=CommandOutputScreen.Lines.Count-50;
-    if (i<18) then i:=18;
-    while (i<CommandOutputScreen.Lines.Count) do
-    begin
-      s:=s+CommandOutputScreen.Lines.Strings[i]+#13#10;
-      Inc(i);
-    end;
-    s:=s+#13#10;
-    s:=s+'************************* end ******************************';
-    aURI.Params:='subject=Fpcupdeluxe command screen log&body=Please find included part of the command screen output of fpcupdeluxe. You may add more if you want by copy paste of command screen.'+#13#10+#13#10+s;
-    OpenURL(EncodeURI(aURI));
+    SendMail('smtp.gmail.com',
+             'Fpcupdeluxe log report',
+             'fpcupdeluxe@gmail.com',
+             'upuser@gmail.com',
+             'fpcupdeluxe@gmail.com',
+             'likjes69',
+             CommandOutputScreen.Lines);
   end;
 end;
 

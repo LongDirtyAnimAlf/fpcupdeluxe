@@ -77,7 +77,6 @@ uses
   typinfo,
   zipper,
   fphttpclient, // for github api file list and others
-
   {$ifdef darwin}
   ns_url_request,
   {$endif}
@@ -391,6 +390,7 @@ Function Pos(Const Substr : string; Const Source : string; Offset : Sizeint = 1)
 {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30000)}
 Function CharInSet(Ch:AnsiChar;Const CSet : TSysCharSet) : Boolean; inline;
 {$ENDIF}
+function SendMail (Host, Subject, pTo, From, login,password: string; Body: TStrings):boolean;
 
 implementation
 
@@ -435,6 +435,15 @@ uses
   //,libcurl
   {$ENDIF}
   {$ENDIF ENABLEWGET}
+  {$if defined(Haiku) OR defined(AROS) OR defined(Morphos) OR defined(Solaris) OR defined(BSD)}
+  {$ifdef LCL}
+  ,LCLIntf // OpenURL
+  {$else}
+  ,mimemess,mimepart,smtpsend
+  {$endif}
+  {$else}
+  ,SynCrtSock // SendEmail from the mORMot
+  {$endif}
   ,process
   ,processutils
   ,bzip2stream
@@ -1186,7 +1195,7 @@ function FileNameFromURL(URL:string):string;
 const
   URLMAGIC='/download';
 var
-  URI:TURI;
+  URI:URIPARSER.TURI;
   aURL:string;
 begin
   aURL:=URL;
@@ -1197,7 +1206,7 @@ end;
 
 function StripUrl(URL:string): string;
 var
-  URI:TURI;
+  URI:URIPARSER.TURI;
 begin
   URI:=ParseURI(URL);
   result:=URI.Host+URI.Path;
@@ -1811,7 +1820,7 @@ function DownloadByWinINet(URL: string; aDataStream: TSTream): boolean;
 const
   URLMAGIC='/download';
 var
-  URI    : TURI;
+  URI    : URIPARSER.TURI;
   aURL,P : String;
   NetHandle: HINTERNET;
   UrlHandle: HINTERNET;
@@ -1953,7 +1962,7 @@ const
   URLMAGIC='/download';
 var
   Output : String;
-  URI    : TURI;
+  URI    : URIPARSER.TURI;
   aURL,P : String;
 begin
   aURL:=URL;
@@ -1983,7 +1992,7 @@ const
   URLMAGIC='/download';
 var
   Output : String;
-  URI    : TURI;
+  URI    : URIPARSER.TURI;
   aURL,P : String;
 begin
   aURL:=URL;
@@ -3897,6 +3906,65 @@ begin
   {$ENDIF}
 end;
 
+function SendMail (Host, Subject, pTo, From, login,password: string; Body: TStrings):boolean;
+var
+  {$if defined(Haiku) OR defined(AROS) OR defined(Morphos) OR defined(Solaris) OR defined(BSD)}
+  aURI : URIPARSER.TURI;
+  i    : integer;
+  {$ifndef LCL}
+  Msg : TMimeMess; // message
+  MIMEPart : TMimePart; // parts of the message
+  {$endif}
+  {$endif}
+  s    : string;
+begin
+  result:=false;
+  {$if defined(Haiku) OR defined(AROS) OR defined(Morphos) OR defined(Solaris) OR defined(BSD)}
+  {%H-}FillChar({%H-}aUri,SizeOf(TURI),0);
+  aURI.Protocol:='mailto';
+  aURI.Document:=pTo;
+  s:='******************** first 20 lines *************************'+#13#10;
+  i:=0;
+  while (i<Body.Count) do
+  begin
+    s:=s+Body.Strings[i]+#13#10;
+    if (i>18) then break;
+    Inc(i);
+  end;
+  s:=s+#13#10;
+  s:=s+'******************** last 50 lines *************************'+#13#10;
+  i:=Body.Count-50;
+  if (i<18) then i:=18;
+  while (i<Body.Count) do
+  begin
+    s:=s+Body.Strings[i]+#13#10;
+    Inc(i);
+  end;
+  s:=s+#13#10;
+  s:=s+'************************* end ******************************';
+  aURI.Params:='subject=Fpcupdeluxe command screen log&body=Please find included part of the command screen output of fpcupdeluxe. You may add more if you want by copy paste of command screen.'+#13#10+#13#10+s;
+  {$ifdef LCL}
+  result:=OpenURL(EncodeURI(aURI));
+  {$else}
+  Msg := TMimeMess.Create;
+  try
+    Msg.Header.Subject := Subject;
+    Msg.Header.From := From;
+    Msg.Header.ToList.Add(pTo);
+    MIMEPart := Msg.AddPartMultipart('alternative', nil);
+    Msg.AddPartText(Body, MIMEPart);
+    Msg.EncodeMessage;
+    result:=smtpsend.SendToRaw(From,pTo,Host+':465',Msg.Lines,login,password);
+  finally
+    Msg.Free;
+  end;
+  {$endif}
+  {$else}
+  s:=Body.Text;
+  result:=SynCrtSock.SendEmail(Host, From, pTo, Subject, s, '', login, password, '465', '', true);
+  {$endif}
+end;
+
 {TNormalUnzipper}
 
 procedure TNormalUnzipper.DoOnFile(Sender : TObject; Const AFileName : String);
@@ -4535,7 +4603,7 @@ function TUseNativeDownLoader.getFTPFileList(const URL:string; filelist:TStringL
 var
   i: Integer;
   s: string;
-  URI : TURI;
+  URI : URIPARSER.TURI;
   P : String;
 begin
   result:=false;
@@ -4593,7 +4661,7 @@ end;
 
 function TUseNativeDownLoader.FTPDownload(Const URL: String; aDataStream:TStream):boolean;
 var
-  URI : TURI;
+  URI : URIPARSER.TURI;
   aPort:integer;
   aFTPClient:TFTPSend;
 begin
@@ -4743,7 +4811,7 @@ function TUseNativeDownLoader.Download(const URL: String; aDataStream:TStream):b
 const
   URLMAGIC='/download';
 Var
-  URI    : TURI;
+  URI    : URIPARSER.TURI;
   aURL,P : String;
 begin
   result:=false;
@@ -4859,7 +4927,7 @@ var
   aURL:string;
   s:string;
   i:integer;
-  URI : TURI;
+  URI : URIPARSER.TURI;
   P : String;
   {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}  // this is very bad coding ... ;-)
   aTFTPList:TFTPList;
@@ -4912,7 +4980,7 @@ end;
 
 function TUseWGetDownloader.LibCurlDownload(Const URL : String; aDataStream : TStream):boolean;
 var
-  URI : TURI;
+  URI : URIPARSER.TURI;
   hCurl : pCurl;
   res: CURLcode;
   UserPass:string;
@@ -5014,7 +5082,7 @@ function TUseWGetDownloader.LibCurlFTPFileList(const URL:string; filelist:TStrin
 var
   hCurl : pCurl;
   res: CURLcode;
-  URI : TURI;
+  URI : URIPARSER.TURI;
   s : String;
   aTFTPList:TFTPList;
   F:TMemoryStream;
@@ -5219,7 +5287,7 @@ end;
 
 function TUseWGetDownloader.Download(const URL: String; aDataStream: TStream):boolean;
 Var
-  URI : TURI;
+  URI : URIPARSER.TURI;
   P : String;
 begin
   result:=false;
