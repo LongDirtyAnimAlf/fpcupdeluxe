@@ -1376,6 +1376,14 @@ begin
       memoSummary.Lines.Append('Missing some tools: please install missing tools!');
       {$endif}
     end
+    {$ifdef Darwin}
+    else if (ExistWordInString(PChar(s),'The subversion command line tools are no longer provided by Xcode',[soDown])) then
+    begin
+      MissingTools:=true;
+      memoSummary.Lines.Append('SVN is no longer included in Xcode command line tools !');
+      memoSummary.Lines.Append('Use a GIT repo or install SVN by yourself (brew).');
+    end
+    {$endif}
     else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
     begin
       memoSummary.Lines.Append('We have had a SVN connection failure. Just start again !');
@@ -1423,9 +1431,9 @@ begin
   end;
 
   // RAM errors
-  if (ExistWordInString(PChar(s),'Can''t call the assembler',[soDown])) OR (ExistWordInString(PChar(s),'Can''t call the resource compiler',[soDown])) then
+  if (ExistWordInString(PChar(s),'call the assembler',[soDown])) OR (ExistWordInString(PChar(s),'call the resource compiler',[soDown])) then
   begin
-    memoSummary.Lines.Append(BeginSnippet+' Most likely, there is not enough RAM (swap) to finish this operation.');
+    memoSummary.Lines.Append(BeginSnippet+' Most (99%) likely, there is not enough RAM (swap) to finish this operation.');
     memoSummary.Lines.Append(BeginSnippet+' Please add some RAM or swap-space (+1GB) and re-run fpcupdeluxe.');
   end;
 
@@ -3434,6 +3442,8 @@ begin
   end;
   if (Sender=btnSendLog) then
   begin
+    memoSummary.Lines.Append('');
+    memoSummary.Lines.Append('Sending email to "fpcupdeluxe@gmail.com" with content of command screen !');
     SendMail('smtp.gmail.com',
              'Fpcupdeluxe log report',
              'fpcupdeluxe@gmail.com',

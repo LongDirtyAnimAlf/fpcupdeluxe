@@ -3651,6 +3651,7 @@ object Form1: TForm1
     AnchorSideRight.Control = btnClearLog
     Left = 832
     Height = 25
+    Hint = 'Send email to fpcup maintainer containing Commandscreen output.'
     Top = 33
     Width = 75
     Anchors = [akTop, akRight]
@@ -3658,6 +3659,8 @@ object Form1: TForm1
     BorderSpacing.Right = 12
     Caption = 'Email log'
     OnClick = btnLogClick
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 12
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
