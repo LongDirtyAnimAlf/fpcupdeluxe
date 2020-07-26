@@ -557,7 +557,8 @@ uses
   //LMessages,
   LCLIntf,
   {$endif}
-  process
+  process,
+  RegExpr
   {$IFDEF UNIX}
   ,LazFileUtils
   {$ENDIF UNIX}
@@ -3578,18 +3579,21 @@ begin
 end;
 
 function TInstaller.GetRevision(ModuleName:string): string;
-const
-  ConstName = 'RevisionStr';
 var
   RevFileName,RevString: string;
   RevisionStringList:TStringList;
+  idx:integer;
+  NumbersExtr: TRegExpr;
 begin
   result:='';
 
+  RevString:='';
   RevFileName:='';
 
+  if (ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) then RevFileName:=ConcatPaths([FSourceDirectory,'ide',REVINCFILENAME]);
+  if ModuleName=_FPC then RevFileName:=ConcatPaths([FSourceDirectory,'compiler',REVINCFILENAME]);
   //if ModuleName=_LAZARUS then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+REVINCFILENAME;
-  if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+  //if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
 
   if FileExists(RevFileName) then
   begin
@@ -3598,11 +3602,33 @@ begin
       RevisionStringList.LoadFromFile(RevFileName);
       if (RevisionStringList.Count>0) then
       begin
+
         if ModuleName=_FPC then
         begin
           RevString:=Trim(RevisionStringList.Strings[0]);
-          RevString:=AnsiDequotedStr(RevString,'''');
-          result:=AnsiDequotedStr(RevString,'"');
+        end;
+
+        if (ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) then
+        begin
+          idx:=StringListStartsWith(RevisionStringList,'const RevisionStr');
+          if (idx<>-1) then
+          begin
+            RevString:=Trim(RevisionStringList.Strings[idx]);
+          end;
+        end;
+
+        if (Length(RevString)>0) then
+        begin
+          NumbersExtr := TRegExpr.Create;
+          try
+            NumbersExtr.Expression := '\d+';
+            if NumbersExtr.Exec(RevString) then
+            begin
+              result := NumbersExtr.Match[0];
+            end;
+          finally
+            NumbersExtr.Free;
+          end;
         end;
       end;
     finally

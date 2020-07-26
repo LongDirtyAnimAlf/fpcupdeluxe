@@ -1491,6 +1491,11 @@ begin
 
   if (ModuleName=_FPC) then
   begin
+    if (Length(ActualRevision)=0) OR (ActualRevision='failure') then
+    begin
+      s1:=GetRevision(ModuleName);
+      if Length(s1)>0 then FActualRevision:=s1;
+    end;
     Infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
   end;
 

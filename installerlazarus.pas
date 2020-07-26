@@ -630,9 +630,14 @@ begin
 
   LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt;
 
-  if (ModuleName=_LAZARUS) then
+  if (ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) then
   begin
-    Infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
+    if (Length(ActualRevision)=0) OR (ActualRevision='failure') then
+    begin
+      s2:=GetRevision(ModuleName);
+      if Length(s2)>0 then FActualRevision:=s2;
+    end;
+    if (ModuleName=_LAZARUS) then Infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
   end;
 
   //Note: available in more recent Lazarus : use "make lazbuild useride" to build ide with installed packages
