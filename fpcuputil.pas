@@ -437,15 +437,9 @@ uses
   //,libcurl
   {$ENDIF}
   {$ENDIF ENABLEWGET}
-  {$if defined(Haiku) OR defined(AROS) OR defined(Morphos) OR defined(Solaris) OR defined(BSD)}
-  {$ifdef LCL}
-  ,LCLIntf // OpenURL
-  {$else}
-  ,mimemess,mimepart,smtpsend
-  {$endif}
-  {$else}
-  ,SynCrtSock // SendEmail from the mORMot
-  {$endif}
+  //,SynCrtSock // SendEmail from the mORMot
+  //,LCLIntf // OpenURL
+  ,mimemess,mimepart,ssl_openssl,smtpsend
   ,process
   ,processutils
   ,bzip2stream
@@ -3913,17 +3907,13 @@ end;
 
 function SendMail (Host, Subject, pTo, From, login,password: string; Body: TStrings):boolean;
 var
-  {$if defined(Haiku) OR defined(AROS) OR defined(Morphos) OR defined(Solaris) OR defined(BSD)}
-  aURI : URIPARSER.TURI;
-  i    : integer;
-  {$ifndef LCL}
-  Msg : TMimeMess; // message
-  MIMEPart : TMimePart; // parts of the message
-  {$endif}
-  {$endif}
+  aURI          : URIPARSER.TURI;
+  i             : integer;
+  Msg           : TMimeMess; // message
+  MIMEPart      : TMimePart; // parts of the message
+  clearpassword : string;
   s             : string;
   Cipher        : TDCP_DES;
-  clearpassword : string;
 begin
   result:=false;
 
@@ -3942,7 +3932,8 @@ begin
     Cipher.Free;
   end;
 
-  {$if defined(Haiku) OR defined(AROS) OR defined(Morphos) OR defined(Solaris) OR defined(BSD)}
+  //s:=Body.Text;
+  //result:=SynCrtSock.SendEmail(Host, From, pTo, Subject, s, '', login, clearpassword, '465', '', true);
   {%H-}FillChar({%H-}aUri,SizeOf(TURI),0);
   aURI.Protocol:='mailto';
   aURI.Document:=pTo;
@@ -3966,9 +3957,7 @@ begin
   s:=s+#13#10;
   s:=s+'************************* end ******************************';
   aURI.Params:='subject=Fpcupdeluxe command screen log&body=Please find included part of the command screen output of fpcupdeluxe. You may add more if you want by copy paste of command screen.'+#13#10+#13#10+s;
-  {$ifdef LCL}
-  result:=OpenURL(EncodeURI(aURI));
-  {$else}
+  //result:=OpenURL(EncodeURI(aURI));
   Msg := TMimeMess.Create;
   try
     Msg.Header.Subject := Subject;
@@ -3981,11 +3970,6 @@ begin
   finally
     Msg.Free;
   end;
-  {$endif}
-  {$else}
-  s:=Body.Text;
-  result:=SynCrtSock.SendEmail(Host, From, pTo, Subject, s, '', login, clearpassword, '465', '', true);
-  {$endif}
 end;
 
 {TNormalUnzipper}
