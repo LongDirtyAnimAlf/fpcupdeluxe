@@ -439,7 +439,9 @@ uses
   {$ENDIF ENABLEWGET}
   //,SynCrtSock // SendEmail from the mORMot
   //,LCLIntf // OpenURL
+  {$ifndef Haiku}
   ,mimemess,mimepart,ssl_openssl,smtpsend
+  {$endif}
   ,process
   ,processutils
   ,bzip2stream
@@ -3905,20 +3907,34 @@ begin
   {$ENDIF}
 end;
 
+function DoRead(Ptr : Pointer; Size : size_t; nmemb: size_t; Data : Pointer) : size_t;cdecl;
+begin
+  if Data=nil then result:=0 else
+  begin
+    result:=TStream(Data).Read(Ptr^,Size*nmemb);
+  end;
+end;
+
 function SendMail (Host, Subject, pTo, From, login,password: string; Body: TStrings):boolean;
 var
   aURI          : URIPARSER.TURI;
   i             : integer;
-  Msg           : TMimeMess; // message
-  MIMEPart      : TMimePart; // parts of the message
   clearpassword : string;
   s             : string;
   Cipher        : TDCP_DES;
+  {$ifdef Haiku}
+  hCurl         : pCurl;
+  res           : CURLcode;
+  recipients    : pointer;
+  aDataStream   : TMemoryStream;
+  {$else}
+  Msg           : TMimeMess; // message
+  MIMEPart      : TMimePart; // parts of the message
+ {$endif}
 begin
   result:=false;
 
   clearpassword:=password;
-
   Cipher := TDCP_DES.Create(nil);
   try
     {$ifdef SECRETDELUXEKEY}
@@ -3932,8 +3948,61 @@ begin
     Cipher.Free;
   end;
 
+  {$ifdef Haiku}
+  if LoadCurlLibrary then
+  begin
+    curl_global_init(CURL_GLOBAL_ALL);
+    try
+      aDataStream := TMemoryStream.Create;
+      Body.SaveToStream(aDataStream);
+      try
+       hCurl:=curl_easy_init();
+       if Assigned(hCurl) then
+       begin
+        res:=CURLE_OK;
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_URL, 'smtp://smtp.gmail.com:587');
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_FTP_SSL , CURLUSESSL_ALL);
+
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_USERNAME, PChar(login));
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_PASSWORD, PChar(clearpassword));
+        s:='<'+From+'>';
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_MAIL_FROM, PChar(s));
+
+        recipients := nil;
+        if (Length(pTo)>0) then
+        begin
+          s:='<'+pTo+'>';
+          if res=CURLE_OK then recipients := curl_slist_append(nil,PChar(s));
+          if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_MAIL_RCPT, recipients);
+        end;
+
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_READFUNCTION, @DoRead);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_READDATA, Pointer(aDataStream));
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_UPLOAD, 1);
+
+        if res=CURLE_OK then res:=curl_easy_perform(hCurl);
+
+        try
+          if Assigned(recipients) then
+          begin
+            curl_slist_free_all(recipients);
+            recipients:=nil;
+          end;
+        except
+        end;
+       end;
+
+      finally
+        aDataStream.Free;
+        if Assigned(hCurl) then curl_easy_cleanup(hCurl);
+      end;
+    except
+      // swallow libcurl exceptions
+    end;
+  end;
   //s:=Body.Text;
   //result:=SynCrtSock.SendEmail(Host, From, pTo, Subject, s, '', login, clearpassword, '465', '', true);
+  {$else}
   {%H-}FillChar({%H-}aUri,SizeOf(TURI),0);
   aURI.Protocol:='mailto';
   aURI.Document:=pTo;
@@ -3970,6 +4039,7 @@ begin
   finally
     Msg.Free;
   end;
+  {$endif}
 end;
 
 {TNormalUnzipper}
