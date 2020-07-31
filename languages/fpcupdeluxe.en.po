@@ -1,6 +1,116 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
+#: extrasettings.captioncheckaddcontext
+msgid "Add context for FPC and Lazarus files."
+msgstr ""
+
+#: extrasettings.captioncheckautoswitchurl
+msgid "Auto-switch repo URL (default=no)"
+msgstr ""
+
+#: extrasettings.captioncheckenableonlinepatching
+msgid "Allow patching of sources by online patches."
+msgstr ""
+
+#: extrasettings.captioncheckextraverbose
+msgid "Be extra verbose (default=no)"
+msgstr ""
+
+#: extrasettings.captioncheckforcelocalrepoclient
+msgid "Use local repo-client (default=no)"
+msgstr ""
+
+#: extrasettings.captioncheckfpcupbootstrappersonly
+msgid "Only use fpcup bootstrappers (default=no)"
+msgstr ""
+
+#: extrasettings.captioncheckgetupdates
+msgid "Check for updates (default=no)"
+msgstr ""
+
+#: extrasettings.captioncheckincludehelp
+msgid "Include Help (default=no)"
+msgstr ""
+
+#: extrasettings.captioncheckincludelcl
+msgid "Include LCL with cross-compiler (default=no)"
+msgstr ""
+
+#: extrasettings.captioncheckpackagerepo
+msgid "Get package repositories (default=no)"
+msgstr ""
+
+#: extrasettings.captioncheckrepo
+msgid "Get FPC/Laz repositories (default=yes)"
+msgstr ""
+
+#: extrasettings.captionchecksendinfo
+msgid "Send location and install info (default=no)"
+msgstr ""
+
+#: extrasettings.captionchecksplitfpc
+msgid "Split FPC source and bins (default=yes)"
+msgstr ""
+
+#: extrasettings.captionchecksplitlazarus
+msgid "Split Lazarus source and bins (default=no)"
+msgstr ""
+
+#: extrasettings.captionchecksystemfpc
+msgid "Use system FPC for Lazarus (default=no)"
+msgstr ""
+
+#: extrasettings.captioncheckupdateonly
+msgid "FPC/Laz rebuild only (default=no)"
+msgstr ""
+
+#: extrasettings.captioncheckusemakejobs
+msgid "Use jobs for GNU make (default=yes)"
+msgstr ""
+
+#: extrasettings.captioncheckusewget
+msgid "Use wget/libcurl as downloader (default=no)"
+msgstr ""
+
+#: extrasettings.captionusesoftfloat80bit
+msgctxt "extrasettings.captionusesoftfloat80bit"
+msgid "Enable software emulation of 80 bit floats."
+msgstr ""
+
+#: extrasettings.hintcheckaddcontext
+msgid "Double clicking on FPC and LAzarus files will open Lazarus."
+msgstr ""
+
+#: extrasettings.hintcheckenableonlinepatching
+msgid "Fpcupdeluxe can patch the sources automagically by using online patches."
+msgstr ""
+
+#: extrasettings.hintcheckforcelocalrepoclient
+msgid "Use the repo-client by fpcupdeluxe."
+msgstr ""
+
+#: extrasettings.hintcheckgetupdates
+msgid "Check for updates of fpcupdeluxe."
+msgstr ""
+
+#: extrasettings.hintcheckrepo
+msgid "Download whole repository, or only latest files"
+msgstr ""
+
+#: extrasettings.hintchecksendinfo
+msgid "Location and install info will be send to public central fpcupdeluxe server."
+msgstr ""
+
+#: extrasettings.hintchecksystemfpc
+msgid "Use the system wide install of FPC to build Lazarus."
+msgstr ""
+
+#: extrasettings.hintusesoftfloat80bit
+msgctxt "extrasettings.hintusesoftfloat80bit"
+msgid "Enable software emulation of 80 bit floats."
+msgstr ""
+
 #: fpcupdeluxemainform.upbuildallcrosscompilers
 msgid "Going to auto-build all installed cross-compilers !"
 msgstr ""
@@ -31,6 +141,70 @@ msgstr ""
 
 #: fpcupdeluxemainform.upupdatenotfound
 msgid "No updates found."
+msgstr ""
+
+#: taboutform.builddatelabel.caption
+msgid "Date:"
+msgstr ""
+
+#: taboutform.caption
+msgid "About fpcupdeluxe"
+msgstr ""
+
+#: taboutform.closebutton.caption
+msgid "&Close"
+msgstr ""
+
+#: taboutform.creditspage.caption
+msgid "Credits"
+msgstr ""
+
+#: taboutform.documentationlabel.caption
+msgid "DocumentationLabel"
+msgstr ""
+
+#: taboutform.documentationurllabel.caption
+msgid "DocumentationURLLabel"
+msgstr ""
+
+#: taboutform.forumlabel.caption
+msgid "ForumLabel"
+msgstr ""
+
+#: taboutform.forumurllabel.caption
+msgid "ForumURLLabel"
+msgstr ""
+
+#: taboutform.fpcversionlabel.caption
+msgid "FPCUPVersionLabel"
+msgstr ""
+
+#: taboutform.officiallabel.caption
+msgid "OfficialLabel"
+msgstr ""
+
+#: taboutform.officialurllabel.caption
+msgid "OfficialURLLabel"
+msgstr ""
+
+#: taboutform.platformlabel.caption
+msgid "PlatformLabel"
+msgstr ""
+
+#: taboutform.reinierlabel.caption
+msgid "ReinierLabel"
+msgstr ""
+
+#: taboutform.reinierurllabel.caption
+msgid "ReinierURLLabel"
+msgstr ""
+
+#: taboutform.versionlabel.caption
+msgid "Version #:"
+msgstr ""
+
+#: taboutform.versionpage.caption
+msgid "Version"
 msgstr ""
 
 #: tform1.autocrossupdate.caption
@@ -247,5 +421,184 @@ msgstr ""
 
 #: tform1.trunkbtn.hint
 msgid "Will install/update trunk version of both FPC and Lazarus."
+msgstr ""
+
+#: tform2.btnaddfpcpatch.caption
+msgid "Add FPC patch"
+msgstr ""
+
+#: tform2.btnaddlazpatch.caption
+msgid "Add Laz patch"
+msgstr ""
+
+#: tform2.btnlistcustomoptions.caption
+msgid "List All"
+msgstr ""
+
+#: tform2.btnremfpcpatch.caption
+msgid "Rem. FPC patch"
+msgstr ""
+
+#: tform2.btnremlazpatch.caption
+msgid "Rem. Laz patch"
+msgstr ""
+
+#: tform2.btnselectbindir.caption
+msgid "Tools"
+msgstr ""
+
+#: tform2.btnselectcompiler.caption
+msgid "Compiler"
+msgstr ""
+
+#: tform2.btnselectlibdir.caption
+msgid "Libraries"
+msgstr ""
+
+#: tform2.caption
+msgid "Advanced settings"
+msgstr ""
+
+#: tform2.editbinlocation.hint
+msgctxt "tform2.editbinlocation.hint"
+msgid "Double click to clear"
+msgstr ""
+
+#: tform2.editcompileroverride.hint
+msgctxt "tform2.editcompileroverride.hint"
+msgid "Double click to clear"
+msgstr ""
+
+#: tform2.editliblocation.hint
+msgctxt "tform2.editliblocation.hint"
+msgid "Double click to clear"
+msgstr ""
+
+#: tform2.groupbox1.caption
+msgid "Proxy settings"
+msgstr ""
+
+#: tform2.groupbox2.caption
+msgid "Miscellaneous settings"
+msgstr ""
+
+#: tform2.groupbox4.caption
+msgid "Custom tools location and build options"
+msgstr ""
+
+#: tform2.groupboxcompileoptions.caption
+msgid "Options Override"
+msgstr ""
+
+#: tform2.groupboxfpclazbranchrevision.caption
+msgid "FPC/Laz branch and revision"
+msgstr ""
+
+#: tform2.label1.caption
+msgid "HTTP proxy URL:"
+msgstr ""
+
+#: tform2.label2.caption
+msgid "HTTP proxy port:"
+msgstr ""
+
+#: tform2.label3.caption
+msgid "HTTP proxy username:"
+msgstr ""
+
+#: tform2.label4.caption
+msgid "HTTP proxy password:"
+msgstr ""
+
+#: tform2.labelcompileroverride.caption
+msgid "Compiler Override"
+msgstr ""
+
+#: tform2.labelcpu.caption
+msgid "Select CPU"
+msgstr ""
+
+#: tform2.labelcrossbuildoptions.caption
+msgid "Cross Build Options Override (i.e. -CfSoft)"
+msgstr ""
+
+#: tform2.labelcrosssubarch.caption
+msgid "Cross SubArch Override (i.e. armv7m, ...)"
+msgstr ""
+
+#: tform2.labelfpcbranch.caption
+msgid "FPC branch"
+msgstr ""
+
+#: tform2.labelfpcoptions.caption
+msgid "FPC options"
+msgstr ""
+
+#: tform2.labelfpcrevision.caption
+msgid "FPC revision"
+msgstr ""
+
+#: tform2.labellazarusbranch.caption
+msgid "Lazarus branch"
+msgstr ""
+
+#: tform2.labellazarusoptions.caption
+msgid "Lazarus options"
+msgstr ""
+
+#: tform2.labellazarusrevision.caption
+msgid "Lazarus revision"
+msgstr ""
+
+#: tform2.labelos.caption
+msgid "Select OS"
+msgstr ""
+
+#: tform2.radiogroup3.caption
+msgid "Search options"
+msgstr ""
+
+#: tform2.radiogrouparmarch.caption
+msgid "ARM target"
+msgstr ""
+
+#: tform3.button1.caption
+msgid "Install selected module"
+msgstr ""
+
+#: tform3.button2.caption
+msgid "Un-install selected module"
+msgstr ""
+
+#: tform3.button3.caption
+msgid "Cancel"
+msgstr ""
+
+#: tform3.caption
+msgid "Module settings"
+msgstr ""
+
+#: tform3.listview1.columns[0].caption
+msgid "Name"
+msgstr ""
+
+#: tform3.listview1.columns[1].caption
+msgid "Category"
+msgstr ""
+
+#: tform3.listview1.columns[2].caption
+msgid "Description"
+msgstr ""
+
+#: tform3.radiogroup1.caption
+msgid "Categories"
+msgstr ""
+
+#: tinfoform.caption
+msgid "InfoForm"
+msgstr ""
+
+#: tinfoform.label1.caption
+msgid "Listing of all custom CPU and OS settings"
 msgstr ""
 
