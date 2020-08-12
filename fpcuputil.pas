@@ -300,6 +300,7 @@ function CalculateFullVersion(Major,Minor,Release:integer):dword;
 function CalculateNumericalVersion(VersionSnippet: string): word;
 function VersionFromUrl(URL:string): string;
 function ReleaseCandidateFromUrl(aURL:string): integer;
+function CheckURL(UseWget: boolean; URL: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): Boolean;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
@@ -2066,6 +2067,30 @@ begin
 
 end;
 
+function CheckURL(UseWget: boolean; URL: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): Boolean;
+var
+  Downloader: TBasicDownLoader;
+begin
+  Result := False;
+
+  if UseWget then
+    Downloader := TWGetDownLoader.Create
+  else
+    Downloader := TNativeDownLoader.Create;
+
+  try
+    Downloader.setProxy(HTTPProxyHost, HTTPProxyPort, HTTPProxyUser, HTTPProxyPassword);
+
+    if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
+      Downloader.UserAgent := FPCUPUSERAGENT
+    else
+      Downloader.UserAgent := NORMALUSERAGENT;
+
+    Result := Downloader.checkURL(URL);
+  finally
+    Downloader.Free;
+  end;
+end;
 
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 var
