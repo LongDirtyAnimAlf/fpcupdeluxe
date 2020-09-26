@@ -1,0 +1,26 @@
+Index: packages/fcl-process/src/processbody.inc
+===================================================================
+--- packages/fcl-process/src/processbody.inc	(revision 46344)
++++ packages/fcl-process/src/processbody.inc	(working copy)
+@@ -48,6 +48,10 @@
+     FProcessOptions : TProcessOptions;
+     FRunCommandSleepTime: Integer;
+     FStartupOptions : TStartupOptions;
++    FProcessID : Integer;
++    FThreadID : Integer;
++    FProcessHandle : Thandle;
++    FThreadHandle : Thandle;
+     FFillAttribute : Cardinal;
+     FApplicationName : TProcessString;
+     FConsoleTitle : TProcessString;
+@@ -99,10 +103,6 @@
+     FInputStream  : TOutputPipeStream;
+     FOutputStream : TInputPipeStream;
+     FStderrStream : TInputPipeStream;
+-    FProcessID : Integer;
+-    FThreadID : Integer;
+-    FProcessHandle : Thandle;
+-    FThreadHandle : Thandle;
+     procedure CloseProcessHandles; virtual;
+     Procedure CreateStreams(InHandle,OutHandle,ErrHandle : Longint);virtual;
+     procedure FreeStream(var AStream: THandleStream);

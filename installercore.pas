@@ -349,7 +349,6 @@ type
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
     FExportOnly: boolean;
     FNoJobs: boolean;
-    FSoftFloat: boolean;
     FOnlinePatching: boolean;
     FVerbose: boolean;
     FUseWget: boolean;
@@ -482,7 +481,6 @@ type
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
     property NoJobs: boolean write FNoJobs;
-    property SoftFloat: boolean write FSoftFloat;
     property OnlinePatching: boolean write FOnlinePatching;
     // display and log in temp log file all sub process output
     property Verbose: boolean write SetVerbosity;
@@ -1555,7 +1553,7 @@ begin
   AddNewUtil('gdate' + GetExeExt,aSourceURL64,'',ucBinutil);
   // just add default 64 bit debugger for all usercases as a binutil !
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucBinutil);
-  //AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucBinutil);
+  AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall.exe.manifest',aSourceURL64,'',ucBinutil);

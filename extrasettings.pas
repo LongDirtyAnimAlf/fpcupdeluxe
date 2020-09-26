@@ -302,8 +302,8 @@ resourcestring
   HintCheckForceLocalRepoClient = 'Use the repo-client by fpcupdeluxe.';
   CaptionCheckForceLocalRepoClient = 'Use local repo-client (default=no)';
 
-  HintCheckGetUpdates = 'Check for updates of fpcupdeluxe.';
-  CaptionCheckGetUpdates = 'Check for updates (default=no)';
+  HintCheckGetUpdates = 'Check for updates of fpcupdeluxe binaries.';
+  CaptionCheckGetUpdates = 'Check for fpcupdeluxe updates (default=no)';
 
   HintUseSoftFloat80bit = 'Enable software emulation of 80 bit floats.';
   CaptionUseSoftFloat80bit = 'Enable software emulation of 80 bit floats.';

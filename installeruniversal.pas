@@ -273,9 +273,7 @@ begin
 
   s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
   //if FileExists(s) then
-  begin
     Processor.Process.Parameters.Add('CFGFILE=' + s);
-  end;
 
   {$IFDEF MSWINDOWS}
   Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX

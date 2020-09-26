@@ -1369,6 +1369,7 @@ begin
     FInstaller.InstallDirectory:=FParent.FPCInstallDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
     (FInstaller as TFPCInstaller).SourcePatches:=FParent.FPCPatches;
+    (FInstaller as TFPCInstaller).SoftFloat:=FParent.SoftFloat;
     if FParent.MUSL then
       (FInstaller as TFPCInstaller).NativeFPCBootstrapCompiler:=false
     else
@@ -1549,7 +1550,6 @@ begin
     {$ENDIF}
     FInstaller.ExportOnly:=FParent.ExportOnly;
     FInstaller.NoJobs:=FParent.NoJobs;
-    FInstaller.SoftFloat:=FParent.SoftFloat;
     FInstaller.OnlinePatching:=FParent.OnlinePatching;
     FInstaller.Log:=FParent.FLog;
     FInstaller.MakeDirectory:=FParent.MakeDirectory;

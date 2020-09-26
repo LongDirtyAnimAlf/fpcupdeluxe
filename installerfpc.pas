@@ -115,6 +115,7 @@ type
 
   TFPCInstaller = class(TBaseFPCInstaller)
   private
+    FSoftFloat: boolean;
     FTargetCompilerName: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
@@ -146,6 +147,7 @@ type
     // and UnInstallModule but executed only once
     function InitModule(aBootstrapVersion:string=''):boolean;
   public
+    property SoftFloat: boolean write FSoftFloat;
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
     property BootstrapCompilerDirectory: string write FBootstrapCompilerDirectory;
     // Build module
@@ -3790,6 +3792,7 @@ begin
 
   if OperationSucceeded then
   begin
+    Infoln(infotext+'Start search and removal of stale build files and directories. May take a while.');
     RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPU,GetTargetOS);
     Infoln(infotext+'Removal of stale build files and directories ready.');
     WritelnLog(infotext+'Update/build/config succeeded.',false);

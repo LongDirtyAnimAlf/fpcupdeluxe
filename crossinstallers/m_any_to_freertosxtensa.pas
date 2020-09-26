@@ -74,17 +74,7 @@ begin
      then ShowInfo('Cross-libs: We have a subarch: '+FSubArch)
      else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
-
-
-
-
-
-
-
-
-
-
-  // begin simple: check presence of library file in basedir
+  // simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LIBCNAME);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
@@ -206,6 +196,31 @@ begin
     //AddFPCCFGSnippet(aOption);
 
     AddFPCCFGSnippet('-Wpesp32');
+
+    S:=Trim(GetEnvironmentVariable('IDF_PATH'));
+    if (Length(S)=0) then
+    begin
+      //AsFile:=ConcatPaths(['esp-idf','components','esptool_py','esptool','esptool.py']);
+      PresetBinPath:=FBinUtilsPath;
+      S:=FindFileInDir('esptool.py',PresetBinPath);
+      if (Length(S)=0) then
+      begin
+        // go one directory up
+        PresetBinPath:=ExpandFileName(IncludeTrailingPathDelimiter(FBinUtilsPath)+'..');
+        S:=FindFileInDir('esptool.py',PresetBinPath);
+      end;
+      if (Length(S)>0) then
+      begin
+        repeat
+          S:=ExtractFileDir(S);
+          AsFile:=ExtractFileName(S);
+        until ((AsFile='components') OR (Length(AsFile)=0));
+        S:=ExtractFileDir(S);
+        if (Length(S)>0) then
+          AddFPCCFGSnippet('-Ff'+S); {Set the IDF SDK path};
+      end;
+    end;
+
   end;
 end;
 

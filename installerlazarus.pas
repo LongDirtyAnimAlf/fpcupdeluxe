@@ -669,6 +669,7 @@ begin
 
     //Make sure our FPC units can be found by Lazarus
     Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
+    //Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCInstallDir));
     //Make sure Lazarus does not pick up these tools from other installs
     Processor.Process.Parameters.Add('FPCMAKE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt);
     Processor.Process.Parameters.Add('PPUMOVE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'ppumove'+GetExeExt);
@@ -692,7 +693,7 @@ begin
     //Always limit the search for fpc.cfg to our own fpc.cfg
     //Only needed on Windows. On Linux, we have already our own fpc.sh
     {$ifdef Windows}
-    s:=s+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
+    //s:=s+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true),'fpc.cfg']);
     {$endif}
 
     // Add remaining options
@@ -749,9 +750,11 @@ begin
         Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
         {$endif}
         Processor.Process.Parameters.Add('useride');
+
         s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
         //if FileExists(s) then
           Processor.Process.Parameters.Add('CFGFILE=' + s);
+
         Infoln(infotext+'Running: make useride', etInfo);
 
         (*
