@@ -2978,6 +2978,11 @@ begin
     Infoln(infotext+'No '+ModuleName+' source directory ('+FSourceDirectory+') found [yet] ... nothing to be done',etInfo);
     exit(true);
   end;
+  if DirectoryIsEmpty(FSourceDirectory) then
+  begin
+    Infoln(infotext+'No '+ModuleName+' files found in source directory ('+FSourceDirectory+') ... nothing to be done',etInfo);
+    exit(true);
+  end;
 end;
 
 function TInstaller.ConfigModule(ModuleName: string): boolean;

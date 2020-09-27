@@ -1486,13 +1486,12 @@ begin
           FInstaller.free; // get rid of old FInstaller
       end;
 
-      if ModuleName='mORMotPXL' then
-        FInstaller:=TmORMotPXLInstaller.Create
-      else
-      if ModuleName='internettools' then
-        FInstaller:=TInternetToolsInstaller.Create
+      case ModuleName of
+        'mORMotPXL'     : FInstaller:=TmORMotPXLInstaller.Create;
+        'internettools' : FInstaller:=TInternetToolsInstaller.Create;
       else
         FInstaller:=TUniversalInstaller.Create;
+      end;
 
       FCurrentModule:=ModuleName;
       //assign properties
