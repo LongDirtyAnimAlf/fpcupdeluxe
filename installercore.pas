@@ -128,20 +128,20 @@ const
 
   {$ifdef win64}
   OpenSSLSourceURL : array [0..5] of string = (
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2u-win64.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2u-x64_86-win64.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2t-x64_86-win64.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2r-x64_86-win64.zip',
-    'http://wiki.overbyte.eu/arch/openssl-1.0.2r-win64.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip',
     'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-x64_86-win64.zip'
     );
   {$endif}
   {$ifdef win32}
   OpenSSLSourceURL : array [0..5] of string = (
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2u-win32.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2u-i386-win32.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2t-i386-win32.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2r-i386-win32.zip',
-    'http://wiki.overbyte.eu/arch/openssl-1.0.2r-win32.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip',
     'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-i386-win32.zip'
     );
@@ -2297,9 +2297,8 @@ var
   OpenSSLFileName,aSourceURL: string;
   i:integer;
 begin
-
-
   result:=false;
+
   OperationSucceeded := false;
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';

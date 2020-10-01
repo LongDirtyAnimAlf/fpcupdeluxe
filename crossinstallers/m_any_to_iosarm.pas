@@ -1,7 +1,7 @@
-unit m_any_to_darwinarm;
+unit m_any_to_iosarm;
 
-{ Cross compiles to Darwin 32 bit
-Copyright (C) 2014 Reinier Olislagers / DonAlfredo
+{ Cross compiles to ios 32 bit arm
+Copyright (C) 2020 Reinier Olislagers / DonAlfredo
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -43,8 +43,8 @@ uses
 
 type
 
-{ Tany_darwinarm }
-Tany_darwinarm = class(TCrossInstaller)
+{ Tany_iosarm }
+Tany_iosarm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -54,15 +54,17 @@ public
   destructor Destroy; override;
 end;
 
-{ Tany_darwinarm }
+{ Tany_iosarm }
 
-function Tany_darwinarm.GetLibs(Basepath:string): boolean;
+function Tany_iosarm.GetLibs(Basepath:string): boolean;
 const
   LibName='libc.dylib';
 var
   s:string;
-  //i,j,k:integer;
-  //found:boolean;
+  {
+  i,j,k:integer;
+  found:boolean;
+  }
 begin
   result:=FLibsFound;
 
@@ -96,12 +98,19 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+'usr'+DirectorySeparator+'lib','libc.tbd');
 
+  // universal libs : also search in arm-darwin
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,'arm-darwin'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,'arm-darwin'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
+
+
   {
   // also for cctools
   if not result then
   begin
     found:=false;
-    for i:=10 downto 1 do
+    for i:=MAXIOSVERSION downto MINIOSVERSION do
     begin
       if found then break;
       for j:=15 downto -1 do
@@ -158,10 +167,11 @@ begin
   end;
 end;
 
-function Tany_darwinarm.GetBinUtils(Basepath:string): boolean;
+function Tany_iosarm.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
   BinPrefixTry: string;
+  aOption:string;
   i:integer;
 begin
   result:=inherited;
@@ -174,9 +184,21 @@ begin
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // Also allow for (cross)binutils from https://github.com/tpoechtrager/cctools
-  BinPrefixTry:='arm-apple-darwin';
+  BinPrefixTry:='aarch64-apple-darwin';
 
-  for i:=15 downto 10 do
+  {
+  10.4  = darwin8
+  10.5  = darwin9
+  10.6  = darwin10
+  10.7  = darwin11
+  10.8  = darwin12
+  10.9  = darwin13
+  10.10 = darwin14
+  10.11 = darwin15
+  10.12 = darwin16
+  }
+
+  for i:=MAXDARWINVERSION downto MINDARWINVERSION do
   begin
     if not result then
     begin
@@ -196,41 +218,39 @@ begin
   if result then
   begin
     FBinsFound:=true;
+
     // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    //'-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    '-XX'+LineEnding+
-    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
+    AddFPCCFGSnippet('-XX');
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
   end;
 end;
 
-constructor Tany_darwinarm.Create;
+constructor Tany_iosarm.Create;
 begin
   inherited Create;
   FTargetCPU:=TCPU.arm;
-  FTargetOS:=TOS.darwin;
+  FTargetOS:=TOS.ios;
   Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor Tany_darwinarm.Destroy;
+destructor Tany_iosarm.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$ifndef Darwin}
 var
-  any_darwinarm:Tany_darwinarm;
+  any_iosarm:Tany_iosarm;
 
 initialization
-  any_darwinarm:=Tany_darwinarm.Create;
-  RegisterCrossCompiler(any_darwinarm.RegisterName,any_darwinarm);
+  any_iosarm:=Tany_iosarm.Create;
+  RegisterCrossCompiler(any_iosarm.RegisterName,any_iosarm);
 
 finalization
-  any_darwinarm.Destroy;
+  any_iosarm.Destroy;
 {$endif}
 
 end.
-

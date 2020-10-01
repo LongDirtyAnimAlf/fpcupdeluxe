@@ -2992,6 +2992,7 @@ object Form1: TForm1
           'morphos'
           'aros'
           'amiga'
+          'ios'
           'freertos'
         )
         OnClick = radgrpOSClick

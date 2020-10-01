@@ -1143,7 +1143,7 @@ end;
 procedure TForm1.CommandOutputScreenMouseWheel(Sender: TObject; Shift: TShiftState;
   WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 begin
-  {$if defined(Darwin) or defined(macOS) or defined(iphonesim)}
+  {$if defined(Darwin) or defined(macOS) or defined(iphonesim) or defined(ios)}
   if ssMeta in Shift then
   {$else}
   if ssCtrl in Shift then
@@ -2053,7 +2053,7 @@ end;
 function TForm1.ButtonProcessCrossCompiler(Sender: TObject):boolean;
 var
   BinsFileName,LibsFileName,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
-  success,verbose:boolean;
+  warning,success,verbose:boolean;
   IncludeLCL,ZipFile:boolean;
   i:integer;
   MajorVersion,MinorVersion:integer;
@@ -2407,13 +2407,19 @@ begin
       OR (FPCupManager.CrossOS_Target=TOS.haiku)
       then
       begin
-        s:='Be forwarned: this will only work with FPC 3.2 / embedded / trunk.' + sLineBreak +
+        s:='Be forwarned: this will only work with [FPC >= 3.2] / [embedded] / [trunk].' + sLineBreak +
            'Do you want to continue ?';
       end;
-      if ((FPCupManager.CrossCPU_Target=TCPU.aarch64) {OR (FPCupManager.CrossCPU_Target=TCPU.i386)} OR (FPCupManager.CrossCPU_Target=TCPU.x86_64)) AND (FPCupManager.CrossOS_Target=TOS.android)
-      then
+
+      warning:=false;
+      if (((FPCupManager.CrossCPU_Target=TCPU.aarch64) {OR (FPCupManager.CrossCPU_Target=TCPU.i386)} OR (FPCupManager.CrossCPU_Target=TCPU.x86_64)) AND (FPCupManager.CrossOS_Target=TOS.android))
+        then warning:=true;
+      if (((FPCupManager.CrossCPU_Target=TCPU.aarch64) OR (FPCupManager.CrossCPU_Target=TCPU.arm)) AND (FPCupManager.CrossOS_Target=TOS.ios))
+        then warning:=true;
+
+      if warning then
       begin
-        s:='Be forwarned: this will only work with trunk.' + sLineBreak +
+        s:='Be forwarned: this will only work with [FPC >= 3.3] / [embedded] / [trunk].' + sLineBreak +
            'Do you want to continue ?';
       end;
 
@@ -2459,7 +2465,7 @@ begin
           //FPCupManager.CrossOPT:='-CpARMV6 ';
         end
         else
-        if (FPCupManager.CrossOS_Target=TOS.darwin) then
+        if ((FPCupManager.CrossOS_Target=TOS.darwin) OR (FPCupManager.CrossOS_Target=TOS.ios)) then
         begin
           FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
         end

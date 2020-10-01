@@ -55,14 +55,17 @@ begin
   result:=true;
   FBinsFound:=true;
 
-  aOption:=GetDarwinSDKVersion('macosx');
-  if Length(aOption)>0 then
+  if ((TargetCPU=TCPU.i386) OR (TargetCPU=TCPU.x86_64)) then
   begin
-    if CompareVersionStrings(aOption,'10.8')>=0 then
+    aOption:=GetDarwinSDKVersion('macosx');
+    if Length(aOption)>0 then
     begin
-      aOption:='10.8';
+      if CompareVersionStrings(aOption,'10.8')>=0 then
+      begin
+        aOption:='10.8';
+      end;
+      AddFPCCFGSnippet('-WM'+aOption);
     end;
-    AddFPCCFGSnippet('-WM'+aOption);
   end;
 end;
 
@@ -84,7 +87,6 @@ end;
 
 {$IFDEF Darwin}
 {$IFNDEF CPUX86_64}
-
 var
   darwin64:TDarwin64;
 
@@ -96,5 +98,6 @@ finalization
   darwin64.Destroy;
 {$ENDIF}
 {$ENDIF}
+
 end.
 

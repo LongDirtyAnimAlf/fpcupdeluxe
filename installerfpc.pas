@@ -632,10 +632,13 @@ begin
         begin
           s1:='';
           {$ifdef Darwin}
-          s1:=GetDarwinSDKVersion('macosx');
-          if CompareVersionStrings(s1,'10.8')>=0 then
+          if (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.x86_64) then
           begin
-            s1:='10.8';
+            s1:=GetDarwinSDKVersion('macosx');
+            if CompareVersionStrings(s1,'10.8')>=0 then
+            begin
+              s1:='10.8';
+            end;
           end;
           {$endif}
           if Length(s1)>0 then
@@ -653,8 +656,8 @@ begin
           if (CrossInstaller.TargetCPU=TCPU.aarch64) OR (CrossInstaller.TargetCPU=TCPU.arm) then
           begin
             s1:=GetDarwinSDKVersion('iphoneos');
-          end
-          else
+          end;
+          if (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.x86_64) then
           begin
             s1:=GetDarwinSDKVersion('iphonesimulator');
           end;

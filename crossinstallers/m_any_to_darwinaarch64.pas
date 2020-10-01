@@ -251,6 +251,7 @@ begin
   inherited Destroy;
 end;
 
+{$ifndef Darwin}
 var
   any_darwinaarch64:Tany_darwinaarch64;
 
@@ -260,6 +261,7 @@ initialization
 
 finalization
   any_darwinaarch64.Destroy;
+{$endif}
 
 end.
 
