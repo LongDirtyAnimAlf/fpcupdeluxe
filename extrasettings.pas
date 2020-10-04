@@ -311,7 +311,7 @@ resourcestring
   HintCheckEnableOnlinePatching = 'Fpcupdeluxe can patch the sources automagically by using online patches.';
   CaptionCheckEnableOnlinePatching = 'Allow patching of sources by online patches.';
 
-  HintCheckAddContext = 'Double clicking on FPC and LAzarus files will open Lazarus.';
+  HintCheckAddContext = 'Double clicking on FPC and Lazarus files will open Lazarus.';
   CaptionCheckAddContext = 'Add context for FPC and Lazarus files.';
 
 var

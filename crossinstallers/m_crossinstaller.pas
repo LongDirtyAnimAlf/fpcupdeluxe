@@ -203,6 +203,7 @@ implementation
 
 uses
   StrUtils,
+  processutils,// for ThreadLog
   fpcuputil;
 
 function GetCPU(aCPU:TCPU):string;
@@ -391,20 +392,35 @@ var
   info:string;
 begin
   sd:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Directory));
-  if LibsOrBins
-     then FLibsPath:=sd
-     else FBinUtilsPath:=sd;
-  if Length(LookFor)=0
-     then result:=DirectoryExists(sd)
-     else result:=FileExists(IncludeTrailingPathDelimiter(sd)+LookFor);
 
-  // Report results to user. SearchBinUtil will probably only be called until
-  // its result is true; if it's called more times, it still ok to keep the
-  // user informed about succesful searches.
+  if LibsOrBins then
+  begin
+    FLibsPath:=sd;
+    info:='Cross-library: ';
+  end
+  else
+  begin
+    FBinUtilsPath:=sd;
+    info:='Cross-binutil(s): ';
+  end;
 
-  if LibsOrBins
-     then info:='library'
-     else info:='binutil(s)';
+  if Length(LookFor)=0 then
+  begin
+    result:=DirectoryExists(sd);
+    info:=info+'looking for directory ['+sd+'].';
+  end
+  else
+  begin
+    result:=FileExists(IncludeTrailingPathDelimiter(sd)+LookFor);
+    info:=info+'looking for file ['+IncludeTrailingPathDelimiter(sd)+LookFor+'].';
+  end;
+
+  {$ifdef DEBUG}
+  if (NOT result) then
+    ThreadLog('Toolsearch failure. '+info,etDebug)
+  else
+    ThreadLog('Toolsearch success !!. '+info,etDebug);
+  {$endif}
 end;
 
 
@@ -565,6 +581,9 @@ begin
 
   if TargetOS=TOS.android then
     FBinUtilsPrefix:=TargetCPUName+'-linux-'+TargetOSName+'-' //standard eg in Android NDK 9
+  else
+  if TargetOS=TOS.ios then
+    FBinUtilsPrefix:=TargetCPUName+'-apple-'+TargetOSName+'-' //standard Apple triplet
   else
     FBinUtilsPrefix:=TargetCPUName+'-'+TargetOSName+'-'; //normal binutils prefix name
 

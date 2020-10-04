@@ -96,40 +96,6 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+'usr'+DirectorySeparator+'lib','libc.tbd');
 
-  {
-  // also for cctools
-  if not result then
-  begin
-    found:=false;
-    for i:=10 downto 1 do
-    begin
-      if found then break;
-      for j:=15 downto -1 do
-      begin
-        if found then break;
-        for k:=15 downto -1 do
-        begin
-          if found then break;
-
-          s:=InttoStr(i);
-          if j<>-1 then
-          begin
-            s:=s+'.'+InttoStr(j);
-            if k<>-1 then s:=s+'.'+InttoStr(k);
-          end;
-          s:='MacIOS'+s+'.sdk';
-
-          s:=DirName+DirectorySeparator+s+DirectorySeparator+'usr'+DirectorySeparator+'lib';
-          result:=SimpleSearchLibrary(BasePath,s,LibName);
-          if not result then
-             result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
-          if result then found:=true;
-        end;
-      end;
-    end;
-  end;
-  }
-
   if not result then
   begin
     {$IFDEF UNIX}
@@ -196,12 +162,9 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    //'-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    '-XX'+LineEnding+
-    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-XX');
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
   end;
 end;
 

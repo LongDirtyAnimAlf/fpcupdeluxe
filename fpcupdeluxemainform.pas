@@ -2815,6 +2815,7 @@ begin
                         if FPCupManager.CrossOS_Target=TOS.freertos then s:='FreeRTOS' else
                           if FPCupManager.CrossOS_Target=TOS.win32 then s:='Windows' else
                             if FPCupManager.CrossOS_Target=TOS.win64 then s:='Windows' else
+                              if FPCupManager.CrossOS_Target=TOS.ios then s:='IOS' else
                               s:=UppercaseFirstChar(GetOS(FPCupManager.CrossOS_Target));
 
           if FPCupManager.SolarisOI then s:=s+'OI';
@@ -2856,6 +2857,16 @@ begin
             end;
 
             // Darwin is special: combined libs for arm and aarch64 with osxcross
+            if (FPCupManager.CrossCPU_Target=TCPU.arm) OR (FPCupManager.CrossCPU_Target=TCPU.aarch64) then
+            begin
+              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.arm),[rfIgnoreCase]);
+              LibsFileName:=StringReplace(LibsFileName,'Aarch64','ARM',[rfIgnoreCase]);
+            end;
+          end;
+
+          if FPCupManager.CrossOS_Target=TOS.ios then
+          begin
+            // iOS is special: combined libs for arm and aarch64 with cctools
             if (FPCupManager.CrossCPU_Target=TCPU.arm) OR (FPCupManager.CrossCPU_Target=TCPU.aarch64) then
             begin
               LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.arm),[rfIgnoreCase]);

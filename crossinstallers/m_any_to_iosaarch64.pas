@@ -61,14 +61,17 @@ const
   LibName='libc.dylib';
 var
   s:string;
-  {
   i,j,k:integer;
   found:boolean;
-  }
+  SDKVersion,SDKMajor,SDKMinor:string;
 begin
   result:=FLibsFound;
 
   if result then exit;
+
+  found:=false;
+  SDKMajor := '';
+  SDKMinor := '';
 
   // begin simple: check presence of library file in basedir
   if not result then
@@ -93,24 +96,22 @@ begin
     result:=SimpleSearchLibrary(BasePath,DirName,'libc.tbd');
 
   if not result then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+'usr'+DirectorySeparator+'lib',LibName);
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,'usr','lib']),LibName);
 
   if not result then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+'usr'+DirectorySeparator+'lib','libc.tbd');
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,'usr','lib']),'libc.tbd');
 
-  // universal libs : also search in arm-darwin
+  // universal libs : also search in arm-ios
   if not result then
-    result:=SimpleSearchLibrary(BasePath,'arm-darwin'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths(['arm-ios','usr','lib']),LibName);
   if not result then
-    result:=SimpleSearchLibrary(BasePath,'arm-darwin'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths(['arm-ios','usr','lib']),'libc.tbd');
 
 
-  {
   // also for cctools
   if not result then
   begin
-    found:=false;
-    for i:=MAXIOSVERSION downto MINIOSVERSION do
+    for i:=11 downto 1 do
     begin
       if found then break;
       for j:=15 downto -1 do
@@ -119,25 +120,38 @@ begin
         for k:=15 downto -1 do
         begin
           if found then break;
-
           s:=InttoStr(i);
           if j<>-1 then
           begin
             s:=s+'.'+InttoStr(j);
             if k<>-1 then s:=s+'.'+InttoStr(k);
           end;
-          s:='MacIOS'+s+'.sdk';
+          SDKVersion:=s;
 
-          s:=DirName+DirectorySeparator+s+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          s:=ConcatPaths([DirName,'iPhoneOS'+SDKVersion+'.sdk','usr','lib']);
           result:=SimpleSearchLibrary(BasePath,s,LibName);
           if not result then
              result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
-          if result then found:=true;
+
+          // universal libs : also search in arm-ios
+          if (not result) then
+          begin
+            s:=ConcatPaths(['arm-ios','iPhoneOS'+SDKVersion+'.sdk','usr','lib']);
+            result:=SimpleSearchLibrary(BasePath,s,LibName);
+            if not result then
+               result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+          end;
+
+          if result then
+          begin
+            found:=true;
+            SDKMajor := InttoStr(i);
+            SDKMinor := InttoStr(j);
+          end;
         end;
       end;
     end;
   end;
-  }
 
   if not result then
   begin
@@ -164,6 +178,15 @@ begin
     AddFPCCFGSnippet('-k-framework -kFoundation');
     AddFPCCFGSnippet('-k-framework -kCoreFoundation');
     AddFPCCFGSnippet('-XR'+s);
+
+    //Add minimal iOS version
+    if found then
+    begin
+      s:='-WP'+SDKMajor+'.'+SDKMinor;
+      AddFPCCFGSnippet(s);
+      FCrossOpts.Add(s+' ');
+    end;
+
   end;
 end;
 
@@ -184,7 +207,7 @@ begin
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // Also allow for (cross)binutils from https://github.com/tpoechtrager/cctools
-  BinPrefixTry:='aarch64-apple-darwin';
+  BinPrefixTry:=TargetCPUName+'-apple-darwin';
 
   {
   10.4  = darwin8
@@ -225,6 +248,7 @@ begin
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
 
     // Set some defaults if user hasn't specified otherwise
+    {
     i:=StringListStartsWith(FCrossOpts,'-Ca');
     if i=-1 then
     begin
@@ -233,6 +257,7 @@ begin
       ShowInfo('Did not find any -Ca architecture parameter; using '+aOption+'.');
     end else aOption:=Trim(FCrossOpts[i]);
     AddFPCCFGSnippet(aOption);
+    }
   end;
 end;
 
