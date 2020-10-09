@@ -111,7 +111,7 @@ begin
   // also for cctools
   if not result then
   begin
-    for i:=11 downto 1 do
+    for i:=15 downto 8 do
     begin
       if found then break;
       for j:=15 downto -1 do
@@ -133,10 +133,10 @@ begin
           if not result then
              result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
 
-          // universal libs : also search in arm-ios
+          // universal libs : also search in all-ios
           if (not result) then
           begin
-            s:=ConcatPaths(['arm-ios','iPhoneOS'+SDKVersion+'.sdk','usr','lib']);
+            s:=ConcatPaths(['all-ios','iPhoneOS'+SDKVersion+'.sdk','usr','lib']);
             result:=SimpleSearchLibrary(BasePath,s,LibName);
             if not result then
                result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
@@ -180,13 +180,19 @@ begin
     AddFPCCFGSnippet('-XR'+s);
 
     //Add minimal iOS version
+    {
     if found then
     begin
       s:='-WP'+SDKMajor+'.'+SDKMinor;
       AddFPCCFGSnippet(s);
       FCrossOpts.Add(s+' ');
     end;
-
+    }
+  end
+  else
+  begin
+    ShowInfo('Hint: https://github.com/xybp888/iOS-SDKs');
+    ShowInfo('Hint: https://github.com/theos/sdks');
   end;
 end;
 
@@ -227,7 +233,12 @@ begin
     begin
       AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
-      if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,'all-ios',AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath+DirectorySeparator+'bin','all-ios',AsFile);
       if result then
       begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';

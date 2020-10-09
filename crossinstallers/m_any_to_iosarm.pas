@@ -104,7 +104,7 @@ begin
   // also for cctools
   if not result then
   begin
-    for i:=11 downto 1 do
+    for i:=15 downto 8 do
     begin
       if found then break;
       for j:=15 downto -1 do
@@ -125,6 +125,15 @@ begin
           result:=SimpleSearchLibrary(BasePath,s,LibName);
           if not result then
              result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+
+          // universal libs : also search in all-ios
+          if (not result) then
+          begin
+            s:=ConcatPaths(['all-ios','iPhoneOS'+SDKVersion+'.sdk','usr','lib']);
+            result:=SimpleSearchLibrary(BasePath,s,LibName);
+            if not result then
+               result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+          end;
 
           if result then
           begin
@@ -153,31 +162,39 @@ begin
   begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-Fl'+ConcatPaths([FLibsPath,'system'])+DirectorySeparator);
 
     s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
     s:=ExpandFileName(s);
     s:=ExcludeTrailingBackslash(s);
 
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
+    AddFPCCFGSnippet('-Fl'+ConcatPaths([s,'System','Library','Frameworks'])+DirectorySeparator);
+
     AddFPCCFGSnippet('-k-framework -kFoundation');
     AddFPCCFGSnippet('-k-framework -kCoreFoundation');
     AddFPCCFGSnippet('-XR'+s);
 
     //Add minimal iOS version
+    {
     if found then
     begin
       s:='-WP'+SDKMajor+'.'+SDKMinor;
       AddFPCCFGSnippet(s);
       FCrossOpts.Add(s+' ');
     end;
-
+    }
+  end
+  else
+  begin
+    ShowInfo('Hint: https://github.com/xybp888/iOS-SDKs');
+    ShowInfo('Hint: https://github.com/theos/sdks');
   end;
 end;
 
 function Tany_iosarm.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
-  BinPrefixTry: string;
+  S,BinPrefixTry,PresetBinPath: string;
   aOption:string;
   i:integer;
 begin
@@ -211,11 +228,33 @@ begin
     begin
       AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
-      if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,'all-ios',AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath+DirectorySeparator+'bin','all-ios',AsFile);
       if result then
       begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
         break;
+      end;
+    end;
+  end;
+
+  if (not result) then
+  begin
+    // do a brute force search of correct binutils
+    PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
+    for i:=MAXDARWINVERSION downto MINDARWINVERSION do
+    begin
+      AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+      S:=FindFileInDir(AsFile,PresetBinPath);
+      if (Length(S)>0) then
+      begin
+        PresetBinPath:=ExtractFilePath(S);
+        result:=SearchBinUtil(PresetBinPath,AsFile);
+        if result then break;
       end;
     end;
   end;

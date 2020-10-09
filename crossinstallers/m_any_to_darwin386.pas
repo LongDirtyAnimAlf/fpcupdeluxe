@@ -95,6 +95,10 @@ begin
       result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
       if not result then
          result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
+      if not result then
+         result:=SimpleSearchLibrary(BasePath,'all-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
+      if not result then
+         result:=SimpleSearchLibrary(BasePath,'all-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
 
       if result then
       begin
@@ -143,6 +147,12 @@ begin
     AddFPCCFGSnippet('-k-framework -kFoundation');
     AddFPCCFGSnippet('-k-framework -kCoreFoundation');
     AddFPCCFGSnippet('-XR'+s);
+  end
+  else
+  begin
+    ShowInfo('Hint: https://github.com/phracker/MacOSX-SDKs');
+    ShowInfo('Hint: https://github.com/alexey-lysiuk/macos-sdk');
+    ShowInfo('Hint: https://github.com/sirgreyhat/MacOSX-SDKs/releases');
   end;
 end;
 
@@ -161,19 +171,11 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Also allow for (cross)binutils from https://github.com/tpoechtrager/osxcross
-  // fpc version from https://github.com/LongDirtyAnimalf/osxcross
-  {$IFDEF MSWINDOWS}
-  if IsWindows64
-     then BinPrefixTry:='x86_64'
-     else BinPrefixTry:='i386';
-  {$else}
-  BinPrefixTry:=GetTargetCPU;
-  //BinPrefixTry:='i386';
-  {$endif}
-  BinPrefixTry:=BinPrefixTry+'-apple-darwin';
+  // Also allow for (cross)binutils from https://github.com/tpoechtrager/cctools
+  // fpc version from https://github.com/LongDirtyAnimalf/cctools
+  BinPrefixTry:=GetTargetCPU+'-apple-darwin';
 
-  for i:=15 downto 10 do
+  for i:=MAXDARWINVERSION downto MINDARWINVERSION do
   begin
     if not result then
     begin
@@ -181,6 +183,10 @@ begin
       result:=SearchBinUtil(BasePath,AsFile);
       if not result then
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,'all-darwin',AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath+DirectorySeparator+'bin','all-darwin',AsFile);
       if not result then
         result:=SimpleSearchBinUtil(BasePath,'x86-darwin',AsFile);
       if result then

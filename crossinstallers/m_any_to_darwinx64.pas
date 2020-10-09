@@ -92,7 +92,15 @@ begin
     for i:=16 downto 3 do
     begin
       s:='MacOSX10.'+InttoStr(i);
-      result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
+      result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
+      if not result then
+         result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
+      if not result then
+         result:=SimpleSearchLibrary(BasePath,'all-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
+      if not result then
+         result:=SimpleSearchLibrary(BasePath,'all-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
+      if not result then
+         result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
       if not result then
          result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
 
@@ -142,13 +150,19 @@ begin
     AddFPCCFGSnippet('-k-framework -kFoundation');
     AddFPCCFGSnippet('-k-framework -kCoreFoundation');
     AddFPCCFGSnippet('-XR'+s);
+  end
+  else
+  begin
+    ShowInfo('Hint: https://github.com/phracker/MacOSX-SDKs');
+    ShowInfo('Hint: https://github.com/alexey-lysiuk/macos-sdk');
+    ShowInfo('Hint: https://github.com/sirgreyhat/MacOSX-SDKs/releases');
   end;
 end;
 
 function Tany_darwinx64.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
-  BinPrefixTry: string;
+  S,BinPrefixTry,PresetBinPath: string;
   i:integer;
 begin
   result:=inherited;
@@ -161,19 +175,11 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Also allow for (cross)binutils from https://github.com/tpoechtrager/osxcross
-  // fpc version from https://github.com/LongDirtyAnimalf/osxcross
-  {$IFDEF MSWINDOWS}
-  if IsWindows64
-     then BinPrefixTry:='x86_64'
-     else BinPrefixTry:='i386';
-  {$else}
-  BinPrefixTry:=GetTargetCPU;
-  //BinPrefixTry:='x86_64';
-  {$endif}
-  BinPrefixTry:=BinPrefixTry+'-apple-darwin';
+  // Also allow for (cross)binutils from https://github.com/tpoechtrager/cctools
+  // fpc version from https://github.com/LongDirtyAnimalf/cctools
+  BinPrefixTry:=TargetCPUName+'-apple-darwin';
 
-  for i:=16 downto 10 do
+  for i:=MAXDARWINVERSION downto MINDARWINVERSION do
   begin
     if not result then
     begin
@@ -182,11 +188,32 @@ begin
       if not result then
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
       if not result then
+        result:=SimpleSearchBinUtil(BasePath,'all-darwin',AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath+DirectorySeparator+'bin','all-darwin',AsFile);
+      if not result then
         result:=SimpleSearchBinUtil(BasePath,'x86-darwin',AsFile);
       if result then
       begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
         break;
+      end;
+    end;
+  end;
+
+  if (not result) then
+  begin
+    // do a brute force search of correct binutils
+    PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
+    for i:=MAXDARWINVERSION downto MINDARWINVERSION do
+    begin
+      AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+      S:=FindFileInDir(AsFile,PresetBinPath);
+      if (Length(S)>0) then
+      begin
+        PresetBinPath:=ExtractFilePath(S);
+        result:=SearchBinUtil(PresetBinPath,AsFile);
+        if result then break;
       end;
     end;
   end;
