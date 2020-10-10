@@ -127,23 +127,19 @@ const
   {$endif}
 
   {$ifdef win64}
-  OpenSSLSourceURL : array [0..5] of string = (
+  OpenSSLSourceURL : array [0..3] of string = (
     'http://wiki.overbyte.eu/arch/openssl-1.0.2u-win64.zip',
-    'https://indy.fulgan.com/SSL/openssl-1.0.2u-x64_86-win64.zip',
-    'https://indy.fulgan.com/SSL/openssl-1.0.2t-x64_86-win64.zip',
-    'https://indy.fulgan.com/SSL/openssl-1.0.2r-x64_86-win64.zip',
+    'https://indy.fulgan.com/SSL/Archive/Experimental/openssl-1.0.2o-x64-VC2017.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip',
-    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-x64_86-win64.zip'
+    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2k-x64_86-win64.zip'
     );
   {$endif}
   {$ifdef win32}
-  OpenSSLSourceURL : array [0..5] of string = (
+  OpenSSLSourceURL : array [0..3] of string = (
     'http://wiki.overbyte.eu/arch/openssl-1.0.2u-win32.zip',
-    'https://indy.fulgan.com/SSL/openssl-1.0.2u-i386-win32.zip',
-    'https://indy.fulgan.com/SSL/openssl-1.0.2t-i386-win32.zip',
-    'https://indy.fulgan.com/SSL/openssl-1.0.2r-i386-win32.zip',
+    'https://indy.fulgan.com/SSL/Archive/Experimental/openssl-1.0.2o-x32-VC2017.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip',
-    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-i386-win32.zip'
+    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2k-i386-win32.zip'
     );
   {$endif}
 

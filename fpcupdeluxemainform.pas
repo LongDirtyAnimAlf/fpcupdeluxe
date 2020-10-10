@@ -2789,13 +2789,20 @@ begin
           if FPCupManager.CrossOS_Target=TOS.darwin then
           begin
             // Darwin has some universal binaries and libs
-            if FPCupManager.CrossCPU_Target=TCPU.i386 then BinsFileName:='x86';
-            if FPCupManager.CrossCPU_Target=TCPU.x86_64 then BinsFileName:='x86';
+            if FPCupManager.CrossCPU_Target=TCPU.i386 then BinsFileName:='All';
+            if FPCupManager.CrossCPU_Target=TCPU.x86_64 then BinsFileName:='All';
             //Newer bins and libs for Darwin on i386 and x86_64
             //if FPCupManager.CrossCPU_Target=TCPU.i386 then BinsFileName:='x86OSX1012';
             //if FPCupManager.CrossCPU_Target=TCPU.x86_64 then BinsFileName:='x86OSX1012';
             if FPCupManager.CrossCPU_Target=TCPU.powerpc then BinsFileName:='powerpc';
             if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='powerpc';
+          end;
+
+          if FPCupManager.CrossOS_Target=TOS.ios then
+          begin
+            // iOS has some universal binaries and libs
+            if FPCupManager.CrossCPU_Target=TCPU.arm then BinsFileName:='All';
+            if FPCupManager.CrossCPU_Target=TCPU.aarch64 then BinsFileName:='All';
           end;
 
           if FPCupManager.CrossOS_Target=TOS.aix then
@@ -2847,8 +2854,8 @@ begin
             // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
             if (FPCupManager.CrossCPU_Target=TCPU.i386) OR (FPCupManager.CrossCPU_Target=TCPU.x86_64) then
             begin
-              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'x86',[rfIgnoreCase]);
-              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),'x86',[rfIgnoreCase]);
+              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[rfIgnoreCase]);
+              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[rfIgnoreCase]);
             end;
             if (FPCupManager.CrossCPU_Target=TCPU.powerpc) OR (FPCupManager.CrossCPU_Target=TCPU.powerpc64) then
             begin
@@ -2869,8 +2876,8 @@ begin
             // iOS is special: combined libs for arm and aarch64 with cctools
             if (FPCupManager.CrossCPU_Target=TCPU.arm) OR (FPCupManager.CrossCPU_Target=TCPU.aarch64) then
             begin
-              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.arm),[rfIgnoreCase]);
-              LibsFileName:=StringReplace(LibsFileName,'Aarch64','ARM',[rfIgnoreCase]);
+              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[rfIgnoreCase]);
+              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[rfIgnoreCase]);
             end;
           end;
 

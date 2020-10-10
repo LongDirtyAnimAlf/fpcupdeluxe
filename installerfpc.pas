@@ -3810,7 +3810,7 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 // On Windows, removing fpmake.exe, see Build FAQ (Nov 2011), 2.5
 var
   CrossCompiling: boolean;
-  FileCounter:word;
+  FileCounter:integer;
   DeleteList: TStringList;
   CPUOS_Signature:string;
   aCleanupCompiler:string;
@@ -3976,10 +3976,13 @@ begin
       DeleteList.Add('.o');
       DeleteFilesExtensionsSubdirs(FSourceDirectory,DeleteList,CPUOS_Signature);
 
-      DeleteList.Clear;
+      // Delete stray compilers, if any !!
+      FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler', '*'+GetExeExt, False);
+      // But do not delete the PPC executable ... :-)
+      FileCounter:=DeleteList.IndexOf(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc'+GetExeExt);
+      if (FileCounter<>-1) then DeleteList.Delete(FileCounter);
 
       // delete stray executables, if any !!
-      FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler', '*'+GetExeExt, False);
       if (NOT CrossCompiling) then
       begin
         FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'utils', '*'+GetExeExt, False);
