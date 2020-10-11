@@ -236,7 +236,7 @@ begin
 
     SVNPath:='';
     if Length(FSVNDirectory)>0
-       then SVNPath:=PathSeparator+ExcludeTrailingPathDelimiter(FSVNDirectory);
+       then SVNPath:=ExcludeTrailingPathDelimiter(FSVNDirectory)+PathSeparator;
 
     SetPath(
       BinPath+PathSeparator+

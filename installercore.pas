@@ -3619,10 +3619,16 @@ begin
         begin
           NumbersExtr := TRegExpr.Create;
           try
-            NumbersExtr.Expression := '\d+';
+            NumbersExtr.Expression := 'r\d+';
             if NumbersExtr.Exec(RevString) then
             begin
               result := NumbersExtr.Match[0];
+            end
+            else
+            begin
+              NumbersExtr.Expression := '\d+';
+              if NumbersExtr.Exec(RevString) then
+                result := NumbersExtr.Match[0];
             end;
           finally
             NumbersExtr.Free;

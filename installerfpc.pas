@@ -959,10 +959,11 @@ begin
                Options:=Options+' -dFPC_USE_LIBC';
           {$endif}
 
-          if (Length(ActualRevision)=0) OR (ActualRevision='failure') then
+          // Revision should be something like : "[r]123456" !!
+          if (Length(ActualRevision)=0) OR (ActualRevision='failure') OR (NOT (ActualRevision[2] in ['0'..'9'])) then
           begin
             s2:=GetRevision(ModuleName);
-            if Length(s2)>0 then FActualRevision:=s2;
+            if (Length(s2)>0) then FActualRevision:=s2;
           end;
 
           if (Length(ActualRevision)>0) AND (ActualRevision<>'failure') then
