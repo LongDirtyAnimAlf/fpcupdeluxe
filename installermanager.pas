@@ -564,14 +564,26 @@ procedure TFPCupManager.WritelnLog(msg: string; ToConsole: boolean);
 begin
   // Set up log if it doesn't exist yet
   FLog.WriteLog(msg);
-  if ToConsole then if Assigned(Sequencer.Installer) then Sequencer.Installer.Infoln(msg);
+  if ToConsole then
+  begin
+    if Assigned(Sequencer.Installer) then
+      Sequencer.Installer.Infoln(msg)
+    else
+      ThreadLog(msg);
+  end;
 end;
 
 procedure TFPCupManager.WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean);
 begin
   // Set up log if it doesn't exist yet
   FLog.WriteLog(EventType,msg);
-  if ToConsole then if Assigned(Sequencer.Installer) then Sequencer.Installer.Infoln(msg,EventType);
+  if ToConsole then
+  begin
+    if Assigned(Sequencer.Installer) then
+      Sequencer.Installer.Infoln(msg,EventType)
+    else
+      ThreadLog(msg,EventType);
+  end;
 end;
 
 function TFPCupManager.LoadFPCUPConfig: boolean;

@@ -445,7 +445,7 @@ uses
   ,process
   ,processutils
   ,bzip2stream
-  ,DCPDES
+  ,DCPdes
   ,DCPsha256
   ,NumCPULib  in './numcpulib/NumCPULib.pas'
   ;
