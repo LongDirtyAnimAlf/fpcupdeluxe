@@ -206,7 +206,12 @@ begin
   j:=IndexOfHeader(AHeader);
   if (J<>-1) then
     FRequestHeaders.Delete(j);
-  if Length(AValue)>0 then FRequestHeaders.AddPair(AHeader,AValue);
+  if Length(AValue)>0 then
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
+  FRequestHeaders.AddPair(AHeader,AValue);
+  {$ELSE}
+  FRequestHeaders.Add(AHeader+'='+AValue);
+  {$ENDIF}
 end;
 
 function TCustomNSHTTPSendAndReceive.IndexOfHeader(const AHeader: String): Integer;

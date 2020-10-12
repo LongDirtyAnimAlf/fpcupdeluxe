@@ -2834,8 +2834,8 @@ begin
           LibsFileName:=BinsFileName;
 
           // normally, we have the standard names for libs and bins paths
-          LibPath:=ConcatPaths([CROSSPATH,'lib',GetCPU(FPCupManager.CrossCPU_Target)])+'-';
-          BinPath:=ConcatPaths([CROSSPATH,'bin',GetCPU(FPCupManager.CrossCPU_Target)])+'-';
+          LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(FPCupManager.CrossCPU_Target)])+'-';
+          BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'bin',GetCPU(FPCupManager.CrossCPU_Target)])+'-';
           if FPCupManager.MUSL then
           begin
             LibPath:=LibPath+'musl';

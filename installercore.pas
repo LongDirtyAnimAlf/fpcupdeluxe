@@ -564,7 +564,7 @@ uses
   //,blcksock, ssl_openssl_lib
   ,openssl
   {$ENDIF}
-  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30000)}
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
   ,opensslsockets
   {$ENDIF}
   {$ENDIF}

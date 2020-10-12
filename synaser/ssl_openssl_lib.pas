@@ -837,6 +837,11 @@ uses
 {$ENDIF OS2}
   SyncObjs;
 
+{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}
+const
+  NilHandle = TLibHandle(0);
+{$ENDIF}
+
 {$IFNDEF CIL}
 type
 // libssl.dll

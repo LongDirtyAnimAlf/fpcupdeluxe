@@ -82,7 +82,7 @@ uses
   {$endif}
   {$ifndef USEONLYCURL}
   {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}
-  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30000)}
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
   //fpopenssl,
   opensslsockets,
   //gnutls,
@@ -1061,8 +1061,8 @@ begin
     try
       XdgDesktopContent.SaveToFile(XdgDesktopFile);
       FpChmod(XdgDesktopFile, &711); //rwx--x--x
-      OperationSucceeded:=RunCommand('xdg-desktop-icon' ,['install','--novendor',XdgDesktopFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
-      OperationSucceeded:=RunCommand('xdg-desktop-menu' ,['install','--novendor',XdgDesktopFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      OperationSucceeded:=RunCommand('xdg-desktop-icon' ,['install','--novendor',XdgDesktopFile],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+      OperationSucceeded:=RunCommand('xdg-desktop-menu' ,['install','--novendor',XdgDesktopFile],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
     except
       OperationSucceeded:=false;
     end;
@@ -1103,7 +1103,7 @@ begin
   if (OperationSucceeded) then
   begin
     aDirectory:=ConcatPaths([GetUserDir,'.local','share','applications']);
-    OperationSucceeded:=RunCommand('update-desktop-database' ,[aDirectory],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    OperationSucceeded:=RunCommand('update-desktop-database' ,[aDirectory],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
   end;
 
   if AddContext then
@@ -1137,7 +1137,7 @@ begin
       aDirectory:=ConcatPaths([GetUserDir,'.local','share','mime','packages']);
       ForceDirectoriesSafe(aDirectory);
       XdgMimeContent.SaveToFile(XdgMimeFile);
-      OperationSucceeded:=RunCommand('xdg-mime' ,['install','--novendor',XdgMimeFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      OperationSucceeded:=RunCommand('xdg-mime' ,['install','--novendor',XdgMimeFile],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
       SysUtils.DeleteFile(XdgMimeFile);
     finally
       XdgMimeContent.Free;
@@ -1146,12 +1146,12 @@ begin
     //Process icon
     aDirectory:=ConcatPaths([GetUserDir,'.local','share','icons']);
     ForceDirectoriesSafe(aDirectory);
-    //OperationSucceeded:=RunCommand('xdg-icon-resource' ,['install','--novendor','--context','mimetypes','--size','64',ExtractFilePath(Target)+'images/icons/lazarus.ico','application-x-lazarus'],Output,[poUsePipes, poStderrToOutPut],swoHide);
-    OperationSucceeded:=RunCommand('xdg-icon-resource' ,['install','--novendor','--context','mimetypes','--size','64',ExtractFilePath(Target)+'images/icons/lazarus64x64.png','application-x-lazarus'],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    //OperationSucceeded:=RunCommand('xdg-icon-resource' ,['install','--novendor','--context','mimetypes','--size','64',ExtractFilePath(Target)+'images/icons/lazarus.ico','application-x-lazarus'],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+    OperationSucceeded:=RunCommand('xdg-icon-resource' ,['install','--novendor','--context','mimetypes','--size','64',ExtractFilePath(Target)+'images/icons/lazarus64x64.png','application-x-lazarus'],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
 
     //Update mime database
     aDirectory:=ConcatPaths([GetUserDir,'.local','share','mime']);
-    OperationSucceeded:=RunCommand('update-mime-database' ,[aDirectory],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    OperationSucceeded:=RunCommand('update-mime-database' ,[aDirectory],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
   end;
 
 end;
@@ -1222,7 +1222,7 @@ begin
   try
     Output:='';
     // -iW does not work on older compilers : use -iV
-    if RunCommand(CompilerPath,['-iV'], Output,[poUsePipes, poStderrToOutPut],swoHide) then
+    if RunCommand(CompilerPath,['-iV'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}{$ENDIF}) then
     //-iVSPTPSOTO
     begin
       Output:=TrimRight(Output);
@@ -1244,7 +1244,7 @@ begin
   if ((CompilerPath='') OR (NOT FileExists(CompilerPath))) then exit;
   try
     Output:='';
-    if RunCommand(CompilerPath,['-iW'], Output,[poUsePipes, poStderrToOutPut],swoHide) then
+    if RunCommand(CompilerPath,['-iW'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
     begin
       Output:=TrimRight(Output);
       if Length(Output)>0 then
@@ -1980,7 +1980,7 @@ begin
 
   ThreadLog('Using PowerShell to download '+TargetFile);
 
-  result:=RunCommand('powershell' ,['-command','"$cli = New-Object System.Net.WebClient;$cli.Headers[''User-Agent''] = '''+P+''';$cli.DownloadFile('''+URL+''','''+TargetFile+''')"'],Output,[poUsePipes, poStderrToOutPut],swoHide);
+  result:=RunCommand('powershell' ,['-command','"$cli = New-Object System.Net.WebClient;$cli.Headers[''User-Agent''] = '''+P+''';$cli.DownloadFile('''+URL+''','''+TargetFile+''')"'],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
 
   if result then
   begin
@@ -2003,7 +2003,7 @@ begin
 
   ThreadLog('Using PowerShell to download '+TargetFile);
 
-  result:=RunCommand('bitsadmin.exe',['/transfer','"JobName"',URL,TargetFile],Output,[poUsePipes, poStderrToOutPut],swoHide);
+  result:=RunCommand('bitsadmin.exe',['/transfer','"JobName"',URL,TargetFile],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
   if result then
   begin
     result:=FileExists(TargetFile);
@@ -2190,7 +2190,9 @@ begin
     repeat
       Ss := TStringStream.Create('');
       try
+        {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
         Ss.Clear;
+        {$ENDIF}
         Ss.Position:=0;
         Ss.Size:=0;
         result:=
@@ -2667,7 +2669,7 @@ begin
 
   try
     Output:='';
-    if RunCommand('gcc',['-print-prog-name=cc1'], Output,[poUsePipes, poStderrToOutPut],swoHide) then
+    if RunCommand('gcc',['-print-prog-name=cc1'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
     begin
       s1:=Trim(Output);
       if FileExists(s1) then
@@ -2684,7 +2686,7 @@ begin
     if (NOT FoundLinkFile) then
     begin
       Output:='';
-      if RunCommand('gcc',['-print-search-dirs'], Output,[poUsePipes, poStderrToOutPut],swoHide) then
+      if RunCommand('gcc',['-print-search-dirs'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
       begin
         Output:=TrimRight(Output);
         if Length(Output)>0 then
@@ -2741,7 +2743,7 @@ begin
     if (NOT FoundLinkFile) then
     begin
       Output:='';
-      if RunCommand('gcc',['-v'], Output,[poUsePipes, poStderrToOutPut],swoHide) then
+      if RunCommand('gcc',['-v'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
       begin
 
         s1:='COLLECT_LTO_WRAPPER=';
@@ -2903,13 +2905,13 @@ var
 begin
   result:=false;
   Output:='';
-  RunCommand('getconf',['GNU_LIBC_VERSION'], Output,[poUsePipes, poStderrToOutPut],swoHide);
+  RunCommand('getconf',['GNU_LIBC_VERSION'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
   begin
     //exit;
     if AnsiContainsText(Output,'glibc') then exit;
   end;
   Output:='';
-  RunCommand('ldd',['--version'], Output,[poUsePipes, poStderrToOutPut],swoHide);
+  RunCommand('ldd',['--version'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
   begin
     if AnsiContainsText(Output,'musl') then result:=true;
   end;
@@ -3010,11 +3012,11 @@ begin
   if (NOT DirectoryExists(result)) then
     result:=ConcatPaths([GetUserDir,'Library','Android','sdk']);
   if (NOT DirectoryExists(result)) then
-    result:=ConcatPaths(['Library','Android','Sdk']);
+    result:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('Library'),'Android','Sdk']);
   if (NOT DirectoryExists(result)) then
-    result:=ConcatPaths(['Library','Android','sdk']);
+    result:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('Library'),'Android','sdk']);
   {$else}
-  result:=ConcatPaths(['usr','lib','android-sdk']);
+  result:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('usr'),'lib','android-sdk']);
   if (NOT DirectoryExists(result)) then
     result:=ConcatPaths([GetUserDir,'Android','Sdk']);
   if (NOT DirectoryExists(result)) then
@@ -3174,7 +3176,7 @@ begin
       {$ifndef CPUX86}
       if (RightStr(sd,4)='/x86') then continue;
       {$endif}
-      RunCommand('find',[sd,'-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      RunCommand('find',[sd,'-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
       result:=(Pos(aLibrary,Output)>0);
       if result then break;
     end;
@@ -3187,7 +3189,7 @@ begin
     for i:=Low(UNIXSEARCHDIRS) to High(UNIXSEARCHDIRS) do
     begin
       sd:=UNIXSEARCHDIRS[i];
-      RunCommand('find',[sd,'-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut],swoHide);
+      RunCommand('find',[sd,'-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
       result:=(Pos(aLibrary,Output)>0);
       if result then break;
     end;
@@ -3195,7 +3197,7 @@ begin
 
   if (NOT result) then
   begin
-    RunCommand('sh',['-c','"ldconfig -p | grep '+aLibrary+'"'],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    RunCommand('sh',['-c','"ldconfig -p | grep '+aLibrary+'"'],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
     result:=(Pos(aLibrary,Output)>0);
   end;
   {$endif}
@@ -3234,7 +3236,7 @@ begin
   {$IFDEF UNIX}
   if (NOT FileExists(result)) then
   begin
-    RunCommand('which',[ExeName],Output,[poUsePipes, poStderrToOutPut],swoHide);
+    RunCommand('which',[ExeName],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
     Output:=Trim(Output);
     if ((Output<>'') and FileExists(Output)) then result:=Output;
   end;
@@ -3336,7 +3338,7 @@ begin
   try
     Output:='';
     ExeName := ExtractFileName(Executable);
-    RunCommandIndir('',Executable,Parameters, Output, aResultCode,[poUsePipes, poStderrToOutPut],swoHide);
+    RunCommandIndir('',Executable,Parameters, Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
     if (aResultCode>=0) then //Not all non-0 result codes are errors. There's no way to tell, really
     begin
       if (ExpectOutput <> '') then
@@ -3630,7 +3632,7 @@ begin
   {$ifdef Unix}
     {$ifndef Darwin}
       s:='';
-      if RunCommand('cat',['/etc/os-release'],s,[poUsePipes, poStderrToOutPut],swoHide) then
+      if RunCommand('cat',['/etc/os-release'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
       begin
         if Pos('No such file or directory',s)=0 then
         begin
@@ -3651,7 +3653,7 @@ begin
       if (NOT success) then
       begin
         s:='';
-        if RunCommand('cat',['/etc/system-release'],s,[poUsePipes, poStderrToOutPut],swoHide) then
+        if RunCommand('cat',['/etc/system-release'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
         begin
           if Pos('No such file or directory',s)=0 then
           begin
@@ -3673,7 +3675,7 @@ begin
       if (NOT success) then
       begin
         s:='';
-        if RunCommand('hostnamectl',[],s,[poUsePipes, poStderrToOutPut],swoHide) then
+        if RunCommand('hostnamectl',[],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
         begin
           AllOutput:=TStringList.Create;
           try
@@ -3703,14 +3705,14 @@ begin
       {$ifdef BSD}
       if (t='unknown') then
       begin
-        if RunCommand('uname',['-r'],s,[poUsePipes, poStderrToOutPut],swoHide)
+        if RunCommand('uname',['-r'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF})
            then t := GetTargetOS+' '+lowercase(Trim(s));
       end;
       {$endif}
 
       if (t='unknown') then t := GetTargetOS;
 
-      if (NOT success) then if RunCommand('uname',['-r'],s,[poUsePipes, poStderrToOutPut],swoHide)
+      if (NOT success) then if RunCommand('uname',['-r'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF})
          then t := t+' '+lowercase(Trim(s));
 
     {$else Darwin}
@@ -3789,7 +3791,9 @@ begin
       Success:=Download(False,aURL,Ss);
       if (NOT Success) then
       begin
+        {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
         Ss.Clear;
+        {$ENDIF}
         Ss.Position:=0;
         Success:=Download(True,aURL,Ss);
       end;
@@ -4098,7 +4102,9 @@ begin
     Application.ProcessMessages;
     {$endif}
     // Do this once ...
+    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
     if Assigned(FUnZipper) then FUnZipper.OnProgressEx:=nil;
+    {$ENDIF}
   end;
 end;
 
@@ -4168,7 +4174,9 @@ begin
         FUnZipper.FileName := ASrcFile;
         FUnZipper.OutputPath := ADstDir;
         FUnZipper.OnStartFile:= @DoOnFile;
+        {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
         FUnZipper.OnProgressEx:= @DoOnProgressEx;
+        {$ENDIF}
         FFileList.Clear;
         if Length(Files)>0 then
           for i := 0 to high(Files) do
@@ -5019,7 +5027,7 @@ begin
   begin
     aURL:=URL;
     if aURL[Length(aURL)]<>'/' then aURL:=aURL+'/';
-    result:=RunCommand(WGETBinary,['-q','--no-remove-listing','--tries='+InttoStr(MaxRetries),'--spider',aURL],s,[poUsePipes, poStderrToOutPut],swoHide);
+    result:=RunCommand(WGETBinary,['-q','--no-remove-listing','--tries='+InttoStr(MaxRetries),'--spider',aURL],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
     if result then
     begin
       {$IF NOT DEFINED(MORPHOS) AND NOT DEFINED(AROS)}  // this is very bad coding ... ;-)
@@ -5348,7 +5356,7 @@ begin
   end;
 
   Output:='';
-  result:=RunCommand(WGETBinary,['--no-check-certificate','--user-agent="'+FUserAgent+'"','--tries='+InttoStr(MaxRetries),'--spider',URL],Output,[poUsePipes, poStderrToOutPut],swoHide);
+  result:=RunCommand(WGETBinary,['--no-check-certificate','--user-agent="'+FUserAgent+'"','--tries='+InttoStr(MaxRetries),'--spider',URL],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
 
   if result then
   begin

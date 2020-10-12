@@ -544,7 +544,9 @@ begin
   {$ifdef LCL}
   FProcess.ShowWindow := swoHide;
   {$endif}
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
   Process.RunCommandSleepTime:=10; // rest the default sleep time to 0 (context switch only)
+  {$ENDIF}
   Self.OnUpdateEvent:=@UpdateEvent;
   FVerbose:=true;
 end;

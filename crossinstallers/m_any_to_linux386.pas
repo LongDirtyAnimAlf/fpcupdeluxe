@@ -209,7 +209,7 @@ begin
     // Now also allow for empty binutilsprefix in the right directory:
     if (NOT result) then
     begin
-      RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut],swoHide);
+      RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
       if AnsiPos('elf64-x86-64', s) <> 0 then
       begin
         s:=Which('objdump');

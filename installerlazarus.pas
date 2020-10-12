@@ -466,13 +466,13 @@ begin
         if FLCL_Platform <> '' then
           Processor.Process.Parameters.Add('--ws=' + FLCL_Platform);
 
-        Processor.Process.Parameters.Add(ConcatPaths(['packager','registration'])+DirectorySeparator+'fcl.lpk');
-        Processor.Process.Parameters.Add(ConcatPaths(['components','lazutils'])+DirectorySeparator+'lazutils.lpk');
-        Processor.Process.Parameters.Add(ConcatPaths(['lcl','interfaces'])+DirectorySeparator+'lcl.lpk');
+        Processor.Process.Parameters.Add(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('packager'),'registration'])+DirectorySeparator+'fcl.lpk');
+        Processor.Process.Parameters.Add(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('components'),'lazutils'])+DirectorySeparator+'lazutils.lpk');
+        Processor.Process.Parameters.Add(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('lcl'),'interfaces'])+DirectorySeparator+'lcl.lpk');
         // Also add the basecomponents !
-        Processor.Process.Parameters.Add(ConcatPaths(['components','synedit'])+DirectorySeparator+'synedit.lpk');
-        Processor.Process.Parameters.Add(ConcatPaths(['components','lazcontrols'])+DirectorySeparator+'lazcontrols.lpk');
-        Processor.Process.Parameters.Add(ConcatPaths(['components','ideintf'])+DirectorySeparator+'ideintf.lpk');
+        Processor.Process.Parameters.Add(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('components'),'synedit'])+DirectorySeparator+'synedit.lpk');
+        Processor.Process.Parameters.Add(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('components'),'lazcontrols'])+DirectorySeparator+'lazcontrols.lpk');
+        Processor.Process.Parameters.Add(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('components'),'ideintf'])+DirectorySeparator+'ideintf.lpk');
       end;
 
       if FLCL_Platform = '' then

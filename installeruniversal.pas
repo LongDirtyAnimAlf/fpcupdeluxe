@@ -2523,7 +2523,11 @@ var
       RequiredModules:='';
       RequiredModulesList:=TStringList.Create;
       try
+        {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
         RequiredModulesList.AddCommaText(ini.ReadString(aModuleName,Trim(_REQUIRES),''));
+        {$ELSE}
+        RequiredModulesList.AddText(ini.ReadString(aModuleName,Trim(_REQUIRES),''));
+        {$ENDIF}
         if (RequiredModulesList.Count>0) then
         begin
           for li:=0 to Pred(RequiredModulesList.Count) do
