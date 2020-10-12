@@ -751,7 +751,13 @@ begin
     FMake := IncludeTrailingPathDelimiter(FMakeDir) + GNUMake + '.exe';
     {$ELSE}
     FMake:=Which(GNUMake);
-    if FMake='' then raise Exception.CreateFmt('%s not found. Please install GNU make.',[GNUMake]);
+    if FMake='' then
+    begin
+      Infoln(localinfotext+'Could not find '+GNUMake+' executable.',etError);
+      Infoln(localinfotext+'This is a fatal error. Exception wil be created.',etError);
+      Infoln(localinfotext+'Please make sure it is installed.',etError);
+      raise Exception.CreateFmt('%s not found. Please install %s',[GNUMake,GNUMake]);
+    end;
     {$ENDIF MSWINDOWS}
   Result := FMake;
 end;

@@ -103,9 +103,9 @@ begin
 
   // universal libs : also search in arm-ios
   if not result then
-    result:=SimpleSearchLibrary(BasePath,ConcatPaths(['arm-ios','usr','lib']),LibName);
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths(['arm-'+TargetOSName,'usr','lib']),LibName);
   if not result then
-    result:=SimpleSearchLibrary(BasePath,ConcatPaths(['arm-ios','usr','lib']),'libc.tbd');
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths(['arm-'+TargetOSName,'usr','lib']),'libc.tbd');
 
 
   // also for cctools
@@ -136,7 +136,7 @@ begin
           // universal libs : also search in all-ios
           if (not result) then
           begin
-            s:=ConcatPaths(['all-ios','iPhoneOS'+SDKVersion+'.sdk','usr','lib']);
+            s:=ConcatPaths(['all-'+TargetOSName,'iPhoneOS'+SDKVersion+'.sdk','usr','lib']);
             result:=SimpleSearchLibrary(BasePath,s,LibName);
             if not result then
                result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
@@ -236,9 +236,9 @@ begin
       if not result then
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
       if not result then
-        result:=SimpleSearchBinUtil(BasePath,'all-ios',AsFile);
+        result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
       if not result then
-        result:=SimpleSearchBinUtil(BasePath+DirectorySeparator+'bin','all-ios',AsFile);
+        result:=SimpleSearchBinUtil(BasePath+DirectorySeparator+'bin','all-'+TargetOSName,AsFile);
       if result then
       begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';

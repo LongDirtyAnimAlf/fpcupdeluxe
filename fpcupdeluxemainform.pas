@@ -6,8 +6,11 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, Types, Buttons, Menus, ComCtrls,
-  SynEdit, SynEditPopup, SynEditMiscClasses,
+  ExtCtrls, Types, Buttons, Menus, ComCtrls, SynEdit, SynEditPopup,
+  SynEditMiscClasses,
+  {%H-}SynGutterBase, {%H-}SynGutterMarks, {%H-}SynGutterLineNumber,
+  {%H-}SynGutterChanges, {%H-}SynGutter,
+  SynGutterCodeFolding,
   installerManager
   {$ifdef usealternateui},alternateui{$endif}
   ,LMessages

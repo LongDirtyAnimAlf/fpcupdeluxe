@@ -203,11 +203,11 @@ begin
       if not result then
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
       if not result then
-        result:=SimpleSearchBinUtil(BasePath,'all-darwin',AsFile);
+        result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
       if not result then
-        result:=SimpleSearchBinUtil(BasePath+DirectorySeparator+'bin','all-darwin',AsFile);
+        result:=SimpleSearchBinUtil(BasePath+DirectorySeparator+'bin','all-'+TargetOSName,AsFile);
       if not result then
-        result:=SimpleSearchBinUtil(BasePath,'x86-darwin',AsFile);
+        result:=SimpleSearchBinUtil(BasePath,'x86-'+TargetOSName,AsFile);
       if result then
       begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';

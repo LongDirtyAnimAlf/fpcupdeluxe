@@ -562,10 +562,6 @@ object Form1: TForm1
     SelectedColor.ItalicPriority = 50
     SelectedColor.UnderlinePriority = 50
     SelectedColor.StrikeOutPriority = 50
-    ScrollOnEditLeftOptions.ScrollExtraPercent = 20
-    ScrollOnEditLeftOptions.ScrollExtraMax = 10
-    ScrollOnEditRightOptions.ScrollExtraPercent = 30
-    ScrollOnEditRightOptions.ScrollExtraMax = 25
     IncrementColor.Background = clNone
     IncrementColor.Foreground = clNone
     HighlightAllColor.Background = clNone
@@ -585,42 +581,6 @@ object Form1: TForm1
     LineHighlightColor.FrameEdges = sfeNone
     OnChange = CommandOutputScreenChange
     OnSpecialLineMarkup = CommandOutputScreenSpecialLineMarkup
-    inline SynLeftGutterPartList1: TSynGutterPartList
-      object SynGutterMarks1: TSynGutterMarks
-        Width = 0
-        MouseActions = <>
-      end
-      object SynGutterLineNumber1: TSynGutterLineNumber
-        Width = 0
-        MouseActions = <>
-        MarkupInfo.Background = clBtnFace
-        MarkupInfo.Foreground = clNone
-        DigitCount = 2
-        ShowOnlyLineNumbersMultiplesOf = 1
-        ZeroStart = False
-        LeadingZeros = False
-      end
-      object SynGutterChanges1: TSynGutterChanges
-        Width = 0
-        MouseActions = <>
-        ModifiedColor = 59900
-        SavedColor = clGreen
-      end
-      object SynGutterSeparator1: TSynGutterSeparator
-        Width = 0
-        MouseActions = <>
-        MarkupInfo.Background = clWhite
-        MarkupInfo.Foreground = clGray
-      end
-      object SynGutterCodeFolding1: TSynGutterCodeFolding
-        Width = 0
-        MouseActions = <>
-        MarkupInfo.Background = clNone
-        MarkupInfo.Foreground = clGray
-        MouseActionsExpanded = <>
-        MouseActionsCollapsed = <>
-      end
-    end
   end
   object InstallDirEdit: TEdit
     AnchorSideLeft.Control = Owner
