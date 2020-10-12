@@ -2383,7 +2383,7 @@ begin
       {$ifndef BSD}
       if (FPCupManager.CrossOS_Target=TOS.freebsd) OR (FPCupManager.CrossOS_Target=TOS.netbsd) OR (FPCupManager.CrossOS_Target=TOS.openbsd) then
       begin
-        if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes, stable).' + sLineBreak +
+        if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, fixes, stable).' + sLineBreak +
                    'See: https://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
                    'Do you want to continue ?'
                    ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then

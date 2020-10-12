@@ -41,10 +41,12 @@ uses
 const
   ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
     'todo: specify what exactly is missing';
-  MAXDARWINVERSION=16;
-  MINDARWINVERSION=10;
-  MAXIOSVERSION=12;
-  MINIOSVERSION=1;
+  MAXDARWINVERSION=20;
+  MINDARWINVERSION=9;
+  MAXOSXVERSION=11;
+  MINOSXVERSION=10;
+  MAXIOSVERSION=14;
+  MINIOSVERSION=8;
   MAXDELPHIVERSION=22;
   MINDELPHIVERSION=12;
   NDKVERSIONNAMES:array[0..21] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e','11','11b','11c','12','12b');

@@ -58,14 +58,19 @@ end;
 
 function Tany_darwinx64.GetLibs(Basepath:string): boolean;
 const
+  OSNAME='MacOSX';
   LibName='libc.dylib';
 var
   s:string;
-  i,j:integer;
+  SDKVersion:string;
+  i,j,k:integer;
+  found:boolean;
 begin
   result:=FLibsFound;
 
   if result then exit;
+
+  found:=false;
 
   // begin simple: check presence of library file in basedir
   if not result then
@@ -86,40 +91,51 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
-  // also for osxcross
+  // also for cctools
   if not result then
   begin
-    for i:=16 downto 3 do
+    for i:=MAXOSXVERSION downto MINOSXVERSION do
     begin
-      s:='MacOSX10.'+InttoStr(i);
-      result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,'all-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,'all-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
-
-      if result then
+      if found then break;
+      for j:=16 downto -1 do
       begin
-        {$ifndef Darwin}
-        j:=StringListStartsWith(FCrossOpts,'-WM');
-        if j=-1 then
+        if found then break;
+        for k:=15 downto -1 do
         begin
-          // any SDK version setting >8 gives errors ... possible FPC bug ?
-          j:=i;
-          if j>8 then j:=8;
-          s:='-WM'+'10.'+InttoStr(j);
-          FCrossOpts.Add(s+' ');
-          ShowInfo('Did not find any -WM; using '+s+'.',etInfo);
-        end else s:=Trim(FCrossOpts[j]);
-        AddFPCCFGSnippet(s);
-        {$endif}
-        break;
+          if found then break;
+          s:=InttoStr(i);
+          if j<>-1 then
+          begin
+            s:=s+'.'+InttoStr(j);
+            if k<>-1 then s:=s+'.'+InttoStr(k);
+          end;
+          SDKVersion:=s;
+
+          s:=ConcatPaths([DirName,OSNAME+SDKVersion+'.sdk','usr','lib']);
+          result:=SimpleSearchLibrary(BasePath,s,LibName);
+          if not result then
+             result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+
+          // universal libs : also search in x86-targetos
+          if (not result) then
+          begin
+            s:=ConcatPaths(['x86-'+TargetOSName,OSNAME+SDKVersion+'.sdk','usr','lib']);
+            result:=SimpleSearchLibrary(BasePath,s,LibName);
+            if not result then
+               result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+          end;
+
+          // universal libs : also search in all-targetos
+          if (not result) then
+          begin
+            s:=ConcatPaths(['all-'+TargetOSName,OSNAME+SDKVersion+'.sdk','usr','lib']);
+            result:=SimpleSearchLibrary(BasePath,s,LibName);
+            if not result then
+               result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+          end;
+
+          if result then found:=true;
+        end;
       end;
     end;
   end;
@@ -179,7 +195,10 @@ begin
   // fpc version from https://github.com/LongDirtyAnimalf/cctools
   BinPrefixTry:=TargetCPUName+'-apple-darwin';
 
-  for i:=MAXDARWINVERSION downto MINDARWINVERSION do
+  // See https://en.wikipedia.org/wiki/Darwin_%28operating_system%29#Release_history
+  // Shows relation between macOS and Darwin versions
+
+  for i:=20 downto 11 do
   begin
     if not result then
     begin
@@ -205,15 +224,39 @@ begin
   begin
     // do a brute force search of correct binutils
     PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
-    for i:=MAXDARWINVERSION downto MINDARWINVERSION do
+    if DirectoryExists(PresetBinPath) then
     begin
-      AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
-      S:=FindFileInDir(AsFile,PresetBinPath);
-      if (Length(S)>0) then
+      for i:=20 downto 10 do
       begin
-        PresetBinPath:=ExtractFilePath(S);
-        result:=SearchBinUtil(PresetBinPath,AsFile);
-        if result then break;
+        if i=10 then
+          AsFile:=BinPrefixTry+'-'+'as'+GetExeExt
+        else
+          AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+        S:=FindFileInDir(AsFile,PresetBinPath);
+        if (Length(S)>0) then
+        begin
+          PresetBinPath:=ExtractFilePath(S);
+          result:=SearchBinUtil(PresetBinPath,AsFile);
+          if result then break;
+        end;
+      end;
+    end;
+    PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin','all-'+TargetOSName]);
+    if DirectoryExists(PresetBinPath) then
+    begin
+      for i:=20 downto 10 do
+      begin
+        if i=10 then
+          AsFile:=BinPrefixTry+'-'+'as'+GetExeExt
+        else
+          AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+        S:=FindFileInDir(AsFile,PresetBinPath);
+        if (Length(S)>0) then
+        begin
+          PresetBinPath:=ExtractFilePath(S);
+          result:=SearchBinUtil(PresetBinPath,AsFile);
+          if result then break;
+        end;
       end;
     end;
   end;

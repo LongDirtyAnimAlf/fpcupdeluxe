@@ -111,7 +111,7 @@ begin
   // also for cctools
   if not result then
   begin
-    for i:=15 downto 8 do
+    for i:=MAXIOSVERSION downto MINIOSVERSION do
     begin
       if found then break;
       for j:=15 downto -1 do

@@ -58,17 +58,19 @@ end;
 
 function Tany_darwinaarch64.GetLibs(Basepath:string): boolean;
 const
+  OSNAME='MacOSX';
   LibName='libc.dylib';
 var
   s:string;
-  {
+  SDKVersion:string;
   i,j,k:integer;
   found:boolean;
-  }
 begin
   result:=FLibsFound;
 
   if result then exit;
+
+  found:=false;
 
   // begin simple: check presence of library file in basedir
   if not result then
@@ -89,60 +91,59 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,'libc.tbd');
-
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+'usr'+DirectorySeparator+'lib',LibName);
-
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+'usr'+DirectorySeparator+'lib','libc.tbd');
-
-  // universal libs : also search in arm-darwin
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,'arm-darwin'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,'arm-darwin'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
-
-
-  {
   // also for cctools
   if not result then
   begin
-    found:=false;
-    for i:=MAXIOSVERSION downto MINIOSVERSION do
+    for i:=MAXOSXVERSION downto MINOSXVERSION do
     begin
       if found then break;
-      for j:=15 downto -1 do
+      for j:=16 downto -1 do
       begin
         if found then break;
         for k:=15 downto -1 do
         begin
           if found then break;
-
           s:=InttoStr(i);
           if j<>-1 then
           begin
             s:=s+'.'+InttoStr(j);
             if k<>-1 then s:=s+'.'+InttoStr(k);
           end;
-          s:='MacIOS'+s+'.sdk';
+          SDKVersion:=s;
 
-          s:=DirName+DirectorySeparator+s+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          s:=ConcatPaths([DirName,OSNAME+SDKVersion+'.sdk','usr','lib']);
           result:=SimpleSearchLibrary(BasePath,s,LibName);
           if not result then
              result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+
+          // universal libs : also search in x86-targetos
+          if (not result) then
+          begin
+            s:=ConcatPaths(['x86-'+TargetOSName,OSNAME+SDKVersion+'.sdk','usr','lib']);
+            result:=SimpleSearchLibrary(BasePath,s,LibName);
+            if not result then
+               result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+          end;
+
+          // universal libs : also search in all-targetos
+          if (not result) then
+          begin
+            s:=ConcatPaths(['all-'+TargetOSName,OSNAME+SDKVersion+'.sdk','usr','lib']);
+            result:=SimpleSearchLibrary(BasePath,s,LibName);
+            if not result then
+               result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+          end;
+
           if result then found:=true;
         end;
       end;
     end;
   end;
-  }
 
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/arm-darwin-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/x86_64-darwin-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
@@ -161,20 +162,27 @@ begin
     s:=ExcludeTrailingBackslash(s);
 
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
+    AddFPCCFGSnippet('-k-framework -kAppKit');
     AddFPCCFGSnippet('-k-framework -kFoundation');
     AddFPCCFGSnippet('-k-framework -kCoreFoundation');
     AddFPCCFGSnippet('-XR'+s);
+  end
+  else
+  begin
+    ShowInfo('Hint: https://github.com/phracker/MacOSX-SDKs');
+    ShowInfo('Hint: https://github.com/alexey-lysiuk/macos-sdk');
+    ShowInfo('Hint: https://github.com/sirgreyhat/MacOSX-SDKs/releases');
   end;
 end;
 
 function Tany_darwinaarch64.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
-  BinPrefixTry: string;
-  aOption:string;
+  S,BinPrefixTry,PresetBinPath: string;
   i:integer;
 begin
   result:=inherited;
+
   if result then exit;
 
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
@@ -184,31 +192,69 @@ begin
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // Also allow for (cross)binutils from https://github.com/tpoechtrager/cctools
-  BinPrefixTry:='aarch64-apple-darwin';
+  // fpc version from https://github.com/LongDirtyAnimalf/cctools
+  BinPrefixTry:=TargetCPUName+'-apple-darwin';
 
-  {
-  10.4  = darwin8
-  10.5  = darwin9
-  10.6  = darwin10
-  10.7  = darwin11
-  10.8  = darwin12
-  10.9  = darwin13
-  10.10 = darwin14
-  10.11 = darwin15
-  10.12 = darwin16
-  }
+  // See https://en.wikipedia.org/wiki/Darwin_%28operating_system%29#Release_history
+  // Shows relation between macOS and Darwin versions
 
-  for i:=MAXDARWINVERSION downto MINDARWINVERSION do
+  for i:=20 downto 11 do
   begin
     if not result then
     begin
       AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
-      if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,'all-darwin',AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath+DirectorySeparator+'bin','all-darwin',AsFile);
       if result then
       begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
         break;
+      end;
+    end;
+  end;
+
+  if (not result) then
+  begin
+    // do a brute force search of correct binutils
+    PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
+    if DirectoryExists(PresetBinPath) then
+    begin
+      for i:=20 downto 10 do
+      begin
+        if i=10 then
+          AsFile:=BinPrefixTry+'-'+'as'+GetExeExt
+        else
+          AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+        S:=FindFileInDir(AsFile,PresetBinPath);
+        if (Length(S)>0) then
+        begin
+          PresetBinPath:=ExtractFilePath(S);
+          result:=SearchBinUtil(PresetBinPath,AsFile);
+          if result then break;
+        end;
+      end;
+    end;
+    PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin','all-'+TargetOSName]);
+    if DirectoryExists(PresetBinPath) then
+    begin
+      for i:=20 downto 10 do
+      begin
+        if i=10 then
+          AsFile:=BinPrefixTry+'-'+'as'+GetExeExt
+        else
+          AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+        S:=FindFileInDir(AsFile,PresetBinPath);
+        if (Length(S)>0) then
+        begin
+          PresetBinPath:=ExtractFilePath(S);
+          result:=SearchBinUtil(PresetBinPath,AsFile);
+          if result then break;
+        end;
       end;
     end;
   end;
@@ -218,24 +264,10 @@ begin
   if result then
   begin
     FBinsFound:=true;
-
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
     AddFPCCFGSnippet('-XX');
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
-
-    // Set some defaults if user hasn't specified otherwise
-    {
-    i:=StringListStartsWith(FCrossOpts,'-Ca');
-    if i=-1 then
-    begin
-      aOption:='-CaAARCH64IOS';
-      FCrossOpts.Add(aOption+' ');
-      ShowInfo('Did not find any -Ca architecture parameter; using '+aOption+'.');
-    end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
-    }
-
   end;
 end;
 

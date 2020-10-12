@@ -104,7 +104,7 @@ begin
   // also for cctools
   if not result then
   begin
-    for i:=15 downto 8 do
+    for i:=MAXIOSVERSION downto MINIOSVERSION do
     begin
       if found then break;
       for j:=15 downto -1 do
@@ -220,6 +220,7 @@ begin
   10.10 = darwin14
   10.11 = darwin15
   10.12 = darwin16
+  10.13 = darwin17
   }
 
   for i:=MAXDARWINVERSION downto MINDARWINVERSION do
