@@ -1341,6 +1341,7 @@ var
   i: integer;
   {$ENDIF MSWINDOWS}
   OperationSucceeded: boolean;
+  InstallPath:string;
   s1,s2: string;
 begin
   s2:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
@@ -1363,9 +1364,15 @@ begin
       // Check all binutils in directory
       for i:=low(FUtilFiles) to high(FUtilFiles) do
       begin
-        if FUtilFiles[i].Category=ucBinutil then
+        if FUtilFiles[i].Category in [ucBinutil,ucDebugger32,ucDebugger64] then
         begin
-          if (NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[i].FileName)) then
+          InstallPath:=IncludeTrailingPathDelimiter(FMakeDir);
+          if (FUtilFiles[i].Category in [ucDebugger32,ucDebugger64]) then
+          begin
+            if (FUtilFiles[i].Category=ucDebugger32) then InstallPath:=InstallPath+'gdb\i386-win32\';
+            if (FUtilFiles[i].Category=ucDebugger64) then InstallPath:=InstallPath+'gdb\x86_64-win64\';
+          end;
+          if (NOT FileExists(InstallPath+FUtilFiles[i].FileName)) then
           begin
             AllThere:=false;
             break;
@@ -1506,7 +1513,7 @@ begin
   // add win32/64 gdb from lazarus
   AddNewUtil('gdb' + GetExeExt,SourceURL_gdb_default,'',ucDebugger32);
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucDebugger64);
-  //AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger64);
+  AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucDebugger64);
 
   // add win32/64 gdb from fpcup
   //AddNewUtil('i386-win32-gdb.zip',SourceURL_gdb,'',ucDebugger32);
@@ -2097,10 +2104,10 @@ begin
 
   for Counter := low(FUtilFiles) to high(FUtilFiles) do
   begin
-    if (FUtilFiles[Counter].Category=ucBinutil) or (FUtilFiles[Counter].Category=ucDebugger32) or (FUtilFiles[Counter].Category=ucDebugger64) then
+    if (FUtilFiles[Counter].Category in [ucBinutil,ucDebugger32,ucDebugger64]) then
     begin
       InstallPath:=IncludeTrailingPathDelimiter(FMakeDir);
-      if (FUtilFiles[Counter].Category=ucDebugger32) or (FUtilFiles[Counter].Category=ucDebugger64) then
+      if (FUtilFiles[Counter].Category in [ucDebugger32,ucDebugger64]) then
       begin
         if (FUtilFiles[Counter].Category=ucDebugger32) then InstallPath:=InstallPath+'gdb\i386-win32\';
         if (FUtilFiles[Counter].Category=ucDebugger64) then InstallPath:=InstallPath+'gdb\x86_64-win64\';
