@@ -1411,7 +1411,7 @@ begin
       // ignore errors, this is only an extra check
     end;
 
-    {$IF (defined(UNIX)) and (not defined(Darwin))}
+    {$IFDEF LINUX}
     // Check for proper ld executable
     if OperationSucceeded then
     try
@@ -1429,7 +1429,7 @@ begin
     except
       // ignore errors, this is only an extra check
     end;
-    {$ENDIF UNIX}
+    {$ENDIF LINUX}
   end;
 
   Result := OperationSucceeded;

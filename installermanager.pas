@@ -432,6 +432,11 @@ type
 implementation
 
 uses
+  {$IFNDEF FPCONLY}
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+  InterfaceBase,
+  {$ENDIF}
+  {$ENDIF}
   StrUtils,
   processutils;
 
@@ -1283,6 +1288,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   end;
   {$endif linux}
   {$endif}
+var
+  WidgetTypeName:string;
 begin
   if FunctionName=_CREATEFPCUPSCRIPT then
     result:=CreateFpcupScript
@@ -1293,8 +1300,12 @@ begin
     result:=DeleteLazarusScript
   else if FunctionName=_CHECKDEVLIBS then
   begin
-    FParent.WritelnLog(etInfo,'Checking dev-libs for: '+FParent.LCL_Platform, true);
-    result:=CheckDevLibs(FParent.LCL_Platform)
+    WidgetTypeName:=FParent.LCL_Platform;
+    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+    if (Length(WidgetTypeName)=0) then WidgetTypeName:=GetLCLWidgetTypeName;
+    {$ENDIF}
+    FParent.WritelnLog(etInfo,'Checking dev-libs for: '+WidgetTypeName, true);
+    result:=CheckDevLibs(WidgetTypeName);
   end
   {$endif}
   else

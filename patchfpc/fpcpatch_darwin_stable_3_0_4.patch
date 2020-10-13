@@ -1,0 +1,302 @@
+Index: compiler/systems/t_bsd.pas
+===================================================================
+--- compiler/systems/t_bsd.pas	(revision 47100)
++++ compiler/systems/t_bsd.pas	(working copy)
+@@ -146,8 +146,8 @@
+        begin
+          if not(target_info.system in systems_darwin) then
+            begin
+-             ExeCmd[1]:='ld $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -L. -o $EXE $CATRES';
+-             DllCmd[1]:='ld $TARGET $EMUL $OPT -shared -L. -o $EXE $CATRES'
++             ExeCmd[1]:='ld $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -L. -o $EXE $CATRES $FILELIST ';
++             DllCmd[1]:='ld $TARGET $EMUL $OPT -shared -L. -o $EXE $CATRES $FILELIST'
+            end
+          else
+            begin
+@@ -166,16 +166,16 @@
+                programs with problems that require Valgrind will have more
+                than 60KB of data (first 4KB of address space is always invalid)
+              }
+-               ExeCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -multiply_defined suppress -L. -o $EXE $CATRES';
++               ExeCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -multiply_defined suppress -L. -o $EXE $CATRES $FILELIST';
+              if not(cs_gdb_valgrind in current_settings.globalswitches) then
+                ExeCmd[1]:=ExeCmd[1]+' -pagezero_size 0x10000';
+ {$else ndef cpu64bitaddr}
+-             ExeCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -multiply_defined suppress -L. -o $EXE $CATRES';
++             ExeCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -multiply_defined suppress -L. -o $EXE $CATRES $FILELIST';
+ {$endif ndef cpu64bitaddr}
+              if (apptype<>app_bundle) then
+-               DllCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $GCSECTIONS -dynamic -dylib -multiply_defined suppress -L. -o $EXE $CATRES'
++               DllCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $GCSECTIONS -dynamic -dylib -multiply_defined suppress -L. -o $EXE $CATRES $FILELIST'
+              else
+-               DllCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $GCSECTIONS -dynamic -bundle -multiply_defined suppress -L. -o $EXE $CATRES'
++               DllCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $GCSECTIONS -dynamic -bundle -multiply_defined suppress -L. -o $EXE $CATRES $FILELIST'
+            end
+        end
+      else
+@@ -321,6 +321,7 @@
+ Function TLinkerBSD.WriteResponseFile(isdll:boolean) : Boolean;
+ Var
+   linkres      : TLinkRes;
++  FilesList    : TLinkRes;
+   i            : longint;
+   cprtobj,
+   gprtobj,
+@@ -516,16 +517,42 @@
+          else if librarysearchpath.FindFile('crtbegin.o',false,s) then
+              LinkRes.AddFileName(s);
+    end;
++
+   { main objectfiles }
++
++  { Generate linkfiles.res file if needed }
++  { Only needed on Windows, due to the limitation of 8196 characters for command line }
++  if (LdSupportsNoResponseFile) AND (source_info.system in systems_all_windows) then
++   begin
++     FilesList:=TLinkRes.Create(outputexedir+'linkfiles.res',false);
+   while not ObjectFiles.Empty do
+    begin
+      s:=ObjectFiles.GetFirst;
+      if s<>'' then
++         begin
++           repeat
++             i:=Pos(source_info.dirsep,s);
++             if i>0 then s[i]:=target_info.dirsep;
++           until i=0;
++           FilesList.Add(s);
++         end;
++      end;
++     FilesList.writetodisk;
++     FilesList.Free;
++   end
++  else
++   begin
++     while not ObjectFiles.Empty do
++      begin
++        s:=ObjectFiles.GetFirst;
++        if s<>'' then
+       if LdSupportsNoResponseFile then
+         LinkRes.AddFileName(s)
+       else
+         LinkRes.AddFileName(maybequoted(s));
+    end;
++   end;
++
+   if not LdSupportsNoResponseFile then
+    LinkRes.Add(')');
+ 
+@@ -712,6 +739,10 @@
+   Replace(cmdstr,'$EMUL',EmulStr);
+   Replace(cmdstr,'$CATRES',CatFileContent(outputexedir+Info.ResName));
+   Replace(cmdstr,'$RES',maybequoted(outputexedir+Info.ResName));
++  if (LdSupportsNoResponseFile) AND (source_info.system in systems_all_windows) then
++    Replace(cmdstr,'$FILELIST','-filelist '+maybequoted(outputexedir+'linkfiles.res'))
++  else
++    Replace(cmdstr,'$FILELIST','');
+   Replace(cmdstr,'$STATIC',StaticStr);
+   Replace(cmdstr,'$STRIP',StripStr);
+   Replace(cmdstr,'$GCSECTIONS',GCSectionsStr);
+@@ -735,7 +766,7 @@
+      not(cs_link_nolink in current_settings.globalswitches) then
+     begin
+       { we have to use a script to use the IFS hack }
+-      linkscript:=TAsmScriptUnix.create(outputexedir+'ppaslink');
++      linkscript:=GenerateScript(outputexedir+'ppaslink');
+       linkscript.AddLinkCommand(BinStr,CmdStr,'');
+       if (extdbgcmdstr<>'') then
+         linkscript.AddLinkCommand(extdbgbinstr,extdbgcmdstr,'');
+@@ -742,7 +773,10 @@
+       linkscript.WriteToDisk;
+       BinStr:=linkscript.fn;
+       if not path_absolute(BinStr) then
+-        BinStr:='./'+BinStr;
++        if cs_link_on_target in current_settings.globalswitches then
++          BinStr:='.'+target_info.dirsep+BinStr
++        else
++          BinStr:='.'+source_info.dirsep+BinStr;
+       CmdStr:='';
+     end;
+ 
+@@ -764,6 +798,10 @@
+        end;
+    end;
+ 
++  { Remove linkfiles.res }
++  if (success) and (LdSupportsNoResponseFile) and (source_info.system in systems_all_windows) then
++    DeleteFile(outputexedir+'linkfiles.res');
++
+   MakeExecutable:=success;   { otherwise a recursive call to link method }
+ end;
+ 
+@@ -830,6 +868,10 @@
+   Replace(cmdstr,'$TARGET',targetstr);
+   Replace(cmdstr,'$EMUL',EmulStr);
+   Replace(cmdstr,'$CATRES',CatFileContent(outputexedir+Info.ResName));
++  if (LdSupportsNoResponseFile) AND (source_info.system in systems_all_windows) then
++    Replace(cmdstr,'$FILELIST','-filelist '+maybequoted(outputexedir+'linkfiles.res'))
++  else
++    Replace(cmdstr,'$FILELIST','');
+   Replace(cmdstr,'$RES',maybequoted(outputexedir+Info.ResName));
+   Replace(cmdstr,'$INIT',InitStr);
+   Replace(cmdstr,'$FINI',FiniStr);
+@@ -869,7 +911,7 @@
+      not(cs_link_nolink in current_settings.globalswitches) then
+     begin
+       { we have to use a script to use the IFS hack }
+-      linkscript:=TAsmScriptUnix.create(outputexedir+'ppaslink');
++      linkscript:=GenerateScript(outputexedir+'ppaslink');
+       linkscript.AddLinkCommand(BinStr,CmdStr,'');
+       if (extdbgbinstr<>'') then
+         linkscript.AddLinkCommand(extdbgbinstr,extdbgcmdstr,'');
+@@ -876,7 +918,10 @@
+       linkscript.WriteToDisk;
+       BinStr:=linkscript.fn;
+       if not path_absolute(BinStr) then
+-        BinStr:='./'+BinStr;
++        if cs_link_on_target in current_settings.globalswitches then
++          BinStr:='.'+target_info.dirsep+BinStr
++        else
++          BinStr:='.'+source_info.dirsep+BinStr;
+       CmdStr:='';
+     end;
+ 
+@@ -907,6 +952,10 @@
+         DeleteFile(outputexedir+'linksyms.fpc');
+     end;
+ 
++  { Remove linkfiles.res }
++  if (success) and (LdSupportsNoResponseFile) and (source_info.system in systems_all_windows) then
++    DeleteFile(outputexedir+'linkfiles.res');
++
+   MakeSharedLibrary:=success;   { otherwise a recursive call to link method }
+ end;
+ 
+Index: rtl/darwin/Makefile
+===================================================================
+--- rtl/darwin/Makefile	(revision 47100)
++++ rtl/darwin/Makefile	(working copy)
+@@ -2691,35 +2691,54 @@
+ SYSCPUDEPS=$(addprefix $(PROCINC)/,$(CPUINCNAMES))
+ SYSDEPS=$(SYSINCDEPS) $(SYSCPUDEPS)
+ $(SYSTEMUNIT)$(PPUEXT) : $(BSDINC)/$(SYSTEMUNIT).pp $(SYSDEPS)
+-	$(COMPILER) -Us -Sg $(BSDINC)/$(SYSTEMUNIT).pp
+-uuchar$(PPUEXT): $(SYSTEMUNIT)$(PPUEXT) $(INC)/uuchar.pp
+-fpintres$(PPUEXT): $(SYSTEMUNIT)$(PPUEXT)
+-fpextres$(PPUEXT): $(SYSTEMUNIT)$(PPUEXT) baseunix$(PPUEXT)
+-iso7185$(PPUEXT): $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $(FPC_SYSTEM_OPT) -Us -Sg $(BSDINC)/$(SYSTEMUNIT).pp
++sysinit$(PPUEXT) : sysinit.pas $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
++uuchar$(PPUEXT): $(INC)/uuchar.pp $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
++fpintres$(PPUEXT): $(INC)/fpintres.pp $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
++fpextres$(PPUEXT): $(INC)/fpextres.pp $(SYSTEMUNIT)$(PPUEXT) baseunix$(PPUEXT)
++	$(COMPILER) $<
++iso7185$(PPUEXT): $(INC)/iso7185.pp $(SYSTEMUNIT)$(PPUEXT)
+ 	$(COMPILER) $(INC)/iso7185.pp
++extpas$(PPUEXT) : $(INC)/extpas.pp dos$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $(INC)/extpas.pp
+ objpas$(PPUEXT): $(SYSTEMUNIT)$(PPUEXT) $(OBJPASDIR)/objpas.pp $(INC)/except.inc $(SYSTEMUNIT)$(PPUEXT)
+ 	$(COMPILER) -I$(OBJPASDIR) $(OBJPASDIR)/objpas.pp
+-strings$(PPUEXT) : $(SYSTEMUNIT)$(PPUEXT) $(INC)/strings.pp $(INC)/stringsi.inc\
++strings$(PPUEXT) : $(INC)/strings.pp $(INC)/stringsi.inc \
+ 		   $(PROCINC)/strings.inc $(PROCINC)/stringss.inc\
+ 		   $(SYSTEMUNIT)$(PPUEXT)
+-objc$(PPUEXT) : $(SYSTEMUNIT)$(PPUEXT) ctypes$(PPUEXT) unixtype$(PPUEXT) $(INC)/objc.pp $(INC)/objc1.inc $(INC)/objcnf.inc
+-objcbase$(PPUEXT) : $(SYSTEMUNIT)$(PPUEXT) $(INC)/objcbase.pp objc$(PPUEXT)
+-baseunix$(PPUEXT) : unixtype$(PPUEXT) sysctl$(PPUEXT) errno.inc ptypes.inc $(UNIXINC)/ctypes.inc \
++	$(COMPILER) $<
++objc$(PPUEXT) : $(INC)/objc.pp $(SYSTEMUNIT)$(PPUEXT) ctypes$(PPUEXT) unixtype$(PPUEXT) $(INC)/objc.pp $(INC)/objc1.inc $(INC)/objcnf.inc
++	$(COMPILER) $<
++objcbase$(PPUEXT) : $(INC)/objcbase.pp $(SYSTEMUNIT)$(PPUEXT) $(INC)/objcbase.pp objc$(PPUEXT)
++	$(COMPILER) $<
++blockrtl$(PPUEXT) : $(INC)/blockrtl.pp $(SYSTEMUNIT)$(PPUEXT) objpas$(PPUEXT) initc$(PPUEXT) ctypes$(PPUEXT) $(INC)/blockrtl.pp
++	$(COMPILER) $<
++baseunix$(PPUEXT) : $(UNIXINC)/baseunix.pp unixtype$(PPUEXT) sysctl$(PPUEXT) errno.inc ptypes.inc $(UNIXINC)/ctypes.inc \
+   signal.inc $(UNIXINC)/bunxh.inc \
+   $(BSDINC)/bunxsysc.inc \
+   $(BSDINC)/ostypes.inc $(BSDINC)/osmacro.inc $(UNIXINC)/gensigset.inc \
+   $(UNIXINC)/genfuncs.inc $(SYSTEMUNIT)$(PPUEXT)
+-unixtype$(PPUEXT) : $(SYSTEMUNIT)$(PPUEXT) $(UNIXINC)/unixtype.pp ptypes.inc $(UNIXINC)/ctypes.inc $(SYSTEMUNIT)$(PPUEXT)
+-unix$(PPUEXT) : unixtype$(PPUEXT) baseunix$(PPUEXT) unixutil$(PPUEXT) strings$(PPUEXT) $(UNIXINC)/unix.pp strings$(PPUEXT) $(INC)/textrec.inc $(INC)/filerec.inc \
++	$(COMPILER) $<
++unixtype$(PPUEXT) : $(UNIXINC)/unixtype.pp $(SYSTEMUNIT)$(PPUEXT) $(UNIXINC)/unixtype.pp ptypes.inc $(UNIXINC)/ctypes.inc $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
++unix$(PPUEXT) : $(UNIXINC)/unix.pp unixtype$(PPUEXT) baseunix$(PPUEXT) unixutil$(PPUEXT) strings$(PPUEXT) $(UNIXINC)/unix.pp strings$(PPUEXT) $(INC)/textrec.inc $(INC)/filerec.inc \
+ 		 unxconst.inc $(UNIXINC)/timezone.inc \
+ 		 unxfunc.inc baseunix$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT)
+-unixutil$(PPUEXT) : $(SYSTEMUNIT)$(PPUEXT)
+-dynlibs$(PPUEXT) : dl$(PPUEXT) objpas$(PPUEXT) rtlconsts$(PPUEXT) sysutils$(PPUEXT) sysconst$(PPUEXT)
+-ctypes$(PPUEXT) : $(SYSTEMUNIT)$(PPUEXT) unixtype$(PPUEXT)
++	$(COMPILER) $<
++unixutil$(PPUEXT) : $(UNIXINC)/unixutil.pp $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
++dynlibs$(PPUEXT) : $(INC)/dynlibs.pas dl$(PPUEXT) objpas$(PPUEXT) rtlconsts$(PPUEXT) sysutils$(PPUEXT) sysconst$(PPUEXT)
++	$(COMPILER) $<
++ctypes$(PPUEXT) : $(INC)/ctypes.pp $(SYSTEMUNIT)$(PPUEXT) unixtype$(PPUEXT)
++	$(COMPILER) $<
+ unixcp$(PPUEXT) : $(UNIXINC)/unixcp.pp $(SYSTEMUNIT)$(PPUEXT) objpas$(PPUEXT) baseunix$(PPUEXT)
+ 	$(COMPILER) $(UNIXINC)/unixcp.pp
+-dos$(PPUEXT) : $(SYSTEMUNIT)$(PPUEXT) strings$(PPUEXT) unix$(PPUEXT) $(UNIXINC)/dos.pp $(INC)/filerec.inc $(INC)/textrec.inc strings$(PPUEXT) \
++dos$(PPUEXT) : $(UNIXINC)/dos.pp $(SYSTEMUNIT)$(PPUEXT) strings$(PPUEXT) unix$(PPUEXT) $(UNIXINC)/dos.pp $(INC)/filerec.inc $(INC)/textrec.inc strings$(PPUEXT) \
+ 	       unix$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
+ sysutils$(PPUEXT) : objpas$(PPUEXT) unix$(PPUEXT) errors$(PPUEXT) sysconst$(PPUEXT) $(UNIXINC)/sysutils.pp $(wildcard $(OBJPASDIR)/sysutils/*.inc) \
+ 		    objpas$(PPUEXT) unix$(PPUEXT) errors$(PPUEXT) sysconst$(PPUEXT)
+ 	$(COMPILER) -Fi$(OBJPASDIR)/sysutils $(UNIXINC)/sysutils.pp
+@@ -2744,30 +2763,45 @@
+ 	$(COMPILER) $(OBJPASDIR)/rtlconsts.pp
+ macpas$(PPUEXT) : $(INC)/macpas.pp objpas$(PPUEXT) math$(PPUEXT)
+ 	$(COMPILER) $(INC)/macpas.pp $(REDIR)
+-ifeq ($(ARCH),x86_64)
++ifneq ($(findstring $(ARCH),x86_64 i386),)
+ cpu$(PPUEXT) : $(PROCINC)/cpu.pp objpas$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT) sysutils$(PPUEXT)
+ else
+ cpu$(PPUEXT) : $(PROCINC)/cpu.pp objpas$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT)
+ endif
++	$(COMPILER) $<
+ mmx$(PPUEXT) : $(PROCINC)/mmx.pp cpu$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
+ getopts$(PPUEXT) : $(INC)/getopts.pp $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
+ heaptrc$(PPUEXT) : $(INC)/heaptrc.pp $(SYSTEMUNIT)$(PPUEXT)
+ 	$(COMPILER) -Sg $(INC)/heaptrc.pp
+ lineinfo$(PPUEXT) : $(INC)/lineinfo.pp $(SYSTEMUNIT)$(PPUEXT) strings$(PPUEXT) $(INC)/exeinfo.pp sysutils$(PPUEXT)
++	$(COMPILER) $<
+ lnfodwrf$(PPUEXT) : $(INC)/lnfodwrf.pp $(SYSTEMUNIT)$(PPUEXT) strings$(PPUEXT) $(INC)/exeinfo.pp lineinfo$(PPUEXT) sysutils$(PPUEXT)
++	$(COMPILER) $<
+ lnfogdb$(PPUEXT) : $(UNIXINC)/lnfogdb.pp $(SYSTEMUNIT)$(PPUEXT) ctypes$(PPUEXT) baseunix$(PPUEXT) unix$(PPUEXT)
++	$(COMPILER) $<
+ charset$(PPUEXT) : $(INC)/charset.pp objpas$(PPUEXT)
++	$(COMPILER) $<
+ cpall$(PPUEXT): $(RTL)/charmaps/cpall.pas system$(PPUEXT) charset$(PPUEXT)
+-	$(COMPILER) -Fu$(INC) -Fi$(RTL)/charmaps $(RTL)/charmaps/cpall.pas
++	$(COMPILER) $<
+ fpwidestring$(PPUEXT): $(OBJPASDIR)/fpwidestring.pp character$(PPUEXT) unixcp$(PPUEXT)
+-	$(COMPILER) $(OBJPASDIR)/fpwidestring.pp
+-termio$(PPUEXT) : baseunix$(PPUEXT)
+-dl$(PPUEXT) : $(SYSTEMUNIT)$(PPUEXT) unixtype$(PPUEXT) ctypes$(PPUEXT)
++	$(COMPILER) $<
++termio$(PPUEXT) : termio.pp baseunix$(PPUEXT)
++	$(COMPILER) $<
++dl$(PPUEXT) : $(UNIXINC)/dl.pp $(SYSTEMUNIT)$(PPUEXT) unixtype$(PPUEXT) ctypes$(PPUEXT)
++	$(COMPILER) $<
+ errors$(PPUEXT) : $(UNIXINC)/errors.pp strings$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT) strings$(PPUEXT)
++	$(COMPILER) $<
+ cmem$(PPUEXT) : $(INC)/cmem.pp $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
+ sysctl$(PPUEXT) : $(BSDINC)/sysctl.pp $(SYSTEMUNIT)$(PPUEXT) unixtype$(PPUEXT)
+-cthreads$(PPUEXT) : $(UNIXINC)/cthreads.pp unix$(PPUEXT) sysutils$(PPUEXT)
+-initc$(PPUEXT) : $(SYSTEMUNIT)$(PPUEXT) ctypes$(PPUEXT)
+-ctypes$(PPUEXT) :  $(INC)/ctypes.pp $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
++cthreads$(PPUEXT) : $(UNIXINC)/cthreads.pp unix$(PPUEXT) sysutils$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
++initc$(PPUEXT) : $(UNIXINC)/initc.pp $(SYSTEMUNIT)$(PPUEXT) ctypes$(PPUEXT)
++	$(COMPILER) $<
+ cwstring$(PPUEXT) : $(UNIXINC)/cwstring.pp $(SYSTEMUNIT)$(PPUEXT) sysutils$(PPUEXT) baseunix$(PPUEXT) unix$(PPUEXT) unixtype$(PPUEXT) ctypes$(PPUEXT) dynlibs$(PPUEXT) unixcp$(PPUEXT)
+-bsd$(PPUEXT) : initc$(PPUEXT) unix$(PPUEXT)
++	$(COMPILER) $<
++bsd$(PPUEXT) : $(BSDINC)/bsd.pas initc$(PPUEXT) unix$(PPUEXT)
++	$(COMPILER) $<

@@ -2891,11 +2891,16 @@ begin
     // add install/fpc/utils to solve data2inc not found by fpcmkcfg
     // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
     s:='';
+    {$ifdef FreeBSD}
+    // for the local GNU binary utilities
+    s:='/usr/local/bin'+PathSeparator;
+    {$endif}
     {$ifdef Darwin}
+    // for the suitable XCode binary utilities
     s1:=GetDarwinSDKVersion('macosx');
     if CompareVersionStrings(s1,'10.14')>=0 then
     begin
-      s:=PathSeparator+'/Library/Developer/CommandLineTools/usr/bin';
+      s:='/Library/Developer/CommandLineTools/usr/bin'+PathSeparator;
     end;
     {$endif}
     SetPath(
@@ -2907,11 +2912,11 @@ begin
       ExcludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
       IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
       IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+PathSeparator+
+      s+
       // pwd is located in /bin ... the makefile needs it !!
       // tools are located in /usr/bin ... the makefile needs it !!
       '/bin'+PathSeparator+
-      '/usr/bin'+
-      s,
+      '/usr/bin',
       true,false);
     {$ENDIF UNIX}
   end;
@@ -3639,6 +3644,7 @@ begin
 
         {$ifdef freebsd}
         ConfigText.Append('-dFPC_USE_LIBC');
+        ConfigText.Append('-FD/usr/local/bin');
         {$endif}
 
         {$IF (defined(NetBSD)) and (not defined(Darwin))}
