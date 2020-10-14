@@ -31,7 +31,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
+{$IF DEFINED(CPUARM) AND DEFINED(LINUX)}
 {$DEFINE DISABLELAZBUILDJOBS}
+{$ELSE}
+{$DEFINE DISABLELAZBUILDJOBS}
+{$ENDIF}
 
 {$modeswitch advancedrecords}
 
@@ -145,14 +149,14 @@ type
   { TmORMotPXLInstaller }
 
   TmORMotPXLInstaller = class(TUniversalInstaller)
-  protected
+  public
     function BuildModule(ModuleName: string): boolean; override;
   end;
 
   { TInternetToolsInstaller }
 
   TInternetToolsInstaller = class(TUniversalInstaller)
-  protected
+  public
     function GetModule(ModuleName: string): boolean; override;
   end;
 
@@ -252,10 +256,14 @@ begin
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusSourceDir);
   Processor.Process.Parameters.Add('--directory=' + Processor.Process.CurrentDirectory);
 
-  {
+  {$IF DEFINED(CPUARM) AND DEFINED(LINUX)}
+  Processor.Process.Parameters.Add('--jobs=1');
+  {$ELSE}
   //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
-  if (NOT FNoJobs) then
-    Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
+  //if (NOT FNoJobs) then
+  //  Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+  {$ENDIF}
+
   Processor.Process.Parameters.Add('FPC=' + FCompiler);
   Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
   Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');

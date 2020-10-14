@@ -410,9 +410,9 @@ type
     function GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
     function GetSanityCheck:boolean;
 
-    function {%H-}GetVersionFromSource(aSourcePath:string):string;virtual;abstract;
-    function {%H-}GetVersionFromURL(aUrl:string):string;virtual;abstract;
-    function {%H-}GetReleaseCandidateFromSource(aSourcePath:string):integer;virtual;abstract;
+    function GetVersionFromSource({%H-}aSourcePath:string):string;virtual;
+    function GetVersionFromURL({%H-}aUrl:string):string;virtual;
+    function GetReleaseCandidateFromSource({%H-}aSourcePath:string):integer;virtual;
     function GetVersion:string;
 
   public
@@ -606,7 +606,7 @@ var
   ConfigText      : TStringList;
   SnipBegin,i     : integer;
   aCPU,aOS        : string;
-  aArch           : string;
+  {%H-}aArch           : string;
 begin
   result:=false;
 
@@ -3091,7 +3091,6 @@ const
 var
   PatchList:TStringList;
   PatchFilePath,PatchFileCorrectedPath,PatchDirectory:string;
-  LocalPatchCmd:string;
   s: string = '';
   Output: string = '';
   ReturnCode,i,j: integer;
@@ -3756,6 +3755,22 @@ begin
   end;
 end;
 
+function TInstaller.GetVersionFromSource(aSourcePath:string):string;
+begin
+  result:='';
+  raise Exception.Create('TInstaller descendants must implement this function themselves.');
+end;
+function TInstaller.GetVersionFromURL(aUrl:string):string;
+begin
+  result:='';
+  raise Exception.Create('TInstaller descendants must implement this function themselves.');
+end;
+function TInstaller.GetReleaseCandidateFromSource(aSourcePath:string):integer;
+begin
+  result:=0;
+  raise Exception.Create('TInstaller descendants must implement this function themselves.');
+end;
+
 function TInstaller.GetVersion:string;
 var
   s:string;
@@ -3922,7 +3937,6 @@ var
   i:integer;
   aTool:TExternalTool;
   FParameters:TStrings;
-  ExeName:string;
 begin
 
   result:=0;

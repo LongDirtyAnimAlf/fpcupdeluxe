@@ -19,8 +19,8 @@ type
     ListView1: TListView;
     RadioGroup1: TRadioGroup;
     procedure ModuleActionClick(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
+    procedure Button3Click({%H-}Sender: TObject);
+    procedure FormCreate({%H-}Sender: TObject);
   private
     FModuleName:string;
   public

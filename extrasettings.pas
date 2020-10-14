@@ -94,13 +94,13 @@ type
     procedure btnAddPatchClick(Sender: TObject);
     procedure btnRemPatchClick(Sender: TObject);
     procedure btnSelectFile(Sender: TObject);
-    procedure btnListCustomOptionsClick(Sender: TObject);
-    procedure ComboBoxCPUOSChange(Sender: TObject);
+    procedure btnListCustomOptionsClick({%H-}Sender: TObject);
+    procedure ComboBoxCPUOSChange({%H-}Sender: TObject);
     procedure EditDblClickDelete(Sender: TObject);
     procedure EditCrossBuildOptionsChange(Sender: TObject);
     procedure EditCrossSubArchChange(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
+    procedure FormCreate({%H-}Sender: TObject);
+    procedure FormDestroy({%H-}Sender: TObject);
     procedure OnDirectorySelect(Sender: TObject);
     procedure RadioGroup3SelectionChanged(Sender: TObject);
     procedure RadioGroupARMArchSelectionChanged(Sender: TObject);
