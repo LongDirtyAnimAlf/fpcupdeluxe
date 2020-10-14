@@ -110,6 +110,7 @@ type
 
   TNormalUnzipper = class(TObject)
   private
+    // To get a filetree on Windows: CMD /c "Tree /F /A > Resultant.txt"
     FUnZipper: TUnZipper;
     FFileCnt: cardinal;
     FFileList:TStrings;

@@ -573,7 +573,7 @@ begin
     if CrossInstaller.SearchModeUsed=smManual
        then BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
        else BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
-    if not BinsAvailable then Infoln('Failed to get crossbinutils', etError);
+    if (not BinsAvailable) then Infoln('Failed to get crossbinutils', etError);
 
     // get/set cross libraries !!
     LibsAvailable:=false;
@@ -588,7 +588,7 @@ begin
     if CrossInstaller.SearchModeUsed=smManual
       then LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory)
       else LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory);
-    if not LibsAvailable then Infoln('Failed to get crosslibrary', etError);
+    if (not LibsAvailable) then Infoln('Failed to get crosslibrary', etError);
 
     result:=(BinsAvailable AND LibsAvailable);
 
@@ -960,13 +960,13 @@ begin
           {$endif}
 
           // Revision should be something like : "[r]123456" !!
-          if (Length(ActualRevision)=0) OR (ActualRevision='failure') OR (NOT (ActualRevision[2] in ['0'..'9'])) then
+          if (Length(ActualRevision)<2) OR (ActualRevision='failure') OR (NOT (ActualRevision[2] in ['0'..'9'])) then
           begin
             s2:=GetRevision(ModuleName);
             if (Length(s2)>0) then FActualRevision:=s2;
           end;
 
-          if (Length(ActualRevision)>0) AND (ActualRevision<>'failure') then
+          if (Length(ActualRevision)>1) AND (ActualRevision<>'failure') then
           begin
             Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
             Processor.Process.Parameters.Add('REVINC=force');
@@ -1615,7 +1615,8 @@ begin
   end;
   {$ENDIF}
 
-  if (Length(ActualRevision)>0) AND (ActualRevision<>'failure') then
+  // Revision should be something like : "[r]123456" !!
+  if (Length(ActualRevision)>1) AND (ActualRevision<>'failure') AND (ActualRevision[2] in ['0'..'9']) then
   begin
     Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
     Processor.Process.Parameters.Add('REVINC=force');

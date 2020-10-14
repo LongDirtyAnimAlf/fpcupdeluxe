@@ -417,7 +417,7 @@ begin
     info:=info+'looking for file ['+IncludeTrailingPathDelimiter(sd)+LookFor+'].';
   end;
 
-  {$ifdef DEBUG}
+  {$ifdef DEBUGGG}
   if (NOT result) then
     ThreadLog('Toolsearch failure. '+info,etDebug)
   else

@@ -1848,6 +1848,7 @@ var
   CleanCommand,CleanDirectory:string;
   CrossCompiling: boolean;
   RunTwice: boolean;
+  s:string;
   {
   DeleteList: TStringList;
   CPUOS_Signature:string;
@@ -2067,9 +2068,30 @@ begin
   end;
   {$endif MSWINDOWS}
 
-  {
   // finally ... if something is still still still floating around ... delete it !!
-  CrossCompiling:=(Self is TLazarusCrossInstaller);
+  if NOT CrossCompiling then
+  begin
+    s:=ConcatPaths([FInstallDirectory,'lazbuild']);
+    if FileExists(s+GetExeExt) then
+    begin
+      FileUtil.CopyFile(s+GetExeExt,s+'.old'+GetExeExt);
+      SysUtils.DeleteFile(s+GetExeExt);
+    end;
+    s:=ConcatPaths([FInstallDirectory,'lazarus']);
+    if FileExists(s+GetExeExt) then
+    begin
+      FileUtil.CopyFile(s+GetExeExt,s+'.old'+GetExeExt);
+      SysUtils.DeleteFile(s+GetExeExt);
+    end;
+    s:=ConcatPaths([FInstallDirectory,'startlazarus']);
+    if FileExists(s+GetExeExt) then
+    begin
+      FileUtil.CopyFile(s+GetExeExt,s+'.old'+GetExeExt);
+      SysUtils.DeleteFile(s+GetExeExt);
+    end;
+  end;
+
+  {
   if CrossCompiling then
     CPUOS_Signature:=GetFPCTarget(false)
   else
