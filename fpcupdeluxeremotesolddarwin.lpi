@@ -27,46 +27,9 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="4">
+    <BuildModes Count="3">
       <Item1 Name="default" Default="True"/>
-      <Item2 Name="debug">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <Libraries Value="libs\win32"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <Conditionals Value="if TargetOS='darwin' then
-   CustomOptions := ' -Cg-';
-if TargetOS='openbsd' then
-   CustomOptions := ' -Cg-';"/>
-          <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-            </Checks>
-            <Optimizations>
-              <OptimizationLevel Value="0"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <DebugInfoType Value="dsDwarf2"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dDEBUG"/>
-          </Other>
-        </CompilerOptions>
-      </Item2>
-      <Item3 Name="darwin32carbon">
+      <Item2 Name="darwin32carbon">
         <MacroValues Count="1">
           <Macro3 Name="LCLWidgetType" Value="carbon"/>
         </MacroValues>
@@ -99,8 +62,8 @@ if TargetOS='openbsd' then
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item3>
-      <Item4 Name="darwin32cocoa">
+      </Item2>
+      <Item3 Name="darwin32cocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -133,7 +96,7 @@ if TargetOS='openbsd' then
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item4>
+      </Item3>
       <SharedMatrixOptions Count="3">
         <Item1 ID="784204643275" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item2 ID="322994045052" Modes="darwin32cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
@@ -209,7 +172,7 @@ if TargetOS='openbsd' then
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+      <Filename Value="libfpclazupdeluxe\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
