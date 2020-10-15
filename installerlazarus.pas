@@ -33,7 +33,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 {$IF DEFINED(CPUARM) AND DEFINED(LINUX)}
 {$DEFINE DISABLELAZBUILDJOBS}
 {$ELSE}
-{$DEFINE DISABLELAZBUILDJOBS}
+{.$DEFINE DISABLELAZBUILDJOBS}
 {$ENDIF}
 
 interface
@@ -292,8 +292,8 @@ implementation
 
 uses
   {$ifdef Darwin}
-  {$ifdef LCLQT5}
   BaseUnix,
+  {$ifdef LCLQT5}
   LazFileUtils,
   {$endif}
   {$endif}
@@ -1098,10 +1098,42 @@ begin
 
   if (ModuleName=_MAKEFILECHECKLAZARUS) then exit;
 
-  if (ModuleName=_USERIDE) OR (ModuleName=_LAZARUS) then
+  if OperationSucceeded then
   begin
-    if OperationSucceeded then
+
+    if (ModuleName=_STARTLAZARUS) then
     begin
+      //Make new symlinks !!
+      {$ifdef Darwin}
+      s:=ConcatPaths([FInstallDirectory,'startlazarus']);
+      if FileExists(s) then
+      begin
+        s2:=ConcatPaths([FInstallDirectory,'startlazarus.app','Contents','MacOS','startlazarus']);
+        SysUtils.DeleteFile(s2);
+        fpSymlink(PChar('./../../../startlazarus'),PChar(s2));
+      end;
+      {$endif}
+    end;
+
+    if (ModuleName=_USERIDE) OR (ModuleName=_LAZARUS) then
+    begin
+      //Make new symlinks !!
+      {$ifdef Darwin}
+      s:=ConcatPaths([FInstallDirectory,'lazarus']);
+      if FileExists(s) then
+      begin
+        s2:=ConcatPaths([FInstallDirectory,'lazarus.app','Contents','MacOS','lazarus']);
+        SysUtils.DeleteFile(s2);
+        fpSymlink(PChar('./../../../lazarus'),PChar(s2));
+      end;
+      s:=ConcatPaths([FInstallDirectory,'startlazarus']);
+      if FileExists(s) then
+      begin
+        s2:=ConcatPaths([FInstallDirectory,'startlazarus.app','Contents','MacOS','startlazarus']);
+        SysUtils.DeleteFile(s2);
+        fpSymlink(PChar('./../../../startlazarus'),PChar(s2));
+      end;
+      {$endif}
 
       LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
       try
@@ -1464,7 +1496,9 @@ end;
 function TLazarusInstaller.InitModule: boolean;
 var
   PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
+  {$IFDEF MSWINDOWS}
   SVNPath:string;
+  {$ENDIF}
 begin
   Result := true;
 

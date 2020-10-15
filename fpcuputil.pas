@@ -2170,9 +2170,9 @@ begin
       begin
         if (aStore.FileList.Count>0) then
         begin
+          result:=true;
           for Content in aStore.FileList do fileurllist.Add(Content);
         end;
-        result:=true;
         exit;
       end;
     end;
@@ -2230,13 +2230,18 @@ begin
         try
           JsonArray:=Json.FindPath('assets') as TJSONArray;
           i:=JsonArray.Count;
-          while (i>0) do
-          begin
-            Dec(i);
-            JsonObject := JsonArray.Objects[i];
-            fileurllist.Add(JsonObject.Get('browser_download_url'));
-            with GitHubFileListCache[High(GitHubFileListCache)] do FileList.Add(fileurllist[(fileurllist.Count-1)]);
-          end;
+          if i=0 then
+            result:=false
+          else
+            begin
+              while (i>0) do
+              begin
+                Dec(i);
+                JsonObject := JsonArray.Objects[i];
+                fileurllist.Add(JsonObject.Get('browser_download_url'));
+                with GitHubFileListCache[High(GitHubFileListCache)] do FileList.Add(fileurllist[(fileurllist.Count-1)]);
+              end;
+            end;
         finally
           Json.Free;
         end;

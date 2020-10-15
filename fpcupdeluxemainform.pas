@@ -246,7 +246,6 @@ uses
   installerUniversal,
   m_crossinstaller, // for checking of availability of fpc[laz]up[deluxe] cross-compilers
   fpcuputil,
-  URIParser,
   process,
   processutils;
 
