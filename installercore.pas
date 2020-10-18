@@ -3297,6 +3297,38 @@ begin
     end;
   end;
 
+
+  {$ifdef Haiku}
+  // we will hack into fpc itself to prevent FPU crash on Haiku
+  //if FOnlinePatching then
+  begin
+    if PatchFPC then
+    begin
+      PatchList:=TStringList.Create;
+      try
+        PatchList.Clear;
+        PatchFilePath:=ConcatPaths([FSourceDirectory,'rtl','inc'])+DirectorySeparator+'mathh.inc';
+        PatchList.LoadFromFile(PatchFilePath);
+        for i:=0 to (PatchList.Count-1) do
+        begin
+          s:=PatchList.Strings[i];
+          if (Pos('fpcupdeluxe',s)>0) then break; // we were here already ... ;-)
+          if ((Pos('Default8087CW',s)>0) AND (Pos('$1332;',s)>0)) then
+          begin
+            PatchList.Strings[i]:=StringReplace(s,'$1332;','$1333; // Patched by fpcupdeluxe to prevent FPU crash',[]);
+            PatchList.SaveToFile(PatchFilePath);
+            break;
+          end;
+        end;
+      finally
+        PatchList.Free;
+      end;
+    end;
+  end;
+  {$endif}
+
+
+
   // we will hack into fpc itself for better isolation
   // needs more testing
   (*

@@ -2774,30 +2774,28 @@ begin
 
           AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
 
+          // Setting the name[s] for the file to download
+          BinsFileName:=GetCPU(FPCupManager.CrossCPU_Target);
+
+          // Set special CPU case
           if FPCupManager.CrossCPU_Target=TCPU.arm then BinsFileName:='ARM';
           if FPCupManager.CrossCPU_Target=TCPU.aarch64 then BinsFileName:='Aarch64';
           if FPCupManager.CrossCPU_Target=TCPU.x86_64 then BinsFileName:='x64';
-          if FPCupManager.CrossCPU_Target=TCPU.i386 then BinsFileName:='i386';
           if FPCupManager.CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
           if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC64';
           if FPCupManager.CrossCPU_Target=TCPU.mips then BinsFileName:='Mips';
           if FPCupManager.CrossCPU_Target=TCPU.mipsel then BinsFileName:='Mipsel';
           if FPCupManager.CrossCPU_Target=TCPU.sparc then BinsFileName:='Sparc';
           if FPCupManager.CrossCPU_Target=TCPU.avr then BinsFileName:='AVR';
-          if FPCupManager.CrossCPU_Target=TCPU.i8086 then BinsFileName:='i8086';
-          if FPCupManager.CrossCPU_Target=TCPU.m68k then BinsFileName:='m68k';
-          if FPCupManager.CrossCPU_Target=TCPU.xtensa then BinsFileName:='xtensa';
 
+          // Set special CPU names
           if FPCupManager.CrossOS_Target=TOS.darwin then
           begin
             // Darwin has some universal binaries and libs
             if FPCupManager.CrossCPU_Target=TCPU.i386 then BinsFileName:='All';
             if FPCupManager.CrossCPU_Target=TCPU.x86_64 then BinsFileName:='All';
-            //Newer bins and libs for Darwin on i386 and x86_64
-            //if FPCupManager.CrossCPU_Target=TCPU.i386 then BinsFileName:='x86OSX1012';
-            //if FPCupManager.CrossCPU_Target=TCPU.x86_64 then BinsFileName:='x86OSX1012';
-            if FPCupManager.CrossCPU_Target=TCPU.powerpc then BinsFileName:='powerpc';
-            if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='powerpc';
+            if FPCupManager.CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
+            if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC';
           end;
 
           if FPCupManager.CrossOS_Target=TOS.ios then
@@ -2810,10 +2808,11 @@ begin
           if FPCupManager.CrossOS_Target=TOS.aix then
           begin
             // AIX has some universal binaries
-            if FPCupManager.CrossCPU_Target=TCPU.powerpc then BinsFileName:='powerpc';
-            if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='powerpc';
+            if FPCupManager.CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
+            if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC';
           end;
 
+          // Set OS case
           if FPCupManager.CrossOS_Target=TOS.morphos then s:='MorphOS' else
             if FPCupManager.CrossOS_Target=TOS.freebsd then s:='FreeBSD' else
               if FPCupManager.CrossOS_Target=TOS.dragonfly then s:='DragonFlyBSD' else
@@ -2835,7 +2834,10 @@ begin
           // normally, we have the same names for libs and bins URL
           LibsFileName:=BinsFileName;
 
-          // normally, we have the standard names for libs and bins paths
+
+          // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
+
+          // Normally, we have the standard names for libs and bins paths
           LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(FPCupManager.CrossCPU_Target)])+'-';
           BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'bin',GetCPU(FPCupManager.CrossCPU_Target)])+'-';
           if FPCupManager.MUSL then
@@ -2856,20 +2858,20 @@ begin
             // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
             if (FPCupManager.CrossCPU_Target=TCPU.i386) OR (FPCupManager.CrossCPU_Target=TCPU.x86_64) then
             begin
-              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[rfIgnoreCase]);
-              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[rfIgnoreCase]);
+              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
+              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
             end;
             if (FPCupManager.CrossCPU_Target=TCPU.powerpc) OR (FPCupManager.CrossCPU_Target=TCPU.powerpc64) then
             begin
-              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[rfIgnoreCase]);
-              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[rfIgnoreCase]);
+              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
+              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
             end;
 
             // Darwin is special: combined libs for arm and aarch64 with osxcross
             if (FPCupManager.CrossCPU_Target=TCPU.arm) OR (FPCupManager.CrossCPU_Target=TCPU.aarch64) then
             begin
-              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.arm),[rfIgnoreCase]);
-              LibsFileName:=StringReplace(LibsFileName,'Aarch64','ARM',[rfIgnoreCase]);
+              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.arm),[]);
+              LibsFileName:=StringReplace(LibsFileName,'Aarch64','ARM',[]);
             end;
           end;
 
@@ -2878,8 +2880,8 @@ begin
             // iOS is special: combined libs for arm and aarch64 with cctools
             if (FPCupManager.CrossCPU_Target=TCPU.arm) OR (FPCupManager.CrossCPU_Target=TCPU.aarch64) then
             begin
-              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[rfIgnoreCase]);
-              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[rfIgnoreCase]);
+              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
+              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
             end;
           end;
 
@@ -2888,16 +2890,16 @@ begin
             // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
             if (FPCupManager.CrossCPU_Target=TCPU.powerpc) OR (FPCupManager.CrossCPU_Target=TCPU.powerpc64) then
             begin
-              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[rfIgnoreCase]);
-              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[rfIgnoreCase]);
+              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
+              LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
             end;
           end;
 
           //Put all windows stuff (not that much) in a single windows directory
           if (FPCupManager.CrossOS_Target=TOS.win32) OR (FPCupManager.CrossOS_Target=TOS.win64) then
           begin
-            BinPath:=StringReplace(BinPath,GetOS(FPCupManager.CrossOS_Target),'windows',[rfIgnoreCase]);
-            LibPath:=StringReplace(LibPath,GetOS(FPCupManager.CrossOS_Target),'windows',[rfIgnoreCase]);
+            BinPath:=StringReplace(BinPath,GetOS(FPCupManager.CrossOS_Target),'windows',[]);
+            LibPath:=StringReplace(LibPath,GetOS(FPCupManager.CrossOS_Target),'windows',[]);
           end;
 
           if FPCupManager.CrossOS_Target=TOS.linux then
