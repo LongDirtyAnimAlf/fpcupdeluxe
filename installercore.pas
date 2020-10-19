@@ -36,14 +36,14 @@ uses
 
 const
   DEFAULTFPCVERSION     = '3.2.0';
-  DEFAULTLAZARUSVERSION = '2.0.8';
+  DEFAULTLAZARUSVERSION = '2.0.10';
 
   FPCTRUNKVERSION       = '3.3.1';
-  FPCTRUNKBOOTVERSION   = '3.0.4';
-  //FPCTRUNKBOOTVERSION   = '3.2.0';
+  //FPCTRUNKBOOTVERSION   = '3.0.4';
+  FPCTRUNKBOOTVERSION   = '3.2.0';
   LAZARUSTRUNKVERSION   = '2.1.0';
 
-  DEFAULTFREEBSDVERSION = 11;
+  DEFAULTFREEBSDVERSION = 12;
 
   LAZBUILDNAME          = 'lazbuild';
 
@@ -3299,7 +3299,7 @@ begin
 
 
   {$ifdef Haiku}
-  // we will hack into fpc itself to prevent FPU crash on Haiku
+  // we will hack into FPC itself to prevent FPU crash on Haiku
   //if FOnlinePatching then
   begin
     if PatchFPC then
@@ -3329,7 +3329,7 @@ begin
 
 
 
-  // we will hack into fpc itself for better isolation
+  // we will hack into FPC itself for better isolation
   // needs more testing
   (*
   if FOnlinePatching then
