@@ -23,6 +23,7 @@ program fpcupdeluxe;
     Josh (alternateui)
     Ondrej Kelle
     Marco van de Voort (marcov)
+    Olly (ollydev)
 
 *)
 (*
