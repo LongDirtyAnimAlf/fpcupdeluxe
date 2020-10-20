@@ -30,12 +30,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
-{$IF DEFINED(CPUARM) AND DEFINED(LINUX)}
-{$DEFINE DISABLELAZBUILDJOBS}
-{$ELSE}
-{.$DEFINE DISABLELAZBUILDJOBS}
-{$ENDIF}
-
 interface
 
 uses
@@ -450,15 +444,6 @@ begin
         // Quiet:=ConsoleVerbosity<=-3;
         Processor.Process.Parameters.Add('--quiet');
         {$ENDIF}
-
-        {$ifdef DISABLELAZBUILDJOBS}
-        if (True) then
-        {$else}
-        if (FNoJobs) then
-        {$endif}
-          Processor.Process.Parameters.Add('--max-process-count=1')
-        else
-          Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
 
         Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
 
@@ -972,15 +957,6 @@ begin
       Processor.Process.Parameters.Add('--quiet');
       {$ENDIF}
 
-      {$ifdef DISABLELAZBUILDJOBS}
-      if (True) then
-      {$else}
-      if (FNoJobs) then
-      {$endif}
-        Processor.Process.Parameters.Add('--max-process-count=1')
-      else
-        Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
-
       Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
       Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);
       Processor.Process.Parameters.Add('--os=' + GetTargetOS);
@@ -1052,15 +1028,6 @@ begin
           {$ELSE}
           Processor.Process.Parameters.Add('--quiet');
           {$ENDIF}
-
-          {$ifdef DISABLELAZBUILDJOBS}
-          if (True) then
-          {$else}
-          if (FNoJobs) then
-          {$endif}
-            Processor.Process.Parameters.Add('--max-process-count=1')
-          else
-            Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
 
           Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
           Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);

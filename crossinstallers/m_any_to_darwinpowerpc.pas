@@ -177,7 +177,8 @@ begin
     begin
       AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
-      if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
       if result then
       begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';

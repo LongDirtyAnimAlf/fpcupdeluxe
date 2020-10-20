@@ -31,12 +31,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
-{$IF DEFINED(CPUARM) AND DEFINED(LINUX)}
-{$DEFINE DISABLELAZBUILDJOBS}
-{$ELSE}
-{.$DEFINE DISABLELAZBUILDJOBS}
-{$ENDIF}
-
 {$modeswitch advancedrecords}
 
 interface
@@ -737,15 +731,6 @@ begin
   Processor.Process.Parameters.Add('--quiet');
   {$ENDIF}
 
-  {$ifdef DISABLELAZBUILDJOBS}
-  if (True) then
-  {$else}
-  if (FNoJobs) then
-  {$endif}
-    Processor.Process.Parameters.Add('--max-process-count=1')
-  else
-    Processor.Process.Parameters.Add('--max-process-count='+InttoStr(FCPUCount));
-
   Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
   Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);
   Processor.Process.Parameters.Add('--os=' + GetTargetOS);
@@ -1244,15 +1229,6 @@ begin
       {$ELSE}
       s:='--quiet';
       {$ENDIF}
-
-      {$ifdef DISABLELAZBUILDJOBS}
-      if (True) then
-      {$else}
-      if (FNoJobs) then
-      {$endif}
-        s:=s+' --max-process-count=1'
-      else
-        s:=s+' --max-process-count='+InttoStr(FCPUCount);
 
       if FLCL_Platform<>'' then s:=s+' --ws=' + FLCL_Platform;
       exec:=StringReplace(exec,LAZBUILDNAME+GetExeExt,LAZBUILDNAME+GetExeExt+' '+s,[rfIgnoreCase]);

@@ -182,6 +182,7 @@ begin
   begin
     if not result then
     begin
+
       AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
       if not result then
@@ -191,17 +192,21 @@ begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
         break;
       end;
+
       //universal bins ?
       if not result then
       begin
         AsFile:='powerpc-apple-darwin'+InttoStr(i)+'-'+'as'+GetExeExt;
-        result:=SimpleSearchBinUtil(BasePath,'powerpc-darwin',AsFile);
+        result:=SearchBinUtil(BasePath,AsFile);
+        if not result then
+          result:=SimpleSearchBinUtil(BasePath,'powerpc-darwin',AsFile);
         if result then
         begin
           FBinUtilsPrefix:='powerpc-apple-darwin'+InttoStr(i)+'-';
           break;
         end;
       end;
+
     end;
   end;
 

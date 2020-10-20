@@ -208,8 +208,6 @@ begin
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
       if not result then
         result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
-      if not result then
-        result:=SimpleSearchBinUtil(BasePath+DirectorySeparator+'bin','all-'+TargetOSName,AsFile);
       if result then
       begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
