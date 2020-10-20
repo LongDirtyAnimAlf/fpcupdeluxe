@@ -30,7 +30,7 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="22">
+    <BuildModes Count="21">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="DefaultQT">
         <MacroValues Count="1">
@@ -568,41 +568,7 @@
           </Other>
         </CompilerOptions>
       </Item17>
-      <Item18 Name="darwinppc64cocoa">
-        <MacroValues Count="1">
-          <Macro2 Name="LCLWidgetType" Value="cocoa"/>
-        </MacroValues>
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-cocoa"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="powerpc64"/>
-            <TargetOS Value="darwin"/>
-            <Optimizations>
-              <OptimizationLevel Value="0"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <UseExternalDbgSyms Value="True"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dRemoteLog"/>
-          </Other>
-        </CompilerOptions>
-      </Item18>
-      <Item19 Name="solarisx64">
+      <Item18 Name="solarisx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -632,8 +598,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item19>
-      <Item20 Name="dragonflyx64">
+      </Item18>
+      <Item19 Name="dragonflyx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -663,8 +629,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item20>
-      <Item21 Name="linux64gtk3">
+      </Item19>
+      <Item20 Name="linux64gtk3">
         <MacroValues Count="1">
           <Macro4 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
@@ -697,8 +663,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item21>
-      <Item22 Name="linuxaarch64QT5">
+      </Item20>
+      <Item21 Name="linuxaarch64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -731,10 +697,10 @@
 -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item22>
+      </Item21>
       <SharedMatrixOptions Count="4">
         <Item1 ID="784204643275" Modes="DefaultQT,linuxx64QT5,linuxi386QT5,linuxaarch64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
-        <Item2 ID="322994045052" Modes="darwinppc64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item2 ID="322994045052" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
         <Item3 ID="015223611220" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
         <Item4 ID="591091371099" Modes="linux64gtk3" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
       </SharedMatrixOptions>

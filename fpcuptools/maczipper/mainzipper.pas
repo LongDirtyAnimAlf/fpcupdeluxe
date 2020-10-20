@@ -14,6 +14,7 @@ type
   TForm1 = class(TForm)
     Button1: TButton;
     Label1: TLabel;
+    Memo1: TMemo;
     procedure Button1Click(Sender: TObject);
   private
 
@@ -38,7 +39,7 @@ const
   BaseDir='.\..\..\..\deluxebin';
   //BaseDir='.\..\deluxebin';
   BaseName='fpcupdeluxe-';
-  FileList:array[0..4] of string = (BaseName+'i386-darwin-carbon',BaseName+'i386-darwin-cocoa',BaseName+'powerpc64-darwin-cocoa',BaseName+'x86_64-darwin-cocoa',BaseName+'x86_64-darwin-qt5');
+  FileList:array[0..6] of string = (BaseName+'i386-darwin-carbon',BaseName+'i386-darwin-cocoa',BaseName+'powerpc-darwin-carbon',BaseName+'powerpc-darwin-cocoa',BaseName+'powerpc64-darwin-cocoa',BaseName+'x86_64-darwin-cocoa',BaseName+'x86_64-darwin-qt5');
 
 { TForm1 }
 
@@ -56,6 +57,8 @@ begin
     aBaseDir:=ExpandFileName(BaseDir);
     aFile1:=aBaseDir+DirectorySeparator+FileList[aIndex1];
     aFile2:=aFile1+'.app'+DirectorySeparator+'Contents'+DirectorySeparator+'MacOS'+DirectorySeparator+FileList[aIndex1];
+    Memo1.Lines.Append(ExtractFileName(aFile2)+' ... please wait.');
+    Application.ProcessMessages;
     if FileExists(aFile2) then
     begin
       DeleteFile(aFile2);
