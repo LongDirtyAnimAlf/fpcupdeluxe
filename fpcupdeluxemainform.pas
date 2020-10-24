@@ -3805,9 +3805,6 @@ begin
   AddMessage('Please stand back and enjoy !');
   AddMessage('');
 
-  //Create base install directory, the place the magic happens
-  ForceDirectoriesSafe(FPCupManager.BaseDirectory);
-
   //save install settings in install directory
   SetFPCUPSettings(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory));
 

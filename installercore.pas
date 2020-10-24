@@ -205,6 +205,9 @@ const
   _OLDLAZARUS              = 'OldLazarus';
   _PAS2JS                  = 'Pas2JS';
 
+  _DOCKER                  = 'Docker';
+
+
   _UNIVERSALDEFAULT        = 'Universal'+_DEFAULT;
   _FPCCLEANBUILDONLY       = _FPC+_CLEAN+_BUILD+_ONLY;
   _FPCREMOVEONLY           = _FPC+_UNINSTALL+_ONLY;
@@ -215,8 +218,6 @@ const
   _LCLREMOVEONLY           = _LCL+_CLEAN+_ONLY;
   _COMPONENTSREMOVEONLY    = _COMPONENTS+_CLEAN+_ONLY;
   _PACKAGERREMOVEONLY      = _PACKAGER+_CLEAN+_ONLY;
-
-  _LAZBUILDONLY            = _LAZBUILD+_ONLY;
 
   _HELP                    = 'Help';
   _HELPFPC                 = _HELP+_FPC;
@@ -287,6 +288,8 @@ type
     FCrossLibraryDirectory: string;
     procedure SetURL(value:string);
     procedure SetSourceDirectory(value:string);
+    procedure SetBaseDirectory(value:string);
+    procedure SetInstallDirectory(value:string);
     function GetShell: string;
     function GetMake: string;
     procedure SetVerbosity(aValue:boolean);
@@ -427,9 +430,9 @@ type
     // Source directory for installation (fpcdir, lazdir,... option)
     property SourceDirectory: string write SetSourceDirectory;
     //Base directory for fpc(laz)up(deluxe) itself
-    property BaseDirectory: string write FBaseDirectory;
-    // Source directory for installation (fpcdir, lazdir,... option)
-    property InstallDirectory: string write FInstallDirectory;
+    property BaseDirectory: string write SetBaseDirectory;
+    // Final install directory
+    property InstallDirectory: string write SetInstallDirectory;
     //Base directory for fpc(laz)up(deluxe) itself
     property TempDirectory: string write FTempDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
@@ -585,9 +588,12 @@ var
   idx: integer;
   target: string;
 begin
-  target := GetFPCTarget(false);
-  if (NOT Assigned(FCrossInstaller)) OR (FCrossInstaller.RegisterName<>target) then
+  result:=nil;
+  if ((FCrossCPU_Target<>TCPU.cpuNone) AND (FCrossOS_Target<>TOS.osNone)) then
   begin
+    if (NOT Assigned(FCrossInstaller)) OR ((FCrossInstaller.TargetCPU<>FCrossCPU_Target)  OR (FCrossInstaller.TargetOS<>FCrossOS_Target)) then
+    begin
+  target := GetFPCTarget(false);
     FCrossInstaller:=nil;
     if assigned(CrossInstallers) then
       for idx := 0 to Pred(CrossInstallers.Count) do
@@ -597,7 +603,18 @@ begin
           break;
         end;
   end;
-  result:=FCrossInstaller;
+  if (NOT Assigned(FCrossInstaller)) then
+  begin
+    Infoln(localinfotext+'Could not find crosscompiler logic for '+target+' !!',etError);
+    Infoln(localinfotext+'This is a fatal error. Exception wil be created.',etError);
+    Infoln(localinfotext+'Please file a bug-report.',etError);
+    raise Exception.CreateFmt('%s fpcup cross-logic not found. Please report this issue.',[target]);
+    end
+    else
+    begin
+      result:=FCrossInstaller;
+    end;
+  end;
 end;
 
 function TInstaller.GetCrossCompilerPresent:boolean;
@@ -734,6 +751,20 @@ begin
     FMinorVersion := -1;
     FReleaseVersion := -1;
     FPatchVersion := -1;
+  end;
+end;
+
+procedure TInstaller.SetBaseDirectory(value:string);
+begin
+  FBaseDirectory:=value;
+end;
+
+procedure TInstaller.SetInstallDirectory(value:string);
+begin
+  FInstallDirectory:=value;
+  if (IsFPCInstaller OR IsLazarusInstaller) then
+  begin
+    ForceDirectoriesSafe(FInstallDirectory);
   end;
 end;
 

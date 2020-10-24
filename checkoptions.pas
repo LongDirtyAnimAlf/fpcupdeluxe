@@ -209,7 +209,7 @@ begin
 
       {$ifdef LCL}
       // do not create shortcut for fpc in case of GUI !!
-      FInstaller.ShortCutNameFpcup:=EmptyStr;
+      //FInstaller.ShortCutNameFpcup:=EmptyStr;
       {$else}
       FManager.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname',DirectorySeparator);
       // Find out if the user specified --fpcuplinkname= to explicitly block creation of a link, or just didn't specify anything.
@@ -333,7 +333,7 @@ begin
       // do not add to default options:
       FManager.Verbose:=Options.GetOptionNoParam('','verbose',false);
       {$ifdef DEBUG}
-      FInstaller.Verbose:=True;
+      //FInstaller.Verbose:=True;
       {$endif}
 
       // getfullrepo is a depreciated option ... left here for compatibility only
