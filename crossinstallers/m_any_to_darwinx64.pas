@@ -198,7 +198,7 @@ begin
   // See https://en.wikipedia.org/wiki/Darwin_%28operating_system%29#Release_history
   // Shows relation between macOS and Darwin versions
 
-  for i:=20 downto 11 do
+  for i:=MAXDARWINVERSION downto MINDARWINVERSION do
   begin
     if not result then
     begin
@@ -224,9 +224,9 @@ begin
     PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
     if DirectoryExists(PresetBinPath) then
     begin
-      for i:=20 downto 10 do
+      for i:=MAXDARWINVERSION downto MINDARWINVERSION do
       begin
-        if i=10 then
+        if i=MINDARWINVERSION then
           AsFile:=BinPrefixTry+'-'+'as'+GetExeExt
         else
           AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
@@ -242,9 +242,9 @@ begin
     PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin','all-'+TargetOSName]);
     if DirectoryExists(PresetBinPath) then
     begin
-      for i:=20 downto 10 do
+      for i:=MAXDARWINVERSION downto MINDARWINVERSION do
       begin
-        if i=10 then
+        if i=MINDARWINVERSION then
           AsFile:=BinPrefixTry+'-'+'as'+GetExeExt
         else
           AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;

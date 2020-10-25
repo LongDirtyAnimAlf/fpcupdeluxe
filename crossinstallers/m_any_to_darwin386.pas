@@ -192,9 +192,9 @@ begin
 
   // Also allow for (cross)binutils from https://github.com/tpoechtrager/cctools
   // fpc version from https://github.com/LongDirtyAnimalf/cctools
-  BinPrefixTry:=GetTargetCPU+'-apple-darwin';
+  BinPrefixTry:=TargetCPUName+'-apple-darwin';
 
-  for i:=20 downto 11 do
+  for i:=MAXDARWINVERSION downto MINDARWINVERSION do
   begin
     if not result then
     begin
@@ -220,9 +220,9 @@ begin
     PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
     if DirectoryExists(PresetBinPath) then
     begin
-      for i:=20 downto 10 do
+      for i:=MAXDARWINVERSION downto MINDARWINVERSION do
       begin
-        if i=10 then
+        if i=MINDARWINVERSION then
           AsFile:=BinPrefixTry+'-'+'as'+GetExeExt
         else
           AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
@@ -238,9 +238,9 @@ begin
     PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin','all-'+TargetOSName]);
     if DirectoryExists(PresetBinPath) then
     begin
-      for i:=20 downto 10 do
+      for i:=MAXDARWINVERSION downto MINDARWINVERSION do
       begin
-        if i=10 then
+        if i=MINDARWINVERSION then
           AsFile:=BinPrefixTry+'-'+'as'+GetExeExt
         else
           AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
