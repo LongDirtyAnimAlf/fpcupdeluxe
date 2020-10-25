@@ -881,25 +881,25 @@ end;
 function ResolveIPToName(IP: string; Family, SockProtocol, SockType: integer): string;
 var
   n: integer;
-  a4: array [1..1] of in_addr;
-  a6: array [1..1] of Tin6_addr;
-  a: array [1..1] of string;
+  a4: in_addr;
+  a6: Tin6_addr;
+  a:  string;
 begin
   Result := IP;
-  a4[1] := StrToNetAddr(IP);
-  if a4[1].s_addr <> INADDR_ANY then
+  a4 := StrToNetAddr(IP);
+  if a4.s_addr <> INADDR_ANY then
   begin
 //why ResolveAddress need address in HOST order? :-O 
-    n := ResolveAddress(nettohost(a4[1]), a);
+    n := ResolveAddress(nettohost(a4), a);
     if n > 0 then
-      Result := a[1];
+      Result := a;
   end
   else
   begin
-    a6[1] := StrToNetAddr6(IP);
-    n := ResolveAddress6(a6[1], a);
+    a6 := StrToNetAddr6(IP);
+    n := ResolveAddress6(a6, a);
     if n > 0 then
-      Result := a[1];
+      Result := a;
   end;
 end;
 

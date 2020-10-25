@@ -2238,7 +2238,8 @@ begin
               begin
                 Dec(i);
                 JsonObject := JsonArray.Objects[i];
-                fileurllist.Add(JsonObject.Get('browser_download_url'));
+                Content:=JsonObject.Get('browser_download_url');
+                fileurllist.Add(Content);
                 with GitHubFileListCache[High(GitHubFileListCache)] do FileList.Add(fileurllist[(fileurllist.Count-1)]);
               end;
             end;
