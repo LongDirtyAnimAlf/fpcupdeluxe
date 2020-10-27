@@ -1944,6 +1944,7 @@ begin
     begin
       Processor.Process.Parameters.Add('OS_TARGET=' + CrossInstaller.TargetOSName);
       Processor.Process.Parameters.Add('CPU_TARGET=' + CrossInstaller.TargetCPUName);
+      if Length(CrossOS_SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossOS_SubArch);
     end
     else
     begin

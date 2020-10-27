@@ -3908,7 +3908,6 @@ begin
     begin  // clean out the correct compiler
       Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);
       Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName);
-      //if Length(CrossInstaller.SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
       if Length(CrossOS_SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossOS_SubArch);
     end
     else

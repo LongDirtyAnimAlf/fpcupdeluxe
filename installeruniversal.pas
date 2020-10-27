@@ -744,6 +744,7 @@ begin
   try
     ProcessorResult:=Processor.ExecuteAndWait;
     result := (ProcessorResult=0);
+
     // runtime packages will return false, but output will have info about package being "only for runtime"
     if result then
     begin
@@ -756,7 +757,7 @@ begin
     else
     begin
       // if the package is only for runtime, just add an lpl file to inform Lazarus of its existence and location ->> set result to true
-      if (Pos('only for runtime',Processor.WorkerOutput.Text)>0) OR (RegisterPackageFeature)
+      if (Pos('only for runtime',Processor.WorkerOutput.Text)>0) OR (RegisterPackageFeature) OR (ProcessorResult=4)
          then result:=True
          else WritelnLog(localinfotext+'Error trying to add package '+PackageName+'. Details: '+FErrorLog.Text,true);
     end;
@@ -1481,13 +1482,13 @@ begin
     // Run all InstallExecute<n> commands:
     // More detailed logging only if verbose or debug:
     if FVerbose then WritelnLog(infotext+'Building module '+ModuleName+' running all InstallExecute commands in: '+LineEnding+
-      sl.text,true);
+      sl.CommaText,true);
     result:=RunCommands('InstallExecute',sl);
 
     // Run all CreateInstaller<n> commands; for now Windows only
     {$IFDEF MSWINDOWS}
     if FVerbose then WritelnLog(infotext+'Building module '+ModuleName+' running all CreateInstaller commands in: '+LineEnding+
-      sl.text,true);
+      sl.CommaText,true);
     result:=CreateInstallers('CreateInstaller',sl, ModuleName);
     {$ENDIF MSWINDOWS}
     end

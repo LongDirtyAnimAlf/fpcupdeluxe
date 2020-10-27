@@ -2059,9 +2059,10 @@ var
   IncludeLCL,ZipFile:boolean;
   i:integer;
   MajorVersion,MinorVersion:integer;
-  aList: TStringList;
+  aList,aSubArchList: TStringList;
   BaseBinsURL:string;
   BinsURL,LibsURL:string;
+  SubArchsCommaText:string;
 begin
   result:=false;
 
@@ -2288,6 +2289,23 @@ begin
     end;
   end;
 
+  //get a list of valid subarch targets
+  SubArchsCommaText:='';
+  try
+    aList:=FPCupManager.ParseSubArchsFromSource;
+    if (aList.Count > 0) then
+    begin
+      for i:=0 to (aList.Count-1) do
+      begin
+        if aList.Names[i]=GetCPU(FPCupManager.CrossCPU_Target) then SubArchsCommaText:=SubArchsCommaText+aList.ValueFromIndex[i]+', ';
+      end;
+      if Length(SubArchsCommaText)>0 then
+        Delete(SubArchsCommaText,Length(SubArchsCommaText)-1,2);
+    end;
+  finally
+    aList.Free;
+  end;
+
   {$ifdef RemoteLog}
   aDataClient.UpInfo.CrossCPUOS:=GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target);
   {$endif}
@@ -2296,8 +2314,36 @@ begin
   begin
     DisEnable(Sender,False);
     try
-      // todo: setting of subarch when removing embedded compiler
-      FPCupManager.OnlyModules:=_LCLALLREMOVEONLY+','+_FPCREMOVEONLY;
+      if ((FPCupManager.CrossOS_Target=TOS.java) OR
+          (FPCupManager.CrossOS_Target=TOS.android) OR
+          (FPCupManager.CrossOS_Target=TOS.ios) OR
+          (FPCupManager.CrossOS_Target=TOS.embedded) OR
+          (FPCupManager.CrossOS_Target=TOS.freertos)) then
+      begin
+        FPCupManager.OnlyModules:=_FPCREMOVEONLY;
+
+        // Bit tricky: set first valid cross-arch for correct cleaning of FPC.
+        if ((FPCupManager.CrossOS_Target=TOS.embedded) OR
+            (FPCupManager.CrossOS_Target=TOS.freertos)) then
+        begin
+          if Length(SubArchsCommaText)>0 then
+          begin
+            aList:=TStringList.Create;
+            try
+              aList.CommaText:=SubArchsCommaText;
+              if aList.Count>0 then FPCupManager.CrossOS_SubArch:=aList[0];
+            finally
+              aList.Free;
+            end;
+          end;
+        end;
+
+      end
+      else
+      begin
+        FPCupManager.OnlyModules:=_LCLALLREMOVEONLY+','+_FPCREMOVEONLY;
+      end;
+
       {$ifdef RemoteLog}
       aDataClient.UpInfo.UpFunction:=ufUninstallCross;
       {$endif}
@@ -2558,6 +2604,12 @@ begin
         end;
       end;
 
+      if ((FPCupManager.CrossOS_Target=TOS.embedded) OR (FPCupManager.CrossOS_Target=TOS.freertos)) then
+      begin
+        if Length(SubArchsCommaText)>0 then
+          memoSummary.Lines.Append('Valid subarch(s) for '+GetCPU(FPCupManager.CrossCPU_Target)+' embedded are: '+SubArchsCommaText);
+      end;
+
       //msdos predefined settings
       if (FPCupManager.CrossOS_Target=TOS.msdos) then
       begin
@@ -2608,26 +2660,6 @@ begin
         s:=Form2.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
         s:=Trim(s);
         if Length(s)>0 then FPCupManager.CrossOS_SubArch:=s;
-
-        //present list of valid subarch targets, just to infrm the user.
-        try
-          aList:=FPCupManager.ParseSubArchsFromSource;
-          if (aList.Count > 0) then
-          begin
-            s:='';
-            for i:=0 to (aList.Count-1) do
-            begin
-              if aList.Names[i]=GetCPU(FPCupManager.CrossCPU_Target) then s:=s+aList.ValueFromIndex[i]+', ';
-            end;
-            if Length(s)>0 then
-            begin
-              Delete(s,Length(s)-1,2);
-              memoSummary.Lines.Append('Valid subarch(s) for '+GetCPU(FPCupManager.CrossCPU_Target)+' embedded are: '+s);
-            end;
-          end;
-        finally
-          aList.Free;
-        end;
       end;
 
       // use the available source to build the cross-compiler ... change nothing about source and url !!
@@ -2637,14 +2669,13 @@ begin
       IncludeLCL:=Form2.IncludeLCL;
       if (FPCupManager.CrossOS_Target=TOS.java) then IncludeLCL:=false;
       if (FPCupManager.CrossOS_Target=TOS.android) then IncludeLCL:=false;
+      if (FPCupManager.CrossOS_Target=TOS.ios) then IncludeLCL:=false;
       if (FPCupManager.CrossOS_Target=TOS.embedded) then IncludeLCL:=false;
       if (FPCupManager.CrossOS_Target=TOS.freertos) then IncludeLCL:=false;
-      // AFAIK, on Darwin, LCL Carbon and Cocoa are only for MACOSX
-      if (FPCupManager.CrossOS_Target=TOS.darwin) AND ((FPCupManager.CrossCPU_Target=TCPU.arm) OR (FPCupManager.CrossCPU_Target=TCPU.aarch64)) then IncludeLCL:=false;
 
       if IncludeLCL then
       begin
-        FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCL';
+        FPCupManager.OnlyModules:=FPCupManager.OnlyModules+','+_LCL;
         if ((FPCupManager.CrossOS_Target=TOS.win32) OR (FPCupManager.CrossOS_Target=TOS.win64)) then
            FPCupManager.LCL_Platform:='win32'
         else
