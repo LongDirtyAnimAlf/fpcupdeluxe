@@ -1821,13 +1821,14 @@ end;
 
 function TFPCInstaller.GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
 var
-  Major,Minor,Build: Integer;
+  Major,Minor,Build,Patch: Integer;
 begin
   result:=-1;
   Major:=-1;
   Minor:=-1;
   Build:=-1;
-  VersionFromString(aVersion,Major,Minor,Build);
+  Patch:=-1;
+  VersionFromString(aVersion,Major,Minor,Build,Patch);
   if index=0 then result:=Major;
   if index=1 then result:=Minor;
   if index=2 then result:=Build;
@@ -2389,7 +2390,7 @@ end;
 function TFPCInstaller.InitModule(aBootstrapVersion:string):boolean;
 var
   aCompilerList:TStringList;
-  i,j,k:integer;
+  i,j,k,l:integer;
   aCompilerArchive,aStandardCompilerArchive:string;
   aCompilerFound,aFPCUPCompilerFound, aLookForBetterAlternative:boolean;
   {$IFDEF FREEBSD}
@@ -2794,7 +2795,7 @@ begin
             aCompilerList:=TStringList.Create;
             try
               aCompilerList.Clear;
-              VersionFromString(aBootstrapVersion,i,j,k);
+              VersionFromString(aBootstrapVersion,i,j,k,l);
               s:=FPCFTPSNAPSHOTURL+'/v'+InttoStr(i)+InttoStr(j)+'/'+GetTargetCPUOS+'/';
               result:=aDownLoader.getFTPFileList(s,aCompilerList);
               if result then
@@ -3032,7 +3033,7 @@ begin
       VersionSnippet:=CompilerVersion(s);
       if VersionSnippet<>'0.0.0' then
       begin
-        VersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+        VersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
         s2:='FPC native builder: Detected source version FPC (compiler): ';
       end;
     end;

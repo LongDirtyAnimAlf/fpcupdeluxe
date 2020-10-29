@@ -296,9 +296,10 @@ function FileNameFromURL(URL:string):string;
 function StripUrl(URL:string): string;
 function CompilerVersion(CompilerPath: string): string;
 function CompilerRevision(CompilerPath: string): string;
-procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build: Integer);
-function CalculateFullVersion(Major,Minor,Release:integer):dword;
-function CalculateNumericalVersion(VersionSnippet: string): word;
+procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build:integer; var Patch: Integer);
+function CalculateFullVersion(const Major,Minor,Release:integer):dword;overload;
+function CalculateFullVersion(const Major,Minor,Release,Patch:integer):qword;overload;
+function CalculateNumericalVersion(VersionSnippet: string): dword;
 function VersionFromUrl(URL:string): string;
 function ReleaseCandidateFromUrl(aURL:string): integer;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
@@ -888,6 +889,8 @@ var
   Ini:TIniFile;
   {$ENDIF}
   OldIniVersion,NewIniVersion:string;
+  Major,Minor,Build,Patch: Integer;
+  OldIniVersionNum,NewIniVersionNum:qword;
 begin
   result:=false;
 
@@ -931,7 +934,20 @@ begin
     OldIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
     Ini.Free;
 
-    if OldIniVersion<>NewIniVersion then
+    Major:=0;
+    Minor:=0;
+    Build:=0;
+    Patch:=0;
+    VersionFromString(OldIniVersion,Major,Minor,Build,Patch);
+    OldIniVersionNum:=CalculateFullVersion(Major,Minor,Build,Patch);
+    Major:=0;
+    Minor:=0;
+    Build:=0;
+    Patch:=0;
+    VersionFromString(NewIniVersion,Major,Minor,Build,Patch);
+    NewIniVersionNum:=CalculateFullVersion(Major,Minor,Build,Patch);
+
+    if (NewIniVersionNum>OldIniVersionNum) then
     begin
       BackupFileName:=ChangeFileExt(filename,'.bak');
       while FileExists(BackupFileName) do BackupFileName := BackupFileName + 'k';
@@ -1262,7 +1278,7 @@ begin
   end;
 end;
 
-procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build: Integer);
+procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build:integer; var Patch: Integer);
 var
   i,j:integer;
   found:boolean;
@@ -1311,9 +1327,24 @@ begin
     Inc(i);
   end;
   if found then Build:=j;
+
+  // skip random symbols to move towards next digit
+  //while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // skip a single random symbol to move towards next digit
+  if (Length(VersionSnippet)>=i) then Inc(i);
+  // get patch version
+  j:=0;
+  found:=false;
+  while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
+  begin
+    found:=true;
+    j:=j*10+Ord(VersionSnippet[i])-$30;
+    Inc(i);
+  end;
+  if found then Patch:=j;
 end;
 
-function CalculateFullVersion(Major,Minor,Release:integer):dword;
+function CalculateFullVersion(const Major,Minor,Release:integer):dword;
 begin
   if (Major>=0) AND (Major<=6) AND (Minor>=0) AND (Release>=0) then
     result:=((Major *  100 + Minor) * 100 + Release)
@@ -1321,14 +1352,24 @@ begin
     result:=0;
 end;
 
-function CalculateNumericalVersion(VersionSnippet: string): word;
+function CalculateFullVersion(const Major,Minor,Release,Patch:integer):qword;
+begin
+  result:=0;
+  if (Major>=0) then result:=(result+Major)*100;
+  if (Minor>=0) then result:=(result+Minor)*100;
+  if (Release>=0) then result:=(result+Release)*100;
+  if (Patch>=0) then result:=result+Patch;
+end;
+
+function CalculateNumericalVersion(VersionSnippet: string): dword;
 var
-  Major,Minor,Build: Integer;
+  Major,Minor,Build,Patch: Integer;
 begin
   Major:=0;
   Minor:=0;
   Build:=0;
-  VersionFromString(VersionSnippet,Major,Minor,Build);
+  Patch:=0;
+  VersionFromString(VersionSnippet,Major,Minor,Build,Patch);
   result:=CalculateFullVersion(Major,Minor,Build);
 end;
 

@@ -241,6 +241,7 @@ const
   _ENDFINAL                = 'End';
   _END                     = _ENDFINAL+_SEP;
 
+  URL_ERROR                = 'sources error (URL mismatch)';
 
 type
   TARMARCH  = (default,armel,armeb,armhf);
@@ -3089,7 +3090,7 @@ begin
     Infoln(infotext+'sources ok.',etInfo)
   else
   begin
-    Infoln(infotext+'sources error (URL mismatch).',aEvent);
+    Infoln(infotext+URL_ERROR+'.',aEvent);
     Infoln(infotext+'desired URL='+FURL,aEvent);
     Infoln(infotext+'source URL='+aRepoClient.Repository,aEvent);
 
@@ -3846,7 +3847,7 @@ begin
     FMinorVersion := -1;
     FReleaseVersion := -1;
     FPatchVersion := -1;
-    VersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion);
+    VersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
     FPatchVersion:=GetReleaseCandidateFromSource(FSourceDirectory);
     if FPatchVersion=-1 then FPatchVersion:=ReleaseCandidateFromUrl(FURL);
   end;

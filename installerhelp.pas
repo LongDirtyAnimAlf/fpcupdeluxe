@@ -918,7 +918,7 @@ begin
   LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
   try
     LazVersion:=LazarusConfig.GetVariable(EnvironmentConfig,'EnvironmentOptions/Version/Lazarus');
-    VersionFromString(LazVersion,FMajorVersion,FMinorVersion,FReleaseVersion);
+    VersionFromString(LazVersion,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
   finally
     LazarusConfig.Free;
   end;

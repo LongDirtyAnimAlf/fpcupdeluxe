@@ -30,7 +30,7 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="21">
+    <BuildModes Count="22">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="DefaultQT">
         <MacroValues Count="1">
@@ -698,6 +698,37 @@
           </Other>
         </CompilerOptions>
       </Item21>
+      <Item22 Name="solarisxi386">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-sun"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-sun"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="solaris"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dRemoteLog"/>
+          </Other>
+        </CompilerOptions>
+      </Item22>
       <SharedMatrixOptions Count="4">
         <Item1 ID="784204643275" Modes="DefaultQT,linuxx64QT5,linuxi386QT5,linuxaarch64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item2 ID="322994045052" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>

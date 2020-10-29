@@ -1245,6 +1245,19 @@ begin
   end;
   *)
 
+  if ( Assigned(FPCUpManager) AND (NOT FPCUpManager.SwitchURL) ) then
+  begin
+    if (ExistWordInString(PChar(s),URL_ERROR,[soDown])) then
+    begin
+      s:=
+      'Fpcupdeluxe encountered a (fatal) URL error.' + sLineBreak +
+      'Most common cause: overwtiting an existing install.' + sLineBreak +
+      'Sources with different URL cannot be installed in same directory.' + sLineBreak +
+      'Please select an new install directory when changing versions.';
+      Application.MessageBox(PChar(s), PChar('URL mismatch error'), MB_ICONSTOP);
+    end;
+  end;
+
   if (ExistWordInString(PChar(s),'Error 217',[soDown])) then
   begin
     memoSummary.Lines.Append('We have a fatal FPC runtime error 217: Unhandled exception occurred.');

@@ -1,0 +1,37 @@
+--- win32/win32richmemo.pas	Sun Sep 06 09:11:18 2020
++++ win32/win32richmemo.pas	Tue Oct 27 09:40:56 2020
+@@ -1639,8 +1639,8 @@
+   end;
+   PStreamText = ^TStreamText;
+ 
+-{$IF FPC_FULLVERSION>=30301}
+-function Read(dwCookie:DWORD_PTR; pbBuff:LPBYTE; cb:LONG; var pcb:LONG):DWORD; stdcall;
++{$IF FPC_FULLVERSION>=30200}
++function Read(dwCookie:DWORD; pbBuff:LPBYTE; cb:LONG; var pcb:LONG):DWORD; stdcall;
+ {$ELSE}
+ function Read(dwCookie:PDWORD; pbBuff:LPBYTE; cb:LONG; var pcb:LONG):DWORD; stdcall;
+ {$ENDIF}
+--- win32/win32richmemoproc.pas	Sun Sep 06 09:11:18 2020
++++ win32/win32richmemoproc.pas	Tue Oct 27 09:40:55 2020
+@@ -758,8 +758,8 @@
+     pfnCallback : EDITSTREAMCALLBACK;
+   end;
+   
+-{$IF FPC_FULLVERSION>=30301}
+-function RTFLoadCallback(dwCookie:DWORD_PTR; pbBuff:LPBYTE; cb:LONG; var pcb:LONG):DWORD; stdcall;
++{$IF FPC_FULLVERSION>=30200}
++function RTFLoadCallback(dwCookie:DWORD; pbBuff:LPBYTE; cb:LONG; var pcb:LONG):DWORD; stdcall;
+ {$ELSE}
+ function RTFLoadCallback(dwCookie:PDWORD; pbBuff:LPBYTE; cb:LONG; var pcb:LONG):DWORD; stdcall;
+ {$ENDIF}
+@@ -786,8 +786,8 @@
+   Result := cbs.dwError = 0;
+ end;
+ 
+-{$IF FPC_FULLVERSION>=30301}
+-function RTFSaveCallback(dwCookie:DWORD_PTR; pbBuff:LPBYTE; cb:LONG; var pcb:LONG):DWORD; stdcall;
++{$IF FPC_FULLVERSION>=30200}
++function RTFSaveCallback(dwCookie:DWORD; pbBuff:LPBYTE; cb:LONG; var pcb:LONG):DWORD; stdcall;
+ {$ELSE}
+ function RTFSaveCallback(dwCookie:PDWORD; pbBuff:LPBYTE; cb:LONG; var pcb:LONG):DWORD; stdcall;
+ {$ENDIF}
