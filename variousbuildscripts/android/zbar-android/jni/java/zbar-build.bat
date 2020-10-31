@@ -14,8 +14,8 @@ set java=C:\Program Files\Java\jdk1.8.0_271\bin
 set javac=%java%\javac.exe
 set jar=%java%\jar.exe
 
-call "%javac%" *.java
-call "%jar%" cf zbar.jar *.class
+call "%javac%" net\sourceforge\zbar\*.java
+call "%jar%" cf zbar.jar net\sourceforge\zbar\*.class
 
 if "%OS%"=="Windows_NT" endlocal
 
