@@ -1527,6 +1527,7 @@ begin
       end;
 
       case ModuleName of
+        'awgg'          : FInstaller:=TAWGGInstaller.Create;
         'mORMotPXL'     : FInstaller:=TmORMotPXLInstaller.Create;
         'internettools' : FInstaller:=TInternetToolsInstaller.Create;
       else

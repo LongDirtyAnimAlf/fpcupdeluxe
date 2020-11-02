@@ -1329,9 +1329,9 @@ begin
   if found then Build:=j;
 
   // skip random symbols to move towards next digit
-  //while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
   // skip a single random symbol to move towards next digit
-  if (Length(VersionSnippet)>=i) then Inc(i);
+  //if (Length(VersionSnippet)>=i) then Inc(i);
   // get patch version
   j:=0;
   found:=false;

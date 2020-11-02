@@ -936,6 +936,8 @@ begin
       if AnsiContainsText(line,'parsing used unit ') then exit;
       if AnsiContainsText(line,'extracting ') then exit;
       if AnsiContainsText(line,'directory not found for option') then exit;
+      if AnsiContainsText(line,'hint(s) issued') then exit;
+      if AnsiContainsText(line,'warning(s) issued') then exit;
 
       // during building of lazarus components, default compiler switches cause version and copyright info to be shown
       // do not know if this is allowed, but this version / copyright info is very redundant as it is shown everytime the compiler is called ...

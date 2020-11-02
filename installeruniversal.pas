@@ -141,14 +141,19 @@ type
   end;
 
   { TmORMotPXLInstaller }
-
   TmORMotPXLInstaller = class(TUniversalInstaller)
   public
     function BuildModule(ModuleName: string): boolean; override;
   end;
 
-  { TInternetToolsInstaller }
+  { TAWGGInstaller }
+  TAWGGInstaller = class(TUniversalInstaller)
+  public
+    function BuildModule(ModuleName: string): boolean; override;
+  end;
 
+
+  { TInternetToolsInstaller }
   TInternetToolsInstaller = class(TUniversalInstaller)
   public
     function GetModule(ModuleName: string): boolean; override;
@@ -2293,6 +2298,82 @@ begin
 
     end;
   end;
+end;
+
+function TAWGGInstaller.BuildModule(ModuleName: string): boolean;
+var
+  Workingdir,versionitis_exe:string;
+  idx:integer;
+  sl:TStringList;
+begin
+  result:=inherited;
+  result:=InitModule;
+  if not result then exit;
+
+  //Perform some extra magic for this module
+
+  Workingdir:='';
+
+  idx:=UniModuleList.IndexOf(ModuleName);
+  if idx>=0 then
+  begin
+    sl:=TStringList(UniModuleList.Objects[idx]);
+    Workingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
+    if Workingdir='' then Workingdir:=GetValueFromKey(INSTALLMAGIC,sl);
+    Workingdir:=FixPath(Workingdir);
+    Workingdir:=Workingdir+DirectorySeparator+'src';
+  end;
+
+  Processor.Process.Parameters.Clear;
+  Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
+  Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
+  Processor.Process.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath);
+  Processor.Process.Parameters.Add('--recursive');
+
+  Processor.Process.Parameters.Add(Workingdir+DirectorySeparator+'versionitis.lpi');
+  Processor.Process.Parameters.Add('--build-mode=default');
+
+  Infoln(infotext+Processor.GetExeInfo,etDebug);
+  ProcessorResult:=Processor.ExecuteAndWait;
+  result := (ProcessorResult=0);
+
+  if not result then exit;
+
+  {$ifdef Windows}
+  versionitis_exe:=Workingdir+DirectorySeparator+'win-versionitis'+GetExeExt;
+  FileUtil.CopyFile(Workingdir+DirectorySeparator+'versionitis'+GetExeExt,versionitis_exe);
+  {$else}
+  versionitis_exe:=Workingdir+DirectorySeparator+'versionitis'+GetExeExt;
+  {$endif}
+
+  // Tricky: copy awgg.lpi to prevent failure of versionitis
+  ForceDirectories(Workingdir+DirectorySeparator+'src');
+  FileUtil.CopyFile(Workingdir+DirectorySeparator+'awgg.lpi',Workingdir+DirectorySeparator+'src'+DirectorySeparator+'awgg.lpi');
+  FileUtil.CopyFile(Workingdir+DirectorySeparator+'src'+DirectorySeparator+'versionitis.pas',Workingdir+DirectorySeparator+'versionitis.pas');
+
+  Processor.Process.Parameters.Clear;
+  Processor.Executable := versionitis_exe;
+  Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
+  Processor.Process.Parameters.Add('-verbose');
+
+  Infoln(infotext+Processor.GetExeInfo,etDebug);
+  ProcessorResult:=Processor.ExecuteAndWait;
+  result := (ProcessorResult=0);
+
+  if not result then exit;
+
+  Processor.Process.Parameters.Clear;
+  Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
+  Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
+  Processor.Process.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath);
+  Processor.Process.Parameters.Add('--recursive');
+
+  Processor.Process.Parameters.Add(Workingdir+DirectorySeparator+'awgg.lpr');
+  Processor.Process.Parameters.Add('--build-mode=default');
+
+  Infoln(infotext+Processor.GetExeInfo,etDebug);
+  ProcessorResult:=Processor.ExecuteAndWait;
+  result := (ProcessorResult=0);
 end;
 
 function TInternetToolsInstaller.GetModule(ModuleName: string): boolean;

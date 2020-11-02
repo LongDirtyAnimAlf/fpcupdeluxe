@@ -1000,6 +1000,8 @@ begin
   // localize FPCUPSettings if possible
   if (NOT GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)))
      then GetFPCUPSettings(SafeGetApplicationPath);
+
+  //memoSummary.Lines.Append('Current install drectory: '+sInstallDir);
 end;
 
 
@@ -1550,6 +1552,22 @@ begin
       BG      := clWhite;
       Special := True;
     end;
+  end;
+
+  if (NOT Special)
+  AND
+  (
+    (AnsiStartsStr('FPCupdeluxe basedir:',s))
+    OR
+    (AnsiStartsStr('FPC URL:',s))
+    OR
+    (AnsiStartsStr('Lazarus URL:',s))
+  )
+  then
+  begin
+    FG      := clRed;
+    BG      := clBlack;
+    Special := True;
   end;
 
   if (NOT Special) AND ExistWordInString(PChar(s),'Found valid',[soWholeWord,soDown]) then
@@ -3778,10 +3796,11 @@ begin
 
   AddMessage('FPCUP(deluxe) is starting up.');
   AddMessage('');
+  AddMessage('FPCupdeluxe basedir:       '+FPCupManager.BaseDirectory);
   {$IFDEF MSWINDOWS}
-  AddMessage('Binutils/make dir:     '+FPCupManager.MakeDirectory);
+  AddMessage('Binutils dir:              '+FPCupManager.MakeDirectory);
   {$ENDIF MSWINDOWS}
-  AddMessage('Bootstrap dir:         '+FPCupManager.BootstrapCompilerDirectory);
+  AddMessage('Bootstrap dir:             '+FPCupManager.BootstrapCompilerDirectory);
 
   {$IF (defined(BSD)) and (not defined(Darwin))}
   FPCupManager.FPCOpt:=FPCupManager.FPCOpt+' -Fl/usr/local/lib -Fl/usr/pkg/lib';
@@ -3833,17 +3852,19 @@ begin
     AddMessage('Switching towards old lazarus sequence !!');
   end;
 
-  AddMessage('FPCupdeluxe basedir:   '+FPCupManager.BaseDirectory);
+  AddMessage('');
 
-  AddMessage('FPC URL:               '+FPCupManager.FPCURL);
-  AddMessage('FPC options:           '+FPCupManager.FPCOPT);
-  AddMessage('FPC source directory:  '+FPCupManager.FPCSourceDirectory);
-  AddMessage('FPC install directory: '+FPCupManager.FPCInstallDirectory);
+  AddMessage('FPC URL:                   '+FPCupManager.FPCURL);
+  AddMessage('FPC source directory:      '+FPCupManager.FPCSourceDirectory);
+  AddMessage('FPC install directory:     '+FPCupManager.FPCInstallDirectory);
+  AddMessage('FPC options:               '+FPCupManager.FPCOPT);
+
+  AddMessage('');
 
   AddMessage('Lazarus URL:               '+FPCupManager.LazarusURL);
-  AddMessage('Lazarus options:           '+FPCupManager.LazarusOPT);
   AddMessage('Lazarus source directory:  '+FPCupManager.LazarusSourceDirectory);
   AddMessage('Lazarus install directory: '+FPCupManager.LazarusInstallDirectory);
+  AddMessage('Lazarus options:           '+FPCupManager.LazarusOPT);
 
   AddMessage('');
   AddMessage('Please stand back and enjoy !');
@@ -4112,6 +4133,8 @@ begin
     FPCupManager.FPCOPT:=Form2.FPCOptions;
     {$endif}
   end;
+
+  AddMessage('Current install drectory: '+sInstallDir);
 end;
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;
