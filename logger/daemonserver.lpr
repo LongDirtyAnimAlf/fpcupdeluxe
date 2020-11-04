@@ -48,7 +48,8 @@ begin
   if not DirectoryExists(GetAppConfigDir(False))
      then CreateDir(GetAppConfigDir(False));
   fDataServer := TDataServer.Create(GetAppConfigDir(False)+'data');
-  fHTTPServer := TSQLHttpServer.Create(InttoStr(PORT_DEFAULT),[fDataServer]);
+  // Use apache as proxy ... only listen to localhost !!
+  fHTTPServer := TSQLHttpServer.Create({'127.0.0.1:'+}InttoStr(PORT_DEFAULT_SERVER),[fDataServer]);
 end;
 
 function TTestDaemon.Stop: Boolean;

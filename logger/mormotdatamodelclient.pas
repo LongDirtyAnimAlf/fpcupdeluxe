@@ -16,20 +16,20 @@ type
 
   TDataClient = class(TSQLRestClientHTTP)
   private
-    FConnected:boolean;
-    FUpInfo:TSQLUp;
-    FEnabled:boolean;
-    procedure ClientConnect;
-    procedure ClientGetInfo;
+    FConnected: boolean;
+    FUpInfo:    TSQLUp;
+    FEnabled:   boolean;
+    procedure   ClientConnect;
+    procedure   ClientGetInfo;
   public
     constructor Create; reintroduce;
-    destructor Destroy; override;
-    procedure SendData;
-    procedure ClearExtraData;
-    procedure AddExtraData(aName,aValue:string);
-    property Connected:boolean read FConnected;
-    property UpInfo:TSQLUp read FUpInfo;
-    property Enabled:boolean write FEnabled;
+    destructor  Destroy; override;
+    function    SendData:TID;
+    procedure   ClearExtraData;
+    procedure   AddExtraData(aName,aValue:string);
+    property    Connected:boolean read FConnected;
+    property    UpInfo:TSQLUp read FUpInfo;
+    property    Enabled:boolean write FEnabled;
   end;
 
 
@@ -48,7 +48,7 @@ begin
   FUpInfo.IPV4Address:='';
   VarClear(FUpInfo.FExtraData);
   aModel:=TSQLModel.Create([TSQLUp]);
-  inherited Create(IP_DEFAULT,PORT_DEFAULT,aModel,true,false,'','',5000,5000,5000);
+  inherited Create(IP_DEFAULT,PORT_DEFAULT_CLIENT,aModel,true,false,'','',5000,5000,5000);
 end;
 
 destructor TDataClient.Destroy;
@@ -121,15 +121,16 @@ begin
   VarClear(FUpInfo.FExtraData);
 end;
 
-procedure TDataClient.SendData;
+function TDataClient.SendData:TID;
 begin
+  result:=0;
   if NOT FEnabled then exit;
   ClientConnect;
   if Connected then
   begin
     ClientGetInfo;
     FUpInfo.DateOfUse:=LocalTimeToUniversal(Now);
-    Add(FUpInfo,True);
+    result:=Add(FUpInfo,True);
   end;
 end;
 

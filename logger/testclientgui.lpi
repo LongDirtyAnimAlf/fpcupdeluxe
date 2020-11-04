@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="10"/>
+    <Version Value="12"/>
     <PathDelim Value="\"/>
     <General>
+      <Flags>
+        <CompatibilityMode Value="True"/>
+      </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
       <Title Value="testclientgui"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -18,9 +20,10 @@
       <Version Value="2"/>
     </PublishOptions>
     <RunParams>
-      <local>
-        <FormatVersion Value="1"/>
-      </local>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default"/>
+      </Modes>
     </RunParams>
     <RequiredPackages Count="1">
       <Item1>
@@ -52,8 +55,9 @@
       <Filename Value="bin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-      <OtherUnitFiles Value="mORMot;mORMot\SQLite3;mORMot\CrossPlatform"/>
+      <IncludeFiles Value="$(ProjOutDir);..\..\mORMot"/>
+      <Libraries Value="..\..\mORMot\static\$(TargetCPU)-$(TargetOS)"/>
+      <OtherUnitFiles Value="..\..\mORMot;..\..\mORMot\SQLite3;..\..\mORMot\CrossPlatform"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

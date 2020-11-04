@@ -20,6 +20,7 @@ type
     miMarkDelete: TMenuItem;
     PopupMenu1: TPopupMenu;
     procedure btnConnectClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure miMarkDeleteClick(Sender: TObject);
@@ -49,12 +50,23 @@ uses
 procedure TForm1.btnConnectClick(Sender: TObject);
 begin
   FreeAndNil(aClient);
-  aClient:=TSQLHttpClient.Create(IP_DEFAULT,InttoStr(PORT_DEFAULT),aModel);
+  aClient:=TSQLHttpClient.Create(IP_DEFAULT,InttoStr(PORT_DEFAULT_CLIENT),aModel);
   if aClient.ServerTimeStampSynchronize then
   begin
     FConnected:=aClient.SetUser(USER_DEFAULT,PASS_DEFAULT);
   end;
   if FConnected then GetData;
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+var
+  aUP:TSQLUp;
+begin
+  aUP:=TSQLUp.Create;
+  aUP.UpVersion:='1.10.1a';
+  aClient.Add(aUP,True);
+  Memo1.Lines.Append('New: '+InttoStr(aUP.ID));
+  aUP.Free;
 end;
 
 procedure TForm1.GetData;

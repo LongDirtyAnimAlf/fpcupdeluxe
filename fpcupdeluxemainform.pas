@@ -3789,6 +3789,7 @@ var
   {$endif}
   s:string;
   aLazarusVersion:word;
+  aRecordNumber:PtrUInt;
 begin
   result:=false;
 
@@ -3948,7 +3949,12 @@ begin
 
       {$ifdef RemoteLog}
       aDataClient.UpInfo.LogEntry:='Success !';
-      aDataClient.SendData;
+      aRecordNumber:=aDataClient.SendData;
+      if (aRecordNumber>0) then
+      begin
+        //AddMessage('SUCCESS ! Info has been send to fpcupdeluxe logger.');
+        //AddMessage('');
+      end;
       {$endif}
 
     end;
@@ -4380,8 +4386,8 @@ begin
   if (Form2.SendInfo) then
   begin
     AddMessage('Fpcupdeluxe logging info:');
-    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml',true);
-    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes');
+    AddMessage('fpcuplogger.batterybutcher.com/root/getinfohtml',true);
+    AddMessage('fpcuplogger.batterybutcher.com/root/getinfohtml?ShowErrors=yes');
   end;
 
 end;
