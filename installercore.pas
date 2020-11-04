@@ -207,6 +207,8 @@ const
 
   _DOCKER                  = 'Docker';
 
+  _SUGGESTED               = 'suggestedpackages';
+  _SUGGESTEDADD            = _SUGGESTED+'add';
 
   _UNIVERSALDEFAULT        = 'Universal'+_DEFAULT;
   _FPCCLEANBUILDONLY       = _FPC+_CLEAN+_BUILD+_ONLY;

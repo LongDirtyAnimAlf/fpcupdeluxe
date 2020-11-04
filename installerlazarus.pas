@@ -1758,6 +1758,10 @@ begin
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/History/Item2/Value', 'C:\Users\Public\Documents');
       {$ENDIF MSWINDOWS}
 
+      // Set message filter to none to be able to detect linking errors.
+      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'MsgView/Filters/Filter1/MinUrgency', 'None');
+      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'MsgView/Filters/Filter1/FilterNotesWithoutPos', 'False');
+
       // add default projects path
       DebuggerPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
       ForceDirectoriesSafe(DebuggerPath);

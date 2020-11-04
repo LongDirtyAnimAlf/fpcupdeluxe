@@ -971,6 +971,11 @@ begin
           SortedModules.Delete(i);
           continue;
         end;
+        if (AnsiStartsText(_DECLARE+_SUGGESTED,s)) OR (AnsiStartsText(_DECLARE+_SUGGESTEDADD,s)) then
+        begin
+          SortedModules.Delete(i);
+          continue;
+        end;
         if (AnsiEndsText(_CLEAN,s)) OR (AnsiEndsText(_UNINSTALL,s)) OR (AnsiEndsText(_BUILD+_ONLY,s)) then
         begin
           SortedModules.Delete(i);
@@ -4031,7 +4036,8 @@ begin
   begin
     with TIniFile.Create(IniDirectory+installerUniversal.DELUXEFILENAME) do
     try
-
+      AddMessage('Current install drectory: '+sInstallDir);
+      AddMessage('');
       AddMessage('Got settings from install directory');
       AddMessage('');
 
@@ -4133,14 +4139,13 @@ begin
   end
   else
   begin
+    AddMessage('Current install drectory: '+sInstallDir);
     {$ifdef Solaris}
     // current trunk does not build with the standard -O2, so use -O1 for all
     Form2.FPCOptions:='-g -gl -O1';
     FPCupManager.FPCOPT:=Form2.FPCOptions;
     {$endif}
   end;
-
-  AddMessage('Current install drectory: '+sInstallDir);
 end;
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;

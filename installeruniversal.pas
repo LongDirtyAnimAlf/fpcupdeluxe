@@ -965,7 +965,7 @@ begin
       //So, take responsibility of correct install
       //All other packages are users responsibility !
 
-      if LowerCase(ModuleName)='suggestedpackages' then
+      if ModuleName=_SUGGESTED then
       begin
 
         {$ifdef Darwin}
