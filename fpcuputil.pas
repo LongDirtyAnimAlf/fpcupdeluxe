@@ -3045,6 +3045,15 @@ begin
   end;
   result:=Trim(s);
 end;
+function GetDarwinSDKLocation:string;
+var
+  Output:string;
+begin
+  Output:='';
+  RunCommand('xcrun',['--show-sdk-path'], Output);
+  if (Length(Output)>0) then
+    result:=Trim(Output);
+end;
 {$endif}
 
 function GetAndroidSDKDir:string;

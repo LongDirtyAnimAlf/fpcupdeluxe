@@ -1613,6 +1613,12 @@ begin
     end;
     }
   end;
+
+  s2:=GetDarwinSDKLocation;
+  if Length(s2)>0 then
+  begin
+    s1:='-Fl'+s2+'/usr/lib '+s1;
+  end;
   {$ENDIF}
 
   // Revision should be something like : "[r]123456" !!
@@ -3707,6 +3713,7 @@ begin
           else
             ConfigText.Append('-WM'+s);
           ConfigText.Append('#ENDIF');
+
           {
           if CompareVersionStrings(s,'10.14')>=0 then
           begin
@@ -3726,6 +3733,14 @@ begin
             //ConfigText.Append('-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk');
           end;
           }
+
+          s:=GetDarwinSDKLocation;
+          if Length(s)>0 then
+          begin
+            ConfigText.Append('# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory');
+            ConfigText.Append('-Fl'+s+'/usr/lib');
+          end;
+
           ConfigText.Append('#ENDIF');
         end;
         {$endif Darwin}
