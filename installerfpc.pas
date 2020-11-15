@@ -959,19 +959,6 @@ begin
                Options:=Options+' -dFPC_USE_LIBC';
           {$endif}
 
-          // Revision should be something like : "[r]123456" !!
-          if (Length(ActualRevision)<2) OR (ActualRevision='failure') OR (NOT (ActualRevision[2] in ['0'..'9'])) then
-          begin
-            s2:=GetRevision(ModuleName);
-            if (Length(s2)>0) then FActualRevision:=s2;
-          end;
-
-          if (Length(ActualRevision)>1) AND (ActualRevision<>'failure') then
-          begin
-            Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
-            Processor.Process.Parameters.Add('REVINC=force');
-          end;
-
           {$ifdef solaris}
           {$IF defined(CPUX64) OR defined(CPUX86)}
           //Still not sure if this is needed
@@ -3700,12 +3687,13 @@ begin
         {$ENDIF UNIX}
 
         {$ifdef Darwin}
+        ConfigText.Append('# Add some extra OSX options');
+        ConfigText.Append('#IFDEF DARWIN');
+
         s:=GetDarwinSDKVersion('macosx');
         if Length(s)>0 then
         begin
-          ConfigText.Append('# Add minimum required OSX version for native compiling');
           ConfigText.Append('# Prevents crti not found linking errors');
-          ConfigText.Append('#IFDEF DARWIN');
           ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
           //ConfigText.Append('#IFDEF CPU'+UpperCase(GetTargetCPU));
           if CompareVersionStrings(s,'10.8')>=0 then
@@ -3713,36 +3701,16 @@ begin
           else
             ConfigText.Append('-WM'+s);
           ConfigText.Append('#ENDIF');
-
-          {
-          if CompareVersionStrings(s,'10.14')>=0 then
-          begin
-            ConfigText.Append('# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory');
-            ConfigText.Append('-FD/Library/Developer/CommandLineTools/usr/bin');
-            ConfigText.Append('#ifdef cpui386');
-            ConfigText.Append('-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib');
-            ConfigText.Append('#endif');
-            ConfigText.Append('#ifndef cpui386');
-            ConfigText.Append('#ifndef cpupowerpc');
-            ConfigText.Append('#ifndef cpupowerpc64');
-            ConfigText.Append('-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk');
-            ConfigText.Append('#endif');
-            ConfigText.Append('#endif');
-            ConfigText.Append('#endif');
-            //ConfigText.Append('-FD/Library/Developer/CommandLineTools/usr/bin');
-            //ConfigText.Append('-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk');
-          end;
-          }
-
-          s:=GetDarwinSDKLocation;
-          if Length(s)>0 then
-          begin
-            ConfigText.Append('# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory');
-            ConfigText.Append('-Fl'+s+'/usr/lib');
-          end;
-
-          ConfigText.Append('#ENDIF');
         end;
+
+        s:=GetDarwinSDKLocation;
+        if Length(s)>0 then
+        begin
+          ConfigText.Append('# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory');
+          ConfigText.Append('-Fl'+s+'/usr/lib');
+        end;
+
+        ConfigText.Append('#ENDIF');
         {$endif Darwin}
 
         {$ifndef FPCONLY}

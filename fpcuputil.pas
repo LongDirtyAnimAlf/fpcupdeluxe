@@ -359,6 +359,7 @@ function IsLinuxMUSL:boolean;
 function GetLogicalCpuCount: integer;
 {$ifdef Darwin}
 function GetDarwinSDKVersion(aSDK: string):string;
+function GetDarwinSDKLocation:string;
 {$endif}
 function GetAndroidSDKDir:string;
 function GetAndroidNDKDir:string;
@@ -3679,7 +3680,7 @@ end;
 
 function GetDistro:string;
 var
-  Major,Minor,Build,i,j: Integer;
+  Major,Minor,Build,Patch,i,j: Integer;
   AllOutput : TStringList;
   s,t:ansistring;
   success:boolean;
@@ -3782,7 +3783,7 @@ begin
       begin
         if Length(s)>0 then
         begin
-          VersionFromString(s,Major,Minor,Build);
+          VersionFromString(s,Major,Minor,Build,Patch);
           t:=t+' '+InttoStr(Major)+'.'+InttoStr(Minor)+'.'+InttoStr(Build);
         end;
       end;
