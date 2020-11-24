@@ -2387,7 +2387,7 @@ var
   aCompilerArchive,aStandardCompilerArchive:string;
   aCompilerFound,aFPCUPCompilerFound, aLookForBetterAlternative:boolean;
   {$IFDEF FREEBSD}
-  l,FreeBSDVersion:integer;
+  FreeBSDVersion:integer;
   {$ENDIF}
   s:string;
   {$ifdef Darwin}
