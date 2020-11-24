@@ -189,8 +189,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot;..\mORMot\SQLite3;..\mORMot\CrossPlatform"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>

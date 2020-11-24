@@ -6,11 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, Types, Buttons, Menus, ComCtrls, SynEdit, SynEditPopup,
-  SynEditMiscClasses,
-  {%H-}SynGutterBase, {%H-}SynGutterMarks, {%H-}SynGutterLineNumber,
-  {%H-}SynGutterChanges, {%H-}SynGutter,
-  SynGutterCodeFolding,
+  ExtCtrls, Types, Buttons, Menus, ComCtrls,
+  SynEdit, SynEditMiscClasses, SynEditPopup,
   installerManager
   {$ifdef usealternateui},alternateui{$endif}
   ,LMessages
@@ -2491,7 +2488,7 @@ begin
       OR (FPCupManager.CrossOS_Target=TOS.haiku)
       then
       begin
-        s:='Be forwarned: this will only work with [FPC >= 3.2] / [embedded] / [trunk].' + sLineBreak +
+        s:='Be forwarned: this will only work with FPC [(>= 3.2) OR (embedded) OR (trunk)].' + sLineBreak +
            'Do you want to continue ?';
       end;
 
@@ -2503,7 +2500,7 @@ begin
 
       if warning then
       begin
-        s:='Be forwarned: this will only work with [FPC >= 3.3] / [embedded] / [trunk].' + sLineBreak +
+        s:='Be forwarned: this will only work with FPC [(>= 3.3) OR (embedded) OR (trunk)].' + sLineBreak +
            'Do you want to continue ?';
       end;
 
