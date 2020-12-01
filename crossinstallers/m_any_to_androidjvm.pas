@@ -83,7 +83,6 @@ begin
   if result then exit;
 
   FBinUtilsPath:='';
-  FBinUtilsPrefix:='';
 
   result:=CheckJava;
   if result then

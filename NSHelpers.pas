@@ -33,20 +33,8 @@ interface
 uses
   CFBase,
   CFString,
-{$IF DEFINED(IPHONESIM) OR DEFINED(CPUARM) OR DEFINED(CPUAARCH64)}  //iOS
- {$IFDEF NoiPhoneAll}
-  Foundation;
- {$ELSE}
-  iPhoneAll;
- {$ENDIF}
-{$ELSE}  //macOS
- {$IFDEF NoCocoaAll}
-  Foundation;
- {$ELSE}
   CocoaAll;
- {$ENDIF}
-{$ENDIF}
-  
+
  {Routines to convert CFString to and from:
    - AnsiString with specified encoding
    - string with specified encoding

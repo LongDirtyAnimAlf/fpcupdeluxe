@@ -21,19 +21,7 @@ uses
   SysUtils,
   Classes,
   httpdefs,
-{$IF DEFINED(IPHONESIM) OR DEFINED(CPUARM) OR DEFINED(CPUAARCH64)}  //iOS
- {$IFDEF NoiPhoneAll}
-  Foundation,
- {$ELSE}
-  iPhoneAll,
- {$ENDIF}
-{$ELSE}  //macOS
- {$IFDEF NoCocoaAll}
-  Foundation,
- {$ELSE}
   CocoaAll,
- {$ENDIF}
-{$ENDIF}
   NSHelpers;
 
 type

@@ -120,6 +120,12 @@ begin
     else
       break;
 
+    {$IFDEF DARWIN}
+    if not FileExists(FRepoExecutable)
+       then FRepoExecutable := '/Library/Developer/CommandLineTools/usr/bin/svn'
+       else break;
+    {$ENDIF}
+
     {$IFDEF MSWINDOWS}
     // Some popular locations for SlikSVN, Subversion, and TortoiseSVN:
     // Covers both 32 bit and 64 bit Windows.

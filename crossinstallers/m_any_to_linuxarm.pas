@@ -125,7 +125,7 @@ begin
 
   if (NOT requirehardfloat) then
   begin
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    AsFile:=BinUtilsPrefix+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
       result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -293,7 +293,7 @@ begin
 
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
-    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
+    AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
 
     // Set some defaults if user hasn't specified otherwise
     // Architecture: e.g. ARMv6, ARMv7,...

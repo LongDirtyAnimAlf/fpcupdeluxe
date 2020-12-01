@@ -118,7 +118,7 @@ begin
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/powerpc-darwin-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/'+RegisterName+'-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
@@ -130,60 +130,77 @@ begin
   if result then
   begin
     FLibsFound:=True;
-
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
 
-    // specialities for osxcross
-    //if Pos('osxcross',FLibsPath)>0 then
-    begin
-      s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
-      s:=ExpandFileName(s);
-      s:=ExcludeTrailingBackslash(s);
+    s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
+    s:=ExpandFileName(s);
+    s:=ExcludeTrailingBackslash(s);
 
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
-      AddFPCCFGSnippet('-k-framework -kAppKit');
-      AddFPCCFGSnippet('-k-framework -kFoundation');
-      AddFPCCFGSnippet('-k-framework -kCoreFoundation');
-      //AddFPCCFGSnippet('-k-framework -kQuartz');
-      AddFPCCFGSnippet('-k-framework -kApplicationServices');
-      AddFPCCFGSnippet('-k-syslibroot -k'+s);
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
+    AddFPCCFGSnippet('-k-framework -kAppKit');
+    AddFPCCFGSnippet('-k-framework -kFoundation');
+    AddFPCCFGSnippet('-k-framework -kCoreFoundation');
+    AddFPCCFGSnippet('-k-framework -kApplicationServices');
+    AddFPCCFGSnippet('-k-syslibroot -k'+s);
+
+    if TargetCPU=TCPU.powerpc64 then
+      AddFPCCFGSnippet('-k-arch -kppc64');
+    if TargetCPU=TCPU.powerpc then
       AddFPCCFGSnippet('-k-arch -kppc');
 
-      AddFPCCFGSnippet('-XR'+s);
-    end;
+    AddFPCCFGSnippet('-Xd');
+    AddFPCCFGSnippet('-XR'+s);
+  end
+  else
+  begin
+    ShowInfo('Hint: https://github.com/phracker/MacOSX-SDKs');
+    ShowInfo('Hint: https://github.com/alexey-lysiuk/macos-sdk');
+    ShowInfo('Hint: https://github.com/sirgreyhat/MacOSX-SDKs/releases');
   end;
 end;
 
 function Tany_darwinpowerpc.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
-  BinPrefixTry: string;
   i:integer;
 begin
   result:=inherited;
+
   if result then exit;
 
-  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-
-  result:=SearchBinUtil(BasePath,AsFile);
+  // Now start with the normal search sequence
   if not result then
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-  BinPrefixTry:='powerpc-apple-darwin';
-
-  for i:=15 downto 8 do
   begin
+    AsFile:=FBinUtilsPrefix+SEARCHFILE+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
     if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
+
+  if (not result) then
+  begin
+    for i:=MAXDARWINVERSION downto MINDARWINVERSION do
     begin
-      AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+      if i=MINDARWINVERSION then
+        AsFile:=BinUtilsPrefix
+      else
+        AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(i),[]);
+      AsFile:=AsFile+SEARCHFILE+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
       if not result then
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-      if result then
-      begin
-        FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
-        break;
-      end;
+      if result then break;
+    end;
+  end;
+
+  if result then
+  begin
+    // Remove the searchfile itself to get the binutils prefix
+    i:=Pos(SEARCHFILE+GetExeExt,AsFile);
+    if i>0 then
+    begin
+      Delete(AsFile,i,MaxInt);
+      FBinUtilsPrefix:=AsFile;
     end;
   end;
 
@@ -196,7 +213,7 @@ begin
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XX');
     AddFPCCFGSnippet('-CX');
-    AddFPCCFGSnippet('-Xd');
+    //AddFPCCFGSnippet('-Xd');
     //AddFPCCFGSnippet('-gw');
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
   end;

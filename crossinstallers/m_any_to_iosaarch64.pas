@@ -156,7 +156,7 @@ begin
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/arm-darwin-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/'+RegisterName+'-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
@@ -177,6 +177,7 @@ begin
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
     AddFPCCFGSnippet('-k-framework -kFoundation');
     AddFPCCFGSnippet('-k-framework -kCoreFoundation');
+    AddFPCCFGSnippet('-Xd');
     AddFPCCFGSnippet('-XR'+s);
 
     //Add minimal iOS version
@@ -199,21 +200,39 @@ end;
 function Tany_iosaarch64.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
-  BinPrefixTry: string;
-  aOption:string;
+  //aOption:string;
   i:integer;
 begin
   result:=inherited;
+
   if result then exit;
 
-  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-
-  result:=SearchBinUtil(BasePath,AsFile);
+  {$ifdef Windows}
   if not result then
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  begin
+    // Search in special Apple directory
+    AsFile:=LDSEARCHFILE+GetExeExt;
+    result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
+  end;
+  if not result then
+  begin
+    // Search in special Darwin directory
+    AsFile:=SEARCHFILE+GetExeExt;
+    result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
+  end;
+  {$endif}
 
-  // Also allow for (cross)binutils from https://github.com/tpoechtrager/cctools
-  BinPrefixTry:=TargetCPUName+'-apple-darwin';
+  // Now start with the normal search sequence
+  if not result then
+  begin
+    AsFile:=BinUtilsPrefix+SEARCHFILE+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
+
+  // See https://en.wikipedia.org/wiki/Darwin_%28operating_system%29#Release_history
+  // Shows relation between macOS and Darwin versions
 
   {
   10.4  = darwin8
@@ -231,17 +250,29 @@ begin
   begin
     if not result then
     begin
-      AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+      if i=MINDARWINVERSION then
+        AsFile:=BinUtilsPrefix
+      else
+        AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(i),[]);
+      AsFile:=AsFile+SEARCHFILE+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
       if not result then
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
       if not result then
         result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
-      if result then
-      begin
-        FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
-        break;
-      end;
+      if result then break;
+    end;
+  end;
+
+  if result then
+  begin
+    // Remove the searchfile itself to get the binutils prefix
+    i:=Pos(SEARCHFILE+GetExeExt,AsFile);
+    if i<1 then i:=Pos(LDSEARCHFILE+GetExeExt,AsFile);
+    if i>0 then
+    begin
+      Delete(AsFile,i,MaxInt);
+      FBinUtilsPrefix:=AsFile;
     end;
   end;
 

@@ -58,15 +58,19 @@ end;
 
 function Tany_darwinpowerpc64.GetLibs(Basepath:string): boolean;
 const
+  OSNAME='MacOSX';
   LibName='libc.dylib';
 var
   s:string;
-  i,aVersion:integer;
-  aOption:string;
+  SDKVersion:string;
+  i,j,k:integer;
+  found:boolean;
 begin
   result:=FLibsFound;
 
   if result then exit;
+
+  found:=false;
 
   // begin simple: check presence of library file in basedir
   if not result then
@@ -87,37 +91,45 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
-  // also for osxcross
+  // also for cctools
   if not result then
   begin
-    for aVersion:=15 downto 3 do
+    for i:=10 downto MINOSXVERSION do
     begin
-      s:='MacOSX10.'+InttoStr(aVersion);
-      result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'u.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'u.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
-
-      //universal libs ?
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,'powerpc-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,'powerpc-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
-
-      if result then
+      if found then break;
+      for j:=5 downto -1 do
       begin
-        i:=StringListStartsWith(FCrossOpts,'-WM');
-        if i=-1 then
+        if found then break;
+        for k:=15 downto -1 do
         begin
-          aOption:='-WM'+'10.'+InttoStr(aVersion);
-          FCrossOpts.Add(aOption+' ');
-          ShowInfo('Did not find any -WM; using '+aOption+'.',etInfo);
-        end else aOption:=Trim(FCrossOpts[i]);
-        AddFPCCFGSnippet(aOption);
-        break;
+          if found then break;
+          s:=InttoStr(i);
+          if j<>-1 then
+          begin
+            s:=s+'.'+InttoStr(j);
+            if k<>-1 then s:=s+'.'+InttoStr(k);
+          end;
+          SDKVersion:=s;
+
+          s:=ConcatPaths([DirName,OSNAME+SDKVersion+'.sdk','usr','lib']);
+          result:=SimpleSearchLibrary(BasePath,s,LibName);
+          if not result then
+             result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+
+          if (not result) then
+          begin
+            if TargetCPU=TCPU.powerpc64 then
+            begin
+              // universal libs : also search in powerpc-targetos
+              s:=ConcatPaths(['powerpc-'+TargetOSName,OSNAME+SDKVersion+'.sdk','usr','lib']);
+              result:=SimpleSearchLibrary(BasePath,s,LibName);
+              if not result then
+                 result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+            end;
+          end;
+
+          if result then found:=true;
+        end;
       end;
     end;
   end;
@@ -125,7 +137,7 @@ begin
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/powerpc64-darwin-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/'+RegisterName+'-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
@@ -137,76 +149,95 @@ begin
   if result then
   begin
     FLibsFound:=True;
-
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
 
-    // specialities for osxcross
-    //if Pos('osxcross',FLibsPath)>0 then
-    begin
-      s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
-      s:=ExpandFileName(s);
-      s:=ExcludeTrailingBackslash(s);
+    s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
+    s:=ExpandFileName(s);
+    s:=ExcludeTrailingBackslash(s);
 
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
-      AddFPCCFGSnippet('-k-framework -kAppKit');
-      AddFPCCFGSnippet('-k-framework -kFoundation');
-      AddFPCCFGSnippet('-k-framework -kCoreFoundation');
-      //AddFPCCFGSnippet('-k-framework -kQuartz');
-      AddFPCCFGSnippet('-k-framework -kApplicationServices');
-      AddFPCCFGSnippet('-k-syslibroot -k'+s);
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
+    AddFPCCFGSnippet('-k-framework -kAppKit');
+    AddFPCCFGSnippet('-k-framework -kFoundation');
+    AddFPCCFGSnippet('-k-framework -kCoreFoundation');
+    AddFPCCFGSnippet('-k-framework -kApplicationServices');
+    AddFPCCFGSnippet('-k-syslibroot -k'+s);
+
+    if TargetCPU=TCPU.powerpc64 then
       AddFPCCFGSnippet('-k-arch -kppc64');
+    if TargetCPU=TCPU.powerpc then
+      AddFPCCFGSnippet('-k-arch -kppc');
 
-      AddFPCCFGSnippet('-XR'+s);
-    end;
+    AddFPCCFGSnippet('-Xd');
+    AddFPCCFGSnippet('-XR'+s);
+  end
+  else
+  begin
+    ShowInfo('Hint: https://github.com/phracker/MacOSX-SDKs');
+    ShowInfo('Hint: https://github.com/alexey-lysiuk/macos-sdk');
+    ShowInfo('Hint: https://github.com/sirgreyhat/MacOSX-SDKs/releases');
   end;
 end;
 
 function Tany_darwinpowerpc64.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
-  BinPrefixTry: string;
   i:integer;
 begin
   result:=inherited;
   if result then exit;
 
-  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-
-  result:=SearchBinUtil(BasePath,AsFile);
+  // Now start with the normal search sequence
   if not result then
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-  BinPrefixTry:='powerpc64-apple-darwin';
-
-  for i:=15 downto 8 do
   begin
+    AsFile:=FBinUtilsPrefix+SEARCHFILE+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
     if not result then
-    begin
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
 
-      AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+  if (not result) then
+  begin
+    for i:=MAXDARWINVERSION downto MINDARWINVERSION do
+    begin
+      if i=MINDARWINVERSION then
+        AsFile:=BinUtilsPrefix
+      else
+        AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(i),[]);
+      AsFile:=AsFile+SEARCHFILE+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
       if not result then
-         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-      if result then
-      begin
-        FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
-        break;
-      end;
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if result then break;
+    end;
+  end;
 
-      //universal bins ?
-      if not result then
+  if (not result) then
+  begin
+    if TargetCPU=TCPU.powerpc64 then
+    begin
+      // universal binaries
+      for i:=MAXDARWINVERSION downto MINDARWINVERSION do
       begin
-        AsFile:='powerpc-apple-darwin'+InttoStr(i)+'-'+'as'+GetExeExt;
-        result:=SearchBinUtil(BasePath,AsFile);
-        if not result then
-          result:=SimpleSearchBinUtil(BasePath,'powerpc-darwin',AsFile);
-        if result then
-        begin
-          FBinUtilsPrefix:='powerpc-apple-darwin'+InttoStr(i)+'-';
-          break;
-        end;
+        if i=MINDARWINVERSION then
+          AsFile:=BinUtilsPrefix
+        else
+          AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(i),[]);
+        AsFile:=StringReplace(AsFile,TargetCPUName,'powerpc',[]);
+        AsFile:=AsFile+SEARCHFILE+GetExeExt;
+        result:=SimpleSearchBinUtil(BasePath,'powerpc-'+TargetOSName,AsFile);
+        if result then break;
       end;
+    end;
+  end;
 
+  if result then
+  begin
+    // Remove the searchfile itself to get the binutils prefix
+    i:=Pos(SEARCHFILE+GetExeExt,AsFile);
+    if i>0 then
+    begin
+      Delete(AsFile,i,MaxInt);
+      FBinUtilsPrefix:=AsFile;
     end;
   end;
 
@@ -219,7 +250,7 @@ begin
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XX');
     AddFPCCFGSnippet('-CX');
-    AddFPCCFGSnippet('-Xd');
+    //AddFPCCFGSnippet('-Xd');
     //AddFPCCFGSnippet('-gw');
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
   end;

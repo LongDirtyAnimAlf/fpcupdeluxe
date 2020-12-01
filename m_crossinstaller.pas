@@ -41,12 +41,16 @@ uses
 const
   ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
     'todo: specify what exactly is missing';
+
   MAXDARWINVERSION=20;
-  MINDARWINVERSION=9;
+  MINDARWINVERSION=7;
+
   MAXOSXVERSION=11;
   MINOSXVERSION=10;
+
   MAXIOSVERSION=14;
   MINIOSVERSION=8;
+
   MAXDELPHIVERSION=22;
   MINDELPHIVERSION=12;
   NDKVERSIONNAMES:array[0..21] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e','11','11b','11c','12','12b');
@@ -87,6 +91,8 @@ const
   CROSSBINPATH   = CROSSPATH+DirectorySeparator+'bin';
   CROSSLIBPATH   = CROSSPATH+DirectorySeparator+'lib';
 
+  LDSEARCHFILE='ld';
+  SEARCHFILE='as';
 
 type
   TCPU = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa);
@@ -107,9 +113,9 @@ type
     function GetTargetCPUName:string;
     function GetTargetOSName:string;
   protected
+    FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
     FBinutilsPathInPath: boolean;
-    FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
     FBinUtilsDirectoryID: string; //where to find the binutils themselves
     FCompilerUsed: CompilerType;
     FSearchMode: SearchMode;
@@ -581,13 +587,16 @@ begin
   FRegisterName:=TargetCPUName+'-'+TargetOSName;
   FBinUtilsDirectoryID:=FRegisterName;
 
-  if TargetOS=TOS.android then
-    FBinUtilsPrefix:=TargetCPUName+'-linux-'+TargetOSName+'-' //standard eg in Android NDK 9
-  else
-  if TargetOS=TOS.ios then
-    FBinUtilsPrefix:=TargetCPUName+'-apple-'+TargetOSName+'-' //standard Apple triplet
+  case TargetOS of
+    TOS.android: FBinUtilsPrefix:=TargetCPUName+'-linux-'+TargetOSName+'-'; //standard eg in Android NDK 9
+    TOS.darwin,TOS.ios:FBinUtilsPrefix:=TargetCPUName+'-apple-'+TargetOSName+'-'; //standard Apple triplet
   else
     FBinUtilsPrefix:=TargetCPUName+'-'+TargetOSName+'-'; //normal binutils prefix name
+  end;
+
+  case TargetCPU of
+    TCPU.jvm: FBinUtilsPrefix:='';
+  end;
 
   FBinutilsPathInPath:=false; //don't add binutils directory to path when cross compiling
 

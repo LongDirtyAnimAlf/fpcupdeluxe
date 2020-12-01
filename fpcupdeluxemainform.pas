@@ -2697,6 +2697,7 @@ begin
 
       // use the available source to build the cross-compiler ... change nothing about source and url !!
       FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;//'FPCCleanOnly,FPCBuildOnly';
+      //FPCupManager.OnlyModules:=_FPC+_BUILD+_ONLY;
 
       // handle inclusion of LCL when cross-compiling
       IncludeLCL:=Form2.IncludeLCL;

@@ -218,7 +218,7 @@ begin
   result:=inherited;
   if result then exit;
 
-  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(Basepath,AsFile);
 
@@ -379,7 +379,7 @@ begin
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
       '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+
-      '-XP'+FBinUtilsPrefix; {Prepend the binutils names};
+      '-XP'+BinUtilsPrefix; {Prepend the binutils names};
   end
   else
   begin

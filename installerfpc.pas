@@ -745,11 +745,15 @@ begin
           Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
 
           //Still not clear if jobs can be enabled for crosscompiler builds ... :-|
+          //However, on Windows, erroros occur frequently due to more jobs.
+          //So, again, disabling for the time being.
+          {
           if (NOT FNoJobs) then
           begin
             Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
             Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
           end;
+          }
 
           Processor.Process.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Process.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
@@ -1051,7 +1055,7 @@ begin
           if CrossInstaller.BinUtilsPath<>''then
           begin
              {$ifdef Darwin}
-             //if (CrossInstaller.TargetOS='iphonesim') then
+             //if (CrossInstaller.TargetOS=TOS.iphonesim) then
              begin
                CrossOptions:=CrossOptions+' -FD'+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath);
                {
@@ -1063,6 +1067,7 @@ begin
                }
              end;
              {$else}
+             //CrossOptions:=CrossOptions+' -FD'+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath);
              //just for testing/debugging
              //Options:=Options+' -sh -s-';
              {$endif}

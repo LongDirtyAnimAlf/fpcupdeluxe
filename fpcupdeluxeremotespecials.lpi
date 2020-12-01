@@ -29,7 +29,7 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="16">
+    <BuildModes Count="17">
       <Item1 Name="default" Default="True"/>
       <Item2 Name="debug">
         <CompilerOptions>
@@ -262,7 +262,40 @@ if TargetOS=&apos;openbsd&apos; then
           </Other>
         </CompilerOptions>
       </Item8>
-      <Item9 Name="darwin64QT5">
+      <Item9 Name="darwinarm64cocoa">
+        <MacroValues Count="1">
+          <Macro2 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-cocoa"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-cocoa"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="aarch64"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dRemoteLog"/>
+          </Other>
+        </CompilerOptions>
+      </Item9>
+      <Item10 Name="darwin64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -315,8 +348,8 @@ if TargetOS=&apos;openbsd&apos; then
 -kAGL"/>
           </Other>
         </CompilerOptions>
-      </Item9>
-      <Item10 Name="openbsdx64">
+      </Item10>
+      <Item11 Name="openbsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -346,8 +379,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item10>
-      <Item11 Name="openbsd32">
+      </Item11>
+      <Item12 Name="openbsd32">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -377,8 +410,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item11>
-      <Item12 Name="haiku32QT5">
+      </Item12>
+      <Item13 Name="haiku32QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -419,8 +452,8 @@ if TargetOS=&apos;openbsd&apos; then
 -k~/config/non-packaged/lib"/>
           </Other>
         </CompilerOptions>
-      </Item12>
-      <Item13 Name="haiku64QT5">
+      </Item13>
+      <Item14 Name="haiku64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -461,8 +494,8 @@ if TargetOS=&apos;openbsd&apos; then
 -k~/config/non-packaged/lib"/>
           </Other>
         </CompilerOptions>
-      </Item13>
-      <Item14 Name="darwinppccarbon">
+      </Item14>
+      <Item15 Name="darwinppccarbon">
         <MacroValues Count="1">
           <Macro3 Name="LCLWidgetType" Value="carbon"/>
         </MacroValues>
@@ -495,8 +528,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item14>
-      <Item15 Name="darwinppccocoa">
+      </Item15>
+      <Item16 Name="darwinppccocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -529,8 +562,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item15>
-      <Item16 Name="darwinppc64cocoa">
+      </Item16>
+      <Item17 Name="darwinppc64cocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -563,10 +596,10 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item16>
+      </Item17>
       <SharedMatrixOptions Count="3">
         <Item1 ID="784204643275" Modes="darwin64QT5,haiku32QT5,haiku64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
-        <Item2 ID="322994045052" Modes="darwin32cocoa,darwin64cocoa,darwinppc64cocoa,darwinppccocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item2 ID="322994045052" Modes="darwin32cocoa,darwin64cocoa,darwinppc64cocoa,darwinppccocoa,darwinarm64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
         <Item3 ID="015223611220" Modes="darwin32carbon,darwinppccarbon" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
       </SharedMatrixOptions>
     </BuildModes>

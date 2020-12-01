@@ -37,6 +37,8 @@ unit fpcuputil;
 {$define ENABLECURL}
 {$define ENABLENATIVE}
 
+{.$define ENABLEEMAIL}
+
 {$ifdef Haiku}
 // synaser does not compile under Haiku
 {$undef ENABLENATIVE}
@@ -443,7 +445,10 @@ uses
   //,SynCrtSock // SendEmail from the mORMot
   //,LCLIntf // OpenURL
   {$ifndef Haiku}
-  ,mimemess,mimepart,ssl_openssl,smtpsend
+  {$ifdef ENABLEEMAIL}
+  ,mimemess,mimepart,smtpsend
+  {$endif}
+  ,ssl_openssl
   {$endif}
   ,process
   ,processutils
@@ -466,7 +471,9 @@ const
   {$ENDIF MSWINDOWS}
 
 {$i revision.inc}
+{$ifdef ENABLEEMAIL}
 {$i secrets.inc}
+{$endif}
 
 type
   TOnWriteStream = procedure(Sender: TObject; APos: Int64) of object;
@@ -3969,6 +3976,7 @@ begin
   {$ENDIF}
 end;
 
+{$ifdef ENABLEEMAIL}
 function DoRead(Ptr : Pointer; Size : size_t; nmemb: size_t; Data : Pointer) : size_t;cdecl;
 begin
   if Data=nil then result:=0 else
@@ -4103,6 +4111,12 @@ begin
   end;
   {$endif}
 end;
+{$else}
+function SendMail (Host, Subject, pTo, From, login,password: string; Body: TStrings):boolean;
+begin
+  result:=true;
+end;
+{$endif}
 
 {TNormalUnzipper}
 
