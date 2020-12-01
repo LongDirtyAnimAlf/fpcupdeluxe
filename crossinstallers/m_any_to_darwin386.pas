@@ -39,14 +39,18 @@ uses
 implementation
 
 uses
-  FileUtil, m_crossinstaller, fpcuputil;
+  m_crossinstaller, m_any_to_apple_base;
 
 type
 
 { Tany_darwin386 }
-Tany_darwin386 = class(TCrossInstaller)
+Tany_darwin386 = class(Tany_apple)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
+protected
+  function GetOSName:string;override;
+  function GetLibName:string;override;
+  function GetTDBLibName:string;override;
 public
   function GetLibs(Basepath:string):boolean;override;
   function GetBinUtils(Basepath:string):boolean;override;
@@ -56,253 +60,27 @@ end;
 
 { Tany_darwin386 }
 
-function Tany_darwin386.GetLibs(Basepath:string): boolean;
-const
-  OSNAME='MacOSX';
-  LibName='libc.dylib';
-var
-  s:string;
-  SDKVersion:string;
-  i,j,k:integer;
-  found:boolean;
+function Tany_darwin386.GetOSName:string;
 begin
-  result:=FLibsFound;
+  result:='MacOSX';
+end;
+function Tany_darwin386.GetLibName:string;
+begin
+  result:='libc.dylib';
+end;
+function Tany_darwin386.GetTDBLibName:string;
+begin
+  result:='libc.tbd';
+end;
 
-  if result then exit;
-
-  found:=false;
-
-  // begin simple: check presence of library file in basedir
-  if not result then
-    result:=SearchLibrary(Basepath,LibName);
-
-  // for osxcross with special libs: search also for libc.tbd
-  if not result then
-    result:=SearchLibrary(Basepath,'libc.tbd');
-
-  if not result then
-    result:=SearchLibrary(IncludeTrailingPathDelimiter(Basepath)+'usr'+DirectorySeparator+'lib',LibName);
-
-  // for osxcross with special libs: search also for libc.tbd
-  if not result then
-    result:=SearchLibrary(IncludeTrailingPathDelimiter(Basepath)+'usr'+DirectorySeparator+'lib','libc.tbd');
-
-  // first search local paths based on libbraries provided for or adviced by fpc itself
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
-
-  // also for cctools
-  if not result then
-  begin
-    for i:=10 downto MINOSXVERSION do
-    begin
-      if found then break;
-      for j:=13 downto -1 do
-      begin
-        if found then break;
-        for k:=15 downto -1 do
-        begin
-          if found then break;
-          s:=InttoStr(i);
-          if j<>-1 then
-          begin
-            s:=s+'.'+InttoStr(j);
-            if k<>-1 then s:=s+'.'+InttoStr(k);
-          end;
-          SDKVersion:=s;
-
-          s:=ConcatPaths([DirName,OSNAME+SDKVersion+'.sdk','usr','lib']);
-          result:=SimpleSearchLibrary(BasePath,s,LibName);
-          if not result then
-             result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
-
-          // universal libs : also search in x86-targetos if suitable
-          if (not result) then
-          begin
-            if ((TargetCPU=TCPU.x86_64) OR (TargetCPU=TCPU.i386)) then
-            begin
-              s:=ConcatPaths(['x86-'+TargetOSName,OSNAME+SDKVersion+'.sdk','usr','lib']);
-              result:=SimpleSearchLibrary(BasePath,s,LibName);
-              if not result then
-                 result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
-            end;
-          end;
-
-          // universal libs : also search in all-targetos
-          if (not result) then
-          begin
-            s:=ConcatPaths(['all-'+TargetOSName,OSNAME+SDKVersion+'.sdk','usr','lib']);
-            result:=SimpleSearchLibrary(BasePath,s,LibName);
-            if not result then
-               result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
-          end;
-
-          if result then found:=true;
-        end;
-      end;
-    end;
-  end;
-
-  if not result then
-  begin
-    {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/'+RegisterName+'-gnu'; //debian Jessie+ convention
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-    ShowInfo('Searched but not found libspath '+FLibsPath);
-    {$ENDIF}
-  end;
-
-  SearchLibraryInfo(result);
-
-  if result then
-  begin
-    FLibsFound:=True;
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-
-    s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
-    s:=ExpandFileName(s);
-    s:=ExcludeTrailingBackslash(s);
-
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
-    AddFPCCFGSnippet('-k-framework -kAppKit');
-    AddFPCCFGSnippet('-k-framework -kFoundation');
-    AddFPCCFGSnippet('-k-framework -kCoreFoundation');
-    AddFPCCFGSnippet('-XR'+s);
-  end
-  else
-  begin
-    ShowInfo('Hint: https://github.com/phracker/MacOSX-SDKs');
-    ShowInfo('Hint: https://github.com/alexey-lysiuk/macos-sdk');
-    ShowInfo('Hint: https://github.com/sirgreyhat/MacOSX-SDKs/releases');
-  end;
+function Tany_darwin386.GetLibs(Basepath:string): boolean;
+begin
+  result:=inherited;
 end;
 
 function Tany_darwin386.GetBinUtils(Basepath:string): boolean;
-var
-  AsFile: string;
-  S,PresetBinPath: string;
-  i:integer;
 begin
   result:=inherited;
-
-  if result then exit;
-
-  {$ifdef Windows}
-  if not result then
-  begin
-    // Search in special Apple directory
-    AsFile:=LDSEARCHFILE+GetExeExt;
-    result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
-  end;
-  if not result then
-  begin
-    // Search in special Darwin directory
-    AsFile:=SEARCHFILE+GetExeExt;
-    result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
-  end;
-  {$endif}
-
-  // Now start with the normal search sequence
-  if not result then
-  begin
-    AsFile:=FBinUtilsPrefix+SEARCHFILE+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-  end;
-
-  for i:=MAXDARWINVERSION downto MINDARWINVERSION do
-  begin
-    if not result then
-    begin
-      if i=MINDARWINVERSION then
-        AsFile:=BinUtilsPrefix
-      else
-        AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(i),[]);
-      AsFile:=AsFile+SEARCHFILE+GetExeExt;
-      result:=SearchBinUtil(BasePath,AsFile);
-      if not result then
-        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-      if not result then
-        result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
-
-      if not result then
-      begin
-        if ((TargetCPU=TCPU.x86_64) OR (TargetCPU=TCPU.i386)) then
-        begin
-          result:=SimpleSearchBinUtil(BasePath,'x86-'+TargetOSName,AsFile);
-        end;
-      end;
-      if result then break;
-    end;
-  end;
-
-  if (not result) then
-  begin
-    // do a brute force search of correct binutils
-    PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
-    if DirectoryExists(PresetBinPath) then
-    begin
-      for i:=MAXDARWINVERSION downto MINDARWINVERSION do
-      begin
-        if i=MINDARWINVERSION then
-          AsFile:=BinUtilsPrefix
-        else
-          AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(i),[]);
-        AsFile:=AsFile+SEARCHFILE+GetExeExt;
-        S:=FindFileInDir(AsFile,PresetBinPath);
-        if (Length(S)>0) then
-        begin
-          PresetBinPath:=ExtractFilePath(S);
-          result:=SearchBinUtil(PresetBinPath,AsFile);
-          if result then break;
-        end;
-      end;
-    end;
-    PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin','all-'+TargetOSName]);
-    if DirectoryExists(PresetBinPath) then
-    begin
-      for i:=MAXDARWINVERSION downto MINDARWINVERSION do
-      begin
-        if i=MINDARWINVERSION then
-          AsFile:=BinUtilsPrefix
-        else
-          AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(i),[]);
-        AsFile:=AsFile+SEARCHFILE+GetExeExt;
-        S:=FindFileInDir(AsFile,PresetBinPath);
-        if (Length(S)>0) then
-        begin
-          PresetBinPath:=ExtractFilePath(S);
-          result:=SearchBinUtil(PresetBinPath,AsFile);
-          if result then break;
-        end;
-      end;
-    end;
-  end;
-
-  if result then
-  begin
-    // Remove the searchfile itself to get the binutils prefix
-    i:=Pos(SEARCHFILE+GetExeExt,AsFile);
-    if i<1 then i:=Pos(LDSEARCHFILE+GetExeExt,AsFile);
-    if i>0 then
-    begin
-      Delete(AsFile,i,MaxInt);
-      FBinUtilsPrefix:=AsFile;
-    end;
-  end;
-
-  SearchBinUtilsInfo(result);
-
-  if result then
-  begin
-    FBinsFound:=true;
-    // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
-    AddFPCCFGSnippet('-XX');
-    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
-  end;
 end;
 
 constructor Tany_darwin386.Create;
@@ -311,8 +89,6 @@ begin
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.darwin;
   Reset;
-  FBinutilsPathInPath:=true;
-  FAlreadyWarned:=false;
   ShowInfo;
 end;
 
