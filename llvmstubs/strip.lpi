@@ -11,7 +11,7 @@
         <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="clang"/>
+      <Title Value="strip"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -26,7 +26,7 @@
     </RunParams>
     <Units Count="1">
       <Unit0>
-        <Filename Value="clang.pas"/>
+        <Filename Value="strip.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
     </Units>
@@ -35,7 +35,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="deluxebin\$NameOnly($(ProjFile))"/>
+      <Filename Value="deluxebin\strip"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
