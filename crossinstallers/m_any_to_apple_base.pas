@@ -292,9 +292,10 @@ begin
 
       if not result then
       begin
-        // Look in special ppc-directory
+        // Look in special ppc-directory for universal named powerpc tools
         if (TargetCPU in [TCPU.powerpc64,TCPU.powerpc]) then
         begin
+          AsFile:=StringReplace(AsFile,TargetCPUName,'powerpc',[]);
           result:=SimpleSearchBinUtil(BasePath,'powerpc-'+TargetOSName,AsFile);
         end;
       end;
