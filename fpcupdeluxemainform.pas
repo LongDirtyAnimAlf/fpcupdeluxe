@@ -2902,7 +2902,7 @@ begin
 
 
           // Set special BinsFile for universal tools for Darwin
-          {$ifdef Windows}
+          {$IF (defined(Windows)) OR (defined(Linux))}
           if (
             ((FPCupManager.CrossOS_Target=TOS.darwin) AND (FPCupManager.CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
             OR
@@ -2933,7 +2933,7 @@ begin
 
 
           // Set special Bins directory for universal tools for Darwin based on clang
-          {$ifdef Windows}
+          {$IF (defined(Windows)) OR (defined(Linux))}
           if (
             ((FPCupManager.CrossOS_Target=TOS.darwin) AND (FPCupManager.CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
             OR
