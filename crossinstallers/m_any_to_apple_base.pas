@@ -67,7 +67,7 @@ function Tany_apple.GetLibs(Basepath:string): boolean;
 var
   s:string;
   SDKVersion:string;
-  i,j,k:integer;
+  Major,Minor,Release:integer;
   found:boolean;
 begin
   result:=FLibsFound;
@@ -79,60 +79,57 @@ begin
   // begin simple: check presence of library file in basedir
   if not result then
     result:=SearchLibrary(Basepath,LibName);
-
-  // for osxcross with special libs: search also for libc.tbd
   if not result then
     result:=SearchLibrary(Basepath,TDBLibName);
 
   if not result then
     result:=SearchLibrary(IncludeTrailingPathDelimiter(Basepath)+'usr'+DirectorySeparator+'lib',LibName);
-
-  // for osxcross with special libs: search also for libc.tbd
   if not result then
     result:=SearchLibrary(IncludeTrailingPathDelimiter(Basepath)+'usr'+DirectorySeparator+'lib',TDBLibName);
 
-  // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,DirName,TDBLibName);
 
-  // also for cctools
+  // also for cctools or special fpcupdeluxe tools
   if not result then
   begin
-    for i:=MAXOSVERSION downto MINOSVERSION do
+    for Major:=MAXOSVERSION downto MINOSVERSION do
     begin
       if found then break;
 
-      for j:=16 downto -1 do
+      for Minor:=16 downto -1 do
       begin
         if found then break;
 
         if (TargetOS=TOS.darwin) then
         begin
-          if (i>11) then continue;
-          if (i=11) and (j>5) then continue;
-          if (i<10) then continue;
+          if (Major>11) then continue;
+          if (Major=11) and (Minor>5) then continue;
+          if (Major<10) then continue;
 
           if (TargetCPU=TCPU.i386) then
           begin
-            if (i>10) then continue;
-            if (i=10) and (j>13) then continue;
+            if (Major>10) then continue;
+            if (Major=10) and (Minor>13) then continue;
           end;
 
           if ((TargetCPU=TCPU.powerpc) OR (TargetCPU=TCPU.powerpc64)) then
           begin
-            if (i>10) then continue;
-            if (i=10) and (j>5) then continue;
+            if (Major>10) then continue;
+            if (Major=10) and (Minor>5) then continue;
           end;
         end;
 
-        for k:=15 downto -1 do
+        for Release:=15 downto -1 do
         begin
           if found then break;
-          s:=InttoStr(i);
-          if j<>-1 then
+          s:=InttoStr(Major);
+          if Minor<>-1 then
           begin
-            s:=s+'.'+InttoStr(j);
-            if k<>-1 then s:=s+'.'+InttoStr(k);
+            s:=s+'.'+InttoStr(Minor);
+            if Release<>-1 then s:=s+'.'+InttoStr(Release);
           end;
           SDKVersion:=s;
 
@@ -232,7 +229,7 @@ end;
 function Tany_apple.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
-  i:integer;
+  i,DarwinRelease:integer;
   //S,PresetBinPath: string;
 begin
   result:=inherited;
@@ -243,14 +240,14 @@ begin
   begin
     if (((TargetOS=TOS.darwin) OR (TargetOS=TOS.ios)) AND (NOT ((TargetCPU=TCPU.powerpc64) OR (TargetCPU=TCPU.powerpc)))) then
     begin
-      // Search in special Apple directory
+      // Search in special Apple directory for LD
       AsFile:=LDSEARCHFILE+GetExeExt;
       result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
     end;
   end;
   if not result then
   begin
-    // Search in special all directory
+    // Search in special all-targetos directory
     AsFile:=SEARCHFILE+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
   end;
@@ -267,14 +264,14 @@ begin
   // See https://en.wikipedia.org/wiki/Darwin_%28operating_system%29#Release_history
   // Shows relation between macOS and Darwin versions
 
-  for i:=MAXDARWINVERSION downto MINDARWINVERSION do
+  for DarwinRelease:=MAXDARWINVERSION downto MINDARWINVERSION do
   begin
     if not result then
     begin
-      if i=MINDARWINVERSION then
+      if DarwinRelease=MINDARWINVERSION then
         AsFile:=BinUtilsPrefix
       else
-        AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(i),[]);
+        AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(DarwinRelease),[]);
       AsFile:=AsFile+SEARCHFILE+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
       if not result then
@@ -314,12 +311,12 @@ begin
     PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
     if DirectoryExists(PresetBinPath) then
     begin
-      for i:=MAXDARWINVERSION downto MINDARWINVERSION do
+      for DarwinRelease:=MAXDARWINVERSION downto MINDARWINVERSION do
       begin
-        if i=MINDARWINVERSION then
+        if DarwinRelease=MINDARWINVERSION then
           AsFile:=BinUtilsPrefix
         else
-          AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(i),[]);
+          AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(DarwinRelease),[]);
         AsFile:=AsFile+SEARCHFILE+GetExeExt;
         S:=FindFileInDir(AsFile,PresetBinPath);
         if (Length(S)>0) then
@@ -333,12 +330,12 @@ begin
     PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin','all-'+TargetOSName]);
     if DirectoryExists(PresetBinPath) then
     begin
-      for i:=MAXDARWINVERSION downto MINDARWINVERSION do
+      for DarwinRelease:=MAXDARWINVERSION downto MINDARWINVERSION do
       begin
-        if i=MINDARWINVERSION then
+        if DarwinRelease=MINDARWINVERSION then
           AsFile:=BinUtilsPrefix
         else
-          AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(i),[]);
+          AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(DarwinRelease),[]);
         AsFile:=AsFile+SEARCHFILE+GetExeExt;
         S:=FindFileInDir(AsFile,PresetBinPath);
         if (Length(S)>0) then
@@ -351,7 +348,6 @@ begin
     end;
   end;
   *)
-
 
   if result then
   begin

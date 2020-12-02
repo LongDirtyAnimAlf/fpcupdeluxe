@@ -101,9 +101,9 @@ begin
   // Some popular locations for Tortoisehg:
   // Covers both 32 bit and 64 bit Windows.
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TorToisehg\' + RepoExecutableName + '.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles')+'\TorToisehg\' + RepoExecutableName + '.exe';
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToisehg\' + RepoExecutableName + '.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)')+'\TorToisehg\' + RepoExecutableName + '.exe';
   //Directory where current executable is:
   if not FileExists(FRepoExecutable) then
     FRepoExecutable := (SafeGetApplicationPath + RepoExecutableName + '.exe');
