@@ -2811,9 +2811,7 @@ begin
       if length(FPCupManager.SkipModules)>0 then aDataClient.AddExtraData('Skip',FPCupManager.SkipModules);
       {$endif}
 
-      //success:=RealRun;
-      success:=false;
-      MissingCrossBins:=true;
+      success:=RealRun;
 
       if {(Sender<>nil) AND} (NOT success) then
       begin
@@ -3232,7 +3230,7 @@ begin
               AddMessage('Looking for: '+LibsFileName,True);
 
               MajorVersion:=1;
-              for MinorVersion:=2 downto 0 do
+              for MinorVersion:=3 downto 0 do
               begin
                 LibsURL:='crosslibs_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
 
