@@ -115,7 +115,7 @@ begin
             if (Major=10) and (Minor>13) then continue;
           end;
 
-          if ((TargetCPU=TCPU.powerpc) OR (TargetCPU=TCPU.powerpc64)) then
+          if (TargetCPU in [TCPU.powerpc,TCPU.powerpc64]) then
           begin
             if (Major>10) then continue;
             if (Major=10) and (Minor>5) then continue;
@@ -141,7 +141,7 @@ begin
           // universal libs : also search in x86-targetos if suitable
           if (not result) then
           begin
-            if ((TargetCPU=TCPU.x86_64) OR (TargetCPU=TCPU.i386)) then
+            if (TargetCPU in [TCPU.x86_64,TCPU.i386]) then
             begin
               s:=ConcatPaths(['x86-'+TargetOSName,OSNAME+SDKVersion+'.sdk','usr','lib']);
               result:=SimpleSearchLibrary(BasePath,s,LibName);
@@ -153,7 +153,7 @@ begin
           // universal libs : also search in powerpc-targetos if suitable
           if (not result) then
           begin
-            if ((TargetCPU=TCPU.powerpc64) OR (TargetCPU=TCPU.powerpc)) then
+            if (TargetCPU in [TCPU.powerpc64,TCPU.powerpc]) then
             begin
               s:=ConcatPaths(['powerpc-'+TargetOSName,OSNAME+SDKVersion+'.sdk','usr','lib']);
               result:=SimpleSearchLibrary(BasePath,s,LibName);
@@ -165,7 +165,7 @@ begin
           // universal libs : also search in all-targetos
           if (not result) then
           begin
-            if ((TargetOS=TOS.darwin) OR (TargetOS=TOS.ios)) then
+            if (TargetOS in [TOS.darwin,TOS.ios]) then
             begin
               s:=ConcatPaths(['all-'+TargetOSName,OSNAME+SDKVersion+'.sdk','usr','lib']);
               result:=SimpleSearchLibrary(BasePath,s,LibName);
@@ -238,7 +238,7 @@ begin
 
   if not result then
   begin
-    if (((TargetOS=TOS.darwin) OR (TargetOS=TOS.ios)) AND (NOT ((TargetCPU=TCPU.powerpc64) OR (TargetCPU=TCPU.powerpc)))) then
+    if (TargetOS in [TOS.darwin,TOS.ios]) AND (NOT (TargetCPU in [TCPU.powerpc64,TCPU.powerpc])) then
     begin
       // Search in special Apple directory for LD
       AsFile:=LDSEARCHFILE+GetExeExt;
@@ -284,7 +284,7 @@ begin
       if not result then
       begin
         // Look in special x86-directory
-        if ((TargetCPU=TCPU.x86_64) OR (TargetCPU=TCPU.i386)) then
+        if (TargetCPU in [TCPU.x86_64,TCPU.i386]) then
         begin
           result:=SimpleSearchBinUtil(BasePath,'x86-'+TargetOSName,AsFile);
         end;
@@ -293,7 +293,7 @@ begin
       if not result then
       begin
         // Look in special ppc-directory
-        if ((TargetCPU=TCPU.powerpc64) OR (TargetCPU=TCPU.powerpc)) then
+        if (TargetCPU in [TCPU.powerpc64,TCPU.powerpc]) then
         begin
           result:=SimpleSearchBinUtil(BasePath,'powerpc-'+TargetOSName,AsFile);
         end;

@@ -184,6 +184,12 @@ begin
         FRepoExecutable := '';
         ThreadLog('SVN client found in path, but its from MSYS and that does not work with fpcupdeluxe.',etWarning);
       end;
+      if (CheckExecutable(FRepoExecutable, ['--version'], 'pc-cygwin')) then
+      begin
+        FRepoExecutable := '';
+        ThreadLog('SVN client found in path, but its from CYGWIN and that does not work with fpcupdeluxe.',etWarning);
+      end;
+
     end;
   end
   else
