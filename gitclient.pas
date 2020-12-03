@@ -142,7 +142,7 @@ begin
     // Check for valid git executable:
     //rv:=TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose);
     //if rv<>0 then
-    if (NOT CheckExecutable(RepoExecutable, ['--version'], '')) then
+    if (NOT CheckExecutable(FRepoExecutable, ['--version'], '', true)) then
     begin
       FRepoExecutable := '';
       //ThreadLog('GIT client found, but error code during check: '+InttoStr(rv),etError);

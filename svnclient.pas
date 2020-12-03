@@ -171,7 +171,7 @@ begin
   begin
     //rv:=TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose);
     //if rv<>0 then
-    if (NOT CheckExecutable(FRepoExecutable, ['--version'], '')) then
+    if (NOT CheckExecutable(FRepoExecutable, ['--version'], '', true)) then
     begin
       FRepoExecutable := '';
       //ThreadLog('SVN client found, but error code during check: '+InttoStr(rv),etError);
@@ -179,12 +179,12 @@ begin
     end
     else
     begin
-      if (CheckExecutable(FRepoExecutable, ['--version'], 'pc-msys')) then
+      if (CheckExecutable(FRepoExecutable, ['--version'], 'pc-msys', true)) then
       begin
         FRepoExecutable := '';
         ThreadLog('SVN client found in path, but its from MSYS and that does not work with fpcupdeluxe.',etWarning);
       end;
-      if (CheckExecutable(FRepoExecutable, ['--version'], 'pc-cygwin')) then
+      if (CheckExecutable(FRepoExecutable, ['--version'], 'pc-cygwin', true)) then
       begin
         FRepoExecutable := '';
         ThreadLog('SVN client found in path, but its from CYGWIN and that does not work with fpcupdeluxe.',etWarning);

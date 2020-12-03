@@ -375,7 +375,7 @@ function LibWhich(aLibrary: string): boolean;
 function Which(const Executable: string): string;
 function IsExecutable(Executable: string):boolean;
 function ForceDirectoriesSafe(Const Dir: RawByteString): Boolean;
-function CheckExecutable(Executable:string;Parameters:array of string;ExpectOutput: string): boolean;
+function CheckExecutable(Executable:string;Parameters:array of string;ExpectOutput: string; beSilent:boolean=false): boolean;
 function GetJava: string;
 function GetJavac: string;
 function CheckJava: boolean;
@@ -3393,7 +3393,7 @@ begin
   {$ENDIF}
 end;
 
-function CheckExecutable(const Executable:string; const Parameters:array of String; ExpectOutput: string; Level: TEventType): boolean;
+function CheckExecutable(const Executable:string; const Parameters:array of String; ExpectOutput: string; Level: TEventType; beSilent:boolean): boolean;
 var
   aResultCode: longint;
   ExeName: string;
@@ -3412,7 +3412,7 @@ begin
         if (NOT Result) then
         begin
           // This is not a warning/error message as sometimes we can use multiple different versions of executables
-          if Level<>etCustom then
+          if ((Level<>etCustom) AND (NOT beSilent)) then
           begin
             if (NOT FileExists(Executable)) then
               ThreadLog(Executable + ' not found.',Level)
@@ -3429,18 +3429,18 @@ begin
     on E: Exception do
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      if Level<>etCustom then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
+      if ((Level<>etCustom) AND (NOT beSilent)) then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
     end;
   end;
-  if Result then
+  if ((Result) AND (NOT beSilent)) then
     ThreadLog('Found valid ' + ExeName + ' application.',etDebug);
 end;
 
-function CheckExecutable(Executable:string;Parameters:array of string;ExpectOutput: string): boolean;
+function CheckExecutable(Executable:string;Parameters:array of string;ExpectOutput: string; beSilent:boolean): boolean;
 begin
   //result:=IsExecutable(Executable);
   //if result then
-    result:=CheckExecutable(Executable, Parameters, ExpectOutput, etInfo);
+    result:=CheckExecutable(Executable, Parameters, ExpectOutput, etInfo, beSilent);
 end;
 
 function GetJavaBase(aJava:string): string;
@@ -3571,7 +3571,7 @@ begin
   {$ifdef Windows}
   result:=CheckExecutable(GetJava, ['-version'], '');
   {$else}
-  result:=CheckExecutable('java', ['-version'], '', etInfo);
+  result:=CheckExecutable('java', ['-version'], '');
   {$endif}
 end;
 
@@ -5009,20 +5009,20 @@ begin
   begin
     WGETBinary:='wget';
   end;
-  FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', etCustom);
+  FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', true);
 
   {$ifdef MSWINDOWS}
   {$ifdef CPU64}
   if (NOT FWGETOk) then
   begin
     WGETBinary:='wget64.exe';
-    FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', etCustom);
+    FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', true);
   end;
   {$endif}
   if (NOT FWGETOk) then
   begin
     WGETBinary:='wget.exe';
-    FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', etCustom);
+    FWGETOk:=CheckExecutable(WGETBinary,['-V'], '', true);
   end;
   {$endif MSWINDOWS}
   {$endif USEONLYCURL}

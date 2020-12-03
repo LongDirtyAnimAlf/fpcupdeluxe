@@ -966,7 +966,7 @@ begin
           s2:=GetRevision(ModuleName);
           if (Length(s2)>0) then
           begin
-            Processor.Process.Parameters.Add('REVSTR='''+s2+'''');
+            Processor.Process.Parameters.Add('REVSTR='+s2);
             Processor.Process.Parameters.Add('REVINC=force');
           end;
 
@@ -1625,7 +1625,7 @@ begin
   s2:=AnsiDequotedStr(s2,'''');
   if (Length(s2)>1) AND (s2<>'failure') AND ((s2[1] in ['0'..'9']) OR (s2[2] in ['0'..'9'])) then
   begin
-    Processor.Process.Parameters.Add('REVSTR='''+s2+'''');
+    Processor.Process.Parameters.Add('REVSTR='+s2);
     Processor.Process.Parameters.Add('REVINC=force');
   end;
 

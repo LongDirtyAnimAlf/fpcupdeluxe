@@ -126,7 +126,7 @@ begin
     // Check for valid hg executable
     //rv:=TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', False);
     //if rv<>0 then
-    if (NOT CheckExecutable(RepoExecutable, ['--version'], '')) then
+    if (NOT CheckExecutable(FRepoExecutable, ['--version'], '', true)) then
     begin
       FRepoExecutable := '';
       //ThreadLog('HG client found, but error code during check: '+InttoStr(rv),etError);
