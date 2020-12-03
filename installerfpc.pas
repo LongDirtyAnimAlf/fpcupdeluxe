@@ -963,6 +963,13 @@ begin
                Options:=Options+' -dFPC_USE_LIBC';
           {$endif}
 
+          s2:=GetRevision(ModuleName);
+          if (Length(s2)>0) then
+          begin
+            Processor.Process.Parameters.Add('REVSTR='''+s2+'''');
+            Processor.Process.Parameters.Add('REVINC=force');
+          end;
+
           {$ifdef solaris}
           {$IF defined(CPUX64) OR defined(CPUX86)}
           //Still not sure if this is needed
@@ -1614,9 +1621,11 @@ begin
   {$ENDIF}
 
   // Revision should be something like : "[r]123456" !!
-  if (Length(ActualRevision)>1) AND (ActualRevision<>'failure') AND (ActualRevision[2] in ['0'..'9']) then
+  s2:=Trim(ActualRevision);
+  s2:=AnsiDequotedStr(s2,'''');
+  if (Length(s2)>1) AND (s2<>'failure') AND ((s2[1] in ['0'..'9']) OR (s2[2] in ['0'..'9'])) then
   begin
-    Processor.Process.Parameters.Add('REVSTR='+ActualRevision);
+    Processor.Process.Parameters.Add('REVSTR='''+s2+'''');
     Processor.Process.Parameters.Add('REVINC=force');
   end;
 

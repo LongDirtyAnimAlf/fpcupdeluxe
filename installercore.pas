@@ -3708,6 +3708,8 @@ begin
               if NumbersExtr.Exec(RevString) then
                 result := NumbersExtr.Match[0];
             end;
+            result:=Trim(result);
+            result:=AnsiDequotedStr(result,'''');
           finally
             NumbersExtr.Free;
           end;

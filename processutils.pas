@@ -952,6 +952,7 @@ begin
         if AnsiContainsText(line,'(e=1)') then exit;
         if AnsiContainsText(line,'error 87') then exit;
         if AnsiContainsText(line,'(e=87)') then exit;
+        if AnsiContainsText(line,'-iTP:') then exit;
         //if AnsiContainsText(line,'dependency dropped') then exit;
       end;
 
