@@ -70,7 +70,7 @@ begin
 end;
 function Tany_darwinx64.GetTDBLibName:string;
 begin
-  result:='libc.tbd';
+  result:='libSystem.B.tbd';
 end;
 
 function Tany_darwinx64.GetLibs(Basepath:string): boolean;

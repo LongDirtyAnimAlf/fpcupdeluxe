@@ -962,9 +962,6 @@ begin
             if Length(s2)>0 then Options:=Options+s2;
           end;
 
-          if ((UseLibc) AND (MakeCycle in [st_Compiler,st_CompilerInstall])) then
-               Options:=Options+' -dFPC_USE_LIBC';
-
           s2:=GetRevision(ModuleName);
           if (Length(s2)>0) then
           begin
