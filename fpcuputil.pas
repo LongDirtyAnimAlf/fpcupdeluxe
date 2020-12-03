@@ -3685,6 +3685,12 @@ begin
   result:=lowercase({$i %FPCTARGETOS%});
 end;
 
+function GetTargetCPUOS:string;
+begin
+  result:=GetTargetCPU+'-'+GetTargetOS;
+end;
+
+
 function GetDistro:string;
 var
   Major,Minor,Build,Patch,i,j: Integer;
@@ -3827,11 +3833,6 @@ begin
     end;
     result:=j;
   end;
-end;
-
-function GetTargetCPUOS:string;
-begin
-  result:=GetTargetCPU+'-'+GetTargetOS;
 end;
 
 function checkGithubRelease(const aURL:string):string;

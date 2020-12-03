@@ -883,6 +883,13 @@ begin
   //Makefile error we are not interested in
   if AnsiContainsText(line,'CreateProcess(') then exit;
 
+  //Various harmless OpenBSD errors
+  if AnsiContainsText(line,'misused, please use') then exit;
+  if AnsiContainsText(line,'may return deterministic values') then exit;
+  if AnsiContainsText(line,'dangerous; do not use it') then exit;
+  if AnsiContainsText(line,'may conflict with') then exit;
+
+  //Various FPC messags
   if AnsiStartsText('Compiling Release Version',line) then exit;
   if AnsiStartsText('Compiling Debug Version',line) then exit;
 

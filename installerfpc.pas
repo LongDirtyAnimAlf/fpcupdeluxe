@@ -116,6 +116,7 @@ type
   TFPCInstaller = class(TBaseFPCInstaller)
   private
     FSoftFloat: boolean;
+    FUseLibc: boolean;
     FTargetCompilerName: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
@@ -147,6 +148,7 @@ type
     // and UnInstallModule but executed only once
     function InitModule(aBootstrapVersion:string=''):boolean;
   public
+    property UseLibc: boolean read FUseLibc;
     property SoftFloat: boolean write FSoftFloat;
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
     property BootstrapCompilerDirectory: string write FBootstrapCompilerDirectory;
@@ -279,7 +281,7 @@ begin
   RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'bin');
 
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'packages'+DirectorySeparator;
-  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -295,7 +297,7 @@ begin
   end;
 
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator;
-  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -315,7 +317,7 @@ begin
 
   // for (very) old versions of FPC : fcl and fv directories
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'fcl'+DirectorySeparator;
-  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -330,7 +332,7 @@ begin
     SysUtils.FindClose(FileInfo);
   end;
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'fv'+DirectorySeparator;
-  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -346,7 +348,7 @@ begin
   end;
 
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'compiler'+DirectorySeparator;
-  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -528,12 +530,14 @@ var
   OldPath:String;
   Options:String;
   s1,s2:string;
-  Counter:integer;
   LibsAvailable,BinsAvailable:boolean;
   MakeCycle:TSTEPS;
   ARMArch:TARMARCH;
   {$ifdef Darwin}
   Minimum_OSX,Minimum_iOS:string;
+  {$endif}
+  {$ifdef MSWINDOWS}
+  Counter:integer;
   {$endif}
 begin
   result:=inherited;
@@ -958,10 +962,8 @@ begin
             if Length(s2)>0 then Options:=Options+s2;
           end;
 
-          {$ifdef freebsd}
-          if (MakeCycle in [st_Compiler,st_CompilerInstall]) then
+          if ((UseLibc) AND (MakeCycle in [st_Compiler,st_CompilerInstall])) then
                Options:=Options+' -dFPC_USE_LIBC';
-          {$endif}
 
           s2:=GetRevision(ModuleName);
           if (Length(s2)>0) then
@@ -995,16 +997,7 @@ begin
           end;
           CrossOptions:=TrimRight(CrossOptions);
 
-          //Still not sure if this is needed
-          //To be checked
-          if (CrossInstaller.TargetOS=TOS.freebsd) then
-          begin
-            //if NOT (MakeCycle in [st_Compiler,st_CompilerInstall]) then
-            begin
-              //Processor.Process.Parameters.Add('COMPILER_OPTIONS=-dFPC_USE_LIBC');
-              CrossOptions:=CrossOptions+' -dFPC_USE_LIBC';
-            end;
-          end;
+          if UseLibc then CrossOptions:=CrossOptions+' -dFPC_USE_LIBC';
 
           if ((CrossInstaller.TargetCPU=TCPU.mipsel) AND (CrossInstaller.TargetOS=TOS.embedded)) then
           begin
@@ -1642,10 +1635,9 @@ begin
     {$ifndef DARWIN}
       s1:=s1+' -Fl/usr/pkg/lib';
     {$endif}
-    {$ifdef FreeBSD}
-      s1:=s1+' -dFPC_USE_LIBC';
-    {$endif}
   {$endif}
+
+  if UseLibc then s1:=s1+' -dFPC_USE_LIBC';
 
   {$ifdef Haiku}
     s2:='';
@@ -2802,7 +2794,7 @@ begin
             aCompilerList:=TStringList.Create;
             try
               aCompilerList.Clear;
-              VersionFromString(aBootstrapVersion,i,j,k,l);
+              VersionFromString(aBootstrapVersion,i,j,k,{%H-}l);
               s:=FPCFTPSNAPSHOTURL+'/v'+InttoStr(i)+InttoStr(j)+'/'+GetTargetCPUOS+'/';
               result:=aDownLoader.getFTPFileList(s,aCompilerList);
               if result then
@@ -3267,6 +3259,22 @@ begin
     {$endif darwin}
   end;//(NOT (Self is TFPCCrossInstaller))
 
+  // Do we need to force the use of libc :
+  FUseLibc:=False;
+
+  if (Self is TFPCCrossInstaller) then
+  begin
+    if (CrossInstaller.TargetOS=TOS.dragonfly) then FUseLibc:=True;
+    if (CrossInstaller.TargetOS=TOS.freebsd) then FUseLibc:=True;
+    if (CrossInstaller.TargetOS=TOS.openbsd) AND (NumericalVersion>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
+  end
+  else
+  begin
+    if (GetTargetOS=GetOS(TOS.dragonfly)) then FUseLibc:=True;
+    if (GetTargetOS=GetOS(TOS.freebsd)) then FUseLibc:=True;
+    if (GetTargetOS=GetOS(TOS.openbsd)) AND (NumericalVersion>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
+  end;
+
   // Now: the real build of FPC !!!
   OperationSucceeded:=BuildModuleCustom(ModuleName);
 
@@ -3665,8 +3673,8 @@ begin
         ConfigText.Append(s);
         {$endif}
 
+        if UseLibc then ConfigText.Append('-dFPC_USE_LIBC');
         {$ifdef freebsd}
-        ConfigText.Append('-dFPC_USE_LIBC');
         ConfigText.Append('-FD/usr/local/bin');
         {$endif}
 
@@ -4180,6 +4188,7 @@ begin
   inherited Create;
 
   FCompiler := '';
+  FUseLibc  := false;
 
   FTargetCompilerName:=GetCompilerName(GetTargetCPU);
 

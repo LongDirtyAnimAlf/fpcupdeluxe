@@ -182,7 +182,6 @@ begin
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names}
-    AddFPCCFGSnippet('-dFPC_USE_LIBC'); {Use libc to build all}
   end;
 end;
 
