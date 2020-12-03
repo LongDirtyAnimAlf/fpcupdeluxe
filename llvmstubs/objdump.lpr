@@ -3,66 +3,10 @@ program objdump;
 {$mode objfpc}{$H+}
 
 uses
- SysUtils;
+ SysUtils, filesearcher;
 
 const
-{$ifdef UNIX}
-    exeext='';
-{$else UNIX}
-  {$ifdef HASAMIGA}
-    exeext='';
-  {$else}
-    {$ifdef NETWARE}
-      exeext='.nlm';
-    {$else}
-      {$ifdef ATARI}
-        exeext='.ttp';
-      {$else}
-        exeext='.exe';
-      {$endif ATARI}
-    {$endif NETWARE}
-  {$endif HASAMIGA}
-{$endif UNIX}
    EXENAME='llvm-objdump';
-
-procedure error(const s : string);
-  begin
-     writeln('Error: ',s);
-     halt(1);
-  end;
-
-function FileSearch (Const Name, DirList : string) : string;
-var
-  I : longint;
-  Temp : string;
-begin
-  Result:=Name;
-  temp:=SetDirSeparators(DirList);
-  while true do
-  begin
-    If Temp = '' then Break;
-    I:=pos(':',Temp);
-    if ((I>0) and (Length(Temp)>I) AND (Temp[I+1]='\')) then I:=0;
-    if (I=0) then I:=pos(';',Temp);
-    if I<>0 then
-    begin
-      Result:=Copy (Temp,1,I-1);
-      system.Delete(Temp,1,I);
-    end
-    else
-    begin
-      Result:=Temp;
-      Temp:='';
-    end;
-    if Result<>'' then
-    begin
-      if (Result<>'') then
-        Result:=IncludeTrailingPathDelimiter(Result)+name;
-    end;
-    if (Result <> '') and FileExists(Result) then exit;
-  end;
-  Result:='';
-end;
 
 var
   pc              : integer;
@@ -81,9 +25,9 @@ begin
     else
       exe:=EXENAME+'-'+InttoStr(pc)+exeext;
     path:=FileSearch(exe,envpath);
-    if ((path<>'') AND (path<>exe)) then break;
+    if ((path<>'') AND (path<>ApplicationName)) then break;
   end;
-  if ((path='') OR (path=exe)) then
+  if ((path='') OR (path=ApplicationName)) then
   begin
     error(path+' not found');
     halt(-1);
