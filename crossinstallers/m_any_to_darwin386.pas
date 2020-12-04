@@ -70,7 +70,7 @@ begin
 end;
 function Tany_darwin386.GetTDBLibName:string;
 begin
-  result:='libSystem.B.tbd';
+  result:='libc.tbd';
 end;
 
 function Tany_darwin386.GetLibs(Basepath:string): boolean;
