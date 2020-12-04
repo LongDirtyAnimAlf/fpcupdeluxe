@@ -83,6 +83,7 @@ type
     MLazarusBugs: TMenuItem;
     MIssuesGitHub: TMenuItem;
     MIssuesForum: TMenuItem;
+    mORMot2Btn: TBitBtn;
     OPMBtn: TBitBtn;
     PageControl1: TPageControl;
     radgrpCPU: TRadioGroup;
@@ -1941,6 +1942,13 @@ begin
       s:='Going to install the mORMot ';
       FPCupManager.OnlyModules:='mORMot';
       //FPCupManager.OnlyModules:='mORMot,zeos';
+    end;
+
+    if Sender=mORMot2Btn then
+    begin
+      s:='Going to install the mORMot2';
+      FPCupManager.OnlyModules:='mORMot2';
+      //FPCupManager.OnlyModules:='mORMot2,zeos';
     end;
 
     if Sender=OPMBtn then
