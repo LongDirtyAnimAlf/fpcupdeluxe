@@ -128,7 +128,7 @@ const
 
   {$ifdef win64}
   OpenSSLSourceURL : array [0..3] of string = (
-    'https://indy.fulgan.com/SSL/openssl-1.0.2u-x64_86-win64.zip'
+    'https://indy.fulgan.com/SSL/openssl-1.0.2u-x64_86-win64.zip',
     'http://wiki.overbyte.eu/arch/openssl-1.0.2u-win64.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip',
     'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-x64_86-win64.zip'

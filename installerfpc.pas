@@ -1606,6 +1606,7 @@ begin
   s2:=GetDarwinSDKLocation;
   if Length(s2)>0 then
   begin
+    s1:='-XR'+s2+' '+s1;
     s1:='-Fl'+s2+'/usr/lib '+s1;
   end;
   {$ENDIF}
@@ -3726,6 +3727,7 @@ begin
         if Length(s)>0 then
         begin
           ConfigText.Append('# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory');
+          ConfigText.Append('-XR'+s);
           ConfigText.Append('-Fl'+s+'/usr/lib');
         end;
 
