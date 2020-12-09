@@ -243,6 +243,11 @@ begin
       // Search in special Apple directory for LD
       AsFile:=LDSEARCHFILE+GetExeExt;
       result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
+      if (NOT result) then
+      begin
+        AsFile:=TargetCPUName+'-w64-mingw32-'+LDSEARCHFILE+GetExeExt;
+        result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
+      end;
     end;
   end;
   if not result then

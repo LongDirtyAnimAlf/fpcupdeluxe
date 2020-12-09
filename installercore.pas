@@ -3264,10 +3264,11 @@ begin
           if (Pos('fpcpatch_haiku.patch',PatchFilePath)>0) OR (Pos('fpcpatch_haiku_',PatchFilePath)>0) then PatchAccepted:=False;
           {$endif}
 
-          {$ifndef Haiku}
-          //only patch the Haiku FPU exception mask on Haiku itself
+          //{$ifndef Haiku}
+          ////only patch the Haiku FPU exception mask on Haiku itself
+          //this patch has been disabled: we always patch the sources to get things running on Haiku !!
           if Pos('fpcpatch_haikufpu',PatchFilePath)>0 then PatchAccepted:=False;
-          {$endif}
+          //{$endif}
 
           {$ifndef OpenBSD}
           //only patch the openbsd mask on OpenBSD itself
@@ -3349,7 +3350,8 @@ begin
           if (Pos('fpcupdeluxe',s)>0) then break; // we were here already ... ;-)
           if ((Pos('Default8087CW',s)>0) AND (Pos('$1332;',s)>0)) then
           begin
-            PatchList.Strings[i]:=StringReplace(s,'$1332;','$1333; // Patched by fpcupdeluxe to prevent FPU crash',[]);
+            //PatchList.Strings[i]:=StringReplace(s,'$1332;','$1333; // Patched by fpcupdeluxe to prevent FPU crash',[]);
+            PatchList.Strings[i]:=StringReplace(s,'$1332;','$137F; // Patched by fpcupdeluxe to prevent FPU crash',[]);
             PatchList.SaveToFile(PatchFilePath);
             break;
           end;

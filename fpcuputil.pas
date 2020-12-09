@@ -3237,34 +3237,51 @@ begin
   begin
     for i:=Low(HAIKUSEARCHDIRS) to High(HAIKUSEARCHDIRS) do
     begin
+      Output:='';
       sd:=HAIKUSEARCHDIRS[i];
       {$ifndef CPUX86}
       if (RightStr(sd,4)='/x86') then continue;
       {$endif}
       RunCommand('find',[sd,'-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
       result:=(Pos(aLibrary,Output)>0);
-      if result then break;
+      if result then
+      begin
+        ThreadLog('Library searcher found '+aLibrary+' inside '+sd+'.',etDebug);
+        break;
+      end;
     end;
   end;
   {$endif}
 
   {$ifdef Unix}
+  {$ifndef Haiku}
   if NOT result then
   begin
     for i:=Low(UNIXSEARCHDIRS) to High(UNIXSEARCHDIRS) do
     begin
+      Output:='';
       sd:=UNIXSEARCHDIRS[i];
       RunCommand('find',[sd,'-type','f','-name',aLibrary],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
       result:=(Pos(aLibrary,Output)>0);
-      if result then break;
+      if result then
+      begin
+        ThreadLog('Library searcher found '+aLibrary+' inside '+sd+'.',etDebug);
+        break;
+      end;
     end;
   end;
 
   if (NOT result) then
   begin
+    Output:='';
     RunCommand('sh',['-c','"ldconfig -p | grep '+aLibrary+'"'],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
     result:=(Pos(aLibrary,Output)>0);
+    if result then
+    begin
+      ThreadLog('Library '+aLibrary+' found by ldconfig.',etDebug);
+    end;
   end;
+  {$endif}
   {$endif}
 end;
 
