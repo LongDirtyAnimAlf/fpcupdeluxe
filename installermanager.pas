@@ -1530,6 +1530,7 @@ begin
         'awgg'          : FInstaller:=TAWGGInstaller.Create;
         'mORMotPXL'     : FInstaller:=TmORMotPXLInstaller.Create;
         'internettools' : FInstaller:=TInternetToolsInstaller.Create;
+        'pas2js-rtl'    :FInstaller:=TPas2jsInstaller.Create;
       else
         FInstaller:=TUniversalInstaller.Create;
       end;

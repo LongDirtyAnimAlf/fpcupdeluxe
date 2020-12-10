@@ -152,6 +152,11 @@ type
     function BuildModule(ModuleName: string): boolean; override;
   end;
 
+  { TPas2jsInstaller }
+  TPas2jsInstaller = class(TUniversalInstaller)
+  public
+    function BuildModule(ModuleName: string): boolean; override;
+  end;
 
   { TInternetToolsInstaller }
   TInternetToolsInstaller = class(TUniversalInstaller)
@@ -2374,6 +2379,80 @@ begin
   Infoln(infotext+Processor.GetExeInfo,etDebug);
   ProcessorResult:=Processor.ExecuteAndWait;
   result := (ProcessorResult=0);
+end;
+
+function TPas2jsInstaller.BuildModule(ModuleName: string): boolean;
+var
+  Workingdir,FilePath:string;
+  idx:integer;
+  sl:TStringList;
+  LazarusConfig: TUpdateLazConfig;
+begin
+  result:=inherited;
+  result:=InitModule;
+  if not result then exit;
+
+  //Perform some extra magic for this module
+
+  Workingdir:='';
+
+  idx:=UniModuleList.IndexOf(ModuleName);
+  if idx>=0 then
+  begin
+    sl:=TStringList(UniModuleList.Objects[idx]);
+    Workingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
+    if Workingdir='' then Workingdir:=GetValueFromKey(INSTALLMAGIC,sl);
+    Workingdir:=FixPath(Workingdir);
+  end;
+
+  Processor.Process.Parameters.Clear;
+  Processor.Executable:=Make;
+  Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
+  Processor.Process.Parameters.Add('PP='+FCompiler);
+  //Processor.Process.Parameters.Add('FPC='+FCompiler);
+
+  Processor.Process.Parameters.Add('clean');
+  Processor.Process.Parameters.Add('all');
+
+  Infoln(infotext+Processor.GetExeInfo,etDebug);
+  ProcessorResult:=Processor.ExecuteAndWait;
+  result := (ProcessorResult=0);
+
+  if not result then exit;
+
+  Self.GetFPCTarget(true);
+
+  LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
+  try
+    // set defaults for pas2js
+    FilePath:=ConcatPaths([WorkingDir,'bin',GetFPCTarget(true),'pas2js'+GetExeExt]);
+    LazarusConfig.SetVariable(Pas2jsConfig, 'compiler/value', FilePath);
+    FilePath:=ConcatPaths([WorkingDir,'bin',GetFPCTarget(true),'compileserver'+GetExeExt]);
+    LazarusConfig.SetVariable(Pas2jsConfig, 'webserver/value', FilePath);
+  finally
+    LazarusConfig.Free;
+  end;
+
+  FilePath:=ConcatPaths([WorkingDir,'packages','rtl','pas2js_rtl.lpk']);
+  result:=InstallPackage(FilePath,WorkingDir,True);
+  if not result then exit;
+
+  FilePath:=ConcatPaths([WorkingDir,'packages','fcl-base','fcl_base_pas2js.lpk']);
+  result:=InstallPackage(FilePath,WorkingDir,True);
+  if not result then exit;
+
+  FilePath:=ConcatPaths([WorkingDir,'packages','fcl-db','pas2js_fcldb.lpk']);
+  result:=InstallPackage(FilePath,WorkingDir,True);
+  if not result then exit;
+
+  FilePath:=ConcatPaths([WorkingDir,'packages','fpcunit','fpcunit_pas2js.lpk']);
+  result:=InstallPackage(FilePath,WorkingDir,True);
+  if not result then exit;
+
+  FilePath:=ConcatPaths([LazarusSourceDir,'components','pas2js','pas2jsdsgn.lpk']);
+  result:=InstallPackage(FilePath,WorkingDir,False);
+  if not result then exit;
+
 end;
 
 function TInternetToolsInstaller.GetModule(ModuleName: string): boolean;

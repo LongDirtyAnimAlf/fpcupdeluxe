@@ -2008,6 +2008,9 @@ begin
   {$IFDEF CPUAARCH64}
   // we need at least 3.2.0 for aarch64
   if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.2.0') then result:='3.2.0';
+  {$IFDEF DARWIN}
+  if CalculateNumericalVersion(result)<CalculateNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
+  {$ENDIF}
   {$ENDIF}
 
   {$IFDEF HAIKU}
