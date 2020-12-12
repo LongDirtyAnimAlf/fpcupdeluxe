@@ -1,13 +1,13 @@
 object Form1: TForm1
-  Left = 367
-  Height = 740
-  Top = 196
-  Width = 1083
+  Left = 50
+  Height = 590
+  Top = 50
+  Width = 1078
   Anchors = []
   Caption = 'Form1'
-  ClientHeight = 720
-  ClientWidth = 1083
-  Constraints.MinHeight = 620
+  ClientHeight = 570
+  ClientWidth = 1078
+  Constraints.MinHeight = 400
   Menu = MainMenu1
   OnClose = FormClose
   OnCreate = FormCreate
@@ -24,13 +24,14 @@ object Form1: TForm1
     Left = 12
     Height = 31
     Hint = 'Open the extended settings form.'
-    Top = 621
+    Top = 471
     Width = 310
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
     Caption = 'Setup+'
     OnClick = btnSetupPlusClick
+    ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 8
@@ -43,11 +44,12 @@ object Form1: TForm1
     Left = 336
     Height = 23
     Top = 33
-    Width = 477
+    Width = 472
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
     Constraints.MinWidth = 120
+    ParentFont = False
     ReadOnly = True
     TabOrder = 6
     Text = 'Sitting and waiting'
@@ -57,7 +59,7 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = btnSendLog
-    Left = 825
+    Left = 820
     Height = 19
     Top = 35
     Width = 74
@@ -65,6 +67,7 @@ object Form1: TForm1
     BorderSpacing.Right = 12
     Caption = 'Auto clear'
     Checked = True
+    ParentFont = False
     State = cbChecked
     TabOrder = 10
   end
@@ -72,7 +75,7 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 998
+    Left = 993
     Height = 25
     Top = 33
     Width = 73
@@ -81,6 +84,7 @@ object Form1: TForm1
     BorderSpacing.Right = 12
     Caption = 'Clear log'
     OnClick = btnLogClick
+    ParentFont = False
     TabOrder = 9
   end
   inline CommandOutputScreen: TSynEdit
@@ -91,9 +95,9 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = memoSummary
     Left = 336
-    Height = 466
+    Height = 316
     Top = 62
-    Width = 735
+    Width = 730
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 8
@@ -621,6 +625,7 @@ object Form1: TForm1
     BorderSpacing.Top = 4
     Caption = 'Set install path'
     OnClick = btnInstallDirSelectClick
+    ParentFont = False
     TabOrder = 1
   end
   object RealFPCURL: TEdit
@@ -633,6 +638,7 @@ object Form1: TForm1
     BorderSpacing.Top = 4
     OnChange = RealURLChange
     OnDblClick = RealURLDblClick
+    ParentFont = False
     ParentShowHint = False
     ReadOnly = True
     ShowHint = True
@@ -648,13 +654,14 @@ object Form1: TForm1
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
-    Width = 382
+    Width = 377
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 4
     BorderSpacing.Right = 12
     OnChange = RealURLChange
     OnDblClick = RealURLDblClick
+    ParentFont = False
     ParentShowHint = False
     ReadOnly = True
     ShowHint = True
@@ -668,8 +675,8 @@ object Form1: TForm1
     AnchorSideBottom.Side = asrBottom
     Left = 6
     Height = 56
-    Top = 660
-    Width = 1065
+    Top = 510
+    Width = 1060
     Align = alBottom
     AutoSize = True
     BorderSpacing.Left = 6
@@ -679,8 +686,9 @@ object Form1: TForm1
     BorderSpacing.CellAlignVertical = ccaCenter
     BevelInner = bvLowered
     ClientHeight = 56
-    ClientWidth = 1065
+    ClientWidth = 1060
     Constraints.MinHeight = 50
+    ParentFont = False
     TabOrder = 2
     object TrunkBtn: TBitBtn
       AnchorSideLeft.Control = Panel1
@@ -828,6 +836,7 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
@@ -1011,6 +1020,7 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
@@ -1162,6 +1172,7 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
@@ -1313,6 +1324,7 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 3
@@ -1464,6 +1476,7 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 4
@@ -1615,6 +1628,7 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 6
@@ -1766,6 +1780,7 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 7
@@ -1774,7 +1789,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
-      Left = 974
+      Left = 969
       Height = 42
       Hint = 'Try to quit fpcupdeluxe'
       Top = 8
@@ -1918,6 +1933,7 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = BitBtnHaltClick
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 5
@@ -2069,6 +2085,7 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 8
@@ -2082,12 +2099,13 @@ object Form1: TForm1
     Left = 336
     Height = 120
     Hint = 'Will show error'
-    Top = 536
-    Width = 735
+    Top = 386
+    Width = 730
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 4
     Constraints.MinWidth = 120
+    ParentFont = False
     ParentShowHint = False
     ReadOnly = True
     ScrollBars = ssAutoVertical
@@ -2099,7 +2117,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = btnSetupPlus
     Left = 12
-    Height = 578
+    Height = 428
     Top = 35
     Width = 310
     ActivePage = BasicSheet
@@ -2107,13 +2125,15 @@ object Form1: TForm1
     BorderSpacing.Left = 12
     BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
+    ParentFont = False
     TabIndex = 0
     TabOrder = 11
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet
       Caption = 'Basic'
-      ClientHeight = 550
+      ClientHeight = 400
       ClientWidth = 302
+      ParentFont = False
       object FPCVersionLabel: TLabel
         AnchorSideLeft.Control = ListBoxFPCTarget
         AnchorSideTop.Control = BasicSheet
@@ -2141,7 +2161,7 @@ object Form1: TForm1
         AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = BitBtnFPCOnly
         Left = 8
-        Height = 362
+        Height = 212
         Top = 34
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
@@ -2150,6 +2170,7 @@ object Form1: TForm1
         BorderSpacing.Bottom = 8
         ItemHeight = 0
         OnSelectionChange = TargetSelectionChange
+        ParentFont = False
         ScrollWidth = 133
         TabOrder = 0
       end
@@ -2181,7 +2202,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = BitBtnLazarusOnly
         Left = 163
-        Height = 362
+        Height = 212
         Top = 34
         Width = 131
         Anchors = [akTop, akRight, akBottom]
@@ -2190,6 +2211,7 @@ object Form1: TForm1
         BorderSpacing.Bottom = 8
         ItemHeight = 0
         OnSelectionChange = TargetSelectionChange
+        ParentFont = False
         ScrollWidth = 133
         TabOrder = 1
       end
@@ -2202,7 +2224,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Only install/update selected FPC version.'
-        Top = 412
+        Top = 262
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -2343,6 +2365,7 @@ object Form1: TForm1
         }
         Layout = blGlyphTop
         OnClick = InstallClick
+        ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 2
@@ -2356,7 +2379,7 @@ object Form1: TForm1
         Left = 163
         Height = 61
         Hint = 'Only install/update selected Lazarus version.'
-        Top = 412
+        Top = 262
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -2497,6 +2520,7 @@ object Form1: TForm1
         }
         Layout = blGlyphTop
         OnClick = InstallClick
+        ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 3
@@ -2511,7 +2535,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Will install/update the selected version of both FPC and Lazarus.'
-        Top = 481
+        Top = 331
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3007,6 +3031,7 @@ object Form1: TForm1
         }
         Layout = blGlyphTop
         OnClick = InstallClick
+        ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 4
@@ -3016,6 +3041,7 @@ object Form1: TForm1
       Caption = 'Cross'
       ClientHeight = 550
       ClientWidth = 302
+      ParentFont = False
       object radgrpCPU: TRadioGroup
         AnchorSideLeft.Control = CrossSheet
         AnchorSideTop.Control = CrossSheet
@@ -3057,6 +3083,7 @@ object Form1: TForm1
           'xtensa'
         )
         OnClick = radgrpCPUClick
+        ParentFont = False
         ParentShowHint = False
         TabOrder = 0
       end
@@ -3114,6 +3141,7 @@ object Form1: TForm1
           'freertos'
         )
         OnClick = radgrpOSClick
+        ParentFont = False
         ParentShowHint = False
         TabOrder = 1
       end
@@ -3134,6 +3162,7 @@ object Form1: TForm1
         BorderSpacing.Bottom = 6
         Caption = 'Install compiler'
         OnClick = ButtonProcessCrossCompiler
+        ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 2
@@ -3156,6 +3185,7 @@ object Form1: TForm1
         BorderSpacing.Bottom = 6
         Caption = 'Update all'
         OnClick = ButtonAutoUpdateCrossCompiler
+        ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 3
@@ -3177,6 +3207,7 @@ object Form1: TForm1
         BorderSpacing.Bottom = 6
         Caption = 'Remove compiler'
         OnClick = ButtonProcessCrossCompiler
+        ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 4
@@ -3186,6 +3217,7 @@ object Form1: TForm1
       Caption = 'Modules'
       ClientHeight = 550
       ClientWidth = 302
+      ParentFont = False
       object listModules: TListBox
         AnchorSideLeft.Control = ModuleSheet
         AnchorSideTop.Control = ModuleSheet
@@ -3205,6 +3237,7 @@ object Form1: TForm1
         OnSelectionChange = listModulesSelectionChange
         OnShowHint = listModulesShowHint
         ParentShowHint = False
+        ParentFont = False
         ScrollWidth = 191
         ShowHint = True
         TabOrder = 0
@@ -3224,6 +3257,7 @@ object Form1: TForm1
         BorderSpacing.Bottom = 8
         Caption = 'Install module'
         OnClick = btnInstallModuleClick
+        ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 1
@@ -3244,6 +3278,7 @@ object Form1: TForm1
         BorderSpacing.Bottom = 8
         Caption = 'Uninstall module'
         OnClick = btnInstallModuleClick
+        ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 2
@@ -3264,6 +3299,7 @@ object Form1: TForm1
         Lines.Strings = (
           ''
         )
+        ParentFont = False
         TabOrder = 3
       end
     end
@@ -3271,6 +3307,7 @@ object Form1: TForm1
       Caption = 'Tags'
       ClientHeight = 550
       ClientWidth = 302
+      ParentFont = False
       object FPCTagLabel: TLabel
         AnchorSideLeft.Control = ListBoxFPCTargetTag
         AnchorSideTop.Control = TagSheet
@@ -3328,8 +3365,9 @@ object Form1: TForm1
           'Please wait.'
           'Getting list.'
         )
-        ItemHeight = 15
+        ItemHeight = 10
         OnSelectionChange = TagSelectionChange
+        ParentFont = False
         ScrollWidth = 133
         TabOrder = 0
       end
@@ -3351,8 +3389,9 @@ object Form1: TForm1
           'Please wait.'
           'Getting list.'
         )
-        ItemHeight = 15
+        ItemHeight = 10
         OnSelectionChange = TagSelectionChange
+        ParentFont = False
         ScrollWidth = 133
         TabOrder = 1
       end
@@ -3506,6 +3545,7 @@ object Form1: TForm1
         }
         Layout = blGlyphTop
         OnClick = OnlyTagClick
+        ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 2
@@ -3660,6 +3700,7 @@ object Form1: TForm1
         }
         Layout = blGlyphTop
         OnClick = OnlyTagClick
+        ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 3
@@ -3678,6 +3719,7 @@ object Form1: TForm1
         BorderSpacing.Left = 8
         BorderSpacing.Right = 8
         BorderSpacing.Bottom = 8
+        ParentFont = False
         ReadOnly = True
         TabOrder = 4
       end
@@ -3686,6 +3728,7 @@ object Form1: TForm1
       Caption = 'Extras'
       ClientHeight = 550
       ClientWidth = 302
+      ParentFont = False
       object btnGetOpenSSL: TButton
         AnchorSideLeft.Control = ExtraSheet
         AnchorSideLeft.Side = asrCenter
@@ -3700,6 +3743,7 @@ object Form1: TForm1
         BorderSpacing.Top = 16
         Caption = 'Get OpenSSL by Browser'
         OnClick = btnGetOpenSSLClick
+        ParentFont = False
         TabOrder = 0
       end
       object ChkMakefileFPC: TButton
@@ -3714,6 +3758,7 @@ object Form1: TForm1
         BorderSpacing.Top = 16
         Caption = 'Check Makefile FPC'
         OnClick = ChkMakefileFPCClick
+        ParentFont = False
         TabOrder = 1
       end
       object ChkMakefileLaz: TButton
@@ -3729,6 +3774,7 @@ object Form1: TForm1
         BorderSpacing.Top = 16
         Caption = 'Check Makefile Lazarus'
         OnClick = ChkMakefileFPCClick
+        ParentFont = False
         TabOrder = 2
       end
       object CreateStartup: TButton
@@ -3744,6 +3790,7 @@ object Form1: TForm1
         BorderSpacing.Top = 16
         Caption = 'Re-create startup scripts'
         OnClick = ChkMakefileFPCClick
+        ParentFont = False
         TabOrder = 3
       end
       object btnUpdateLazarusMakefiles: TButton
@@ -3760,6 +3807,7 @@ object Form1: TForm1
         BorderSpacing.Top = 16
         Caption = 'Update Lazarus Makefiles'
         OnClick = btnUpdateLazarusMakefilesClick
+        ParentFont = False
         TabOrder = 4
         Visible = False
       end
@@ -3768,7 +3816,7 @@ object Form1: TForm1
   object btnSendLog: TButton
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = btnClearLog
-    Left = 911
+    Left = 906
     Height = 25
     Hint = 'Send email to fpcup maintainer containing Commandscreen output.'
     Top = 33
@@ -3778,18 +3826,19 @@ object Form1: TForm1
     BorderSpacing.Right = 12
     Caption = 'Email log'
     OnClick = btnLogClick
+    ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 12
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]
-    Left = 920
-    Top = 120
+    Left = 507
+    Top = 139
   end
   object MainMenu1: TMainMenu
-    Left = 920
-    Top = 176
+    Left = 363
+    Top = 75
     object MenuFile: TMenuItem
       Caption = '&File'
       object MenuItem6: TMenuItem
@@ -3838,8 +3887,8 @@ object Form1: TForm1
     end
   end
   object ActionList1: TActionList
-    Left = 920
-    Top = 240
+    Left = 507
+    Top = 75
     object actFileExit: TFileExit
       Category = 'File'
       Caption = 'E&xit'
@@ -3855,8 +3904,9 @@ object Form1: TForm1
   end
   object IniPropStorageApp: TIniPropStorage
     StoredValues = <>
+    OnSavingProperties = IniPropStorageAppSavingProperties
     OnRestoringProperties = IniPropStorageAppRestoringProperties
-    Left = 920
-    Top = 313
+    Left = 363
+    Top = 139
   end
 end

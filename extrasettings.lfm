@@ -1,14 +1,13 @@
 object Form2: TForm2
-  Left = 294
-  Height = 670
-  Top = 108
-  Width = 756
+  Left = 132
+  Height = 660
+  Top = 48
+  Width = 782
   Caption = 'Advanced settings'
-  ClientHeight = 670
-  ClientWidth = 756
+  ClientHeight = 660
+  ClientWidth = 782
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  Position = poMainFormCenter
   LCLVersion = '2.1.0.0'
   object GroupBox1: TGroupBox
     AnchorSideLeft.Control = Owner
@@ -17,7 +16,7 @@ object Form2: TForm2
     Left = 8
     Height = 124
     Top = 8
-    Width = 348
+    Width = 374
     Anchors = [akTop, akLeft, akRight]
     AutoSize = True
     BorderSpacing.Left = 8
@@ -27,7 +26,8 @@ object Form2: TForm2
     BorderSpacing.InnerBorder = 4
     Caption = 'Proxy settings'
     ClientHeight = 104
-    ClientWidth = 344
+    ClientWidth = 370
+    ParentFont = False
     TabOrder = 0
     object Label1: TLabel
       AnchorSideLeft.Control = GroupBox1
@@ -40,6 +40,7 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       Caption = 'HTTP proxy URL:'
       ParentColor = False
+      ParentFont = False
     end
     object EditHTTPProxyHost: TEdit
       AnchorSideLeft.Control = GroupBox1
@@ -50,12 +51,13 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 23
-      Width = 235
+      Width = 261
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       BorderSpacing.Right = 12
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       TabOrder = 0
     end
     object Label2: TLabel
@@ -63,7 +65,7 @@ object Form2: TForm2
       AnchorSideTop.Control = Label1
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 251
+      Left = 277
       Height = 15
       Top = 4
       Width = 89
@@ -72,19 +74,21 @@ object Form2: TForm2
       BorderSpacing.Right = 4
       Caption = 'HTTP proxy port:'
       ParentColor = False
+      ParentFont = False
     end
     object EditHTTPProxyPort: TEdit
       AnchorSideLeft.Control = Label2
       AnchorSideTop.Control = EditHTTPProxyHost
       AnchorSideRight.Control = Label2
       AnchorSideRight.Side = asrBottom
-      Left = 251
+      Left = 277
       Height = 23
       Top = 23
       Width = 89
       Anchors = [akTop, akLeft, akRight]
       NumbersOnly = True
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       TabOrder = 1
     end
     object Label3: TLabel
@@ -99,6 +103,7 @@ object Form2: TForm2
       BorderSpacing.Top = 8
       Caption = 'HTTP proxy username:'
       ParentColor = False
+      ParentFont = False
     end
     object EditHTTPProxyUser: TEdit
       AnchorSideLeft.Control = Label3
@@ -110,6 +115,7 @@ object Form2: TForm2
       Width = 140
       BorderSpacing.Top = 4
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       TabOrder = 2
     end
     object Label4: TLabel
@@ -118,7 +124,7 @@ object Form2: TForm2
       AnchorSideTop.Control = Label3
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 223
+      Left = 249
       Height = 15
       Top = 54
       Width = 117
@@ -126,19 +132,21 @@ object Form2: TForm2
       BorderSpacing.Right = 4
       Caption = 'HTTP proxy password:'
       ParentColor = False
+      ParentFont = False
     end
     object EditHTTPProxyPassword: TEdit
       AnchorSideLeft.Control = Label4
       AnchorSideTop.Control = EditHTTPProxyUser
       AnchorSideRight.Control = Label4
       AnchorSideRight.Side = asrBottom
-      Left = 223
+      Left = 249
       Height = 23
       Top = 73
       Width = 117
       Anchors = [akTop, akLeft, akRight]
       EchoMode = emPassword
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       PasswordChar = '*'
       TabOrder = 3
     end
@@ -150,23 +158,24 @@ object Form2: TForm2
     AnchorSideRight.Control = GroupBox4
     AnchorSideBottom.Control = btnAddFPCPatch
     Left = 8
-    Height = 440
+    Height = 430
     Top = 140
-    Width = 416
+    Width = 442
     Anchors = [akTop, akLeft, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 8
     BorderSpacing.Right = 8
     BorderSpacing.Bottom = 12
     Caption = 'Miscellaneous settings'
-    ClientHeight = 420
-    ClientWidth = 412
+    ClientHeight = 410
+    ClientWidth = 438
+    ParentFont = False
     TabOrder = 3
     object MiscellaneousCheckListBox: TCheckListBox
       Left = 4
-      Height = 412
+      Height = 402
       Top = 4
-      Width = 404
+      Width = 430
       Align = alClient
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -174,6 +183,7 @@ object Form2: TForm2
       BorderSpacing.Bottom = 4
       ExtendedSelect = False
       ItemHeight = 0
+      ParentFont = False
       TabOrder = 0
     end
   end
@@ -184,8 +194,8 @@ object Form2: TForm2
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = ButtonPanel
-    Left = 432
-    Height = 429
+    Left = 458
+    Height = 419
     Top = 140
     Width = 316
     Anchors = [akTop, akRight, akBottom]
@@ -193,8 +203,9 @@ object Form2: TForm2
     BorderSpacing.Right = 8
     BorderSpacing.Bottom = 4
     Caption = 'Custom tools location and build options'
-    ClientHeight = 409
+    ClientHeight = 399
     ClientWidth = 312
+    ParentFont = False
     TabOrder = 4
     object ComboBoxOS: TComboBox
       AnchorSideLeft.Control = ComboBoxCPU
@@ -209,6 +220,7 @@ object Form2: TForm2
       BorderSpacing.Left = 8
       ItemHeight = 15
       OnChange = ComboBoxCPUOSChange
+      ParentFont = False
       Style = csDropDownList
       TabOrder = 1
     end
@@ -224,6 +236,7 @@ object Form2: TForm2
       BorderSpacing.Top = 8
       ItemHeight = 15
       OnChange = ComboBoxCPUOSChange
+      ParentFont = False
       ParentShowHint = False
       Style = csDropDownList
       TabOrder = 0
@@ -262,6 +275,7 @@ object Form2: TForm2
         'custom'
       )
       OnSelectionChanged = RadioGroup3SelectionChanged
+      ParentFont = False
       TabOrder = 3
     end
     object EditLibLocation: TEdit
@@ -280,6 +294,7 @@ object Form2: TForm2
       BorderSpacing.Right = 12
       Enabled = False
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       ParentShowHint = False
       ReadOnly = True
       ShowHint = True
@@ -301,6 +316,7 @@ object Form2: TForm2
       BorderSpacing.Right = 12
       Enabled = False
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       ParentShowHint = False
       ReadOnly = True
       ShowHint = True
@@ -324,6 +340,7 @@ object Form2: TForm2
       Constraints.MinWidth = 80
       Enabled = False
       OnClick = OnDirectorySelect
+      ParentFont = False
       TabOrder = 5
     end
     object btnSelectBinDir: TButton
@@ -344,6 +361,7 @@ object Form2: TForm2
       Constraints.MinWidth = 80
       Enabled = False
       OnClick = OnDirectorySelect
+      ParentFont = False
       TabOrder = 7
     end
     object EditCrossBuildOptions: TEdit
@@ -363,6 +381,7 @@ object Form2: TForm2
       Enabled = False
       OnChange = EditCrossBuildOptionsChange
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       TabOrder = 8
     end
     object LabelCrossBuildOptions: TLabel
@@ -377,6 +396,7 @@ object Form2: TForm2
       BorderSpacing.Top = 12
       Caption = 'Cross Build Options Override (i.e. -CfSoft)'
       ParentColor = False
+      ParentFont = False
     end
     object btnListCustomOptions: TButton
       AnchorSideTop.Control = ComboBoxOS
@@ -391,6 +411,7 @@ object Form2: TForm2
       BorderSpacing.Right = 6
       Caption = 'List All'
       OnClick = btnListCustomOptionsClick
+      ParentFont = False
       TabOrder = 2
     end
     object LabelCrossSubArch: TLabel
@@ -405,6 +426,7 @@ object Form2: TForm2
       BorderSpacing.Top = 6
       Caption = 'Cross SubArch Override (i.e. armv7m, ...)'
       ParentColor = False
+      ParentFont = False
     end
     object EditCrossSubArch: TEdit
       AnchorSideLeft.Control = GroupBox4
@@ -423,6 +445,7 @@ object Form2: TForm2
       Enabled = False
       OnChange = EditCrossSubArchChange
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       TabOrder = 9
     end
     object EditCompilerOverride: TEdit
@@ -441,6 +464,7 @@ object Form2: TForm2
       BorderSpacing.Right = 12
       Enabled = False
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       ParentShowHint = False
       ReadOnly = True
       ShowHint = True
@@ -464,6 +488,7 @@ object Form2: TForm2
       Constraints.MinWidth = 80
       Enabled = False
       OnClick = btnSelectFile
+      ParentFont = False
       TabOrder = 11
     end
     object LabelCompilerOverride: TLabel
@@ -478,6 +503,7 @@ object Form2: TForm2
       BorderSpacing.Top = 6
       Caption = 'Compiler Override'
       ParentColor = False
+      ParentFont = False
     end
     object RadioGroupARMArch: TRadioGroup
       AnchorSideLeft.Control = GroupBox4
@@ -505,6 +531,7 @@ object Form2: TForm2
       Columns = 4
       Enabled = False
       OnSelectionChanged = RadioGroupARMArchSelectionChanged
+      ParentFont = False
       TabOrder = 12
     end
     object LabelCPU: TLabel
@@ -518,6 +545,7 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       Caption = 'Select CPU'
       ParentColor = False
+      ParentFont = False
     end
     object LabelOS: TLabel
       AnchorSideLeft.Control = ComboBoxOS
@@ -528,6 +556,7 @@ object Form2: TForm2
       Width = 49
       Caption = 'Select OS'
       ParentColor = False
+      ParentFont = False
     end
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox
@@ -536,7 +565,7 @@ object Form2: TForm2
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 504
+    Left = 530
     Height = 124
     Top = 8
     Width = 244
@@ -550,6 +579,7 @@ object Form2: TForm2
     Caption = 'FPC/Laz branch and revision'
     ClientHeight = 104
     ClientWidth = 240
+    ParentFont = False
     TabOrder = 2
     object EditFPCBranch: TEdit
       AnchorSideLeft.Control = LabelFPCbranch
@@ -560,6 +590,7 @@ object Form2: TForm2
       Top = 23
       Width = 112
       BorderSpacing.Top = 4
+      ParentFont = False
       TabOrder = 0
     end
     object LabelFPCbranch: TLabel
@@ -570,6 +601,7 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       Caption = 'FPC branch'
       ParentColor = False
+      ParentFont = False
     end
     object EditFPCRevision: TEdit
       AnchorSideLeft.Control = LabelFPCRevision
@@ -580,6 +612,7 @@ object Form2: TForm2
       Top = 23
       Width = 104
       BorderSpacing.Top = 4
+      ParentFont = False
       TabOrder = 1
     end
     object LabelFPCRevision: TLabel
@@ -590,6 +623,7 @@ object Form2: TForm2
       Width = 65
       Caption = 'FPC revision'
       ParentColor = False
+      ParentFont = False
     end
     object LabelLazarusbranch: TLabel
       AnchorSideTop.Control = EditFPCBranch
@@ -601,6 +635,7 @@ object Form2: TForm2
       BorderSpacing.Top = 8
       Caption = 'Lazarus branch'
       ParentColor = False
+      ParentFont = False
     end
     object EditLazarusBranch: TEdit
       AnchorSideLeft.Control = LabelLazarusbranch
@@ -611,6 +646,7 @@ object Form2: TForm2
       Top = 73
       Width = 112
       BorderSpacing.Top = 4
+      ParentFont = False
       TabOrder = 2
     end
     object LabelLazarusRevision: TLabel
@@ -623,6 +659,7 @@ object Form2: TForm2
       BorderSpacing.Top = 8
       Caption = 'Lazarus revision'
       ParentColor = False
+      ParentFont = False
     end
     object EditLazarusRevision: TEdit
       AnchorSideLeft.Control = LabelLazarusRevision
@@ -633,6 +670,7 @@ object Form2: TForm2
       Top = 73
       Width = 104
       BorderSpacing.Top = 4
+      ParentFont = False
       TabOrder = 3
     end
   end
@@ -641,7 +679,7 @@ object Form2: TForm2
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = GroupBoxFPCLazBranchRevision
-    Left = 364
+    Left = 390
     Height = 124
     Top = 8
     Width = 132
@@ -655,6 +693,7 @@ object Form2: TForm2
     Caption = 'Options Override'
     ClientHeight = 104
     ClientWidth = 128
+    ParentFont = False
     TabOrder = 1
     object LabelFPCOptions: TLabel
       AnchorSideTop.Control = GroupBoxCompileOptions
@@ -665,6 +704,7 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       Caption = 'FPC options'
       ParentColor = False
+      ParentFont = False
     end
     object EditFPCOptions: TEdit
       AnchorSideLeft.Control = LabelFPCOptions
@@ -676,6 +716,7 @@ object Form2: TForm2
       Width = 120
       BorderSpacing.Top = 4
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       TabOrder = 0
     end
     object LabelLazarusOptions: TLabel
@@ -688,6 +729,7 @@ object Form2: TForm2
       BorderSpacing.Top = 8
       Caption = 'Lazarus options'
       ParentColor = False
+      ParentFont = False
     end
     object EditLazarusOptions: TEdit
       AnchorSideLeft.Control = LabelLazarusOptions
@@ -699,6 +741,7 @@ object Form2: TForm2
       Width = 120
       BorderSpacing.Top = 4
       OnDblClick = EditDblClickDelete
+      ParentFont = False
       TabOrder = 1
     end
   end
@@ -710,13 +753,14 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 134
     Height = 70
-    Top = 592
+    Top = 582
     Width = 170
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 8
     ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
+    ParentFont = False
     TabOrder = 5
   end
   object btnAddFPCPatch: TButton
@@ -724,7 +768,7 @@ object Form2: TForm2
     AnchorSideBottom.Control = btnRemFPCPatch
     Left = 6
     Height = 25
-    Top = 592
+    Top = 582
     Width = 120
     Anchors = [akLeft, akBottom]
     AutoSize = True
@@ -733,6 +777,7 @@ object Form2: TForm2
     Constraints.MinHeight = 24
     Constraints.MinWidth = 120
     OnClick = btnAddPatchClick
+    ParentFont = False
     TabOrder = 6
   end
   object btnRemFPCPatch: TButton
@@ -741,7 +786,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 6
     Height = 25
-    Top = 637
+    Top = 627
     Width = 120
     Anchors = [akLeft, akBottom]
     AutoSize = True
@@ -751,6 +796,7 @@ object Form2: TForm2
     Constraints.MinHeight = 24
     Constraints.MinWidth = 120
     OnClick = btnRemPatchClick
+    ParentFont = False
     TabOrder = 7
   end
   object ListBoxLazPatch: TListBox
@@ -761,13 +807,14 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 450
     Height = 70
-    Top = 592
+    Top = 582
     Width = 170
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 6
     ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
+    ParentFont = False
     TabOrder = 8
   end
   object btnAddLazPatch: TButton
@@ -776,13 +823,14 @@ object Form2: TForm2
     AnchorSideBottom.Control = btnRemLazPatch
     Left = 324
     Height = 25
-    Top = 592
+    Top = 582
     Width = 120
     AutoSize = True
     Caption = 'Add Laz patch'
     Constraints.MinHeight = 24
     Constraints.MinWidth = 120
     OnClick = btnAddPatchClick
+    ParentFont = False
     TabOrder = 9
   end
   object btnRemLazPatch: TButton
@@ -792,7 +840,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 324
     Height = 25
-    Top = 637
+    Top = 627
     Width = 120
     Anchors = [akLeft, akBottom]
     AutoSize = True
@@ -801,6 +849,7 @@ object Form2: TForm2
     Constraints.MinHeight = 24
     Constraints.MinWidth = 120
     OnClick = btnRemPatchClick
+    ParentFont = False
     TabOrder = 10
   end
   object ButtonPanel: TPanel
@@ -808,15 +857,16 @@ object Form2: TForm2
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 650
+    Left = 676
     Height = 89
-    Top = 573
+    Top = 563
     Width = 98
     Anchors = [akRight, akBottom]
     BorderSpacing.Right = 8
     BorderSpacing.Bottom = 8
     ClientHeight = 89
     ClientWidth = 98
+    ParentFont = False
     TabOrder = 11
     object BitBtn1: TBitBtn
       AnchorSideLeft.Control = ButtonPanel
@@ -837,6 +887,7 @@ object Form2: TForm2
       DefaultCaption = True
       Kind = bkOK
       ModalResult = 1
+      ParentFont = False
       TabOrder = 0
     end
     object BitBtn2: TBitBtn
@@ -859,18 +910,26 @@ object Form2: TForm2
       DefaultCaption = True
       Kind = bkCancel
       ModalResult = 2
+      ParentFont = False
       TabOrder = 1
     end
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 160
-    Top = 8
+    Left = 80
+    Top = 264
   end
   object OpenDialog1: TOpenDialog
     Filter = 'Patch|*.patch|Diff|*.diff|All|*.*'
     Options = [ofFileMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail, ofAutoPreview]
-    Left = 160
-    Top = 64
+    Left = 80
+    Top = 352
+  end
+  object IniPropStorageSettings: TIniPropStorage
+    StoredValues = <>
+    OnSavingProperties = IniPropStorageSettingsSavingProperties
+    OnRestoringProperties = IniPropStorageSettingsRestoringProperties
+    Left = 80
+    Top = 184
   end
 end

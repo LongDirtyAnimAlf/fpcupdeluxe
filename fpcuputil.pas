@@ -272,6 +272,8 @@ type
     {$endif}
   {$endif USEONLYCURL}
 
+
+function MulDiv( a, b, c : Integer ) : Integer;
 // Create shortcut on desktop to Target file
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false) ;
 // Create shell script in user directory that links to Target
@@ -668,6 +670,10 @@ begin
 end;
 {$endif}
 
+function MulDiv( a, b, c : Integer ) : Integer;
+begin
+  result := int64(a)*int64(b) div c;
+end;
 
 function SafeExpandFileName (Const FileName : String): String;
 begin

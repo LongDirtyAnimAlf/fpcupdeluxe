@@ -110,6 +110,7 @@ type
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
     procedure IniPropStorageAppRestoringProperties(Sender: TObject);
+    procedure IniPropStorageAppSavingProperties(Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick(Sender: TObject);
     procedure InstallClick(Sender: TObject);
@@ -1857,7 +1858,17 @@ end;
 
 procedure TForm1.IniPropStorageAppRestoringProperties(Sender: TObject);
 begin
-  SessionProperties := 'WindowState;Top;Left;Width;Height;CmdFontSize;';
+  SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;';
+  //Width := MulDiv(Width, 96, Screen.PixelsPerInch);
+  //Height := MulDiv(Height, 96, Screen.PixelsPerInch);
+end;
+
+procedure TForm1.IniPropStorageAppSavingProperties(Sender: TObject);
+begin
+  if Self.WindowState=wsMaximized then
+    SessionProperties := 'WindowState;CmdFontSize;'
+  else
+    SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;';
 end;
 
 procedure TForm1.actFileSaveAccept(Sender: TObject);

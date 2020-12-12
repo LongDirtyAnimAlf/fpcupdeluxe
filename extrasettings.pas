@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls,
-  Dialogs, CheckLst, m_crossinstaller, installerCore;
+  Dialogs, CheckLst, IniPropStorage, m_crossinstaller, installerCore;
 
 type
   TCrossSetting = (fpcup,auto,custom);
@@ -46,6 +46,7 @@ type
     btnRemLazPatch: TButton;
     btnSelectCompiler: TButton;
     btnListCustomOptions: TButton;
+    IniPropStorageSettings: TIniPropStorage;
     LabelCPU: TLabel;
     LabelOS: TLabel;
     MiscellaneousCheckListBox: TCheckListBox;
@@ -101,6 +102,8 @@ type
     procedure EditCrossSubArchChange(Sender: TObject);
     procedure FormCreate({%H-}Sender: TObject);
     procedure FormDestroy({%H-}Sender: TObject);
+    procedure IniPropStorageSettingsRestoringProperties(Sender: TObject);
+    procedure IniPropStorageSettingsSavingProperties(Sender: TObject);
     procedure OnDirectorySelect(Sender: TObject);
     procedure RadioGroup3SelectionChanged(Sender: TObject);
     procedure RadioGroupARMArchSelectionChanged(Sender: TObject);
@@ -369,6 +372,7 @@ var
   //Cipher: TDCP_rc4;
   Cipher: TDCP_DES;
 begin
+  IniPropStorageSettings.IniFileName:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+'visuals.ini';
 
   SortedList:=TStringList.Create;
   try
@@ -884,6 +888,21 @@ begin
        ListBoxLazPatch.Items.Objects[i] := nil;
     end;
   end;
+end;
+
+procedure TForm2.IniPropStorageSettingsRestoringProperties(Sender: TObject);
+begin
+  SessionProperties := 'WindowState;Width;Height;Top;Left;';
+  //Width := MulDiv(Width, 96, Screen.PixelsPerInch);
+  //Height := MulDiv(Height, 96, Screen.PixelsPerInch);
+end;
+
+procedure TForm2.IniPropStorageSettingsSavingProperties(Sender: TObject);
+begin
+  if Self.WindowState=wsMaximized then
+    SessionProperties := 'WindowState;'
+  else
+    SessionProperties := 'WindowState;Width;Height;Top;Left;';
 end;
 
 procedure TForm2.RadioGroup3SelectionChanged(Sender: TObject);
