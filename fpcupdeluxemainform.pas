@@ -335,7 +335,7 @@ var
 begin
   MessageTrigger:=false;
 
-  IniPropStorageApp.IniFileName:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+'visuals.ini';
+  IniPropStorageApp.IniFileName:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+installerUniversal.DELUXEFILENAME;
 
   {$ifdef EnableLanguages}
   sLanguage:='en';

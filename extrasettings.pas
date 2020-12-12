@@ -372,7 +372,7 @@ var
   //Cipher: TDCP_rc4;
   Cipher: TDCP_DES;
 begin
-  IniPropStorageSettings.IniFileName:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+'visuals.ini';
+  IniPropStorageSettings.IniFileName:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+installerUniversal.DELUXEFILENAME;
 
   SortedList:=TStringList.Create;
   try
