@@ -695,6 +695,16 @@ begin
 
   if (Sender<>nil) then
   begin
+    s:='Going to update all crosscompilers !' + sLineBreak +
+       'Do you want to continue ?';
+    if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+    begin
+      exit;
+    end;
+  end;
+
+  if (Sender<>nil) then
+  begin
 
     CheckAutoClearStore:=CheckAutoClear.Checked;
     if CheckAutoClearStore then btnClearLog.Click;
