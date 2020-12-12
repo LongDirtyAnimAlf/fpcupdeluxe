@@ -374,6 +374,7 @@ if TargetOS=&apos;openbsd&apos; then
               <UseLineInfoUnit Value="False"/>
               <StripSymbols Value="True"/>
             </Debugging>
+            <LinkSmart Value="True"/>
           </Linking>
           <Other>
             <CustomOptions Value="-dRemoteLog"/>
@@ -405,6 +406,7 @@ if TargetOS=&apos;openbsd&apos; then
               <UseLineInfoUnit Value="False"/>
               <StripSymbols Value="True"/>
             </Debugging>
+            <LinkSmart Value="True"/>
           </Linking>
           <Other>
             <CustomOptions Value="-dRemoteLog"/>

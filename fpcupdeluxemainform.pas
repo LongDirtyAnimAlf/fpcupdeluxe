@@ -11,7 +11,7 @@ uses
   installerManager
   {$ifdef usealternateui},alternateui{$endif}
   ,LMessages
-  ,LCLVersion, ActnList, StdActns
+  ,LCLVersion, ActnList, StdActns, IniPropStorage
   {$ifdef RemoteLog}
   ,mormotdatamodelclient
   {$endif}
@@ -58,6 +58,7 @@ type
     actFileSave: TFileSaveAs;
     FPCVersionLabel: TLabel;
     FPCTagLabel: TLabel;
+    IniPropStorageApp: TIniPropStorage;
     LazarusVersionLabel: TLabel;
     LazarusTagLabel: TLabel;
     ListBoxFPCTarget: TListBox;
@@ -108,6 +109,7 @@ type
     CommandOutputScreen: TSynEdit;
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
+    procedure IniPropStorageAppRestoringProperties(Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick(Sender: TObject);
     procedure InstallClick(Sender: TObject);
@@ -126,7 +128,6 @@ type
     procedure FormClose({%H-}Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate({%H-}Sender: TObject);
     procedure FormDestroy({%H-}Sender: TObject);
-    procedure FormResize({%H-}Sender: TObject);
     procedure LazarusVersionLabelClick({%H-}Sender: TObject);
     procedure listModulesSelectionChange(Sender: TObject; User: boolean);
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
@@ -192,17 +193,21 @@ type
     procedure AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
     procedure SetTarget(aControl:TControl;const aTarget:string='');
     procedure InitFPCupManager;
+    function  GetCmdFontSize:integer;
+    procedure SetCmdFontSize(aValue:integer);
     {$ifndef usealternateui}
     property  FPCTarget:string read FFPCTarget write SetFPCTarget;
     property  LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
     {$endif}
-
   public
     { public declarations }
     {$ifdef usealternateui}
     property FPCTarget:string read FFPCTarget write SetFPCTarget;
     property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
     {$endif}
+
+  published
+    property CmdFontSize: integer read GetCmdFontSize write SetCmdFontSize;
   end;
 
 resourcestring
@@ -329,6 +334,8 @@ var
 begin
   MessageTrigger:=false;
 
+  IniPropStorageApp.IniFileName:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+'visuals.ini';
+
   {$ifdef EnableLanguages}
   sLanguage:='en';
   {$endif}
@@ -439,23 +446,6 @@ begin
     sConsentWarning:=ReadBool('General','ConsentWarning',true);
     {$endif}
     CheckAutoClear.Checked:=ReadBool('General','AutoClear',True);
-    CommandOutputScreen.Font.Size := ReadInteger('General','CommandFontSize',CommandOutputScreen.Font.Size);
-
-    if ValueExists('General','Maximized') then
-    begin
-      if ReadBool('General','Maximized',False) then
-      begin
-        Self.WindowState:=wsMaximized;
-      end
-      else
-      begin
-        Self.WindowState:=wsNormal;
-        Self.Top := ReadInteger('General','Top',Self.Top);
-        Self.Left := ReadInteger('General','Left',Self.Left);
-        Self.Width := ReadInteger('General','Width',Self.Width);
-        Self.Height := ReadInteger('General','Height',Self.Height);
-      end;
-    end;
   finally
     Free;
   end;
@@ -542,6 +532,7 @@ begin
   *)
 end;
 
+{
 procedure TForm1.FormResize(Sender: TObject);
 var
   w:integer;
@@ -551,6 +542,7 @@ begin
   RealLazURL.Width:=RealFPCURL.Width;
   RealLazURL.Left:=RealFPCURL.Left+(w+4);
 end;
+}
 
 procedure TForm1.InitShortCuts;
 begin
@@ -1861,6 +1853,11 @@ end;
 
 procedure TForm1.btnUpdateLazarusMakefilesClick(Sender: TObject);
 begin
+end;
+
+procedure TForm1.IniPropStorageAppRestoringProperties(Sender: TObject);
+begin
+  SessionProperties := 'WindowState;Top;Left;Width;Height;CmdFontSize;';
 end;
 
 procedure TForm1.actFileSaveAccept(Sender: TObject);
@@ -3631,20 +3628,6 @@ begin
       WriteString('ProxySettings','HTTPProxyUser',FPCupManager.HTTPProxyUser);
       WriteString('ProxySettings','HTTPProxyPass',FPCupManager.HTTPProxyPassword);
 
-      WriteInteger('General','CommandFontSize',CommandOutputScreen.Font.Size);
-
-      if Self.WindowState=wsNormal then
-      begin
-        WriteInteger('General','Top',Self.Top);
-        WriteInteger('General','Left',Self.Left);
-        WriteInteger('General','Width',Self.Width);
-        WriteInteger('General','Height',Self.Height);
-        WriteBool('General','Maximized',False);
-      end
-      else
-      begin
-        WriteBool('General','Maximized',True);
-      end;
       UpdateFile;
     finally
       Free;
@@ -4440,6 +4423,17 @@ begin
     memoSummary.Lines.Append(upUpdateFound);
   end else AddMessage(upUpdateNotFound);
 end;
+
+function TForm1.GetCmdFontSize:integer;
+begin
+  result:=CommandOutputScreen.Font.Size;
+end;
+
+procedure TForm1.SetCmdFontSize(aValue:integer);
+begin
+  CommandOutputScreen.Font.Size:=aValue;
+end;
+
 
 end.
 
