@@ -1879,96 +1879,104 @@ end;
 procedure TForm1.QuickBtnClick(Sender: TObject);
 var
   s:string;
+  aFPCTarget:string;
+  aLazarusTarget:string;
+  aModule:string;
 begin
+  s:='';
+
+  aFPCTarget:='';
+  aLazarusTarget:='';
+  aModule:='';
+
+  if Sender=TrunkBtn then
+  begin
+    s:='Going to install both FPC trunk and Lazarus trunk.';
+    aFPCTarget:='trunk';
+    aLazarusTarget:='trunk';
+  end;
+
+  if Sender=FixesBtn then
+  begin
+    s:='Going to install FPC fixes and Lazarus fixes.';
+    aFPCTarget:='fixes';
+    aLazarusTarget:='fixes';
+  end;
+
+  if Sender=StableBtn then
+  begin
+    s:='Going to install FPC stable and Lazarus stable.';
+    aFPCTarget:='stable';
+    aLazarusTarget:='stable';
+  end;
+
+  if Sender=OldBtn then
+  begin
+    s:='Going to install FPC 2.6.4 and Lazarus 1.4.';
+    aFPCTarget:='2.6.4';
+    aLazarusTarget:='1.4';
+  end;
+
+  {
+  if Sender=DinoBtn then
+  begin
+    s:='Going to install FPC 2.0.2 and Lazarus 0.9.16.';
+    aFPCTarget:='2.0.2';
+    //aLazarusTarget:='0.9.4';
+    aLazarusTarget:='0.9.16';
+  end;
+  }
+
+  if Sender=EmbeddedBtn then
+  begin
+    s:='Going to install FPC and Lazarus for SAM embedded.';
+    aFPCTarget:='embedded';
+    aLazarusTarget:='embedded';
+    //aModule:='mbf,pxl';
+    aModule:='mbf';
+  end;
+
+  if Sender=mORMotBtn then
+  begin
+    s:='Going to install the mORMot.';
+    aModule:='mORMot';
+    //aModule:='mORMot,zeos';
+  end;
+
+  if Sender=mORMot2Btn then
+  begin
+    s:='Going to install the mORMot2.';
+    aModule:='mORMot2';
+    //aModule:='mORMot2,zeos';
+  end;
+
+  if Sender=OPMBtn then
+  begin
+    s:='Going to install the Online Package Manager.';
+    aModule:='opm';
+  end;
+
+  s:=s+sLineBreak;
+  s:=s+'Install directory: '+Self.sInstallDir;
+  s:=s+sLineBreak;
+  s:=s+'Do you want to continue ?';
+  if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+
 
   DisEnable(Sender,False);
   try
     PrepareRun;
 
-    if Sender=TrunkBtn then
+    if (Length(aFPCTarget)>0) then FPCupManager.FPCURL:=aFPCTarget;
+    if (Length(aLazarusTarget)>0) then FPCupManager.LazarusURL:=aLazarusTarget;
+
+    if (Length(aModule)>0)then
     begin
-      s:='Going to install both FPC trunk and Lazarus trunk';
-      FPCTarget:='trunk';
-      LazarusTarget:='trunk';
+      if ((Length(aFPCTarget)=0) AND (Length(aLazarusTarget)=0)) then
+        FPCupManager.OnlyModules:=aModule
+      else
+        FPCupManager.IncludeModules:=aModule;
     end;
-
-    {
-    if Sender=NPBtn then
-    begin
-      s:='Going to install NewPascal release';
-      FPCTarget:='newpascalgit';
-      //FPCBranch:='release';
-      LazarusTarget:='newpascalgit';
-      //LazarusBranch:='release';
-      //FPCupManager.IncludeModules:='mORMot';
-    end;
-    }
-
-    if Sender=FixesBtn then
-    begin
-      s:='Going to install FPC fixes and Lazarus fixes';
-      FPCTarget:='fixes';
-      LazarusTarget:='fixes';
-    end;
-
-    if Sender=StableBtn then
-    begin
-      s:='Going to install FPC stable and Lazarus stable';
-      FPCTarget:='stable';
-      LazarusTarget:='stable';
-    end;
-
-    if Sender=OldBtn then
-    begin
-      s:='Going to install FPC 2.6.4 and Lazarus 1.4 ';
-      FPCTarget:='2.6.4';
-      LazarusTarget:='1.4';
-    end;
-
-    {
-    if Sender=DinoBtn then
-    begin
-      s:='Going to install FPC 2.0.2 and Lazarus 0.9.16 ';
-      FPCTarget:='2.0.2';
-      //LazarusTarget:='0.9.4';
-      LazarusTarget:='0.9.16';
-      FPCupManager.OnlyModules:=_FPC+','+_LAZARUSSIMPLE;
-    end;
-    }
-
-    if Sender=EmbeddedBtn then
-    begin
-      s:='Going to install FPC and Lazarus for SAM embedded ';
-      FPCTarget:='embedded';
-      LazarusTarget:='embedded';
-      //FPCupManager.IncludeModules:='mbf,pxl';
-      FPCupManager.IncludeModules:='mbf';
-    end;
-
-    if Sender=mORMotBtn then
-    begin
-      s:='Going to install the mORMot ';
-      FPCupManager.OnlyModules:='mORMot';
-      //FPCupManager.OnlyModules:='mORMot,zeos';
-    end;
-
-    if Sender=mORMot2Btn then
-    begin
-      s:='Going to install the mORMot2';
-      FPCupManager.OnlyModules:='mORMot2';
-      //FPCupManager.OnlyModules:='mORMot2,zeos';
-    end;
-
-    if Sender=OPMBtn then
-    begin
-      s:='Going to install the Online Package Manager ';
-      FPCupManager.OnlyModules:='opm';
-      //FPCupManager.OnlyModules:='mORMot,zeos';
-    end;
-
-
-    FPCupManager.FPCURL:=FPCTarget;
-    FPCupManager.LazarusURL:=LazarusTarget;
 
     if (NOT Form2.IncludeHelp) then
     begin
@@ -2000,95 +2008,101 @@ procedure TForm1.btnInstallModuleClick(Sender: TObject);
 var
   //i:integer;
   modules:string;
+  s:string;
 begin
-  //Form3.ShowModal;
+  if listModules.SelCount=0 then
+  begin
+    AddMessage('Please select a module / package.');
+    exit;
+  end;
 
-  DisEnable(Sender,False);
+  modules:='';
 
-  //for i:=1 to 100 do
-  try
-    if listModules.SelCount=0 then
+  //No multi-select for now
+  (*
+  for i:=0 to listModules.Count-1 do
+  begin
+    if listModules.Selected[i] then
     begin
-      AddMessage('Please select a module / package.');
-      exit;
-    end;
-
-    PrepareRun;
-
-    FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
-
-    modules:='';
-
-    //No multi-select for now
-    (*
-    for i:=0 to listModules.Count-1 do
-    begin
-      if listModules.Selected[i] then
-      begin
-        modules:=modules+listModules.Items[i];
-        if Sender=btnUninstallModule then modules:=modules+_UNINSTALL;
-        modules:=modules+',';
-        {$ifdef RemoteLog}
-        aDataClient.AddExtraData('module'+InttoStr(i),listModules.Items[i]);
-        {$endif}
-      end;
-    end;
-    *)
-
-    //Single select
-    if (listModules.ItemIndex<>-1) then
-    begin
-      modules:=listModules.Items.Strings[listModules.ItemIndex];
+      s:=listModules.Items[i];
+      modules:=modules+s;
       if Sender=btnUninstallModule then modules:=modules+_UNINSTALL else
       begin
         if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
       end;
+      modules:=modules+',';
       {$ifdef RemoteLog}
-      aDataClient.AddExtraData('module'+InttoStr(1),modules);
+      aDataClient.AddExtraData('module'+InttoStr(i),s);
+      {$endif}
+    end;
+  end;
+  *)
+
+  //Single select
+  if (listModules.ItemIndex<>-1) then
+  begin
+    s:=listModules.Items.Strings[listModules.ItemIndex];
+    modules:=s;
+    if Sender=btnUninstallModule then modules:=modules+_UNINSTALL else
+    begin
+      if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
+    end;
+    {$ifdef RemoteLog}
+    aDataClient.AddExtraData('module'+InttoStr(1),s);
+    {$endif}
+  end;
+
+  if Length(modules)>0 then
+  begin
+    //Delete stale trailing comma, if any
+    if RightStr(modules,1)=',' then SetLength(modules,Length(modules)-1);
+
+    s:=modules;
+    s:=StringReplace(s,_UNINSTALL,'',[rfReplaceAll]);
+    s:=StringReplace(s,_BUILD+_ONLY,'',[rfReplaceAll]);
+    if Sender=btnInstallModule then s:='Going to install/update module '+s;
+    if Sender=btnUninstallModule then s:='Going to remove module '+s;
+    s:=s+'.'+sLineBreak;
+    s:=s+'Install directory: '+Self.sInstallDir;
+    s:=s+sLineBreak;
+    s:=s+'Do you want to continue ?';
+    if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+
+    if Sender=btnInstallModule then
+    begin
+      AddMessage('Limiting installation/update to '+FPCupManager.OnlyModules);
+      AddMessage('');
+      AddMessage('Going to install selected modules with given options.');
+      sStatus:='Going to install/update selected modules.';
+      {$ifdef RemoteLog}
+      aDataClient.UpInfo.UpFunction:=ufInstallModule;
+      {$endif}
+    end
+    else
+    begin
+      AddMessage('Going to remove selected modules.');
+      sStatus:='Going to remove selected modules.';
+      {$ifdef RemoteLog}
+      aDataClient.UpInfo.UpFunction:=ufUninstallModule;
       {$endif}
     end;
 
-    if Length(modules)>0 then
-    begin
-      //Delete stale trailing comma, if any
-      if RightStr(modules,1)=',' then SetLength(modules,Length(modules)-1);
-      FPCupManager.OnlyModules:=modules;
+    DisEnable(Sender,False);
+    try
+      PrepareRun;
 
-      if Sender=btnInstallModule then
-      begin
-        AddMessage('Limiting installation/update to '+FPCupManager.OnlyModules);
-        AddMessage('');
-        AddMessage('Going to install selected modules with given options.');
-        sStatus:='Going to install/update selected modules.';
-        {$ifdef RemoteLog}
-        aDataClient.UpInfo.UpFunction:=ufInstallModule;
-        {$endif}
-      end
-      else
-      begin
-        AddMessage('Going to remove selected modules.');
-        sStatus:='Going to remove selected modules.';
-        {$ifdef RemoteLog}
-        aDataClient.UpInfo.UpFunction:=ufUninstallModule;
-        {$endif}
-      end;
+      FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
+      FPCupManager.OnlyModules:=modules;
 
       RealRun;
 
-      (*
-      AddMessage('Run: '+modules+InttoStr(i));
-      if (NOT RealRun) then
-      begin
-        break;
-      end;
-      *)
-
+    finally
+      FPCupManager.ExportOnly:=(NOT Form2.Repo);
+      DisEnable(Sender,True);
     end;
 
-  finally
-    FPCupManager.ExportOnly:=(NOT Form2.Repo);
-    DisEnable(Sender,True);
   end;
+
 end;
 
 procedure TForm1.btnInstallDirSelectClick(Sender: TObject);
@@ -2216,13 +2230,8 @@ begin
     exit;
   end;
 
-
-
   // OS=amiga) AND (CPU<>m68k))
   // OS=morphos) AND (CPU<>powerpc))
-
-
-
 
   PrepareRun;
 
@@ -2361,6 +2370,13 @@ begin
 
   if Sender=ButtonRemoveCrossCompiler then
   begin
+    s:='Going to remove the cross-compiler for ['+GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target)+'].' + sLineBreak +
+       'Do you want to continue ?';
+    if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+    begin
+      exit;
+    end;
+
     DisEnable(Sender,False);
     try
       if ((FPCupManager.CrossOS_Target=TOS.java) OR
@@ -2477,20 +2493,6 @@ begin
         end;
       end;
 
-      {$ifndef BSD}
-      if (FPCupManager.CrossOS_Target=TOS.freebsd) OR (FPCupManager.CrossOS_Target=TOS.netbsd) OR (FPCupManager.CrossOS_Target=TOS.openbsd) then
-      begin
-        if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, fixes, stable).' + sLineBreak +
-                   'See: https://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
-                   'Do you want to continue ?'
-                   ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
-                   begin
-                     memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=30908');
-                     exit;
-                   end;
-      end;
-      {$endif}
-
       s:='';
       if (FPCupManager.CrossOS_Target=TOS.aix)
       then
@@ -2530,12 +2532,19 @@ begin
       end;
       {$endif}
 
-      if length(s)>0 then
+      if (length(s)=0) then
       begin
-        if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
-        begin
-          exit;
-        end;
+        s:='Going to install the cross-compiler for ['+GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target)+'].' + sLineBreak +
+           'Do you want to continue ?';
+      end
+      else
+      begin
+        s:='Going to install the cross-compiler for ['+GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target)+'].' + sLineBreak + s;
+      end;
+
+      if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+      begin
+        exit;
       end;
     end;
 
@@ -3428,6 +3437,16 @@ begin
     ShowMessage(s);
     exit;
   end;
+
+  s:='';
+  if Sender=BitBtnFPCOnly then s:='Going to install/update FPC.';
+  if Sender=BitBtnLazarusOnly then s:='Going to install/update Lazarus.';
+  if Sender=BitBtnFPCandLazarus then s:='Going to install/update FPC and Lazarus.';
+  s:=s+sLineBreak;
+  s:=s+'Install directory: '+Self.sInstallDir;
+  s:=s+sLineBreak;
+  s:=s+'Do you want to continue ?';
+  if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
 
   DisEnable(Sender,False);
   try
