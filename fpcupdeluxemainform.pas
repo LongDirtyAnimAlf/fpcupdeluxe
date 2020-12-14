@@ -2004,7 +2004,15 @@ begin
     sStatus:=s;
 
     {$ifdef RemoteLog}
-    aDataClient.UpInfo.UpFunction:=ufInstallFPCLAZ;
+    if ((Length(aFPCTarget)>0) OR (Length(aLazarusTarget)>0)) then
+    begin
+      aDataClient.UpInfo.UpFunction:=ufInstallFPCLAZ;
+    end
+    else
+    begin
+      aDataClient.UpInfo.UpFunction:=ufInstallModule;
+      aDataClient.AddExtraData('module',aModule);
+    end;
     {$endif}
 
     RealRun;
@@ -2034,16 +2042,12 @@ begin
   begin
     if listModules.Selected[i] then
     begin
-      s:=listModules.Items[i];
-      modules:=modules+s;
+      modules:=modules+listModules.Items[i];
       if Sender=btnUninstallModule then modules:=modules+_UNINSTALL else
       begin
         if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
       end;
       modules:=modules+',';
-      {$ifdef RemoteLog}
-      aDataClient.AddExtraData('module'+InttoStr(i),s);
-      {$endif}
     end;
   end;
   *)
@@ -2051,15 +2055,11 @@ begin
   //Single select
   if (listModules.ItemIndex<>-1) then
   begin
-    s:=listModules.Items.Strings[listModules.ItemIndex];
-    modules:=s;
+    modules:=listModules.Items.Strings[listModules.ItemIndex];
     if Sender=btnUninstallModule then modules:=modules+_UNINSTALL else
     begin
       if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
     end;
-    {$ifdef RemoteLog}
-    aDataClient.AddExtraData('module'+InttoStr(1),s);
-    {$endif}
   end;
 
   if Length(modules)>0 then
@@ -2084,17 +2084,11 @@ begin
       AddMessage('');
       AddMessage('Going to install selected modules with given options.');
       sStatus:='Going to install/update selected modules.';
-      {$ifdef RemoteLog}
-      aDataClient.UpInfo.UpFunction:=ufInstallModule;
-      {$endif}
     end
     else
     begin
       AddMessage('Going to remove selected modules.');
       sStatus:='Going to remove selected modules.';
-      {$ifdef RemoteLog}
-      aDataClient.UpInfo.UpFunction:=ufUninstallModule;
-      {$endif}
     end;
 
     DisEnable(Sender,False);
@@ -2103,6 +2097,15 @@ begin
 
       FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
       FPCupManager.OnlyModules:=modules;
+
+      {$ifdef RemoteLog}
+      s:=modules;
+      s:=StringReplace(s,_UNINSTALL,'',[rfReplaceAll]);
+      s:=StringReplace(s,_BUILD+_ONLY,'',[rfReplaceAll]);
+      aDataClient.AddExtraData('module[s]:',s);
+      if Sender=btnInstallModule then aDataClient.UpInfo.UpFunction:=ufInstallModule;
+      if Sender=btnUninstallModule then aDataClient.UpInfo.UpFunction:=ufUninstallModule;
+      {$endif}
 
       RealRun;
 
