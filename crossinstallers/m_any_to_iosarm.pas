@@ -97,6 +97,7 @@ begin
   inherited Destroy;
 end;
 
+{$ifndef Darwin}
 var
   any_iosarm:Tany_iosarm;
 
@@ -107,5 +108,6 @@ initialization
 finalization
   any_iosarm.Destroy;
 
+{$endif Darwin}
 end.
 

@@ -1038,8 +1038,9 @@ begin
              else
              begin
                CrossOptions:=CrossOptions+' -Xd';
-               CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
              end;
+
+             CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
              {$endif}
 
             // if we have libs ... chances are +/-100% that we have bins, so set path to include bins !

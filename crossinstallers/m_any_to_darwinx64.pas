@@ -97,6 +97,7 @@ begin
   inherited Destroy;
 end;
 
+{$ifndef Darwin}
 var
   any_darwinx64:Tany_darwinx64;
 
@@ -107,5 +108,6 @@ initialization
 finalization
   any_darwinx64.Destroy;
 
+{$endif Darwin}
 end.
 

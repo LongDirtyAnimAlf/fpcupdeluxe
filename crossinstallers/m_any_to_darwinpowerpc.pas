@@ -97,6 +97,7 @@ begin
   inherited Destroy;
 end;
 
+{$ifndef Darwin}
 var
   any_darwinpowerpc:Tany_darwinpowerpc;
 
@@ -107,5 +108,6 @@ initialization
 finalization
   any_darwinpowerpc.Destroy;
 
+{$endif Darwin}
 end.
 

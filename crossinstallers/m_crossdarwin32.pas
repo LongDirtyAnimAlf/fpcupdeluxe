@@ -1,77 +1,48 @@
 unit m_crossdarwin32;
 
-{ Cross compiles from Darwin x86_64 code to Darwin x86/32 bit
+{ Cross compiles from Darwin to Darwin i386
 }
-
-
-{$mode objfpc}{$H+}
 
 interface
 
+{$mode objfpc}{$H+}
+
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils;
 
 implementation
 
 uses
-  fpcuputil;
+  m_crossinstaller, m_darwin_to_apple_base;
 
 type
-
-{ TDarwin32 }
-
-TDarwin32 = class(TCrossInstaller)
-private
-  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-public
-  function GetLibs(Basepath:string):boolean;override;
-  function GetBinUtils(Basepath:string):boolean;override;
-  constructor Create;
-  destructor Destroy; override;
-end;
+  TDarwin32 = class(Tdarwin_apple)
+  public
+    function GetLibs(Basepath:string):boolean;override;
+    function GetBinUtils(Basepath:string):boolean;override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 { TDarwin32 }
 
 function TDarwin32.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
-  if result then exit;
-  FLibsPath:='';
-  result:=true;
-  FLibsFound:=true;
+  result:=inherited;
 end;
 
 function TDarwin32.GetBinUtils(Basepath:string): boolean;
-var
-  aOption:string;
 begin
   result:=inherited;
-  if result then exit;
-  FBinUtilsPath:='';
-  FBinUtilsPrefix:=''; // we have the "native" names, no prefix
-  result:=true;
-  FBinsFound:=true;
-
-  aOption:=GetDarwinSDKVersion('macosx');
-  if Length(aOption)>0 then
-  begin
-    if CompareVersionStrings(aOption,'10.8')>=0 then
-    begin
-      aOption:='10.8';
-    end;
-    AddFPCCFGSnippet('-WM'+aOption);
-  end;
-
 end;
 
 constructor TDarwin32.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TDarwin64';
+  FCrossModuleNamePrefix:='TDarwinAny';
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.darwin;
   Reset;
-  FAlreadyWarned:=false;
   ShowInfo;
 end;
 
@@ -80,9 +51,8 @@ begin
   inherited Destroy;
 end;
 
-{$IFDEF Darwin}
-{$IFDEF CPUX86_64}
-
+{$ifdef Darwin}
+{$ifndef CPUX86}
 var
   Darwin32:TDarwin32;
 
@@ -92,7 +62,8 @@ initialization
 
 finalization
   Darwin32.Destroy;
-{$ENDIF}
-{$ENDIF}
+
+{$endif CPUX86}
+{$endif Darwin}
 end.
 

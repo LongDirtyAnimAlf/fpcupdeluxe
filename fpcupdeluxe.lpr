@@ -99,15 +99,18 @@ uses
   {$ifndef CPUX86}
   m_crossdarwin32,
   {$endif}
+  {$ifndef CPUAARCH64}
+  m_crossdarwinaarch64,
+  {$endif}
   {$ifdef CPUX86}
   m_crossdarwinpowerpc,
+  m_crossdarwin386iphonesim,
   {$endif}
-  m_crossdarwinarm,
-  m_crossdarwinaarch64,
+  {$ifdef CPUX86_64}
+  m_crossdarwinx64iphonesim,
+  {$endif}
   m_crossiosarm,
   m_crossiosaarch64,
-  m_crossdarwinx64iphonesim,
-  m_crossdarwin386iphonesim,
   {$else}
   m_any_to_darwin386,
   m_any_to_darwinx64,

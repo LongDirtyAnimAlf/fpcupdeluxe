@@ -1,82 +1,48 @@
 unit m_crossdarwin64;
 
-{  Cross compiles from Darwin x86/32 bit to Darwin x86_64 code
+{ Cross compiles from Darwin to Darwin x86_64
 }
-
-
-{$mode objfpc}{$H+}
 
 interface
 
+{$mode objfpc}{$H+}
+
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils;
 
 implementation
 
 uses
-  fpcuputil;
+  m_crossinstaller, m_darwin_to_apple_base;
 
 type
+  TDarwin64 = class(Tdarwin_apple)
+  public
+    function GetLibs(Basepath:string):boolean;override;
+    function GetBinUtils(Basepath:string):boolean;override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 { TDarwin64 }
 
-TDarwin64 = class(TCrossInstaller)
-private
-  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-public
-  function GetLibs(Basepath:string):boolean;override;
-  function GetBinUtils(Basepath:string):boolean;override;
-  constructor Create;
-  destructor Destroy; override;
-end;
-
-{ TWin32 }
-
 function TDarwin64.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
-  if result then exit;
-
-  FLibsPath:='';
-  result:=true;
-  FLibsFound:=true;
+  result:=inherited;
 end;
 
 function TDarwin64.GetBinUtils(Basepath:string): boolean;
-var
-  aOption:string;
 begin
   result:=inherited;
-  if result then exit;
-
-  FBinUtilsPath:='';
-  FBinUtilsPrefix:='';
-
-  result:=true;
-  FBinsFound:=true;
-
-  if ((TargetCPU=TCPU.i386) OR (TargetCPU=TCPU.x86_64)) then
-  begin
-    aOption:=GetDarwinSDKVersion('macosx');
-    if Length(aOption)>0 then
-    begin
-      if CompareVersionStrings(aOption,'10.8')>=0 then
-      begin
-        aOption:='10.8';
-      end;
-      AddFPCCFGSnippet('-WM'+aOption);
-    end;
-  end;
 end;
 
 constructor TDarwin64.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TDarwin32';
+  FCrossModuleNamePrefix:='TDarwinAny';
   FTargetCPU:=TCPU.x86_64;
   FTargetOS:=TOS.darwin;
   Reset;
-  FAlreadyWarned:=false;
   ShowInfo;
 end;
 
@@ -85,19 +51,19 @@ begin
   inherited Destroy;
 end;
 
-{$IFDEF Darwin}
-{$IFNDEF CPUX86_64}
+{$ifdef Darwin}
+{$ifndef CPUX86_64}
 var
-  darwin64:TDarwin64;
+  Darwin64:TDarwin64;
 
 initialization
-  darwin64:=TDarwin64.Create;
-  RegisterCrossCompiler(darwin64.RegisterName,darwin64);
+  Darwin64:=TDarwin64.Create;
+  RegisterCrossCompiler(Darwin64.RegisterName,Darwin64);
 
 finalization
-  darwin64.Destroy;
-{$ENDIF}
-{$ENDIF}
+  Darwin64.Destroy;
 
+{$endif CPUX86}
+{$endif Darwin}
 end.
 

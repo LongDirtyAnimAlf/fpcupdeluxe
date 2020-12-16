@@ -364,6 +364,7 @@ function GetLogicalCpuCount: integer;
 {$ifdef Darwin}
 function GetDarwinSDKVersion(aSDK: string):string;
 function GetDarwinSDKLocation:string;
+function GetDarwinToolsLocation:string;
 {$endif}
 function GetAndroidSDKDir:string;
 function GetAndroidNDKDir:string;
@@ -3023,41 +3024,65 @@ var
   Output,s:string;
   i,j:integer;
 begin
-  Output:='';
   s:='';
   j:=0;
-  //if ExecuteCommandCompat('xcodebuild -version -sdk '+aSDK, Output, False) <> 0 then
-  RunCommand('xcodebuild',['-version','-sdk',aSDK], Output);
+
+  if (Length(s)=0) then
   begin
-    i:=Pos(SearchTarget,Output);
-    if i>0 then
+    if (Length(aSDK)=0) OR (aSDK='macosx') then
     begin
-      i:=i+length(SearchTarget);
-      while (Length(Output)>i) AND (Output[i] in ['0'..'9','.']) do
+      Output:='';
+      RunCommand('xcrun',['--show-sdk-version'], Output);
+      if (Length(Output)>0) then
       begin
-        s:=s+Output[i];
-        Inc(i);
-      end;
-    end
-    else
-    begin
-      //xcodebuild not working ... try something completely different ...
-      if aSDK='macosx' then
-      begin
-        RunCommand('sw_vers',['-productVersion'], Output);
-        if (Length(Output)>0) then
+        i:=1;
+        while (i<=Length(Output)) AND (Output[i] in ['0'..'9','.']) do
         begin
-          i:=1;
-          while (Length(Output)>i) AND (Output[i] in ['0'..'9','.']) do
-          begin
-            s:=s+Output[i];
-            Inc(i);
-          end;
+          s:=s+Output[i];
+          Inc(i);
         end;
       end;
     end;
   end;
-  result:=Trim(s);
+
+  if (Length(s)=0) then
+  begin
+    Output:='';
+    //if ExecuteCommandCompat('xcodebuild -version -sdk '+aSDK, Output, False) <> 0 then
+    RunCommand('xcodebuild',['-version','-sdk',aSDK], Output);
+    begin
+      i:=Pos(SearchTarget,Output);
+      if i>0 then
+      begin
+        i:=i+length(SearchTarget);
+        while (i<=Length(Output)) AND (Output[i] in ['0'..'9','.']) do
+        begin
+          s:=s+Output[i];
+          Inc(i);
+        end;
+      end
+    end;
+  end;
+
+  if (Length(s)=0) then
+  begin
+    if aSDK='macosx' then
+    begin
+      Output:='';
+      RunCommand('sw_vers',['-productVersion'], Output);
+      if (Length(Output)>0) then
+      begin
+        i:=1;
+        while (i<=Length(Output)) AND (Output[i] in ['0'..'9','.']) do
+        begin
+          s:=s+Output[i];
+          Inc(i);
+        end;
+      end;
+    end;
+  end;
+
+  result:=s;
 end;
 function GetDarwinSDKLocation:string;
 var
@@ -3065,8 +3090,19 @@ var
 begin
   Output:='';
   RunCommand('xcrun',['--show-sdk-path'], Output);
+  Output:=Trim(Output);
   if (Length(Output)>0) then
-    result:=Trim(Output);
+    result:=Output;
+end;
+function GetDarwinToolsLocation:string;
+var
+  Output:string;
+begin
+  Output:='';
+  RunCommand('xcrun',['-f','clang'], Output);
+  Output:=Trim(Output);
+  if (Length(Output)>0) then
+    result:=Output;
 end;
 {$endif}
 

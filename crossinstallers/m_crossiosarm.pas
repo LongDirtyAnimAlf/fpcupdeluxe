@@ -1,136 +1,39 @@
 unit m_crossiosarm;
 
-{ Cross compiles from Darwin to Darwin arm (iphone)
+{ Cross compiles from Darwin to iOS arm (iphone)
 }
-
-
-{$mode objfpc}{$H+}
 
 interface
 
+{$mode objfpc}{$H+}
+
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils;
 
 implementation
 
 uses
-  fpcuputil;
-
-const
-  SDKNAME='iPhoneOS';
-
-  SDKLOCATIONS:array[0..4] of string = (
-    '/Applications/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
-    '/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
-    '~/Desktop/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
-    '~/Downloads/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
-    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk'
-  );
-
-  TOOLCHAINLOCATIONS:array[0..4] of string = (
-    '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
-    '/Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
-    '~/Desktop/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
-    '~/Downloads/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
-    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain'
-  );
+  m_crossinstaller, m_darwin_to_apple_base;
 
 type
-
-{ TiOSarm }
-
-TiOSarm = class(TCrossInstaller)
-private
-  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-public
-  function GetLibs(Basepath:string):boolean;override;
-  function GetBinUtils(Basepath:string):boolean;override;
-  constructor Create;
-  destructor Destroy; override;
-end;
+  TiOSarm = class(Tdarwin_apple)
+  public
+    function GetLibs(Basepath:string):boolean;override;
+    function GetBinUtils(Basepath:string):boolean;override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 { TiOSarm }
 
 function TiOSarm.GetLibs(Basepath:string): boolean;
-var
-  aOption:string;
-  i:integer;
 begin
-  result:=FLibsFound;
-  if result then exit;
-
-  FLibsPath:='';
-  result:=false;
-  FLibsFound:=false;
-
-  for FLibsPath in SDKLOCATIONS do
-  begin
-    FLibsPath:=ExpandFileName(FLibsPath);
-    if DirectoryExists(FLibsPath) then
-    begin
-      FLibsFound:=true;
-      break;
-    end;
-  end;
-
-  if FLibsFound then
-  begin
-    {
-    i:=StringListContains(FCrossOpts,'-isysroot');
-    if i=-1 then
-    begin
-      aOption:='-ao"-isysroot '+ExcludeTrailingPathDelimiter(FLibsPath)+'"';
-      FCrossOpts.Add(aOption+' ');
-      ShowInfo('Did not find sysroot parameter; using '+aOption+'.');
-    end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
-    }
-    FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-  end else FLibsPath:='';
-
-  // Never fail.
-  result:=true;
-  FLibsFound:=true;
+  result:=inherited;
 end;
 
 function TiOSarm.GetBinUtils(Basepath:string): boolean;
-var
-  aOption:string;
-  i:integer;
 begin
   result:=inherited;
-  if result then exit;
-
-  FBinUtilsPath:='';
-  FBinUtilsPrefix:=''; // we have the "native" names, no prefix
-
-  result:=false;
-  FBinsFound:=false;
-
-  for FBinUtilsPath in TOOLCHAINLOCATIONS do
-  begin
-    FBinUtilsPath:=ExpandFileName(FBinUtilsPath);
-    if DirectoryExists(FBinUtilsPath) then
-    begin
-      FBinsFound:=true;
-      break;
-    end;
-  end;
-
-  if FBinsFound then
-  begin
-    AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FBinUtilsPath));
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(FBinUtilsPath)+'usr/bin';
-    AddFPCCFGSnippet('-FD'+FBinUtilsPath);{search this directory for compiler utilities}
-  end else FBinUtilsPath:='';
-
-  aOption:=GetDarwinSDKVersion(LowerCase(SDKNAME));
-  if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
-
-  // Never fail
-  result:=true;
-  FBinsFound:=true;
 end;
 
 constructor TiOSarm.Create;
@@ -140,7 +43,6 @@ begin
   FTargetCPU:=TCPU.arm;
   FTargetOS:=TOS.ios;
   Reset;
-  FAlreadyWarned:=false;
   ShowInfo;
 end;
 
@@ -159,7 +61,7 @@ initialization
 
 finalization
   iOSarm.Destroy;
-{$endif}
 
+{$endif Darwin}
 end.
 
