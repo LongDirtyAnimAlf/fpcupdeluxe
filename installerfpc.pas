@@ -631,46 +631,48 @@ begin
         Minimum_iOS:='';
 
         // Check/set OSX deployment version
-        i:=StringListStartsWith(CrossInstaller.CrossOpt,'-WM');
-        if i=-1 then
+        if (CrossInstaller.TargetOS=TOS.darwin) then
         begin
-          s1:='';
-          {$ifdef Darwin}
-          if (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.x86_64) then
+          i:=StringListStartsWith(CrossInstaller.CrossOpt,'-WM');
+          if i=-1 then
           begin
-            s1:=GetDarwinSDKVersion('macosx');
-            if CompareVersionStrings(s1,'10.8')>=0 then
+            s1:='';
+            if (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.x86_64) then
             begin
-              s1:='10.8';
+              s1:=GetDarwinSDKVersion('macosx');
+              if CompareVersionStrings(s1,'10.8')>=0 then
+              begin
+                s1:='10.8';
+              end;
             end;
-          end;
-          {$endif}
-          if Length(s1)>0 then
-          begin
-            Minimum_OSX:='-WM'+s1;
-          end;
-        end else Minimum_OSX:=CrossInstaller.CrossOpt[i];
+            if Length(s1)>0 then
+            begin
+              Minimum_OSX:='-WM'+s1;
+            end;
+          end else Minimum_OSX:=CrossInstaller.CrossOpt[i];
+        end;
 
         // Check/set iOS deployment version
-        i:=StringListStartsWith(CrossInstaller.CrossOpt,'-WP');
-        if i=-1 then
+        if (CrossInstaller.TargetOS in [TOS.ios,TOS.iphonesim]) then
         begin
-          s1:='';
-          {$ifdef Darwin}
-          if (CrossInstaller.TargetCPU=TCPU.aarch64) OR (CrossInstaller.TargetCPU=TCPU.arm) then
+          i:=StringListStartsWith(CrossInstaller.CrossOpt,'-WP');
+          if i=-1 then
           begin
-            s1:=GetDarwinSDKVersion('iphoneos');
-          end;
-          if (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.x86_64) then
-          begin
-            s1:=GetDarwinSDKVersion('iphonesimulator');
-          end;
-          {$endif}
-          if Length(s1)>0 then
-          begin
-            Minimum_iOS:='-WP'+s1;
-          end;
-        end else Minimum_iOS:=CrossInstaller.CrossOpt[i];
+            s1:='';
+            if (CrossInstaller.TargetCPU=TCPU.aarch64) OR (CrossInstaller.TargetCPU=TCPU.arm) then
+            begin
+              s1:=GetDarwinSDKVersion('iphoneos');
+            end;
+            if (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.x86_64) then
+            begin
+              s1:=GetDarwinSDKVersion('iphonesimulator');
+            end;
+            if Length(s1)>0 then
+            begin
+              Minimum_iOS:='-WP'+s1;
+            end;
+          end else Minimum_iOS:=CrossInstaller.CrossOpt[i];
+        end;
         {$endif}
 
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
@@ -1033,14 +1035,14 @@ begin
              if (CrossInstaller.TargetOS=TOS.darwin) OR (CrossInstaller.TargetOS=TOS.iphonesim) then
              begin
                s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'..'+DirectorySeparator+'..');
-               CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s1);
+               CrossOptions:=CrossOptions+' -XR'+MaybeQuoted(ExcludeTrailingPathDelimiter(s1));
              end
              else
              begin
                CrossOptions:=CrossOptions+' -Xd';
              end;
 
-             CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
+             CrossOptions:=CrossOptions+' -Fl'+MaybeQuoted(ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath));
              {$endif}
 
             // if we have libs ... chances are +/-100% that we have bins, so set path to include bins !

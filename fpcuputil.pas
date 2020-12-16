@@ -365,6 +365,7 @@ function GetLogicalCpuCount: integer;
 function GetDarwinSDKVersion(aSDK: string):string;
 function GetDarwinSDKLocation:string;
 function GetDarwinToolsLocation:string;
+function GetXCodeLocation:string;
 {$endif}
 function GetAndroidSDKDir:string;
 function GetAndroidNDKDir:string;
@@ -3100,6 +3101,16 @@ var
 begin
   Output:='';
   RunCommand('xcrun',['-f','clang'], Output);
+  Output:=Trim(Output);
+  if (Length(Output)>0) then
+    result:=Output;
+end;
+function GetXCodeLocation:string;
+var
+  Output:string;
+begin
+  Output:='';
+  RunCommand('xcode-select',['--print-path'], Output);
   Output:=Trim(Output);
   if (Length(Output)>0) then
     result:=Output;

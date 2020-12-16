@@ -28,17 +28,19 @@ uses
 
 const
   SDKNAME='$SDK';
-  iSDKNAME='iOS';
-  macSDKNAME='macOS';
+  iSDKNAME='iPhoneOS';
+  macSDKNAME='macOSX';
   simSDKNAME='iPhoneSimulator';
 
+  SDKLOCATIONSBASEPATH=SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk';
+
   SDKLOCATIONS:array[0..5] of string = (
-    '/Applications/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
-    '/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
-    '~/Desktop/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
-    '~/Downloads/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
-    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk',
-    '/Applications/Xcode-beta.app/Contents/Developer/Platforms/'+SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk'
+    '/Applications/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH,
+    '/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH,
+    '~/Desktop/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH,
+    '~/Downloads/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH,
+    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH,
+    '/Applications/Xcode-beta.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH
   );
 
   TOOLCHAINLOCATIONS:array[0..5] of string = (
@@ -64,14 +66,63 @@ begin
   result:=false;
   FLibsFound:=false;
 
-  if (NOT FLibsFound) then
+  if (TargetOS in [TOS.darwin,TOS.ios,TOS.iphonesim]) then
   begin
-    if (TargetOS=TOS.iphonesim) then
+
+    if (NOT FLibsFound) then
+    begin
+      FLibsPath:=SDKNAME+'.sdk';
+      case TargetOS of
+        TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+        TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+        TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      end;
+      if RightStr(ExcludeTrailingPathDelimiter(Basepath),Length(FLibsPath))=FLibsPath then
+      begin
+        if DirectoryExists(Basepath) then
+        begin
+          FLibsPath:=ExcludeTrailingPathDelimiter(Basepath);
+          FLibsFound:=true;
+        end;
+      end;
+    end;
+
+    if (NOT FLibsFound) then
+    begin
+      FLibsPath:=Basepath;
+      FLibsPath:=FLibsPath+'/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH;
+      case TargetOS of
+        TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+        TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+        TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      end;
+      if DirectoryExists(FLibsPath) then
+        FLibsFound:=true;
+    end;
+
+    if (NOT FLibsFound) then
+    begin
+      FLibsPath:=Basepath;
+      FLibsPath:=FLibsPath+'/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH;
+      case TargetOS of
+        TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+        TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+        TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      end;
+      if DirectoryExists(FLibsPath) then
+        FLibsFound:=true;
+    end;
+
+    if (NOT FLibsFound) then
     begin
       for FLibsPath in SDKLOCATIONS do
       begin
         FLibsPath:=ExpandFileName(FLibsPath);
-        FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+        case TargetOS of
+          TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+          TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+          TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+        end;
         if DirectoryExists(FLibsPath) then
         begin
           FLibsFound:=true;
@@ -79,47 +130,42 @@ begin
         end;
       end;
     end;
-  end;
 
-
-  if (NOT FLibsFound) then
-  begin
-    if (TargetOS=TOS.ios) then
-    begin
-      for FLibsPath in SDKLOCATIONS do
-      begin
-        FLibsPath:=ExpandFileName(FLibsPath);
-        FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
-        if DirectoryExists(FLibsPath) then
-        begin
-          FLibsFound:=true;
-          break;
-        end;
-      end;
-    end;
   end;
 
   if (NOT FLibsFound) then
   begin
     if (TargetOS=TOS.darwin) then
     begin
-      for FLibsPath in SDKLOCATIONS do
-      begin
-        FLibsPath:=ExpandFileName(FLibsPath);
-        FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
-        if DirectoryExists(FLibsPath) then
-        begin
-          FLibsFound:=true;
-          break;
-        end;
-      end;
+      FLibsPath:=GetDarwinSDKLocation;
+      if (Length(FLibsPath)>0) AND (DirectoryExists(FLibsPath)) then
+        FLibsFound:=true;
     end;
   end;
 
   if (NOT FLibsFound) then
   begin
-    FLibsPath:=GetDarwinSDKLocation;
-    if (Length(FLibsPath)>0) AND (DirectoryExists(FLibsPath)) then
+    FLibsPath:=GetXCodeLocation;
+    FLibsPath:=FLibsPath+'/Platforms/'+SDKLOCATIONSBASEPATH;
+    case TargetOS of
+      TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+    end;
+    if DirectoryExists(FLibsPath) then
+      FLibsFound:=true;
+  end;
+
+  if (NOT FLibsFound) then
+  begin
+    FLibsPath:=GetXCodeLocation;
+    FLibsPath:=FLibsPath+'/SDKs/'+SDKNAME+'.sdk';
+    case TargetOS of
+      TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+    end;
+    if DirectoryExists(FLibsPath) then
       FLibsFound:=true;
   end;
 
@@ -136,9 +182,9 @@ begin
     AddFPCCFGSnippet(aOption);
     }
 
-    AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-XR'+MaybeQuoted(ExcludeTrailingPathDelimiter(FLibsPath)));
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-Fl'+MaybeQuoted(IncludeTrailingPathDelimiter(FLibsPath)));
   end else FLibsPath:='';
 
   if (TargetOS in [TOS.ios,TOS.iphonesim]) then
