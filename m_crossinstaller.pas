@@ -225,6 +225,8 @@ begin
   result:=TCPU.cpuNone;
   if length(aCPU)>0 then
   begin
+    if aCPU='armv6' then xCPU:=TCPU.arm
+    else
     if aCPU='ppc' then xCPU:=TCPU.powerpc
     else
     if aCPU='ppc64' then xCPU:=TCPU.powerpc64

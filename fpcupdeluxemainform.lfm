@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 50
-  Height = 590
+  Left = 295
+  Height = 650
   Top = 50
   Width = 1078
   Anchors = []
   Caption = 'Form1'
-  ClientHeight = 570
+  ClientHeight = 630
   ClientWidth = 1078
   Constraints.MinHeight = 400
   Menu = MainMenu1
@@ -24,7 +24,7 @@ object Form1: TForm1
     Left = 12
     Height = 31
     Hint = 'Open the extended settings form.'
-    Top = 471
+    Top = 531
     Width = 310
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
@@ -95,7 +95,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = memoSummary
     Left = 336
-    Height = 316
+    Height = 376
     Top = 62
     Width = 730
     BorderSpacing.Top = 6
@@ -675,7 +675,7 @@ object Form1: TForm1
     AnchorSideBottom.Side = asrBottom
     Left = 6
     Height = 56
-    Top = 510
+    Top = 570
     Width = 1060
     Align = alBottom
     AutoSize = True
@@ -2099,7 +2099,7 @@ object Form1: TForm1
     Left = 336
     Height = 120
     Hint = 'Will show error'
-    Top = 386
+    Top = 446
     Width = 730
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
@@ -2117,16 +2117,16 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = btnSetupPlus
     Left = 12
-    Height = 428
+    Height = 488
     Top = 35
     Width = 310
-    ActivePage = BasicSheet
+    ActivePage = CrossSheet
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 12
     BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
     ParentFont = False
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 11
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet
@@ -3039,7 +3039,7 @@ object Form1: TForm1
     end
     object CrossSheet: TTabSheet
       Caption = 'Cross'
-      ClientHeight = 400
+      ClientHeight = 460
       ClientWidth = 302
       ParentFont = False
       object radgrpCPU: TRadioGroup
@@ -3047,7 +3047,7 @@ object Form1: TForm1
         AnchorSideTop.Control = CrossSheet
         AnchorSideBottom.Control = ButtonInstallCrossCompiler
         Left = 8
-        Height = 246
+        Height = 306
         Top = 8
         Width = 128
         Anchors = [akTop, akLeft, akBottom]
@@ -3063,13 +3063,14 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 226
+        ClientHeight = 286
         ClientWidth = 124
         Constraints.MaxWidth = 150
         Items.Strings = (
           'i386'
           'x86_64'
           'arm'
+          'armv6'
           'aarch64'
           'ppc'
           'ppc64'
@@ -3096,7 +3097,7 @@ object Form1: TForm1
         AnchorSideBottom.Control = CrossSheet
         AnchorSideBottom.Side = asrBottom
         Left = 152
-        Height = 386
+        Height = 446
         Top = 8
         Width = 140
         Anchors = [akTop, akRight, akBottom]
@@ -3113,7 +3114,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 366
+        ClientHeight = 426
         ClientWidth = 136
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -3155,7 +3156,7 @@ object Form1: TForm1
         Left = 8
         Height = 40
         Hint = 'Install the selected CPU-OS cross-compiler.'
-        Top = 262
+        Top = 322
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 6
@@ -3178,7 +3179,7 @@ object Form1: TForm1
         Left = 8
         Height = 40
         Hint = 'Auto-update all installed cross-compilers.'
-        Top = 354
+        Top = 414
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 4
@@ -3200,7 +3201,7 @@ object Form1: TForm1
         Left = 8
         Height = 40
         Hint = 'Remove the selected CPU-OS cross-compiler.'
-        Top = 308
+        Top = 368
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 6

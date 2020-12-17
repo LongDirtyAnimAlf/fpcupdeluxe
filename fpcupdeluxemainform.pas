@@ -2160,7 +2160,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>GetCPU(TCPU.mipsel)) then
+        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>'armv6') and (s<>GetCPU(TCPU.aarch64)) and (s<>GetCPU(TCPU.mipsel)) then
         begin
           success:=false;
         end;
@@ -2183,7 +2183,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.i386)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.mipsel)) and (s<>GetCPU(TCPU.jvm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>'x8664') and (s<>GetCPU(TCPU.x86_64)) then
+        if (s<>GetCPU(TCPU.i386)) and (s<>GetCPU(TCPU.arm)) and (s<>'armv6') and (s<>GetCPU(TCPU.mipsel)) and (s<>GetCPU(TCPU.jvm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>'x8664') and (s<>GetCPU(TCPU.x86_64)) then
         begin
           success:=false;
         end;
@@ -2203,14 +2203,12 @@ begin
     s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
     if s='jvm' then
     begin
+      success:=false;
       if radgrpOS.ItemIndex<>-1 then
       begin
         s:=radgrpOS.Items[radgrpOS.ItemIndex];
-        if (s<>GetOS(TOS.android)) and (s<>GetOS(TOS.java)) then
-        begin
-          success:=false;
-        end;
-      end else success:=false;
+        if (s=GetOS(TOS.android)) OR (s=GetOS(TOS.java)) then success:=true;
+      end;
     end;
   end;
 
@@ -2226,20 +2224,39 @@ begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s='dragonfly' then
     begin
+      success:=false;
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.x86_64)) then
-        begin
-          success:=false;
-        end;
-      end else success:=false;
+        if (s=GetCPU(TCPU.x86_64)) then success:=true;
+      end;
     end;
   end;
 
   if (NOT success) then
   begin
     if Sender<>nil then ShowMessage('No valid CPU target for dragonfly.');
+    exit;
+  end;
+
+  success:=true;
+  if radgrpCPU.ItemIndex<>-1 then
+  begin
+    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
+    if s='armv6' then
+    begin
+      success:=false;
+      if radgrpOS.ItemIndex<>-1 then
+      begin
+        s:=radgrpOS.Items[radgrpOS.ItemIndex];
+        if (s=GetOS(TOS.linux)) then success:=true;
+      end;
+    end;
+  end;
+
+  if (NOT success) then
+  begin
+    if Sender<>nil then ShowMessage('ARMV6 is [only available] for [RPi] Linux.');
     exit;
   end;
 
@@ -2565,18 +2582,22 @@ begin
 
     try
 
-      //arm predefined settings
+      //arm (non-embedded) predefined settings
       if (FPCupManager.CrossCPU_Target=TCPU.arm) AND (FPCupManager.CrossOS_Target<>TOS.embedded) then
       begin
         // default: armhf
-        // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm for all targets
+        // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm for all targets except linux
         // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
         // but I stand corrected if this assumption is wrong
         s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
         if Length(s)=0 then
-          FPCupManager.FPCOPT:='-dFPC_ARMHF '
-        else
-          FPCupManager.FPCOPT:=s+' ';
+        begin
+          // Only add ARMHF if crossing towards standard arm
+          // Leave armv6 alone for older RPi systems
+          if (radgrpCPU.ItemIndex<>-1) AND (radgrpCPU.Items[radgrpCPU.ItemIndex]<>'armv6') then
+            s:='-dFPC_ARMHF ';
+        end else s:=s+' ';
+        FPCupManager.FPCOPT:=s;
 
         if (FPCupManager.CrossOS_Target=TOS.wince) then
         begin
@@ -2595,7 +2616,7 @@ begin
             if Pos('-dFPC_ARMHF',FPCupManager.FPCOPT)>0 then
               FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF '
             else
-              FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH ';
+              FPCupManager.CrossOPT:='-CpARMV6 -CfVFPV2 ';
           end;
         end;
       end;
