@@ -798,9 +798,9 @@ begin
             end;
           end;
 
-          // try to get subarch
+          // try to get CPU for arm-linux
           aSubArch:='';
-          if (aOS=GetOS(TOS.embedded)) then
+          if (aOS=GetOS(TOS.linux)) AND (aCPU=GetCPU(TCPU.arm)) then
           begin
             i:=SnipBegin;
             while true do
@@ -809,6 +809,7 @@ begin
               if (Pos('-Cp',s)=1) then
               begin
                 aSubArch:=Trim(Copy(s,Length('-Cp')+1,MaxInt));
+                if aSubArch='ARMV6' then aCPU:='armv6';
                 break;
               end;
               Inc(i);

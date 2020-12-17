@@ -2120,18 +2120,18 @@ object Form1: TForm1
     Height = 488
     Top = 35
     Width = 310
-    ActivePage = CrossSheet
+    ActivePage = BasicSheet
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 12
     BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
     ParentFont = False
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 11
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet
       Caption = 'Basic'
-      ClientHeight = 400
+      ClientHeight = 460
       ClientWidth = 302
       ParentFont = False
       object FPCVersionLabel: TLabel
@@ -2161,7 +2161,7 @@ object Form1: TForm1
         AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = BitBtnFPCOnly
         Left = 8
-        Height = 212
+        Height = 272
         Top = 34
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
@@ -2202,7 +2202,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = BitBtnLazarusOnly
         Left = 163
-        Height = 212
+        Height = 272
         Top = 34
         Width = 131
         Anchors = [akTop, akRight, akBottom]
@@ -2224,7 +2224,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Only install/update selected FPC version.'
-        Top = 262
+        Top = 322
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -2379,7 +2379,7 @@ object Form1: TForm1
         Left = 163
         Height = 61
         Hint = 'Only install/update selected Lazarus version.'
-        Top = 262
+        Top = 322
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -2535,7 +2535,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Will install/update the selected version of both FPC and Lazarus.'
-        Top = 331
+        Top = 391
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
