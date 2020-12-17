@@ -32,15 +32,16 @@ const
   macSDKNAME='macOSX';
   simSDKNAME='iPhoneSimulator';
 
-  SDKLOCATIONSBASEPATH=SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk';
+  LIBSLOCATIONSBASEPATH    = SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk';
+  TOOLSLOCATIONSBASEPATH   = SDKNAME+'.platform/Developer/usr/bin';
 
   SDKLOCATIONS:array[0..5] of string = (
-    '/Applications/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH,
-    '/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH,
-    '~/Desktop/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH,
-    '~/Downloads/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH,
-    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH,
-    '/Applications/Xcode-beta.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH
+    '/Applications/Xcode.app/Contents/Developer/Platforms/',
+    '/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/',
+    '~/Desktop/Xcode.app/Contents/Developer/Platforms/',
+    '~/Downloads/Xcode.app/Contents/Developer/Platforms/',
+    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/',
+    '/Applications/Xcode-beta.app/Contents/Developer/Platforms/'
   );
 
   TOOLCHAINLOCATIONS:array[0..5] of string = (
@@ -57,7 +58,6 @@ const
 function Tdarwin_apple.GetLibs(Basepath:string): boolean;
 var
   aOption:string;
-  i:integer;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -77,6 +77,7 @@ begin
         TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       end;
+      DoDirSeparators(FLibsPath);
       if RightStr(ExcludeTrailingPathDelimiter(Basepath),Length(FLibsPath))=FLibsPath then
       begin
         if DirectoryExists(Basepath) then
@@ -90,12 +91,13 @@ begin
     if (NOT FLibsFound) then
     begin
       FLibsPath:=Basepath;
-      FLibsPath:=FLibsPath+'/Xcode.app/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH;
+      FLibsPath:=ConcatPaths([FLibsPath,'Xcode.app','Contents','Developer','Platforms',LIBSLOCATIONSBASEPATH]);
       case TargetOS of
         TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       end;
+      DoDirSeparators(FLibsPath);
       if DirectoryExists(FLibsPath) then
         FLibsFound:=true;
     end;
@@ -103,12 +105,13 @@ begin
     if (NOT FLibsFound) then
     begin
       FLibsPath:=Basepath;
-      FLibsPath:=FLibsPath+'/Contents/Developer/Platforms/'+SDKLOCATIONSBASEPATH;
+      FLibsPath:=ConcatPaths([FLibsPath,'Contents','Developer','Platforms',LIBSLOCATIONSBASEPATH]);
       case TargetOS of
         TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       end;
+      DoDirSeparators(FLibsPath);
       if DirectoryExists(FLibsPath) then
         FLibsFound:=true;
     end;
@@ -117,12 +120,13 @@ begin
     begin
       for FLibsPath in SDKLOCATIONS do
       begin
-        FLibsPath:=ExpandFileName(FLibsPath);
+        FLibsPath:=ExpandFileName(FLibsPath)+LIBSLOCATIONSBASEPATH;
         case TargetOS of
           TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
           TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
           TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         end;
+        DoDirSeparators(FLibsPath);
         if DirectoryExists(FLibsPath) then
         begin
           FLibsFound:=true;
@@ -146,12 +150,13 @@ begin
   if (NOT FLibsFound) then
   begin
     FLibsPath:=GetXCodeLocation;
-    FLibsPath:=FLibsPath+'/Platforms/'+SDKLOCATIONSBASEPATH;
+    FLibsPath:=FLibsPath+DirectorySeparator+'Platforms'+DirectorySeparator+LIBSLOCATIONSBASEPATH;
     case TargetOS of
       TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
     end;
+    DoDirSeparators(FLibsPath);
     if DirectoryExists(FLibsPath) then
       FLibsFound:=true;
   end;
@@ -159,44 +164,92 @@ begin
   if (NOT FLibsFound) then
   begin
     FLibsPath:=GetXCodeLocation;
-    FLibsPath:=FLibsPath+'/SDKs/'+SDKNAME+'.sdk';
+    FLibsPath:=FLibsPath+DirectorySeparator+'SDKs'+DirectorySeparator+SDKNAME+'.sdk';
     case TargetOS of
       TOS.iphonesim : FLibsPath:=StringReplace(FLibsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
     end;
+    DoDirSeparators(FLibsPath);
     if DirectoryExists(FLibsPath) then
       FLibsFound:=true;
   end;
 
   if FLibsFound then
   begin
+
+    SearchLibraryInfo(true);
+
     {
-    i:=StringListContains(FCrossOpts,'-isysroot');
-    if i=-1 then
+    // Prevent using default search path
+    if (TargetOS in [TOS.ios,TOS.iphonesim]) then
     begin
-      aOption:='-ao"-isysroot '+ExcludeTrailingPathDelimiter(FLibsPath)+'"';
+      aOption:='-Xd';
+      AddFPCCFGSnippet(aOption);
       FCrossOpts.Add(aOption+' ');
-      ShowInfo('Did not find sysroot parameter; using '+aOption+'.');
-    end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
+    end;
     }
 
-    AddFPCCFGSnippet('-XR'+MaybeQuoted(ExcludeTrailingPathDelimiter(FLibsPath)));
-    FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
-    AddFPCCFGSnippet('-Fl'+MaybeQuoted(IncludeTrailingPathDelimiter(FLibsPath)));
+    // Add linker search path
+    aOption:='-XR'+MaybeQuotedSpacesOnly(ExcludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet(aOption);
+    FCrossOpts.Add(aOption+' ');
+
+    // Add library path to be sure ...
+    FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr'+DirectorySeparator+'lib';
+    aOption:='-Fl'+MaybeQuotedSpacesOnly(IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet(aOption);
+    FCrossOpts.Add(aOption+' ');
+
+    // Add library path when cross-compiling to be sure ...
+    aOption:='-Fl'+MaybeQuotedSpacesOnly(FLibsPath+DirectorySeparator+'system');
+    FCrossOpts.Add(aOption+' ');
+
   end else FLibsPath:='';
 
-  if (TargetOS in [TOS.ios,TOS.iphonesim]) then
+  // Add minimum version to prevent linker failures if needed.
+
+  if (((TargetOS=TOS.ios) OR (TargetOS=TOS.darwin)) AND (TargetCPU=TCPU.arm)) then
   begin
     aOption:=GetDarwinSDKVersion(LowerCase(iSDKNAME));
-    if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
+    if Length(aOption)>0 then
+    begin
+      if CompareVersionStrings(aOption,'6.0')>=0 then
+      begin
+        aOption:='6.0';
+      end;
+      AddFPCCFGSnippet('-WP'+aOption);
+      FCrossOpts.Add('-WP'+aOption+' ');
+    end;
+  end;
+
+  if (TargetOS=TOS.iphonesim) then
+  begin
+    aOption:=GetDarwinSDKVersion(LowerCase(simSDKNAME));
+    if Length(aOption)=0 then aOption:=GetDarwinSDKVersion(LowerCase(iSDKNAME));
+    if Length(aOption)>0 then
+    begin
+      if CompareVersionStrings(aOption,'8.1')>=0 then
+      begin
+        aOption:='8.1';
+      end;
+      AddFPCCFGSnippet('-WP'+aOption);
+      FCrossOpts.Add('-WP'+aOption+' ');
+    end;
   end;
 
   if (TargetOS=TOS.darwin) then
   begin
     aOption:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
-    if Length(aOption)>0 then AddFPCCFGSnippet('-WM'+aOption);
+    if Length(aOption)>0 then
+    begin
+      if CompareVersionStrings(aOption,'10.8')>=0 then
+      begin
+        aOption:='10.8';
+      end;
+      AddFPCCFGSnippet('-WM'+aOption);
+      FCrossOpts.Add('-WM'+aOption+' ');
+    end;
   end;
 
   // Never fail.
@@ -217,15 +270,58 @@ begin
 
   if (NOT FBinsFound) then
   begin
-    for FBinUtilsPath in TOOLCHAINLOCATIONS do
+    FBinUtilsPath:=Basepath;
+    FBinUtilsPath:=ConcatPaths([FBinUtilsPath,'Xcode.app','Contents','Developer','Platforms',TOOLSLOCATIONSBASEPATH]);
+    case TargetOS of
+      TOS.iphonesim : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      TOS.ios       : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      TOS.darwin    : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+    end;
+    DoDirSeparators(FBinUtilsPath);
+    if DirectoryExists(FBinUtilsPath) then
+      FBinsFound:=true;
+  end;
+
+  if (NOT FBinsFound) then
+  begin
+    FBinUtilsPath:=Basepath;
+    FBinUtilsPath:=ConcatPaths([FBinUtilsPath,'Xcode.app','Contents','Developer','Toolchains','XcodeDefault.xctoolchain','usr','bin']);
+    DoDirSeparators(FBinUtilsPath);
+    if DirectoryExists(FBinUtilsPath) then
+      FBinsFound:=true;
+  end;
+
+  if (NOT FBinsFound) then
+  begin
+    for FBinUtilsPath in SDKLOCATIONS do
     begin
-      FBinUtilsPath:=ExpandFileName(FBinUtilsPath);
+      FBinUtilsPath:=ExpandFileName(FBinUtilsPath)+TOOLSLOCATIONSBASEPATH;
+      case TargetOS of
+        TOS.iphonesim : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+        TOS.ios       : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+        TOS.darwin    : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      end;
+      DoDirSeparators(FBinUtilsPath);
       if DirectoryExists(FBinUtilsPath) then
       begin
         FBinsFound:=true;
         break;
       end;
     end;
+  end;
+
+  if (NOT FBinsFound) then
+  begin
+    FBinUtilsPath:=GetXCodeLocation;
+    FBinUtilsPath:=FBinUtilsPath+DirectorySeparator+'Platforms'+DirectorySeparator+TOOLSLOCATIONSBASEPATH;
+    case TargetOS of
+      TOS.iphonesim : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,simSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      TOS.ios       : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+      TOS.darwin    : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
+    end;
+    DoDirSeparators(FBinUtilsPath);
+    if DirectoryExists(FBinUtilsPath) then
+      FBinsFound:=true;
   end;
 
   if (NOT FBinsFound) then
@@ -237,10 +333,28 @@ begin
     end;
   end;
 
+  if (NOT FBinsFound) then
+  begin
+    for FBinUtilsPath in TOOLCHAINLOCATIONS do
+    begin
+      FBinUtilsPath:=ExpandFileName(FBinUtilsPath)+'/usr/bin';
+      if DirectoryExists(FBinUtilsPath) then
+      begin
+        FBinsFound:=true;
+        break;
+      end;
+    end;
+  end;
+
   if FBinsFound then
   begin
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(FBinUtilsPath)+'usr/bin';
-    AddFPCCFGSnippet('-FD'+FBinUtilsPath);{search this directory for compiler utilities}
+
+    SearchBinUtilsInfo(true);
+
+    // Set this directory for compiler utilities
+    AddFPCCFGSnippet('-FD'+FBinUtilsPath);
+    FCrossOpts.Add('-FD'+FBinUtilsPath+' ');
+
   end else FBinUtilsPath:='';
 
   // Never fail

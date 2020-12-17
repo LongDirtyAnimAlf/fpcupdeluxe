@@ -332,6 +332,7 @@ function FileCorrectLineEndings(const SrcFilename, DestFilename: string): boolea
 function FixPath(const s:string):string;
 function FileIsReadOnly(const s:string):boolean;
 function MaybeQuoted(const s:string):string;
+function MaybeQuotedSpacesOnly(const s:string):string;
 // Like ExpandFilename but does not expand an empty string to current directory
 function SafeExpandFileName (Const FileName : String): String;
 // Get application name
@@ -2589,6 +2590,13 @@ begin
     result:=s;
 end;
 
+function MaybeQuotedSpacesOnly(const s:string):string;
+begin
+  if (Pos(' ',s)>0) then
+    result:='"'+s+'"'
+  else
+    result:=s;
+end;
 
 function StringsStartsWith(const SearchIn:array of string; SearchFor:string; StartIndex:integer; CS:boolean): integer;
 var
@@ -3096,14 +3104,19 @@ begin
     result:=Output;
 end;
 function GetDarwinToolsLocation:string;
+const
+  BINARY = 'clang';
 var
   Output:string;
 begin
   Output:='';
-  RunCommand('xcrun',['-f','clang'], Output);
+  RunCommand('xcrun',['-f',BINARY], Output);
   Output:=Trim(Output);
   if (Length(Output)>0) then
+  begin
+    Delete(Output,Length(Output)-Length(BINARY),MaxInt);
     result:=Output;
+  end;
 end;
 function GetXCodeLocation:string;
 var

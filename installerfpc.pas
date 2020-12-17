@@ -533,9 +533,6 @@ var
   LibsAvailable,BinsAvailable:boolean;
   MakeCycle:TSTEPS;
   ARMArch:TARMARCH;
-  {$ifdef Darwin}
-  Minimum_OSX,Minimum_iOS:string;
-  {$endif}
   {$ifdef MSWINDOWS}
   Counter:integer;
   {$endif}
@@ -622,58 +619,6 @@ begin
       try
         if CrossInstaller.BinUtilsPathInPath then
            SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
-
-        {$ifdef Darwin}
-        //Get minimum Mac OS X deployment version: 10.4, 10.5.1, ... (Darwin)
-        //Get minimum iOS deployment version: 8.0, 8.0.2, ... (iphonesim)
-        //Add minimum required OSX/iOS version to prevent "crti not found" errors.
-        Minimum_OSX:='';
-        Minimum_iOS:='';
-
-        // Check/set OSX deployment version
-        if (CrossInstaller.TargetOS=TOS.darwin) then
-        begin
-          i:=StringListStartsWith(CrossInstaller.CrossOpt,'-WM');
-          if i=-1 then
-          begin
-            s1:='';
-            if (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.x86_64) then
-            begin
-              s1:=GetDarwinSDKVersion('macosx');
-              if CompareVersionStrings(s1,'10.8')>=0 then
-              begin
-                s1:='10.8';
-              end;
-            end;
-            if Length(s1)>0 then
-            begin
-              Minimum_OSX:='-WM'+s1;
-            end;
-          end else Minimum_OSX:=CrossInstaller.CrossOpt[i];
-        end;
-
-        // Check/set iOS deployment version
-        if (CrossInstaller.TargetOS in [TOS.ios,TOS.iphonesim]) then
-        begin
-          i:=StringListStartsWith(CrossInstaller.CrossOpt,'-WP');
-          if i=-1 then
-          begin
-            s1:='';
-            if (CrossInstaller.TargetCPU=TCPU.aarch64) OR (CrossInstaller.TargetCPU=TCPU.arm) then
-            begin
-              s1:=GetDarwinSDKVersion('iphoneos');
-            end;
-            if (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.x86_64) then
-            begin
-              s1:=GetDarwinSDKVersion('iphonesimulator');
-            end;
-            if Length(s1)>0 then
-            begin
-              Minimum_iOS:='-WP'+s1;
-            end;
-          end else Minimum_iOS:=CrossInstaller.CrossOpt[i];
-        end;
-        {$endif}
 
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
         begin
@@ -816,9 +761,6 @@ begin
           case MakeCycle of
             st_Compiler:
             begin
-              {$ifdef Darwin}
-              if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
-              {$endif}
               Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
               Processor.Process.Parameters.Add('compiler_cycle');
             end;
@@ -837,10 +779,6 @@ begin
                   fpChmod(s2,&755);
                 end;
               end;
-              {$endif}
-
-              {$ifdef Darwin}
-              if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
               {$endif}
               Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
               Processor.Process.Parameters.Add('compiler_install');
@@ -865,9 +803,6 @@ begin
             end;
             st_Packages:
             begin
-              {$ifdef Darwin}
-              if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
-              {$endif}
               s1:=CrossCompilerName;
               s2:=IncludeTrailingPathDelimiter(FBinPath)+s1;
               if (NOT FileExists(s2)) then
@@ -1013,66 +948,11 @@ begin
 
           if CrossInstaller.LibsPath<>''then
           begin
-             // https://wiki.freepascal.org/FPC_AIX_Port#Cross-compiling
-             if (CrossInstaller.TargetOS=TOS.aix) then
-             begin
-               CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
-             end;
-
-             {$ifndef Darwin}
-             CrossOptions:=CrossOptions+' -Xd';
-             CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
-
-             if (CrossInstaller.TargetOS=TOS.darwin) then
-             begin
-               // add extra libs located in ...\system for Mac SDK
-               // does not do harm on other systems if they are not there
-               CrossOptions:=CrossOptions+' -Fl'+IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'system';
-             end;
-             {$endif}
-
-             {$ifdef Darwin}
-             if (CrossInstaller.TargetOS=TOS.darwin) OR (CrossInstaller.TargetOS=TOS.iphonesim) then
-             begin
-               s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'..'+DirectorySeparator+'..');
-               CrossOptions:=CrossOptions+' -XR'+MaybeQuoted(ExcludeTrailingPathDelimiter(s1));
-             end
-             else
-             begin
-               CrossOptions:=CrossOptions+' -Xd';
-             end;
-
-             CrossOptions:=CrossOptions+' -Fl'+MaybeQuoted(ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath));
-             {$endif}
-
-            // if we have libs ... chances are +/-100% that we have bins, so set path to include bins !
-            // but only in case we did not do it before
-            // not sure if this is realy needed
-            //if NOT CrossInstaller.BinUtilsPathInPath then
-            //   SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),true,false);
+            {$ifndef Darwin}
+            CrossOptions:=CrossOptions+' -Xd';
+            CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
+            {$endif}
           end;
-
-          if CrossInstaller.BinUtilsPath<>''then
-          begin
-             {$ifdef Darwin}
-             //if (CrossInstaller.TargetOS=TOS.iphonesim) then
-             begin
-               CrossOptions:=CrossOptions+' -FD'+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath);
-               {
-               s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath)+'..'+DirectorySeparator+'..');
-               if (MakeCycle in [st_RTL]) then
-               begin
-                 CrossOptions:=CrossOptions+' -ao-isysroot '+ExcludeTrailingPathDelimiter(s1);
-               end;
-               }
-             end;
-             {$else}
-             //CrossOptions:=CrossOptions+' -FD'+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath);
-             //just for testing/debugging
-             //Options:=Options+' -sh -s-';
-             {$endif}
-          end;
-
 
           {$ifdef Darwin}
           Options:=Options+' -ap';
