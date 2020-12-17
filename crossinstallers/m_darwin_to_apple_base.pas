@@ -77,7 +77,6 @@ begin
         TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       end;
-      DoDirSeparators(FLibsPath);
       if RightStr(ExcludeTrailingPathDelimiter(Basepath),Length(FLibsPath))=FLibsPath then
       begin
         if DirectoryExists(Basepath) then
@@ -97,7 +96,6 @@ begin
         TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       end;
-      DoDirSeparators(FLibsPath);
       if DirectoryExists(FLibsPath) then
         FLibsFound:=true;
     end;
@@ -111,7 +109,6 @@ begin
         TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       end;
-      DoDirSeparators(FLibsPath);
       if DirectoryExists(FLibsPath) then
         FLibsFound:=true;
     end;
@@ -126,7 +123,6 @@ begin
           TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
           TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         end;
-        DoDirSeparators(FLibsPath);
         if DirectoryExists(FLibsPath) then
         begin
           FLibsFound:=true;
@@ -156,7 +152,6 @@ begin
       TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
     end;
-    DoDirSeparators(FLibsPath);
     if DirectoryExists(FLibsPath) then
       FLibsFound:=true;
   end;
@@ -170,7 +165,6 @@ begin
       TOS.ios       : FLibsPath:=StringReplace(FLibsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       TOS.darwin    : FLibsPath:=StringReplace(FLibsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
     end;
-    DoDirSeparators(FLibsPath);
     if DirectoryExists(FLibsPath) then
       FLibsFound:=true;
   end;
@@ -191,18 +185,18 @@ begin
     }
 
     // Add linker search path
-    aOption:='-XR'+MaybeQuotedSpacesOnly(ExcludeTrailingPathDelimiter(FLibsPath));
+    aOption:='-XR'+ExcludeTrailingPathDelimiter(FLibsPath);
     AddFPCCFGSnippet(aOption);
     FCrossOpts.Add(aOption+' ');
 
     // Add library path to be sure ...
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr'+DirectorySeparator+'lib';
-    aOption:='-Fl'+MaybeQuotedSpacesOnly(IncludeTrailingPathDelimiter(FLibsPath));
+    aOption:='-Fl'+IncludeTrailingPathDelimiter(FLibsPath);
     AddFPCCFGSnippet(aOption);
     FCrossOpts.Add(aOption+' ');
 
     // Add library path when cross-compiling to be sure ...
-    aOption:='-Fl'+MaybeQuotedSpacesOnly(FLibsPath+DirectorySeparator+'system');
+    aOption:='-Fl'+FLibsPath+DirectorySeparator+'system';
     FCrossOpts.Add(aOption+' ');
 
   end else FLibsPath:='';
@@ -277,7 +271,6 @@ begin
       TOS.ios       : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       TOS.darwin    : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
     end;
-    DoDirSeparators(FBinUtilsPath);
     if DirectoryExists(FBinUtilsPath) then
       FBinsFound:=true;
   end;
@@ -286,7 +279,6 @@ begin
   begin
     FBinUtilsPath:=Basepath;
     FBinUtilsPath:=ConcatPaths([FBinUtilsPath,'Xcode.app','Contents','Developer','Toolchains','XcodeDefault.xctoolchain','usr','bin']);
-    DoDirSeparators(FBinUtilsPath);
     if DirectoryExists(FBinUtilsPath) then
       FBinsFound:=true;
   end;
@@ -301,7 +293,6 @@ begin
         TOS.ios       : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
         TOS.darwin    : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       end;
-      DoDirSeparators(FBinUtilsPath);
       if DirectoryExists(FBinUtilsPath) then
       begin
         FBinsFound:=true;
@@ -319,7 +310,6 @@ begin
       TOS.ios       : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,iSDKNAME,[rfReplaceAll, rfIgnoreCase]);
       TOS.darwin    : FBinUtilsPath:=StringReplace(FBinUtilsPath,SDKNAME,macSDKNAME,[rfReplaceAll, rfIgnoreCase]);
     end;
-    DoDirSeparators(FBinUtilsPath);
     if DirectoryExists(FBinUtilsPath) then
       FBinsFound:=true;
   end;

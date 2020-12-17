@@ -736,6 +736,7 @@ begin
           Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
           {$ENDIF}
           // Tell make where to find the target binutils if cross-compiling:
+          // Not strictly necessary: the cross-options have this already:
           if CrossInstaller.BinUtilsPath<>'' then
              Processor.Process.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
 
