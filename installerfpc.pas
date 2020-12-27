@@ -767,7 +767,8 @@ begin
             end;
             st_CompilerInstall:
             begin
-              {$if (defined(Linux)) AND (defined (CPUX86_64))}
+              {$if (defined(Linux))}
+              {$if (defined(CPUAARCH64)) OR (defined(CPUX86_64))}
               if FMUSL then
               begin
                 // copy over the [cross-]compiler
@@ -780,6 +781,7 @@ begin
                   fpChmod(s2,&755);
                 end;
               end;
+              {$endif}
               {$endif}
               Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
               Processor.Process.Parameters.Add('compiler_install');
@@ -848,12 +850,24 @@ begin
 
           Processor.Process.Parameters.Add('CROSSINSTALL=1');
 
+          //if (Length(CrossInstaller.SubArch)>0) then
+          //  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+ConcatPaths([FInstallDirectory,'units','freertos',CrossInstaller.SubArch,'rtl']);
+
           if (CrossInstaller.TargetCPU=TCPU.jvm) then
           begin
             if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
             begin
               //Infoln(infotext+'Skipping build step '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+' for '+CrossInstaller.TargetCPUName+'.',etInfo);
               //continue;
+            end;
+          end;
+
+          if ((CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.freertos)) then
+          begin
+            if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
+            begin
+              //Infoln(infotext+'Skipping build step '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+' for '+CrossInstaller.TargetCPUName+'.',etInfo);
+              continue;
             end;
           end;
 

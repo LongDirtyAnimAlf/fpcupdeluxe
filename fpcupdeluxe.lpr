@@ -86,6 +86,7 @@ uses
   m_any_to_go32v2i386,
   m_any_to_linuxxtensa,
   m_any_to_freertosxtensa,
+  m_any_to_freertosarm,
   {$ifdef LINUX}
   //{$ifdef CPUX86}
   m_linux386_to_mips,

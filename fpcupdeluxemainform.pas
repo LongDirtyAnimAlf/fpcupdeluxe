@@ -2179,6 +2179,28 @@ begin
   if radgrpOS.ItemIndex<>-1 then
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
+    if s=GetOS(TOS.freertos) then
+    begin
+      success:=false;
+      if radgrpCPU.ItemIndex<>-1 then
+      begin
+        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
+        if (s=GetCPU(TCPU.xtensa)) OR (s=GetCPU(TCPU.arm)) then
+          success:=true;
+      end;
+    end;
+  end;
+
+  if (NOT success) then
+  begin
+    if Sender<>nil then ShowMessage('No valid CPU target for FreeRTOS.');
+    exit;
+  end;
+
+  success:=true;
+  if radgrpOS.ItemIndex<>-1 then
+  begin
+    s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s=GetOS(TOS.android) then
     begin
       if radgrpCPU.ItemIndex<>-1 then
@@ -2312,6 +2334,17 @@ begin
       exit;
     end;
     {$endif}
+
+    {$ifdef CPUAARCH64}
+    if FPCupManager.CrossCPU_Target=TCPU.aarch64 then
+    begin
+      if Sender<>nil then Application.MessageBox(PChar('On Linux aarch64, you cannot cross towards another Linux aarch64.'), PChar('FPC limitation'), MB_ICONERROR);
+      FPCupManager.CrossOS_Target:=TOS.osNone; // cleanup
+      FPCupManager.CrossCPU_Target:=TCPU.cpuNone; // cleanup
+      exit;
+    end;
+    {$endif}
+
 
     {$ifdef CPUX86}
     if FPCupManager.CrossCPU_Target=TCPU.i386 then
@@ -2695,12 +2728,17 @@ begin
           FPCupManager.CrossOPT:='-Cplx6 -Cfhard ';
           FPCupManager.CrossOS_SubArch:='lx6';
         end;
+        if (FPCupManager.CrossCPU_Target=TCPU.arm) then
+        begin
+          FPCupManager.CrossOPT:='-Cparmv7em -CfFPV4_SP_D16 ';
+          FPCupManager.CrossOS_SubArch:='armv7em';
+        end;
       end;
 
       if ((FPCupManager.CrossOS_Target=TOS.embedded) OR (FPCupManager.CrossOS_Target=TOS.freertos)) then
       begin
         if Length(SubArchsCommaText)>0 then
-          memoSummary.Lines.Append('Valid subarch(s) for '+GetCPU(FPCupManager.CrossCPU_Target)+' embedded are: '+SubArchsCommaText);
+          memoSummary.Lines.Append('Valid subarch(s) for '+GetCPU(FPCupManager.CrossCPU_Target)+' '+GetOS(FPCupManager.CrossOS_Target)+' are: '+SubArchsCommaText);
       end;
 
       //msdos predefined settings
