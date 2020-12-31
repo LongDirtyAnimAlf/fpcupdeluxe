@@ -2380,9 +2380,12 @@ begin
 
   if (NOT FPCupManager.CheckValidCPUOS) then
   begin
-    memoSummary.Lines.Append('');
-    memoSummary.Lines.Append('FPC source (fpmkunit.pp): No valid CPU / OS target.');
-    memoSummary.Lines.Append('Cross-building will continue, but with great changes of errors !!');
+    if (FPCupManager.CrossOS_Target<>TOS.freertos) then
+    begin
+      memoSummary.Lines.Append('');
+      memoSummary.Lines.Append('FPC source (fpmkunit.pp): No valid CPU / OS target.');
+      memoSummary.Lines.Append('Cross-building will continue, but with great changes of errors !!');
+    end;
   end;
 
   if assigned(CrossInstallers) then
@@ -2730,6 +2733,12 @@ begin
         end;
         if (FPCupManager.CrossCPU_Target=TCPU.arm) then
         begin
+          s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+          if Length(s)=0 then
+            FPCupManager.FPCOPT:='-dFPC_ARMHF '
+          else
+            FPCupManager.FPCOPT:=s+' ';
+          //FPCupManager.CrossOPT:='-Cparmv7em -CfFPV4_SP_D16 -OoFASTMATH -CaEABIHF ';
           FPCupManager.CrossOPT:='-Cparmv7em -CfFPV4_SP_D16 ';
           FPCupManager.CrossOS_SubArch:='armv7em';
         end;
