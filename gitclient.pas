@@ -434,6 +434,7 @@ begin
   if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
+  if (NOT Assigned(FileList)) then exit;
 
   FileList.Clear;
   // --porcelain indicate stable output;

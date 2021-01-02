@@ -3951,6 +3951,7 @@ var
   aRepoClient:TRepoClient;
   s:string;
   SourceVersion:string;
+  bUltibo:boolean;
 begin
   result:=inherited;
   result:=InitModule;
@@ -3961,13 +3962,30 @@ begin
 
   SourceVersion:='0.0.0';
 
+  bUltibo:=(Pos('github.com/ultibohub',URL)>0);
+
+  if bUltibo then
+    FSourceDirectory:=StringReplace(FSourceDirectory,DirectorySeparator+'source','',[]);
+
   aRepoClient:=GetSuitableRepoClient;
 
   if aRepoClient=nil then
   begin
-    Infoln(infotext+'Using FTP for download of ' + ModuleName + ' sources.',etWarning);
+    result:=true;
+    Infoln(infotext+'Downloading ' + ModuleName + ' sources.',etInfo);
     result:=DownloadFromFTP(ModuleName);
     FActualRevision:=FPreviousRevision;
+    if result and bUltibo then
+    begin
+      // Get Ultibo Core also
+      s:=URL;
+      URL:=StringReplace(URL,'/FPC','/Core',[]);
+      Infoln(infotext+'Downloading Ultibo Core sources.',etInfo);
+      result:=DownloadFromFTP('Core');
+      URL:=s;
+      FActualRevision:='32846';
+      FPreviousRevision:=FActualRevision;
+    end;
   end
   else
   begin
@@ -3978,6 +3996,7 @@ begin
       if (aRepoClient.ClassType=FGitClient.ClassType)
          then result:=DownloadFromGit(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings)
          else result:=DownloadFromSVN(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings);
+
       if UpdateWarnings.Count>0 then
       begin
         WritelnLog(UpdateWarnings);
@@ -3988,10 +4007,12 @@ begin
 
   end;
 
+  if bUltibo then
+    FSourceDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'source';
+
   if result then
   begin
-    SourceVersion:=GetVersion;
-
+  SourceVersion:=GetVersion;
     if (SourceVersion<>'0.0.0') then
     begin
       s:=GetRevisionFromVersion(ModuleName,SourceVersion);

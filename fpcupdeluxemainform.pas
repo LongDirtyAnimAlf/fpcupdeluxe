@@ -2201,6 +2201,28 @@ begin
   if radgrpOS.ItemIndex<>-1 then
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
+    if s=GetOS(TOS.ultibo) then
+    begin
+      success:=false;
+      if radgrpCPU.ItemIndex<>-1 then
+      begin
+        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
+        if (s=GetCPU(TCPU.arm)) OR (s=GetCPU(TCPU.aarch64)) then
+          success:=true;
+      end;
+    end;
+  end;
+
+  if (NOT success) then
+  begin
+    if Sender<>nil then ShowMessage('No valid CPU target for Ultibo.');
+    exit;
+  end;
+
+  success:=true;
+  if radgrpOS.ItemIndex<>-1 then
+  begin
+    s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s=GetOS(TOS.android) then
     begin
       if radgrpCPU.ItemIndex<>-1 then
@@ -2380,7 +2402,7 @@ begin
 
   if (NOT FPCupManager.CheckValidCPUOS) then
   begin
-    if (FPCupManager.CrossOS_Target<>TOS.freertos) then
+    if (NOT (FPCupManager.CrossOS_Target in [TOS.freertos,TOS.ultibo])) then
     begin
       memoSummary.Lines.Append('');
       memoSummary.Lines.Append('FPC source (fpmkunit.pp): No valid CPU / OS target.');
@@ -2741,6 +2763,19 @@ begin
           //FPCupManager.CrossOPT:='-Cparmv7em -CfFPV4_SP_D16 -OoFASTMATH -CaEABIHF ';
           FPCupManager.CrossOPT:='-Cparmv7em -CfFPV4_SP_D16 ';
           FPCupManager.CrossOS_SubArch:='armv7em';
+        end;
+      end;
+
+      //ultibo predefined settings
+      if (FPCupManager.CrossOS_Target=TOS.ultibo) then
+      begin
+        if (FPCupManager.CrossCPU_Target=TCPU.arm) then
+        begin
+          FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+          FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -CIARM -CaEABIHF -OoFASTMATH ';
+          FPCupManager.CrossOS_SubArch:='armv7a';
+          //FPCupManager.CrossOPT:='-CpARMV6 -CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
+          //FPCupManager.CrossOS_SubArch:='armv6';
         end;
       end;
 

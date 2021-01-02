@@ -1688,20 +1688,23 @@ begin
     end;
   end;
 
-  if aBeforeRevision<>FRET_UNKNOWN_REVISION then
+  if Assigned(UpdateWarnings) then
   begin
-    aClient.LocalModifications(UpdateWarnings); //Get list of modified files
-    if UpdateWarnings.Count > 0 then
+    if aBeforeRevision<>FRET_UNKNOWN_REVISION then
     begin
-      UpdateWarnings.Insert(0, {BeginSnippet+' '+}aModuleName + ': WARNING: found modified files.');
-      if FKeepLocalChanges=false then
+      aClient.LocalModifications(UpdateWarnings); //Get list of modified files
+      if UpdateWarnings.Count > 0 then
       begin
-        DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + aBeforeRevision + '.diff';
-        CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,aClient);
-        UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': reverting to original before updating.');
-        aClient.Revert; //Remove local changes
-      end
-      else UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': leaving modified files as is before updating.');
+        UpdateWarnings.Insert(0, {BeginSnippet+' '+}aModuleName + ': WARNING: found modified files.');
+        if FKeepLocalChanges=false then
+        begin
+          DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + aBeforeRevision + '.diff';
+          CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,aClient);
+          UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': reverting to original before updating.');
+          aClient.Revert; //Remove local changes
+        end
+        else UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': leaving modified files as is before updating.');
+      end;
     end;
   end;
 
@@ -1762,7 +1765,7 @@ begin
       begin
          Output:='';
 
-         UpdateWarnings.Add(aModuleName + ': reapplying local changes.');
+         if Assigned(UpdateWarnings) then UpdateWarnings.Add(aModuleName + ': reapplying local changes.');
 
          // check for default values
          if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
@@ -2054,7 +2057,7 @@ function TInstaller.DownloadFromFTP(ModuleName: string): boolean;
 var
   i:integer;
   FilesList:TStringList;
-  FPCArchive,aName,aFile:string;
+  FPCArchive,FPCArchiveDir,aName,aFile:string;
 begin
   result:=false;
 
@@ -2063,8 +2066,9 @@ begin
   if (NOT DirectoryIsEmpty(ExcludeTrailingPathDelimiter(FSourceDirectory))) then
   begin
     Infoln(localinfotext+ModuleName+' sources are already there.',etWarning);
-    Infoln(localinfotext+ModuleName+' build-process will continue with existing sources.',etWarning);
-    exit(true);
+    Infoln(localinfotext+ModuleName+' sources will be replaced.',etWarning);
+    //Infoln(localinfotext+ModuleName+' build-process will continue with existing sources.',etWarning);
+    //exit(true);
   end;
 
   Infoln(localinfotext+'Getting '+ModuleName+' sources.',etInfo);
@@ -2072,6 +2076,8 @@ begin
   FPCArchive := GetTempFileNameExt('FPCUPTMP','zip');
   result:=GetFile(FURL,FPCArchive);
   if (result AND (NOT FileExists(FPCArchive))) then result:=false;
+
+  FPCArchiveDir := GetTempDirName('FPCUPTMP');
 
   if result then
   begin
@@ -2081,7 +2087,7 @@ begin
     with TNormalUnzipper.Create do
     begin
       try
-        result:=DoUnZip(FPCArchive,FSourceDirectory,[]);
+        result:=DoUnZip(FPCArchive,FPCArchiveDir,[]);
       finally
         Free;
       end;
@@ -2091,7 +2097,7 @@ begin
   if result then
   begin
     aName:='';
-    FilesList:=FindAllDirectories(FSourceDirectory,False);
+    FilesList:=FindAllDirectories(FPCArchiveDir,False);
     if FilesList.Count=1 then aName:=FilesList[0];
     FreeAndNil(FilesList);
     if Pos(LowerCase(ModuleName),LowerCase(ExtractFileName(aName)))>0 then
@@ -2117,8 +2123,23 @@ begin
       DeleteDirectory(aName,False);
       FreeAndNil(FilesList);
     end;
-  end;
 
+    // We now have all files.
+    // Move-copy them to the source directory
+    Infoln(infotext+'Moving files towards desired source directory.',etInfo);
+    Infoln(infotext+'This is time-consuming. Please wait.',etInfo);
+    FilesList:=FindAllFiles(FPCArchiveDir, '', True);
+    for i:=0 to (FilesList.Count-1) do
+    begin
+      aFile:=FilesList[i];
+      aName:=ConcatPaths([FSourceDirectory,ExtractRelativePath(IncludeTrailingPathDelimiter(FPCArchiveDir),ExtractFilePath(aFile))]);
+      ForceDirectoriesSafe(aName);
+      MoveFile(aFile,IncludeTrailingPathDelimiter(aName)+ExtractFileName(aFile));
+    end;
+    FreeAndNil(FilesList);
+
+  end;
+  DeleteDirectory(FPCArchiveDir,False);
   SysUtils.Deletefile(FPCArchive); //Get rid of temp file.
 end;
 

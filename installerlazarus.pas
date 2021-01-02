@@ -1228,6 +1228,9 @@ begin
     //VersionSnippet:=DelChars(s, '''');
     s:=TrimSet(s, [#39]);
     s:=Trim(s);
+    //x:=Length(s);
+    //while (x>0) AND (NOT (s[x] in ['0'..'9','.'])) do Dec(x);
+    //if (x<Length(s)) then Delete(S,x,MaxInt);
     if Length(s)>0 then result:=s;
     CloseFile(TxtFile);
   end;
@@ -2181,6 +2184,7 @@ var
   s:string;
   SourceVersion:string;
   FilePath:string;
+  bUltibo:boolean;
 begin
   result:=inherited;
   result:=InitModule;
@@ -2191,13 +2195,21 @@ begin
 
   SourceVersion:='0.0.0';
 
+  bUltibo:=(Pos('github.com/ultibohub',URL)>0);
+
   aRepoClient:=GetSuitableRepoClient;
 
   if aRepoClient=nil then
   begin
-    Infoln(infotext+'Using FTP for download of ' + ModuleName + ' sources.',etWarning);
+    result:=true;
+    Infoln(infotext+'Downloading ' + ModuleName + ' sources.',etInfo);
     result:=DownloadFromFTP(ModuleName);
     FActualRevision:=FPreviousRevision;
+    if result and bUltibo then
+    begin
+      //FActualRevision:='';
+      //FPreviousRevision:=FActualRevision;
+    end;
   end
   else
   begin
@@ -2208,6 +2220,7 @@ begin
       if (aRepoClient.ClassType=FGitClient.ClassType)
          then result:=DownloadFromGit(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings)
          else result:=DownloadFromSVN(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings);
+
       if UpdateWarnings.Count>0 then
       begin
         WritelnLog(UpdateWarnings);
@@ -2215,13 +2228,11 @@ begin
     finally
       UpdateWarnings.Free;
     end;
-
   end;
 
   if result then
   begin
     SourceVersion:=GetVersion;
-
     if (SourceVersion<>'0.0.0') then
     begin
       s:=GetRevisionFromVersion(ModuleName,SourceVersion);

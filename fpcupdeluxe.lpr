@@ -87,6 +87,7 @@ uses
   m_any_to_linuxxtensa,
   m_any_to_freertosxtensa,
   m_any_to_freertosarm,
+  m_any_to_ultiboarm,
   {$ifdef LINUX}
   //{$ifdef CPUX86}
   m_linux386_to_mips,

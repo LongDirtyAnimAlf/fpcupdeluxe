@@ -1374,10 +1374,16 @@ function TSequencer.GetInstaller(ModuleName: string): boolean;
 var
   CrossCompiling:boolean;
   aCompiler:string;
+  LocalFPCSourceDir:string;
 begin
   result:=true;
 
   CrossCompiling:=(FParent.CrossCPU_Target<>TCPU.cpuNone) or (FParent.CrossOS_Target<>TOS.osNone);
+
+  if (Pos('github.com/ultibohub',FParent.FPCURL)>0) then
+    LocalFPCSourceDir:=IncludeTrailingPathDelimiter(FParent.FPCSourceDirectory)+'source'
+  else
+    LocalFPCSourceDir:=FParent.FPCSourceDirectory;
 
   //check if this is a known module:
 
@@ -1405,7 +1411,7 @@ begin
     else
       FInstaller:=TFPCNativeInstaller.Create;
 
-    FInstaller.SourceDirectory:=FParent.FPCSourceDirectory;
+    FInstaller.SourceDirectory:=LocalFPCSourceDir;
     FInstaller.InstallDirectory:=FParent.FPCInstallDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
     (FInstaller as TFPCInstaller).SourcePatches:=FParent.FPCPatches;
@@ -1454,6 +1460,7 @@ begin
       FInstaller:=TLazarusNativeInstaller.Create;
 
     // source- and install-dir are the same for Lazarus ... could be changed
+
     FInstaller.SourceDirectory:=FParent.LazarusSourceDirectory;
     FInstaller.InstallDirectory:=FParent.LazarusInstallDirectory;
 
@@ -1464,7 +1471,7 @@ begin
     // LCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
     (FInstaller as TLazarusInstaller).LCL_Platform:=FParent.LCL_Platform;
-    (FInstaller as TLazarusInstaller).FPCSourceDir:=FParent.FPCSourceDirectory;
+    (FInstaller as TLazarusInstaller).FPCSourceDir:=LocalFPCSourceDir;
     (FInstaller as TLazarusInstaller).FPCInstallDir:=FParent.FPCInstallDirectory;
     (FInstaller as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     (FInstaller as TLazarusInstaller).SourcePatches:=FParent.FLazarusPatches;
@@ -1488,7 +1495,7 @@ begin
         FInstaller.free; // get rid of old FInstaller
       end;
     FInstaller:=THelpFPCInstaller.Create;
-    FInstaller.SourceDirectory:=FParent.FPCSourceDirectory;
+    FInstaller.SourceDirectory:=LocalFPCSourceDir;
   end
   {$ifndef FPCONLY}
   else if ModuleName=_HELPLAZARUS
@@ -1508,7 +1515,7 @@ begin
     FInstaller.SourceDirectory:=FParent.LazarusSourceDirectory;
     FInstaller.InstallDirectory:=FParent.LazarusInstallDirectory;
     (FInstaller as THelpLazarusInstaller).FPCBinDirectory:=IncludeTrailingPathDelimiter(FParent.FPCInstallDirectory);
-    (FInstaller as THelpLazarusInstaller).FPCSourceDirectory:=IncludeTrailingPathDelimiter(FParent.FPCSourceDirectory);
+    (FInstaller as THelpLazarusInstaller).FPCSourceDirectory:=IncludeTrailingPathDelimiter(LocalFPCSourceDir);
     (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
   end
   {$endif}
@@ -1538,7 +1545,7 @@ begin
       FCurrentModule:=ModuleName;
       //assign properties
       (FInstaller as TUniversalInstaller).FPCInstallDir:=FParent.FPCInstallDirectory;
-      (FInstaller as TUniversalInstaller).FPCSourceDir:=FParent.FPCSourceDirectory;
+      (FInstaller as TUniversalInstaller).FPCSourceDir:=LocalFPCSourceDir;
       // Use compileroptions for chosen FPC compile options...
       FInstaller.CompilerOptions:=FParent.FPCOPT;
       // ... but more importantly, pass Lazarus compiler options needed for IDE rebuild

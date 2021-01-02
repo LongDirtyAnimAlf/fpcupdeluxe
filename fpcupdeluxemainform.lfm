@@ -3140,6 +3140,7 @@ object Form1: TForm1
           'amiga'
           'ios'
           'freertos'
+          'ultibo'
         )
         OnClick = radgrpOSClick
         ParentFont = False
