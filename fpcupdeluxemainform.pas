@@ -3410,9 +3410,10 @@ begin
                   begin
                     for i:=0 to Pred(aList.Count) do
                     begin
-                      if Pos(TargetFile,aList[i])>0 then
+                      s:=aList[i];
+                      if Pos(TargetFile,s)>0 then
                       begin
-                        TargetFile := FileNameFromURL(aList[i]);
+                        TargetFile := FileNameFromURL(s);
                         success:=true;
                         break;
                       end;
