@@ -2122,6 +2122,16 @@ begin
 end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;
+const
+ VERSIONEXPRESSION='$FPC_VERSION';
+ CPUEXPRESSION='$CPU_TARGET';
+ OSEXPRESSION='$OS_TARGET';
+ REGEXPACKAGE =
+   '[package]'+LineEnding+
+   'name=regexpr'+LineEnding+
+   'version='+VERSIONEXPRESSION+LineEnding+
+   '[require]'+LineEnding+
+   'packages_'+OSEXPRESSION+'_'+CPUEXPRESSION+'='+LineEnding;
 {$ifdef Darwin}
 {$ifdef LCLQT5}
 function CreateQT5Symlinks(aApp:string):boolean;
@@ -2207,8 +2217,51 @@ begin
     FActualRevision:=FPreviousRevision;
     if result and bUltibo then
     begin
+
+      FilePath:=ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true),'regexpr'])+PathDelim+'Package.fpc';
+      //if FileExists(FilePath) then SysUtils.DeleteFile(FilePath);
+      if (NOT FileExists(FilePath)) then
+      begin
+        s:=REGEXPACKAGE;
+        s:=StringReplace(s,VERSIONEXPRESSION,CompilerVersion(FCompiler),[]);
+        s:=StringReplace(s,CPUEXPRESSION,GetTargetCPU,[]);
+        s:=StringReplace(s,OSEXPRESSION,GetTargetOS,[]);
+
+        UpdateWarnings:=TStringList.Create;
+        try
+          UpdateWarnings.Text:=s;
+          UpdateWarnings.SaveToFile(FilePath);
+        finally
+          UpdateWarnings.Free;
+        end;
+      end;
+
+      Processor.Executable := ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt;
+      Processor.Process.Parameters.Clear;
+
+      s:=Processor.Environment.GetVar('FPCDIR');
+      try
+        Processor.Environment.SetVar('FPCDIR',ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true)]));
+        Processor.Process.Parameters.Add('-T' + GetTargetCPU + '-' + GetTargetOS);
+
+        Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
+        ProcessorResult := Processor.ExecuteAndWait;
+
+        Processor.Process.CurrentDirectory := ConcatPaths([FSourceDirectory,'ide']);
+        ProcessorResult := Processor.ExecuteAndWait;
+
+        Processor.Process.CurrentDirectory := ConcatPaths([FSourceDirectory,'components']);
+        ProcessorResult := Processor.ExecuteAndWait;
+
+        Processor.Process.CurrentDirectory := ConcatPaths([FSourceDirectory,'tools']);
+        ProcessorResult := Processor.ExecuteAndWait;
+      finally
+        Processor.Environment.SetVar('FPCDIR',s);
+      end;
+
       //FActualRevision:='';
       //FPreviousRevision:=FActualRevision;
+
     end;
   end
   else
