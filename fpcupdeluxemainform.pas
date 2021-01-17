@@ -2207,7 +2207,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s=GetCPU(TCPU.arm)) OR (s=GetCPU(TCPU.aarch64)) then
+        if (s=GetCPU(TCPU.arm)) OR (s=GetCPU(TCPU.aarch64)) OR (s='armv6') then
           success:=true;
       end;
     end;
@@ -2294,14 +2294,14 @@ begin
       if radgrpOS.ItemIndex<>-1 then
       begin
         s:=radgrpOS.Items[radgrpOS.ItemIndex];
-        if (s=GetOS(TOS.linux)) then success:=true;
+        if (s=GetOS(TOS.linux)) OR (s=GetOS(TOS.ultibo)) then success:=true;
       end;
     end;
   end;
 
   if (NOT success) then
   begin
-    if Sender<>nil then ShowMessage('ARMV6 is [only available] for [RPi] Linux.');
+    if Sender<>nil then ShowMessage('ARMV6 is [only available] for [RPi] Linux and Ultibo.');
     exit;
   end;
 
@@ -2772,10 +2772,16 @@ begin
         if (FPCupManager.CrossCPU_Target=TCPU.arm) then
         begin
           FPCupManager.FPCOPT:='-dFPC_ARMHF ';
-          FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -CIARM -CaEABIHF -OoFASTMATH ';
-          FPCupManager.CrossOS_SubArch:='armv7a';
-          //FPCupManager.CrossOPT:='-CpARMV6 -CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
-          //FPCupManager.CrossOS_SubArch:='armv6';
+          if (radgrpCPU.ItemIndex<>-1) AND (radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') then
+          begin
+            FPCupManager.CrossOPT:='-CpARMV6 -CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
+            FPCupManager.CrossOS_SubArch:='armv6';
+          end
+          else
+          begin
+            FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -CIARM -CaEABIHF -OoFASTMATH ';
+            FPCupManager.CrossOS_SubArch:='armv7a';
+          end;
         end;
       end;
 
