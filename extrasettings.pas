@@ -825,12 +825,19 @@ begin
   try
     for OS := Low(TOS) to High(TOS) do
     begin
+
+      if OS=osNone then continue;
+
       for CPU := Low(TCPU) to High(TCPU) do
       begin
+
+        if CPU=cpuNone then continue;
+
         // skip non-combi's to reduce size of ini-file
         if ((OS=amiga) AND (CPU<>m68k)) then continue;
         if ((OS=morphos) AND (CPU<>powerpc)) then continue;
         if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java) AND (OS<>android)) then continue;
+        if (OS=ultibo) AND ((CPU<>arm) AND (CPU<>aarch64)) then continue;
         if (OS=android) AND ((CPU<>arm) AND (CPU<>aarch64) AND (CPU<>jvm) AND (CPU<>mipsel)) then continue;
         if (OS=iphonesim) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
         if (OS=wince) AND (CPU<>arm) then continue;
@@ -843,7 +850,6 @@ begin
         if (CPU=xtensa) AND ((OS<>linux) AND (OS<>freertos)) then continue;
         if (CPU=powerpc) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=powerpc64) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
-        if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin) AND (OS<>android)) then continue;
         if (CPU=mips) AND (OS<>linux) then continue;
         if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android) AND (OS<>embedded)) then continue;
         if (CPU=avr) AND (OS<>embedded) then continue;

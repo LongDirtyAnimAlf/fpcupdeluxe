@@ -115,8 +115,9 @@ type
 
   TFPCInstaller = class(TBaseFPCInstaller)
   private
-    FSoftFloat: boolean;
-    FUseLibc: boolean;
+    FSoftFloat  : boolean;
+    FUseLibc    : boolean;
+    FUltibo     : boolean;
     FTargetCompilerName: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
@@ -150,6 +151,7 @@ type
   public
     property UseLibc: boolean read FUseLibc;
     property SoftFloat: boolean write FSoftFloat;
+    property Ultibo: boolean read FUltibo;
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
     property BootstrapCompilerDirectory: string write FBootstrapCompilerDirectory;
     // Build module
@@ -2331,6 +2333,8 @@ begin
   if FMUSL then NativeFPCBootstrapCompiler:=false;
   {$endif}
 
+  FUltibo:=(Pos('github.com/ultibohub',URL)>0);
+
   if (aBootstrapVersion<>'') then
   begin
     FBootstrapCompilerOverrideVersionCheck:=false;
@@ -3374,7 +3378,6 @@ begin
         end;
       end;
 
-
       s := FPCCfg;
       if (NOT FileExists(s)) then
       begin
@@ -3386,6 +3389,128 @@ begin
       begin
         Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
       end;
+
+      if Ultibo then
+      begin
+        // Creating Ultibo configuration files
+
+        s := IncludeTrailingPathDelimiter(FBinPath) + 'RPI.CFG';
+        if (NOT FileExists(s)) then
+        begin
+          //create RPI.CFG
+          AssignFile(TxtFile,s);
+          Rewrite(TxtFile);
+          try
+            writeln(TxtFile,'#');
+            writeln(TxtFile,'# Raspberry Pi (A/B/A+/B+/Zero) specific config file');
+            writeln(TxtFile,'#');
+            writeln(TxtFile,'-CfVFPV2');
+            writeln(TxtFile,'-CIARM');
+            writeln(TxtFile,'-CaEABIHF');
+            writeln(TxtFile,'-OoFASTMATH');
+            writeln(TxtFile,'-dRPI');
+            writeln(TxtFile,'-XParm-none-eabi-');
+            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv6-ultibo/rtl');
+            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv6-ultibo/packages');
+            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv6-ultibo/lib');
+            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv6-ultibo/lib/vc4');
+          finally
+            CloseFile(TxtFile);
+          end;
+        end
+        else
+        begin
+          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+        end;
+
+        s := IncludeTrailingPathDelimiter(FBinPath) + 'RPI2.CFG';
+        if (NOT FileExists(s)) then
+        begin
+          //create RPI2.CFG
+          AssignFile(TxtFile,s);
+          Rewrite(TxtFile);
+          try
+            writeln(TxtFile,'#');
+            writeln(TxtFile,'# Raspberry Pi 2B specific config file');
+            writeln(TxtFile,'#');
+            writeln(TxtFile,'-CfVFPV3');
+            writeln(TxtFile,'-CIARM');
+            writeln(TxtFile,'-CaEABIHF');
+            writeln(TxtFile,'-OoFASTMATH');
+            writeln(TxtFile,'-dRPI2');
+            writeln(TxtFile,'-XParm-none-eabi-');
+            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/rtl');
+            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/packages');
+            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv7-ultibo/lib');
+            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv7-ultibo/lib/vc4');
+          finally
+            CloseFile(TxtFile);
+          end;
+        end
+        else
+        begin
+          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+        end;
+
+        s := IncludeTrailingPathDelimiter(FBinPath) + 'RPI3.CFG';
+        if (NOT FileExists(s)) then
+        begin
+          //create RPI3.CFG
+          AssignFile(TxtFile,s);
+          Rewrite(TxtFile);
+          try
+            writeln(TxtFile,'#');
+            writeln(TxtFile,'# Raspberry Pi 3B specific config file');
+            writeln(TxtFile,'#');
+            writeln(TxtFile,'-CfVFPV3');
+            writeln(TxtFile,'-CIARM');
+            writeln(TxtFile,'-CaEABIHF');
+            writeln(TxtFile,'-OoFASTMATH');
+            writeln(TxtFile,'-dRPI3');
+            writeln(TxtFile,'-XParm-none-eabi-');
+            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/rtl');
+            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/packages');
+            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv7-ultibo/lib');
+            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv7-ultibo/lib/vc4');
+          finally
+            CloseFile(TxtFile);
+          end;
+        end
+        else
+        begin
+          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+        end;
+
+        s := IncludeTrailingPathDelimiter(FBinPath) + 'QEMUVPB.CFG';
+        if (NOT FileExists(s)) then
+        begin
+          //create QEMUVPB.CFG
+          AssignFile(TxtFile,s);
+          Rewrite(TxtFile);
+          try
+            writeln(TxtFile,'#');
+            writeln(TxtFile,'# QEMU VersatilePB specific config file');
+            writeln(TxtFile,'#');
+            writeln(TxtFile,'-CfVFPV3');
+            writeln(TxtFile,'-CIARM');
+            writeln(TxtFile,'-CaEABIHF');
+            writeln(TxtFile,'-OoFASTMATH');
+            writeln(TxtFile,'-dQEMUVPB');
+            writeln(TxtFile,'-XParm-none-eabi-');
+            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/rtl');
+            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/packages');
+            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv7-ultibo/lib');
+          finally
+            CloseFile(TxtFile);
+          end;
+        end
+        else
+        begin
+          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+        end;
+
+      end;
+
     end;
 
     // if, for one reason or another, there is no cfg file, create a minimal one by ourselves
@@ -3947,11 +4072,10 @@ end;
 
 function TFPCInstaller.GetModule(ModuleName: string): boolean;
 var
-  UpdateWarnings: TStringList;
-  aRepoClient:TRepoClient;
-  s:string;
-  SourceVersion:string;
-  bUltibo:boolean;
+  UpdateWarnings : TStringList;
+  aRepoClient    : TRepoClient;
+  s              : string;
+  SourceVersion  : string;
 begin
   result:=inherited;
   result:=InitModule;
@@ -3962,9 +4086,7 @@ begin
 
   SourceVersion:='0.0.0';
 
-  bUltibo:=(Pos('github.com/ultibohub',URL)>0);
-
-  if bUltibo then
+  if Ultibo then
     FSourceDirectory:=StringReplace(FSourceDirectory,DirectorySeparator+'source','',[]);
 
   aRepoClient:=GetSuitableRepoClient;
@@ -3975,7 +4097,7 @@ begin
     Infoln(infotext+'Downloading ' + ModuleName + ' sources.',etInfo);
     result:=DownloadFromFTP(ModuleName);
     FActualRevision:=FPreviousRevision;
-    if result and bUltibo then
+    if result and Ultibo then
     begin
       // Get Ultibo Core also
       s:=URL;
@@ -4007,7 +4129,7 @@ begin
 
   end;
 
-  if bUltibo then
+  if Ultibo then
     FSourceDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'source';
 
   if result then
@@ -4108,10 +4230,11 @@ constructor TFPCInstaller.Create;
 begin
   inherited Create;
 
+  FTargetCompilerName:=GetCompilerName(GetTargetCPU);
+
   FCompiler := '';
   FUseLibc  := false;
-
-  FTargetCompilerName:=GetCompilerName(GetTargetCPU);
+  FUltibo   := false;
 
   InitDone:=false;
 end;
