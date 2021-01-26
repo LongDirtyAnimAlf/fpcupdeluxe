@@ -362,7 +362,7 @@ begin
   btnGetOpenSSL.Visible:=false;
   {$endif}
 
-  {$IF defined(CPUAARCH64) OR defined(CPUARM) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2)) OR defined(Haiku) OR defined(AROS) OR defined(Morphos) OR (defined(CPUPOWERPC) AND defined(Darwin)) OR (defined(CPUPOWERPC64) AND defined(Darwin))}
+  {$IF defined(Haiku) OR defined(AROS) OR defined(Morphos) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2)) OR (defined(CPUPOWERPC) AND defined(Darwin)) OR (defined(CPUPOWERPC64) AND defined(Darwin))}
   // disable some features
   OldBtn.Visible:=False;
   {DinoBtn.Visible:=False;}
@@ -370,8 +370,7 @@ begin
   {$endif}
   {$IF defined(CPUAARCH64) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2))}
   // disable some features
-  FixesBtn.Visible:=False;
-  StableBtn.Visible:=False;
+  OldBtn.Visible:=False;
   {$endif}
 
   {$ifdef Darwin}
@@ -3191,6 +3190,7 @@ begin
                     begin
                       if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386crossbins';
                       if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64crossbins';
+                      if GetTargetCPU=GetCPU(TCPU.arm) then BaseBinsURL:='linuxarmcrossbins';
                     end
                     else
                       if GetTargetOS=GetOS(TOS.freebsd) then

@@ -117,7 +117,6 @@ type
   private
     FSoftFloat  : boolean;
     FUseLibc    : boolean;
-    FUltibo     : boolean;
     FTargetCompilerName: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
@@ -151,7 +150,6 @@ type
   public
     property UseLibc: boolean read FUseLibc;
     property SoftFloat: boolean write FSoftFloat;
-    property Ultibo: boolean read FUltibo;
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
     property BootstrapCompilerDirectory: string write FBootstrapCompilerDirectory;
     // Build module
@@ -2333,8 +2331,6 @@ begin
   if FMUSL then NativeFPCBootstrapCompiler:=false;
   {$endif}
 
-  FUltibo:=(Pos('github.com/ultibohub',URL)>0);
-
   if (aBootstrapVersion<>'') then
   begin
     FBootstrapCompilerOverrideVersionCheck:=false;
@@ -4234,7 +4230,6 @@ begin
 
   FCompiler := '';
   FUseLibc  := false;
-  FUltibo   := false;
 
   InitDone:=false;
 end;

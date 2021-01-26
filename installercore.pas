@@ -280,15 +280,16 @@ type
 
   TInstaller = class(TObject)
   private
-    FURL: string;
-    FKeepLocalChanges: boolean;
-    FReApplyLocalChanges: boolean;
-    FCrossInstaller:TCrossInstaller;
-    FCrossCPU_Target: TCPU; //When cross-compiling: CPU, e.g. x86_64
-    FCrossOS_Target: TOS; //When cross-compiling: OS, e.g. win64
-    FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
-    FCrossToolsDirectory: string;
-    FCrossLibraryDirectory: string;
+    FURL                   : string;
+    FUltibo                : boolean;
+    FKeepLocalChanges      : boolean;
+    FReApplyLocalChanges   : boolean;
+    FCrossInstaller        : TCrossInstaller;
+    FCrossCPU_Target       : TCPU; //When cross-compiling: CPU, e.g. x86_64
+    FCrossOS_Target        : TOS; //When cross-compiling: OS, e.g. win64
+    FCrossOS_SubArch       : string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
+    FCrossToolsDirectory   : string;
+    FCrossLibraryDirectory : string;
     procedure SetURL(value:string);
     procedure SetSourceDirectory(value:string);
     procedure SetBaseDirectory(value:string);
@@ -469,6 +470,8 @@ type
     property SolarisOI: boolean write FSolarisOI;
     // do we have musl instead of libc
     property MUSL: boolean write FMUSL;
+    // Are we installing Ultibo
+    property Ultibo: boolean read FUltibo;
     property Log: TLogger write FLog;
     // Directory where make (and the other binutils on Windows) is located
     property MakeDirectory: string write FMakeDir;
@@ -742,6 +745,7 @@ begin
     FMinorVersion := -1;
     FReleaseVersion := -1;
     FPatchVersion := -1;
+    FUltibo:=(Pos('github.com/ultibohub',FURL)>0);
   end;
 end;
 
@@ -2369,8 +2373,7 @@ begin
 
   Infoln(localinfotext+'No OpenSLL library files available for SSL. Going to download them.',etWarning);
 
-
-  //if (NOT CheckWin32Version(6,2)) then
+  if (NOT OperationSucceeded) {AND (NOT CheckWin32Version(6,2))} then
   begin
     if SVNClient.ValidClient then
     begin
@@ -2394,6 +2397,22 @@ begin
        then Infoln(localinfotext+'SVN OpenSLL library files download from '+OPENSSL_URL_LATEST_SVN+' ok.',etWarning)
   end;
 
+  // Direct download OpenSSL from from Lazarus binaries
+  if (NOT OperationSucceeded) AND (NOT SVNClient.ValidClient) then
+  begin
+    OpenSSLFileName:='libeay32.dll';
+    OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
+    if OperationSucceeded then
+    begin
+      OpenSSLFileName:='ssleay32.dll';
+      OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
+    end;
+
+    if OperationSucceeded
+       then Infoln(localinfotext+'Direct OpenSLL library files download from '+OPENSSL_URL_LATEST_SVN+' ok.',etWarning)
+  end;
+
+  // Direct download OpenSSL from public sources
   if (NOT OperationSucceeded) then
   begin
     OpenSSLFileName := GetTempFileNameExt('FPCUPTMP','zip');
@@ -2457,21 +2476,6 @@ begin
        else Infoln(localinfotext+'Could not download/install openssl library archive.', etError);
 
     SysUtils.Deletefile(OpenSSLFileName); //Get rid of temp zip if success.
-  end;
-
-  // Real last resort: direct download OpenSSL from from Lazarus binaries
-  if (NOT OperationSucceeded) AND (NOT SVNClient.ValidClient) then
-  begin
-    OpenSSLFileName:='libeay32.dll';
-    OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
-    if OperationSucceeded then
-    begin
-      OpenSSLFileName:='ssleay32.dll';
-      OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
-    end;
-
-    if OperationSucceeded
-       then Infoln(localinfotext+'Direct OpenSLL library files download from '+OPENSSL_URL_LATEST_SVN+' ok.',etWarning)
   end;
 
   result := OperationSucceeded;
@@ -4196,6 +4200,7 @@ begin
 
   FMUSL      := false;
   FSolarisOI := false;
+  FUltibo    := false;
 
   {$ifdef Linux}
   FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';
