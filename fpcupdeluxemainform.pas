@@ -1975,10 +1975,13 @@ begin
 
   DisEnable(Sender,False);
   try
-    PrepareRun;
 
-    if (Length(aFPCTarget)>0) then FPCupManager.FPCURL:=aFPCTarget;
-    if (Length(aLazarusTarget)>0) then FPCupManager.LazarusURL:=aLazarusTarget;
+    if (Length(aFPCTarget)>0) then
+      FPCTarget:=aFPCTarget;
+    if (Length(aLazarusTarget)>0) then
+      LazarusTarget:=aLazarusTarget;
+
+    PrepareRun;
 
     if (Length(aModule)>0)then
     begin
@@ -3872,7 +3875,6 @@ begin
   FPCupManager.Verbose:=Form2.ExtraVerbose;
   {$ENDIF}
 
-  // set default values for FPC and Lazarus URL ... can still be changed inside the quick real run button onclicks
   FPCupManager.FPCURL:=FPCTarget;
   FPCupManager.LazarusURL:=LazarusTarget;
 
