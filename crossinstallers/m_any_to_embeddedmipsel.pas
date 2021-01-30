@@ -78,18 +78,34 @@ function TAny_Embeddedmipsel.GetLibs(Basepath:string): boolean;
 const
   LibName='';
 begin
-  // mipsel-embedded does not need libs by default, but user can add them.
-
   result:=FLibsFound;
+
   if result then exit;
 
-  // search local paths based on libbraries provided for or adviced by fpc itself
-  result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+  if length(FSubArch)>0
+     then ShowInfo('We have a subarch: '+FSubArch)
+     else ShowInfo('No subarch defined');
+
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
+  // search local paths based on libraries provided for or adviced by fpc itself
+  if not result then
+     if length(FSubArch)>0 then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+FSubArch,LibName);
+  if not result then
+     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   if result then
   begin
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
+    FLibsFound:=True;
+
+    if (length(FSubArch)>0) then
+    begin
+      if (Pos(FSubArch,FLibsPath)>0) then
+        // we have a libdir with a subarch inside: make it universal !!
+        FLibsPath:=StringReplace(FLibsPath,FSubArch,'$FPCSUBARCH',[]);
+    end;
+
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
     SearchLibraryInfo(result);
   end
   else
@@ -224,7 +240,7 @@ begin
       FSubArch:='pic32mx';
       ShowInfo('Did not find any -Cp architecture parameter; using -Cpmips32 and SUBARCH=pic32mx.');
     end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
+    //AddFPCCFGSnippet(aOption);
 
   end;
 end;

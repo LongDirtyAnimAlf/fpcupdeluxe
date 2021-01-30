@@ -917,11 +917,11 @@ begin
       aSequence:=_DEFAULT;
       {$ifdef win32}
       // Run Windows specific cross compiler or regular version
-      if Pos(_CROSSWIN,SkipModules)=0 then aSequence:='Defaultwin32';
+      if Pos(_CROSSWIN,SkipModules)=0 then aSequence:=_DEFAULT+'win32';
       {$endif}
       {$ifdef win64}
       //not yet
-      //if Pos(_CROSSWIN,SkipModules)=0 then aSequence:='Defaultwin64';
+      //if Pos(_CROSSWIN,SkipModules)=0 then aSequence:=_DEFAULT+'win64';
       {$endif}
       {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
       aSequence:=_DEFAULTSIMPLE;

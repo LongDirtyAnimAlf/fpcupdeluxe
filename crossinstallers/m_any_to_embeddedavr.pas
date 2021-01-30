@@ -123,9 +123,18 @@ begin
   end;
   {$endif unix}
 
+
   if result then
   begin
     FLibsFound:=True;
+
+    if (length(FSubArch)>0) then
+    begin
+      if (Pos(FSubArch,FLibsPath)>0) then
+        // we have a libdir with a subarch inside: make it universal !!
+        FLibsPath:=StringReplace(FLibsPath,FSubArch,'$FPCSUBARCH',[]);
+    end;
+
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
     SearchLibraryInfo(result);
   end;
@@ -233,7 +242,7 @@ begin
       FCrossOpts.Add(aOption+' ');
       ShowInfo('Did not find any -Cp architecture parameter; using -Cp'+FSubArch+' and SUBARCH='+FSubArch+'.');
     end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
+    //AddFPCCFGSnippet(aOption);
   end;
 end;
 

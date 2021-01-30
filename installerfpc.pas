@@ -530,6 +530,7 @@ var
   OldPath:String;
   Options:String;
   s1,s2:string;
+  UnitSearchPath:string;
   LibsAvailable,BinsAvailable:boolean;
   MakeCycle:TSTEPS;
   ARMArch:TARMARCH;
@@ -657,6 +658,27 @@ begin
               if (CrossInstaller.TargetOS=TOS.java) then
                 //s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units','$FPCTARGET','rtl','org','freepascal','rtl'])+LineEnding;
                 s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl'])+LineEnding;
+
+              if (CrossInstaller.TargetOS in [TOS.ultibo,TOS.embedded,TOS.freertos]) then
+              begin
+                if (CrossInstaller.TargetOS=TOS.embedded) then
+                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH']);
+                if (CrossInstaller.TargetOS=TOS.ultibo) then
+                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-$FPCSUBARCH']);
+                if (CrossInstaller.TargetOS=TOS.freertos) then
+                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName,'$FPCSUBARCH']);
+
+                // Lazarus gives an error when units are located in a non-standard directory.
+                // Therefor: add a universal searchpath for units also ... bit tricky
+                // Must be the first entry ... so it will be used as the last ... :-|
+                if (CrossInstaller.TargetOS in [TOS.embedded]) then
+                begin
+                  s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'*','rtl'])+LineEnding;
+                end;
+
+                s1:=s1+'-Fu'+UnitSearchPath+DirectorySeparator+'rtl'+LineEnding;
+                s1:=s1+'-Fu'+UnitSearchPath+DirectorySeparator+'packages'+LineEnding;
+              end;
 
               if (Length(s1)=0) then s1:='# Dummy (blank) config for auto-detect cross-compilers'+LineEnding;
             end;
@@ -850,8 +872,26 @@ begin
 
           Processor.Process.Parameters.Add('CROSSINSTALL=1');
 
-          //if (Length(CrossInstaller.SubArch)>0) then
-          //  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+ConcatPaths([FInstallDirectory,'units','freertos',CrossInstaller.SubArch,'rtl']);
+          if (CrossInstaller.TargetOS in [TOS.ultibo,TOS.embedded,TOS.freertos]) then
+          begin
+            if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
+            begin
+              if (Length(CrossInstaller.SubArch)>0) then
+              begin
+                if (CrossInstaller.TargetOS=TOS.ultibo) then
+                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-'+CrossInstaller.SubArch]);
+                if (CrossInstaller.TargetOS=TOS.embedded) then
+                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArch]);
+                if (CrossInstaller.TargetOS=TOS.freertos) then
+                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName,CrossInstaller.SubArch]);
+
+                if (MakeCycle=st_RtlInstall) then
+                  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+s1+DirectorySeparator+'rtl');
+                if (MakeCycle=st_PackagesInstall) then
+                  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+s1+DirectorySeparator+'packages');
+              end;
+            end;
+          end;
 
           if (CrossInstaller.TargetCPU=TCPU.jvm) then
           begin
@@ -3406,10 +3446,11 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI');
             writeln(TxtFile,'-XParm-none-eabi-');
-            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv6-ultibo/rtl');
-            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv6-ultibo/packages');
-            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv6-ultibo/lib');
-            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv6-ultibo/lib/vc4');
+            s2:=ConcatPaths([FInstallDirectory,'units','Ultibo-$FPCSUBARCH']);
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
           finally
             CloseFile(TxtFile);
           end;
@@ -3435,10 +3476,11 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI2');
             writeln(TxtFile,'-XParm-none-eabi-');
-            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/rtl');
-            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/packages');
-            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv7-ultibo/lib');
-            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv7-ultibo/lib/vc4');
+            s2:=ConcatPaths([FInstallDirectory,'units','Ultibo-$FPCSUBARCH']);
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
           finally
             CloseFile(TxtFile);
           end;
@@ -3464,10 +3506,11 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI3');
             writeln(TxtFile,'-XParm-none-eabi-');
-            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/rtl');
-            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/packages');
-            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv7-ultibo/lib');
-            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv7-ultibo/lib/vc4');
+            s2:=ConcatPaths([FInstallDirectory,'units','Ultibo-$FPCSUBARCH']);
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
           finally
             CloseFile(TxtFile);
           end;
@@ -3493,9 +3536,10 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dQEMUVPB');
             writeln(TxtFile,'-XParm-none-eabi-');
-            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/rtl');
-            //writeln(TxtFile,'-Fu$BASE/fpc/units/armv7-ultibo/packages');
-            //writeln(TxtFile,'-Fl$BASE/fpc/units/armv7-ultibo/lib');
+            s2:=ConcatPaths([FInstallDirectory,'units','Ultibo-$FPCSUBARCH']);
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
           finally
             CloseFile(TxtFile);
           end;

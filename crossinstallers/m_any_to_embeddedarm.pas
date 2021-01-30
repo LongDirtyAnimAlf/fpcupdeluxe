@@ -61,6 +61,8 @@ end;
 function TAny_Embeddedarm.GetLibs(Basepath:string): boolean;
 const
   LibName='libgcc.a';  // is this correct ??
+var
+  aPath:string;
 begin
   // Arm-embedded does not need libs by default, but user can add them.
   result:=FLibsFound;
@@ -83,6 +85,14 @@ begin
   begin
     FLibsFound:=True;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
+
+    if (length(FSubArch)>0) then
+    begin
+      if (Pos(FSubArch,FLibsPath)>0) then
+        // we have a libdir with a subarch inside: make it universal !!
+        FLibsPath:=StringReplace(FLibsPath,FSubArch,'$FPCSUBARCH',[]);
+    end;
+
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
     SearchLibraryInfo(result);
   end;
@@ -170,21 +180,6 @@ begin
   begin
     FBinsFound:=true;
 
-    {
-    if length(FSubArch)>0 then
-    begin
-      ShowInfo('Cross-bins: We have a subarch: '+FSubArch);
-      i:=StringListStartsWith(FCrossOpts,'-Cp');
-      if i=-1 then
-      begin
-        aOption:='-Cp'+FSubArch;
-        FCrossOpts.Add(aOption+' ');
-        ShowInfo('Did not find any -Cp architecture parameter; using '+aOption);
-      end else aOption:=Trim(FCrossOpts[i]);
-      AddFPCCFGSnippet(aOption);
-    end else ShowInfo('Cross-bins: No subarch defined. Expect fatal errors.',etError);
-    }
-
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
@@ -197,34 +192,7 @@ begin
       FCrossOpts.Add(aOption+' ');
       ShowInfo('Did not find any -Cp architecture parameter; using -Cp'+FSubArch+' and SUBARCH='+FSubArch+'.');
     end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
-
-    (*
-    if length(FSubArch)=0 then
-    begin
-      aOption:='armv6m';
-      ShowInfo('Did not find any subarch definition; using '+aOption+' (cortex-m0/embed default).');
-      FSubArch:=aOption;
-      aOption:='-Cp'+aOption;
-      FCrossOpts.Add(aOption+' ');
-      AddFPCCFGSnippet(aOption);
-    end;
-    *)
-
-    (*
-    // Set some defaults if user hasn't specified otherwise
-    // Architecture: e.g. ARMv6, ARMv7,...
-    i:=StringListStartsWith(FCrossOpts,'-Cp');
-    if i=-1 then
-    begin
-      aOption:='-CpARMV7M';  // cortex-m3/embed default
-      FCrossOpts.Add(aOption+' ');
-      // When compiling for arm-embedded, a sub-architecture (e.g. SUBARCH=armv4t or SUBARCH=armv7m) must be defined)
-      FSubArch:='armv7m';
-      ShowInfo('Did not find any -Cp architecture parameter; using '+aOption+' (cortex-m3/embed default).');
-    end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
-    *)
+    //AddFPCCFGSnippet(aOption);
   end;
 end;
 

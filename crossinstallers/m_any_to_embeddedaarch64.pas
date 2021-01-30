@@ -83,6 +83,14 @@ begin
   begin
     FLibsFound:=True;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
+
+    if (length(FSubArch)>0) then
+    begin
+      if (Pos(FSubArch,FLibsPath)>0) then
+        // we have a libdir with a subarch inside: make it universal !!
+        FLibsPath:=StringReplace(FLibsPath,FSubArch,'$FPCSUBARCH',[]);
+    end;
+
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
     SearchLibraryInfo(result);
   end;
@@ -162,23 +170,9 @@ begin
   else
   begin
     FBinsFound:=true;
-
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
-
-    {
-    i:=StringListStartsWith(FCrossOpts,'-Cp');
-    if i=-1 then
-    begin
-      if length(FSubArch)=0 then FSubArch:='armv6m';
-      aOption:='-Cp'+FSubArch;
-      FCrossOpts.Add(aOption+' ');
-      ShowInfo('Did not find any -Cp architecture parameter; using -Cp'+FSubArch+' and SUBARCH='+FSubArch+'.');
-    end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
-    }
-
   end;
 end;
 
