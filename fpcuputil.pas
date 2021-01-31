@@ -2270,8 +2270,9 @@ begin
         Ss.Free;
       end;
 
-      result:=(Length(Content)>0);
+      result:=((Length(Content)>0) AND (Pos('Not Found',Content)=0));
 
+      Json:=nil;
       if result then
       begin
         try
@@ -4977,7 +4978,7 @@ begin
           aDataStream.Position:=0;
           aDataStream.Size:=0;
           Get(URL,aDataStream);
-          //HTTPMethod('GET',URL,aDataStream,[200,301,302,303,307,308]);
+          //HTTPMethod('GET',URL,aDataStream,[200,404]);
           response:=ResponseStatusCode;
           result:=(response=200);
           //result:=(response>=100) and (response<300);

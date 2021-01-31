@@ -1637,13 +1637,13 @@ object Form1: TForm1
       AnchorSideLeft.Control = mORMot2Btn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 836
+      Left = 833
       Height = 42
       Hint = 'Install the famous Online Package Manager'
       Top = 8
       Width = 89
       AutoSize = True
-      BorderSpacing.Left = 5
+      BorderSpacing.Left = 16
       BorderSpacing.Top = 2
       BorderSpacing.Around = 4
       Caption = 'OPM'
@@ -1942,13 +1942,13 @@ object Form1: TForm1
       AnchorSideLeft.Control = mORMotBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 710
+      Left = 696
       Height = 42
       Hint = 'Get the mORMot2 for FPC'
       Top = 8
       Width = 117
       AutoSize = True
-      BorderSpacing.Left = 16
+      BorderSpacing.Left = 2
       BorderSpacing.Top = 2
       BorderSpacing.Around = 4
       Caption = 'mORMot2'
@@ -2120,13 +2120,13 @@ object Form1: TForm1
     Height = 488
     Top = 35
     Width = 310
-    ActivePage = BasicSheet
+    ActivePage = CrossSheet
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 12
     BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
     ParentFont = False
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 11
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet
@@ -3047,7 +3047,7 @@ object Form1: TForm1
         AnchorSideTop.Control = CrossSheet
         AnchorSideBottom.Control = ButtonInstallCrossCompiler
         Left = 8
-        Height = 306
+        Height = 320
         Top = 8
         Width = 128
         Anchors = [akTop, akLeft, akBottom]
@@ -3063,7 +3063,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 286
+        ClientHeight = 300
         ClientWidth = 124
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -3155,11 +3155,12 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = ButtonRemoveCrossCompiler
         Left = 8
-        Height = 40
+        Height = 25
         Hint = 'Install the selected CPU-OS cross-compiler.'
-        Top = 322
+        Top = 336
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
         BorderSpacing.Top = 6
         BorderSpacing.Bottom = 6
         Caption = 'Install compiler'
@@ -3169,7 +3170,7 @@ object Form1: TForm1
         ShowHint = True
         TabOrder = 2
       end
-      object AutoCrossUpdate: TButton
+      object ButtonSubarchSelect: TButton
         AnchorSideLeft.Control = ButtonInstallCrossCompiler
         AnchorSideTop.Control = ButtonInstallCrossCompiler
         AnchorSideTop.Side = asrBottom
@@ -3178,15 +3179,16 @@ object Form1: TForm1
         AnchorSideBottom.Control = CrossSheet
         AnchorSideBottom.Side = asrBottom
         Left = 8
-        Height = 40
-        Hint = 'Auto-update all installed cross-compilers.'
-        Top = 414
+        Height = 25
+        Hint = 'Select a subarch for embedded target.'
+        Top = 429
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
         BorderSpacing.Top = 4
         BorderSpacing.Bottom = 6
-        Caption = 'Update all'
-        OnClick = ButtonAutoUpdateCrossCompiler
+        Caption = 'Select subarch'
+        OnClick = ButtonSubarchSelectClick
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
@@ -3198,13 +3200,14 @@ object Form1: TForm1
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = radgrpCPU
         AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = AutoCrossUpdate
+        AnchorSideBottom.Control = ButtonAutoCrossUpdate
         Left = 8
-        Height = 40
+        Height = 25
         Hint = 'Remove the selected CPU-OS cross-compiler.'
-        Top = 368
+        Top = 367
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
         BorderSpacing.Top = 6
         BorderSpacing.Bottom = 6
         Caption = 'Remove compiler'
@@ -3213,6 +3216,29 @@ object Form1: TForm1
         ParentShowHint = False
         ShowHint = True
         TabOrder = 4
+      end
+      object ButtonAutoCrossUpdate: TButton
+        AnchorSideLeft.Control = radgrpCPU
+        AnchorSideTop.Control = radgrpCPU
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = radgrpCPU
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = ButtonSubarchSelect
+        Left = 8
+        Height = 25
+        Hint = 'Auto-update all installed cross-compilers.'
+        Top = 398
+        Width = 128
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Top = 6
+        BorderSpacing.Bottom = 6
+        Caption = 'Update all'
+        OnClick = ButtonAutoUpdateCrossCompiler
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 5
       end
     end
     object ModuleSheet: TTabSheet

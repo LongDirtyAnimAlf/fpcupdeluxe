@@ -861,7 +861,7 @@ begin
         WriteString(s,'LibPath',FCrossUtils[CPU,OS].LibDir);
         WriteString(s,'BinPath',FCrossUtils[CPU,OS].BinDir);
         WriteString(s,'CrossBuildOptions',FCrossUtils[CPU,OS].CrossBuildOptions);
-        if OS=embedded then
+        if OS in [TOS.embedded,TOS.freertos,TOS.ultibo] then
         begin
           WriteString(s,'CrossSubArch',FCrossUtils[CPU,OS].CrossSubArch);
         end;

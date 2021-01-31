@@ -34,7 +34,7 @@ type
 
   TForm1 = class(TForm)
     ActionList1: TActionList;
-    AutoCrossUpdate: TButton;
+    ButtonSubarchSelect: TButton;
     BitBtnFPCandLazarus: TBitBtn;
     BitBtnFPCOnly: TBitBtn;
     BitBtnFPCOnlyTag: TBitBtn;
@@ -48,6 +48,7 @@ type
     btnClearLog: TButton;
     btnUninstallModule: TButton;
     btnGetOpenSSL: TButton;
+    ButtonAutoCrossUpdate: TButton;
     ChkMakefileFPC: TButton;
     ButtonInstallCrossCompiler: TButton;
     ButtonRemoveCrossCompiler: TButton;
@@ -109,6 +110,7 @@ type
     CommandOutputScreen: TSynEdit;
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
+    procedure ButtonSubarchSelectClick(Sender: TObject);
     procedure IniPropStorageAppRestoringProperties(Sender: TObject);
     procedure IniPropStorageAppSavingProperties(Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
@@ -940,6 +942,7 @@ var
   SortedModules: TStringList;
   i:integer;
   s,v:string;
+  SettingsSuccess:boolean;
 begin
   FPCupManager:=TFPCupManager.Create;
   FPCupManager.ConfigFile:=SafeGetApplicationPath+installerUniversal.CONFIGFILENAME;
@@ -1004,10 +1007,19 @@ begin
   FPCupManager.HTTPProxyPassword:=Form2.HTTPProxyPass;
 
   // localize FPCUPSettings if possible
-  if (NOT GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)))
-     then GetFPCUPSettings(SafeGetApplicationPath);
 
-  //memoSummary.Lines.Append('Current install drectory: '+sInstallDir);
+  SettingsSuccess:=GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
+  if (NOT SettingsSuccess) then SettingsSuccess:=GetFPCUPSettings(SafeGetApplicationPath);
+
+  if (SettingsSuccess and DirectoryExists(sInstallDir)) then
+  begin
+    s:=ConcatPaths([sInstallDir,'fpcsrc']);
+    if DirectoryExists(s) then
+      FPCupManager.FPCSourceDirectory:=s;
+    s:=ConcatPaths([sInstallDir,'lazarus']);
+    if DirectoryExists(s) then
+      FPCupManager.LazarusSourceDirectory:=s;
+  end;
 end;
 
 
@@ -1940,7 +1952,7 @@ begin
   if Sender=EmbeddedBtn then
   begin
     s:='Going to install FPC and Lazarus for SAM embedded.';
-    aFPCTarget:='embedded';
+    aFPCTarget:='embedded-mir';
     aLazarusTarget:='embedded';
     //aModule:='mbf,pxl';
     aModule:='mbf';
@@ -2138,7 +2150,7 @@ var
   IncludeLCL,ZipFile:boolean;
   i:integer;
   MajorVersion,MinorVersion:integer;
-  aList,aSubArchList: TStringList;
+  aList: TStringList;
   BaseBinsURL:string;
   BinsURL,LibsURL:string;
   SubArchsCommaText:string;
@@ -2642,24 +2654,28 @@ begin
     DisEnable(Sender,False);
 
     try
-
-      //arm (non-embedded) predefined settings
-      if (FPCupManager.CrossCPU_Target=TCPU.arm) AND (FPCupManager.CrossOS_Target<>TOS.embedded) then
+      //arm predefined ABI settings for all but embedded
+      if ((FPCupManager.CrossCPU_Target=TCPU.arm) AND (FPCupManager.CrossOS_Target<>TOS.embedded)) then
       begin
         // default: armhf
-        // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm for all targets except linux
-        // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
+        // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (armel) for Android
+        // adding this option will allow ppcrossarm compiler to generate ARMHF when needed
         // but I stand corrected if this assumption is wrong
         s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
         if Length(s)=0 then
         begin
-          // Only add ARMHF if crossing towards standard arm
-          // Leave armv6 alone for older RPi systems
-          if (radgrpCPU.ItemIndex<>-1) AND (radgrpCPU.Items[radgrpCPU.ItemIndex]<>'armv6') then
-            s:='-dFPC_ARMHF ';
+          s:='-dFPC_ARMHF ';
+          // Only add default ARMHF if crossing towards standard arm
+          // Leave armv6 alone for older RPi linux systems: most likely non-hardfloat
+          if ((radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') AND (FPCupManager.CrossOS_Target=TOS.linux)) then
+            s:='';
         end else s:=s+' ';
         FPCupManager.FPCOPT:=s;
+      end;
 
+      //arm (unix, non-android) predefined settings
+      if (FPCupManager.CrossCPU_Target=TCPU.arm) AND (NOT (FPCupManager.CrossOS_Target in [TOS.android,TOS.embedded,TOS.freertos,TOS.ultibo])) then
+      begin
         if (FPCupManager.CrossOS_Target=TOS.wince) then
         begin
           //Disable for now : setting ARMV6 or higher gives problems with FPC 3.0.4 and lower
@@ -2672,13 +2688,10 @@ begin
         end
         else
         begin
-          if (FPCupManager.CrossOS_Target<>TOS.android) then
-          begin
-            if Pos('-dFPC_ARMHF',FPCupManager.FPCOPT)>0 then
-              FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF '
-            else
-              FPCupManager.CrossOPT:='-CpARMV6 -CfVFPV2 ';
-          end;
+          if Pos('-dFPC_ARMHF',FPCupManager.FPCOPT)>0 then
+            FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF '
+          else
+            FPCupManager.CrossOPT:='-CpARMV6 -CfVFPV2 ';
         end;
       end;
 
@@ -2714,7 +2727,6 @@ begin
       begin
         if (FPCupManager.CrossCPU_Target=TCPU.avr) then
         begin
-          FPCupManager.FPCOPT:='-O2 ';
           // for Uno (ATMega328P) use avr5
           // for Mega (ATMega2560) use avr6
           FPCupManager.CrossOPT:='-Cpavr5 ';
@@ -2722,24 +2734,9 @@ begin
         end;
         if (FPCupManager.CrossCPU_Target=TCPU.arm) then
         begin
-          s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-          if Length(s)=0 then
-            FPCupManager.FPCOPT:='-dFPC_ARMHF '
-          else
-            FPCupManager.FPCOPT:=s+' ';
+          // What to do with hard/soft-float ??!!
           FPCupManager.CrossOS_SubArch:='armv6m';
         end;
-        {
-        if (FPCupManager.CrossCPU_Target=TCPU.aarch64) then
-        begin
-          s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-          if Length(s)=0 then
-            FPCupManager.FPCOPT:='-dFPC_ARMHF '
-          else
-            FPCupManager.FPCOPT:=s+' ';
-          FPCupManager.CrossOS_SubArch:='armv6m';
-        end;
-        }
         if (FPCupManager.CrossCPU_Target=TCPU.mipsel) then
         begin
           FPCupManager.CrossOPT:='-Cpmips32 ';
@@ -2757,13 +2754,9 @@ begin
         end;
         if (FPCupManager.CrossCPU_Target=TCPU.arm) then
         begin
-          s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-          if Length(s)=0 then
-            FPCupManager.FPCOPT:='-dFPC_ARMHF '
-          else
-            FPCupManager.FPCOPT:=s+' ';
-          //FPCupManager.CrossOPT:='-Cparmv7em -CfFPV4_SP_D16 -OoFASTMATH -CaEABIHF ';
           FPCupManager.CrossOPT:='-Cparmv7em -CfFPV4_SP_D16 ';
+          if Pos('-dFPC_ARMHF',FPCupManager.FPCOPT)>0 then
+            FPCupManager.CrossOPT:=FPCupManager.CrossOPT+' -OoFASTMATH -CaEABIHF ';
           FPCupManager.CrossOS_SubArch:='armv7em';
         end;
       end;
@@ -2773,8 +2766,9 @@ begin
       begin
         if (FPCupManager.CrossCPU_Target=TCPU.arm) then
         begin
+          // Always hardfloat !!
           FPCupManager.FPCOPT:='-dFPC_ARMHF ';
-          if (radgrpCPU.ItemIndex<>-1) AND (radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') then
+          if (radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') then
           begin
             FPCupManager.CrossOPT:='-CpARMV6 -CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
             FPCupManager.CrossOS_SubArch:='armv6';
@@ -2829,6 +2823,8 @@ begin
       s:=Trim(s);
       if Length(s)>0 then
       begin
+        if Length(FPCupManager.FPCOPT)>0 then
+          AddMessage('Overriding FPC options with values from Setup+.');
         FPCupManager.FPCOPT:=s+' ';
       end;
 
@@ -2985,6 +2981,7 @@ begin
           BinsFileName:='';
 
           if ((Sender<>nil) AND (CheckAutoClear.Checked)) then memoSummary.Clear;
+
           memoSummary.Lines.Append('New try building a cross-compiler for '+GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target)+'.');
 
           AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
@@ -3523,6 +3520,9 @@ begin
               memoSummary.Lines.Append('Got all tools now. Start building cross-compiler.');
               if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
 
+              AddMessage(sStatus);
+              memoSummary.Lines.Append(sStatus);
+
               success:= RealRun;
 
             end else AddMessage('No luck in getting then cross-tools ... aborting.');
@@ -4014,8 +4014,12 @@ begin
     if (Length(s)>0) then
     begin
       if Pos(_LAZARUSSIMPLE,s)=0 then s:=StringReplace(s,_LAZARUS,_LAZARUSSIMPLE,[]);
-      s:=StringReplace(s,'FPCCrossWin32-64','',[]);
-      s:=StringReplace(s,'LazarusCrossWin32-64','',[]);
+      {$ifdef mswindows}
+      {$ifdef win32}
+      s:=StringReplace(s,_FPC+_CROSSWIN,'',[]);
+      s:=StringReplace(s,_LAZARUS+_CROSSWIN,'',[]);
+      {$endif}
+      {$endif}
       FPCupManager.OnlyModules:=s;
     end
     else
@@ -4505,6 +4509,49 @@ begin
     end;
   end;
 end;
+
+procedure TForm1.ButtonSubarchSelectClick(Sender: TObject);
+var
+  i:integer;
+  s:string;
+  SourcePath:string;
+  aList:TStringList;
+begin
+  AddMessage('Fpcupdeluxe select subarch.');
+
+  if radgrpCPU.ItemIndex<>-1 then
+  begin
+    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
+    FPCupManager.CrossCPU_Target:=GetTCPU(s);
+  end;
+
+  if radgrpOS.ItemIndex<>-1 then
+  begin
+    s:=radgrpOS.Items[radgrpOS.ItemIndex];
+    FPCupManager.CrossOS_Target:=GetTOS(s);
+  end;
+
+  //SourcePath:=ConcatPaths([FPCupManager.FPCSourceDirectory,'bin',aCPU+'-'+aOS]);
+  //SourcePath:=ConcatPaths([sInstallDir,'fpcsrc','bin',aCPU+'-'+aOS]);
+
+  //get a list of valid subarch targets
+  try
+    aList:=FPCupManager.ParseSubArchsFromSource;
+    if (aList.Count > 0) then
+    begin
+      for i:=0 to (aList.Count-1) do
+      begin
+        if aList.Names[i]=GetCPU(FPCupManager.CrossCPU_Target) then
+        begin
+          AddMessage(aList.ValueFromIndex[i]);
+        end;
+      end;
+    end;
+  finally
+    aList.Free;
+  end;
+end;
+
 
 procedure TForm1.HandleInfo(var Msg: TLMessage);
 var
