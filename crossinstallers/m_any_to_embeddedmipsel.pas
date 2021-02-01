@@ -77,20 +77,25 @@ end;
 function TAny_Embeddedmipsel.GetLibs(Basepath:string): boolean;
 const
   LibName='';
+var
+  aSubarchName:string;
 begin
   result:=FLibsFound;
 
   if result then exit;
 
-  if length(FSubArch)>0
-     then ShowInfo('We have a subarch: '+FSubArch)
-     else ShowInfo('No subarch defined');
+  if (FSubArch<>TSUBARCH.saNone) then
+  begin
+    aSubarchName:=GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(FSubArch));
+    ShowInfo('Cross-libs: We have a subarch: '+aSubarchName);
+  end
+  else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
   // search local paths based on libraries provided for or adviced by fpc itself
   if not result then
-     if length(FSubArch)>0 then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+FSubArch,LibName);
+     if (FSubArch<>TSUBARCH.saNone) then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,LibName);
   if not result then
      result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
@@ -98,11 +103,11 @@ begin
   begin
     FLibsFound:=True;
 
-    if (length(FSubArch)>0) then
+    if (FSubArch<>TSUBARCH.saNone) then
     begin
-      if (Pos(FSubArch,FLibsPath)>0) then
+      if (Pos(aSubarchName,FLibsPath)>0) then
         // we have a libdir with a subarch inside: make it universal !!
-        FLibsPath:=StringReplace(FLibsPath,FSubArch,'$FPCSUBARCH',[]);
+        FLibsPath:=StringReplace(FLibsPath,aSubarchName,'$FPCSUBARCH',[]);
     end;
 
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
@@ -225,23 +230,10 @@ begin
   else
   begin
     FBinsFound:=true;
-
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
     AddFPCCFGSnippet('-a5'); // prevents the addition of .module nomips16 pseudo-op : not all assemblers can handle this
-
-    i:=StringListStartsWith(FCrossOpts,'-Cp');
-    if i=-1 then
-    begin
-      aOption:='-Cpmips32';
-      FCrossOpts.Add(aOption+' ');
-      //When compiling for mipsel-embedded, a sub-architecture (e.g. SUBARCH=pic32mx) must be defined)
-      FSubArch:='pic32mx';
-      ShowInfo('Did not find any -Cp architecture parameter; using -Cpmips32 and SUBARCH=pic32mx.');
-    end else aOption:=Trim(FCrossOpts[i]);
-    //AddFPCCFGSnippet(aOption);
-
   end;
 end;
 

@@ -57,21 +57,27 @@ function TAny_FreeRTOSArm.GetLibs(Basepath:string): boolean;
 const
   StaticLibName1='libfreertos.a';
   StaticLibName2='libc_nano.a';
+var
+  aSubarchName:string;
 begin
   result:=FLibsFound;
+
   if result then exit;
 
-  if length(FSubArch)>0
-     then ShowInfo('Cross-libs: We have a subarch: '+FSubArch)
-     else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
+  if (FSubArch<>TSUBARCH.saNone) then
+  begin
+    aSubarchName:=GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(FSubArch));
+    ShowInfo('Cross-libs: We have a subarch: '+aSubarchName);
+  end
+  else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LIBCNAME);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
-  if ((not result) AND (length(FSubArch)>0)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+FSubArch,LIBCNAME);
+  if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,LIBCNAME);
 
   // do the same as above, but look for a static freertos lib
   if not result then
@@ -79,8 +85,8 @@ begin
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName1);
-  if ((not result) AND (length(FSubArch)>0)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+FSubArch,StaticLibName1);
+  if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibName1);
 
   // do the same as above, but look for a static libc_nano lib
   if not result then
@@ -88,8 +94,8 @@ begin
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName2);
-  if ((not result) AND (length(FSubArch)>0)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+FSubArch,StaticLibName2);
+  if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibName2);
 
   if result then
   begin
@@ -121,30 +127,9 @@ begin
   if result then
   begin
     FBinsFound:=true;
-
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
-
-    i:=StringListStartsWith(FCrossOpts,'-Cp');
-    if i=-1 then
-    begin
-      if length(FSubArch)=0 then FSubArch:='armv7em';
-      aOption:='-Cparmv7em ';
-      FCrossOpts.Add(aOption+' ');
-      ShowInfo('Did not find any -Cp architecture parameter; using '+aOption+' and SUBARCH='+FSubArch+'.');
-    end else aOption:=Trim(FCrossOpts[i]);
-    //AddFPCCFGSnippet(aOption);
-
-    i:=StringListStartsWith(FCrossOpts,'-Cf');
-    if i=-1 then
-    begin
-      aOption:='-CfFPV4_SP_D16 ';
-      FCrossOpts.Add(aOption+' ');
-      ShowInfo('Did not find any -Cf parameter; using '+aOption+'.');
-    end else aOption:=Trim(FCrossOpts[i]);
-    //AddFPCCFGSnippet(aOption);
-
   end;
 end;
 

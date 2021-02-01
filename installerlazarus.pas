@@ -319,6 +319,7 @@ begin
     // up from there.
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     CrossInstaller.SetSubArch(CrossOS_SubArch);
+
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       Infoln(infotext+'Failed to get crossbinutils', etError)
     else if not CrossInstaller.GetLibs(FBaseDirectory) then
@@ -1881,6 +1882,22 @@ begin
     DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory) + LAZARUSCFG);
   end;
 
+  if (ModuleName=_LAZARUS) then
+  begin
+    if CrossCompiling then
+    begin
+      CrossInstaller.SetCrossOpt(CrossOPT);
+      CrossInstaller.SetSubArch(CrossOS_SubArch);
+    end
+    else
+    begin
+      //Infoln(infotext+'If your primary config path has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
+      //  FInstallDirectory) + 'lazarus.cfg which points to the primary config path.', etInfo);
+      Infoln(infotext+'Deleting Lazarus primary config file ('+LAZARUSCFG+').', etInfo);
+      DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory) + LAZARUSCFG);
+    end;
+  end;
+
   {$ifdef MSWINDOWS}
   // If doing crosswin32-64 or crosswin64-32, make distclean will not only clean the LCL
   // but also existing lhelp.exe if present. Temporarily copy that so we can restore it later.
@@ -1951,7 +1968,7 @@ begin
     begin
       Processor.Process.Parameters.Add('OS_TARGET=' + CrossInstaller.TargetOSName);
       Processor.Process.Parameters.Add('CPU_TARGET=' + CrossInstaller.TargetCPUName);
-      if Length(CrossOS_SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossOS_SubArch);
+      if (CrossInstaller.SubArch<>TSubarch.saNone) then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArchName);
     end
     else
     begin

@@ -65,14 +65,19 @@ end;
 function Tany_ultiboarm.GetLibs(Basepath:string): boolean;
 const
   LibName='libc.a';
+var
+  aSubarchName:string;
 begin
   result:=FLibsFound;
 
   if result then exit;
 
-  if length(FSubArch)>0
-    then ShowInfo('We have a subarch: '+FSubArch)
-    else ShowInfo('No subarch defined');
+  if (FSubArch<>TSUBARCH.saNone) then
+  begin
+    aSubarchName:=GetSubarch(FSubArch);
+    ShowInfo('Cross-libs: We have a subarch: '+aSubarchName);
+  end
+  else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
@@ -89,7 +94,7 @@ begin
 
   // search local paths based on libraries provided for or adviced by fpc itself
   if not result then
-     if length(FSubArch)>0 then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+FSubArch,LibName);
+     if (FSubArch<>TSUBARCH.saNone) then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,LibName);
 
   SearchLibraryInfo(result);
 

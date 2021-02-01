@@ -287,7 +287,7 @@ type
     FCrossInstaller        : TCrossInstaller;
     FCrossCPU_Target       : TCPU; //When cross-compiling: CPU, e.g. x86_64
     FCrossOS_Target        : TOS; //When cross-compiling: OS, e.g. win64
-    FCrossOS_SubArch       : string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
+    FCrossOS_SubArch       : TSUBARCH; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
     FCrossToolsDirectory   : string;
     FCrossLibraryDirectory : string;
     procedure SetURL(value:string);
@@ -444,7 +444,7 @@ type
     // Compiler options passed on to make as OPT= or FPCOPT=
     property CompilerOptions: string write FCompilerOptions;
     // SubArch for target embedded
-    property CrossOS_SubArch: string read FCrossOS_SubArch;
+    property CrossOS_SubArch: TSUBARCH read FCrossOS_SubArch;
     // Options for cross compiling. User can specify his own, but cross compilers can set defaults, too
     property CrossOPT: string read FCrossOPT write FCrossOPT;
     property CrossToolsDirectory:string read FCrossToolsDirectory write FCrossToolsDirectory;
@@ -499,7 +499,7 @@ type
     function GetCompilerName(Cpu_Target:TCPU):string;overload;
     function GetCompilerName(Cpu_Target:string):string;overload;
     function GetCrossCompilerName(Cpu_Target:TCPU):string;
-    procedure SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);virtual;
+    procedure SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);virtual;
     // append line ending and write to log and, if specified, to console
     procedure WritelnLog(msg: TStrings; ToConsole: boolean = true);overload;
     procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
@@ -2958,7 +2958,7 @@ begin
   {$ENDIF UNIX}
 end;
 
-procedure TInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);
+procedure TInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);
 begin
   FCrossCPU_Target:=aCPU;
   FCrossOS_Target:=aOS;
@@ -4191,7 +4191,7 @@ begin
 
   FCrossCPU_Target:=TCPU.cpuNone;
   FCrossOS_Target:=TOS.osNone;
-  FCrossOS_SubArch:='';
+  FCrossOS_SubArch:=TSUBARCH.saNone;
 
   FMajorVersion   := -1;
   FMinorVersion   := -1;

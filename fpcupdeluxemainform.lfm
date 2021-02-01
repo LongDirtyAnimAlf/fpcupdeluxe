@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 72
+  Left = 356
   Height = 650
-  Top = 93
+  Top = 88
   Width = 1078
   Anchors = []
   Caption = 'Form1'
@@ -3188,6 +3188,7 @@ object Form1: TForm1
         BorderSpacing.Top = 4
         BorderSpacing.Bottom = 6
         Caption = 'Select subarch'
+        Enabled = False
         OnClick = ButtonSubarchSelectClick
         ParentFont = False
         ParentShowHint = False

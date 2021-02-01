@@ -246,6 +246,7 @@ uses
   {$endif UNIX}
   AboutFrm,
   extrasettings,
+  subarch,
   modulesettings,
   //checkoptions,
   installerCore,
@@ -488,6 +489,7 @@ begin
     // must be done here, to enable local storage/access of some setttings !!
     Form2:=TForm2.Create(Form1);
     Form3:=TForm3.Create(Form1);
+    SubarchForm:=TSubarchForm.Create(Form1);
     InitFpcupdeluxe;
     {$ifdef RemoteLog}
     Application.QueueAsyncCall(@InitConsent,0);
@@ -1151,15 +1153,23 @@ begin
 end;
 
 procedure TForm1.radgrpOSClick(Sender: TObject);
+var
+  CPUType:TCPU;
+  OSType:TOS;
+
 begin
   if (radgrpOS.ItemIndex<>-1) then
+    OSType:=GetTOS(radgrpOS.Items[radgrpOS.ItemIndex]);
+  if (radgrpCPU.ItemIndex<>-1) then
+    CPUType:=GetTCPU(radgrpCPU.Items[radgrpCPU.ItemIndex]);
+
+  if (OSType in [TOS.java,TOS.msdos]) then
   begin
-    if (radgrpOS.Items[radgrpOS.ItemIndex]=GetOS(TOS.java)) OR (radgrpOS.Items[radgrpOS.ItemIndex]=GetOS(TOS.msdos)) then
-    begin
-      radgrpCPU.ItemIndex:=-1;
-      radgrpCPU.Enabled:=false;
-    end else radgrpCPU.Enabled:=true;
-  end;
+    radgrpCPU.ItemIndex:=-1;
+    radgrpCPU.Enabled:=false;
+  end else radgrpCPU.Enabled:=true;
+
+  ButtonSubarchSelect.Enabled:=(OSType in [TOS.embedded,TOS.freertos,TOS.ultibo]);
 end;
 
 procedure TForm1.CommandOutputScreenMouseWheel(Sender: TObject; Shift: TShiftState;
@@ -2499,7 +2509,7 @@ begin
             aList:=TStringList.Create;
             try
               aList.CommaText:=SubArchsCommaText;
-              if aList.Count>0 then FPCupManager.CrossOS_SubArch:=aList[0];
+              if aList.Count>0 then FPCupManager.CrossOS_SubArch:=GetTSubarch(aList[0]);
             finally
               aList.Free;
             end;
@@ -2730,17 +2740,17 @@ begin
           // for Uno (ATMega328P) use avr5
           // for Mega (ATMega2560) use avr6
           FPCupManager.CrossOPT:='-Cpavr5 ';
-          FPCupManager.CrossOS_SubArch:='avr5';
+          FPCupManager.CrossOS_SubArch:=TSubarch.avr5;
         end;
         if (FPCupManager.CrossCPU_Target=TCPU.arm) then
         begin
           // What to do with hard/soft-float ??!!
-          FPCupManager.CrossOS_SubArch:='armv6m';
+          FPCupManager.CrossOS_SubArch:=TSubarch.armv6m;
         end;
         if (FPCupManager.CrossCPU_Target=TCPU.mipsel) then
         begin
           FPCupManager.CrossOPT:='-Cpmips32 ';
-          FPCupManager.CrossOS_SubArch:='pic32mx';
+          FPCupManager.CrossOS_SubArch:=TSubarch.pic32mx;
         end;
       end;
 
@@ -2750,14 +2760,14 @@ begin
         if (FPCupManager.CrossCPU_Target=TCPU.xtensa) then
         begin
           FPCupManager.CrossOPT:='-Cplx6 -Cfhard ';
-          FPCupManager.CrossOS_SubArch:='lx6';
+          FPCupManager.CrossOS_SubArch:=TSubarch.lx6;
         end;
         if (FPCupManager.CrossCPU_Target=TCPU.arm) then
         begin
           FPCupManager.CrossOPT:='-Cparmv7em -CfFPV4_SP_D16 ';
           if Pos('-dFPC_ARMHF',FPCupManager.FPCOPT)>0 then
             FPCupManager.CrossOPT:=FPCupManager.CrossOPT+' -OoFASTMATH -CaEABIHF ';
-          FPCupManager.CrossOS_SubArch:='armv7em';
+          FPCupManager.CrossOS_SubArch:=TSubarch.armv7em;
         end;
       end;
 
@@ -2771,12 +2781,12 @@ begin
           if (radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') then
           begin
             FPCupManager.CrossOPT:='-CpARMV6 -CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
-            FPCupManager.CrossOS_SubArch:='armv6';
+            FPCupManager.CrossOS_SubArch:=TSubarch.armv6;
           end
           else
           begin
             FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -CIARM -CaEABIHF -OoFASTMATH ';
-            FPCupManager.CrossOS_SubArch:='armv7a';
+            FPCupManager.CrossOS_SubArch:=TSubarch.armv7a;
           end;
         end;
       end;
@@ -2838,7 +2848,7 @@ begin
       begin
         s:=Form2.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
         s:=Trim(s);
-        if Length(s)>0 then FPCupManager.CrossOS_SubArch:=s;
+        if Length(s)>0 then FPCupManager.CrossOS_SubArch:=GetTSubarch(s);
       end;
 
       // use the available source to build the cross-compiler ... change nothing about source and url !!
@@ -2938,11 +2948,11 @@ begin
         aDataClient.AddExtraData('CROSSOPT',FPCupManager.CrossOPT);
         {$endif}
       end;
-      if FPCupManager.CrossOS_SubArch<>'' then
+      if FPCupManager.CrossOS_SubArch<>TSubarch.saNone then
       begin
-        sStatus:=sStatus+' {SUBARCH: '+FPCupManager.CrossOS_SubArch+'}';
+        sStatus:=sStatus+' {SUBARCH: '+GetSubarch(FPCupManager.CrossOS_SubArch)+'}';
         {$ifdef RemoteLog}
-        aDataClient.AddExtraData('SUBARCH',FPCupManager.CrossOS_SubArch);
+        aDataClient.AddExtraData('SUBARCH',GetSubarch(FPCupManager.CrossOS_SubArch));
         {$endif}
       end;
       sStatus:=sStatus+'.';
@@ -3851,7 +3861,7 @@ begin
   FPCupManager.SkipModules:='';
   FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
   FPCupManager.CrossOS_Target:=TOS.osNone;
-  FPCupManager.CrossOS_SubArch:='';
+  FPCupManager.CrossOS_SubArch:=TSubarch.saNone;
 
   FPCupManager.LCL_Platform:='';
 
@@ -4550,6 +4560,13 @@ begin
   finally
     aList.Free;
   end;
+
+  SubarchForm.ShowModal;
+  if SubarchForm.ModalResult=mrOk then
+  begin
+  end;
+
+
 end;
 
 

@@ -61,21 +61,26 @@ end;
 function TAny_Embeddedaarch64.GetLibs(Basepath:string): boolean;
 const
   LibName='libgcc.a';  // is this correct ??
+var
+  aSubarchName:string;
 begin
   // Arm-embedded does not need libs by default, but user can add them.
   result:=FLibsFound;
 
   if result then exit;
 
-  if length(FSubArch)>0
-     then ShowInfo('Cross-libs: We have a subarch: '+FSubArch)
-     else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
+  if (FSubArch<>TSUBARCH.saNone) then
+  begin
+    aSubarchName:=GetSubarch(FSubArch);
+    ShowInfo('Cross-libs: We have a subarch: '+aSubarchName);
+  end
+  else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
   // search local paths based on libraries provided for or adviced by fpc itself
   if not result then
-     if length(FSubArch)>0 then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+FSubArch,LibName);
+     if (FSubArch<>TSUBARCH.saNone) then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,LibName);
   if not result then
      result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
@@ -84,11 +89,11 @@ begin
     FLibsFound:=True;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
 
-    if (length(FSubArch)>0) then
+    if (FSubArch<>TSUBARCH.saNone) then
     begin
-      if (Pos(FSubArch,FLibsPath)>0) then
+      if (Pos(aSubarchName,FLibsPath)>0) then
         // we have a libdir with a subarch inside: make it universal !!
-        FLibsPath:=StringReplace(FLibsPath,FSubArch,'$FPCSUBARCH',[]);
+        FLibsPath:=StringReplace(FLibsPath,aSubarchName,'$FPCSUBARCH',[]);
     end;
 
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}

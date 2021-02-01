@@ -191,7 +191,7 @@ type
     {$endif}
     FCrossOPT: string;
     FCrossOS_Target: TOS;
-    FCrossOS_SubArch: string;
+    FCrossOS_SubArch: TSUBARCH;
     FFPCDesiredRevision: string;
     FFPCDesiredBranch: string;
     FFPCSourceDirectory: string;
@@ -295,7 +295,7 @@ type
     property ConfigFile: string read FConfigFile write FConfigFile;
     property CrossCPU_Target:TCPU read FCrossCPU_Target write FCrossCPU_Target;
     property CrossOS_Target:TOS read FCrossOS_Target write FCrossOS_Target;
-    property CrossOS_SubArch:string read FCrossOS_SubArch write FCrossOS_SubArch;
+    property CrossOS_SubArch:TSUBARCH read FCrossOS_SubArch write FCrossOS_SubArch;
     property CrossCombo_Target:TCPUOS read GetCrossCombo_Target;
 
     // Widgetset for which the user wants to compile the LCL (not the IDE).

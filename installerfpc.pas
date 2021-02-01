@@ -203,7 +203,7 @@ type
     constructor Create;
     destructor Destroy; override;
     function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
-    procedure SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);override;
+    procedure SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);override;
     property CrossCompilerName: string read FCrossCompilerName;
   end;
 
@@ -506,7 +506,7 @@ begin
   Infoln(FPCCFGINFOTEXT+'Inserting snippet in '+FPCCFG+' done.',etInfo);
 end;
 
-procedure TFPCCrossInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);
+procedure TFPCCrossInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);
 begin
   inherited;
   if Assigned(CrossInstaller) then FCrossCompilerName:=GetCrossCompilerName(CrossInstaller.TargetCPU);
@@ -876,14 +876,14 @@ begin
           begin
             if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
             begin
-              if (Length(CrossInstaller.SubArch)>0) then
+              if (CrossInstaller.SubArch<>TSUBARCH.saNone) then
               begin
                 if (CrossInstaller.TargetOS=TOS.ultibo) then
-                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-'+CrossInstaller.SubArch]);
+                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-'+CrossInstaller.SubArchName]);
                 if (CrossInstaller.TargetOS=TOS.embedded) then
-                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArch]);
+                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName]);
                 if (CrossInstaller.TargetOS=TOS.freertos) then
-                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName,CrossInstaller.SubArch]);
+                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName,CrossInstaller.SubArchName]);
 
                 if (MakeCycle=st_RtlInstall) then
                   Processor.Process.Parameters.Add('INSTALL_UNITDIR='+s1+DirectorySeparator+'rtl');
@@ -917,7 +917,7 @@ begin
           Processor.Process.Parameters.Add('OS_SOURCE='+GetTargetOS);
           Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName); //cross compile for different OS...
           Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName); // and processor.
-          if Length(CrossInstaller.SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
+          if (CrossInstaller.SubArch<>TSubarch.saNone) then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArchName);
 
           //Processor.Process.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
           Processor.Process.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
@@ -3926,6 +3926,9 @@ begin
     // Delete any existing buildstamp file
     Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'build-stamp.'+CPUOS_Signature);
     Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'base.build-stamp.'+CPUOS_Signature);
+    //pass on user-requested cross compile options
+    CrossInstaller.SetCrossOpt(CrossOPT);
+    CrossInstaller.SetSubArch(CrossOS_SubArch);
   end else CPUOS_Signature:=GetFPCTarget(true);
 
   {$IFDEF MSWINDOWS}
@@ -3979,7 +3982,7 @@ begin
     begin  // clean out the correct compiler
       Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);
       Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName);
-      if Length(CrossOS_SubArch)>0 then Processor.Process.Parameters.Add('SUBARCH='+CrossOS_SubArch);
+      if (CrossInstaller.SubArch<>TSubarch.saNone) then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArchName);
     end
     else
     begin

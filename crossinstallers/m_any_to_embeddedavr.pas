@@ -79,7 +79,10 @@ const
   LibName='libc.a';
   {$ifdef unix}
   UnixAVRLibDirs :array[0..3] of string = ('/usr/local/lib/avr/lib','/usr/lib/avr/lib','/usr/lib/avr','/lib/avr');
+  {$endif}
 var
+  aSubarchName:string;
+  {$ifdef unix}
   i:integer;
   {$endif}
 begin
@@ -88,15 +91,18 @@ begin
 
   if result then exit;
 
-  if length(FSubArch)>0
-     then ShowInfo('We have a subarch: '+FSubArch)
-     else ShowInfo('No subarch defined');
+  if (FSubArch<>TSUBARCH.saNone) then
+  begin
+    aSubarchName:=GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(FSubArch));
+    ShowInfo('Cross-libs: We have a subarch: '+aSubarchName);
+  end
+  else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
   // search local paths based on libraries provided for or adviced by fpc itself
   if not result then
-     if length(FSubArch)>0 then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+FSubArch,LibName);
+     if (FSubArch<>TSUBARCH.saNone) then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,LibName);
   if not result then
      result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
@@ -104,11 +110,11 @@ begin
   // User may also have placed them into their regular search path:
   if not result then
   begin
-    if length(FSubArch)>0 then
+    if (FSubArch<>TSUBARCH.saNone) then
     begin
       for i:=Low(UnixAVRLibDirs) to High(UnixAVRLibDirs) do
       begin
-        result:=SearchLibrary(IncludeTrailingPathDelimiter(UnixAVRLibDirs[i])+FSubArch,LibName);
+        result:=SearchLibrary(IncludeTrailingPathDelimiter(UnixAVRLibDirs[i])+aSubarchName,LibName);
         if result then break;
       end;
     end;
@@ -128,11 +134,11 @@ begin
   begin
     FLibsFound:=True;
 
-    if (length(FSubArch)>0) then
+    if (FSubArch<>TSUBARCH.saNone) then
     begin
-      if (Pos(FSubArch,FLibsPath)>0) then
+      if (Pos(aSubarchName,FLibsPath)>0) then
         // we have a libdir with a subarch inside: make it universal !!
-        FLibsPath:=StringReplace(FLibsPath,FSubArch,'$FPCSUBARCH',[]);
+        FLibsPath:=StringReplace(FLibsPath,aSubarchName,'$FPCSUBARCH',[]);
     end;
 
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
@@ -229,20 +235,9 @@ begin
   else
   begin
     FBinsFound:=true;
-
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
-
-    i:=StringListStartsWith(FCrossOpts,'-Cp');
-    if i=-1 then
-    begin
-      if length(FSubArch)=0 then FSubArch:='avr5';
-      aOption:='-Cp'+FSubArch;
-      FCrossOpts.Add(aOption+' ');
-      ShowInfo('Did not find any -Cp architecture parameter; using -Cp'+FSubArch+' and SUBARCH='+FSubArch+'.');
-    end else aOption:=Trim(FCrossOpts[i]);
-    //AddFPCCFGSnippet(aOption);
   end;
 end;
 

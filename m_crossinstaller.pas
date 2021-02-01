@@ -94,12 +94,22 @@ const
 type
   TCPU = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa);
   TOS  = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo);
+  TSUBARCH = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,lx6,lx106);
 
   TCPUOS = record
     CPU:TCPU;
     OS:TOS;
   end;
 
+const
+  SUBARCH_CPU        = [TCPU.arm,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.xtensa];
+  SUBARCH_ARM        = [armv4..armv7m];
+  SUBARCH_AVR        = [avr1..avrxmega3];
+  SUBARCH_MIPSEL     = [pic32mx];
+  SUBARCH_RISCV32    = [rv32imac];
+  SUBARCH_XTENSA     = [lx6..lx106];
+
+type
   CompilerType=(ctBootstrap,ctInstalled);
   SearchMode=(smFPCUPOnly,smAuto,smManual);
 
@@ -109,6 +119,7 @@ type
     function GetCrossModuleName:string;
     function GetTargetCPUName:string;
     function GetTargetOSName:string;
+    function GetSubarchName:string;
   protected
     FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
@@ -122,8 +133,8 @@ type
     FLibsPath: string; //path for target environment libraries
     FTargetCPU: TCPU; //cpu for the target environment. Follows FPC names
     FTargetOS: TOS; //operating system for the target environment. Follows FPC names
+    FSubArch: TSUBARCH; //optional subarch for embedded targets
     FRegisterName: string;
-    FSubArch: string; //optional subarch for embedded targets
     FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
     FSolarisOI:boolean;
     FMUSL:boolean;
@@ -150,7 +161,7 @@ type
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
     procedure SetCrossOpt(CrossOpts: string);
     // Pass subarch if any
-    procedure SetSubArch(SubArch: string);
+    procedure SetSubArch(SubArch: TSUBARCH);
     procedure ShowInfo(info: string = ''; Level: TEventType = etInfo);
     // Reset some variables to default values
     procedure Reset; virtual;
@@ -182,10 +193,12 @@ type
     property DirName:string read FBinUtilsDirectoryID;
     property TargetCPU:TCPU read FTargetCPU;
     property TargetOS:TOS read FTargetOS;
+    property SubArch:TSUBARCH read FSubArch;
     property TargetCPUName: string read GetTargetCPUName;
     property TargetOSName: string read GetTargetOSName;
+    property SubArchName:string read GetSubarchName;
     property RegisterName:string read FRegisterName;
-    property SubArch:string read FSubArch;
+
     property SolarisOI: boolean write FSolarisOI;
     property MUSL: boolean write FMUSL;
     constructor Create;
@@ -197,6 +210,8 @@ function GetTCPU(aCPU:string):TCPU;
 function GetOS(aOS:TOS):string;
 function GetTOS(aOS:string):TOS;
 function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
+function GetSubarch(aSubarch:TSubarch):string;
+function GetTSubarch(aSubarch:string):TSubarch;
 
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 function GetExeExt: string;
@@ -236,7 +251,7 @@ begin
     begin
       xCPU:=TCPU(GetEnumValueSimple(TypeInfo(TCPU),aCPU));
       if Ord(xCPU) < 0 then
-        raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aCPU]);
+        raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPU.', [aCPU]);
     end;
     result:=xCPU;
   end;
@@ -256,6 +271,12 @@ begin
   result:=TOS.osNone;
   if length(aOS)>0 then
   begin
+    if (Pos('linux',aOS)>0) then xOS:=TOS.linux
+    else
+    if (Pos('solaris',aOS)>0) then xOS:=TOS.solaris
+    else
+    if aOS='windows' then xOS:=TOS.win32
+    else
     if aOS='i-sim' then xOS:=TOS.iphonesim
     else
     if aOS='i-simulator' then xOS:=TOS.iphonesim
@@ -267,7 +288,7 @@ begin
     begin
       xOS:=TOS(GetEnumValueSimple(TypeInfo(TOS),aOS));
       if Ord(xOS) < 0 then
-        raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aOS]);
+        raise Exception.CreateFmt('Invalid OS name "%s" for GetOS.', [aOS]);
     end;
     result:=xOS;
   end;
@@ -284,6 +305,23 @@ begin
     if result.CPU=TCPU.x86_64 then result.OS:=TOS.win64;
   end
   else result.OS:=GetTOS(aOS);
+end;
+
+function GetSubarch(aSubarch:TSubarch):string;
+begin
+  if (aSubarch<Low(TSubarch)) OR (aSubarch>High(TSubarch)) then
+    raise Exception.Create('Invalid Subarch for GetSubarch.');
+  result:=GetEnumNameSimple(TypeInfo(TSubarch),Ord(aSubarch));
+end;
+
+function GetTSubarch(aSubarch:string):TSubarch;
+var
+  xSubarch:TSubarch;
+begin
+  result:=TSubarch.saNone;
+  xSubarch:=TSubarch(GetEnumValueSimple(TypeInfo(TSubarch),aSubarch));
+  if Ord(xSubarch) < 0 then
+    raise Exception.CreateFmt('Invalid Subarch name "%s" for GetSubarch.', [xSubarch]);
 end;
 
 function GetExeExt: string;
@@ -318,6 +356,10 @@ begin
   result:=GetOS(TargetOS);
 end;
 
+function TCrossInstaller.GetSubarchName:string;
+begin
+  result:=GetSubarch(Subarch);
+end;
 
 procedure TCrossInstaller.AddFPCCFGSnippet(aSnip: string);
 var
@@ -557,7 +599,7 @@ begin
   end;
 end;
 
-procedure TCrossInstaller.SetSubArch(SubArch: string);
+procedure TCrossInstaller.SetSubArch(SubArch: TSUBARCH);
 begin
   FSubArch:=SubArch;
 end;
@@ -581,7 +623,7 @@ begin
   FBinsFound:=false;
   FCrossOptsAdded:=false;
   FCrossOpts.Clear;
-  FSubArch:='';
+  FSubArch:=TSUBARCH.saNone;
 
   FRegisterName:=TargetCPUName+'-'+TargetOSName;
   FBinUtilsDirectoryID:=FRegisterName;
