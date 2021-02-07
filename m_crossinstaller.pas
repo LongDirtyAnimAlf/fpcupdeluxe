@@ -101,6 +101,8 @@ type
     OS:TOS;
   end;
 
+  TSUBARCHS = set of TSUBARCH;
+
 const
   SUBARCH_OS         = [TOS.embedded,TOS.freertos,TOS.ultibo];
   SUBARCH_CPU        = [TCPU.arm,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.xtensa];
@@ -228,8 +230,9 @@ function GetTCPU(aCPU:string):TCPU;
 function GetOS(aOS:TOS):string;
 function GetTOS(aOS:string):TOS;
 function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
-function GetSubarch(aSubarch:TSubarch):string;
-function GetTSubarch(aSubarch:string):TSubarch;
+function GetSubarch(aSubarch:TSUBARCH):string;
+function GetTSubarch(aSubarch:string):TSUBARCH;
+function GetSubarchs(aCPU:TCPU;aOS:TOS):TSUBARCHS;
 
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 function GetExeExt: string;
@@ -325,21 +328,41 @@ begin
   else result.OS:=GetTOS(aOS);
 end;
 
-function GetSubarch(aSubarch:TSubarch):string;
+function GetSubarch(aSubarch:TSUBARCH):string;
 begin
-  if (aSubarch<Low(TSubarch)) OR (aSubarch>High(TSubarch)) then
+  if (aSubarch<Low(TSUBARCH)) OR (aSubarch>High(TSUBARCH)) then
     raise Exception.Create('Invalid Subarch for GetSubarch.');
-  result:=GetEnumNameSimple(TypeInfo(TSubarch),Ord(aSubarch));
+  result:=GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(aSubarch));
 end;
 
-function GetTSubarch(aSubarch:string):TSubarch;
+function GetTSubarch(aSubarch:string):TSUBARCH;
 var
-  xSubarch:TSubarch;
+  xSubarch:TSUBARCH;
 begin
-  result:=TSubarch.saNone;
-  xSubarch:=TSubarch(GetEnumValueSimple(TypeInfo(TSubarch),aSubarch));
-  if Ord(xSubarch) < 0 then
-    raise Exception.CreateFmt('Invalid Subarch name "%s" for GetSubarch.', [xSubarch]);
+  result:=TSUBARCH.saNone;
+  if (Length(aSubarch)>0) then
+  begin
+    xSubarch:=TSUBARCH(GetEnumValueSimple(TypeInfo(TSUBARCH),aSubarch));
+    if Ord(xSubarch) < 0 then
+      raise Exception.CreateFmt('Invalid Subarch name "%s" for GetSubarch.', [xSubarch]);
+    result:=xSubarch;
+  end;
+end;
+
+function GetSubarchs(aCPU:TCPU;aOS:TOS):TSUBARCHS;
+begin
+  result:=[TSUBARCH.saNone];
+  if ((aOS in SUBARCH_OS) AND (aCPU in SUBARCH_CPU)) then
+  begin
+    case aCPU of
+      TCPU.arm:      if (aOS<>TOS.ultibo) then result:=SUBARCH_ARM;
+      TCPU.avr:      if (aOS=TOS.embedded) then result:=SUBARCH_AVR;
+      TCPU.mipsel:   if (aOS=TOS.embedded) then result:=SUBARCH_MIPSEL;
+      TCPU.riscv32:  if (aOS=TOS.embedded) then result:=SUBARCH_RISCV32;
+      TCPU.xtensa:   if (aOS<>TOS.ultibo) then result:=SUBARCH_XTENSA;
+    end;
+    if (aOS=TOS.ultibo) then result:=[TSUBARCH.armv6,TSUBARCH.armv7a];
+  end;
 end;
 
 function GetExeExt: string;
@@ -535,7 +558,7 @@ begin
     if LibsOrBins
        then sd:=sd+'lib'
        else sd:=sd+'bin';
-    if Length(DirName)>0 then sd:=sd+DirectorySeparator+DirName;
+    if (Length(DirName)>0) then sd:=sd+DirectorySeparator+DirName;
     sd:=SafeExpandFileName(sd);
     result:=SearchUtil(sd, LookFor, LibsOrBins);
     if ((NOT result) AND (NOT LibsOrBins)) then

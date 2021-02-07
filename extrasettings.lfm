@@ -6,6 +6,7 @@ object Form2: TForm2
   Caption = 'Advanced settings'
   ClientHeight = 660
   ClientWidth = 782
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   LCLVersion = '2.1.0.0'
@@ -209,17 +210,17 @@ object Form2: TForm2
     TabOrder = 4
     object EditLibLocation: TEdit
       AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = PageControl1
+      AnchorSideTop.Control = rgrpSearchOptions
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = btnSelectLibDir
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 164
+      Top = 179
       Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
-      BorderSpacing.Top = 4
+      BorderSpacing.Top = 8
       BorderSpacing.Right = 12
       Enabled = False
       OnDblClick = EditDblClickDelete
@@ -237,7 +238,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 193
+      Top = 208
       Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -259,7 +260,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 276
       Height = 25
-      Top = 164
+      Top = 179
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -280,7 +281,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 276
       Height = 25
-      Top = 193
+      Top = 208
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -301,7 +302,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 23
-      Top = 247
+      Top = 262
       Width = 344
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -319,7 +320,7 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 228
+      Top = 243
       Width = 219
       BorderSpacing.Left = 4
       BorderSpacing.Top = 12
@@ -335,7 +336,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 295
+      Top = 310
       Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -357,7 +358,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 276
       Height = 25
-      Top = 295
+      Top = 310
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -376,7 +377,7 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 276
+      Top = 291
       Width = 97
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -391,8 +392,8 @@ object Form2: TForm2
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
       Left = 4
-      Height = 59
-      Top = 326
+      Height = 51
+      Top = 341
       Width = 344
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True
@@ -418,27 +419,29 @@ object Form2: TForm2
       AnchorSideTop.Control = GroupBox4
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
-      Left = 0
-      Height = 160
+      Left = 4
+      Height = 128
       Top = 0
-      Width = 362
+      Width = 352
       ActivePage = tsCPUOS
       Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 4
+      BorderSpacing.Right = 6
       TabIndex = 0
       TabOrder = 8
       object tsCPUOS: TTabSheet
         Caption = 'CPU/OS'
-        ClientHeight = 132
-        ClientWidth = 354
+        ClientHeight = 100
+        ClientWidth = 344
         object LabelCPU: TLabel
-          AnchorSideLeft.Control = GroupBox4
-          AnchorSideTop.Control = GroupBox4
+          AnchorSideLeft.Control = tsCPUOS
+          AnchorSideTop.Control = tsCPUOS
           Left = 4
           Height = 15
-          Top = 4
+          Top = 12
           Width = 57
           BorderSpacing.Left = 4
-          BorderSpacing.Top = 4
+          BorderSpacing.Top = 12
           Caption = 'Select CPU'
           ParentColor = False
           ParentFont = False
@@ -448,19 +451,19 @@ object Form2: TForm2
           AnchorSideTop.Control = LabelCPU
           Left = 96
           Height = 15
-          Top = 4
+          Top = 12
           Width = 49
           Caption = 'Select OS'
           ParentColor = False
           ParentFont = False
         end
         object ComboBoxCPU: TComboBox
-          AnchorSideLeft.Control = GroupBox4
+          AnchorSideLeft.Control = tsCPUOS
           AnchorSideTop.Control = LabelCPU
           AnchorSideTop.Side = asrBottom
           Left = 4
           Height = 23
-          Top = 27
+          Top = 35
           Width = 84
           BorderSpacing.Left = 4
           BorderSpacing.Top = 8
@@ -475,11 +478,11 @@ object Form2: TForm2
           AnchorSideLeft.Control = ComboBoxCPU
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Control = ComboBoxCPU
-          AnchorSideRight.Control = GroupBox4
+          AnchorSideRight.Control = tsCPUOS
           AnchorSideRight.Side = asrBottom
           Left = 96
           Height = 23
-          Top = 27
+          Top = 35
           Width = 104
           BorderSpacing.Left = 8
           ItemHeight = 15
@@ -492,9 +495,9 @@ object Form2: TForm2
           AnchorSideTop.Control = ComboBoxOS
           AnchorSideRight.Control = tsCPUOS
           AnchorSideRight.Side = asrBottom
-          Left = 287
+          Left = 277
           Height = 25
-          Top = 27
+          Top = 35
           Width = 61
           Anchors = [akTop, akRight]
           AutoSize = True
@@ -504,49 +507,11 @@ object Form2: TForm2
           ParentFont = False
           TabOrder = 2
         end
-        object rgrpSearchOptions: TRadioGroup
-          AnchorSideLeft.Control = tsCPUOS
-          AnchorSideTop.Side = asrBottom
-          AnchorSideRight.Control = tsCPUOS
-          AnchorSideRight.Side = asrBottom
-          AnchorSideBottom.Control = tsCPUOS
-          AnchorSideBottom.Side = asrBottom
-          Left = 4
-          Height = 52
-          Top = 80
-          Width = 344
-          Anchors = [akLeft, akRight, akBottom]
-          AutoFill = True
-          BorderSpacing.Left = 4
-          BorderSpacing.Top = 7
-          BorderSpacing.Right = 6
-          Caption = 'Search options'
-          ChildSizing.LeftRightSpacing = 6
-          ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-          ChildSizing.EnlargeVertical = crsHomogenousChildResize
-          ChildSizing.ShrinkHorizontal = crsScaleChilds
-          ChildSizing.ShrinkVertical = crsScaleChilds
-          ChildSizing.Layout = cclLeftToRightThenTopToBottom
-          ChildSizing.ControlsPerLine = 3
-          ClientHeight = 32
-          ClientWidth = 340
-          Columns = 3
-          Enabled = False
-          ItemIndex = 0
-          Items.Strings = (
-            'fpcup'
-            'full auto'
-            'custom'
-          )
-          OnSelectionChanged = rgrpSearchOptionsSelectionChanged
-          ParentFont = False
-          TabOrder = 3
-        end
       end
       object tsSUBARCH: TTabSheet
         Caption = 'Subarch'
-        ClientHeight = 132
-        ClientWidth = 354
+        ClientHeight = 100
+        ClientWidth = 344
         object rgrpSubarch: TRadioGroup
           AnchorSideLeft.Control = tsSUBARCH
           AnchorSideTop.Control = tsSUBARCH
@@ -555,7 +520,7 @@ object Form2: TForm2
           Left = 4
           Height = 60
           Top = 8
-          Width = 344
+          Width = 334
           Anchors = [akTop, akLeft, akRight]
           AutoFill = True
           AutoSize = True
@@ -569,12 +534,53 @@ object Form2: TForm2
           ChildSizing.ShrinkHorizontal = crsScaleChilds
           ChildSizing.ShrinkVertical = crsScaleChilds
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
-          ChildSizing.ControlsPerLine = 3
-          Columns = 3
+          ChildSizing.ControlsPerLine = 4
+          Columns = 4
           Constraints.MinHeight = 60
+          OnSelectionChanged = rgrpSubarchSelectionChanged
           TabOrder = 0
         end
       end
+    end
+    object rgrpSearchOptions: TRadioGroup
+      AnchorSideLeft.Control = GroupBox4
+      AnchorSideTop.Control = PageControl1
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = tsCPUOS
+      AnchorSideBottom.Side = asrBottom
+      Left = 4
+      Height = 39
+      Top = 132
+      Width = 352
+      Anchors = [akTop, akLeft, akRight]
+      AutoFill = True
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 6
+      Caption = 'Search options'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 3
+      ClientHeight = 19
+      ClientWidth = 348
+      Columns = 3
+      Enabled = False
+      ItemIndex = 0
+      Items.Strings = (
+        'fpcup'
+        'full auto'
+        'custom'
+      )
+      OnSelectionChanged = rgrpSearchOptionsSelectionChanged
+      ParentFont = False
+      TabOrder = 9
     end
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox

@@ -765,7 +765,7 @@ begin
           }
 
           if (Sender=nil) then
-            Form2.SetCrossAvailable(GetCPUOSCombo(aCPU,aOS),true);
+            Form2.SetCrossAvailable(GetTCPU(aCPU),GetTOS(aOS),GetTSubarch(aSubArch),true);
 
           // try to distinguish between different Solaris versons
           if (aOS=GetOS(TOS.solaris)) then
@@ -2527,7 +2527,7 @@ begin
       {$endif}
       success:=RealRun;
       if success then
-        Form2.SetCrossAvailable(FPCupManager.CrossCombo_Target,false);
+        Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,false);
     finally
       DisEnable(Sender,true);
     end;
@@ -3546,7 +3546,7 @@ begin
       end;
 
       if success then
-        Form2.SetCrossAvailable(FPCupManager.CrossCombo_Target,true);
+        Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,true);
 
     finally
       DisEnable(Sender,True);
@@ -3723,7 +3723,7 @@ begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
     FPCupManager.CrossOS_Target:=GetTOS(s);
   end;
-  Form2.SetCrossTarget(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+  Form2.SetCrossTarget(FPCupManager,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
 
   Form2.ShowModal;
   if Form2.ModalResult=mrOk then
@@ -4554,7 +4554,7 @@ begin
     FPCupManager.CrossOS_Target:=GetTOS(s);
   end;
 
-  Form2.SetCrossTarget(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+  Form2.SetCrossTarget(FPCupManager,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
 
   SubarchForm.ShowModal;
 
