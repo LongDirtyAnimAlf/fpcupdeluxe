@@ -1169,7 +1169,7 @@ begin
     radgrpCPU.Enabled:=false;
   end else radgrpCPU.Enabled:=true;
 
-  ButtonSubarchSelect.Enabled:=(OSType in [TOS.embedded,TOS.freertos,TOS.ultibo]);
+  ButtonSubarchSelect.Enabled:=(OSType in SUBARCH_OS);
 end;
 
 procedure TForm1.CommandOutputScreenMouseWheel(Sender: TObject; Shift: TShiftState;
@@ -2843,12 +2843,12 @@ begin
       s:=Trim(s);
       if Length(s)>0 then FPCupManager.CrossOPT:=s+' ';
 
-      // override / set custom FPC cross-subarch by special user input through setup+
-      if (FPCupManager.CrossOS_Target=TOS.embedded) then
+      // override / set custom FPC cross-subarch by special user input through subarch setting
+      if (FPCupManager.CrossOS_Target in SUBARCH_OS) then
       begin
-        s:=Form2.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-        s:=Trim(s);
-        if Length(s)>0 then FPCupManager.CrossOS_SubArch:=GetTSubarch(s);
+        //s:=SubarchForm.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+        //s:=Trim(s);
+        //if Length(s)>0 then FPCupManager.CrossOS_SubArch:=GetTSubarch(s);
       end;
 
       // use the available source to build the cross-compiler ... change nothing about source and url !!

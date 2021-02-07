@@ -12,19 +12,16 @@ type
   TCrossSetting = (fpcup,auto,custom);
 
   TCrossUtil = record
-    CPU:string;
-    OS:string;
     Setting:TCrossSetting;
     LibDir:string;
     BinDir:string;
     CrossBuildOptions:string;
-    CrossSubArch:string;
     CrossARMArch:string;
     Compiler:string;
     Available:boolean;
   end;
 
-  TCrossUtils = array[TCPU,TOS] of TCrossUtil;
+  TCrossUtils = array[TCPU,TOS,TSUBARCH] of TCrossUtil;
 
   TString = class(TObject)
   private
@@ -53,7 +50,6 @@ type
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
     EditCrossBuildOptions: TEdit;
-    EditCrossSubArch: TEdit;
     EditFPCBranch: TEdit;
     EditFPCOptions: TEdit;
     EditFPCRevision: TEdit;
@@ -77,7 +73,6 @@ type
     Label3: TLabel;
     Label4: TLabel;
     LabelCrossBuildOptions: TLabel;
-    LabelCrossSubArch: TLabel;
     LabelCompilerOverride: TLabel;
     LabelFPCbranch: TLabel;
     LabelFPCOptions: TLabel;
@@ -99,7 +94,6 @@ type
     procedure ComboBoxCPUOSChange({%H-}Sender: TObject);
     procedure EditDblClickDelete(Sender: TObject);
     procedure EditCrossBuildOptionsChange(Sender: TObject);
-    procedure EditCrossSubArchChange(Sender: TObject);
     procedure FormCreate({%H-}Sender: TObject);
     procedure FormDestroy({%H-}Sender: TObject);
     procedure IniPropStorageSettingsRestoringProperties(Sender: TObject);
@@ -210,7 +204,6 @@ type
     function GetLibraryDirectory(aCPU:TCPU;aOS:TOS):string;
     function GetToolsDirectory(aCPU:TCPU;aOS:TOS):string;
     function GetCrossBuildOptions(aCPU:TCPU;aOS:TOS):string;
-    function GetCrossSubArch(aCPU:TCPU;aOS:TOS):string;
     function GetCrossARMArch(aCPU:TCPU;aOS:TOS):string;
     function GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS): string;
     function GetCompiler(aCPU:TCPU;aOS:TOS): string;
@@ -356,9 +349,9 @@ begin
   begin
     xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
     if Sender=btnSelectLibDir then
-       FCrossUtils[xCPUOS.CPU,xCPUOS.OS].LibDir:=SelectDirectoryDialog1.FileName;
+       FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].LibDir:=SelectDirectoryDialog1.FileName;
     if Sender=btnSelectBinDir then
-       FCrossUtils[xCPUOS.CPU,xCPUOS.OS].BinDir:=SelectDirectoryDialog1.FileName;
+       FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].BinDir:=SelectDirectoryDialog1.FileName;
   end;
 end;
 
@@ -434,16 +427,13 @@ begin
   begin
     for CPU := Low(TCPU) to High(TCPU) do
     begin
-      FCrossUtils[CPU,OS].CPU:=GetEnumNameSimple(TypeInfo(TCPU),Ord(CPU));
-      FCrossUtils[CPU,OS].OS:=GetEnumNameSimple(TypeInfo(TOS),Ord(OS));
-      FCrossUtils[CPU,OS].Setting:=TCrossSetting.fpcup;
-      FCrossUtils[CPU,OS].LibDir:='';
-      FCrossUtils[CPU,OS].BinDir:='';
-      FCrossUtils[CPU,OS].CrossBuildOptions:='';
-      FCrossUtils[CPU,OS].CrossSubArch:='';
-      FCrossUtils[CPU,OS].CrossARMArch:='';
-      FCrossUtils[CPU,OS].Compiler:='';
-      FCrossUtils[CPU,OS].Available:=false;
+      FCrossUtils[CPU,OS,saNone].Setting:=TCrossSetting.fpcup;
+      FCrossUtils[CPU,OS,saNone].LibDir:='';
+      FCrossUtils[CPU,OS,saNone].BinDir:='';
+      FCrossUtils[CPU,OS,saNone].CrossBuildOptions:='';
+      FCrossUtils[CPU,OS,saNone].CrossARMArch:='';
+      FCrossUtils[CPU,OS,saNone].Compiler:='';
+      FCrossUtils[CPU,OS,saNone].Available:=false;
     end;
   end;
 
@@ -538,7 +528,9 @@ procedure TForm2.SetInstallDir(const aInstallDir:string='');
 var
   CPU:TCPU;
   OS:TOS;
-  s:string;
+  SUBARCH:TSUBARCH;
+  Subarchs: set of TSUBARCH;
+  s1,s2:string;
 begin
   if (Length(aInstallDir)>0)
      then FInstallPath:=IncludeTrailingPathDelimiter(aInstallDir)
@@ -550,20 +542,36 @@ begin
     begin
       for CPU := Low(TCPU) to High(TCPU) do
       begin
-        s:=FCrossUtils[CPU,OS].CPU+'-'+FCrossUtils[CPU,OS].OS;
-        FCrossUtils[CPU,OS].Setting:=TCrossSetting(ReadInteger(s,'Setting',Ord(fpcup)));
-        FCrossUtils[CPU,OS].LibDir:=ReadString(s,'LibPath','');
-        FCrossUtils[CPU,OS].BinDir:=ReadString(s,'BinPath','');
-        FCrossUtils[CPU,OS].CrossBuildOptions:=ReadString(s,'CrossBuildOptions','');
-        if OS=embedded then
+
+        s1:=GetEnumNameSimple(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumNameSimple(TypeInfo(TOS),Ord(OS));
+
+        Subarchs:=[saNone];
+        if ((OS in SUBARCH_OS) AND (CPU in SUBARCH_CPU)) then
         begin
-          FCrossUtils[CPU,OS].CrossSubArch:=ReadString(s,'CrossSubArch','');
+          case CPU of
+            TCPU.arm:      Subarchs:=SUBARCH_ARM;
+            TCPU.avr:      if (OS=TOS.embedded) then Subarchs:=SUBARCH_AVR;
+            TCPU.mipsel:   if (OS=TOS.embedded) then Subarchs:=SUBARCH_MIPSEL;
+            TCPU.riscv32:  if (OS=TOS.embedded) then Subarchs:=SUBARCH_RISCV32;
+            TCPU.xtensa:   if (OS<>TOS.ultibo) then Subarchs:=SUBARCH_XTENSA;
+          end;
         end;
-        if CPU=arm then
+
+        for SUBARCH in Subarchs do
         begin
-          FCrossUtils[CPU,OS].CrossARMArch:=ReadString(s,'CrossARMArch','');
+          if (SUBARCH<>saNone) then
+            s2:=s1+'-'+GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(SUBARCH))
+          else
+            s2:=s1;
+          FCrossUtils[CPU,OS,SUBARCH].Setting:=TCrossSetting(ReadInteger(s2,'Setting',Ord(fpcup)));
+          FCrossUtils[CPU,OS,SUBARCH].LibDir:=ReadString(s2,'LibPath','');
+          FCrossUtils[CPU,OS,SUBARCH].BinDir:=ReadString(s2,'BinPath','');
+          FCrossUtils[CPU,OS,SUBARCH].CrossBuildOptions:=ReadString(s2,'CrossBuildOptions','');
+          if CPU=arm then
+            FCrossUtils[CPU,OS,SUBARCH].CrossARMArch:=ReadString(s2,'CrossARMArch','');
+          FCrossUtils[CPU,OS,SUBARCH].Compiler:=ReadString(s2,'Compiler','');
         end;
-        FCrossUtils[CPU,OS].Compiler:=ReadString(s,'Compiler','');
+
       end;
     end;
   finally
@@ -586,15 +594,13 @@ begin
   if e then
   begin
     xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
-    if (xCPUOS.OS=TOS.embedded) OR (xCPUOS.OS=TOS.freertos) then EditCrossSubArch.Enabled:=e;
     if (xCPUOS.CPU=TCPU.arm) then RadioGroupARMArch.Enabled:=e;
-    EditLibLocation.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].LibDir;
-    EditBinLocation.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].BinDir;
-    EditCrossBuildOptions.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossBuildOptions;
-    EditCrossSubArch.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossSubArch;
-    RadioGroup3.ItemIndex:=Ord(FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Setting);
-    RadioGroupARMArch.ItemIndex:=Ord(GetARMArch(FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossARMArch));
-    EditCompilerOverride.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Compiler;
+    EditLibLocation.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].LibDir;
+    EditBinLocation.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].BinDir;
+    EditCrossBuildOptions.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].CrossBuildOptions;
+    RadioGroup3.ItemIndex:=Ord(FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].Setting);
+    RadioGroupARMArch.ItemIndex:=Ord(GetARMArch(FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].CrossARMArch));
+    EditCompilerOverride.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].Compiler;
   end;
 end;
 
@@ -606,11 +612,10 @@ begin
   if ( (ComboBoxCPU.ItemIndex<>-1) AND (ComboBoxOS.ItemIndex<>-1) )  then
   begin
     xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
-    if Sender=EditCompilerOverride then FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Compiler:='';
-    if Sender=EditLibLocation then FCrossUtils[xCPUOS.CPU,xCPUOS.OS].LibDir:='';
-    if Sender=EditBinLocation then FCrossUtils[xCPUOS.CPU,xCPUOS.OS].BinDir:='';
-    if Sender=EditCrossBuildOptions then FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossBuildOptions:='';
-    if Sender=EditCrossSubArch then FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossSubArch:='';
+    if Sender=EditCompilerOverride then FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].Compiler:='';
+    if Sender=EditLibLocation then FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].LibDir:='';
+    if Sender=EditBinLocation then FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].BinDir:='';
+    if Sender=EditCrossBuildOptions then FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].CrossBuildOptions:='';
   end;
 end;
 
@@ -621,18 +626,7 @@ begin
   if ( (ComboBoxCPU.ItemIndex<>-1) AND (ComboBoxOS.ItemIndex<>-1) )  then
   begin
     xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
-    FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossBuildOptions:=TEdit(Sender).Text;
-  end;
-end;
-
-procedure TForm2.EditCrossSubArchChange(Sender: TObject);
-var
-  xCPUOS:TCPUOS;
-begin
-  if ( (ComboBoxCPU.ItemIndex<>-1) AND (ComboBoxOS.ItemIndex<>-1) )  then
-  begin
-    xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
-    FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossSubArch:=TEdit(Sender).Text;
+    FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].CrossBuildOptions:=TEdit(Sender).Text;
   end;
 end;
 
@@ -700,7 +694,7 @@ begin
   begin
     xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
     if Sender=btnSelectCompiler then
-       FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Compiler:=OpenDialog1.FileName;
+       FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].Compiler:=OpenDialog1.FileName;
   end;
 end;
 
@@ -708,6 +702,8 @@ procedure TForm2.btnListCustomOptionsClick(Sender: TObject);
 var
   CPU:TCPU;
   OS:TOS;
+  SUBARCH:TSUBARCH;
+  Subarchs: set of TSUBARCH;
   s:string;
   x:integer;
 begin
@@ -718,47 +714,54 @@ begin
       for CPU := Low(TCPU) to High(TCPU) do
       begin
         x:=InfoForm.Memo1.Lines.Count;
-        s:=FCrossUtils[CPU,OS].CPU+'-'+FCrossUtils[CPU,OS].OS;
-        if FCrossUtils[CPU,OS].Setting=auto then
+        s:=GetEnumNameSimple(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumNameSimple(TypeInfo(TOS),Ord(OS));
+          if FCrossUtils[CPU,OS,saNone].Setting=auto then
         begin
           InfoForm.Memo1.Lines.Append(s+': full auto search tools and libraries.');
         end
         else
-        if FCrossUtils[CPU,OS].Setting=custom then
+        if FCrossUtils[CPU,OS,saNone].Setting=custom then
         begin
           InfoForm.Memo1.Lines.Append(s+' (manual settings):');
-          InfoForm.Memo1.Lines.Append('  libs     : '+FCrossUtils[CPU,OS].LibDir);
-          InfoForm.Memo1.Lines.Append('  bins      : '+FCrossUtils[CPU,OS].BinDir);
+          InfoForm.Memo1.Lines.Append('  libs     : '+FCrossUtils[CPU,OS,saNone].LibDir);
+          InfoForm.Memo1.Lines.Append('  bins      : '+FCrossUtils[CPU,OS,saNone].BinDir);
         end;
 
-        if Length(FCrossUtils[CPU,OS].CrossBuildOptions)>0 then
+        if Length(FCrossUtils[CPU,OS,saNone].CrossBuildOptions)>0 then
         begin
           if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
-          InfoForm.Memo1.Lines.Append('  options : '+FCrossUtils[CPU,OS].CrossBuildOptions);
+          InfoForm.Memo1.Lines.Append('  options : '+FCrossUtils[CPU,OS,saNone].CrossBuildOptions);
         end;
 
-        if OS=embedded then
+        if ((OS in SUBARCH_OS) AND (CPU in SUBARCH_CPU)) then
         begin
-          if Length(FCrossUtils[CPU,OS].CrossSubArch)>0 then
+          Subarchs:=[];
+          case CPU of
+            TCPU.arm:      Subarchs:=SUBARCH_ARM;
+            TCPU.avr:      if (OS=TOS.embedded) then Subarchs:=SUBARCH_AVR;
+            TCPU.mipsel:   if (OS=TOS.embedded) then Subarchs:=SUBARCH_MIPSEL;
+            TCPU.riscv32:  if (OS=TOS.embedded) then Subarchs:=SUBARCH_RISCV32;
+            TCPU.xtensa:   if (OS<>TOS.ultibo) then Subarchs:=SUBARCH_XTENSA;
+          end;
+          for SUBARCH in Subarchs do
           begin
-            if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
-            InfoForm.Memo1.Lines.Append('  subarch : '+FCrossUtils[CPU,OS].CrossSubArch);
+            InfoForm.Memo1.Lines.Append('  subarch : '+s+'-'+GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(SUBARCH)));
           end;
         end;
 
         if CPU=arm then
         begin
-          if Length(FCrossUtils[CPU,OS].CrossARMArch)>0 then
+          if Length(FCrossUtils[CPU,OS,saNone].CrossARMArch)>0 then
           begin
             if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
-            InfoForm.Memo1.Lines.Append('  ARM Arch : '+FCrossUtils[CPU,OS].CrossARMArch);
+            InfoForm.Memo1.Lines.Append('  ARM Arch : '+FCrossUtils[CPU,OS,saNone].CrossARMArch);
           end;
         end;
 
-        if Length(FCrossUtils[CPU,OS].Compiler)>0 then
+        if Length(FCrossUtils[CPU,OS,saNone].Compiler)>0 then
         begin
           if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
-          InfoForm.Memo1.Lines.Append('  compiler : '+FCrossUtils[CPU,OS].Compiler);
+          InfoForm.Memo1.Lines.Append('  compiler : '+FCrossUtils[CPU,OS,saNone].Compiler);
         end;
 
         if x<>InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append('');
@@ -775,7 +778,9 @@ procedure TForm2.FormDestroy(Sender: TObject);
 var
   CPU:TCPU;
   OS:TOS;
-  s:string;
+  SUBARCH:TSUBARCH;
+  Subarchs: set of TSUBARCH;
+  s1,s2:string;
   i:integer;
   //Cipher: TDCP_rc4;
   Cipher: TDCP_DES;
@@ -797,8 +802,9 @@ begin
     WriteString('ProxySettings','HTTPProxyUser',EditHTTPProxyUser.Text);
 
     // add some security into the password storage ... ;-)
-    s:=EditHTTPProxyPassword.Text;
-    if Length(s)>0 then
+    s1:=EditHTTPProxyPassword.Text;
+    s2:=s1;
+    if Length(s1)>0 then
     begin
       //Cipher:= TDCP_rc4.Create(nil);
       Cipher := TDCP_DES.Create(nil);
@@ -808,13 +814,13 @@ begin
         {$else}
         Cipher.InitStr(DELUXEKEY,TDCP_sha256);
         {$endif}
-        s:=Cipher.EncryptString(s);
+        s2:=Cipher.EncryptString(s1);
       finally
         Cipher.Burn;
         Cipher.Free;
       end;
     end;
-    WriteString('ProxySettings','HTTPProxyPass',s);
+    WriteString('ProxySettings','HTTPProxyPass',s2);
 
     UpdateFile;
   finally
@@ -856,20 +862,36 @@ begin
         if (CPU=sparc64) AND (OS<>linux) then continue;
         if ((CPU=riscv32) OR (CPU=riscv64)) AND ((OS<>linux) AND (OS<>embedded)) then continue;
 
-        s:=FCrossUtils[CPU,OS].CPU+'-'+FCrossUtils[CPU,OS].OS;
-        WriteInteger(s,'Setting',Ord(FCrossUtils[CPU,OS].Setting));
-        WriteString(s,'LibPath',FCrossUtils[CPU,OS].LibDir);
-        WriteString(s,'BinPath',FCrossUtils[CPU,OS].BinDir);
-        WriteString(s,'CrossBuildOptions',FCrossUtils[CPU,OS].CrossBuildOptions);
-        if OS in [TOS.embedded,TOS.freertos,TOS.ultibo] then
+        s1:=GetEnumNameSimple(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumNameSimple(TypeInfo(TOS),Ord(OS));
+
+        Subarchs:=[saNone];
+        if ((OS in SUBARCH_OS) AND (CPU in SUBARCH_CPU)) then
         begin
-          WriteString(s,'CrossSubArch',FCrossUtils[CPU,OS].CrossSubArch);
+          case CPU of
+            TCPU.arm:      Subarchs:=SUBARCH_ARM;
+            TCPU.avr:      if (OS=TOS.embedded) then Subarchs:=SUBARCH_AVR;
+            TCPU.mipsel:   if (OS=TOS.embedded) then Subarchs:=SUBARCH_MIPSEL;
+            TCPU.riscv32:  if (OS=TOS.embedded) then Subarchs:=SUBARCH_RISCV32;
+            TCPU.xtensa:   if (OS<>TOS.ultibo) then Subarchs:=SUBARCH_XTENSA;
+          end;
         end;
-        if CPU=arm then
+
+        for SUBARCH in Subarchs do
         begin
-          WriteString(s,'CrossARMArch',FCrossUtils[CPU,OS].CrossARMArch);
+          if (SUBARCH<>saNone) then
+            s2:=s1+'-'+GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(SUBARCH))
+          else
+            s2:=s1;
+          WriteInteger(s2,'Setting',Ord(FCrossUtils[CPU,OS,SUBARCH].Setting));
+          WriteString(s2,'LibPath',FCrossUtils[CPU,OS,SUBARCH].LibDir);
+          WriteString(s2,'BinPath',FCrossUtils[CPU,OS,SUBARCH].BinDir);
+          WriteString(s2,'CrossBuildOptions',FCrossUtils[CPU,OS,SUBARCH].CrossBuildOptions);
+          if CPU=arm then
+            WriteString(s2,'CrossARMArch',FCrossUtils[CPU,OS,SUBARCH].CrossARMArch);
+          WriteString(s2,'Compiler',FCrossUtils[CPU,OS,SUBARCH].Compiler);
         end;
-        WriteString(s,'Compiler',FCrossUtils[CPU,OS].Compiler);
+
+
       end;
     end;
     UpdateFile;
@@ -921,7 +943,7 @@ begin
   if (ComboBoxOS.ItemIndex<>-1) AND (ComboBoxCPU.ItemIndex<>-1) then
   begin
     xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
-    FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Setting:=TCrossSetting(i);
+    FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].Setting:=TCrossSetting(i);
   end;
   e:=(i=2);
   EditLibLocation.Enabled:=e;
@@ -945,9 +967,9 @@ begin
       xARMArch:=TARMARCH(i);
     xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
     if xARMArch=TARMARCH.default then
-      FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossARMArch:=''
+      FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].CrossARMArch:=''
     else
-      FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossARMArch:=GetEnumNameSimple(TypeInfo(TARMARCH),Ord(xARMArch));
+      FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].CrossARMArch:=GetEnumNameSimple(TypeInfo(TARMARCH),Ord(xARMArch));
   end;
 end;
 
@@ -972,10 +994,10 @@ end;
 function TForm2.GetLibraryDirectory(aCPU:TCPU;aOS:TOS):string;
 begin
   try
-    case FCrossUtils[aCPU,aOS].Setting of
+    case FCrossUtils[aCPU,aOS,saNone].Setting of
       fpcup: result:='';
       auto: result:='FPCUP_AUTO';
-      custom: result:=FCrossUtils[aCPU,aOS].LibDir;
+      custom: result:=FCrossUtils[aCPU,aOS,saNone].LibDir;
     else result:='';
     end;
   except
@@ -986,10 +1008,10 @@ end;
 function TForm2.GetToolsDirectory(aCPU:TCPU;aOS:TOS):string;
 begin
   try
-    case FCrossUtils[aCPU,aOS].Setting of
+    case FCrossUtils[aCPU,aOS,saNone].Setting of
       fpcup: result:='';
       auto: result:='FPCUP_AUTO';
-      custom: result:=FCrossUtils[aCPU,aOS].BinDir;
+      custom: result:=FCrossUtils[aCPU,aOS,saNone].BinDir;
     else result:='';
     end;
   except
@@ -999,24 +1021,19 @@ end;
 
 function TForm2.GetCrossBuildOptions(aCPU:TCPU;aOS:TOS):string;
 begin
-  result:=FCrossUtils[aCPU,aOS].CrossBuildOptions;
-end;
-
-function TForm2.GetCrossSubArch(aCPU:TCPU;aOS:TOS): string;
-begin
-  result:=FCrossUtils[aCPU,aOS].CrossSubArch;
+  result:=FCrossUtils[aCPU,aOS,saNone].CrossBuildOptions;
 end;
 
 function TForm2.GetCrossARMArch(aCPU:TCPU;aOS:TOS): string;
 begin
-  result:=FCrossUtils[aCPU,aOS].CrossARMArch;
+  result:=FCrossUtils[aCPU,aOS,saNone].CrossARMArch;
 end;
 
 function TForm2.GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS): string;
 var
   aARMArch:string;
 begin
-  aARMArch:=FCrossUtils[aCPU,aOS].CrossARMArch;
+  aARMArch:=FCrossUtils[aCPU,aOS,saNone].CrossARMArch;
   if Length(aARMArch)=0 then
     result:=''
   else
@@ -1026,17 +1043,17 @@ end;
 
 function TForm2.GetCompiler(aCPU:TCPU;aOS:TOS): string;
 begin
-  result:=FCrossUtils[aCPU,aOS].Compiler;
+  result:=FCrossUtils[aCPU,aOS,saNone].Compiler;
 end;
 
 procedure TForm2.SetCrossAvailable(xCPUOS:TCPUOS; aValue:boolean);
 begin
-  FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Available:=aValue;
+  FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].Available:=aValue;
 end;
 
 function TForm2.GetCrossAvailable(xCPUOS:TCPUOS): boolean;
 begin
-  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Available;
+  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS,saNone].Available;
 end;
 
 function TForm2.GetCheckIndex(aCaption:string):integer;

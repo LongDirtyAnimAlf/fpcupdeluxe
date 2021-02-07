@@ -2211,7 +2211,6 @@ var
   s:string;
   SourceVersion:string;
   FilePath:string;
-  bUltibo:boolean;
 begin
   result:=inherited;
   result:=InitModule;
@@ -2222,8 +2221,6 @@ begin
 
   SourceVersion:='0.0.0';
 
-  bUltibo:=(Pos('github.com/ultibohub',URL)>0);
-
   aRepoClient:=GetSuitableRepoClient;
 
   if aRepoClient=nil then
@@ -2232,7 +2229,7 @@ begin
     Infoln(infotext+'Downloading ' + ModuleName + ' sources.',etInfo);
     result:=DownloadFromFTP(ModuleName);
     FActualRevision:=FPreviousRevision;
-    if result and bUltibo then
+    if result and Ultibo then
     begin
 
       FilePath:=ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true),'regexpr'])+PathDelim+'Package.fpc';

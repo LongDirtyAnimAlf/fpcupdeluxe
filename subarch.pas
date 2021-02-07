@@ -11,26 +11,15 @@ type
   { TSubarchForm }
 
   TSubarchForm = class(TForm)
-    btnListCustomOptions: TButton;
     btnSelectBinDir: TButton;
-    btnSelectCompiler: TButton;
     btnSelectLibDir: TButton;
-    ComboBoxCPU: TComboBox;
-    ComboBoxOS: TComboBox;
     EditBinLocation: TEdit;
-    EditCompilerOverride: TEdit;
     EditCrossBuildOptions: TEdit;
-    EditCrossSubArch: TEdit;
     EditLibLocation: TEdit;
     GroupBox4: TGroupBox;
-    LabelCompilerOverride: TLabel;
-    LabelCPU: TLabel;
     LabelCrossBuildOptions: TLabel;
-    LabelCrossSubArch: TLabel;
-    LabelOS: TLabel;
     rgrpSelectCPU: TRadioGroup;
     rgrpSelectSubarch: TRadioGroup;
-    RadioGroup3: TRadioGroup;
     RadioGroupARMArch: TRadioGroup;
     procedure FormCreate(Sender: TObject);
     procedure rgrpSelectCPUSelectionChanged(Sender: TObject);
@@ -49,17 +38,25 @@ implementation
 
 uses
   fpcuputil,
-  m_crossinstaller;
+  m_crossinstaller,
+  installerCore;
 
 { TSubarchForm }
 
 procedure TSubarchForm.FormCreate(Sender: TObject);
 var
   aCPU:TCPU;
+  ARMArch:TARMARCH;
 begin
+  // Fill CPU radiogroup
   for aCPU in SUBARCH_CPU do
     rgrpSelectCPU.Items.Append(GetCPU(aCPU));
   rgrpSelectCPU.ItemIndex:=0;
+
+  // Fill ARM Arch radiogroup
+  for ARMArch := Low(TARMARCH) to High(TARMARCH) do
+    RadioGroupARMArch.Items.Add(GetEnumNameSimple(TypeInfo(TARMARCH),Ord(ARMArch)));
+  RadioGroupARMArch.ItemIndex:=0;
 end;
 
 procedure TSubarchForm.rgrpSelectCPUSelectionChanged(Sender: TObject);
@@ -71,7 +68,8 @@ var
 begin
   i:=rgrpSelectCPU.ItemIndex;
   if (i<0) then exit;
-  rgrpSelectSubarch.BeginUpdateBounds;
+  BeginFormUpdate;
+  //rgrpSelectSubarch.BeginUpdateBounds;
   try
     rgrpSelectSubarch.Items.Clear;
     aCPU:=TCPU(GetEnumValueSimple(TypeInfo(TCPU),rgrpSelectCPU.Items[i]));
@@ -81,12 +79,15 @@ begin
       TCPU.mipsel:Subarchs:=SUBARCH_MIPSEL;
       TCPU.riscv32:Subarchs:=SUBARCH_RISCV32;
       TCPU.xtensa:Subarchs:=SUBARCH_XTENSA;
+    else
+      exit;
     end;
     for aSubarch in Subarchs do
       rgrpSelectSubarch.Items.Append(GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(aSubarch)));
     if rgrpSelectSubarch.Items.Count=1 then rgrpSelectSubarch.ItemIndex:=0;
   finally
-    rgrpSelectSubarch.EndUpdateBounds;
+    //rgrpSelectSubarch.EndUpdateBounds;
+    EndFormUpdate;
   end;
 end;
 

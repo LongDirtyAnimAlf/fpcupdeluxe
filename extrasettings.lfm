@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 125
+  Left = 268
   Height = 660
-  Top = 130
+  Top = 136
   Width = 782
   Caption = 'Advanced settings'
   ClientHeight = 660
@@ -414,40 +414,6 @@ object Form2: TForm2
       ParentFont = False
       TabOrder = 2
     end
-    object LabelCrossSubArch: TLabel
-      AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = EditCrossBuildOptions
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 15
-      Top = 231
-      Width = 213
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Cross SubArch Override (i.e. armv7m, ...)'
-      ParentColor = False
-      ParentFont = False
-    end
-    object EditCrossSubArch: TEdit
-      AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = LabelCrossSubArch
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = GroupBox4
-      AnchorSideRight.Side = asrBottom
-      Left = 4
-      Height = 23
-      Top = 250
-      Width = 294
-      Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 4
-      BorderSpacing.Right = 14
-      Enabled = False
-      OnChange = EditCrossSubArchChange
-      OnDblClick = EditDblClickDelete
-      ParentFont = False
-      TabOrder = 9
-    end
     object EditCompilerOverride: TEdit
       AnchorSideLeft.Control = GroupBox4
       AnchorSideTop.Control = LabelCompilerOverride
@@ -456,7 +422,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 298
+      Top = 250
       Width = 210
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -468,7 +434,7 @@ object Form2: TForm2
       ParentShowHint = False
       ReadOnly = True
       ShowHint = True
-      TabOrder = 10
+      TabOrder = 9
     end
     object btnSelectCompiler: TButton
       AnchorSideLeft.Control = EditLibLocation
@@ -478,7 +444,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 226
       Height = 25
-      Top = 298
+      Top = 250
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -489,15 +455,15 @@ object Form2: TForm2
       Enabled = False
       OnClick = btnSelectFile
       ParentFont = False
-      TabOrder = 11
+      TabOrder = 10
     end
     object LabelCompilerOverride: TLabel
       AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = EditCrossSubArch
+      AnchorSideTop.Control = EditCrossBuildOptions
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 279
+      Top = 231
       Width = 97
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -513,7 +479,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 59
-      Top = 329
+      Top = 281
       Width = 294
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True
@@ -532,7 +498,7 @@ object Form2: TForm2
       Enabled = False
       OnSelectionChanged = RadioGroupARMArchSelectionChanged
       ParentFont = False
-      TabOrder = 12
+      TabOrder = 11
     end
     object LabelCPU: TLabel
       AnchorSideLeft.Control = GroupBox4

@@ -801,7 +801,7 @@ begin
   Result.Sorted := True;
   Result.Duplicates := dupIgnore;
 
-  s:=IncludeTrailingPathDelimiter(FPCSourceDirectory)+'rtl'+DirectorySeparator+'embedded'+DirectorySeparator+FPCMAKEFILENAME;
+  s:=IncludeTrailingPathDelimiter(FPCSourceDirectory)+'rtl'+DirectorySeparator+GetOS(CrossOS_Target)+DirectorySeparator+FPCMAKEFILENAME;
 
   if FileExists(s) then
   begin
