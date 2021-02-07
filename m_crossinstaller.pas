@@ -111,8 +111,25 @@ const
   SUBARCH_XTENSA     = [lx6..lx106];
 
 type
-  CompilerType=(ctBootstrap,ctInstalled);
-  SearchMode=(smFPCUPOnly,smAuto,smManual);
+  TSearchSetting = (ssUp,ssAuto,ssCustom);
+
+const
+  FPCUP_AUTO_MAGIC = 'FPCUP_AUTO';
+
+type
+  TCrossUtil = record
+    Setting:TSearchSetting;
+    LibDir:string;
+    BinDir:string;
+    CrossBuildOptions:string;
+    CrossARMArch:string;
+    Compiler:string;
+    Available:boolean;
+  end;
+
+  TCrossUtils = array[TCPU,TOS,TSUBARCH] of TCrossUtil;
+
+  TCompilerType=(ctBootstrap,ctInstalled);
 
   { TCrossInstaller }
   TCrossInstaller = class(TObject)
@@ -126,8 +143,8 @@ type
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
     FBinutilsPathInPath: boolean;
     FBinUtilsDirectoryID: string; //where to find the binutils themselves
-    FCompilerUsed: CompilerType;
-    FSearchMode: SearchMode;
+    FCompilerUsed: TCompilerType;
+    FSearchMode: TSearchSetting;
     FCrossModuleNamePrefix: string; //used for identifying module to user in messages
     FCrossOpts: TStringList; //Options to be added to CROSSOPT by the calling code. XP= (binutils prefix) is already done, no need to add it
     FFPCCFGSnippet: string; //snippet to be added to fpc.cfg in order to find binutils/libraries etc
@@ -169,8 +186,8 @@ type
     // Which compiler should be used for cross compilation.
     // Normally the bootstrap compiler, but cross compilers may need the installed compiler
     // (often a trunk version, though there's no tests yet that check trunk is installed)
-    property CompilerUsed: CompilerType read FCompilerUsed;
-    property SearchModeUsed: SearchMode read FSearchMode write FSearchMode;
+    property CompilerUsed: TCompilerType read FCompilerUsed;
+    property SearchModeUsed: TSearchSetting read FSearchMode write FSearchMode;
     property CrossModuleName: string read GetCrossModuleName;
     // Represents arguments for CROSSOPT parameter
     // No need to add XP= (binutils prefix): calling code will do this
@@ -480,7 +497,7 @@ var
 begin
   result:=false;
 
-  if SearchModeUsed=smManual then exit;
+  if SearchModeUsed=TSearchSetting.ssCustom then exit;
 
   // first search local paths based on libraries provided for or adviced by fpc itself
   sd:=IncludeTrailingPathDelimiter(BasePath);
@@ -529,7 +546,7 @@ begin
   end;
 
   {$IFDEF UNIX}
-  if (SearchModeUsed=smAuto) then
+  if (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     if LibsOrBins
        then sd:='lib'

@@ -564,30 +564,30 @@ begin
 
     // get/set cross binary utils !!
     BinsAvailable:=false;
-    CrossInstaller.SearchModeUsed:=smFPCUPOnly; // default;
+    CrossInstaller.SearchModeUsed:=TSearchSetting.ssUp; // default;
     if Length(CrossToolsDirectory)>0 then
     begin
       // we have a crosstools setting
-      if (CrossToolsDirectory='FPCUP_AUTO')
-         then CrossInstaller.SearchModeUsed:=smAuto
-         else CrossInstaller.SearchModeUsed:=smManual;
+      if (CrossToolsDirectory=FPCUP_AUTO_MAGIC)
+         then CrossInstaller.SearchModeUsed:=TSearchSetting.ssAuto
+         else CrossInstaller.SearchModeUsed:=TSearchSetting.ssCustom;
     end;
-    if CrossInstaller.SearchModeUsed=smManual
+    if CrossInstaller.SearchModeUsed=TSearchSetting.ssCustom
        then BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
        else BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
     if (not BinsAvailable) then Infoln('Failed to get crossbinutils', etError);
 
     // get/set cross libraries !!
     LibsAvailable:=false;
-    CrossInstaller.SearchModeUsed:=smFPCUPOnly;
+    CrossInstaller.SearchModeUsed:=TSearchSetting.ssUp;
     if Length(CrossLibraryDirectory)>0 then
     begin
       // we have a crosslibrary setting
-      if (CrossLibraryDirectory='FPCUP_AUTO')
-         then CrossInstaller.SearchModeUsed:=smAuto
-         else CrossInstaller.SearchModeUsed:=smManual;
+      if (CrossLibraryDirectory=FPCUP_AUTO_MAGIC)
+         then CrossInstaller.SearchModeUsed:=TSearchSetting.ssAuto
+         else CrossInstaller.SearchModeUsed:=TSearchSetting.ssCustom;
     end;
-    if CrossInstaller.SearchModeUsed=smManual
+    if CrossInstaller.SearchModeUsed=TSearchSetting.ssCustom
       then LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory)
       else LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory);
     if (not LibsAvailable) then Infoln('Failed to get crosslibrary', etError);

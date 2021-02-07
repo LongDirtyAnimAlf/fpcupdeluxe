@@ -72,7 +72,7 @@ begin
   //rgrpSelectSubarch.BeginUpdateBounds;
   try
     rgrpSelectSubarch.Items.Clear;
-    aCPU:=TCPU(GetEnumValueSimple(TypeInfo(TCPU),rgrpSelectCPU.Items[i]));
+    aCPU:=GetTCPU(rgrpSelectCPU.Items[i]);
     case aCPU of
       TCPU.arm:Subarchs:=SUBARCH_ARM;
       TCPU.avr:Subarchs:=SUBARCH_AVR;
@@ -83,7 +83,7 @@ begin
       exit;
     end;
     for aSubarch in Subarchs do
-      rgrpSelectSubarch.Items.Append(GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(aSubarch)));
+      rgrpSelectSubarch.Items.Append(GetSubarch(aSubarch));
     if rgrpSelectSubarch.Items.Count=1 then rgrpSelectSubarch.ItemIndex:=0;
   finally
     //rgrpSelectSubarch.EndUpdateBounds;

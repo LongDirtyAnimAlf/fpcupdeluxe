@@ -864,14 +864,14 @@ begin
 
       if (NOT success) then break;
 
-      aOS:=GetEnumNameSimple(TypeInfo(TOS),Ord(OSType));
+      aOS:=GetOS(OSType);
 
       for CPUType := Low(TCPU) to High(TCPU) do
       begin
 
         if (NOT success) then break;
 
-        aCPU:=GetEnumNameSimple(TypeInfo(TCPU),Ord(CPUType));
+        aCPU:=GetCPU(CPUType);
 
         // tricky; see above; improvement todo
         aRadiogroup_CPU:=aCPU;
@@ -3709,7 +3709,22 @@ begin
 end;
 
 procedure TForm1.btnSetupPlusClick(Sender: TObject);
+var
+  s:string;
 begin
+  if radgrpCPU.ItemIndex<>-1 then
+  begin
+    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
+    FPCupManager.CrossCPU_Target:=GetTCPU(s);
+  end;
+
+  if radgrpOS.ItemIndex<>-1 then
+  begin
+    s:=radgrpOS.Items[radgrpOS.ItemIndex];
+    FPCupManager.CrossOS_Target:=GetTOS(s);
+  end;
+  Form2.SetCrossTarget(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+
   Form2.ShowModal;
   if Form2.ModalResult=mrOk then
   begin
@@ -4524,8 +4539,6 @@ procedure TForm1.ButtonSubarchSelectClick(Sender: TObject);
 var
   i:integer;
   s:string;
-  SourcePath:string;
-  aList:TStringList;
 begin
   AddMessage('Fpcupdeluxe select subarch.');
 
@@ -4541,34 +4554,14 @@ begin
     FPCupManager.CrossOS_Target:=GetTOS(s);
   end;
 
-  //SourcePath:=ConcatPaths([FPCupManager.FPCSourceDirectory,'bin',aCPU+'-'+aOS]);
-  //SourcePath:=ConcatPaths([sInstallDir,'fpcsrc','bin',aCPU+'-'+aOS]);
-
-  //get a list of valid subarch targets
-  try
-    aList:=FPCupManager.ParseSubArchsFromSource;
-    if (aList.Count > 0) then
-    begin
-      for i:=0 to (aList.Count-1) do
-      begin
-        if aList.Names[i]=GetCPU(FPCupManager.CrossCPU_Target) then
-        begin
-          AddMessage(aList.ValueFromIndex[i]);
-        end;
-      end;
-    end;
-  finally
-    aList.Free;
-  end;
+  Form2.SetCrossTarget(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
 
   SubarchForm.ShowModal;
+
   if SubarchForm.ModalResult=mrOk then
   begin
   end;
-
-
 end;
-
 
 procedure TForm1.HandleInfo(var Msg: TLMessage);
 var

@@ -100,7 +100,7 @@ begin
     result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
   // if binaries already found, search for library belonging to these binaries !!
-  if (not result) AND (Length(FBinUtilsPath)>0) AND (Pos('Error:',FBinUtilsPath)=0) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (Length(FBinUtilsPath)>0) AND (Pos('Error:',FBinUtilsPath)=0) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FBinUtilsPath);
     if ndkversion>0 then
@@ -123,7 +123,7 @@ begin
   end;
 
   // search for a library provide by a standard android libraries install
-  if (not result) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
     begin
@@ -163,7 +163,7 @@ begin
 
   {$IFDEF MSWINDOWS}
   // find Delphi android libs
-  if (not result) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     ShowInfo('Searched but not found libspath '+FLibsPath,etDebug);
     for delphiversion:=MAXDELPHIVERSION downto MINDELPHIVERSION do
@@ -238,7 +238,7 @@ begin
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // if libs already found, search for binutils belonging to this lib !!
-  if (not result) AND (Length(FLibsPath)>0) AND (Pos('Error:',FLibsPath)=0) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (Length(FLibsPath)>0) AND (Pos('Error:',FLibsPath)=0) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FLibsPath);
     if ndkversion>0 then
@@ -276,7 +276,7 @@ begin
     end;
   end;
 
-  if (not result) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
     begin
@@ -321,7 +321,7 @@ begin
   //http://dl.google.com/android/ndk/android-ndk-r9c-windows-x86_64.zip
   //also windows may be windows-x86_64...
 
-  if (not result) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
     begin
@@ -350,7 +350,7 @@ begin
   end;
 
   // check Delphi auto installed android libraries
-  if (not result) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     for delphiversion:=MAXDELPHIVERSION downto MINDELPHIVERSION do
     begin

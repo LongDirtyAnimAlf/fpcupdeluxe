@@ -84,7 +84,7 @@ begin
   result:=SearchLibrary(Basepath,LIBCNAME);
 
   // if binaries already found, search for library belonging to these binaries !!
-  if (not result) AND (Length(FBinUtilsPath)>0) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (Length(FBinUtilsPath)>0) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FBinUtilsPath);
     if ndkversion>0 then
@@ -113,7 +113,7 @@ begin
 
   //C:\Users\<username>\AppData\Local\Android\sdk
 
-  if (not result) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
     begin
@@ -151,7 +151,7 @@ begin
 
   {$IFDEF MSWINDOWS}
   // find Delphi android libs
-  if (not result) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     ShowInfo('Searched but not found libspath '+FLibsPath,etDebug);
     for delphiversion:=MAXDELPHIVERSION downto MINDELPHIVERSION do
@@ -222,7 +222,7 @@ begin
   result:=SearchBinUtil(Basepath,AsFile);
 
   // if libs already found, search for binutils belonging to this lib !!
-  if (not result) AND (Length(FLibsPath)>0) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (Length(FLibsPath)>0) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FLibsPath);
     if ndkversion>0 then
@@ -267,7 +267,7 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  if (not result) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
     begin
@@ -312,7 +312,7 @@ begin
 
 
   {$IFDEF MSWINDOWS}
-  if (not result) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
     begin
@@ -341,7 +341,7 @@ begin
   end;
 
   // check Delphi auto installed android libraries
-  if (not result) AND (SearchModeUsed=smAuto) then
+  if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     for delphiversion:=MAXDELPHIVERSION downto MINDELPHIVERSION do
     begin

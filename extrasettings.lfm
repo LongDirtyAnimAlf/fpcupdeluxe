@@ -160,7 +160,7 @@ object Form2: TForm2
     Left = 8
     Height = 430
     Top = 140
-    Width = 442
+    Width = 392
     Anchors = [akTop, akLeft, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 8
@@ -168,14 +168,14 @@ object Form2: TForm2
     BorderSpacing.Bottom = 12
     Caption = 'Miscellaneous settings'
     ClientHeight = 410
-    ClientWidth = 438
+    ClientWidth = 388
     ParentFont = False
     TabOrder = 3
     object MiscellaneousCheckListBox: TCheckListBox
       Left = 4
       Height = 402
       Top = 4
-      Width = 430
+      Width = 380
       Align = alClient
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -194,100 +194,29 @@ object Form2: TForm2
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = ButtonPanel
-    Left = 458
+    Left = 408
     Height = 419
     Top = 140
-    Width = 316
+    Width = 366
     Anchors = [akTop, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Right = 8
     BorderSpacing.Bottom = 4
     Caption = 'Custom tools location and build options'
     ClientHeight = 399
-    ClientWidth = 312
+    ClientWidth = 362
     ParentFont = False
     TabOrder = 4
-    object ComboBoxOS: TComboBox
-      AnchorSideLeft.Control = ComboBoxCPU
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = ComboBoxCPU
-      AnchorSideRight.Control = GroupBox4
-      AnchorSideRight.Side = asrBottom
-      Left = 96
-      Height = 23
-      Top = 27
-      Width = 104
-      BorderSpacing.Left = 8
-      ItemHeight = 15
-      OnChange = ComboBoxCPUOSChange
-      ParentFont = False
-      Style = csDropDownList
-      TabOrder = 1
-    end
-    object ComboBoxCPU: TComboBox
-      AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = LabelCPU
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 23
-      Top = 27
-      Width = 84
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 8
-      ItemHeight = 15
-      OnChange = ComboBoxCPUOSChange
-      ParentFont = False
-      ParentShowHint = False
-      Style = csDropDownList
-      TabOrder = 0
-    end
-    object RadioGroup3: TRadioGroup
-      AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = ComboBoxCPU
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = GroupBox4
-      AnchorSideRight.Side = asrBottom
-      Left = 4
-      Height = 58
-      Top = 57
-      Width = 302
-      Anchors = [akTop, akLeft, akRight]
-      AutoFill = True
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 7
-      BorderSpacing.Right = 6
-      Caption = 'Search options'
-      ChildSizing.LeftRightSpacing = 6
-      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-      ChildSizing.EnlargeVertical = crsHomogenousChildResize
-      ChildSizing.ShrinkHorizontal = crsScaleChilds
-      ChildSizing.ShrinkVertical = crsScaleChilds
-      ChildSizing.Layout = cclLeftToRightThenTopToBottom
-      ChildSizing.ControlsPerLine = 3
-      ClientHeight = 38
-      ClientWidth = 298
-      Columns = 3
-      Enabled = False
-      ItemIndex = 0
-      Items.Strings = (
-        'fpcup'
-        'full auto'
-        'custom'
-      )
-      OnSelectionChanged = RadioGroup3SelectionChanged
-      ParentFont = False
-      TabOrder = 3
-    end
     object EditLibLocation: TEdit
       AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = RadioGroup3
+      AnchorSideTop.Control = PageControl1
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = btnSelectLibDir
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 119
-      Width = 210
+      Top = 164
+      Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -298,7 +227,7 @@ object Form2: TForm2
       ParentShowHint = False
       ReadOnly = True
       ShowHint = True
-      TabOrder = 4
+      TabOrder = 0
     end
     object EditBinLocation: TEdit
       AnchorSideLeft.Control = GroupBox4
@@ -308,8 +237,8 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 148
-      Width = 210
+      Top = 193
+      Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -320,7 +249,7 @@ object Form2: TForm2
       ParentShowHint = False
       ReadOnly = True
       ShowHint = True
-      TabOrder = 6
+      TabOrder = 2
     end
     object btnSelectLibDir: TButton
       AnchorSideLeft.Control = EditLibLocation
@@ -328,9 +257,9 @@ object Form2: TForm2
       AnchorSideTop.Control = EditLibLocation
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
-      Left = 226
+      Left = 276
       Height = 25
-      Top = 119
+      Top = 164
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -341,7 +270,7 @@ object Form2: TForm2
       Enabled = False
       OnClick = OnDirectorySelect
       ParentFont = False
-      TabOrder = 5
+      TabOrder = 1
     end
     object btnSelectBinDir: TButton
       AnchorSideLeft.Control = EditBinLocation
@@ -349,9 +278,9 @@ object Form2: TForm2
       AnchorSideTop.Control = EditBinLocation
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
-      Left = 226
+      Left = 276
       Height = 25
-      Top = 148
+      Top = 193
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -362,7 +291,7 @@ object Form2: TForm2
       Enabled = False
       OnClick = OnDirectorySelect
       ParentFont = False
-      TabOrder = 7
+      TabOrder = 3
     end
     object EditCrossBuildOptions: TEdit
       AnchorSideLeft.Control = GroupBox4
@@ -372,8 +301,8 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 23
-      Top = 202
-      Width = 294
+      Top = 247
+      Width = 344
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -382,7 +311,7 @@ object Form2: TForm2
       OnChange = EditCrossBuildOptionsChange
       OnDblClick = EditDblClickDelete
       ParentFont = False
-      TabOrder = 8
+      TabOrder = 4
     end
     object LabelCrossBuildOptions: TLabel
       AnchorSideLeft.Control = GroupBox4
@@ -390,29 +319,13 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 183
+      Top = 228
       Width = 219
       BorderSpacing.Left = 4
       BorderSpacing.Top = 12
       Caption = 'Cross Build Options Override (i.e. -CfSoft)'
       ParentColor = False
       ParentFont = False
-    end
-    object btnListCustomOptions: TButton
-      AnchorSideTop.Control = ComboBoxOS
-      AnchorSideRight.Control = GroupBox4
-      AnchorSideRight.Side = asrBottom
-      Left = 216
-      Height = 25
-      Top = 27
-      Width = 90
-      Anchors = [akTop, akLeft, akRight]
-      AutoSize = True
-      BorderSpacing.Right = 6
-      Caption = 'List All'
-      OnClick = btnListCustomOptionsClick
-      ParentFont = False
-      TabOrder = 2
     end
     object EditCompilerOverride: TEdit
       AnchorSideLeft.Control = GroupBox4
@@ -422,8 +335,8 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 250
-      Width = 210
+      Top = 295
+      Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -434,7 +347,7 @@ object Form2: TForm2
       ParentShowHint = False
       ReadOnly = True
       ShowHint = True
-      TabOrder = 9
+      TabOrder = 5
     end
     object btnSelectCompiler: TButton
       AnchorSideLeft.Control = EditLibLocation
@@ -442,9 +355,9 @@ object Form2: TForm2
       AnchorSideTop.Control = EditCompilerOverride
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
-      Left = 226
+      Left = 276
       Height = 25
-      Top = 250
+      Top = 295
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -455,7 +368,7 @@ object Form2: TForm2
       Enabled = False
       OnClick = btnSelectFile
       ParentFont = False
-      TabOrder = 10
+      TabOrder = 6
     end
     object LabelCompilerOverride: TLabel
       AnchorSideLeft.Control = GroupBox4
@@ -463,7 +376,7 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 231
+      Top = 276
       Width = 97
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -479,8 +392,8 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 59
-      Top = 281
-      Width = 294
+      Top = 326
+      Width = 344
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True
       BorderSpacing.Left = 4
@@ -498,31 +411,170 @@ object Form2: TForm2
       Enabled = False
       OnSelectionChanged = RadioGroupARMArchSelectionChanged
       ParentFont = False
-      TabOrder = 11
+      TabOrder = 7
     end
-    object LabelCPU: TLabel
+    object PageControl1: TPageControl
       AnchorSideLeft.Control = GroupBox4
       AnchorSideTop.Control = GroupBox4
-      Left = 4
-      Height = 15
-      Top = 4
-      Width = 57
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 4
-      Caption = 'Select CPU'
-      ParentColor = False
-      ParentFont = False
-    end
-    object LabelOS: TLabel
-      AnchorSideLeft.Control = ComboBoxOS
-      AnchorSideTop.Control = LabelCPU
-      Left = 96
-      Height = 15
-      Top = 4
-      Width = 49
-      Caption = 'Select OS'
-      ParentColor = False
-      ParentFont = False
+      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 160
+      Top = 0
+      Width = 362
+      ActivePage = tsCPUOS
+      Anchors = [akTop, akLeft, akRight]
+      TabIndex = 0
+      TabOrder = 8
+      object tsCPUOS: TTabSheet
+        Caption = 'CPU/OS'
+        ClientHeight = 132
+        ClientWidth = 354
+        object LabelCPU: TLabel
+          AnchorSideLeft.Control = GroupBox4
+          AnchorSideTop.Control = GroupBox4
+          Left = 4
+          Height = 15
+          Top = 4
+          Width = 57
+          BorderSpacing.Left = 4
+          BorderSpacing.Top = 4
+          Caption = 'Select CPU'
+          ParentColor = False
+          ParentFont = False
+        end
+        object LabelOS: TLabel
+          AnchorSideLeft.Control = ComboBoxOS
+          AnchorSideTop.Control = LabelCPU
+          Left = 96
+          Height = 15
+          Top = 4
+          Width = 49
+          Caption = 'Select OS'
+          ParentColor = False
+          ParentFont = False
+        end
+        object ComboBoxCPU: TComboBox
+          AnchorSideLeft.Control = GroupBox4
+          AnchorSideTop.Control = LabelCPU
+          AnchorSideTop.Side = asrBottom
+          Left = 4
+          Height = 23
+          Top = 27
+          Width = 84
+          BorderSpacing.Left = 4
+          BorderSpacing.Top = 8
+          ItemHeight = 15
+          OnChange = ComboBoxCPUOSChange
+          ParentFont = False
+          ParentShowHint = False
+          Style = csDropDownList
+          TabOrder = 0
+        end
+        object ComboBoxOS: TComboBox
+          AnchorSideLeft.Control = ComboBoxCPU
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = ComboBoxCPU
+          AnchorSideRight.Control = GroupBox4
+          AnchorSideRight.Side = asrBottom
+          Left = 96
+          Height = 23
+          Top = 27
+          Width = 104
+          BorderSpacing.Left = 8
+          ItemHeight = 15
+          OnChange = ComboBoxCPUOSChange
+          ParentFont = False
+          Style = csDropDownList
+          TabOrder = 1
+        end
+        object btnListCustomOptions: TButton
+          AnchorSideTop.Control = ComboBoxOS
+          AnchorSideRight.Control = tsCPUOS
+          AnchorSideRight.Side = asrBottom
+          Left = 287
+          Height = 25
+          Top = 27
+          Width = 61
+          Anchors = [akTop, akRight]
+          AutoSize = True
+          BorderSpacing.Right = 6
+          Caption = 'List All'
+          OnClick = btnListCustomOptionsClick
+          ParentFont = False
+          TabOrder = 2
+        end
+        object rgrpSearchOptions: TRadioGroup
+          AnchorSideLeft.Control = tsCPUOS
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = tsCPUOS
+          AnchorSideRight.Side = asrBottom
+          AnchorSideBottom.Control = tsCPUOS
+          AnchorSideBottom.Side = asrBottom
+          Left = 4
+          Height = 52
+          Top = 80
+          Width = 344
+          Anchors = [akLeft, akRight, akBottom]
+          AutoFill = True
+          BorderSpacing.Left = 4
+          BorderSpacing.Top = 7
+          BorderSpacing.Right = 6
+          Caption = 'Search options'
+          ChildSizing.LeftRightSpacing = 6
+          ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+          ChildSizing.EnlargeVertical = crsHomogenousChildResize
+          ChildSizing.ShrinkHorizontal = crsScaleChilds
+          ChildSizing.ShrinkVertical = crsScaleChilds
+          ChildSizing.Layout = cclLeftToRightThenTopToBottom
+          ChildSizing.ControlsPerLine = 3
+          ClientHeight = 32
+          ClientWidth = 340
+          Columns = 3
+          Enabled = False
+          ItemIndex = 0
+          Items.Strings = (
+            'fpcup'
+            'full auto'
+            'custom'
+          )
+          OnSelectionChanged = rgrpSearchOptionsSelectionChanged
+          ParentFont = False
+          TabOrder = 3
+        end
+      end
+      object tsSUBARCH: TTabSheet
+        Caption = 'Subarch'
+        ClientHeight = 132
+        ClientWidth = 354
+        object rgrpSubarch: TRadioGroup
+          AnchorSideLeft.Control = tsSUBARCH
+          AnchorSideTop.Control = tsSUBARCH
+          AnchorSideRight.Control = tsSUBARCH
+          AnchorSideRight.Side = asrBottom
+          Left = 4
+          Height = 60
+          Top = 8
+          Width = 344
+          Anchors = [akTop, akLeft, akRight]
+          AutoFill = True
+          AutoSize = True
+          BorderSpacing.Left = 4
+          BorderSpacing.Top = 8
+          BorderSpacing.Right = 6
+          Caption = 'Select subarch'
+          ChildSizing.LeftRightSpacing = 6
+          ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+          ChildSizing.EnlargeVertical = crsHomogenousChildResize
+          ChildSizing.ShrinkHorizontal = crsScaleChilds
+          ChildSizing.ShrinkVertical = crsScaleChilds
+          ChildSizing.Layout = cclLeftToRightThenTopToBottom
+          ChildSizing.ControlsPerLine = 3
+          Columns = 3
+          Constraints.MinHeight = 60
+          TabOrder = 0
+        end
+      end
     end
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox
