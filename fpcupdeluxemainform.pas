@@ -1770,8 +1770,8 @@ begin
     // skip git fatal messages ... they are not that fatal ... but not sure yet !
     // if (Pos('fatal: not a git repository',lowercase(s))=0) then
     begin
-      FG      := TColor($8080FF);
-      BG      := TColor($800000);
+      FG      := TColor($0060FF);
+      BG      := TColor($204000);
       Special := True;
     end;
   end;
@@ -2992,16 +2992,23 @@ begin
           {$endif MSWINDOWS}
 
           // bit tricky ... if bins and/or libs are already there exit this retry ... ;-)
+
           if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+BinPath)) then MissingCrossBins:=false;
 
-          if (FPCupManager.CrossOS_SubArch<>TSUBARCH.saNone) then
+          if (FPCupManager.CrossOS_SubArch=TSUBARCH.saNone) then
           begin
             if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+LibPath)) then MissingCrossLibs:=false;
           end
           else
-            MissingCrossLibs:=true;// force the download of embedded libs if not there ... if this fails, don't worry, building will go on
+          begin
+            s:=ConcatPaths([sInstallDir,LibPath,GetSubarch(FPCupManager.CrossOS_SubArch)]);
+            if (NOT DirectoryIsEmpty(s)) then
+              MissingCrossLibs:=false
+            else
+              MissingCrossLibs:=true;// force the download of embedded libs if not there ... if this fails, don't worry, building will go on
+          end;
 
-
+          // Get tools !!
           if (MissingCrossBins OR MissingCrossLibs) then
           begin
 
