@@ -2991,13 +2991,18 @@ begin
           BinsFileName:='CrossBins'+BinsFileName;
           {$endif MSWINDOWS}
 
-          // bit tricky ... if bins and libs are already there exit this retry ... ;-)
-          if (
-             (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+BinPath))
-             OR
-             (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+LibPath))
-             )
-          then
+          // bit tricky ... if bins and/or libs are already there exit this retry ... ;-)
+          if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+BinPath)) then MissingCrossBins:=false;
+
+          if (FPCupManager.CrossOS_SubArch<>TSUBARCH.saNone) then
+          begin
+            if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+LibPath)) then MissingCrossLibs:=false;
+          end
+          else
+            MissingCrossLibs:=true;// force the download of embedded libs if not there ... if this fails, don't worry, building will go on
+
+
+          if (MissingCrossBins OR MissingCrossLibs) then
           begin
 
             // many files to unpack for Darwin : do not show progress of unpacking files when unpacking for Darwin.

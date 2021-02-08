@@ -1094,7 +1094,9 @@ begin
               if FileExists(s2) then
               begin
                 Infoln(infotext+'Copy cross-compiler ('+CrossCompilerName+') into: '+FBinPath,etInfo);
-                FileUtil.CopyFile(s2,s1);
+                //FileUtil.CopyFile(s2,s1);
+                SysUtils.DeleteFile(s1);
+                SysUtils.RenameFile(s2,s1);
                 fpChmod(s1,&755);
               end;
             end;
@@ -1155,7 +1157,9 @@ begin
           if FileExists(s2) then
           begin
             Infoln(infotext+'Copy cross-compiler ('+CrossCompilerName+') into: '+FBinPath,etInfo);
-            FileUtil.CopyFile(s2,s1);
+            //FileUtil.CopyFile(s2,s1);
+            SysUtils.DeleteFile(s1);
+            SysUtils.RenameFile(s2,s1);
             fpChmod(s1,&755);
           end;
           {$ENDIF}
@@ -2234,7 +2238,12 @@ begin
       if (ExtractFileName(BootstrapFilePath)<>CompilerName) then
       begin
         // Give the bootstrapper its correct name
-        if FileExists(BootstrapFilePath) then FileUtil.CopyFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
+        if FileExists(BootstrapFilePath) then
+        begin
+          //FileUtil.CopyFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
+          SysUtils.DeleteFile(BootstrapFileArchiveDir+CompilerName);
+          SysUtils.RenameFile(BootstrapFilePath,BootstrapFileArchiveDir+CompilerName);
+        end;
       end;
     end;
 
@@ -2251,8 +2260,14 @@ begin
       begin
         Infoln(localinfotext+'Success. Going to copy '+BootstrapFilePath+' to '+FBootstrapCompiler,etInfo);
         SysUtils.DeleteFile(FBootstrapCompiler); //ignore errors
+
         // We might be moving files across partitions so we cannot use renamefile
-        OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, FBootstrapCompiler);
+        // However, this gives errors on Darwin due to the copied file not being signed.
+        // So, use rename and fall-over to copy in case of error
+        //OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, FBootstrapCompiler);
+        OperationSucceeded:=SysUtils.RenameFile(BootstrapFilePath,FBootstrapCompiler);
+        if (NOT OperationSucceeded) then OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, FBootstrapCompiler);
+
         //Sysutils.DeleteFile(ArchiveDir + CompilerName);
       end else OperationSucceeded:=False;
     end;
@@ -3020,8 +3035,13 @@ begin
       begin
         s:=GetCompilerName(GetTargetCPU);
         s:=Which(s);
-        //Copy the compiler to out bootstrap directory
+        {$ifdef Darwin}
+        // Due to codesigning, do not copy, but just use it.
+        if FileExists(s) then FCompiler:=s;
+        {$else}
+        //Copy the compiler to our bootstrap directory
         if FileExists(s) then FileUtil.CopyFile(s,FCompiler);
+        {$endif}
         if NOT FileExists(s) then
         begin
           s:='fpc'+GetExeExt;
@@ -3225,9 +3245,12 @@ begin
     if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName) then
     begin
       Infoln(infotext+'Copy compiler ('+TargetCompilerName+') into: '+FBinPath,etDebug);
-      FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName,
-        IncludeTrailingPathDelimiter(FBinPath)+TargetCompilerName);
-      fpChmod(IncludeTrailingPathDelimiter(FBinPath)+TargetCompilerName,&755);
+      s:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName;
+      s2:=IncludeTrailingPathDelimiter(FBinPath)+TargetCompilerName;
+      //FileUtil.CopyFile(s,s2);
+      SysUtils.DeleteFile(s2);
+      SysUtils.RenameFile(s,s2);
+      fpChmod(s2,&755);
     end;
 
     // create link 'units' below FInstallDirectory to
