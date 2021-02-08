@@ -579,19 +579,16 @@ begin
           begin
             // Set defaults for CrossBuildOptions
 
-            //arm predefined ABI settings for all but embedded
-            if ((CPU=TCPU.arm) AND (NOT (OS in SUBARCH_OS))) then
+            //arm (unix, non-android) predefined settings
+            if (CPU=TCPU.arm) AND (NOT (OS in SUBARCH_OS)) AND (NOT (OS in [TOS.win32,TOS.win64,TOS.iphonesim,TOS.java,TOS.msdos,TOS.solaris,TOS.morphos,TOS.aros,TOS.amiga,TOS.go32v2])) then
             begin
+
               // default: armhf
               // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (armel) for Android
               // adding this option will allow ppcrossarm compiler to generate ARMHF when needed
               // but I stand corrected if this assumption is wrong
               aARMABISetting:=TARMARCH.armhf;
-            end;
 
-            //arm (unix, non-android) predefined settings
-            if (CPU=TCPU.arm) AND (OS<>TOS.android) AND (NOT (OS in SUBARCH_OS)) then
-            begin
               if (OS=TOS.wince) then
               begin
                 //Disable for now : setting ARMV6 or higher gives problems with FPC 3.0.4 and lower
@@ -604,11 +601,15 @@ begin
               end
               else
               begin
-                if (aARMABISetting=TARMARCH.armhf) then
-                  aCrossOptionSetting:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF '
-                else
-                  aCrossOptionSetting:='-CpARMV6 -CfVFPV2 ';
+                if (OS<>TOS.android) then
+                begin
+                  if (aARMABISetting=TARMARCH.armhf) then
+                    aCrossOptionSetting:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF '
+                  else
+                    aCrossOptionSetting:='-CpARMV6 -CfVFPV2 ';
+                end;
               end;
+
             end;
 
             //android predefined settings
@@ -950,9 +951,12 @@ begin
 
     for OS := Low(TOS) to High(TOS) do
     begin
+      if OS=TOS.osNone then continue;
 
       for CPU := Low(TCPU) to High(TCPU) do
       begin
+        if CPU=TCPU.cpuNone then continue;
+
         s1:=GetCPU(CPU)+'-'+GetOS(OS);
 
         Subarchs:=GetSubarchs(CPU,OS);
@@ -986,10 +990,13 @@ begin
 
           if CPU=arm then
           begin
-            if Length(CrossUtils[CPU,OS,SUBARCH].CrossARMArch)>0 then
+            if (Length(CrossUtils[CPU,OS,SUBARCH].CrossARMArch)>0) then
             begin
-              if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
-              InfoForm.Memo1.Lines.Append('  ARM Arch : '+CrossUtils[CPU,OS,SUBARCH].CrossARMArch);
+              if (CrossUtils[CPU,OS,SUBARCH].CrossARMArch<>GetEnumNameSimple(TypeInfo(TARMARCH),Ord(TARMARCH.default))) then
+              begin
+                if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
+                InfoForm.Memo1.Lines.Append('  ARM Arch : '+CrossUtils[CPU,OS,SUBARCH].CrossARMArch);
+              end;
             end;
           end;
 

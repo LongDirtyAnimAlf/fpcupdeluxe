@@ -39,11 +39,11 @@ type
     LocalCPU:TCPU;
     LocalOS:TOS;
     LocalSUBARCH:TSUBARCH;
+    SUBARCHStore:array[TCPU,TOS] of TSUBARCH;
     procedure SetGUI;
-    function GetSelectedSubArch:TSUBARCH;
   public
     procedure SetCrossTarget({%H-}aSender:TObject;aCPU:TCPU;aOS:TOS);
-    property SelectedSubArch:TSUBARCH read GetSelectedSubArch;
+    function GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
   end;
 
 var
@@ -63,6 +63,7 @@ uses
 procedure TSubarchForm.FormCreate(Sender: TObject);
 var
   aCPU:TCPU;
+  aOS:TOS;
   ARMArch:TARMARCH;
 begin
   // Fill CPU radiogroup
@@ -78,11 +79,19 @@ begin
   LocalCPU:=TCPU.cpuNone;
   LocalOS:=TOS.osNone;
   LocalSUBARCH:=TSUBARCH.saNone;
+
+  for aCPU in TCPU do
+  begin
+    for aOS in TOS do
+    begin
+      SUBARCHStore[aCPU,aOS]:=TSUBARCH.saNone;
+    end;
+  end;
+
 end;
 
 procedure TSubarchForm.FormShow(Sender: TObject);
 begin
-  LocalSUBARCH:=TSUBARCH.saNone;
   SetGUI;
 end;
 
@@ -107,6 +116,7 @@ end;
 
 procedure TSubarchForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  SUBARCHStore[LocalCPU,LocalOS]:=LocalSUBARCH;
   LocalCPU:=TCPU.cpuNone;
   LocalOS:=TOS.osNone;
 end;
@@ -119,13 +129,18 @@ begin
   begin
     if Sender=btnSelectLibDir then EditLibLocation.Text:=SelectDirectoryDialog1.FileName;
     if Sender=btnSelectBinDir then EditBinLocation.Text:=SelectDirectoryDialog1.FileName;
-  end;
-  if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
-  begin
-    if Sender=btnSelectLibDir then
-       CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].LibDir:=SelectDirectoryDialog1.FileName;
-    if Sender=btnSelectBinDir then
-       CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].BinDir:=SelectDirectoryDialog1.FileName;
+
+    if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
+    begin
+      with CrossUtils[LocalCPU,LocalOS,LocalSUBARCH] do
+      begin
+        if Sender=btnSelectLibDir then
+          LibDir:=EditLibLocation.Text;
+        if Sender=btnSelectBinDir then
+          BinDir:=EditBinLocation.Text;
+        Setting:=TSearchSetting.ssCustom;
+      end;
+    end;
   end;
 end;
 
@@ -142,9 +157,17 @@ begin
   TEdit(Sender).Text:='';
   if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
   begin
-    if Sender=EditLibLocation then CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].LibDir:='';
-    if Sender=EditBinLocation then CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].BinDir:='';
-    if Sender=EditCrossBuildOptions then CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions:='';
+    with CrossUtils[LocalCPU,LocalOS,LocalSUBARCH] do
+    begin
+      if Sender=EditLibLocation then
+        LibDir:='';
+      if Sender=EditBinLocation then
+        BinDir:='';
+      if (Length(BinDir)=0) AND (Length(LibDir)=0) then
+        Setting:=TSearchSetting.ssUp;
+      if Sender=EditCrossBuildOptions then
+        CrossBuildOptions:='';
+    end;
   end;
 end;
 
@@ -181,7 +204,10 @@ begin
       exit;
     end;
     for SUBARCH in Subarchs do
+    begin
       rgrpSelectSubarch.Items.Append(GetSubarch(SUBARCH));
+      if SUBARCH=LocalSUBARCH then rgrpSelectSubarch.ItemIndex:=Pred(rgrpSelectSubarch.Items.Count);
+    end;
     if rgrpSelectSubarch.Items.Count=1 then rgrpSelectSubarch.ItemIndex:=0;
   finally
     EndFormUpdate;
@@ -203,6 +229,7 @@ procedure TSubarchForm.SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS);
 begin
   LocalCPU:=aCPU;
   LocalOS:=aOS;
+  LocalSUBARCH:=SUBARCHStore[LocalCPU,LocalOS];
   rgrpSelectCPUSelectionChanged(nil);
 end;
 
@@ -224,9 +251,9 @@ begin
   btnSelectBinDir.Enabled:=e;
 end;
 
-function TSubarchForm.GetSelectedSubArch:TSUBARCH;
+function TSubarchForm.GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
 begin
-  result:=LocalSUBARCH;
+  result:=SUBARCHStore[aCPU,aOS];
 end;
 
 end.

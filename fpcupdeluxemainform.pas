@@ -2439,9 +2439,8 @@ begin
     end;
   end;
 
-
   // Set subarch early
-  FPCupManager.CrossOS_SubArch:=SubarchForm.SelectedSubArch;
+  FPCupManager.CrossOS_SubArch:=SubarchForm.GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
 
   {$ifdef RemoteLog}
   aDataClient.UpInfo.CrossCPUOS:=GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target);
@@ -2615,7 +2614,7 @@ begin
       //embedded predefined settings
       if (FPCupManager.CrossOS_Target=TOS.embedded) then
       begin
-        if SubarchForm.SelectedSubArch=TSUBARCH.saNone then
+        if FPCupManager.CrossOS_SubArch=TSUBARCH.saNone then
         begin
           if (FPCupManager.CrossCPU_Target=TCPU.avr) then
             FPCupManager.CrossOS_SubArch:=TSubarch.avr5;
@@ -2629,10 +2628,12 @@ begin
       //freertos predefined settings
       if (FPCupManager.CrossOS_Target=TOS.freertos) then
       begin
-        if SubarchForm.SelectedSubArch=TSUBARCH.saNone then
+        if FPCupManager.CrossOS_SubArch=TSUBARCH.saNone then
         begin
           if (FPCupManager.CrossCPU_Target=TCPU.xtensa) then
             FPCupManager.CrossOS_SubArch:=TSubarch.lx6;
+          if (radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') then
+            FPCupManager.CrossOS_SubArch:=TSubarch.armv6m;
           if (FPCupManager.CrossCPU_Target=TCPU.arm) then
             FPCupManager.CrossOS_SubArch:=TSubarch.armv7em;
         end;
@@ -2643,7 +2644,7 @@ begin
       begin
         if (FPCupManager.CrossCPU_Target=TCPU.arm) then
         begin
-          if SubarchForm.SelectedSubArch=TSUBARCH.saNone then
+          if FPCupManager.CrossOS_SubArch=TSUBARCH.saNone then
           begin
             if (radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') then
               FPCupManager.CrossOS_SubArch:=TSubarch.armv6

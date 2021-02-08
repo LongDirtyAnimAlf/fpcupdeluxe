@@ -104,8 +104,8 @@ type
   TSUBARCHS = set of TSUBARCH;
 
 const
-  SUBARCH_OS         = [TOS.embedded,TOS.freertos,TOS.ultibo];
-  SUBARCH_CPU        = [TCPU.arm,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.xtensa];
+  SUBARCH_OS         = [{TOS.osNone,}TOS.embedded,TOS.freertos,TOS.ultibo];
+  SUBARCH_CPU        = [{TCPU.cpuNone,}TCPU.arm,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.xtensa];
   SUBARCH_ARM        = [armv4..armv7m];
   SUBARCH_AVR        = [avr1..avrxmega3];
   SUBARCH_MIPSEL     = [pic32mx];
