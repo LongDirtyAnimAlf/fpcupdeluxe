@@ -82,9 +82,9 @@ type
     procedure btnSelectFile(Sender: TObject);
     procedure btnListCustomOptionsClick({%H-}Sender: TObject);
     procedure ComboBoxCPUOSChange({%H-}Sender: TObject);
+    procedure EditCrossBuildOptionsEditingDone(Sender: TObject);
     procedure EditDblClickDelete(Sender: TObject);
-    procedure EditCrossBuildOptionsChange(Sender: TObject);
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormClose(Sender: TObject; var {%H-}CloseAction: TCloseAction);
     procedure FormCreate({%H-}Sender: TObject);
     procedure FormDestroy({%H-}Sender: TObject);
     procedure IniPropStorageSettingsRestoringProperties(Sender: TObject);
@@ -94,7 +94,6 @@ type
     procedure RadioGroupARMArchSelectionChanged(Sender: TObject);
     procedure rgrpSubarchSelectionChanged(Sender: TObject);
   private
-    FCrossUtils:TCrossUtils;
     FInstallPath:string;
 
     LocalCPU:TCPU;
@@ -199,15 +198,15 @@ type
 
     procedure SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH);
 
-    function GetLibraryDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH=TSUBARCH.saNone):string;
-    function GetToolsDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH=TSUBARCH.saNone):string;
-    function GetCrossBuildOptions(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH=TSUBARCH.saNone):string;
-    function GetCrossARMArch(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH=TSUBARCH.saNone):string;
-    function GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH=TSUBARCH.saNone): string;
-    function GetCompiler(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH=TSUBARCH.saNone): string;
+    function GetLibraryDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
+    function GetToolsDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
+    function GetCrossBuildOptions(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
+    function GetCrossARMArch(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
+    function GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
+    function GetCompiler(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
 
-    function  GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH=TSUBARCH.saNone): boolean;
-    procedure SetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH=TSUBARCH.saNone; aValue:boolean=false);
+    function  GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
+    procedure SetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH;aValue:boolean);
 
     property Repo:boolean read GetRepo write SetRepo;
     property PackageRepo:boolean read GetPackageRepo write SetPackageRepo;
@@ -344,9 +343,9 @@ begin
   if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
   begin
     if Sender=btnSelectLibDir then
-       FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].LibDir:=SelectDirectoryDialog1.FileName;
+       CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].LibDir:=SelectDirectoryDialog1.FileName;
     if Sender=btnSelectBinDir then
-       FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].BinDir:=SelectDirectoryDialog1.FileName;
+       CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].BinDir:=SelectDirectoryDialog1.FileName;
   end;
 end;
 
@@ -431,13 +430,13 @@ begin
 
       for SUBARCH in Subarchs do
       begin
-        FCrossUtils[CPU,OS,SUBARCH].Setting:=TSearchSetting.ssUp;
-        FCrossUtils[CPU,OS,SUBARCH].LibDir:='';
-        FCrossUtils[CPU,OS,SUBARCH].BinDir:='';
-        FCrossUtils[CPU,OS,SUBARCH].CrossBuildOptions:='';
-        FCrossUtils[CPU,OS,SUBARCH].CrossARMArch:='';
-        FCrossUtils[CPU,OS,SUBARCH].Compiler:='';
-        FCrossUtils[CPU,OS,SUBARCH].Available:=false;
+        CrossUtils[CPU,OS,SUBARCH].Setting:=TSearchSetting.ssUp;
+        CrossUtils[CPU,OS,SUBARCH].LibDir:='';
+        CrossUtils[CPU,OS,SUBARCH].BinDir:='';
+        CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions:='';
+        CrossUtils[CPU,OS,SUBARCH].CrossARMArch:='';
+        CrossUtils[CPU,OS,SUBARCH].Compiler:='';
+        CrossUtils[CPU,OS,SUBARCH].Available:=false;
       end;
     end;
   end;
@@ -534,12 +533,17 @@ begin
 end;
 
 procedure TForm2.SetInstallDir(const aInstallDir:string='');
+const
+  CROSSOPTIONS = 'CrossBuildOptions';
+  ARMABI = 'CrossARMArch';
 var
   CPU:TCPU;
   OS:TOS;
   SUBARCH:TSUBARCH;
   Subarchs:TSUBARCHS;
   s1,s2:string;
+  aCrossOptionSetting:string;
+  aARMABISetting:TARMARCH;
 begin
   if (Length(aInstallDir)>0)
      then FInstallPath:=IncludeTrailingPathDelimiter(aInstallDir)
@@ -562,13 +566,189 @@ begin
             s2:=s1+'-'+GetSubarch(SUBARCH)
           else
             s2:=s1;
-          FCrossUtils[CPU,OS,SUBARCH].Setting:=TSearchSetting(ReadInteger(s2,'Setting',Ord(TSearchSetting.ssUp)));
-          FCrossUtils[CPU,OS,SUBARCH].LibDir:=ReadString(s2,'LibPath','');
-          FCrossUtils[CPU,OS,SUBARCH].BinDir:=ReadString(s2,'BinPath','');
-          FCrossUtils[CPU,OS,SUBARCH].CrossBuildOptions:=ReadString(s2,'CrossBuildOptions','');
-          if CPU=arm then
-            FCrossUtils[CPU,OS,SUBARCH].CrossARMArch:=ReadString(s2,'CrossARMArch','');
-          FCrossUtils[CPU,OS,SUBARCH].Compiler:=ReadString(s2,'Compiler','');
+
+          CrossUtils[CPU,OS,SUBARCH].Setting:=TSearchSetting(ReadInteger(s2,'Setting',Ord(TSearchSetting.ssUp)));
+          CrossUtils[CPU,OS,SUBARCH].LibDir:=ReadString(s2,'LibPath','');
+          CrossUtils[CPU,OS,SUBARCH].BinDir:=ReadString(s2,'BinPath','');
+          CrossUtils[CPU,OS,SUBARCH].Compiler:=ReadString(s2,'Compiler','');
+
+          aCrossOptionSetting:='';
+          aARMABISetting:=TARMARCH.default;
+
+          if (NOT ValueExists(s2,CROSSOPTIONS)) then
+          begin
+            // Set defaults for CrossBuildOptions
+
+            //arm predefined ABI settings for all but embedded
+            if ((CPU=TCPU.arm) AND (NOT (OS in SUBARCH_OS))) then
+            begin
+              // default: armhf
+              // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (armel) for Android
+              // adding this option will allow ppcrossarm compiler to generate ARMHF when needed
+              // but I stand corrected if this assumption is wrong
+              aARMABISetting:=TARMARCH.armhf;
+            end;
+
+            //arm (unix, non-android) predefined settings
+            if (CPU=TCPU.arm) AND (OS<>TOS.android) AND (NOT (OS in SUBARCH_OS)) then
+            begin
+              if (OS=TOS.wince) then
+              begin
+                //Disable for now : setting ARMV6 or higher gives problems with FPC 3.0.4 and lower
+                //aCrossOptionSetting:='-CpARMV6 ';
+              end
+              else
+              if ((OS=TOS.darwin) OR (OS=TOS.ios)) then
+              begin
+                aCrossOptionSetting:='-CpARMV7 -CfVFPV3 ';
+              end
+              else
+              begin
+                if (aARMABISetting=TARMARCH.armhf) then
+                  aCrossOptionSetting:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF '
+                else
+                  aCrossOptionSetting:='-CpARMV6 -CfVFPV2 ';
+              end;
+            end;
+
+            //android predefined settings
+            if (OS=TOS.android) then
+            begin
+              if (CPU=TCPU.i386) then
+              begin
+                aCrossOptionSetting:='-CfSSSE3 ';
+              end;
+              if (CPU=TCPU.x86_64) then
+              begin
+                aCrossOptionSetting:='-CfSSE42 ';
+              end;
+              if (CPU=TCPU.arm) then
+              begin
+                // Use hard floats, using armeabi-v7a Android ABI.
+                // Note: do not use -CaEABIHF on Android, to not use
+                // armeabi-v7a-hard ABI. Reasons:
+                // - armeabi-v7a-hard ABI is not adviced anymore by Google,
+                //   see "ARM Hard Float ABI Removal" on
+                //   https://android.googlesource.com/platform/ndk/+/353e653824b79c43b948429870d0abeedebde386/docs/HardFloatAbi.md
+                // - it prevents calling functions from libraries not using
+                //   armeabi-v7a-hard ABI (but only using armeabi-v7a) like
+                //   http://repo.or.cz/openal-soft/android.git or
+                //   https://github.com/michaliskambi/tremolo-android .
+                aCrossOptionSetting:='-Cp'+DEFAULTARMCPU+' -CfVFPV3_D16 ';
+              end;
+            end;
+
+            //embedded predefined settings
+            if (OS=TOS.embedded) then
+            begin
+              if (CPU=TCPU.avr) then
+              begin
+                // for Uno (ATMega328P) use avr5
+                // for Mega (ATMega2560) use avr6
+                if SUBARCH=TSubarch.avr5 then
+                  aCrossOptionSetting:='-Cpavr5 ';
+                if SUBARCH=TSubarch.avr6 then
+                  aCrossOptionSetting:='-Cpavr6 ';
+              end;
+              if (CPU=TCPU.arm) then
+              begin
+                // What to do with hard/soft-float ??!!
+              end;
+              if (CPU=TCPU.mipsel) then
+              begin
+                if SUBARCH=TSubarch.pic32mx then
+                  aCrossOptionSetting:='-Cpmips32 ';
+              end;
+            end;
+
+            //freertos predefined settings
+            if (OS=TOS.freertos) then
+            begin
+              if (CPU=TCPU.xtensa) then
+              begin
+                if SUBARCH=TSubarch.lx6 then
+                  aCrossOptionSetting:='-Cplx6 -Cfhard ';
+              end;
+              if (CPU=TCPU.arm) then
+              begin
+                if SUBARCH=TSubarch.armv6m then
+                  aCrossOptionSetting:='-Cparmv6m ';
+                if SUBARCH=TSubarch.armv7m then
+                  aCrossOptionSetting:='-Cparmv7m ';
+                if SUBARCH=TSubarch.armv7em then
+                begin
+                  aARMABISetting:=TARMARCH.armhf;
+                  aCrossOptionSetting:='-Cparmv7em -CfFPV4_SP_D16 ';
+                end;
+                if (aARMABISetting=TARMARCH.armhf) then
+                  aCrossOptionSetting:=aCrossOptionSetting+' -OoFASTMATH -CaEABIHF ';
+              end;
+            end;
+
+            //ultibo predefined settings
+            if (OS=TOS.ultibo) then
+            begin
+              if (CPU=TCPU.arm) then
+              begin
+                // Always hardfloat !!
+                aARMABISetting:=TARMARCH.armhf;
+
+                if SUBARCH=TSubarch.armv6 then
+                  aCrossOptionSetting:='-CpARMV6 -CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
+                if SUBARCH=TSubarch.armv7a then
+                  aCrossOptionSetting:='-CpARMV7A -CfVFPV3 -CIARM -CaEABIHF -OoFASTMATH ';
+              end;
+            end;
+
+            //msdos predefined settings
+            if (OS=TOS.msdos) then
+            begin
+              if (CPU=TCPU.i8086) then
+              begin
+                {$IFDEF DARWIN}
+                aCrossOptionSetting:='-WmLarge ';
+                {$ELSE}
+                aCrossOptionSetting:='-WmMedium ';
+                {$ENDIF DARWIN}
+              end;
+            end;
+
+            //ppc64 predefined settings
+            if (CPU=TCPU.powerpc64) then
+            begin
+              if ((OS=TOS.linux)) then
+              begin
+                // for now, little endian only on Linux (IBM CPU's) !!
+                aCrossOptionSetting:='-Cb- -Caelfv2 ';
+              end;
+            end;
+
+            //freebsd predefined settings
+            if (OS=TOS.freebsd) then
+            begin
+              //This is already done in the FPC installer itself.
+              //To be checked if that is the right choice.
+              //aCrossOptionSetting:='-dFPC_USE_LIBC ';
+            end;
+
+            //Store predefined setting.
+            CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions:=aCrossOptionSetting;
+          end
+          else
+            CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions:=ReadString(s2,CROSSOPTIONS,'');
+
+
+          // Set defaults for ARM ABI
+          if CPU=TCPU.arm then
+          begin
+            if (NOT ValueExists(s2,ARMABI)) then
+            begin
+              //Store predefined setting.
+              CrossUtils[CPU,OS,SUBARCH].CrossARMArch:=GetEnumNameSimple(TypeInfo(TARMARCH),Ord(aARMABISetting));
+            end
+            else
+              CrossUtils[CPU,OS,SUBARCH].CrossARMArch:=ReadString(s2,ARMABI,'');
+          end;
         end;
 
       end;
@@ -613,14 +793,14 @@ begin
   btnSelectCompiler.Enabled:=e;
   RadioGroupARMArch.Enabled:=(e AND (LocalCPU=TCPU.arm));
 
-  EditLibLocation.Text:=FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].LibDir;
-  EditBinLocation.Text:=FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].BinDir;
-  EditCrossBuildOptions.Text:=FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions;
-  rgrpSearchOptions.ItemIndex:=Ord(FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Setting);
-  RadioGroupARMArch.ItemIndex:=Ord(GetARMArch(FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch));
-  EditCompilerOverride.Text:=FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Compiler;
+  EditLibLocation.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].LibDir;
+  EditBinLocation.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].BinDir;
+  EditCrossBuildOptions.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions;
+  rgrpSearchOptions.ItemIndex:=Ord(CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Setting);
+  RadioGroupARMArch.ItemIndex:=Ord(GetARMArch(CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch));
+  EditCompilerOverride.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Compiler;
 
-  if e then e:=FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Setting=TSearchSetting.ssCustom;
+  if e then e:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Setting=TSearchSetting.ssCustom;
   EditLibLocation.Enabled:=e;
   EditBinLocation.Enabled:=e;
   btnSelectLibDir.Enabled:=e;
@@ -666,23 +846,23 @@ begin
   SetCrossTarget(Sender,aCPU,aOS,TSUBARCH.saNone);
 end;
 
+procedure TForm2.EditCrossBuildOptionsEditingDone(Sender: TObject);
+begin
+  if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
+  begin
+    CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions:=TEdit(Sender).Text;
+  end;
+end;
+
 procedure TForm2.EditDblClickDelete(Sender: TObject);
 begin
   TEdit(Sender).Text:='';
   if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
   begin
-    if Sender=EditCompilerOverride then FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Compiler:='';
-    if Sender=EditLibLocation then FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].LibDir:='';
-    if Sender=EditBinLocation then FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].BinDir:='';
-    if Sender=EditCrossBuildOptions then FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions:='';
-  end;
-end;
-
-procedure TForm2.EditCrossBuildOptionsChange(Sender: TObject);
-begin
-  if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
-  begin
-    FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions:=TEdit(Sender).Text;
+    if Sender=EditCompilerOverride then CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Compiler:='';
+    if Sender=EditLibLocation then CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].LibDir:='';
+    if Sender=EditBinLocation then CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].BinDir:='';
+    if Sender=EditCrossBuildOptions then CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions:='';
   end;
 end;
 
@@ -752,7 +932,7 @@ begin
   if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
   begin
     if Sender=btnSelectCompiler then
-       FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Compiler:=OpenDialog1.FileName;
+       CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Compiler:=OpenDialog1.FileName;
   end;
 end;
 
@@ -773,49 +953,50 @@ begin
 
       for CPU := Low(TCPU) to High(TCPU) do
       begin
-        x:=InfoForm.Memo1.Lines.Count;
         s1:=GetCPU(CPU)+'-'+GetOS(OS);
 
         Subarchs:=GetSubarchs(CPU,OS);
 
         for SUBARCH in Subarchs do
         begin
-          if (SUBARCH<>saNone) then
+          if (SUBARCH<>TSUBARCH.saNone) then
             s2:=s1+'-'+GetSubarch(SUBARCH)
           else
             s2:=s1;
 
-          if FCrossUtils[CPU,OS,SUBARCH].Setting=TSearchSetting.ssAuto then
+          x:=InfoForm.Memo1.Lines.Count;
+
+          if CrossUtils[CPU,OS,SUBARCH].Setting=TSearchSetting.ssAuto then
           begin
             InfoForm.Memo1.Lines.Append(s2+': full auto search tools and libraries.');
           end
           else
-          if FCrossUtils[CPU,OS,SUBARCH].Setting=TSearchSetting.ssCustom then
+          if CrossUtils[CPU,OS,SUBARCH].Setting=TSearchSetting.ssCustom then
           begin
             InfoForm.Memo1.Lines.Append(s2+' (manual settings):');
-            InfoForm.Memo1.Lines.Append('  libs     : '+FCrossUtils[CPU,OS,SUBARCH].LibDir);
-            InfoForm.Memo1.Lines.Append('  bins      : '+FCrossUtils[CPU,OS,SUBARCH].BinDir);
+            InfoForm.Memo1.Lines.Append('  libs     : '+CrossUtils[CPU,OS,SUBARCH].LibDir);
+            InfoForm.Memo1.Lines.Append('  bins      : '+CrossUtils[CPU,OS,SUBARCH].BinDir);
           end;
 
-          if Length(FCrossUtils[CPU,OS,SUBARCH].CrossBuildOptions)>0 then
+          if Length(CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions)>0 then
           begin
             if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
-            InfoForm.Memo1.Lines.Append('  options : '+FCrossUtils[CPU,OS,SUBARCH].CrossBuildOptions);
+            InfoForm.Memo1.Lines.Append('  options : '+CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions);
           end;
 
           if CPU=arm then
           begin
-            if Length(FCrossUtils[CPU,OS,SUBARCH].CrossARMArch)>0 then
+            if Length(CrossUtils[CPU,OS,SUBARCH].CrossARMArch)>0 then
             begin
               if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
-              InfoForm.Memo1.Lines.Append('  ARM Arch : '+FCrossUtils[CPU,OS,SUBARCH].CrossARMArch);
+              InfoForm.Memo1.Lines.Append('  ARM Arch : '+CrossUtils[CPU,OS,SUBARCH].CrossARMArch);
             end;
           end;
 
-          if Length(FCrossUtils[CPU,OS,SUBARCH].Compiler)>0 then
+          if Length(CrossUtils[CPU,OS,SUBARCH].Compiler)>0 then
           begin
             if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
-            InfoForm.Memo1.Lines.Append('  compiler : '+FCrossUtils[CPU,OS,SUBARCH].Compiler);
+            InfoForm.Memo1.Lines.Append('  compiler : '+CrossUtils[CPU,OS,SUBARCH].Compiler);
           end;
 
           if x<>InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append('');
@@ -928,15 +1109,14 @@ begin
             s2:=s1+'-'+GetSubarch(SUBARCH)
           else
             s2:=s1;
-          WriteInteger(s2,'Setting',Ord(FCrossUtils[CPU,OS,SUBARCH].Setting));
-          WriteString(s2,'LibPath',FCrossUtils[CPU,OS,SUBARCH].LibDir);
-          WriteString(s2,'BinPath',FCrossUtils[CPU,OS,SUBARCH].BinDir);
-          WriteString(s2,'CrossBuildOptions',FCrossUtils[CPU,OS,SUBARCH].CrossBuildOptions);
+          WriteInteger(s2,'Setting',Ord(CrossUtils[CPU,OS,SUBARCH].Setting));
+          WriteString(s2,'LibPath',CrossUtils[CPU,OS,SUBARCH].LibDir);
+          WriteString(s2,'BinPath',CrossUtils[CPU,OS,SUBARCH].BinDir);
+          WriteString(s2,'CrossBuildOptions',CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions);
           if CPU=arm then
-            WriteString(s2,'CrossARMArch',FCrossUtils[CPU,OS,SUBARCH].CrossARMArch);
-          WriteString(s2,'Compiler',FCrossUtils[CPU,OS,SUBARCH].Compiler);
+            WriteString(s2,'CrossARMArch',CrossUtils[CPU,OS,SUBARCH].CrossARMArch);
+          WriteString(s2,'Compiler',CrossUtils[CPU,OS,SUBARCH].Compiler);
         end;
-
 
       end;
     end;
@@ -986,7 +1166,7 @@ var
 begin
   i:=(Sender AS TRadioGroup).ItemIndex;
   if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
-    FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Setting:=TSearchSetting(i);
+    CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Setting:=TSearchSetting(i);
   e:=(TSearchSetting(i)=TSearchSetting.ssCustom);
   EditLibLocation.Enabled:=e;
   EditBinLocation.Enabled:=e;
@@ -1007,9 +1187,9 @@ begin
     else
       xARMArch:=TARMARCH(i);
     if xARMArch=TARMARCH.default then
-      FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=''
+      CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=''
     else
-      FCrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=GetEnumNameSimple(TypeInfo(TARMARCH),Ord(xARMArch));
+      CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=GetEnumNameSimple(TypeInfo(TARMARCH),Ord(xARMArch));
   end;
 end;
 
@@ -1049,10 +1229,10 @@ end;
 function TForm2.GetLibraryDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
 begin
   try
-    case FCrossUtils[aCPU,aOS,aSubarch].Setting of
+    case CrossUtils[aCPU,aOS,aSubarch].Setting of
       TSearchSetting.ssUp: result:='';
       TSearchSetting.ssAuto: result:=FPCUP_AUTO_MAGIC;
-      TSearchSetting.ssCustom: result:=FCrossUtils[aCPU,aOS,aSubarch].LibDir;
+      TSearchSetting.ssCustom: result:=CrossUtils[aCPU,aOS,aSubarch].LibDir;
     else result:='';
     end;
   except
@@ -1063,10 +1243,10 @@ end;
 function TForm2.GetToolsDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
 begin
   try
-    case FCrossUtils[aCPU,aOS,aSubarch].Setting of
+    case CrossUtils[aCPU,aOS,aSubarch].Setting of
       TSearchSetting.ssUp: result:='';
       TSearchSetting.ssAuto: result:=FPCUP_AUTO_MAGIC;
-      TSearchSetting.ssCustom: result:=FCrossUtils[aCPU,aOS,aSubarch].BinDir;
+      TSearchSetting.ssCustom: result:=CrossUtils[aCPU,aOS,aSubarch].BinDir;
     else result:='';
     end;
   except
@@ -1076,19 +1256,19 @@ end;
 
 function TForm2.GetCrossBuildOptions(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
 begin
-  result:=FCrossUtils[aCPU,aOS,aSubarch].CrossBuildOptions;
+  result:=CrossUtils[aCPU,aOS,aSubarch].CrossBuildOptions;
 end;
 
 function TForm2.GetCrossARMArch(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
 begin
-  result:=FCrossUtils[aCPU,aOS,aSubarch].CrossARMArch;
+  result:=CrossUtils[aCPU,aOS,aSubarch].CrossARMArch;
 end;
 
 function TForm2.GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
 var
   aARMArch:string;
 begin
-  aARMArch:=FCrossUtils[aCPU,aOS,aSubarch].CrossARMArch;
+  aARMArch:=CrossUtils[aCPU,aOS,aSubarch].CrossARMArch;
   if Length(aARMArch)=0 then
     result:=''
   else
@@ -1098,17 +1278,17 @@ end;
 
 function TForm2.GetCompiler(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
 begin
-  result:=FCrossUtils[aCPU,aOS,aSubarch].Compiler;
+  result:=CrossUtils[aCPU,aOS,aSubarch].Compiler;
 end;
 
 procedure TForm2.SetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH; aValue:boolean);
 begin
-  FCrossUtils[aCPU,aOS,saNone].Available:=aValue;
+  CrossUtils[aCPU,aOS,saNone].Available:=aValue;
 end;
 
 function TForm2.GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
 begin
-  result:=FCrossUtils[aCPU,aOS,aSubarch].Available;
+  result:=CrossUtils[aCPU,aOS,aSubarch].Available;
 end;
 
 function TForm2.GetCheckIndex(aCaption:string):integer;

@@ -3083,7 +3083,7 @@ object Form1: TForm1
           'm68k'
           'xtensa'
         )
-        OnClick = radgrpCPUClick
+        OnSelectionChanged = radgrpTargetChanged
         ParentFont = False
         ParentShowHint = False
         TabOrder = 0
@@ -3142,7 +3142,7 @@ object Form1: TForm1
           'freertos'
           'ultibo'
         )
-        OnClick = radgrpOSClick
+        OnSelectionChanged = radgrpTargetChanged
         ParentFont = False
         ParentShowHint = False
         TabOrder = 1
@@ -3187,7 +3187,7 @@ object Form1: TForm1
         AutoSize = True
         BorderSpacing.Top = 4
         BorderSpacing.Bottom = 6
-        Caption = 'Select subarch'
+        Caption = 'Set subarch'
         Enabled = False
         OnClick = ButtonSubarchSelectClick
         ParentFont = False

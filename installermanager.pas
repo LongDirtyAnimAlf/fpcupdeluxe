@@ -394,7 +394,7 @@ type
   TState=record
     instr:TKeyword;
     param:string;
-    end;
+  end;
 
   { TSequencer }
 

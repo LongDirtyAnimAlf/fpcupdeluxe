@@ -113,6 +113,7 @@ type
     procedure ButtonSubarchSelectClick(Sender: TObject);
     procedure IniPropStorageAppRestoringProperties(Sender: TObject);
     procedure IniPropStorageAppSavingProperties(Sender: TObject);
+    procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick(Sender: TObject);
     procedure InstallClick(Sender: TObject);
@@ -148,8 +149,6 @@ type
       var Special: boolean; Markup: TSynSelectedColor);
     procedure TargetSelectionChange(Sender: TObject; User: boolean);
     procedure MenuItem1Click({%H-}Sender: TObject);
-    procedure radgrpCPUClick({%H-}Sender: TObject);
-    procedure radgrpOSClick({%H-}Sender: TObject);
     procedure CommandOutputScreenMouseWheel({%H-}Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; {%H-}MousePos: TPoint; var {%H-}Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
@@ -1139,39 +1138,6 @@ begin
   ShowAboutForm;
 end;
 
-procedure TForm1.radgrpCPUClick(Sender: TObject);
-begin
-  if (radgrpCPU.ItemIndex<>-1) then
-  begin
-  if (radgrpCPU.Items[radgrpCPU.ItemIndex]='i8086') then
-    begin
-      radgrpOS.ItemIndex:=-1;
-      radgrpOS.Enabled:=false;
-    end
-    else radgrpOS.Enabled:=true;
-  end
-end;
-
-procedure TForm1.radgrpOSClick(Sender: TObject);
-var
-  CPUType:TCPU;
-  OSType:TOS;
-
-begin
-  if (radgrpOS.ItemIndex<>-1) then
-    OSType:=GetTOS(radgrpOS.Items[radgrpOS.ItemIndex]);
-  if (radgrpCPU.ItemIndex<>-1) then
-    CPUType:=GetTCPU(radgrpCPU.Items[radgrpCPU.ItemIndex]);
-
-  if (OSType in [TOS.java,TOS.msdos]) then
-  begin
-    radgrpCPU.ItemIndex:=-1;
-    radgrpCPU.Enabled:=false;
-  end else radgrpCPU.Enabled:=true;
-
-  ButtonSubarchSelect.Enabled:=(OSType in SUBARCH_OS);
-end;
-
 procedure TForm1.CommandOutputScreenMouseWheel(Sender: TObject; Shift: TShiftState;
   WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 begin
@@ -1903,6 +1869,20 @@ begin
     SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;';
 end;
 
+procedure TForm1.radgrpTargetChanged(Sender: TObject);
+var
+  CPUType:TCPU;
+  OSType:TOS;
+begin
+  CPUType:=TCPU.cpuNone;
+  OSType:=TOS.osNone;
+  if (radgrpOS.ItemIndex<>-1) then
+    OSType:=GetTOS(radgrpOS.Items[radgrpOS.ItemIndex]);
+  if (radgrpCPU.ItemIndex<>-1) then
+    CPUType:=GetTCPU(radgrpCPU.Items[radgrpCPU.ItemIndex]);
+  ButtonSubarchSelect.Enabled:=((OSType in SUBARCH_OS) AND (CPUType in SUBARCH_CPU));
+end;
+
 procedure TForm1.actFileSaveAccept(Sender: TObject);
 begin
   CommandOutputScreen.Lines.SaveToFile(actFileSave.Dialog.FileName);
@@ -2163,7 +2143,6 @@ var
   aList: TStringList;
   BaseBinsURL:string;
   BinsURL,LibsURL:string;
-  SubArchsCommaText:string;
 begin
   result:=false;
 
@@ -2460,22 +2439,9 @@ begin
     end;
   end;
 
-  //get a list of valid subarch targets
-  SubArchsCommaText:='';
-  try
-    aList:=FPCupManager.ParseSubArchsFromSource;
-    if (aList.Count > 0) then
-    begin
-      for i:=0 to (aList.Count-1) do
-      begin
-        if aList.Names[i]=GetCPU(FPCupManager.CrossCPU_Target) then SubArchsCommaText:=SubArchsCommaText+aList.ValueFromIndex[i]+', ';
-      end;
-      if Length(SubArchsCommaText)>0 then
-        Delete(SubArchsCommaText,Length(SubArchsCommaText)-1,2);
-    end;
-  finally
-    aList.Free;
-  end;
+
+  // Set subarch early
+  FPCupManager.CrossOS_SubArch:=SubarchForm.SelectedSubArch;
 
   {$ifdef RemoteLog}
   aDataClient.UpInfo.CrossCPUOS:=GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target);
@@ -2495,27 +2461,9 @@ begin
       if ((FPCupManager.CrossOS_Target=TOS.java) OR
           (FPCupManager.CrossOS_Target=TOS.android) OR
           (FPCupManager.CrossOS_Target=TOS.ios) OR
-          (FPCupManager.CrossOS_Target=TOS.embedded) OR
-          (FPCupManager.CrossOS_Target=TOS.freertos)) then
+          (FPCupManager.CrossOS_Target in SUBARCH_OS)) then
       begin
         FPCupManager.OnlyModules:=_FPCREMOVEONLY;
-
-        // Bit tricky: set first valid cross-arch for correct cleaning of FPC.
-        if ((FPCupManager.CrossOS_Target=TOS.embedded) OR
-            (FPCupManager.CrossOS_Target=TOS.freertos)) then
-        begin
-          if Length(SubArchsCommaText)>0 then
-          begin
-            aList:=TStringList.Create;
-            try
-              aList.CommaText:=SubArchsCommaText;
-              if aList.Count>0 then FPCupManager.CrossOS_SubArch:=GetTSubarch(aList[0]);
-            finally
-              aList.Free;
-            end;
-          end;
-        end;
-
       end
       else
       begin
@@ -2664,110 +2612,29 @@ begin
     DisEnable(Sender,False);
 
     try
-      //arm predefined ABI settings for all but embedded
-      if ((FPCupManager.CrossCPU_Target=TCPU.arm) AND (FPCupManager.CrossOS_Target<>TOS.embedded)) then
-      begin
-        // default: armhf
-        // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (armel) for Android
-        // adding this option will allow ppcrossarm compiler to generate ARMHF when needed
-        // but I stand corrected if this assumption is wrong
-        s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-        if Length(s)=0 then
-        begin
-          s:='-dFPC_ARMHF ';
-          // Only add default ARMHF if crossing towards standard arm
-          // Leave armv6 alone for older RPi linux systems: most likely non-hardfloat
-          if ((radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') AND (FPCupManager.CrossOS_Target=TOS.linux)) then
-            s:='';
-        end else s:=s+' ';
-        FPCupManager.FPCOPT:=s;
-      end;
-
-      //arm (unix, non-android) predefined settings
-      if (FPCupManager.CrossCPU_Target=TCPU.arm) AND (NOT (FPCupManager.CrossOS_Target in [TOS.android,TOS.embedded,TOS.freertos,TOS.ultibo])) then
-      begin
-        if (FPCupManager.CrossOS_Target=TOS.wince) then
-        begin
-          //Disable for now : setting ARMV6 or higher gives problems with FPC 3.0.4 and lower
-          //FPCupManager.CrossOPT:='-CpARMV6 ';
-        end
-        else
-        if ((FPCupManager.CrossOS_Target=TOS.darwin) OR (FPCupManager.CrossOS_Target=TOS.ios)) then
-        begin
-          FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
-        end
-        else
-        begin
-          if Pos('-dFPC_ARMHF',FPCupManager.FPCOPT)>0 then
-            FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF '
-          else
-            FPCupManager.CrossOPT:='-CpARMV6 -CfVFPV2 ';
-        end;
-      end;
-
-      //android predefined settings
-      if (FPCupManager.CrossOS_Target=TOS.android) then
-      begin
-        if (FPCupManager.CrossCPU_Target=TCPU.i386) then
-        begin
-          FPCupManager.CrossOPT:='-CfSSSE3 ';
-        end;
-        if (FPCupManager.CrossCPU_Target=TCPU.x86_64) then
-        begin
-          FPCupManager.CrossOPT:='-CfSSE42 ';
-        end;
-        if (FPCupManager.CrossCPU_Target=TCPU.arm) then
-        begin
-          // Use hard floats, using armeabi-v7a Android ABI.
-          // Note: do not use -CaEABIHF on Android, to not use
-          // armeabi-v7a-hard ABI. Reasons:
-          // - armeabi-v7a-hard ABI is not adviced anymore by Google,
-          //   see "ARM Hard Float ABI Removal" on
-          //   https://android.googlesource.com/platform/ndk/+/353e653824b79c43b948429870d0abeedebde386/docs/HardFloatAbi.md
-          // - it prevents calling functions from libraries not using
-          //   armeabi-v7a-hard ABI (but only using armeabi-v7a) like
-          //   http://repo.or.cz/openal-soft/android.git or
-          //   https://github.com/michaliskambi/tremolo-android .
-          FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3_D16 ';
-        end;
-      end;
-
       //embedded predefined settings
       if (FPCupManager.CrossOS_Target=TOS.embedded) then
       begin
-        if (FPCupManager.CrossCPU_Target=TCPU.avr) then
+        if SubarchForm.SelectedSubArch=TSUBARCH.saNone then
         begin
-          // for Uno (ATMega328P) use avr5
-          // for Mega (ATMega2560) use avr6
-          FPCupManager.CrossOPT:='-Cpavr5 ';
-          FPCupManager.CrossOS_SubArch:=TSubarch.avr5;
-        end;
-        if (FPCupManager.CrossCPU_Target=TCPU.arm) then
-        begin
-          // What to do with hard/soft-float ??!!
-          FPCupManager.CrossOS_SubArch:=TSubarch.armv6m;
-        end;
-        if (FPCupManager.CrossCPU_Target=TCPU.mipsel) then
-        begin
-          FPCupManager.CrossOPT:='-Cpmips32 ';
-          FPCupManager.CrossOS_SubArch:=TSubarch.pic32mx;
+          if (FPCupManager.CrossCPU_Target=TCPU.avr) then
+            FPCupManager.CrossOS_SubArch:=TSubarch.avr5;
+          if (FPCupManager.CrossCPU_Target=TCPU.arm) then
+            FPCupManager.CrossOS_SubArch:=TSubarch.armv6m;
+          if (FPCupManager.CrossCPU_Target=TCPU.mipsel) then
+            FPCupManager.CrossOS_SubArch:=TSubarch.pic32mx;
         end;
       end;
 
       //freertos predefined settings
       if (FPCupManager.CrossOS_Target=TOS.freertos) then
       begin
-        if (FPCupManager.CrossCPU_Target=TCPU.xtensa) then
+        if SubarchForm.SelectedSubArch=TSUBARCH.saNone then
         begin
-          FPCupManager.CrossOPT:='-Cplx6 -Cfhard ';
-          FPCupManager.CrossOS_SubArch:=TSubarch.lx6;
-        end;
-        if (FPCupManager.CrossCPU_Target=TCPU.arm) then
-        begin
-          FPCupManager.CrossOPT:='-Cparmv7em -CfFPV4_SP_D16 ';
-          if Pos('-dFPC_ARMHF',FPCupManager.FPCOPT)>0 then
-            FPCupManager.CrossOPT:=FPCupManager.CrossOPT+' -OoFASTMATH -CaEABIHF ';
-          FPCupManager.CrossOS_SubArch:=TSubarch.armv7em;
+          if (FPCupManager.CrossCPU_Target=TCPU.xtensa) then
+            FPCupManager.CrossOS_SubArch:=TSubarch.lx6;
+          if (FPCupManager.CrossCPU_Target=TCPU.arm) then
+            FPCupManager.CrossOS_SubArch:=TSubarch.armv7em;
         end;
       end;
 
@@ -2776,80 +2643,29 @@ begin
       begin
         if (FPCupManager.CrossCPU_Target=TCPU.arm) then
         begin
-          // Always hardfloat !!
-          FPCupManager.FPCOPT:='-dFPC_ARMHF ';
-          if (radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') then
+          if SubarchForm.SelectedSubArch=TSUBARCH.saNone then
           begin
-            FPCupManager.CrossOPT:='-CpARMV6 -CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
-            FPCupManager.CrossOS_SubArch:=TSubarch.armv6;
-          end
-          else
-          begin
-            FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -CIARM -CaEABIHF -OoFASTMATH ';
-            FPCupManager.CrossOS_SubArch:=TSubarch.armv7a;
+            if (radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') then
+              FPCupManager.CrossOS_SubArch:=TSubarch.armv6
+            else
+              FPCupManager.CrossOS_SubArch:=TSubarch.armv7a;
           end;
         end;
       end;
 
-      if ((FPCupManager.CrossOS_Target=TOS.embedded) OR (FPCupManager.CrossOS_Target=TOS.freertos)) then
+      // Set FPC options
+      FPCupManager.FPCOPT:=Form2.FPCOptions;
+      if (FPCupManager.CrossCPU_Target=TCPU.arm) then
       begin
-        if Length(SubArchsCommaText)>0 then
-          memoSummary.Lines.Append('Valid subarch(s) for '+GetCPU(FPCupManager.CrossCPU_Target)+' '+GetOS(FPCupManager.CrossOS_Target)+' are: '+SubArchsCommaText);
-      end;
-
-      //msdos predefined settings
-      if (FPCupManager.CrossOS_Target=TOS.msdos) then
-      begin
-        if (FPCupManager.CrossCPU_Target=TCPU.i8086) then
+        if (Length(FPCupManager.FPCOPT)=0) then
         begin
-          {$IFDEF DARWIN}
-          FPCupManager.CrossOPT:='-WmLarge ';
-          {$ELSE}
-          FPCupManager.CrossOPT:='-WmMedium ';
-          {$ENDIF DARWIN}
+          // Set arm abi build option
+          FPCupManager.FPCOPT:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
         end;
       end;
 
-      //ppc64 predefined settings
-      if (FPCupManager.CrossCPU_Target=TCPU.powerpc64) then
-      begin
-        if ((FPCupManager.CrossOS_Target=TOS.linux)) then
-        begin
-          // for now, little endian only on Linux (IBM CPU's) !!
-          FPCupManager.CrossOPT:='-Cb- -Caelfv2 ';
-        end;
-      end;
-
-      //freebsd predefined settings
-      if (FPCupManager.CrossOS_Target=TOS.freebsd) then
-      begin
-        //This is already done in the FPC installer itself.
-        //To be checked if that is the right choice.
-        //FPCupManager.CrossOPT:='-dFPC_USE_LIBC ';
-      end;
-
-      // recheck / override / set custom FPC options by special user input through setup+
-      s:=Form2.FPCOptions;
-      s:=Trim(s);
-      if Length(s)>0 then
-      begin
-        if Length(FPCupManager.FPCOPT)>0 then
-          AddMessage('Overriding FPC options with values from Setup+.');
-        FPCupManager.FPCOPT:=s+' ';
-      end;
-
-      // override / set custom FPC crossoptions by special user input through setup+
-      s:=Form2.GetCrossBuildOptions(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-      s:=Trim(s);
-      if Length(s)>0 then FPCupManager.CrossOPT:=s+' ';
-
-      // override / set custom FPC cross-subarch by special user input through subarch setting
-      if (FPCupManager.CrossOS_Target in SUBARCH_OS) then
-      begin
-        //s:=SubarchForm.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-        //s:=Trim(s);
-        //if Length(s)>0 then FPCupManager.CrossOS_SubArch:=GetTSubarch(s);
-      end;
+      // Set FPC cross-compile options
+      FPCupManager.CrossOPT:=Form2.GetCrossBuildOptions(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
 
       // use the available source to build the cross-compiler ... change nothing about source and url !!
       FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;//'FPCCleanOnly,FPCBuildOnly';
@@ -2899,7 +2715,7 @@ begin
       //For testing only !!
       //FPCupManager.OnlyModules:='LCL';
 
-      s:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+      s:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
       s:=Trim(s);
       if Length(s)>0 then
       begin
@@ -2912,7 +2728,7 @@ begin
           AddMessage('Expect failures.');
         end;
       end;
-      s:=Form2.GetToolsDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+      s:=Form2.GetToolsDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
       s:=Trim(s);
       if Length(s)>0 then
       begin
@@ -3912,7 +3728,7 @@ begin
   FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
 
   // set custom FPC compiler by special user input through setup+
-  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTCPU(GetTargetCPU),GetTOS(GetTargetOS));
+  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTCPU(GetTargetCPU),GetTOS(GetTargetOS),TSUBARCH.saNone);
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
   FPCupManager.BaseDirectory:=sInstallDir;
@@ -4540,8 +4356,6 @@ var
   i:integer;
   s:string;
 begin
-  AddMessage('Fpcupdeluxe select subarch.');
-
   if radgrpCPU.ItemIndex<>-1 then
   begin
     s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
@@ -4554,12 +4368,13 @@ begin
     FPCupManager.CrossOS_Target:=GetTOS(s);
   end;
 
-  Form2.SetCrossTarget(FPCupManager,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
+  SubarchForm.SetCrossTarget(FPCupManager,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
 
   SubarchForm.ShowModal;
 
   if SubarchForm.ModalResult=mrOk then
   begin
+    AddMessage('Fpcupdeluxe select subarch ok !!');
   end;
 end;
 

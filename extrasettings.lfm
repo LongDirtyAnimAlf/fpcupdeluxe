@@ -309,8 +309,8 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       BorderSpacing.Right = 14
       Enabled = False
-      OnChange = EditCrossBuildOptionsChange
       OnDblClick = EditDblClickDelete
+      OnEditingDone = EditCrossBuildOptionsEditingDone
       ParentFont = False
       TabOrder = 4
     end

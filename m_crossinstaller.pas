@@ -238,6 +238,7 @@ procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller)
 function GetExeExt: string;
 
 var
+  CrossUtils:TCrossUtils;
   CrossInstallers:TStringList=nil;
 
 implementation
