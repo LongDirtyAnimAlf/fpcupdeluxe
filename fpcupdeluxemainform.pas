@@ -1770,8 +1770,8 @@ begin
     // skip git fatal messages ... they are not that fatal ... but not sure yet !
     // if (Pos('fatal: not a git repository',lowercase(s))=0) then
     begin
-      FG      := clRed;
-      BG      := clBlue;
+      FG      := TColor($8080FF);
+      BG      := TColor($800000);
       Special := True;
     end;
   end;

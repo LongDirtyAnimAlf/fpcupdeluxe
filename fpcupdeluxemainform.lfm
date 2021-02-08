@@ -1789,17 +1789,17 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
-      Left = 969
+      Left = 963
       Height = 42
       Hint = 'Try to quit fpcupdeluxe'
       Top = 8
-      Width = 84
+      Width = 90
       Anchors = [akTop, akRight]
       AutoSize = True
       BorderSpacing.Top = 2
       BorderSpacing.Right = 1
       BorderSpacing.Around = 4
-      Caption = 'Halt'
+      Caption = 'STOP'
       Glyph.Data = {
         36100000424D3610000000000000360000002800000020000000200000000100
         2000000000000010000064000000640000000000000000000000000000000000
@@ -2120,13 +2120,13 @@ object Form1: TForm1
     Height = 488
     Top = 35
     Width = 310
-    ActivePage = CrossSheet
+    ActivePage = BasicSheet
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 12
     BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
     ParentFont = False
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 11
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet
