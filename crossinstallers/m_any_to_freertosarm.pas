@@ -91,11 +91,16 @@ begin
   // do the same as above, but look for a static libc_nano lib
   if not result then
     result:=SearchLibrary(Basepath,StaticLibName2);
+
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName2);
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
     result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibName2);
+
+  // search local paths based on libbraries provided for or adviced by https://github.com/michael-ring/freertos4fpc
+  if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,'lib',aSubarchName]),StaticLibName2);
 
   if result then
   begin

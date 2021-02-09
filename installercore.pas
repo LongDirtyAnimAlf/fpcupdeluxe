@@ -245,18 +245,9 @@ const
 
   URL_ERROR                = 'sources error (URL mismatch)';
 
-type
-  TARMARCH  = (default,armel,armeb,armhf);
-
-  //TTargetSet=array[tcpu,tos] of boolean;
-
 const
   ppcSuffix : array[TCPU] of string=(
     'none','386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','68k','xtensa'
-  );
-
-  ARMArchFPCStr : array[TARMARCH] of string=(
-    '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
   );
 
 type

@@ -1771,7 +1771,7 @@ begin
     // if (Pos('fatal: not a git repository',lowercase(s))=0) then
     begin
       FG      := TColor($0060FF);
-      BG      := TColor($204000);
+      BG      := TColor($402000);
       Special := True;
     end;
   end;
@@ -3213,7 +3213,41 @@ begin
 
             if MissingCrossLibs then
             begin
+              if ((FPCupManager.CrossCPU_Target=TCPU.arm) AND (FPCupManager.CrossOS_Target=TOS.freertos)) then
+              begin
+                s:='10.4.3';
+                LibsFileName:='FreeRTOS-'+s+'-for-for-FreePascal.zip';
+                DownloadURL:='https://github.com/michael-ring/freertos4fpc/releases/download/v'+s+'-1/'+LibsFileName;
+                TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+LibsFileName;
+                SysUtils.DeleteFile(TargetFile);
+                success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                if success then
+                begin
+                  AddMessage('Download successfull !');
+                  TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator;
+                  ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+LibPath);
+                  with TNormalUnzipper.Create do
+                  begin
+                    try
+                      success:=DoUnZip(TargetFile,TargetPath,[]);
+                    finally
+                      Free;
+                    end;
+                  end;
+                  if success then
+                  begin
+                    SysUtils.DeleteFile(TargetFile);
+                    MissingCrossLibs:=False;
+                  end;
+                end;
+              end;
+            end;
+
+
+            if MissingCrossLibs then
+            begin
               AddMessage('Going to look for the right cross-libraries. Can (will) take some time !',True);
+
 
               AddMessage('Looking for: '+LibsFileName,True);
 
@@ -3341,12 +3375,14 @@ begin
                   break;
                 end;
               end;
+
               // as libraries are not always needed for embedded, end with success even if the above has failed
               if FPCupManager.CrossOS_Target=TOS.embedded then
               begin
                 success:=true;
                 MissingCrossLibs:=False;
               end;
+
             end;
 
             if success then
@@ -4157,6 +4193,8 @@ begin
       Free;
     end;
 
+    AddMessage('');
+
     Form2.SetInstallDir(IniDirectory);
 
     {$ifdef usealternateui}
@@ -4387,7 +4425,7 @@ begin
 
   if SubarchForm.ModalResult=mrOk then
   begin
-    AddMessage('Fpcupdeluxe select subarch ok !!');
+    AddMessage('Fpcupdeluxe: selected subarch = '+GetSubarch(SubarchForm.GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target)));
   end;
 end;
 

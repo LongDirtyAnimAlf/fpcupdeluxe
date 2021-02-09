@@ -201,7 +201,7 @@ type
     function GetLibraryDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
     function GetToolsDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
     function GetCrossBuildOptions(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
-    function GetCrossARMArch(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
+    function GetCrossARMArch(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):TARMARCH;
     function GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
     function GetCompiler(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
 
@@ -434,7 +434,7 @@ begin
         CrossUtils[CPU,OS,SUBARCH].LibDir:='';
         CrossUtils[CPU,OS,SUBARCH].BinDir:='';
         CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions:='';
-        CrossUtils[CPU,OS,SUBARCH].CrossARMArch:='';
+        CrossUtils[CPU,OS,SUBARCH].CrossARMArch:=TARMARCH.default;
         CrossUtils[CPU,OS,SUBARCH].Compiler:='';
         CrossUtils[CPU,OS,SUBARCH].Available:=false;
       end;
@@ -745,10 +745,10 @@ begin
             if (NOT ValueExists(s2,ARMABI)) then
             begin
               //Store predefined setting.
-              CrossUtils[CPU,OS,SUBARCH].CrossARMArch:=GetEnumNameSimple(TypeInfo(TARMARCH),Ord(aARMABISetting));
+              CrossUtils[CPU,OS,SUBARCH].CrossARMArch:=aARMABISetting;
             end
             else
-              CrossUtils[CPU,OS,SUBARCH].CrossARMArch:=ReadString(s2,ARMABI,'');
+              CrossUtils[CPU,OS,SUBARCH].CrossARMArch:=GetTARMArch(ReadString(s2,ARMABI,''));
           end;
         end;
 
@@ -798,7 +798,7 @@ begin
   EditBinLocation.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].BinDir;
   EditCrossBuildOptions.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions;
   rgrpSearchOptions.ItemIndex:=Ord(CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Setting);
-  RadioGroupARMArch.ItemIndex:=Ord(GetARMArch(CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch));
+  RadioGroupARMArch.ItemIndex:=Ord(CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch);
   EditCompilerOverride.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Compiler;
 
   if e then e:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].Setting=TSearchSetting.ssCustom;
@@ -990,13 +990,10 @@ begin
 
           if CPU=arm then
           begin
-            if (Length(CrossUtils[CPU,OS,SUBARCH].CrossARMArch)>0) then
+            if (CrossUtils[CPU,OS,SUBARCH].CrossARMArch<>TARMARCH.default) then
             begin
-              if (CrossUtils[CPU,OS,SUBARCH].CrossARMArch<>GetEnumNameSimple(TypeInfo(TARMARCH),Ord(TARMARCH.default))) then
-              begin
-                if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
-                InfoForm.Memo1.Lines.Append('  ARM Arch : '+CrossUtils[CPU,OS,SUBARCH].CrossARMArch);
-              end;
+              if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
+              InfoForm.Memo1.Lines.Append('  ARM Arch : '+GetARMArch(CrossUtils[CPU,OS,SUBARCH].CrossARMArch));
             end;
           end;
 
@@ -1121,7 +1118,7 @@ begin
           WriteString(s2,'BinPath',CrossUtils[CPU,OS,SUBARCH].BinDir);
           WriteString(s2,'CrossBuildOptions',CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions);
           if CPU=arm then
-            WriteString(s2,'CrossARMArch',CrossUtils[CPU,OS,SUBARCH].CrossARMArch);
+            WriteString(s2,'CrossARMArch',GetARMArch(CrossUtils[CPU,OS,SUBARCH].CrossARMArch));
           WriteString(s2,'Compiler',CrossUtils[CPU,OS,SUBARCH].Compiler);
         end;
 
@@ -1193,10 +1190,7 @@ begin
       xARMArch:=TARMARCH.default
     else
       xARMArch:=TARMARCH(i);
-    if xARMArch=TARMARCH.default then
-      CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=''
-    else
-      CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=GetEnumNameSimple(TypeInfo(TARMARCH),Ord(xARMArch));
+    CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=xARMArch;
   end;
 end;
 
@@ -1266,22 +1260,15 @@ begin
   result:=CrossUtils[aCPU,aOS,aSubarch].CrossBuildOptions;
 end;
 
-function TForm2.GetCrossARMArch(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
+function TForm2.GetCrossARMArch(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): TARMARCH;
 begin
   result:=CrossUtils[aCPU,aOS,aSubarch].CrossARMArch;
 end;
 
 function TForm2.GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
-var
-  aARMArch:string;
 begin
-  aARMArch:=CrossUtils[aCPU,aOS,aSubarch].CrossARMArch;
-  if Length(aARMArch)=0 then
-    result:=''
-  else
-    result:=GetARMArchFPCDefine(GetARMArch(aARMArch));
+  result:=GetARMArchFPCDefine(CrossUtils[aCPU,aOS,aSubarch].CrossARMArch);
 end;
-
 
 function TForm2.GetCompiler(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
 begin

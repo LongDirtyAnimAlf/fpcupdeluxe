@@ -179,8 +179,6 @@ type
   // check if enabled modules are allowed !
   function CheckIncludeModule(ModuleName: string):boolean;
   function SetConfigFile(aConfigFile: string):boolean;
-  function GetARMArch(aARMArch:string):TARMARCH;
-  function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
 
 var
   sequences:string;
@@ -2969,23 +2967,6 @@ begin
   if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME) then
      result:=SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
 end;
-
-
-function GetARMArch(aARMArch:string):TARMARCH;
-begin
-  if Length(aARMArch)=0 then
-    result:=TARMARCH.default
-  else
-    result:=TARMARCH(GetEnumValue(TypeInfo(TARMARCH),aARMArch));
-  if Ord(result) < 0 then
-    raise Exception.CreateFmt('Invalid ARM Arch name "%s" for GetARMArch.', [aARMArch]);
-end;
-
-function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
-begin
-  result:=ARMArchFPCStr[aARMArch];
-end;
-
 
 initialization
   IniGeneralSection:=TStringList.create;

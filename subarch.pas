@@ -71,7 +71,7 @@ begin
     rgrpSelectCPU.Items.Append(GetCPU(aCPU));
   rgrpSelectCPU.ItemIndex:=0;
 
-  // Fill ARM Arch radiogroup
+  // Fill ARM ABI radiogroup
   for ARMArch := Low(TARMARCH) to High(TARMARCH) do
     RadioGroupARMArch.Items.Add(GetEnumNameSimple(TypeInfo(TARMARCH),Ord(ARMArch)));
   RadioGroupARMArch.ItemIndex:=0;
@@ -107,10 +107,7 @@ begin
       xARMArch:=TARMARCH.default
     else
       xARMArch:=TARMARCH(i);
-    if xARMArch=TARMARCH.default then
-      CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=''
-    else
-      CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=GetEnumNameSimple(TypeInfo(TARMARCH),Ord(xARMArch));
+    CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=xARMArch;
   end;
 end;
 
@@ -189,24 +186,20 @@ begin
     i:=rgrpSelectCPU.ItemIndex;
     if (i<0) then exit;
     CPU:=GetTCPU(rgrpSelectCPU.Items[i]);
+    //LocalCPU:=CPU;
   end;
 
   BeginFormUpdate;
   try
     rgrpSelectSubarch.Items.Clear;
-    case CPU of
-      TCPU.arm:Subarchs:=SUBARCH_ARM;
-      TCPU.avr:Subarchs:=SUBARCH_AVR;
-      TCPU.mipsel:Subarchs:=SUBARCH_MIPSEL;
-      TCPU.riscv32:Subarchs:=SUBARCH_RISCV32;
-      TCPU.xtensa:Subarchs:=SUBARCH_XTENSA;
-    else
-      exit;
-    end;
+    Subarchs:=GetSubarchs(CPU,LocalOS);
     for SUBARCH in Subarchs do
     begin
-      rgrpSelectSubarch.Items.Append(GetSubarch(SUBARCH));
-      if SUBARCH=LocalSUBARCH then rgrpSelectSubarch.ItemIndex:=Pred(rgrpSelectSubarch.Items.Count);
+      if (SUBARCH<>TSUBARCH.saNone) then
+      begin
+        rgrpSelectSubarch.Items.Append(GetSubarch(SUBARCH));
+        if SUBARCH=LocalSUBARCH then rgrpSelectSubarch.ItemIndex:=Pred(rgrpSelectSubarch.Items.Count);
+      end;
     end;
     if rgrpSelectSubarch.Items.Count=1 then rgrpSelectSubarch.ItemIndex:=0;
   finally
@@ -240,7 +233,7 @@ begin
   EditLibLocation.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].LibDir;
   EditBinLocation.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].BinDir;
   EditCrossBuildOptions.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions;
-  RadioGroupARMArch.ItemIndex:=Ord(GetARMArch(CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch));
+  RadioGroupARMArch.ItemIndex:=Ord(CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch);
 
   e:=(LocalSUBARCH<>TSUBARCH.saNone);
   EditLibLocation.Enabled:=e;

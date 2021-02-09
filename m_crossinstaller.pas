@@ -114,8 +114,12 @@ const
 
 type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
+  TARMARCH  = (default,armel,armeb,armhf);
 
 const
+  ARMArchFPCStr : array[TARMARCH] of string=(
+    '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
+  );
   FPCUP_AUTO_MAGIC = 'FPCUP_AUTO';
 
 type
@@ -124,7 +128,7 @@ type
     LibDir:string;
     BinDir:string;
     CrossBuildOptions:string;
-    CrossARMArch:string;
+    CrossARMArch:TARMARCH;
     Compiler:string;
     Available:boolean;
   end;
@@ -233,6 +237,9 @@ function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
 function GetSubarch(aSubarch:TSUBARCH):string;
 function GetTSubarch(aSubarch:string):TSUBARCH;
 function GetSubarchs(aCPU:TCPU;aOS:TOS):TSUBARCHS;
+function GetARMArch(aARMarch:TARMARCH):string;
+function GetTARMArch(aARMArch:string):TARMARCH;
+function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
 
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 function GetExeExt: string;
@@ -363,8 +370,34 @@ begin
       TCPU.xtensa:   if (aOS<>TOS.ultibo) then result:=SUBARCH_XTENSA;
     end;
     if (aOS=TOS.ultibo) then result:=[TSUBARCH.armv6,TSUBARCH.armv7a];
+    if (aOS=TOS.freertos) then result:=[TSUBARCH.armv6m,TSUBARCH.armv7em,TSUBARCH.armv7m];
   end;
 end;
+
+function GetARMArch(aARMarch:TARMARCH):string;
+begin
+  if (aARMarch<Low(TARMARCH)) OR (aARMarch>High(TARMARCH)) then
+    raise Exception.Create('Invalid ARMarch for GetARMarch.');
+  result:=GetEnumNameSimple(TypeInfo(TARMARCH),Ord(aARMarch));
+end;
+
+function GetTARMArch(aARMArch:string):TARMARCH;
+begin
+  if Length(aARMArch)=0 then
+    result:=TARMARCH.default
+  else
+    result:=TARMARCH(GetEnumValueSimple(TypeInfo(TARMARCH),aARMArch));
+  if Ord(result) < 0 then
+    raise Exception.CreateFmt('Invalid ARM Arch name "%s" for GetARMArch.', [aARMArch]);
+end;
+
+
+
+function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
+begin
+  result:=ARMArchFPCStr[aARMArch];
+end;
+
 
 function GetExeExt: string;
 begin
