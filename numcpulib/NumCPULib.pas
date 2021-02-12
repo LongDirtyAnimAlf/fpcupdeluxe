@@ -932,9 +932,12 @@ end;
 {$IFDEF NUMCPULIB_APPLE}
 
 class function TNumCPULib.GetLogicalCPUCountApple(): UInt32;
-var
-  LTempRes: Int32;
+//var
+//  LTempRes: Int32;
 begin
+  Result := UInt32(GetValueUsingSysCtlByName('hw.logicalcpu'));
+  (*
+
 {$IF DEFINED(NUMCPULIB_MACOS)}
   // >= (Mac OS X 10.4+)
   if NSAppKitVersionNumber >= 824 then // NSAppKitVersionNumber10_4
@@ -958,6 +961,7 @@ begin
   begin
     Result := UInt32(LTempRes);
   end;
+  *)
 end;
 
 class function TNumCPULib.GetPhysicalCPUCountApple(): UInt32;
