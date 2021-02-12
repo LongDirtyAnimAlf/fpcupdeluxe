@@ -3916,7 +3916,19 @@ begin
   if TargetCPU<>TCPU.cpuNone then
   begin
     if Cross then
+    begin
+      // See fpc.pp
+      {$ifndef darwin}
       s:='ppcross'+ppcSuffix[TargetCPU]
+      {$else not darwin}
+      { the mach-o format supports "fat" binaries whereby }
+      { a single executable contains machine code for     }
+      { several architectures -> it is counter-intuitive  }
+      { and non-standard to use different binary names    }
+      { for cross-compilers vs. native compilers          }
+      s:='ppc'+ppcSuffix[TargetCPU];
+      {$endif not darwin}
+    end
     else
       s:='ppc'+ppcSuffix[TargetCPU];
   end;

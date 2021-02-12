@@ -96,11 +96,6 @@ type
   TOS  = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo);
   TSUBARCH = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,lx6,lx106);
 
-  TCPUOS = record
-    CPU:TCPU;
-    OS:TOS;
-  end;
-
   TSUBARCHS = set of TSUBARCH;
 
 const
@@ -233,7 +228,6 @@ function GetCPU(aCPU:TCPU):string;
 function GetTCPU(aCPU:string):TCPU;
 function GetOS(aOS:TOS):string;
 function GetTOS(aOS:string):TOS;
-function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
 function GetSubarch(aSubarch:TSUBARCH):string;
 function GetTSubarch(aSubarch:string):TSUBARCH;
 function GetSubarchs(aCPU:TCPU;aOS:TOS):TSUBARCHS;
@@ -321,19 +315,6 @@ begin
     end;
     result:=xOS;
   end;
-end;
-
-function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
-begin
-  result.CPU:=TCPU.cpuNone;
-  result.OS:=TOS.osNone;
-  result.CPU:=GetTCPU(aCPU);
-  if ( (LowerCase(aOS)='windows') OR (LowerCase(aOS)='mswindows') ) then
-  begin
-    if result.CPU=TCPU.i386 then result.OS:=TOS.win32;
-    if result.CPU=TCPU.x86_64 then result.OS:=TOS.win64;
-  end
-  else result.OS:=GetTOS(aOS);
 end;
 
 function GetSubarch(aSubarch:TSUBARCH):string;

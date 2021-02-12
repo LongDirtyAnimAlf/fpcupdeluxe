@@ -241,7 +241,7 @@ type
     FSolarisOI:boolean;
     FMUSL:boolean;
     FRunInfo:string;
-    function GetCrossCombo_Target:TCPUOS;
+    function GetCrossCombo_Target:string;
     {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
     procedure SetLazarusSourceDirectory(AValue: string);
@@ -296,7 +296,7 @@ type
     property CrossCPU_Target:TCPU read FCrossCPU_Target write FCrossCPU_Target;
     property CrossOS_Target:TOS read FCrossOS_Target write FCrossOS_Target;
     property CrossOS_SubArch:TSUBARCH read FCrossOS_SubArch write FCrossOS_SubArch;
-    property CrossCombo_Target:TCPUOS read GetCrossCombo_Target;
+    property CrossCombo_Target:string read GetCrossCombo_Target;
 
     // Widgetset for which the user wants to compile the LCL (not the IDE).
     // Empty if default LCL widgetset used for current platform
@@ -981,11 +981,11 @@ begin
   inherited Destroy;
 end;
 
-
-function TFPCupManager.GetCrossCombo_Target:TCPUOS;
+function TFPCupManager.GetCrossCombo_Target:string;
 begin
-  result.CPU:=FCrossCPU_Target;
-  result.OS:=FCrossOS_Target;
+  result:=GetCPU(FCrossCPU_Target)+'-'+GetOS(FCrossOS_Target);
+  if (FCrossOS_SubArch<>TSUBARCH.saNone) then
+    result:=result+'-'+GetSubarch(FCrossOS_SubArch);
 end;
 
 { TSequencer }

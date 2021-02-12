@@ -2593,15 +2593,8 @@ begin
       {$endif}
 
       if (length(s)=0) then
-      begin
-        s:='Going to install the cross-compiler for ['+GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target)+'].' + sLineBreak +
-           'Do you want to continue ?';
-      end
-      else
-      begin
-        s:='Going to install the cross-compiler for ['+GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target)+'].' + sLineBreak + s;
-      end;
-
+        s:='Do you want to continue ?';
+      s:='Going to install the cross-compiler for' + sLineBreak + '['+FPCupManager.CrossCombo_Target+']' + sLineBreak + s;
       if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
       begin
         exit;
@@ -2980,6 +2973,15 @@ begin
               end;
             end;
             {$endif}
+          end;
+
+          if FPCupManager.CrossOS_Target=TOS.freertos then
+          begin
+            // use embedded arm tools for freertos arm:
+            if (FPCupManager.CrossCPU_Target=TCPU.arm) then
+            begin
+              BinsFileName:=StringReplace(BinsFileName,'FreeRTOS','Embedded',[]);
+            end;
           end;
 
           // All ready !!

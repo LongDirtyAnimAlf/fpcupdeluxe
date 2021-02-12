@@ -1077,27 +1077,32 @@ begin
             {$IFDEF UNIX}
             if (result) AND (MakeCycle=st_CompilerInstall) then
             begin
-              s2:=ConcatPaths([FSourceDirectory,'compiler',CrossCompilerName]);
-              //The compiler gets installed here
-              //s2:=ConcatPaths([FInstallDirectory,'lib','bin',GetFPCVersion,CrossCompilerName]);
-              {$ifdef Darwin}
-              // on Darwin, the normal compiler names are used for the final cross-target compiler !!
-              // very tricky !
-              s1:=ConcatPaths([FBinPath,GetCompilerName(CrossInstaller.TargetCPU)]);
-              {$else}
-              s1:=ConcatPaths([FBinPath,CrossCompilerName]);
-              {$endif}
-
-              //fpSymlink(pchar(s2),pchar(s1));
-
-              // copy over the cross-compiler towards the FPC bin-directory, with the right compilername.
+              // Get the correct name of the cross-compiler in source-directory
+              s1:='ppcross'+ppcSuffix[CrossInstaller.TargetCPU];
+              s2:=ConcatPaths([FSourceDirectory,'compiler',s1]);
               if FileExists(s2) then
               begin
-                Infoln(infotext+'Copy cross-compiler ('+CrossCompilerName+') into: '+FBinPath,etInfo);
-                //FileUtil.CopyFile(s2,s1);
-                SysUtils.DeleteFile(s1);
-                SysUtils.RenameFile(s2,s1);
-                fpChmod(s1,&755);
+                {$ifdef Darwin}
+                if CrossCompilerName=GetCompilerName(GetTargetCPU) then
+                begin
+                  Infoln(infotext+'Cross-compiler and native compiler share the same name: '+CrossCompilerName+'.',etInfo);
+                  Infoln(infotext+'Skipping manual compiler-copy to bin-directory ! To be investigated.',etInfo);
+                  // Perhaps we need to contruct a "fat" binary
+                  // lipo -create s1 CrossCompilerName -output s1
+                  // TODO
+                  // I do not know what to do at the moment
+                end
+                else
+                {$endif Darwin}
+                begin
+                  // copy over / rename the cross-compiler towards the FPC bin-directory, with the right compilername.
+                  Infoln(infotext+'Copy cross-compiler ('+s1+') into: '+FBinPath,etInfo);
+                  s1:=ConcatPaths([FBinPath,CrossCompilerName]);
+                  //FileUtil.CopyFile(s2,s1);
+                  SysUtils.DeleteFile(s1);
+                  SysUtils.RenameFile(s2,s1);
+                  fpChmod(s1,&755);
+                end;
               end;
             end;
             {$ENDIF UNIX}
@@ -1142,31 +1147,40 @@ begin
         else
         begin
 
+          // Get the correct name of the cross-compiler in source-directory
+          s1:='ppcross'+ppcSuffix[CrossInstaller.TargetCPU];
+          s2:=ConcatPaths([FSourceDirectory,'compiler',s1]);
           {$ifdef crosssimple}
           {$IFDEF UNIX}
-          s2:=ConcatPaths([FSourceDirectory,'compiler',CrossCompilerName]);
-          //s2:=ConcatPaths([FInstallDirectory,'lib','bin',GetFPCVersion,CrossCompilerName]);
-          {$ifdef Darwin}
-          // on Darwin, the normal compiler names are used for the final cross-target compiler !!
-          // very tricky !
-          s1:=ConcatPaths([FBinPath,GetCompilerName(CrossInstaller.TargetCPU)]);
-          {$else}
-          s1:=ConcatPaths([FBinPath,CrossCompilerName]);
-          {$endif}
-          // copy over the cross-compiler towards the FPC bin-directory, with the right compilername.
           if FileExists(s2) then
           begin
-            Infoln(infotext+'Copy cross-compiler ('+CrossCompilerName+') into: '+FBinPath,etInfo);
-            //FileUtil.CopyFile(s2,s1);
-            SysUtils.DeleteFile(s1);
-            SysUtils.RenameFile(s2,s1);
-            fpChmod(s1,&755);
+            {$ifdef Darwin}
+            if CrossCompilerName=GetCompilerName(GetTargetCPU) then
+            begin
+              Infoln(infotext+'Cross-compiler and native compiler share the same name: '+CrossCompilerName+'.',etInfo);
+              Infoln(infotext+'Skipping manual compiler-copy to bin-directory ! To be investigated.',etInfo);
+              // Perhaps we need to contruct a "fat" binary
+              // lipo -create s1 CrossCompilerName -output s1
+              // TODO
+              // I do not know what to do at the moment
+            end
+            else
+            {$endif Darwin}
+            begin
+              // copy over / rename the cross-compiler towards the FPC bin-directory, with the right compilername.
+              Infoln(infotext+'Copy cross-compiler ('+s1+') into: '+FBinPath,etInfo);
+              s1:=ConcatPaths([FBinPath,CrossCompilerName]);
+              //FileUtil.CopyFile(s2,s1);
+              SysUtils.DeleteFile(s1);
+              SysUtils.RenameFile(s2,s1);
+              fpChmod(s1,&755);
+            end;
           end;
           {$ENDIF}
           {$endif crosssimple}
 
           // delete cross-compiler in source-directory
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+CrossCompilerName);
+          SysUtils.DeleteFile(s2);
 
           {$IFDEF UNIX}
           result:=CreateFPCScript;
@@ -3796,9 +3810,9 @@ begin
         {$ENDIF UNIX}
 
         {$ifdef Darwin}
+        ConfigText.Append('');
         ConfigText.Append('# Add some extra OSX options');
         ConfigText.Append('#IFDEF DARWIN');
-
         s:=GetDarwinSDKVersion('macosx');
         if Length(s)>0 then
         begin
@@ -3811,16 +3825,26 @@ begin
             ConfigText.Append('-WM'+s);
           ConfigText.Append('#ENDIF');
         end;
-
-        s:=GetDarwinSDKLocation;
-        if Length(s)>0 then
-        begin
-          ConfigText.Append('# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory');
-          ConfigText.Append('-XR'+s);
-          ConfigText.Append('-Fl'+s+'/usr/lib');
-        end;
-
         ConfigText.Append('#ENDIF');
+
+        s:=GetDarwinSDKVersion('macosx');
+        if  (Length(s)=0) OR (CompareVersionStrings(s,'10.14')>=0) then
+        begin
+          ConfigText.Append('');
+          if (Length(s)>0) then
+            ConfigText.Append('# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory');
+          s:=GetDarwinSDKLocation;
+          if (Length(s)>0) AND (DirectoryExists(s)) then
+          begin
+            ConfigText.Append('#IFDEF DARWIN');
+            ConfigText.Append('-XR'+s);
+            ConfigText.Append('#ENDIF');
+            ConfigText.Append('-Fl'+s+'/usr/lib');
+          end;
+          s:=GetDarwinToolsLocation;
+          if (Length(s)>0) AND (DirectoryExists(s)) then
+            ConfigText.Append('-FD'+s);
+        end;
         {$endif Darwin}
 
         {$ifndef FPCONLY}
