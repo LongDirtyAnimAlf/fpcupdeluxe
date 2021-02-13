@@ -580,13 +580,9 @@ begin
             // Set defaults for CrossBuildOptions
 
             //arm (unix, non-android) predefined settings
-            if (CPU=TCPU.arm) AND (NOT (OS in SUBARCH_OS)) AND (NOT (OS in [TOS.win32,TOS.win64,TOS.iphonesim,TOS.java,TOS.msdos,TOS.solaris,TOS.morphos,TOS.aros,TOS.amiga,TOS.go32v2])) then
+            if (CPU=TCPU.arm) AND (NOT (OS in SUBARCH_OS)) AND (NOT (OS in [TOS.android,TOS.win32,TOS.win64,TOS.iphonesim,TOS.java,TOS.msdos,TOS.solaris,TOS.morphos,TOS.aros,TOS.amiga,TOS.go32v2])) then
             begin
-
               // default: armhf
-              // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (armel) for Android
-              // adding this option will allow ppcrossarm compiler to generate ARMHF when needed
-              // but I stand corrected if this assumption is wrong
               aARMABISetting:=TARMARCH.armhf;
 
               if (OS=TOS.wince) then
@@ -625,6 +621,12 @@ begin
               end;
               if (CPU=TCPU.arm) then
               begin
+                // default: armhf
+                // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (armel) for Android
+                // adding this option will allow ppcrossarm compiler to generate ARMHF when needed
+                // but I stand corrected if this assumption is wrong
+                aARMABISetting:=TARMARCH.armhf;
+
                 // Use hard floats, using armeabi-v7a Android ABI.
                 // Note: do not use -CaEABIHF on Android, to not use
                 // armeabi-v7a-hard ABI. Reasons:
@@ -635,7 +637,7 @@ begin
                 //   armeabi-v7a-hard ABI (but only using armeabi-v7a) like
                 //   http://repo.or.cz/openal-soft/android.git or
                 //   https://github.com/michaliskambi/tremolo-android .
-                aCrossOptionSetting:='-Cp'+DEFAULTARMCPU+' -CfVFPV3_D16 ';
+                aCrossOptionSetting:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 ';
               end;
             end;
 

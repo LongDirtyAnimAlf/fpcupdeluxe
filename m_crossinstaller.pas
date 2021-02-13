@@ -350,8 +350,9 @@ begin
       TCPU.riscv32:  if (aOS=TOS.embedded) then result:=SUBARCH_RISCV32;
       TCPU.xtensa:   if (aOS<>TOS.ultibo) then result:=SUBARCH_XTENSA;
     end;
+    // Limit some special targets
     if (aOS=TOS.ultibo) then result:=[TSUBARCH.armv6,TSUBARCH.armv7a];
-    if (aOS=TOS.freertos) then result:=[TSUBARCH.armv6m,TSUBARCH.armv7em,TSUBARCH.armv7m];
+    if ((aOS=TOS.freertos) AND (aCPU=TCPU.arm)) then result:=[TSUBARCH.armv6m,TSUBARCH.armv7em,TSUBARCH.armv7m];
   end;
 end;
 
@@ -420,7 +421,6 @@ end;
 procedure TCrossInstaller.AddFPCCFGSnippet(aSnip: string);
 var
   aSnippd:string;
-  i:integer;
 begin
   if Length(Trim(aSnip))=0 then exit;
 

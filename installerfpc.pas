@@ -3483,7 +3483,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','Ultibo-$FPCSUBARCH']);
+            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-$FPCSUBARCH']);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -3513,7 +3513,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI2');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','Ultibo-$FPCSUBARCH']);
+            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-$FPCSUBARCH']);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -3543,7 +3543,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI3');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','Ultibo-$FPCSUBARCH']);
+            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-$FPCSUBARCH']);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -3573,7 +3573,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dQEMUVPB');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','Ultibo-$FPCSUBARCH']);
+            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-$FPCSUBARCH']);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -3992,9 +3992,13 @@ begin
   end;
   {$ENDIF}
 
-  if FileExists(FCompiler)
-     then aCleanupCompiler:=FCompiler
-     else aCleanupCompiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
+  aCleanupCompiler:=IncludeTrailingPathDelimiter(FBinPath)+GetCompilerName(GetTargetCPU);
+  if (NOT FileExists(aCleanupCompiler)) then
+  begin
+    if FileExists(FCompiler)
+       then aCleanupCompiler:=FCompiler
+       else aCleanupCompiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
+  end;
 
   if FileExists(aCleanupCompiler) then
   begin

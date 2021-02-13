@@ -151,7 +151,7 @@ uses
   m_anyinternallinker_to_winarm64,
   m_anyinternallinker_to_winx64,
   {$endif MSWINDOWS}
-  fpcupdeluxemainform, subarch;
+  fpcupdeluxemainform;
 
 {$R *.res}
 

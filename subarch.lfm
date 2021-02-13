@@ -1,15 +1,14 @@
 object SubarchForm: TSubarchForm
   Left = 438
-  Height = 290
+  Height = 271
   Top = 133
-  Width = 526
+  Width = 497
   AutoSize = True
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  BorderWidth = 6
   Caption = 'Subarch Settings'
-  ClientHeight = 290
-  ClientWidth = 526
+  ClientHeight = 271
+  ClientWidth = 497
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
@@ -23,9 +22,9 @@ object SubarchForm: TSubarchForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = rgrpSelectSubarch
     AnchorSideBottom.Side = asrBottom
-    Left = 192
+    Left = 174
     Height = 218
-    Top = 16
+    Top = 6
     Width = 316
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 8
@@ -208,12 +207,16 @@ object SubarchForm: TSubarchForm
     end
   end
   object rgrpSelectCPU: TRadioGroup
-    Left = 24
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 6
     Height = 140
-    Top = 16
+    Top = 6
     Width = 160
     AutoFill = True
     AutoSize = True
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 6
     Caption = 'Select CPU'
     ChildSizing.LeftRightSpacing = 6
     ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
@@ -234,9 +237,9 @@ object SubarchForm: TSubarchForm
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = rgrpSelectCPU
     AnchorSideRight.Side = asrBottom
-    Left = 24
+    Left = 6
     Height = 70
-    Top = 164
+    Top = 154
     Width = 160
     Anchors = [akTop, akLeft, akRight]
     AutoFill = True
@@ -259,12 +262,13 @@ object SubarchForm: TSubarchForm
     AnchorSideTop.Control = rgrpSelectSubarch
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 12
-    Height = 38
-    Top = 240
-    Width = 502
+    Left = 6
+    Height = 35
+    Top = 230
+    Width = 485
     Anchors = [akTop, akLeft, akRight, akBottom]
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
