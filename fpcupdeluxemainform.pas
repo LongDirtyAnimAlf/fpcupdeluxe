@@ -2656,6 +2656,11 @@ begin
           // Set arm abi build option
           FPCupManager.FPCOPT:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
         end;
+
+        // Set ABI option
+        //FPCupManager.CrossOS_ABI:=TABI.abiNone;
+
+
       end;
 
       // Set FPC cross-compile options
@@ -3218,8 +3223,8 @@ begin
               if ((FPCupManager.CrossCPU_Target=TCPU.arm) AND (FPCupManager.CrossOS_Target=TOS.freertos)) then
               begin
                 s:='10.4.3';
-                LibsFileName:='FreeRTOS-'+s+'-for-for-FreePascal.zip';
-                DownloadURL:='https://github.com/michael-ring/freertos4fpc/releases/download/v'+s+'-1/'+LibsFileName;
+                LibsFileName:='FreeRTOS-'+s+'-for-FreePascal.zip';
+                DownloadURL:='https://github.com/michael-ring/freertos4fpc/releases/download/v'+s+'-2/'+LibsFileName;
                 TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+LibsFileName;
                 SysUtils.DeleteFile(TargetFile);
                 success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
@@ -3744,7 +3749,6 @@ begin
   FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
   FPCupManager.CrossOS_Target:=TOS.osNone;
   FPCupManager.CrossOS_SubArch:=TSubarch.saNone;
-  FPCupManager.CrossOS_ABI:=TABI.abiNone;
 
   FPCupManager.LCL_Platform:='';
 

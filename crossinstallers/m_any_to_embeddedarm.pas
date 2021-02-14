@@ -109,10 +109,6 @@ begin
       if (Pos(aSubarchName,FLibsPath)>0) then
         // we have a libdir with a subarch inside: make it universal !!
         FLibsPath:=StringReplace(FLibsPath,aSubarchName,'$FPCSUBARCH',[]);
-
-      if (Pos(aSubarchName,FLibsPath)>0) then
-        // we have a libdir with a subarch inside: make it universal !!
-        FLibsPath:=StringReplace(FLibsPath,aSubarchName,'$FPCSUBARCH',[]);
     end;
 
     // Perform ABI magic for libpath

@@ -143,9 +143,9 @@ const
     );
   {$endif}
 
-  SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
-  SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
-  FPCSnipMagic='# If you don''t want so much verbosity use'; //denotes end of standard fpc.cfg
+  SnipMagicBegin = '# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
+  SnipMagicEnd   = '# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
+  FPCSnipMagic   = '# If you don''t want so much verbosity use'; //denotes end of standard fpc.cfg
 
   //Sequence contants for statemachine
 
@@ -2966,7 +2966,20 @@ begin
   if (FCrossCPU_Target=TCPU.arm) then
     FCrossOS_ABI:=aABI
   else
-    FCrossOS_ABI:=TABI.abiNone;
+  begin
+    if (FCrossOS_Target=TOS.ios) then
+    begin
+      FCrossOS_ABI:=aABI;
+      if (aABI<>TABI.default) OR (aABI<>TABI.aarch64ios) then
+        raise Exception.CreateFmt('Invalid ARM ABI "%s" for SetABI for iOS.', [aABI]);
+    end
+    else
+    begin
+      FCrossOS_ABI:=TABI.default;
+      if (aABI<>TABI.default) then
+        raise Exception.CreateFmt('Invalid ARM ABI "%s" for SetABI.', [aABI]);
+    end;
+  end;
 end;
 
 function TInstaller.GetSuitableRepoClient:TRepoClient;
@@ -4208,7 +4221,7 @@ begin
   FCrossCPU_Target:=TCPU.cpuNone;
   FCrossOS_Target:=TOS.osNone;
   FCrossOS_SubArch:=TSUBARCH.saNone;
-  FCrossOS_ABI:=TABI.abiNone;
+  FCrossOS_ABI:=TABI.default;
 
   FMajorVersion   := -1;
   FMinorVersion   := -1;

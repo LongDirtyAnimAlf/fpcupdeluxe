@@ -95,7 +95,7 @@ type
   TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa);
   TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo);
   TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,lx6,lx106);
-  TABI      = (abiNone,default,eabi,eabihf);
+  TABI      = (default,eabi,eabihf,aarch64ios);
 
   TSUBARCHS = set of TSUBARCH;
 
@@ -115,9 +115,6 @@ type
 const
   ARMArchFPCStr : array[TARMARCH] of string=(
     '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
-  );
-  ARMABIFPCStr : array[TABI] of string=(
-    '','default','eabi','eabihf'
   );
   FPCUP_AUTO_MAGIC = 'FPCUP_AUTO';
 
@@ -391,12 +388,14 @@ end;
 
 function GetABI(aABI:TABI):string;
 begin
-  result:=ARMABIFPCStr[aABI];
-  {
-  if (aABI<Low(TABI)) OR (aABI>High(TABI)) then
-    raise Exception.Create('Invalid ABI for GetABI.');
-  result:=GetEnumNameSimple(TypeInfo(TABI),Ord(aABI));
-  }
+  if aABI=TABI.default then
+    result:=''
+  else
+  begin
+    if (aABI<Low(TABI)) OR (aABI>High(TABI)) then
+      raise Exception.Create('Invalid ABI for GetABI.');
+    result:=GetEnumNameSimple(TypeInfo(TABI),Ord(aABI));
+  end;
 end;
 
 function GetExeExt: string;
@@ -447,7 +446,10 @@ var
 begin
   if Length(Trim(aSnip))=0 then exit;
 
-  aSnippd:=StringReplace(aSnip,' ',LineEnding,[rfReplaceAll]);
+  aSnippd:=StringReplace(aSnip,'#IFDEF ','#IFDEF_',[rfReplaceAll]);
+  aSnippd:=StringReplace(aSnippd,' ',LineEnding,[rfReplaceAll]);
+  aSnippd:=StringReplace(aSnippd,'#IFDEF_','#IFDEF ',[rfReplaceAll]);
+
   if (Pos(aSnippd,FFPCCFGSnippet)>0) then exit;
 
   if Length(FPCCFGSnippet)>0 then
@@ -656,7 +658,16 @@ begin
 
   // Add user-selected CROSSOPT to fpc.cfg snippet
   // Descendents can add more fpc.cfg snippets but shouldn't remove what the user chose
-  for i:=0 to FCrossOpts.Count-1 do AddFPCCFGSnippet(FCrossOpts[i]);
+  if (SubArch<>TSUBARCH.saNone) then
+    AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(Self.SubArchName));
+  for i:=0 to FCrossOpts.Count-1 do
+  begin
+    if ((SubArch<>TSUBARCH.saNone) AND AnsiContainsText(FCrossOpts[i],'-Cp'+Self.SubArchName)) then continue;
+    AddFPCCFGSnippet(FCrossOpts[i]);
+  end;
+  if (SubArch<>TSUBARCH.saNone) then
+    AddFPCCFGSnippet('#ENDIF');
+
   FCrossOptsAdded:=true;
 end;
 
@@ -709,7 +720,7 @@ begin
   FCrossOptsAdded:=false;
   FCrossOpts.Clear;
   FSubArch:=TSUBARCH.saNone;
-  FABI:=TABI.abiNone;
+  FABI:=TABI.default;
 
   FRegisterName:=TargetCPUName+'-'+TargetOSName;
   FBinUtilsDirectoryID:=FRegisterName;
@@ -756,8 +767,205 @@ begin
   inherited Destroy;
 end;
 
+procedure InitDefaultCrossSettings;
+var
+  CPU:TCPU;
+  OS:TOS;
+  SUBARCH:TSUBARCH;
+  Subarchs:TSUBARCHS;
+  s1,s2:string;
+  aCrossOptionSetting:string;
+  aARMABISetting:TARMARCH;
+begin
+  for OS := Low(TOS) to High(TOS) do
+  begin
+    for CPU := Low(TCPU) to High(TCPU) do
+    begin
+
+      s1:=GetCPU(CPU)+'-'+GetOS(OS);
+
+      Subarchs:=GetSubarchs(CPU,OS);
+
+      for SUBARCH in Subarchs do
+      begin
+        if (SUBARCH<>TSUBARCH.saNone) then
+          s2:=s1+'-'+GetSubarch(SUBARCH)
+        else
+          s2:=s1;
+
+        CrossUtils[CPU,OS,SUBARCH].Setting:=TSearchSetting.ssUp;
+        CrossUtils[CPU,OS,SUBARCH].LibDir:='';
+        CrossUtils[CPU,OS,SUBARCH].BinDir:='';
+        CrossUtils[CPU,OS,SUBARCH].Compiler:='';
+
+        aCrossOptionSetting:='';
+        aARMABISetting:=TARMARCH.none;
+
+        // Set defaults for CrossBuildOptions
+
+        //arm (unix, non-android) predefined settings
+        if (
+          (CPU=TCPU.arm)
+          AND (NOT (OS in SUBARCH_OS))
+          AND (NOT (OS in [TOS.android,TOS.win32,TOS.win64,TOS.iphonesim,TOS.java,TOS.msdos,TOS.solaris,TOS.morphos,TOS.aros,TOS.amiga,TOS.go32v2]))
+          ) then
+        begin
+          // default: armhf
+          aARMABISetting:=TARMARCH.armhf;
+
+          if (OS=TOS.wince) then
+          begin
+            //Disable for now : setting ARMV6 or higher gives problems with FPC 3.0.4 and lower
+            //aCrossOptionSetting:='-CpARMV6 ';
+          end
+          else
+          if ((OS=TOS.darwin) OR (OS=TOS.ios)) then
+          begin
+            aCrossOptionSetting:='-CpARMV7 -CfVFPV3 -CaEABI ';
+          end
+          else
+          begin
+            aCrossOptionSetting:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF ';
+          end;
+        end;
+
+        //android predefined settings
+        if (OS=TOS.android) then
+        begin
+          if (CPU=TCPU.i386) then
+          begin
+            aCrossOptionSetting:='-CfSSSE3 ';
+          end;
+          if (CPU=TCPU.x86_64) then
+          begin
+            aCrossOptionSetting:='-CfSSE42 ';
+          end;
+          if (CPU=TCPU.arm) then
+          begin
+            // default: armhf
+            // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (armel) for Android
+            // adding this option will allow ppcrossarm compiler to generate ARMHF when needed
+            // but I stand corrected if this assumption is wrong
+            aARMABISetting:=TARMARCH.armhf;
+
+            // Use hard floats, using armeabi-v7a Android ABI.
+            // Note: do not use -CaEABIHF on Android, to not use
+            // armeabi-v7a-hard ABI. Reasons:
+            // - armeabi-v7a-hard ABI is not adviced anymore by Google,
+            //   see "ARM Hard Float ABI Removal" on
+            //   https://android.googlesource.com/platform/ndk/+/353e653824b79c43b948429870d0abeedebde386/docs/HardFloatAbi.md
+            // - it prevents calling functions from libraries not using
+            //   armeabi-v7a-hard ABI (but only using armeabi-v7a) like
+            //   http://repo.or.cz/openal-soft/android.git or
+            //   https://github.com/michaliskambi/tremolo-android .
+            aCrossOptionSetting:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -CaEABI ';
+          end;
+        end;
+
+        //freertos and embedded predefined settings
+        if (OS in [TOS.embedded,TOS.freertos]) then
+        begin
+
+          if ((CPU=TCPU.avr) AND (OS=TOS.embedded)) then
+          begin
+            // for Uno (ATMega328P) use avr5
+            // for Mega (ATMega2560) use avr6
+            if SUBARCH=TSubarch.avr5 then
+              aCrossOptionSetting:='-Cpavr5 ';
+            if SUBARCH=TSubarch.avr6 then
+              aCrossOptionSetting:='-Cpavr6 ';
+          end;
+
+          if (CPU=TCPU.xtensa) then
+          begin
+            if SUBARCH=TSubarch.lx6 then
+              aCrossOptionSetting:='-Cplx6 -Cfhard ';
+          end;
+
+          if (CPU=TCPU.arm) then
+          begin
+            aARMABISetting:=TARMARCH.armhf;
+            aCrossOptionSetting:='-Cp'+GetSubarch(SUBARCH)+' ';
+            if (SUBARCH<>TSubarch.armv7em) then
+              aCrossOptionSetting:=aCrossOptionSetting+' -CaEABI '
+            else
+              aCrossOptionSetting:=aCrossOptionSetting+' -CfFPV4_SP_D16 -OoFASTMATH -CaEABIHF '
+          end;
+
+          if ((CPU=TCPU.mipsel) AND (OS=TOS.embedded)) then
+          begin
+            if SUBARCH=TSubarch.pic32mx then
+              aCrossOptionSetting:='-Cpmips32 ';
+          end;
+
+        end;
+
+        //ultibo predefined settings
+        if (OS=TOS.ultibo) then
+        begin
+          if (CPU=TCPU.arm) then
+          begin
+            // Always hardfloat !!
+            aARMABISetting:=TARMARCH.armhf;
+
+            if SUBARCH=TSubarch.armv6 then
+              aCrossOptionSetting:='-CpARMV6 -CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
+            if SUBARCH=TSubarch.armv7a then
+              aCrossOptionSetting:='-CpARMV7A -CfVFPV3 -CIARM -CaEABIHF -OoFASTMATH ';
+          end;
+        end;
+
+        //msdos predefined settings
+        if (OS=TOS.msdos) then
+        begin
+          if (CPU=TCPU.i8086) then
+          begin
+            {$IFDEF DARWIN}
+            aCrossOptionSetting:='-WmLarge ';
+            {$ELSE}
+            aCrossOptionSetting:='-WmMedium ';
+            {$ENDIF DARWIN}
+          end;
+        end;
+
+        //ppc64 predefined settings
+        if (CPU=TCPU.powerpc64) then
+        begin
+          if ((OS=TOS.linux)) then
+          begin
+            // for now, little endian only on Linux (IBM CPU's) !!
+            aCrossOptionSetting:='-Cb- -Caelfv2 ';
+          end;
+        end;
+
+        //freebsd predefined settings
+        if (OS=TOS.freebsd) then
+        begin
+          //This is already done in the FPC installer itself.
+          //To be checked if that is the right choice.
+          //aCrossOptionSetting:='-dFPC_USE_LIBC ';
+        end;
+
+        //Store predefined setting.
+        CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions:=aCrossOptionSetting;
+
+        // Set defaults for ARM ABI
+        if CPU=TCPU.arm then
+        begin
+          CrossUtils[CPU,OS,SUBARCH].CrossARMArch:=aARMABISetting;
+        end;
+
+      end;
+    end;
+  end;
+end;
+
+initialization
+  InitDefaultCrossSettings;
+
 finalization
   if assigned(CrossInstallers) then
     CrossInstallers.Destroy;
+
 end.
 

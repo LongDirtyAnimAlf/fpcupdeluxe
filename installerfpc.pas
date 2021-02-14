@@ -667,12 +667,7 @@ begin
                 else
                 begin
                   if CrossInstaller.TargetCPU=TCPU.arm then
-                  begin
-                    if CrossInstaller.ABI<>TABI.abiNone then
-                      UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH','$FPCABI'])
-                    else
-                      UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH']);
-                  end
+                    UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH','$FPCABI'])
                   else
                     UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH']);
                 end;
@@ -694,14 +689,16 @@ begin
             //Edit dedicated settings of config snippet
             InsertFPCCFGSnippet(FPCCfg,
               SnipMagicBegin+CrossInstaller.RegisterName+LineEnding+
+              '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
               '# Cross compile settings dependent on both target OS and target CPU'+LineEnding+
               '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
-              '#IFDEF '+uppercase(CrossInstaller.TargetOSName)+LineEnding+
+              '#IFDEF '+UpperCase(CrossInstaller.TargetOSName)+LineEnding+
               '#IFDEF CPU'+s2+LineEnding+
-              '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
               s1+
-              '#ENDIF'+LineEnding+
-              '#ENDIF'+LineEnding+
+              '#ENDIF CPU'+s2+LineEnding+
+              '#ENDIF '+UpperCase(CrossInstaller.TargetOSName)+LineEnding+
+              //'#ENDIF'+LineEnding+
+              //'#ENDIF'+LineEnding+
               '#ENDIF'+LineEnding+
               SnipMagicEnd);
 
@@ -891,12 +888,7 @@ begin
                 else
                 begin
                   if CrossInstaller.TargetCPU=TCPU.arm then
-                  begin
-                    if CrossInstaller.ABI<>TABI.abiNone then
-                      UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName,CrossInstaller.ABIName])
-                    else
-                      UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName])
-                  end
+                    UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName,CrossInstaller.ABIName])
                   else
                     UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName]);
                 end;
