@@ -319,6 +319,7 @@ begin
     // up from there.
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     CrossInstaller.SetSubArch(CrossOS_SubArch);
+    CrossInstaller.SetABI(CrossOS_ABI);
 
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       Infoln(infotext+'Failed to get crossbinutils', etError)
@@ -1888,6 +1889,7 @@ begin
     begin
       CrossInstaller.SetCrossOpt(CrossOPT);
       CrossInstaller.SetSubArch(CrossOS_SubArch);
+      CrossInstaller.SetABI(CrossOS_ABI);
     end
     else
     begin

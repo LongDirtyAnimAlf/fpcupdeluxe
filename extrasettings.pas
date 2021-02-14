@@ -434,7 +434,7 @@ begin
         CrossUtils[CPU,OS,SUBARCH].LibDir:='';
         CrossUtils[CPU,OS,SUBARCH].BinDir:='';
         CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions:='';
-        CrossUtils[CPU,OS,SUBARCH].CrossARMArch:=TARMARCH.default;
+        CrossUtils[CPU,OS,SUBARCH].CrossARMArch:=TARMARCH.none;
         CrossUtils[CPU,OS,SUBARCH].Compiler:='';
         CrossUtils[CPU,OS,SUBARCH].Available:=false;
       end;
@@ -573,7 +573,7 @@ begin
           CrossUtils[CPU,OS,SUBARCH].Compiler:=ReadString(s2,'Compiler','');
 
           aCrossOptionSetting:='';
-          aARMABISetting:=TARMARCH.default;
+          aARMABISetting:=TARMARCH.none;
 
           if (NOT ValueExists(s2,CROSSOPTIONS)) then
           begin
@@ -992,7 +992,7 @@ begin
 
           if CPU=arm then
           begin
-            if (CrossUtils[CPU,OS,SUBARCH].CrossARMArch<>TARMARCH.default) then
+            if (CrossUtils[CPU,OS,SUBARCH].CrossARMArch<>TARMARCH.none) then
             begin
               if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
               InfoForm.Memo1.Lines.Append('  ARM Arch : '+GetARMArch(CrossUtils[CPU,OS,SUBARCH].CrossARMArch));
@@ -1189,7 +1189,7 @@ begin
   begin
     i:=(Sender AS TRadioGroup).ItemIndex;
     if i=-1 then
-      xARMArch:=TARMARCH.default
+      xARMArch:=TARMARCH.none
     else
       xARMArch:=TARMARCH(i);
     CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=xARMArch;

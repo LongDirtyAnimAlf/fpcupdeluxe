@@ -57,8 +57,11 @@ function TAny_FreeRTOSArm.GetLibs(Basepath:string): boolean;
 const
   StaticLibName1='libfreertos.a';
   StaticLibName2='libc_nano.a';
+  ABINAMES:array[0..2] of string = ('eabihf','eabi','default');
 var
   aSubarchName:string;
+  aIndex:integer;
+  aABI:string;
 begin
   result:=FLibsFound;
 
@@ -100,12 +103,50 @@ begin
 
   // search local paths based on libbraries provided for or adviced by https://github.com/michael-ring/freertos4fpc
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
+  begin
     result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,'lib',aSubarchName]),StaticLibName2);
+    if (not result) then
+    begin
+      for aABI in ABINAMES do
+      begin
+        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,'lib',aSubarchName,aABI]),StaticLibName2);
+        if result then break;
+      end;
+    end;
+  end;
 
   if result then
   begin
     SearchLibraryInfo(true);
     FLibsFound:=True;
+
+    // Perform subarch magic for libpath
+    if (FSubArch<>TSUBARCH.saNone) then
+    begin
+      if (Pos(aSubarchName,FLibsPath)>0) then
+        // we have a libdir with a subarch inside: make it universal !!
+        FLibsPath:=StringReplace(FLibsPath,aSubarchName,'$FPCSUBARCH',[]);
+
+      if (Pos(aSubarchName,FLibsPath)>0) then
+        // we have a libdir with a subarch inside: make it universal !!
+        FLibsPath:=StringReplace(FLibsPath,aSubarchName,'$FPCSUBARCH',[]);
+    end;
+
+    // Perform ABI magic for libpath
+    aIndex:=Pos(Self.RegisterName,FLibsPath);
+    if (aIndex<>-1) then
+    begin
+      for aABI in ABINAMES do
+      begin
+        if (Pos(DirectorySeparator+aABI+DirectorySeparator,FLibsPath,aIndex)>0) then
+        begin
+          // we have a libdir with a ABI inside: make it universal !!
+          FLibsPath:=StringReplace(FLibsPath,DirectorySeparator+aABI+DirectorySeparator,DirectorySeparator+'$FPCABI'+DirectorySeparator,[]);
+          break;
+        end;
+      end;
+    end;
+
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
   end;
 end;

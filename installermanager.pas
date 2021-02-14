@@ -192,6 +192,7 @@ type
     FCrossOPT: string;
     FCrossOS_Target: TOS;
     FCrossOS_SubArch: TSUBARCH;
+    FCrossOS_ABI: TABI;
     FFPCDesiredRevision: string;
     FFPCDesiredBranch: string;
     FFPCSourceDirectory: string;
@@ -296,6 +297,7 @@ type
     property CrossCPU_Target:TCPU read FCrossCPU_Target write FCrossCPU_Target;
     property CrossOS_Target:TOS read FCrossOS_Target write FCrossOS_Target;
     property CrossOS_SubArch:TSUBARCH read FCrossOS_SubArch write FCrossOS_SubArch;
+    property CrossOS_ABI:TABI read FCrossOS_ABI write FCrossOS_ABI;
     property CrossCombo_Target:string read GetCrossCombo_Target;
 
     // Widgetset for which the user wants to compile the LCL (not the IDE).
@@ -1610,6 +1612,7 @@ begin
       // The below is used to get the right cross-installer !!
       // By setting the target.
       FInstaller.SetTarget(FParent.CrossCPU_Target,FParent.CrossOS_Target,FParent.CrossOS_SubArch);
+      FInstaller.SetABI(FParent.FCrossOS_ABI);
       FInstaller.CrossOPT:=FParent.CrossOPT;
       FInstaller.CrossLibraryDirectory:=FParent.CrossLibraryDirectory;
       FInstaller.CrossToolsDirectory:=FParent.CrossToolsDirectory;

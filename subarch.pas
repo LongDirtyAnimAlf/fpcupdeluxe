@@ -104,7 +104,7 @@ begin
   begin
     i:=(Sender AS TRadioGroup).ItemIndex;
     if i=-1 then
-      xARMArch:=TARMARCH.default
+      xARMArch:=TARMARCH.none
     else
       xARMArch:=TARMARCH(i);
     CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=xARMArch;

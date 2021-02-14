@@ -92,9 +92,10 @@ const
   SEARCHFILE='as';
 
 type
-  TCPU = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa);
-  TOS  = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo);
-  TSUBARCH = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,lx6,lx106);
+  TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa);
+  TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo);
+  TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,lx6,lx106);
+  TABI      = (abiNone,default,eabi,eabihf);
 
   TSUBARCHS = set of TSUBARCH;
 
@@ -109,11 +110,14 @@ const
 
 type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
-  TARMARCH  = (default,armel,armeb,armhf);
+  TARMARCH  = (none,armel,armeb,armhf);
 
 const
   ARMArchFPCStr : array[TARMARCH] of string=(
     '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
+  );
+  ARMABIFPCStr : array[TABI] of string=(
+    '','default','eabi','eabihf'
   );
   FPCUP_AUTO_MAGIC = 'FPCUP_AUTO';
 
@@ -139,6 +143,7 @@ type
     function GetTargetCPUName:string;
     function GetTargetOSName:string;
     function GetSubarchName:string;
+    function GetABIName:string;
   protected
     FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
@@ -153,6 +158,7 @@ type
     FTargetCPU: TCPU; //cpu for the target environment. Follows FPC names
     FTargetOS: TOS; //operating system for the target environment. Follows FPC names
     FSubArch: TSUBARCH; //optional subarch for embedded targets
+    FABI: TABI; //optional subarch for embedded targets
     FRegisterName: string;
     FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
     FSolarisOI:boolean;
@@ -181,6 +187,8 @@ type
     procedure SetCrossOpt(CrossOpts: string);
     // Pass subarch if any
     procedure SetSubArch(SubArch: TSUBARCH);
+    // Pass ABI if any
+    procedure SetABI(ABI: TABI);
     procedure ShowInfo(info: string = ''; Level: TEventType = etInfo);
     // Reset some variables to default values
     procedure Reset; virtual;
@@ -213,9 +221,11 @@ type
     property TargetCPU:TCPU read FTargetCPU;
     property TargetOS:TOS read FTargetOS;
     property SubArch:TSUBARCH read FSubArch;
+    property ABI:TABI read FABI;
     property TargetCPUName: string read GetTargetCPUName;
     property TargetOSName: string read GetTargetOSName;
     property SubArchName:string read GetSubarchName;
+    property ABIName:string read GetABIName;
     property RegisterName:string read FRegisterName;
 
     property SolarisOI: boolean write FSolarisOI;
@@ -234,6 +244,7 @@ function GetSubarchs(aCPU:TCPU;aOS:TOS):TSUBARCHS;
 function GetARMArch(aARMarch:TARMARCH):string;
 function GetTARMArch(aARMArch:string):TARMARCH;
 function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
+function GetABI(aABI:TABI):string;
 
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 function GetExeExt: string;
@@ -366,20 +377,27 @@ end;
 function GetTARMArch(aARMArch:string):TARMARCH;
 begin
   if Length(aARMArch)=0 then
-    result:=TARMARCH.default
+    result:=TARMARCH.none
   else
     result:=TARMARCH(GetEnumValueSimple(TypeInfo(TARMARCH),aARMArch));
   if Ord(result) < 0 then
     raise Exception.CreateFmt('Invalid ARM Arch name "%s" for GetARMArch.', [aARMArch]);
 end;
 
-
-
 function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
 begin
   result:=ARMArchFPCStr[aARMArch];
 end;
 
+function GetABI(aABI:TABI):string;
+begin
+  result:=ARMABIFPCStr[aABI];
+  {
+  if (aABI<Low(TABI)) OR (aABI>High(TABI)) then
+    raise Exception.Create('Invalid ABI for GetABI.');
+  result:=GetEnumNameSimple(TypeInfo(TABI),Ord(aABI));
+  }
+end;
 
 function GetExeExt: string;
 begin
@@ -416,6 +434,11 @@ end;
 function TCrossInstaller.GetSubarchName:string;
 begin
   result:=GetSubarch(Subarch);
+end;
+
+function TCrossInstaller.GetABIName:string;
+begin
+  result:=GetABI(ABI);
 end;
 
 procedure TCrossInstaller.AddFPCCFGSnippet(aSnip: string);
@@ -660,6 +683,12 @@ begin
   FSubArch:=SubArch;
 end;
 
+procedure TCrossInstaller.SetABI(ABI: TABI);
+begin
+  FABI:=ABI;
+end;
+
+
 procedure TCrossInstaller.ShowInfo(info: string = ''; Level: TEventType = etInfo);
 begin
   (*
@@ -680,6 +709,7 @@ begin
   FCrossOptsAdded:=false;
   FCrossOpts.Clear;
   FSubArch:=TSUBARCH.saNone;
+  FABI:=TABI.abiNone;
 
   FRegisterName:=TargetCPUName+'-'+TargetOSName;
   FBinUtilsDirectoryID:=FRegisterName;

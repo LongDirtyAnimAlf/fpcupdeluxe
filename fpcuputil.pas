@@ -396,7 +396,7 @@ function GetTargetCPUOS:string;
 function GetDistro:string;
 function GetFreeBSDVersion:byte;
 function checkGithubRelease(const aURL:string):string;
-{$IF FPC_FULLVERSION < 30300}
+{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}
 Function Pos(Const Substr : string; Const Source : string; Offset : Sizeint = 1) : SizeInt;
 {$ENDIF}
 {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30000)}
@@ -4017,7 +4017,7 @@ begin
   end;
 end;
 
-{$IF FPC_FULLVERSION < 30300}
+{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}
 Function Pos(Const Substr : string; Const Source : string; Offset : Sizeint = 1) : SizeInt;
 var
   i,MaxLen : SizeInt;

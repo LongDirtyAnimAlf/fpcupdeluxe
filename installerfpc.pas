@@ -561,6 +561,7 @@ begin
     //pass on user-requested cross compile options
     CrossInstaller.SetCrossOpt(CrossOPT);
     CrossInstaller.SetSubArch(CrossOS_SubArch);
+    CrossInstaller.SetABI(CrossOS_ABI);
 
     // get/set cross binary utils !!
     BinsAvailable:=false;
@@ -659,15 +660,22 @@ begin
                 //s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units','$FPCTARGET','rtl','org','freepascal','rtl'])+LineEnding;
                 s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl'])+LineEnding;
 
-              if (CrossInstaller.TargetOS in [TOS.ultibo,TOS.embedded,TOS.freertos]) then
+              if (CrossInstaller.TargetOS in SUBARCH_OS) then
               begin
-                if (CrossInstaller.TargetOS=TOS.embedded) then
-                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH']);
                 if (CrossInstaller.TargetOS=TOS.ultibo) then
-                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-$FPCSUBARCH']);
-                if (CrossInstaller.TargetOS=TOS.freertos) then
-                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName,'$FPCSUBARCH']);
-
+                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-$FPCSUBARCH'])
+                else
+                begin
+                  if CrossInstaller.TargetCPU=TCPU.arm then
+                  begin
+                    if CrossInstaller.ABI<>TABI.abiNone then
+                      UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH','$FPCABI'])
+                    else
+                      UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH']);
+                  end
+                  else
+                    UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH']);
+                end;
                 // Lazarus gives an error when units are located in a non-standard directory.
                 // Therefor: add a universal searchpath for units also ... bit tricky
                 // Must be the first entry ... so it will be used as the last ... :-|
@@ -876,19 +884,26 @@ begin
           begin
             if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
             begin
-              if (CrossInstaller.SubArch<>TSUBARCH.saNone) then
+              if (CrossInstaller.TargetOS in SUBARCH_OS) then
               begin
                 if (CrossInstaller.TargetOS=TOS.ultibo) then
-                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-'+CrossInstaller.SubArchName]);
-                if (CrossInstaller.TargetOS=TOS.embedded) then
-                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName]);
-                if (CrossInstaller.TargetOS=TOS.freertos) then
-                  s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName,CrossInstaller.SubArchName]);
-
+                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-'+CrossInstaller.SubArchName])
+                else
+                begin
+                  if CrossInstaller.TargetCPU=TCPU.arm then
+                  begin
+                    if CrossInstaller.ABI<>TABI.abiNone then
+                      UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName,CrossInstaller.ABIName])
+                    else
+                      UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName])
+                  end
+                  else
+                    UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName]);
+                end;
                 if (MakeCycle=st_RtlInstall) then
-                  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+s1+DirectorySeparator+'rtl');
+                  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath+DirectorySeparator+'rtl');
                 if (MakeCycle=st_PackagesInstall) then
-                  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+s1+DirectorySeparator+'packages');
+                  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath+DirectorySeparator+'packages');
               end;
             end;
           end;
@@ -3976,6 +3991,7 @@ begin
     //pass on user-requested cross compile options
     CrossInstaller.SetCrossOpt(CrossOPT);
     CrossInstaller.SetSubArch(CrossOS_SubArch);
+    CrossInstaller.SetABI(CrossOS_ABI);
   end else CPUOS_Signature:=GetFPCTarget(true);
 
   {$IFDEF MSWINDOWS}

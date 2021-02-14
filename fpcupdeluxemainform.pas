@@ -3744,6 +3744,7 @@ begin
   FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
   FPCupManager.CrossOS_Target:=TOS.osNone;
   FPCupManager.CrossOS_SubArch:=TSubarch.saNone;
+  FPCupManager.CrossOS_ABI:=TABI.abiNone;
 
   FPCupManager.LCL_Platform:='';
 
