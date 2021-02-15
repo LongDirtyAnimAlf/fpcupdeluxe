@@ -2980,6 +2980,8 @@ begin
             {$endif}
           end;
 
+          //{$IF defined(CPUAARCH64) AND defined(DARWIN)}
+          {$ifndef MSWINDOWS}
           if FPCupManager.CrossOS_Target=TOS.freertos then
           begin
             // use embedded arm tools for freertos arm:
@@ -2988,6 +2990,7 @@ begin
               BinsFileName:=StringReplace(BinsFileName,'FreeRTOS','Embedded',[]);
             end;
           end;
+          {$endif}
 
           // All ready !!
 
@@ -3189,8 +3192,11 @@ begin
                     aList.Add('You can find them at:');
                     aList.Add(DownloadURL);
                     s:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
-                    SysUtils.DeleteFile(s);
-                    aList.SaveToFile(s);
+                    If DirectoryExists(ExtractFileDir(s)) then
+                    begin
+                      SysUtils.DeleteFile(s);
+                      aList.SaveToFile(s);
+                    end;
                   finally
                     aList.Free;
                   end;
@@ -3222,9 +3228,11 @@ begin
             begin
               if ((FPCupManager.CrossCPU_Target=TCPU.arm) AND (FPCupManager.CrossOS_Target=TOS.freertos)) then
               begin
+                // Use deticated libs by Michael Ring !
                 s:='10.4.3';
+                MinorVersion:=3;
                 LibsFileName:='FreeRTOS-'+s+'-for-FreePascal.zip';
-                DownloadURL:='https://github.com/michael-ring/freertos4fpc/releases/download/v'+s+'-2/'+LibsFileName;
+                DownloadURL:='https://github.com/michael-ring/freertos4fpc/releases/download/v'+s+'-'+InttoStr(MinorVersion)+'/'+LibsFileName;
                 TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+LibsFileName;
                 SysUtils.DeleteFile(TargetFile);
                 success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
@@ -3249,7 +3257,6 @@ begin
                 end;
               end;
             end;
-
 
             if MissingCrossLibs then
             begin
@@ -3373,8 +3380,11 @@ begin
                     aList.Add('You can find them at:');
                     aList.Add(DownloadURL);
                     s:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
-                    SysUtils.DeleteFile(s);
-                    aList.SaveToFile(s);
+                    if DirectoryExists(ExtractFileDir(s)) then
+                    begin
+                      SysUtils.DeleteFile(s);
+                      aList.SaveToFile(s);
+                    end;
                   finally
                     aList.Free;
                   end;

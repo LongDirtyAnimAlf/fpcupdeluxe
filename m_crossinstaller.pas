@@ -88,8 +88,8 @@ const
   CROSSBINPATH   = CROSSPATH+DirectorySeparator+'bin';
   CROSSLIBPATH   = CROSSPATH+DirectorySeparator+'lib';
 
-  LDSEARCHFILE='ld';
-  SEARCHFILE='as';
+  LDSEARCHFILE  = 'ld';
+  SEARCHFILE    = 'as';
 
 type
   TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa);
@@ -100,7 +100,7 @@ type
   TARMARCH  = (none,armel,armeb,armhf);
 
   TSUBARCHS = set of TSUBARCH;
-  TABIS = set of TABI;
+  TABIS     = set of TABI;
 
 const
   SUBARCH_OS         = [{TOS.osNone,}TOS.embedded,TOS.freertos,TOS.ultibo];
@@ -257,7 +257,9 @@ procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller)
 function GetExeExt: string;
 
 var
+  {$ifdef LCL}
   CrossUtils:TCrossUtils;
+  {$endif LCL}
   CrossInstallers:TStringList=nil;
 
 implementation
@@ -803,6 +805,7 @@ begin
   inherited Destroy;
 end;
 
+{$ifdef LCL}
 procedure InitDefaultCrossSettings;
 var
   CPU:TCPU;
@@ -998,6 +1001,7 @@ end;
 
 initialization
   InitDefaultCrossSettings;
+{$endif LCL}
 
 finalization
   if assigned(CrossInstallers) then

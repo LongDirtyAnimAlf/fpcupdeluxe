@@ -670,13 +670,14 @@ begin
                     UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,FPC_SUBARCH_MAGIC,FPC_ABI_MAGIC])
                   else
                     UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,FPC_SUBARCH_MAGIC]);
-                end;
-                // Lazarus gives an error when units are located in a non-standard directory.
-                // Therefor: add a universal searchpath for units also ... bit tricky
-                // Must be the first entry ... so it will be used as the last ... :-|
-                if (CrossInstaller.TargetOS in [TOS.embedded]) then
-                begin
-                  s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'*','rtl'])+LineEnding;
+
+                  // Lazarus gives an error when units are located in a non-standard directory.
+                  // Therefor: create a dummy system.ppu ... only on Windows ...
+                  // Tricky ... :-| ... !!!
+                  {$ifdef MSWINDOWS}
+                  if (CrossInstaller.TargetOS in [TOS.embedded,TOS.freertos]) then
+                    FileCreate(ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'system.ppu']));
+                  {$endif MSWINDOWS}
                 end;
 
                 s1:=s1+'-Fu'+UnitSearchPath+DirectorySeparator+'rtl'+LineEnding;
