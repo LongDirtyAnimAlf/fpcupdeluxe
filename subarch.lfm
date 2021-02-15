@@ -1,14 +1,14 @@
 object SubarchForm: TSubarchForm
   Left = 438
-  Height = 271
+  Height = 326
   Top = 133
-  Width = 497
+  Width = 553
   AutoSize = True
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Subarch Settings'
-  ClientHeight = 271
-  ClientWidth = 497
+  ClientHeight = 326
+  ClientWidth = 553
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
@@ -23,15 +23,15 @@ object SubarchForm: TSubarchForm
     AnchorSideBottom.Control = rgrpSelectSubarch
     AnchorSideBottom.Side = asrBottom
     Left = 174
-    Height = 218
+    Height = 268
     Top = 6
-    Width = 316
+    Width = 372
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Right = 8
     Caption = 'Custom tools location and build options'
-    ClientHeight = 198
-    ClientWidth = 312
+    ClientHeight = 248
+    ClientWidth = 368
     ParentFont = False
     TabOrder = 0
     object EditLibLocation: TEdit
@@ -43,7 +43,7 @@ object SubarchForm: TSubarchForm
       Height = 23
       Hint = 'Double click to clear'
       Top = 19
-      Width = 210
+      Width = 266
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -64,7 +64,7 @@ object SubarchForm: TSubarchForm
       Height = 23
       Hint = 'Double click to clear'
       Top = 69
-      Width = 210
+      Width = 266
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -85,7 +85,7 @@ object SubarchForm: TSubarchForm
       Left = 4
       Height = 23
       Top = 119
-      Width = 294
+      Width = 350
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -118,7 +118,7 @@ object SubarchForm: TSubarchForm
       Left = 4
       Height = 40
       Top = 150
-      Width = 294
+      Width = 350
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True
       AutoSize = True
@@ -171,7 +171,7 @@ object SubarchForm: TSubarchForm
       AnchorSideTop.Control = EditLibLocation
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
-      Left = 226
+      Left = 282
       Height = 25
       Top = 19
       Width = 80
@@ -191,7 +191,7 @@ object SubarchForm: TSubarchForm
       AnchorSideTop.Control = EditBinLocation
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
-      Left = 226
+      Left = 282
       Height = 25
       Top = 69
       Width = 80
@@ -204,6 +204,36 @@ object SubarchForm: TSubarchForm
       OnClick = btnSelectDirClick
       ParentFont = False
       TabOrder = 5
+    end
+    object RadioGroupABI: TRadioGroup
+      AnchorSideLeft.Control = GroupBox4
+      AnchorSideTop.Control = RadioGroupARMArch
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Side = asrBottom
+      Left = 4
+      Height = 40
+      Top = 198
+      Width = 350
+      Anchors = [akTop, akLeft, akRight]
+      AutoFill = True
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 8
+      BorderSpacing.Right = 14
+      Caption = 'ABI'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 4
+      Columns = 4
+      Constraints.MinHeight = 40
+      OnSelectionChanged = RadioGroupABISelectionChanged
+      ParentFont = False
+      TabOrder = 6
     end
   end
   object rgrpSelectCPU: TRadioGroup
@@ -238,7 +268,7 @@ object SubarchForm: TSubarchForm
     AnchorSideRight.Control = rgrpSelectCPU
     AnchorSideRight.Side = asrBottom
     Left = 6
-    Height = 70
+    Height = 120
     Top = 154
     Width = 160
     Anchors = [akTop, akLeft, akRight]
@@ -253,7 +283,7 @@ object SubarchForm: TSubarchForm
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    Constraints.MinHeight = 70
+    Constraints.MinHeight = 120
     OnSelectionChanged = rgrpSelectSubarchSelectionChanged
     TabOrder = 2
   end
@@ -266,9 +296,9 @@ object SubarchForm: TSubarchForm
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 6
-    Height = 35
-    Top = 230
-    Width = 485
+    Height = 40
+    Top = 280
+    Width = 541
     Anchors = [akTop, akLeft, akRight, akBottom]
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
@@ -282,7 +312,7 @@ object SubarchForm: TSubarchForm
     ShowButtons = [pbOK]
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
-    Left = 207
-    Top = 181
+    Left = 88
+    Top = 32
   end
 end

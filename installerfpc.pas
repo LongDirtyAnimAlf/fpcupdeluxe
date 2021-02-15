@@ -663,13 +663,13 @@ begin
               if (CrossInstaller.TargetOS in SUBARCH_OS) then
               begin
                 if (CrossInstaller.TargetOS=TOS.ultibo) then
-                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-$FPCSUBARCH'])
+                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-'+FPC_SUBARCH_MAGIC])
                 else
                 begin
                   if CrossInstaller.TargetCPU=TCPU.arm then
-                    UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH','$FPCABI'])
+                    UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,FPC_SUBARCH_MAGIC,FPC_ABI_MAGIC])
                   else
-                    UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'$FPCSUBARCH']);
+                    UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,FPC_SUBARCH_MAGIC]);
                 end;
                 // Lazarus gives an error when units are located in a non-standard directory.
                 // Therefor: add a universal searchpath for units also ... bit tricky
@@ -3490,7 +3490,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-$FPCSUBARCH']);
+            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -3520,7 +3520,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI2');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-$FPCSUBARCH']);
+            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -3550,7 +3550,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI3');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-$FPCSUBARCH']);
+            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -3580,7 +3580,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dQEMUVPB');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-$FPCSUBARCH']);
+            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');

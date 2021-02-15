@@ -95,28 +95,36 @@ type
   TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa);
   TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo);
   TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,lx6,lx106);
-  TABI      = (default,eabi,eabihf,aarch64ios);
+  //TABI      = (default,sysv,aix,darwin,elfv2,eabi,armeb,eabihf,oldwin32gnu,aarch64ios,riscvhf,linux386_sysv,windowed,call0);
+  TABI      = (default,sysv,elfv2,eabi,eabihf,aarch64ios,riscvhf,windowed,call0);
+  TARMARCH  = (none,armel,armeb,armhf);
 
   TSUBARCHS = set of TSUBARCH;
+  TABIS = set of TABI;
 
 const
   SUBARCH_OS         = [{TOS.osNone,}TOS.embedded,TOS.freertos,TOS.ultibo];
   SUBARCH_CPU        = [{TCPU.cpuNone,}TCPU.arm,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.xtensa];
-  SUBARCH_ARM        = [armv4..armv7m];
-  SUBARCH_AVR        = [avr1..avrxmega3];
-  SUBARCH_MIPSEL     = [pic32mx];
-  SUBARCH_RISCV32    = [rv32imac];
-  SUBARCH_XTENSA     = [lx6..lx106];
+  SUBARCH_ARM        = [TSUBARCH.armv4..TSUBARCH.armv7m];
+  SUBARCH_AVR        = [TSUBARCH.avr1..TSUBARCH.avrxmega3];
+  SUBARCH_MIPSEL     = [TSUBARCH.pic32mx];
+  SUBARCH_RISCV32    = [TSUBARCH.rv32imac];
+  SUBARCH_XTENSA     = [TSUBARCH.lx6..TSUBARCH.lx106];
+
+  ABI_ARM            = [TABI.default,TABI.eabi,TABI.eabihf];
+  ABI_XTENSA         = [TABI.default,TABI.windowed,TABI.call0];
 
 type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
-  TARMARCH  = (none,armel,armeb,armhf);
 
 const
   ARMArchFPCStr : array[TARMARCH] of string=(
     '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
   );
-  FPCUP_AUTO_MAGIC = 'FPCUP_AUTO';
+  FPCUP_AUTO_MAGIC  = 'FPCUP_AUTO';
+
+  FPC_SUBARCH_MAGIC = '$FPCSUBARCH';
+  FPC_ABI_MAGIC     = '$FPCABI';
 
 type
   TCrossUtil = record
@@ -242,6 +250,8 @@ function GetARMArch(aARMarch:TARMARCH):string;
 function GetTARMArch(aARMArch:string):TARMARCH;
 function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
 function GetABI(aABI:TABI):string;
+function GetTABI(aABI:string):TABI;
+function GetABIs(aCPU:TCPU;aOS:TOS):TABIS;
 
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 function GetExeExt: string;
@@ -398,6 +408,28 @@ begin
   end;
 end;
 
+function GetTABI(aABI:string):TABI;
+begin
+  if Length(aABI)=0 then
+    result:=TABI.default
+  else
+    result:=TABI(GetEnumValueSimple(TypeInfo(TABI),aABI));
+  if Ord(result) < 0 then
+    raise Exception.CreateFmt('Invalid ARM ABI name "%s" for GetTABI.', [aABI]);
+end;
+
+function GetABIs(aCPU:TCPU;aOS:TOS):TABIS;
+begin
+  result:=[TABI.default];
+  if ((aOS in SUBARCH_OS) AND (aCPU in SUBARCH_CPU)) then
+  begin
+    case aCPU of
+      TCPU.arm:      if (aOS<>TOS.ultibo) then result:=ABI_ARM;
+      TCPU.xtensa:   if (aOS<>TOS.ultibo) then result:=ABI_XTENSA;
+    end;
+  end;
+end;
+
 function GetExeExt: string;
 begin
   {$IFDEF WINDOWS}
@@ -446,9 +478,13 @@ var
 begin
   if Length(Trim(aSnip))=0 then exit;
 
-  aSnippd:=StringReplace(aSnip,'#IFDEF ','#IFDEF_',[rfReplaceAll]);
+  aSnippd:=aSnip;
+
+  aSnippd:=StringReplace(aSnippd,'#IFDEF ','#IFDEF_',[rfReplaceAll]);
+  aSnippd:=StringReplace(aSnippd,'#ENDIF ','#ENDIF_',[rfReplaceAll]);
   aSnippd:=StringReplace(aSnippd,' ',LineEnding,[rfReplaceAll]);
   aSnippd:=StringReplace(aSnippd,'#IFDEF_','#IFDEF ',[rfReplaceAll]);
+  aSnippd:=StringReplace(aSnippd,'#ENDIF_','#ENDIF ',[rfReplaceAll]);
 
   if (Pos(aSnippd,FFPCCFGSnippet)>0) then exit;
 
@@ -666,7 +702,7 @@ begin
     AddFPCCFGSnippet(FCrossOpts[i]);
   end;
   if (SubArch<>TSUBARCH.saNone) then
-    AddFPCCFGSnippet('#ENDIF');
+    AddFPCCFGSnippet('#ENDIF '+UpperCase(Self.SubArchName));
 
   FCrossOptsAdded:=true;
 end;

@@ -22,6 +22,7 @@ type
     LabelCrossBuildOptions: TLabel;
     LabelLibraries: TLabel;
     LabelBintools: TLabel;
+    RadioGroupABI: TRadioGroup;
     rgrpSelectCPU: TRadioGroup;
     rgrpSelectSubarch: TRadioGroup;
     RadioGroupARMArch: TRadioGroup;
@@ -32,6 +33,7 @@ type
     procedure FormClose(Sender: TObject; var {%H-}CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure RadioGroupABISelectionChanged(Sender: TObject);
     procedure RadioGroupARMArchSelectionChanged(Sender: TObject);
     procedure rgrpSelectCPUSelectionChanged(Sender: TObject);
     procedure rgrpSelectSubarchSelectionChanged(Sender: TObject);
@@ -41,6 +43,7 @@ type
     LocalSUBARCH:TSUBARCH;
     SUBARCHStore:array[TCPU,TOS] of TSUBARCH;
     procedure SetGUI;
+    procedure SetABI;
   public
     procedure SetCrossTarget({%H-}aSender:TObject;aCPU:TCPU;aOS:TOS);
     function GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
@@ -65,16 +68,23 @@ var
   aCPU:TCPU;
   aOS:TOS;
   ARMArch:TARMARCH;
+  aABI:TABI;
 begin
   // Fill CPU radiogroup
   for aCPU in SUBARCH_CPU do
     rgrpSelectCPU.Items.Append(GetCPU(aCPU));
   rgrpSelectCPU.ItemIndex:=0;
 
-  // Fill ARM ABI radiogroup
+  // Fill ARM Arch radiogroup
   for ARMArch := Low(TARMARCH) to High(TARMARCH) do
     RadioGroupARMArch.Items.Add(GetEnumNameSimple(TypeInfo(TARMARCH),Ord(ARMArch)));
   RadioGroupARMArch.ItemIndex:=0;
+
+  // Fill ABI radiogroup
+  for aABI in ABI_ARM do
+    RadioGroupABI.Items.Add(GetEnumNameSimple(TypeInfo(TABI),Ord(aABI)));
+  RadioGroupABI.ItemIndex:=0;
+
 
   LocalCPU:=TCPU.cpuNone;
   LocalOS:=TOS.osNone;
@@ -93,6 +103,47 @@ end;
 procedure TSubarchForm.FormShow(Sender: TObject);
 begin
   SetGUI;
+end;
+
+procedure TSubarchForm.RadioGroupABISelectionChanged(Sender: TObject);
+var
+  i:integer;
+  ABI:TABI;
+  s:string;
+begin
+  if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
+  begin
+    i:=(Sender AS TRadioGroup).ItemIndex;
+    if i=-1 then
+      ABI:=TABI.default
+    else
+      ABI:=GetTABI((Sender AS TRadioGroup).Items[i]);
+
+    s:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions;
+    i:=Pos('-Ca',s);
+    if (i>0) then
+    begin
+      //while ((i<=Length(s)) AND (s[i] in ['-','0'..'9','a'..'z','A'..'Z'])) do Delete(s,i,1);
+      while ((i<=Length(s)) AND (s[i]<>' ')) do Delete(s,i,1);
+    end;
+    if i=0 then
+    begin
+      s:=Trim(s);
+      i:=Length(s);
+      if (i>0) AND (s[i]<>' ') then
+      begin
+        s:=s+' ';
+        Inc(i);
+      end;
+      Inc(i);
+    end;
+    if ABI<>TABI.default then
+      Insert('-Ca'+UpperCase(GetABI(ABI)),s,i);
+    s:=Trim(s);
+    s:=s+' ';
+    CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions:=s;
+    EditCrossBuildOptions.Text:=s;
+  end;
 end;
 
 procedure TSubarchForm.RadioGroupARMArchSelectionChanged(Sender: TObject);
@@ -173,6 +224,8 @@ var
   CPU:TCPU;
   SUBARCH:TSUBARCH;
   Subarchs:TSUBARCHS;
+  ABI:TABI;
+  ABIs:TABIS;
   i:integer;
 begin
   if Sender=nil then
@@ -191,6 +244,7 @@ begin
 
   BeginFormUpdate;
   try
+
     rgrpSelectSubarch.Items.Clear;
     Subarchs:=GetSubarchs(CPU,LocalOS);
     for SUBARCH in Subarchs do
@@ -202,6 +256,17 @@ begin
       end;
     end;
     if rgrpSelectSubarch.Items.Count=1 then rgrpSelectSubarch.ItemIndex:=0;
+
+    RadioGroupABI.Items.Clear;
+    ABIs:=GetABIs(CPU,LocalOS);
+    for ABI in ABIs do
+    begin
+      if (ABI=TABI.default) then
+        RadioGroupABI.Items.Append('default')
+      else
+        RadioGroupABI.Items.Append(GetABI(ABI));
+    end;
+
   finally
     EndFormUpdate;
   end;
@@ -216,6 +281,7 @@ begin
   if (i<>-1) then
     LocalSUBARCH:=GetTSubarch(rgrpSelectSubarch.Items[i]);
   SetGUI;
+  SetABI;
 end;
 
 procedure TSubarchForm.SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS);
@@ -235,13 +301,34 @@ begin
   EditCrossBuildOptions.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions;
   RadioGroupARMArch.ItemIndex:=Ord(CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch);
 
+  SetABI;
+
   e:=(LocalSUBARCH<>TSUBARCH.saNone);
   EditLibLocation.Enabled:=e;
   EditBinLocation.Enabled:=e;
   EditCrossBuildOptions.Enabled:=e;
   RadioGroupARMArch.Enabled:=(e AND (LocalCPU=TCPU.arm));
+  RadioGroupABI.Enabled:=(e AND (LocalCPU in [TCPU.arm,TCPU.xtensa]));
   btnSelectLibDir.Enabled:=e;
   btnSelectBinDir.Enabled:=e;
+end;
+
+procedure TSubarchForm.SetABI;
+var
+  s:string;
+  aABI:TABI;
+  i:integer;
+begin
+  i:=-1;
+  s:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions;
+  for aABI in ABI_ARM do
+  begin
+    if (aABI=TABI.default) then continue;
+    if (Pos('-Ca'+UpperCase(GetABI(aABI)),s)>0) then
+      i:=RadioGroupABI.Items.IndexOf(GetABI(aABI));
+  end;
+  if (i<>-1) then
+    RadioGroupABI.ItemIndex:=i;
 end;
 
 function TSubarchForm.GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;

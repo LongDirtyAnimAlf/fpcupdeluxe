@@ -57,11 +57,10 @@ function TAny_FreeRTOSArm.GetLibs(Basepath:string): boolean;
 const
   StaticLibName1='libfreertos.a';
   StaticLibName2='libc_nano.a';
-  ABINAMES:array[0..2] of string = ('eabihf','eabi','default');
 var
   aSubarchName:string;
   aIndex:integer;
-  aABI:string;
+  aABI:TABI;
 begin
   result:=FLibsFound;
 
@@ -107,9 +106,10 @@ begin
     result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,'lib',aSubarchName]),StaticLibName2);
     if (not result) then
     begin
-      for aABI in ABINAMES do
+      for aABI in TABI do
       begin
-        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,'lib',aSubarchName,aABI]),StaticLibName2);
+        if aABI=TABI.default then continue;
+        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,'lib',aSubarchName,GetABI(aABI)]),StaticLibName2);
         if result then break;
       end;
     end;
@@ -125,19 +125,20 @@ begin
     begin
       if (Pos(aSubarchName,FLibsPath)>0) then
         // we have a libdir with a subarch inside: make it universal !!
-        FLibsPath:=StringReplace(FLibsPath,aSubarchName,'$FPCSUBARCH',[]);
+        FLibsPath:=StringReplace(FLibsPath,aSubarchName,FPC_SUBARCH_MAGIC,[]);
     end;
 
     // Perform ABI magic for libpath
     aIndex:=Pos(Self.RegisterName,FLibsPath);
     if (aIndex<>-1) then
     begin
-      for aABI in ABINAMES do
+      for aABI in TABI do
       begin
-        if (Pos(DirectorySeparator+aABI+DirectorySeparator,FLibsPath,aIndex)>0) then
+        if aABI=TABI.default then continue;
+        if (Pos(DirectorySeparator+GetABI(aABI)+DirectorySeparator,FLibsPath,aIndex)>0) then
         begin
           // we have a libdir with a ABI inside: make it universal !!
-          FLibsPath:=StringReplace(FLibsPath,DirectorySeparator+aABI+DirectorySeparator,DirectorySeparator+'$FPCABI'+DirectorySeparator,[]);
+          FLibsPath:=StringReplace(FLibsPath,DirectorySeparator+GetABI(aABI)+DirectorySeparator,DirectorySeparator+FPC_ABI_MAGIC+DirectorySeparator,[]);
           break;
         end;
       end;

@@ -514,10 +514,51 @@ begin
 end;
 
 procedure TForm2.SetInstallDir(const aInstallDir:string='');
+var
+  CPU:TCPU;
+  OS:TOS;
+  SUBARCH:TSUBARCH;
+  Subarchs:TSUBARCHS;
+  s1,s2:string;
 begin
   if (Length(aInstallDir)>0)
      then FInstallPath:=IncludeTrailingPathDelimiter(aInstallDir)
      else FInstallPath:=SafeGetApplicationPath;
+
+
+  with TMemIniFile.Create(FInstallPath+installerUniversal.DELUXEFILENAME) do
+  try
+    for OS := Low(TOS) to High(TOS) do
+    begin
+      if OS=osNone then continue;
+      for CPU := Low(TCPU) to High(TCPU) do
+      begin
+        if CPU=cpuNone then continue;
+        s1:=GetCPU(CPU)+'-'+GetOS(OS);
+        Subarchs:=GetSubarchs(CPU,OS);
+        for SUBARCH in Subarchs do
+        begin
+          if (SUBARCH<>saNone) then
+            s2:=s1+'-'+GetSubarch(SUBARCH)
+          else
+            s2:=s1;
+          with CrossUtils[CPU,OS,SUBARCH] do
+          begin
+            Ord(Setting):=ReadInteger(s2,'Setting',Ord(Setting));
+            LibDir:=ReadString(s2,'LibPath',LibDir);
+            BinDir:=ReadString(s2,'BinPath',BinDir);
+            CrossBuildOptions:=ReadString(s2,'CrossBuildOptions',CrossBuildOptions);
+            if CPU=arm then
+              CrossARMArch:=GetTARMArch(ReadString(s2,'CrossARMArch',GetARMArch(CrossARMArch)));
+            Compiler:=ReadString(s2,'Compiler',Compiler);
+          end;
+        end;
+      end;
+    end;
+  finally
+    Free;
+  end;
+
 end;
 
 procedure TForm2.SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH);
@@ -731,41 +772,43 @@ begin
 
           x:=InfoForm.Memo1.Lines.Count;
 
-          if CrossUtils[CPU,OS,SUBARCH].Setting=TSearchSetting.ssAuto then
+          with CrossUtils[CPU,OS,SUBARCH] do
           begin
-            InfoForm.Memo1.Lines.Append(s2+': full auto search tools and libraries.');
-          end
-          else
-          if CrossUtils[CPU,OS,SUBARCH].Setting=TSearchSetting.ssCustom then
-          begin
-            InfoForm.Memo1.Lines.Append(s2+' (manual settings):');
-            InfoForm.Memo1.Lines.Append('  libs     : '+CrossUtils[CPU,OS,SUBARCH].LibDir);
-            InfoForm.Memo1.Lines.Append('  bins      : '+CrossUtils[CPU,OS,SUBARCH].BinDir);
-          end;
+            if Setting=TSearchSetting.ssAuto then
+            begin
+              InfoForm.Memo1.Lines.Append(s2+': full auto search tools and libraries.');
+            end
+            else
+            if Setting=TSearchSetting.ssCustom then
+            begin
+              InfoForm.Memo1.Lines.Append(s2+' (manual settings):');
+              InfoForm.Memo1.Lines.Append('  libs     : '+LibDir);
+              InfoForm.Memo1.Lines.Append('  bins      : '+BinDir);
+            end;
 
-          if Length(CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions)>0 then
-          begin
-            if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
-            InfoForm.Memo1.Lines.Append('  options : '+CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions);
-          end;
-
-          if CPU=arm then
-          begin
-            if (CrossUtils[CPU,OS,SUBARCH].CrossARMArch<>TARMARCH.none) then
+            if Length(CrossBuildOptions)>0 then
             begin
               if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
-              InfoForm.Memo1.Lines.Append('  ARM Arch : '+GetARMArch(CrossUtils[CPU,OS,SUBARCH].CrossARMArch));
+              InfoForm.Memo1.Lines.Append('  options : '+CrossBuildOptions);
             end;
+
+            if CPU=arm then
+            begin
+              if (CrossARMArch<>TARMARCH.none) then
+              begin
+                if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
+                InfoForm.Memo1.Lines.Append('  ARM Arch : '+GetARMArch(CrossARMArch));
+              end;
+            end;
+
+            if Length(Compiler)>0 then
+            begin
+              if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
+              InfoForm.Memo1.Lines.Append('  compiler : '+Compiler);
+            end;
+
+            if x<>InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append('');
           end;
-
-          if Length(CrossUtils[CPU,OS,SUBARCH].Compiler)>0 then
-          begin
-            if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
-            InfoForm.Memo1.Lines.Append('  compiler : '+CrossUtils[CPU,OS,SUBARCH].Compiler);
-          end;
-
-          if x<>InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append('');
-
         end;
 
       end;
@@ -874,13 +917,18 @@ begin
             s2:=s1+'-'+GetSubarch(SUBARCH)
           else
             s2:=s1;
-          WriteInteger(s2,'Setting',Ord(CrossUtils[CPU,OS,SUBARCH].Setting));
-          WriteString(s2,'LibPath',CrossUtils[CPU,OS,SUBARCH].LibDir);
-          WriteString(s2,'BinPath',CrossUtils[CPU,OS,SUBARCH].BinDir);
-          WriteString(s2,'CrossBuildOptions',CrossUtils[CPU,OS,SUBARCH].CrossBuildOptions);
-          if CPU=arm then
-            WriteString(s2,'CrossARMArch',GetARMArch(CrossUtils[CPU,OS,SUBARCH].CrossARMArch));
-          WriteString(s2,'Compiler',CrossUtils[CPU,OS,SUBARCH].Compiler);
+
+          with CrossUtils[CPU,OS,SUBARCH] do
+          begin
+            WriteInteger(s2,'Setting',Ord(Setting));
+            WriteString(s2,'LibPath',LibDir);
+            WriteString(s2,'BinPath',BinDir);
+            WriteString(s2,'CrossBuildOptions',CrossBuildOptions);
+            if CPU=arm then
+              WriteString(s2,'CrossARMArch',GetARMArch(CrossARMArch));
+            WriteString(s2,'Compiler',Compiler);
+          end;
+
         end;
 
       end;
