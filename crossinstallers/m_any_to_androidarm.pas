@@ -378,7 +378,7 @@ begin
   end;
   {$ENDIF}
 
-
+  (*
   if (NOT result) then
   begin
     PresetBinPath:=IncludeTrailingPathDelimiter(GetUserDir);
@@ -400,6 +400,7 @@ begin
       result:=SearchBinUtil(PresetBinPath,AsFile);
     end;
   end;
+  *)
 
   SearchBinUtilsInfo(result);
 

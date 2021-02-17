@@ -57,6 +57,7 @@ type
     ChkMakefileLaz: TButton;
     actFileExit: TFileExit;
     actFileSave: TFileSaveAs;
+    WioBtn: TBitBtn;
     FPCVersionLabel: TLabel;
     FPCTagLabel: TLabel;
     IniPropStorageApp: TIniPropStorage;
@@ -72,7 +73,7 @@ type
     MemoAddTag: TMemo;
     memoSummary: TMemo;
     MenuItem1: TMenuItem;
-    EmbeddedBtn: TBitBtn;
+    PicoBtn: TBitBtn;
     MenuItem2: TMenuItem;
     MEnglishlanguage: TMenuItem;
     MChineseCNlanguage: TMenuItem;
@@ -85,7 +86,6 @@ type
     MLazarusBugs: TMenuItem;
     MIssuesGitHub: TMenuItem;
     MIssuesForum: TMenuItem;
-    mORMot2Btn: TBitBtn;
     OPMBtn: TBitBtn;
     PageControl1: TPageControl;
     radgrpCPU: TRadioGroup;
@@ -1894,6 +1894,10 @@ var
   aFPCTarget:string;
   aLazarusTarget:string;
   aModule:string;
+  success:boolean;
+  aCPU:TCPU;
+  aOS:TOS;
+  aSUBARCH:TSUBARCH;
 begin
   s:='';
 
@@ -1939,13 +1943,21 @@ begin
   end;
   }
 
-  if Sender=EmbeddedBtn then
+  if Sender=PicoBtn then
   begin
-    s:='Going to install FPC and Lazarus for SAM embedded.';
+    s:='Going to install FPC and Lazarus for Raspberry Pico.';
     aFPCTarget:='embedded-mir';
     aLazarusTarget:='embedded';
     //aModule:='mbf,pxl';
-    aModule:='mbf';
+    //aModule:='mbf';
+  end;
+
+  if Sender=WioBtn then
+  begin
+    s:='Going to install FPC and Lazarus for Wio Terminal.';
+    aFPCTarget:='embedded-mir';
+    aLazarusTarget:='embedded';
+    //aModule:='mbf-freertos';
   end;
 
   if Sender=mORMotBtn then
@@ -1955,12 +1967,6 @@ begin
     //aModule:='mORMot,zeos';
   end;
 
-  if Sender=mORMot2Btn then
-  begin
-    s:='Going to install the mORMot2.';
-    aModule:='mORMot2';
-    //aModule:='mORMot2,zeos';
-  end;
 
   if Sender=OPMBtn then
   begin
@@ -2020,7 +2026,48 @@ begin
     end;
     {$endif}
 
-    RealRun;
+    success:=RealRun;
+    //success:=true;
+
+    if success then
+    begin
+
+      if Sender=PicoBtn then
+      begin
+        s:='Going to install FPC cross-compiler for Raspberry Pico.';
+        aCPU:=TCPU.arm;
+        aOS:=TOS.embedded;
+        aSUBARCH:=TSUBARCH.armv6;
+      end;
+
+      if Sender=WioBtn then
+      begin
+        s:='Going to install FPC cross-compiler for Wio Terminal.';
+        aCPU:=TCPU.arm;
+        aOS:=TOS.freertos;
+        aSUBARCH:=TSUBARCH.armv7em;
+      end;
+
+      if (Sender=PicoBtn) OR (Sender=WioBtn) then
+      begin
+        Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
+
+        radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
+        radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
+
+        AddMessage(s+'.');
+        sStatus:=s;
+
+        success:=ButtonProcessCrossCompiler(nil);
+
+        if success
+           then memoSummary.Lines.Append('Cross-compiler install/update ok.')
+           else memoSummary.Lines.Append('Failure during install update of cross-compiler !!');
+
+        memoSummary.Lines.Append('');
+      end;
+
+    end;
 
   finally
     DisEnable(Sender,True);
@@ -3641,13 +3688,13 @@ end;
 
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
-  sInstallDir:=InstallDirEdit.Text;
+  sInstallDir:=SetDirSeparators(InstallDirEdit.Text);
   if DirectoryExists(sInstallDir) then GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
 
 procedure TForm1.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  sInstallDir:=InstallDirEdit.Text;
+  sInstallDir:=SetDirSeparators(InstallDirEdit.Text);
   if DirectoryExists(sInstallDir) then GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
 
