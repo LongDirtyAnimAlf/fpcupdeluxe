@@ -1228,10 +1228,25 @@ begin
           Options:=Trim(Options);
 
           s1:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+Options;
+
           {$ifdef DEBUG}
           //s:=s+' -g -gl -dEXTDEBUG'; //-va+
           //s:=s+' -dEXTDEBUG'; //-va+
           {$endif}
+
+          {$ifdef DARWIN}
+          //{$if (defined(CPUAARCH64)) AND (defined(DARWIN))}
+          if MakeCycle=st_Compiler then
+          begin
+            s2:=GetDarwinSDKLocation;
+            if Length(s2)>0 then
+            begin
+              s1:='-XR'+s2+' '+s1;
+              s1:='-Fl'+s2+'/usr/lib '+s1;
+            end;
+          end;
+          {$ENDIF}
+
           Processor.Process.Parameters.Add('OPT='+s1);
 
           try

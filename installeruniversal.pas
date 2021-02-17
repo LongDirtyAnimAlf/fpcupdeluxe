@@ -532,6 +532,7 @@ begin
     {$ELSE}
     len:=1;
     {$ENDIF}
+    //DoDirSeparators(s);
     for i:=len to length(s) do
       if (s[i] in ['/','\']){$IFDEF MSWINDOWS} AND (s[i-1]<>' '){$ENDIF} then
         s[i]:=DirectorySeparator;

@@ -2050,10 +2050,10 @@ begin
 
       if (Sender=PicoBtn) OR (Sender=WioBtn) then
       begin
-        Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
-
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
+        Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
+        SubarchForm.SetSelectedSubArch(aCPU,aOS,aSUBARCH);
 
         AddMessage(s+'.');
         sStatus:=s;

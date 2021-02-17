@@ -46,7 +46,8 @@ type
     procedure SetABI;
   public
     procedure SetCrossTarget({%H-}aSender:TObject;aCPU:TCPU;aOS:TOS);
-    function GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
+    function  GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
+    procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
   end;
 
 var
@@ -334,6 +335,11 @@ end;
 function TSubarchForm.GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
 begin
   result:=SUBARCHStore[aCPU,aOS];
+end;
+
+procedure TSubarchForm.SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
+begin
+  SUBARCHStore[aCPU,aOS]:=aSUBARCH;
 end;
 
 end.
