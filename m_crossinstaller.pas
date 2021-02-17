@@ -488,7 +488,12 @@ begin
   aSnippd:=StringReplace(aSnippd,'#IFDEF_','#IFDEF ',[rfReplaceAll]);
   aSnippd:=StringReplace(aSnippd,'#ENDIF_','#ENDIF ',[rfReplaceAll]);
 
-  if (Pos(aSnippd,FFPCCFGSnippet)>0) then exit;
+  // Check for duplicates
+  if (Pos('#IFDEF',aSnippd)=0) AND (Pos('#ENDIF',aSnippd)=0) then
+  begin
+    if (Pos(aSnippd,FFPCCFGSnippet)>0) then
+      exit;
+  end;
 
   if Length(FPCCFGSnippet)>0 then
   begin
@@ -704,7 +709,7 @@ begin
     AddFPCCFGSnippet(FCrossOpts[i]);
   end;
   if (SubArch<>TSUBARCH.saNone) then
-    AddFPCCFGSnippet('#ENDIF '+UpperCase(Self.SubArchName));
+    AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(Self.SubArchName));
 
   FCrossOptsAdded:=true;
 end;

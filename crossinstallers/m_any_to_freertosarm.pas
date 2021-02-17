@@ -61,6 +61,7 @@ var
   aSubarchName:string;
   aIndex:integer;
   aABI:TABI;
+  aPath:TStringArray;
 begin
   result:=FLibsFound;
 
@@ -115,36 +116,64 @@ begin
     end;
   end;
 
+
+  {
+  if (SubArch<>TSUBARCH.saNone) then
+    AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(Self.SubArchName));
+  for i:=0 to FCrossOpts.Count-1 do
+  begin
+    if ((SubArch<>TSUBARCH.saNone) AND AnsiContainsText(FCrossOpts[i],'-Cp'+Self.SubArchName)) then continue;
+    AddFPCCFGSnippet(FCrossOpts[i]);
+  end;
+  if (SubArch<>TSUBARCH.saNone) then
+    AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(Self.SubArchName));
+  }
+
+
   if result then
   begin
-    SearchLibraryInfo(true);
     FLibsFound:=True;
 
-    // Perform subarch magic for libpath
+    //aIndex:=GetDirs(FLibsPath,aPath);
+    aPath:=FLibsPath.Split(DirectorySeparator);
+
+    // Perform Subarch magic for libpath
     if (FSubArch<>TSUBARCH.saNone) then
     begin
-      if (Pos(aSubarchName,FLibsPath)>0) then
-        // we have a libdir with a subarch inside: make it universal !!
-        FLibsPath:=StringReplace(FLibsPath,aSubarchName,FPC_SUBARCH_MAGIC,[]);
+      aIndex:=StringsSame(aPath,aSubarchName);
+      if (aIndex<>-1) then
+        aPath[aIndex]:=FPC_SUBARCH_MAGIC;
     end;
 
     // Perform ABI magic for libpath
-    aIndex:=Pos(Self.RegisterName,FLibsPath);
+    aIndex:=StringsSame(aPath,RegisterName);
     if (aIndex<>-1) then
     begin
       for aABI in TABI do
       begin
         if aABI=TABI.default then continue;
-        if (Pos(DirectorySeparator+GetABI(aABI)+DirectorySeparator,FLibsPath,aIndex)>0) then
+        aIndex:=StringsSame(aPath,GetABI(aABI));
+        if (aIndex<>-1) then
         begin
-          // we have a libdir with a ABI inside: make it universal !!
-          FLibsPath:=StringReplace(FLibsPath,DirectorySeparator+GetABI(aABI)+DirectorySeparator,DirectorySeparator+FPC_ABI_MAGIC+DirectorySeparator,[]);
+          aPath[aIndex]:=FPC_ABI_MAGIC;
           break;
         end;
       end;
     end;
 
+    FLibsPath:=ConcatPaths(aPath);
+
+    // If we do not have magic, add subarch to enclose
+    if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
+      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
+
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+
+    // If we do not have magic, add subarch to enclose
+    if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
+      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
+
+    SearchLibraryInfo(true);
   end;
 end;
 

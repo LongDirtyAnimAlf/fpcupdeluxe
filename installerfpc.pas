@@ -387,98 +387,286 @@ const
   FPCCFGINFOTEXT='FPCCrossInstaller (InsertFPCCFGSnippet: '+FPCCONFIGFILENAME+'): ';
 var
   ConfigText: TStringList;
-  i:integer;
-  SnipBegin,SnipEnd,SnipEndLastResort: integer;
-  SnippetText: TStringList;
-  s:string;
+  i,j,k:integer;
+  SnipBegin,SnipEnd: integer;
+  SnippetText,SubarchText: TStringList;
+  NewSnipped:boolean;
+  SUBARCH:TSUBARCH;
+  Subarchs:TSUBARCHS;
 begin
-  result:=false;
+  result:=true;
+
+  if (NOT Assigned(CrossInstaller)) OR (NOT FileExists(FPCCFG)) then
+  begin
+    exit(false);
+  end;
+
+  NewSnipped:=false;
+
+  //Set CPU
+  //s2:=UpperCase(CrossInstaller.TargetCPUName);
+  //if (CrossInstaller.TargetCPU=TCPU.powerpc) then
+  //begin
+  //  s2:='POWERPC32'; //Distinguish between 32 and 64 bit powerpc
+  //end;
 
   ConfigText:=TStringList.Create;
   {$IF FPC_FULLVERSION > 30100}
   //ConfigText.DefaultEncoding:=TEncoding.ASCII;
   {$ENDIF}
   SnippetText:=TStringList.Create;
+
+  SubarchText:=TStringList.Create;
+
   try
-    SnippetText.Text:=Snippet;
+
+    if Length(Snippet)>0 then SnippetText.Text:=Snippet;
+
     ConfigText.LoadFromFile(FPCCFG);
 
-    // Look for exactly this string (first snippet-line always contains Magic + OS and CPU combo):
-    i:=StringListStartsWith(ConfigText,SnippetText.Strings[0]);
-
-    if (i<>-1) then
+    SnipBegin:=StringListSame(ConfigText,SnipMagicBegin+CrossInstaller.RegisterName);
+    if (SnipBegin<>-1) then
     begin
-      SnipBegin:=i;
-
-      SnipEnd:=MaxInt;
-      SnipEndLastResort:=MaxInt;
-
-      i:=StringListStartsWith(ConfigText,SnipMagicEnd,SnipBegin);
-      if (i<>-1) then
-        SnipEnd:=i // got you !!
-      else
-        begin
-          // in case of failure, find beginning of next (magic) config segment
-          i:=StringListStartsWith(ConfigText,SnipMagicBegin,SnipBegin);
-          if (i<>-1) then SnipEndLastResort:=i-1; // got you !!
-        end;
-
-      if SnipEnd=MaxInt then
+      // Now look for the end of the snipped
+      SnipEnd:=StringListSame(ConfigText,SnipMagicEnd{+CrossInstaller.RegisterName},SnipBegin);
+      // Also look for the end of the snipped of an old config file
+      //if (SnipEnd=-1) then
+      //  SnipEnd:=StringListSame(ConfigText,SnipMagicEnd,SnipBegin);
+      if (SnipEnd=-1) then
       begin
-        //apparently snippet was not closed correct
-        if SnipEndLastResort<>MaxInt then
+        Infoln(FPCCFGINFOTEXT+'Existing snippet was not closed correct. Will continue, but please check your '+FPCCONFIGFILENAME+'.',etWarning);
+        // Snipped not closed correct.
+        // Look for start of next snipped in any
+        SnipEnd:=StringListSame(ConfigText,SnipMagicBegin,SnipBegin);
+        if (SnipEnd=-1) then
         begin
-          SnipEnd:=SnipEndLastResort;
-          Infoln(FPCCFGINFOTEXT+'Existing snippet was not closed correct. Will continue, but please check your '+FPCCONFIGFILENAME+'.',etWarning);
+          // Snipped not closed at all
+          // We could error out.
+          // But, for now, set end to end of config file.
+          // To be improved.
+          SnipEnd:=ConfigText.Count;
+          //result:=false;
+          //Infoln(FPCCFGINFOTEXT+'Existing snippet was not closed at all. Please check your '+FPCCONFIGFILENAME+' for '+SnipMagicEnd+'.',etError);
+        end
+        else
+        begin
+          Dec(SnipEnd);
         end;
       end;
-      if SnipEnd=MaxInt then
-      begin
-        //apparently snippet was not closed at all: severe error
-        Infoln(FPCCFGINFOTEXT+'Existing snippet was not closed at all. Please check your '+FPCCONFIGFILENAME+' for '+SnipMagicEnd+'.',etError);
-        exit;
-      end;
-
-      // Do we have a snipped with a CPU define
-      i:=StringListStartsWith(SnippetText,'#IFDEF CPU');
-      if (i<>-1) then
-      begin
-        s:=SnippetText[i];
-        // Check detailed CPU setting
-        for i:=SnipBegin to SnipEnd do
-        begin
-          // do we have a CPU define ...
-          if ConfigText.Strings[i]=s then
-          begin
-            result:=true;
-            break;
-          end;
-        end;
-      end else result:=true;
-    end;
-
-    if result then
-    begin
-      // Replace snippet
-      Infoln(FPCCFGINFOTEXT+'Found existing snippet in '+FPCCFG+'. Replacing it with new version.',etInfo);
-      for i:=SnipBegin to SnipEnd do ConfigText.Delete(SnipBegin);
     end
     else
     begin
-      // Add snippet
-      Infoln(FPCCFGINFOTEXT+'Adding settings into '+FPCCFG+'.',etInfo);
-      if ConfigText[ConfigText.Count-1]<>'' then ConfigText.Add('');
-      SnipBegin:=ConfigText.Count;
+      // Snipped not found.
+      NewSnipped:=true;
+      if SnippetText.Count>0 then
+      begin
+        // Add empty line if needed
+        if ConfigText[ConfigText.Count-1]<>'' then ConfigText.Append('');
+
+        // Simple: new snipped to be appended
+        ConfigText.Append(SnipMagicBegin+CrossInstaller.RegisterName);
+        ConfigText.Append('# Inserted by fpcup '+DateTimeToStr(Now));
+        ConfigText.Append('# Cross compile settings dependent on both target OS and target CPU');
+        ConfigText.Append('#IFDEF FPC_CROSSCOMPILING');
+        ConfigText.Append('#IFDEF '+UpperCase(CrossInstaller.TargetOSName));
+        ConfigText.Append('#IFDEF CPU'+UpperCase(CrossInstaller.TargetCPUName));
+
+        // Just add new snipped
+        if SnippetText.Count>0 then
+        begin
+          for i:=0 to (SnippetText.Count-1) do
+            ConfigText.Append(SnippetText.Strings[i]);
+        end;
+
+        ConfigText.Append('#ENDIF CPU'+UpperCase(CrossInstaller.TargetCPUName));
+        ConfigText.Append('#ENDIF '+UpperCase(CrossInstaller.TargetOSName));
+        ConfigText.Append('#ENDIF FPC_CROSSCOMPILING');
+        ConfigText.Append(SnipMagicEnd{+CrossInstaller.RegisterName});
+      end;
     end;
 
-    if (SnippetText.Count>1) then
+    if result AND (NOT NewSnipped) then
     begin
-      for i:=0 to (SnippetText.Count-1) do
-      begin
-        ConfigText.Insert(SnipBegin,SnippetText.Strings[i]);
-        Inc(SnipBegin);
-      end;
 
+      if (SnippetText.Count=0) then
+      begin
+        // Remove config for this target
+        for k:=0 to (SnipEnd-SnipBegin) do if (SnipBegin<ConfigText.Count) then ConfigText.Delete(SnipBegin);
+        while (SnipBegin<ConfigText.Count) AND (ConfigText[SnipBegin]='') do ConfigText.Delete(SnipBegin);
+      end
+      else
+      begin
+        // Existing snipped !! The hard part.
+
+        // First, locate real config snipped inside config
+        j:=StringListSame(ConfigText,'#IFDEF CPU'+CrossInstaller.TargetCPUName,SnipBegin);
+        if (j>SnipEnd) then j:=-1;
+        if (j=-1) then
+        begin
+          // This is a severe error and should never happen
+          // Do not yet know how to handle it
+          result:=false;
+        end
+        else
+        begin
+          i:=StringListSame(ConfigText,'#ENDIF CPU'+CrossInstaller.TargetCPUName,j);
+          if (i=-1) then
+          begin
+            // Old versions of fpcupdeluxe used a simple 3 x #ENDIF ... check for this !!
+            i:=StringListSame(ConfigText,'#ENDIF',j);
+            if (i<>-1) then
+            begin
+              if ((i+2)>Pred(ConfigText.Count)) OR (ConfigText[i+1]<>'#ENDIF') OR (ConfigText[i+2]<>'#ENDIF') then
+                i:=-1;
+            end;
+          end;
+          if (i>SnipEnd) then i:=-1;
+          if (i=-1) then
+          begin
+            // This is a severe error and should never happen
+            // Do not yet know how to handle it
+            result:=false;
+          end
+          else
+          begin
+            Inc(j);
+            Dec(i);
+            SnipBegin:=j;
+            SnipEnd:=i;
+          end;
+        end;
+
+        // SnipBegin and SnipEnd now point to space between #IFDEFS of target CPU
+        // So everything in between handles general settings and subarch settings
+
+        if result then
+        begin
+
+          // Save all subarch settings except for current subarch that needs to be replaced
+
+          Subarchs:=GetSubarchs(CrossInstaller.TargetCPU,CrossInstaller.TargetOS);
+          for SUBARCH in Subarchs do
+          begin
+            if (SUBARCH=TSUBARCH.saNone) then continue;
+
+            repeat
+              // Do we have a config with a Subarch define
+              j:=StringListSame(ConfigText,'#IFDEF CPU'+GetSubarch(SUBARCH),SnipBegin);
+              if (j>SnipEnd) then j:=-1;
+              if (j=-1) then break;
+              i:=StringListSame(ConfigText,'#ENDIF CPU'+GetSubarch(SUBARCH),j);
+              if (i>SnipEnd) then i:=-1;
+              if (i=-1) then
+              begin
+                // This is a severe error and should never happen
+                // Do not yet know how to handle it
+                // Just quit
+                result:=false;
+                break;
+              end
+              else
+              begin
+                // Found subarch part
+                for k:=0 to (i-j) do
+                begin
+                  // Save non-matching subarch settings
+                  if (SUBARCH<>CrossInstaller.SubArch) then
+                    SubarchText.Append(ConfigText.Strings[j]);
+                  // Delete this subarch part from config
+                  ConfigText.Delete(j);
+                  Dec(SnipEnd);
+                end;
+              end;
+            until false;
+
+          end;
+
+          if result then
+          begin
+
+            // Add new subarch settings if any
+            if (CrossInstaller.SubArch<>TSUBARCH.saNone) then
+            begin
+              NewSnipped:=false;
+              SubarchText.Append('#IFDEF CPU'+UpperCase(CrossInstaller.SubArchName));
+              repeat
+                // Do we have a config with a Subarch define
+                j:=StringListSame(SnippetText,'#IFDEF CPU'+CrossInstaller.SubArchName,0);
+                if (j=-1) then break;
+                // We have a subarch
+                // Now, add only subarch part.
+                i:=StringListSame(SnippetText,'#ENDIF CPU'+CrossInstaller.SubArchName,j);
+                if (i=-1) then
+                begin
+                  // This is a severe error and should never happen
+                  // Do not yet know how to handle it
+                  // Just quit
+                  result:=false;
+                  break;
+                end
+                else
+                begin
+                  // Found subarch part
+                  NewSnipped:=true;
+                  // Delete source #ENDIF CPUXXXXX
+                  SnippetText.Delete(i);
+                  // Delete source #IFDEF CPUXXXXX
+                  SnippetText.Delete(j);
+                  Dec(i,2);
+                  for k:=j to i do
+                  begin
+                    SubarchText.Append(SnippetText.Strings[j]);
+                    SnippetText.Delete(j);
+                  end;
+                end;
+              until false;
+              SubarchText.Append('#ENDIF CPU'+UpperCase(CrossInstaller.SubArchName));
+
+              // Bit tricky: remove defines if not used anymore
+              if (NOT NewSnipped) then
+              begin
+                SubarchText.Delete(Pred(SubarchText.Count));
+                SubarchText.Delete(Pred(SubarchText.Count));
+              end;
+            end;
+
+            if result then
+            begin
+              // We now have a subarchtext with all new and previous defines.
+
+              for k:=0 to (SnipEnd-SnipBegin) do ConfigText.Delete(SnipBegin);
+
+              // We now have a  a cleaned up general config
+
+              // Add new config snipped into config file
+              if (SnippetText.Count>0) then
+              begin
+                for k:=0 to (SnippetText.Count-1) do
+                begin
+                  ConfigText.Insert(SnipBegin,SnippetText.Strings[k]);
+                  Inc(SnipBegin);
+                end;
+              end;
+
+              // Add new subarch snipped into config file
+              if (SubarchText.Count>0) then
+              begin
+                for k:=0 to (SubarchText.Count-1) do
+                begin
+                  ConfigText.Insert(SnipBegin,SubarchText.Strings[k]);
+                  Inc(SnipBegin);
+                end;
+              end;
+
+              // All ok and done !!
+            end;
+          end;
+        end;
+      end;
+    end;
+
+    if (SnippetText.Count>0) then
+    begin
       //{$ifndef Darwin}
       {$ifdef MSWINDOWS}
       // remove pipeline assembling for Darwin when cross-compiling !!
@@ -499,12 +687,16 @@ begin
 
     result:=true;
   finally
+    SubarchText.Free;
     ConfigText.Free;
     SnippetText.Free;
   end;
 
   Infoln(FPCCFGINFOTEXT+'Inserting snippet in '+FPCCFG+' done.',etInfo);
 end;
+
+
+
 
 procedure TFPCCrossInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);
 begin
@@ -636,13 +828,6 @@ begin
             //Set basic config text
             s1:='# Dummy (blank) config just to replace dedicated settings during build of cross-compiler'+LineEnding;
 
-            //Set CPU
-            s2:=UpperCase(CrossInstaller.TargetCPUName);
-            if (CrossInstaller.TargetCPU=TCPU.powerpc) then
-            begin
-              s2:='POWERPC32'; //Distinguish between 32 and 64 bit powerpc
-            end;
-
             //Remove dedicated settings of config snippet
             if MakeCycle=Low(TSTEPS) then
               Infoln(infotext+'Removing '+FPCCONFIGFILENAME+' config snippet for target '+CrossInstaller.RegisterName,etInfo);
@@ -688,20 +873,7 @@ begin
             end;
 
             //Edit dedicated settings of config snippet
-            InsertFPCCFGSnippet(FPCCfg,
-              SnipMagicBegin+CrossInstaller.RegisterName+LineEnding+
-              '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
-              '# Cross compile settings dependent on both target OS and target CPU'+LineEnding+
-              '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
-              '#IFDEF '+UpperCase(CrossInstaller.TargetOSName)+LineEnding+
-              '#IFDEF CPU'+s2+LineEnding+
-              s1+
-              '#ENDIF CPU'+s2+LineEnding+
-              '#ENDIF '+UpperCase(CrossInstaller.TargetOSName)+LineEnding+
-              //'#ENDIF'+LineEnding+
-              //'#ENDIF'+LineEnding+
-              '#ENDIF'+LineEnding+
-              SnipMagicEnd);
+            InsertFPCCFGSnippet(FPCCfg,s1);
 
             {$ifdef UNIX}
             //Correct for some case errors on Unixes
@@ -1342,7 +1514,7 @@ begin
     end;
 
     FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
-    InsertFPCCFGSnippet(FPCCfg,SnipMagicBegin+CrossInstaller.RegisterName);
+    InsertFPCCFGSnippet(FPCCfg,'');
 
     aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(false);
     if DirectoryExists(aDir) then
