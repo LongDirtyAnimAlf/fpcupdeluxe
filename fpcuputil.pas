@@ -3200,6 +3200,8 @@ begin
 end;
 
 function GetAndroidNDKDir:string;
+const
+  SEARCHFILE='ndk-build.cmd';
 var
   aSDKDir,aNDKDir:string;
   FilesList:TStringList;
@@ -3211,11 +3213,13 @@ begin
     aNDKDir:=ConcatPaths([aSDKDir,'ndk']);
     FilesList:=TStringList.Create;
     try
+      //FindAllFiles(FilesList,aSDKDir, SEARCHFILE, true);
       FindAllDirectories(FilesList,aNDKDir,False);
       if FilesList.Count>0 then
       begin
         FilesList.Sorted:=True;
         //Get the highest version = latest = best I guess ... ;-)
+        //result:=ExtractFileDir(FilesList[FilesList.Count-1]);
         result:=FilesList[FilesList.Count-1];
       end;
     finally

@@ -1236,13 +1236,17 @@ begin
 
           {$ifdef DARWIN}
           //{$if (defined(CPUAARCH64)) AND (defined(DARWIN))}
-          if MakeCycle=st_Compiler then
+          s2:=GetDarwinSDKVersion('macosx');
+          if  (Length(s2)=0) OR (CompareVersionStrings(s2,'10.14')>=0) then
           begin
-            s2:=GetDarwinSDKLocation;
-            if Length(s2)>0 then
+            //if MakeCycle in [st_Compiler,st_Rtl,st_Packages] then
             begin
-              s1:='-XR'+s2+' '+s1;
-              s1:='-Fl'+s2+'/usr/lib '+s1;
+              s2:=GetDarwinSDKLocation;
+              if Length(s2)>0 then
+              begin
+                s1:='-XR'+s2+' '+s1;
+                s1:='-Fl'+s2+'/usr/lib '+s1;
+              end;
             end;
           end;
           {$ENDIF}

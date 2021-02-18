@@ -86,7 +86,7 @@ type
     MLazarusBugs: TMenuItem;
     MIssuesGitHub: TMenuItem;
     MIssuesForum: TMenuItem;
-    OPMBtn: TBitBtn;
+    UltiboBtn: TBitBtn;
     PageControl1: TPageControl;
     radgrpCPU: TRadioGroup;
     radgrpOS: TRadioGroup;
@@ -1392,7 +1392,7 @@ begin
     begin
       MissingTools:=true;
       memoSummary.Lines.Append('SVN is no longer included in Xcode command line tools !');
-      memoSummary.Lines.Append('Use a GIT repo or install SVN by yourself (brew).');
+      memoSummary.Lines.Append('Use a GIT repo (preferred) or install SVN by yourself (brew).');
     end
     {$endif}
     else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
@@ -1928,9 +1928,12 @@ begin
 
   if Sender=OldBtn then
   begin
-    s:='Going to install FPC 2.6.4 and Lazarus 1.4.';
-    aFPCTarget:='2.6.4';
-    aLazarusTarget:='1.4';
+    //s:='Going to install FPC 2.6.4 and Lazarus 1.4.';
+    //aFPCTarget:='2.6.4';
+    //aLazarusTarget:='1.4';
+    s:='Going to install FPC 3.0.4 and Lazarus 1.8.4.';
+    aFPCTarget:='3.0.4';
+    aLazarusTarget:='1.8.4';
   end;
 
   {
@@ -1968,10 +1971,11 @@ begin
   end;
 
 
-  if Sender=OPMBtn then
+  if Sender=UltiboBtn then
   begin
-    s:='Going to install the Online Package Manager.';
-    aModule:='opm';
+    s:='Going to install the Ultibo.';
+    aFPCTarget:='ultibo';
+    aLazarusTarget:='ultibo';
   end;
 
   s:=s+sLineBreak;
@@ -2037,7 +2041,7 @@ begin
         s:='Going to install FPC cross-compiler for Raspberry Pico.';
         aCPU:=TCPU.arm;
         aOS:=TOS.embedded;
-        aSUBARCH:=TSUBARCH.armv6;
+        aSUBARCH:=TSUBARCH.armv6m;
       end;
 
       if Sender=WioBtn then
@@ -2048,7 +2052,15 @@ begin
         aSUBARCH:=TSUBARCH.armv7em;
       end;
 
-      if (Sender=PicoBtn) OR (Sender=WioBtn) then
+      if Sender=UltiboBtn then
+      begin
+        s:='Going to install FPC cross-compiler for Ultibo.';
+        aCPU:=TCPU.arm;
+        aOS:=TOS.ultibo;
+        aSUBARCH:=TSUBARCH.armv7a;
+      end;
+
+      if (Sender=PicoBtn) OR (Sender=WioBtn) OR (Sender=UltiboBtn) then
       begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
