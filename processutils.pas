@@ -1028,6 +1028,8 @@ begin
       if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then exit;
       {$endif}
 
+      s:='rm ';
+      if AnsiStartsText(s,line) then exit;
       s:='rm -f ';
       if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
       if AnsiContainsText(line,'/'+TrimRight(s)) OR AnsiStartsText(TrimRight(s),line) then exit;
@@ -1039,9 +1041,19 @@ begin
       s:='mv ';
       if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
       s:='cp ';
-      if ( (AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line)) AND AnsiContainsText(line,'.compiled') ) then exit;
+      if ( (AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line)) AND (AnsiContainsText(line,'.compiled') OR AnsiContainsText(line,'.tmp')) ) then exit;
       s:='grep: ';
       if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+
+      {$ifdef Darwin}
+      s:='strip -no_uuid ';
+      if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then exit;
+      if AnsiContainsText(line,'/'+TrimRight(s)) OR AnsiStartsText(TrimRight(s),line) then exit;
+      s:='/usr/bin/codesign ';
+      if AnsiStartsText(s,line) then exit;
+      s:='/usr/bin/diff ';
+      if AnsiStartsText(s,line) then exit;
+      {$endif}
 
       if AnsiContainsText(line,'is up to date.') then exit;
       if AnsiContainsText(line,'searching ') then exit;

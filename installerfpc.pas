@@ -755,6 +755,8 @@ begin
     CrossInstaller.SetSubArch(CrossOS_SubArch);
     CrossInstaller.SetABI(CrossOS_ABI);
 
+    Infoln(infotext+'Looking for crosstools and crosslibs on system. Please wait.',etInfo);
+
     // get/set cross binary utils !!
     BinsAvailable:=false;
     CrossInstaller.SearchModeUsed:=TSearchSetting.ssUp; // default;

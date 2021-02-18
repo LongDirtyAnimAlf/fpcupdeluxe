@@ -144,15 +144,6 @@ begin
 
     SearchLibraryInfo(true);
   end;
-
-  if not result then
-  begin
-    //libs path is optional; it can be empty
-    ShowInfo('Libspath ignored; it is optional for this cross compiler.');
-    FLibsPath:='';
-    FLibsFound:=True;
-    result:=true;
-  end;
 end;
 
 {$ifndef FPCONLY}

@@ -31,6 +31,7 @@ end;
 
 function TAny_AndroidARM.GetBinUtils(Basepath:string): boolean;
 begin
+  FBinUtilsPrefix:=TargetCPUName+'-linux-'+TargetOSName+'eabi-'; //standard eg in Android NDK 9
   result:=inherited;
 end;
 
@@ -42,8 +43,6 @@ begin
   FAlreadyWarned:=false;
 
   SetLength(NDKTOOLCHAINVERSIONS,4);
-
-  FBinUtilsPrefix:=TargetCPUName+'-linux-'+TargetOSName+'eabi-'; //standard eg in Android NDK 9
 
   ARCH:=TargetCPUName;
   ARCHSHORT:=TargetCPUName;

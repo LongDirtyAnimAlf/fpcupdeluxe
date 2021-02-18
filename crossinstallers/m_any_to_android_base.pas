@@ -77,6 +77,30 @@ uses
   {$ENDIF}
   FileUtil, fpcuputil;
 
+const
+  SEARCHFOR ='platforms'+DirectorySeparator+'android-';
+
+// sort descending
+function StringListSortCompare(List: TStringList; Index1, Index2: Integer): Integer;
+var
+  s1,s2:string;
+  x:integer;
+begin
+  x:=Pos(SEARCHFOR,List[Index1]);
+  if x>0 then
+    s1:=Copy(List[Index1],x+Length(SEARCHFOR),2)
+  else
+    s1:=List[Index1];
+  x:=Pos(SEARCHFOR,List[Index2]);
+  if x>0 then
+    s2:=Copy(List[Index2],x+Length(SEARCHFOR),2)
+  else
+    s2:=List[Index2];
+  if List.CaseSensitive
+    then Result := AnsiCompareStr(s2,s1)
+    else Result := AnsiCompareText(s2,s1);
+end;
+
 { Tany_android }
 
 function Tany_android.GetLibs(Basepath:string): boolean;
@@ -85,7 +109,9 @@ function Tany_android.GetLibs(Basepath:string): boolean;
   //LibName='libandroid.so';
 var
   delphiversion,ndkversion,platform:byte;
+  s:string;
   PresetLibPath:string;
+  FilesFound,FilesFoundFiltered: TStringList;
 begin
 
   result:=FLibsFound;
@@ -188,6 +214,45 @@ begin
     end;
   end;
   {$ENDIF}
+
+  if (NOT result) then
+  begin
+    //Perform a brute force search
+
+    PresetLibPath:=IncludeTrailingPathDelimiter(GetUserDir);
+    {$ifdef Darwin}
+    PresetLibPath:=ConcatPaths([PresetLibPath,'Library','Android']);
+    {$endif}
+    {$ifdef Unix}
+    {$ifndef Darwin}
+    PresetLibPath:=ConcatPaths([PresetLibPath,'Android']);
+    {$endif}
+    {$endif}
+    {$ifdef Windows}
+    PresetLibPath:=ConcatPaths([PresetLibPath,'AppData','Local','Android']);
+    {$endif}
+
+    FilesFound:=FindAllFiles(PresetLibPath,LIBCNAME);
+    FilesFoundFiltered:=TStringList.Create;
+    try
+      for s in FilesFound do
+      begin
+        if (Pos(NDKARCHDIRNAME,s)=0) OR (Pos(SEARCHFOR,s)=0) then continue;
+        FilesFoundFiltered.Append(s);
+      end;
+      FilesFoundFiltered.CustomSort(@StringListSortCompare);
+      for s in FilesFoundFiltered do
+      begin
+        // Get the first ... we were sorting from highest version to lowest
+        PresetLibPath:=ExtractFilePath(s);
+        result:=SearchLibrary(PresetLibPath,LIBCNAME);
+        break;
+      end;
+    finally
+      FreeAndNil(FilesFoundFiltered);
+      FreeAndNil(FilesFound);
+    end;
+  end;
 
   SearchLibraryInfo(result);
 
@@ -377,6 +442,8 @@ begin
 
   if (NOT result) then
   begin
+    //Perform a brute force search
+
     PresetBinPath:=IncludeTrailingPathDelimiter(GetUserDir);
     {$ifdef Darwin}
     PresetBinPath:=ConcatPaths([PresetBinPath,'Library','Android']);

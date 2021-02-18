@@ -2213,6 +2213,7 @@ var
   s:string;
   SourceVersion:string;
   FilePath:string;
+  aIndex:integer;
 begin
   result:=inherited;
   result:=InitModule;
@@ -2231,9 +2232,9 @@ begin
     Infoln(infotext+'Downloading ' + ModuleName + ' sources.',etInfo);
     result:=DownloadFromFTP(ModuleName);
     FActualRevision:=FPreviousRevision;
+
     if result and Ultibo then
     begin
-
       FilePath:=ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true),'regexpr'])+PathDelim+'Package.fpc';
       //if FileExists(FilePath) then SysUtils.DeleteFile(FilePath);
       if (NOT FileExists(FilePath)) then
@@ -2351,6 +2352,41 @@ begin
     CreateRevision(ModuleName,ActualRevision);
 
     if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
+
+    if Ultibo OR ( (SourceVersion<>'0.0.0') AND (CompareVersionStrings(SourceVersion,'2.0.10')<=0) ) then
+    begin
+      // Prevent lazbuild crash !!
+      FilePath:=ConcatPaths([FSourceDirectory,'components','ideintf'])+PathDelim+'ideexterntoolintf.pas';
+      if (FileExists(FilePath)) then
+      begin
+        UpdateWarnings:=TStringList.Create;
+        try
+          UpdateWarnings.LoadFromFile(FilePath);
+          aIndex:=StringListContains(UpdateWarnings,'FWorkerMessages.EnterCriticalSection;');
+          if (aIndex<>-1) then
+          begin
+            s:=UpdateWarnings.Strings[aIndex-1];
+            if (Pos('FPCUP:',s)=0) AND (Pos('Sleep',s)=0) then
+            begin
+              UpdateWarnings.Insert(aIndex,'  Sleep(1); // FPCUP: force context switch to prevent occational crash ... issue #36318, #37883 etc.');
+              UpdateWarnings.SaveToFile(FilePath);
+            end;
+          end;
+          aIndex:=StringListContains(UpdateWarnings,'FWorkerMessages.LeaveCriticalSection;');
+          if (aIndex<>-1) then
+          begin
+            s:=UpdateWarnings.Strings[aIndex-1];
+            if (Pos('FPCUP:',s)=0) AND (Pos('Sleep',s)=0) then
+            begin
+              UpdateWarnings.Insert(aIndex,'  Sleep(1); // FPCUP: force context switch to prevent occational crash ... issue #36318, #37883 etc.');
+              UpdateWarnings.SaveToFile(FilePath);
+            end;
+          end;
+        finally
+          UpdateWarnings.Free;
+        end;
+      end;
+    end;
 
     {$ifdef Darwin}
     {$ifdef LCLQT5}

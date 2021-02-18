@@ -32,6 +32,7 @@ end;
 
 function TAny_Android386.GetBinUtils(Basepath:string): boolean;
 begin
+  FBinUtilsPrefix:='i686'+'-linux-'+TargetOSName+'-'; //standard eg in Android NDK 9
   result:=inherited;
 end;
 
@@ -41,8 +42,6 @@ begin
   FTargetCPU:=TCPU.i386;
   Reset;
   FAlreadyWarned:=false;
-
-  FBinUtilsPrefix:='i686-linux-'+GetOS(TargetOS)+'-';//standard eg in Android NDK 9
 
   SetLength(NDKTOOLCHAINVERSIONS,1);
 
