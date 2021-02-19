@@ -195,16 +195,17 @@ type
   TFPCCrossInstaller = class(TFPCInstaller)
   private
     FCrossCompilerName: string;
+    function GetUnitsInstallDirectory:string;
+    function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
+    property CrossCompilerName: string read FCrossCompilerName;
   protected
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; override;
   public
-    function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
     destructor Destroy; override;
-    function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
+    function UnInstallModule(ModuleName:string): boolean; override;
     procedure SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);override;
-    property CrossCompilerName: string read FCrossCompilerName;
   end;
 
 
@@ -378,6 +379,28 @@ end;
 destructor TFPCCrossInstaller.Destroy;
 begin
   inherited Destroy;
+end;
+
+function TFPCCrossInstaller.GetUnitsInstallDirectory:string;
+begin
+  if NOT Assigned(CrossInstaller) then exit;
+
+  // Standard directory
+  result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName]);
+
+  // Specials
+  if (CrossInstaller.TargetOS in SUBARCH_OS) then
+  begin
+    if (CrossInstaller.TargetOS=TOS.ultibo) then
+      result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-'+CrossInstaller.SubArchName])
+    else
+    begin
+      if CrossInstaller.TargetCPU=TCPU.arm then
+        result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName,CrossInstaller.ABIName])
+      else
+        result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName]);
+    end;
+  end;
 end;
 
 function TFPCCrossInstaller.InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
@@ -638,22 +661,22 @@ begin
 
               // We now have a  a cleaned up general config
 
-              // Add new config snipped into config file
-              if (SnippetText.Count>0) then
-              begin
-                for k:=0 to (SnippetText.Count-1) do
-                begin
-                  ConfigText.Insert(SnipBegin,SnippetText.Strings[k]);
-                  Inc(SnipBegin);
-                end;
-              end;
-
               // Add new subarch snipped into config file
               if (SubarchText.Count>0) then
               begin
                 for k:=0 to (SubarchText.Count-1) do
                 begin
                   ConfigText.Insert(SnipBegin,SubarchText.Strings[k]);
+                  Inc(SnipBegin);
+                end;
+              end;
+
+              // Add new config snipped into config file
+              if (SnippetText.Count>0) then
+              begin
+                for k:=0 to (SnippetText.Count-1) do
+                begin
+                  ConfigText.Insert(SnipBegin,SnippetText.Strings[k]);
                   Inc(SnipBegin);
                 end;
               end;
@@ -694,9 +717,6 @@ begin
 
   Infoln(FPCCFGINFOTEXT+'Inserting snippet in '+FPCCFG+' done.',etInfo);
 end;
-
-
-
 
 procedure TFPCCrossInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);
 begin
@@ -859,12 +879,12 @@ begin
                     UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,FPC_SUBARCH_MAGIC]);
 
                   // Lazarus gives an error when units are located in a non-standard directory.
-                  // Therefor: create a dummy system.ppu ... only on Windows ...
+                  // Therefor: create a dummy system.ppu
                   // Tricky ... :-| ... !!!
-                  {$ifdef MSWINDOWS}
+                  //{$ifdef MSWINDOWS}
                   if (CrossInstaller.TargetOS in [TOS.embedded,TOS.freertos]) then
                     FileCreate(ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'system.ppu']));
-                  {$endif MSWINDOWS}
+                  //{$endif MSWINDOWS}
                 end;
 
                 s1:=s1+'-Fu'+UnitSearchPath+DirectorySeparator+'rtl'+LineEnding;
@@ -1058,19 +1078,34 @@ begin
             begin
               if (CrossInstaller.TargetOS in SUBARCH_OS) then
               begin
-                if (CrossInstaller.TargetOS=TOS.ultibo) then
-                  UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-'+CrossInstaller.SubArchName])
-                else
-                begin
-                  if CrossInstaller.TargetCPU=TCPU.arm then
-                    UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName,CrossInstaller.ABIName])
-                  else
-                    UnitSearchPath:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,CrossInstaller.SubArchName]);
-                end;
+                UnitSearchPath:=GetUnitsInstallDirectory;
                 if (MakeCycle=st_RtlInstall) then
                   Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath+DirectorySeparator+'rtl');
                 if (MakeCycle=st_PackagesInstall) then
                   Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath+DirectorySeparator+'packages');
+              end;
+            end;
+          end;
+
+          if (MakeCycle in [st_Compiler,st_CompilerInstall]) then
+          begin
+            // Do we need a new cross-compiler ?
+            // Check version and revision against FPC.
+            s1:=IncludeTrailingPathDelimiter(FBinPath)+CrossCompilerName;
+            if FileExists(s1) then
+            begin
+              // Cross-compiler exists
+              // First, check version
+              s2:=CompilerVersion(s1);
+              if  (Length(s2)>0) AND (s2<>'0.0.0') AND (CompareVersionStrings(s2,CompilerVersion(GetCompilerInDir(FInstallDirectory)))=0) then
+              begin
+                // Second, check version
+                s2:=CompilerRevision(s1);
+                if (Length(s2)>0) AND (s2=CompilerRevision(GetCompilerInDir(FInstallDirectory))) then
+                begin
+                  if (MakeCycle=st_Compiler) then Infoln(infotext+'Skipping cross-compiler build step: seems to be up to date !!',etWarning);
+                  continue; // best guess: compilers stem from identical sources, so do not build the cross-compiler again
+                end;
               end;
             end;
           end;
@@ -1551,7 +1586,8 @@ begin
       end;
     end;
 
-    aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'units'+DirectorySeparator+GetFPCTarget(false);
+    aDir:=GetUnitsInstallDirectory;
+
     {$ifdef UNIX}
     if FileIsSymlink(aDir) then
     begin
@@ -1573,6 +1609,10 @@ begin
         end;
       end;
     end;
+
+    // Delete dummy system.ppu
+    //if (CrossInstaller.TargetOS in [TOS.embedded,TOS.freertos]) then
+    //  SysUtils.DeleteFile(ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'system.ppu']));
 
   end;
 end;

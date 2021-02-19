@@ -110,7 +110,7 @@ function Tany_android.GetLibs(Basepath:string): boolean;
 var
   delphiversion,ndkversion,platform:byte;
   s:string;
-  PresetLibPath:string;
+  PresetLibPath,aOption:string;
   FilesFound,FilesFoundFiltered: TStringList;
 begin
 
@@ -219,6 +219,7 @@ begin
   begin
     //Perform a brute force search
 
+    (*
     PresetLibPath:=IncludeTrailingPathDelimiter(GetUserDir);
     {$ifdef Darwin}
     PresetLibPath:=ConcatPaths([PresetLibPath,'Library','Android']);
@@ -231,6 +232,18 @@ begin
     {$ifdef Windows}
     PresetLibPath:=ConcatPaths([PresetLibPath,'AppData','Local','Android']);
     {$endif}
+    *)
+
+    PresetLibPath:=GetAndroidSDKDir;
+
+    aOption:=ConcatPaths([PresetLibPath,'ndk-bundle']);
+    if (NOT DirectoryExists(aOption)) then
+      aOption:=ConcatPaths([PresetLibPath,'ndk']);
+    if (NOT DirectoryExists(aOption)) then
+      aOption:=GetAndroidNDKDir;
+
+    if DirectoryExists(aOption) then
+      PresetLibPath:=aOption;
 
     FilesFound:=FindAllFiles(PresetLibPath,LIBCNAME);
     FilesFoundFiltered:=TStringList.Create;
@@ -444,6 +457,7 @@ begin
   begin
     //Perform a brute force search
 
+    (*
     PresetBinPath:=IncludeTrailingPathDelimiter(GetUserDir);
     {$ifdef Darwin}
     PresetBinPath:=ConcatPaths([PresetBinPath,'Library','Android']);
@@ -456,6 +470,19 @@ begin
     {$ifdef Windows}
     PresetBinPath:=ConcatPaths([PresetBinPath,'AppData','Local','Android']);
     {$endif}
+    *)
+
+    PresetBinPath:=GetAndroidSDKDir;
+
+    aOption:=ConcatPaths([PresetBinPath,'ndk-bundle']);
+    if (NOT DirectoryExists(aOption)) then
+      aOption:=ConcatPaths([PresetBinPath,'ndk']);
+    if (NOT DirectoryExists(aOption)) then
+      aOption:=GetAndroidNDKDir;
+
+    if DirectoryExists(aOption) then
+      PresetBinPath:=aOption;
+
     PresetBinPath:=FindFileInDir(AsFile,PresetBinPath);
     if (Length(PresetBinPath)>0) then
     begin

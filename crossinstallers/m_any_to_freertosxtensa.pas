@@ -60,50 +60,94 @@ end;
 
 function TAny_FreeRTOSXtensa.GetLibs(Basepath:string): boolean;
 const
-  StaticLibName1='libesp32.a';
-  StaticLibName2='libfreertos.a';
-  StaticLibName3='libc.a';
+  StaticLibName1='libfreertos.a';
+  StaticLibName2='libc.a';
 var
   PresetLibPath:string;
+  StaticLibNameESP:string;
   S:string;
   aSubarchName:string;
+  aIndex:integer;
+  aPath:TStringArray;
 begin
   result:=FLibsFound;
   if result then exit;
 
+  StaticLibNameESP:='';
+
   if (FSubArch<>TSUBARCH.saNone) then
   begin
+    if (FSubArch=TSUBARCH.lx6) then StaticLibNameESP:='libesp32.a';
+    if (FSubArch=TSUBARCH.lx106) then StaticLibNameESP:='libesp8266.a';
     aSubarchName:=GetSubarch(FSubArch);
     ShowInfo('Cross-libs: We have a subarch: '+aSubarchName);
   end
   else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
-  // search local paths based on libbraries provided for or adviced by fpc itself
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
-  // do the same as above, but look for a static esp lib
+  if (Length(StaticLibNameESP)>0) then
+  begin
+    if not result then
+      result:=SearchLibrary(Basepath,StaticLibNameESP);
+    // search local paths based on libbraries provided for or adviced by fpc itself
+    if not result then
+      result:=SimpleSearchLibrary(BasePath,DirName,StaticLibNameESP);
+    if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
+      result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibNameESP);
+  end;
+
+  // do the same as above, but look for a static freertos lib
   if not result then
     result:=SearchLibrary(Basepath,StaticLibName1);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName1);
+  if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibName1);
 
-  // do the same as above, but look for a static freertos lib
+  // do the same as above, but look for a static libc_nano lib
   if not result then
     result:=SearchLibrary(Basepath,StaticLibName2);
+
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName2);
+  if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibName2);
 
-  SearchLibraryInfo(result);
+  // search local paths based on libbraries provided for or adviced by https://github.com/michael-ring/freertos4fpc
+  if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,aSubarchName]),StaticLibName2);
 
   if result then
   begin
     FLibsFound:=True;
+
+    SearchLibraryInfo(true);
+
+    //aIndex:=GetDirs(FLibsPath,aPath);
+    aPath:=FLibsPath.Split(DirectorySeparator);
+
+    // Perform Subarch magic for libpath
+    if (FSubArch<>TSUBARCH.saNone) then
+    begin
+      aIndex:=StringsSame(aPath,aSubarchName);
+      if (aIndex<>-1) then
+        aPath[aIndex]:=FPC_SUBARCH_MAGIC;
+    end;
+
+    FLibsPath:=ConcatPaths(aPath);
+
+    // If we do not have magic, add subarch to enclose
+    if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
+      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
+
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+
+    // If we do not have magic, add subarch to enclose
+    if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
+      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
   end;
 
   if (true) then
@@ -113,7 +157,7 @@ begin
     //if FpGeteuid=0 then PresetLibPath:='/usr/local/lib';
     {$ENDIF}
     PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-esp32-elf']);
-    S:=FindFileInDir(StaticLibName3,PresetLibPath);
+    S:=FindFileInDir(StaticLibName2,PresetLibPath);
     if (Length(S)>0) then
     begin
       PresetLibPath:=ExtractFilePath(S);

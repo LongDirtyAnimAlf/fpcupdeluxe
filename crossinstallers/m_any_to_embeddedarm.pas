@@ -103,6 +103,8 @@ begin
   begin
     FLibsFound:=True;
 
+    SearchLibraryInfo(true);
+
     //aIndex:=GetDirs(FLibsPath,aPath);
     aPath:=FLibsPath.Split(DirectorySeparator);
 
@@ -141,8 +143,6 @@ begin
     // If we do not have magic, add subarch to enclose
     if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
       AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
-
-    SearchLibraryInfo(true);
   end;
 end;
 

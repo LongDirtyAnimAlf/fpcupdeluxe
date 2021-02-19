@@ -3210,7 +3210,9 @@ begin
   aSDKDir:=GetAndroidSDKDir;
   if DirectoryExists(aSDKDir) then
   begin
-    aNDKDir:=ConcatPaths([aSDKDir,'ndk']);
+    aNDKDir:=ConcatPaths([aSDKDir,'ndk-bundle']);
+    if (NOT DirectoryExists(aNDKDir)) then
+      aNDKDir:=ConcatPaths([aSDKDir,'ndk']);
     FilesList:=TStringList.Create;
     try
       //FindAllFiles(FilesList,aSDKDir, SEARCHFILE, true);
@@ -3228,7 +3230,7 @@ begin
   end;
 end;
 
-// 1on1 copy from unit cutils from the fpc compiler;
+// 1on1 shameless copy from unit cutils from the fpc compiler;
 function CompareVersionStrings(s1,s2: string): longint;
 var
   start1, start2,
@@ -3266,9 +3268,10 @@ begin
     { if one of the two is at the end while the other isn't, add a '.0' }
     if (i1>length(s1)) and
        (i2<=length(s2)) then
-      s1:=s1+'.0'
-    else if i2>length(s2) then
-      s2:=s2+'.0';
+      s1:=s1+'.0';
+    if (i2>length(s2)) and
+       (i1<=length(s1)) then
+       s2:=s2+'.0';
     { compare non-numerical characters normally }
     while (i1<=length(s1)) and
           not(s1[i1] in ['0'..'9']) and

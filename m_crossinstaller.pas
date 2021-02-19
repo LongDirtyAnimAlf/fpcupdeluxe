@@ -283,8 +283,6 @@ begin
   result:=TCPU.cpuNone;
   if length(aCPU)>0 then
   begin
-    if aCPU='armv6' then xCPU:=TCPU.arm
-    else
     if aCPU='ppc' then xCPU:=TCPU.powerpc
     else
     if aCPU='ppc64' then xCPU:=TCPU.powerpc64
@@ -506,19 +504,31 @@ end;
 
 procedure TCrossInstaller.SearchLibraryInfo(found:boolean; const extrainfo:string='');
 begin
-  //if found then
-  //  Infoln(CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo)
-  //else
-  //  Infoln(CrossModuleName + ': Searched but did not find any library !!', etError);
+  if found then
+  begin
+    ThreadLog('fpcupdeluxe: '+CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo);
+    //Infoln(CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo)
+  end;
+  if (NOT found) then
+  begin
+    //ThreadLog(CrossModuleName + ': Searched but did not find any library !!', etError);
+    //Infoln(CrossModuleName + ': Searched but did not find any library !!', etError);
+  end;
   //if Length(extrainfo)>0 then Infoln(CrossModuleName + ' libs : '+extrainfo, etInfo);
 end;
 
 procedure TCrossInstaller.SearchBinUtilsInfo(found:boolean; const extrainfo:string='');
 begin
-  //if found then
-  //  Infoln(CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo)
-  //else
-  //  Infoln(CrossModuleName + ': Searched but did not find any binary utilities !!', etError);
+  if found then
+  begin
+    ThreadLog('fpcupdeluxe: '+CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo);
+    //Infoln(CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo)
+  end;
+  if (NOT found) then
+  begin
+    //ThreadLog(CrossModuleName + ': Searched but did not find any binary utilities !!', etError);
+    //Infoln(CrossModuleName + ': Searched but did not find any binary utilities !!', etError);
+  end;
   //if Length(extrainfo)>0 then Infoln(CrossModuleName + ' bins : '+extrainfo, etInfo);
 end;
 

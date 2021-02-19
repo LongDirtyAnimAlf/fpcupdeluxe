@@ -1053,6 +1053,8 @@ begin
       if AnsiStartsText(s,line) then exit;
       s:='/usr/bin/diff ';
       if AnsiStartsText(s,line) then exit;
+      s:='svnversion: error: ';
+      if AnsiStartsText(s,line) then exit;
       {$endif}
 
       if AnsiContainsText(line,'is up to date.') then exit;

@@ -800,23 +800,10 @@ begin
             end;
           end;
 
-          // try to get CPU for arm-linux
+          // try to get a subarch
           aSubArch:='';
-          if (aOS=GetOS(TOS.linux)) AND (aCPU=GetCPU(TCPU.arm)) then
+          if (GetTOS(aOS) in SUBARCH_OS) then
           begin
-            i:=SnipBegin;
-            while true do
-            begin
-              s:=ConfigText.Strings[i];
-              if (Pos('-Cp',s)=1) then
-              begin
-                aSubArch:=Trim(Copy(s,Length('-Cp')+1,MaxInt));
-                if aSubArch='ARMV6' then aCPU:='armv6';
-                break;
-              end;
-              Inc(i);
-              if (i>=ConfigText.Count) OR (s=SnipMagicEnd) then break;
-            end;
           end;
 
           aRadiogroup_CPU:=aCPU;
@@ -1175,6 +1162,12 @@ begin
     end;
   end;
 
+  // report about correct tools that are found and used
+  //if (ExistWordInString(PChar(s),'found correct',[soDown])) then
+  //begin
+  //  memoSummary.Lines.Append(s);
+  //end;
+
   if (ExistWordInString(PChar(s),' native builder: ',[soDown])) OR (ExistWordInString(PChar(s),' cross-builder: ',[soDown])) then
   begin
     memoSummary.Lines.Append(s);
@@ -1369,13 +1362,13 @@ begin
     end
     else if (ExistWordInString(PChar(s),'failed to get crossbinutils',[soDown])) then
     begin
+      if (NOT MissingCrossBins) then memoSummary.Lines.Append('Missing correct cross binary utilities');
       MissingCrossBins:=true;
-      memoSummary.Lines.Append('Missing correct cross binary utilities');
     end
     else if (ExistWordInString(PChar(s),'failed to get crosslibrary',[soDown])) then
     begin
+      if (NOT MissingCrossLibs) then memoSummary.Lines.Append('Missing correct cross libraries');
       MissingCrossLibs:=true;
-      memoSummary.Lines.Append('Missing correct cross libraries');
     end
     else if ((ExistWordInString(PChar(s),'CheckAndGetTools',[soDown])) OR (ExistWordInString(PChar(s),'Required package is not installed',[soDown]))) then
     begin
@@ -1454,12 +1447,6 @@ begin
     memoSummary.Lines.Append('Busy with help files. Be patient: can be time consuming !!');
   end;
 
-  // report about correct tools that are found and used
-  if (ExistWordInString(PChar(s),'found correct',[soDown])) then
-  begin
-    memoSummary.Lines.Append(s);
-  end;
-
   if ExistWordInString(PChar(s),BeginSnippet,[soWholeWord,soDown]) then
   begin
     if ExistWordInString(PChar(s),'revision:',[soWholeWord,soDown]) then
@@ -1530,7 +1517,10 @@ begin
   begin
     if ExistWordInString(PChar(s),Seriousness[etInfo],[soWholeWord,soDown]) then
     begin
-      FG      := clYellow;
+      if ExistWordInString(PChar(s),'found correct',[soWholeWord,soDown]) then
+        FG      := clLime
+      else
+        FG      := clYellow;
       BG      := clBlack;
       Special := True;
     end;
@@ -2223,7 +2213,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>'armv6') and (s<>GetCPU(TCPU.aarch64)) and (s<>GetCPU(TCPU.mipsel)) then
+        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>GetCPU(TCPU.mipsel)) then
         begin
           success:=false;
         end;
@@ -2269,7 +2259,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s=GetCPU(TCPU.arm)) OR (s=GetCPU(TCPU.aarch64)) OR (s='armv6') then
+        if (s=GetCPU(TCPU.arm)) OR (s=GetCPU(TCPU.aarch64)) then
           success:=true;
       end;
     end;
@@ -2290,7 +2280,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.i386)) and (s<>GetCPU(TCPU.arm)) and (s<>'armv6') and (s<>GetCPU(TCPU.mipsel)) and (s<>GetCPU(TCPU.jvm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>'x8664') and (s<>GetCPU(TCPU.x86_64)) then
+        if (s<>GetCPU(TCPU.i386)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.mipsel)) and (s<>GetCPU(TCPU.jvm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>'x8664') and (s<>GetCPU(TCPU.x86_64)) then
         begin
           success:=false;
         end;
@@ -2343,27 +2333,6 @@ begin
   if (NOT success) then
   begin
     if Sender<>nil then ShowMessage('No valid CPU target for dragonfly.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpCPU.ItemIndex<>-1 then
-  begin
-    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-    if s='armv6' then
-    begin
-      success:=false;
-      if radgrpOS.ItemIndex<>-1 then
-      begin
-        s:=radgrpOS.Items[radgrpOS.ItemIndex];
-        if (s=GetOS(TOS.linux)) OR (s=GetOS(TOS.ultibo)) then success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('ARMV6 is [only available] for [RPi] Linux and Ultibo.');
     exit;
   end;
 
@@ -2684,8 +2653,6 @@ begin
         begin
           if (FPCupManager.CrossCPU_Target=TCPU.xtensa) then
             FPCupManager.CrossOS_SubArch:=TSubarch.lx6;
-          if (radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') then
-            FPCupManager.CrossOS_SubArch:=TSubarch.armv6m;
           if (FPCupManager.CrossCPU_Target=TCPU.arm) then
             FPCupManager.CrossOS_SubArch:=TSubarch.armv7em;
         end;
@@ -2698,10 +2665,7 @@ begin
         begin
           if FPCupManager.CrossOS_SubArch=TSUBARCH.saNone then
           begin
-            if (radgrpCPU.Items[radgrpCPU.ItemIndex]='armv6') then
-              FPCupManager.CrossOS_SubArch:=TSubarch.armv6
-            else
-              FPCupManager.CrossOS_SubArch:=TSubarch.armv7a;
+            FPCupManager.CrossOS_SubArch:=TSubarch.armv7a;
           end;
         end;
       end;
@@ -3289,7 +3253,7 @@ begin
               begin
                 // Use deticated libs by Michael Ring !
                 s:='10.4.3';
-                MinorVersion:=3;
+                MinorVersion:=4;
                 LibsFileName:='FreeRTOS-'+s+'-for-FreePascal.zip';
                 DownloadURL:='https://github.com/michael-ring/freertos4fpc/releases/download/v'+s+'-'+InttoStr(MinorVersion)+'/'+LibsFileName;
                 TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+LibsFileName;

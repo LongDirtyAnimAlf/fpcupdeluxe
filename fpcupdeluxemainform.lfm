@@ -1,5 +1,5 @@
 object Form1: TForm1
-  Left = 45
+  Left = 193
   Height = 650
   Top = 51
   Width = 1078
@@ -1874,7 +1874,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       Left = 456
       Height = 42
-      Hint = 'Get FPC for SAM embedded'
+      Hint = 'Get FPC for SAMD51 embedded'
       Top = 8
       Width = 92
       AutoSize = True
@@ -2062,7 +2062,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       Left = 557
       Height = 42
-      Hint = 'Get FPC for SAM embedded'
+      Hint = 'Get FPC for armv6m RPi Pico'
       Top = 8
       Width = 95
       AutoSize = True
@@ -3381,7 +3381,6 @@ object Form1: TForm1
           'i386'
           'x86_64'
           'arm'
-          'armv6'
           'aarch64'
           'ppc'
           'ppc64'

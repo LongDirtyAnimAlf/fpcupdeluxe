@@ -104,18 +104,17 @@ begin
   // search local paths based on libbraries provided for or adviced by https://github.com/michael-ring/freertos4fpc
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
   begin
-    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,'lib',aSubarchName]),StaticLibName2);
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,aSubarchName]),StaticLibName2);
     if (not result) then
     begin
       for aABI in TABI do
       begin
         if aABI=TABI.default then continue;
-        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,'lib',aSubarchName,GetABI(aABI)]),StaticLibName2);
+        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,aSubarchName,GetABI(aABI)]),StaticLibName2);
         if result then break;
       end;
     end;
   end;
-
 
   {
   if (SubArch<>TSUBARCH.saNone) then
@@ -133,6 +132,8 @@ begin
   if result then
   begin
     FLibsFound:=True;
+
+    SearchLibraryInfo(true);
 
     //aIndex:=GetDirs(FLibsPath,aPath);
     aPath:=FLibsPath.Split(DirectorySeparator);
@@ -172,8 +173,6 @@ begin
     // If we do not have magic, add subarch to enclose
     if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
       AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
-
-    SearchLibraryInfo(true);
   end;
 end;
 
