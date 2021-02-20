@@ -196,7 +196,7 @@ type
   public
     procedure SetInstallDir(const aInstallDir:string='');
 
-    procedure SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH);
+    procedure SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS);
 
     function GetLibraryDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
     function GetToolsDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
@@ -561,33 +561,37 @@ begin
 
 end;
 
-procedure TForm2.SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH);
+procedure TForm2.SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS);
 var
   Subarch:TSUBARCH;
   Subarchs:TSUBARCHS;
   aIndex:integer;
   e:boolean;
+  SystemChange:boolean;
 begin
+
+  SystemChange:=( (LocalCPU<>aCPU) OR (LocalOS<>aOS) );
+
   LocalCPU:=aCPU;
   LocalOS:=aOS;
-  LocalSUBARCH:=aSubarch;
+  LocalSUBARCH:=GetSelectedSubArch(LocalCPU,LocalOS);
 
-  SetSelectedSubArch(LocalCPU,LocalOS,LocalSUBARCH);
-
-  if LocalCPU=TCPU.cpuNone then
-    ComboBoxCPU.ItemIndex:=-1
-  else
+  if SystemChange then
   begin
-    aIndex:=ComboBoxCPU.Items.IndexOf(GetCPU(LocalCPU));
-    ComboBoxCPU.ItemIndex:=aIndex;
-  end;
-
-  if LocalOS=TOS.osNone then
-    ComboBoxOS.ItemIndex:=-1
-  else
-  begin
-    aIndex:=ComboBoxOS.Items.IndexOf(GetOS(LocalOS));
-    ComboBoxOS.ItemIndex:=aIndex;
+    if LocalCPU=TCPU.cpuNone then
+      ComboBoxCPU.ItemIndex:=-1
+    else
+    begin
+      aIndex:=ComboBoxCPU.Items.IndexOf(GetCPU(LocalCPU));
+      ComboBoxCPU.ItemIndex:=aIndex;
+    end;
+    if LocalOS=TOS.osNone then
+      ComboBoxOS.ItemIndex:=-1
+    else
+    begin
+      aIndex:=ComboBoxOS.Items.IndexOf(GetOS(LocalOS));
+      ComboBoxOS.ItemIndex:=aIndex;
+    end;
   end;
 
   e:=((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone));
@@ -617,24 +621,33 @@ begin
 
     tsSUBARCH.Enabled:=e;
 
-    rgrpSubarch.BeginUpdateBounds;
-    try
-      rgrpSubarch.Items.Clear;
-      Subarchs:=[TSUBARCH.saNone];
-      if (e) then
-        Subarchs:=GetSubarchs(LocalCPU,LocalOS);
-      for Subarch in Subarchs do
-      begin
-        if (Subarch<>TSUBARCH.saNone) then
+    if SystemChange then
+    begin
+      rgrpSubarch.BeginUpdateBounds;
+      try
+        rgrpSubarch.Items.Clear;
+        Subarchs:=[TSUBARCH.saNone];
+        if (e) then
+          Subarchs:=GetSubarchs(LocalCPU,LocalOS);
+        for Subarch in Subarchs do
         begin
-          rgrpSubarch.Items.Append(GetSubarch(Subarch));
-          if Subarch=LocalSUBARCH then rgrpSubarch.ItemIndex:=Pred(rgrpSubarch.Items.Count);
+          if (Subarch<>TSUBARCH.saNone) then
+          begin
+            rgrpSubarch.Items.Append(GetSubarch(Subarch));
+            if Subarch=LocalSUBARCH then rgrpSubarch.ItemIndex:=Pred(rgrpSubarch.Items.Count);
+          end;
         end;
+        if rgrpSubarch.Items.Count=1 then rgrpSubarch.ItemIndex:=0;
+      finally
+        rgrpSubarch.EndUpdateBounds;
       end;
-      if rgrpSubarch.Items.Count=1 then rgrpSubarch.ItemIndex:=0;
-    finally
-      rgrpSubarch.EndUpdateBounds;
+    end
+    else
+    begin
+      aIndex:=rgrpSubarch.Items.IndexOf(GetSubarch(LocalSUBARCH));
+      rgrpSubarch.ItemIndex:=aIndex;
     end;
+
   end;
 
 end;
@@ -648,7 +661,7 @@ begin
   aOS:=TOS.osNone;
   if (ComboBoxCPU.ItemIndex<>-1) then aCPU:=GetTCPU(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex]);
   if (ComboBoxOS.ItemIndex<>-1) then aOS:=GetTOS(ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
-  SetCrossTarget(Sender,aCPU,aOS,TSUBARCH.saNone);
+  SetCrossTarget(Sender,aCPU,aOS);
 end;
 
 procedure TForm2.EditCrossBuildOptionsEditingDone(Sender: TObject);
@@ -673,6 +686,9 @@ end;
 
 procedure TForm2.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  SetSelectedSubArch(LocalCPU,LocalOS,LocalSUBARCH);
+  LocalCPU:=TCPU.cpuNone;
+  LocalOS:=TOS.osNone;
   PageControl1.PageIndex:=0;
 end;
 
@@ -1007,17 +1023,14 @@ end;
 
 procedure TForm2.rgrpSubarchSelectionChanged(Sender: TObject);
 var
-  s:string;
+  i:integer;
 begin
-  if (rgrpSubarch.ItemIndex<>-1) then
-  begin
-    s:=rgrpSubarch.Items[rgrpSubarch.ItemIndex];
-    LocalSUBARCH:=GetTSubarch(s);
-  end
-  else
-    LocalSUBARCH:=TSUBARCH.saNone;
-
-  SetCrossTarget(Sender,LocalCPU,LocalOS,LocalSUBARCH);
+  LocalSUBARCH:=TSUBARCH.saNone;
+  i:=rgrpSubarch.ItemIndex;
+  if (i<>-1) then
+    LocalSUBARCH:=GetTSubarch(rgrpSubarch.Items[i]);
+  SetSelectedSubArch(LocalCPU,LocalOS,LocalSUBARCH);
+  SetCrossTarget(Sender,LocalCPU,LocalOS);
 end;
 
 {

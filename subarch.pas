@@ -290,8 +290,6 @@ begin
   EditCrossBuildOptions.Text:=CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossBuildOptions;
   RadioGroupARMArch.ItemIndex:=Ord(CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch);
 
-  SetABI;
-
   e:=(LocalSUBARCH<>TSUBARCH.saNone);
   EditLibLocation.Enabled:=e;
   EditBinLocation.Enabled:=e;
