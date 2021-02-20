@@ -3946,17 +3946,23 @@ begin
             y:=x;
 
             // delete previous settings by fpcup[deluxe] by looking for some magic ... ;-)
+
+            // remove beginmagic if any
             ConfigText.Delete(x);
+
+            // remove all until endmagic if any
             while (x<ConfigText.Count) do
             begin
-              if (Length(ConfigText.Strings[x])>0) AND (ConfigText.Strings[x]<>SnipMagicEnd) AND (Pos(SnipMagicBegin,ConfigText.Strings[x])=0) then
-                ConfigText.Delete(x)
-              else
+              if (ConfigText.Strings[x]=SnipMagicEnd) then
+              begin
+                ConfigText.Delete(x);
                 break;
+              end;
+              if (Pos(SnipMagicBegin,ConfigText.Strings[x])=1) then break;
+              ConfigText.Delete(x);
             end;
-            // remove endmagic if any
-            if (ConfigText.Strings[x]=SnipMagicEnd) then ConfigText.Delete(x);
-            // remove empty lines if any
+
+            // remove stray empty lines if any
             while (x<ConfigText.Count) AND (Length(ConfigText.Strings[x])=0) do ConfigText.Delete(x);
           end;
         until x=-1;
@@ -4158,6 +4164,7 @@ begin
 
         // add magic
         ConfigText.Append(SnipMagicEnd);
+
         // add empty line
         ConfigText.Append('');
 
