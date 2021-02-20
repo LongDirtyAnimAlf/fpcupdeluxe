@@ -572,6 +572,8 @@ begin
   LocalOS:=aOS;
   LocalSUBARCH:=aSubarch;
 
+  SetSelectedSubArch(LocalCPU,LocalOS,LocalSUBARCH);
+
   if LocalCPU=TCPU.cpuNone then
     ComboBoxCPU.ItemIndex:=-1
   else

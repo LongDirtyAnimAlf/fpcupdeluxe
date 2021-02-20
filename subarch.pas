@@ -41,13 +41,10 @@ type
     LocalCPU:TCPU;
     LocalOS:TOS;
     LocalSUBARCH:TSUBARCH;
-    SUBARCHStore:array[TCPU,TOS] of TSUBARCH;
     procedure SetGUI;
     procedure SetABI;
   public
     procedure SetCrossTarget({%H-}aSender:TObject;aCPU:TCPU;aOS:TOS);
-    function  GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
-    procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
   end;
 
 var
@@ -90,15 +87,6 @@ begin
   LocalCPU:=TCPU.cpuNone;
   LocalOS:=TOS.osNone;
   LocalSUBARCH:=TSUBARCH.saNone;
-
-  for aCPU in TCPU do
-  begin
-    for aOS in TOS do
-    begin
-      SUBARCHStore[aCPU,aOS]:=TSUBARCH.saNone;
-    end;
-  end;
-
 end;
 
 procedure TSubarchForm.FormShow(Sender: TObject);
@@ -165,7 +153,7 @@ end;
 
 procedure TSubarchForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  SUBARCHStore[LocalCPU,LocalOS]:=LocalSUBARCH;
+  SetSelectedSubArch(LocalCPU,LocalOS,LocalSUBARCH);
   LocalCPU:=TCPU.cpuNone;
   LocalOS:=TOS.osNone;
 end;
@@ -289,7 +277,7 @@ procedure TSubarchForm.SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS);
 begin
   LocalCPU:=aCPU;
   LocalOS:=aOS;
-  LocalSUBARCH:=SUBARCHStore[LocalCPU,LocalOS];
+  LocalSUBARCH:=GetSelectedSubArch(LocalCPU,LocalOS);
   rgrpSelectCPUSelectionChanged(nil);
 end;
 
@@ -330,16 +318,6 @@ begin
   end;
   if (i<>-1) then
     RadioGroupABI.ItemIndex:=i;
-end;
-
-function TSubarchForm.GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
-begin
-  result:=SUBARCHStore[aCPU,aOS];
-end;
-
-procedure TSubarchForm.SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
-begin
-  SUBARCHStore[aCPU,aOS]:=aSUBARCH;
 end;
 
 end.

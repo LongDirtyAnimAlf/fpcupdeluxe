@@ -252,6 +252,10 @@ function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
 function GetABI(aABI:TABI):string;
 function GetTABI(aABI:string):TABI;
 function GetABIs(aCPU:TCPU;aOS:TOS):TABIS;
+{$ifdef LCL}
+function  GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
+procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
+{$endif LCL}
 
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 function GetExeExt: string;
@@ -259,6 +263,7 @@ function GetExeExt: string;
 var
   {$ifdef LCL}
   CrossUtils:TCrossUtils;
+  SUBARCHStore:array[TCPU,TOS] of TSUBARCH;
   {$endif LCL}
   CrossInstallers:TStringList=nil;
 
@@ -429,6 +434,18 @@ begin
     end;
   end;
 end;
+
+{$ifdef LCL}
+function GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
+begin
+  result:=SUBARCHStore[aCPU,aOS];
+end;
+
+procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
+begin
+  SUBARCHStore[aCPU,aOS]:=aSUBARCH;
+end;
+{$endif LCL}
 
 function GetExeExt: string;
 begin
@@ -833,8 +850,11 @@ var
 begin
   for OS := Low(TOS) to High(TOS) do
   begin
+
     for CPU := Low(TCPU) to High(TCPU) do
     begin
+
+      SetSelectedSubArch(CPU,OS,TSUBARCH.saNone);
 
       s1:=GetCPU(CPU)+'-'+GetOS(OS);
 

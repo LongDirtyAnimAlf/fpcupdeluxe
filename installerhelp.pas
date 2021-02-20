@@ -164,8 +164,6 @@ end;
 
 THelpLazarusInstaller = class(THelpInstaller)
 private
-  FFPCBinDirectory: string;
-  FFPCSourceDirectory: string;
   FLazarusPrimaryConfigPath: string;
 protected
   // Build module descendant customisation
@@ -178,10 +176,6 @@ public
   function ConfigModule(ModuleName:string): boolean; override;
   // Install update sources
   function GetModule(ModuleName:string): boolean; override;
-  // Root bins directory of FPC; needed for finding fpdoc tool
-  property FPCBinDirectory: string write FFPCBinDirectory;
-  // Root source directory of FPC; needed for finding fpdoc files
-  property FPCSourceDirectory: string write FFPCSourceDirectory;
   // Configuration for Lazarus; required for configuration
   property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
   // Uninstall module
@@ -213,20 +207,19 @@ end;
 
 function THelpInstaller.InitModule: boolean;
 var
-  BinPath: string; //path where compiler is
-  PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
+  PlainBinDir: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
   SVNPath:string;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+
+  PlainBinDir := SafeExpandFileName(FFPCCompilerBinPath+'..'+DirectorySeparator+'..');
+
   Infoln(localinfotext+'Entering ...',etDebug);
 
   result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
 
   if result then
   begin
-    // Look for make etc in the current compiler directory:
-    BinPath:=ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
-    PlainBinPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BinPath) + '..'+DirectorySeparator+'..');
     {$IFDEF MSWINDOWS}
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
@@ -239,22 +232,22 @@ begin
        then SVNPath:=ExcludeTrailingPathDelimiter(FSVNDirectory)+PathSeparator;
 
     SetPath(
-      BinPath+PathSeparator+
-      PlainBinPath+PathSeparator+
+      ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
+      PlainBinDir+PathSeparator+
       FMakeDir+PathSeparator+
       SVNPath+
       ExcludeTrailingPathDelimiter(FInstallDirectory),
       false,false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
-    SetPath(BinPath+PathSeparator+
+    SetPath(ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
     {$IFDEF DARWIN}
     // pwd is located in /bin ... the makefile needs it !!
     // tools are located in /usr/bin ... the makefile needs it !!
     // don't ask, but this is needed when fpcupdeluxe runs out of an .app package ... quirk solved this way .. ;-)
     '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
     {$ENDIF}
-    PlainBinPath,true,false);
+    PlainBinDir,true,false);
     {$ENDIF UNIX}
   end;
 end;
@@ -684,13 +677,13 @@ begin
       end;
 
       // Check for proper fpdoc
-      FPDocExe:=FFPCBinDirectory+
+      FPDocExe:=IncludeTrailingPathDelimiter(FFPCInstallDir)+
         'bin'+DirectorySeparator+
         GetFPCTarget(true)+DirectorySeparator+
         'fpdoc'+GetExeExt;
       if (CheckExecutable(FPDocExe, ['--help'], 'FPDoc')=false) then
       begin
-      FPDocExe:=FFPCSourceDirectory+
+      FPDocExe:=IncludeTrailingPathDelimiter(FFPCSourceDir)+
         'utils'+DirectorySeparator+
         'fpdoc'+DirectorySeparator+
         'fpdoc'+GetExeExt;
@@ -698,7 +691,7 @@ begin
       if (CheckExecutable(FPDocExe, ['--help'], 'FPDoc')=false) then
       begin
         // Try again, in bin directory; newer FPC releases may have migrated to this
-        FPDocExes:=FindAllFiles(FFPCBinDirectory+'bin'+DirectorySeparator,
+        FPDocExes:=FindAllFiles(IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator,
           'fpdoc'+GetExeExt,true);
         try
           if FPDocExes.Count>0 then FPDocExe:=FPDocExes[0]; //take only the first
@@ -738,7 +731,7 @@ begin
         //
         // So specify path explicitly
         // --css-file argument available since r42283
-        Processor.Process.Parameters.Add('--css-file='+FFPCSourceDirectory+
+        Processor.Process.Parameters.Add('--css-file='+IncludeTrailingPathDelimiter(FFPCSourceDir)+
           'utils'+DirectorySeparator+'fpdoc'+DirectorySeparator+'fpdoc.css');
 
         Processor.Process.Parameters.Add('--outfmt');
@@ -804,9 +797,11 @@ end;
 function THelpLazarusInstaller.InitModule: boolean;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+
   Infoln(localinfotext+'Entering ...',etDebug);
 
   result:=false;
+
   if inherited InitModule then
   begin
     // This must be the directory of the build_lcl_docs project, otherwise

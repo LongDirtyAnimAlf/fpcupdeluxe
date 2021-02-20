@@ -40,7 +40,7 @@ uses
   {$ifndef FPCONLY}
   ,updatelazconfig
   {$endif}
-  {$IFDEF MSWINDOWS}, wininstaller{$ENDIF};
+  ;
 
 type
   {$ifndef FPCONLY}
@@ -68,9 +68,6 @@ type
 
   TUniversalInstaller = class(TBaseUniversalInstaller)
   private
-    // FPC base directories
-    FFPCSourceDir:string;
-    FFPCInstallDir:string;
     FPath:string; //Path to be used within this session (e.g. including compiler path)
     InitDone:boolean;
     {$ifndef FPCONLY}
@@ -92,12 +89,6 @@ type
   protected
     // Scans for and adds all packages specified in a (module's) stringlist with commands:
     function AddPackages(sl:TStringList): boolean;
-    {$IFDEF MSWINDOWS}
-    // Filters (a module's) sl stringlist and creates all <Directive> installers.
-    // Directive can now only be Windows/Windows32/Winx86 (synonyms)
-    // For now Windows-only; could be extended to generic cross platform installer class once this works
-    function CreateInstallers(Directive:string;sl:TStringList;ModuleName:string):boolean;
-    {$ENDIF MSWINDOWS}
     // Get a value for a key=value pair. Case-insensitive for keys. Expands macros in values.
     function GetValueFromKey(Key:string;sl:TStringList;recursion:integer=0):string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
@@ -278,8 +269,8 @@ begin
   Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
 
   //Make sure Lazarus does not pick up these tools from other installs
-  Processor.Process.Parameters.Add('FPCMAKE=' + FBinPath+'fpcmake'+GetExeExt);
-  Processor.Process.Parameters.Add('PPUMOVE=' + FBinPath+'ppumove'+GetExeExt);
+  Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
+  Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
 
   s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
   //if FileExists(s) then
@@ -334,7 +325,7 @@ begin
     {$ifdef MSWindows}
     //Prepend FPC binary directory to PATH to prevent pickup of strange tools
     OldPath:=Processor.Environment.GetVar(PATHVARNAME);
-    s:=ExcludeTrailingPathDelimiter(FBinPath);
+    s:=ExcludeTrailingPathDelimiter(FFPCCompilerBinPath);
     if OldPath<>'' then
        Processor.Environment.SetVar(PATHVARNAME, s+PathSeparator+OldPath)
     else
@@ -451,7 +442,7 @@ begin
         else if macro='FPCDIR' then
           macro:=ExcludeTrailingPathDelimiter(FPCInstallDir)
         else if macro='FPCBINDIR' then
-            macro:=ExcludeTrailingPathDelimiter(FBinPath)
+            macro:=ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)
         else if macro='FPCBIN' then
             macro:=ExcludeTrailingPathDelimiter(FCompiler)
         else if macro='TOOLDIR' then
@@ -544,6 +535,7 @@ function TUniversalInstaller.InitModule: boolean;
 begin
   result:=true;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+
   Infoln(localinfotext+'Entering ...',etDebug);
   if InitDone then exit;
 
@@ -557,10 +549,8 @@ begin
   if not(result) then
     Infoln(localinfotext+'Missing required executables. Aborting.',etError);
 
-  // Add fpc architecture bin and plain paths
-  FBinPath:=ConcatPaths([FPCInstallDir,'bin',GetFPCTarget(true)])+DirectorySeparator;
   // Need to remember because we don't always use ProcessEx
-  FPath:=ExcludeTrailingPathDelimiter(FBinPath)+PathSeparator+
+  FPath:=ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
   {$IFDEF DARWIN}
   // pwd is located in /bin ... the makefile needs it !!
   // tools are located in /usr/bin ... the makefile needs it !!
@@ -1102,84 +1092,6 @@ begin
 
 end;
 
-{$IFDEF MSWINDOWS}
-function TUniversalInstaller.CreateInstallers(Directive: string; sl: TStringList;ModuleName:string): boolean;
-// Create installers
-// For now only support WINDOWS/WINDOWS32/WIN32/WINX86, and ignore others
-var
-  i:integer;
-  InstallDir,exec:string;
-  Installer: TWinInstaller;
-  Workingdir:string;
-  BaseWorkingdir:string;
-  ReadyCounter:integer;
-begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CreateInstallers): ';
-
-  result:=true; //succeed by default
-  BaseWorkingdir:=GetValueFromKey('Workingdir',sl);
-  BaseWorkingdir:=FixPath(BaseWorkingdir);
-
-  ReadyCounter:=0;
-
-  for i:=0 to MAXINSTRUCTIONS do
-    begin
-    if i=0
-       then exec:=GetValueFromKey(Directive,sl)
-       else exec:=GetValueFromKey(Directive+IntToStr(i),sl);
-    // Skip over missing numbers:
-
-    //Limit iterration;
-    if ReadyCounter>MAXEMPTYINSTRUCTIONS then break;
-
-    // Skip over missing data or if no exec is defined
-    if (exec='') then
-    begin
-      Inc(ReadyCounter);
-      continue;
-    end else ReadyCounter:=0;
-
-    Workingdir:=GetValueFromKey('Workingdir'+IntToStr(i),sl);
-    Workingdir:=FixPath(Workingdir);
-    if Workingdir='' then Workingdir:=BaseWorkingdir;
-    case uppercase(exec) of
-      'WINDOWS','WINDOWS32','WIN32','WINX86': {good name};
-      else
-        begin
-        WritelnLog(localinfotext+'Ignoring unknown installer name '+exec+'.',true);
-        continue;
-        end;
-    end;
-
-    if FVerbose then WritelnLog(localinfotext+'Running CreateInstallers for '+exec,true);
-    // Convert any relative path to absolute path:
-    InstallDir:=IncludeTrailingPathDelimiter(SafeExpandFileName(GetValueFromKey('InstallDir',sl)));
-    InstallDir:=FixPath(InstallDir);
-    if InstallDir<>'' then
-      ForceDirectoriesSafe(InstallDir);
-    Installer:=TWinInstaller.Create(InstallDir,FCompiler,FVerbose);
-    try
-      //todo: make installer module-level; split out config from build part; would also require fixed svn dirs etc
-      Installer.FPCDir:=FPCInstallDir;
-      {$ifndef FPCONLY}
-      Installer.LazarusDir:=FLazarusInstallDir;
-      // todo: following not strictly needed:?!?
-      Installer.LazarusPrimaryConfigPath:=FLazarusPrimaryConfigPath;
-      {$endif}
-      result:=Installer.BuildModuleCustom(ModuleName);
-    finally
-      Installer.Free;
-    end;
-
-    if not result then
-      begin
-      WritelnLog(etError,localinfotext+'CreateInstallers for '+exec+' failed. Stopping installer creation.',true);
-      break; //fail on first installer failure
-      end;
-    end;
-end;
-{$ENDIF MSWINDOWS}
-
 function TUniversalInstaller.RunCommands(Directive: string;sl:TStringList): boolean;
 var
   i,j:integer;
@@ -1487,19 +1399,11 @@ begin
   if idx>=0 then
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
-
     // Run all InstallExecute<n> commands:
     // More detailed logging only if verbose or debug:
     if FVerbose then WritelnLog(infotext+'Building module '+ModuleName+' running all InstallExecute commands in: '+LineEnding+
       sl.CommaText,true);
     result:=RunCommands('InstallExecute',sl);
-
-    // Run all CreateInstaller<n> commands; for now Windows only
-    {$IFDEF MSWINDOWS}
-    if FVerbose then WritelnLog(infotext+'Building module '+ModuleName+' running all CreateInstaller commands in: '+LineEnding+
-      sl.CommaText,true);
-    result:=CreateInstallers('CreateInstaller',sl, ModuleName);
-    {$ENDIF MSWINDOWS}
     end
   else
     result:=false;

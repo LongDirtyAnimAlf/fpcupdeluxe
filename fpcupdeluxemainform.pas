@@ -1970,10 +1970,10 @@ begin
 
   s:=s+sLineBreak;
   s:=s+'Install directory: '+Self.sInstallDir;
-  s:=s+sLineBreak;
-  s:=s+'Do you want to continue ?';
-  if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+  if (MessageDlg(s+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
 
+  AddMessage(s+'.');
+  //sStatus:=s;
 
   DisEnable(Sender,False);
   try
@@ -2004,10 +2004,6 @@ begin
       FPCupManager.IncludeModules:=FPCupManager.IncludeModules+_LHELP;
     end;
 
-    AddMessage(s+'.');
-
-    sStatus:=s;
-
     {$ifdef RemoteLog}
     if ((Length(aFPCTarget)>0) OR (Length(aLazarusTarget)>0)) then
     begin
@@ -2019,6 +2015,10 @@ begin
       aDataClient.AddExtraData('module',aModule);
     end;
     {$endif}
+
+    if Form2.UpdateOnly then
+    begin
+    end;
 
     success:=RealRun;
     //success:=true;
@@ -2055,7 +2055,7 @@ begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
         Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
-        SubarchForm.SetSelectedSubArch(aCPU,aOS,aSUBARCH);
+        SetSelectedSubArch(aCPU,aOS,aSUBARCH);
 
         AddMessage(s+'.');
         sStatus:=s;
@@ -2468,7 +2468,7 @@ begin
   end;
 
   // Set subarch early
-  FPCupManager.CrossOS_SubArch:=SubarchForm.GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+  FPCupManager.CrossOS_SubArch:=GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
 
   {$ifdef RemoteLog}
   aDataClient.UpInfo.CrossCPUOS:=GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target);
@@ -3616,6 +3616,7 @@ end;
 procedure TForm1.btnSetupPlusClick(Sender: TObject);
 var
   s:string;
+  aOldSubarch,aNewSubarch:TSUBARCH;
 begin
   if radgrpCPU.ItemIndex<>-1 then
   begin
@@ -3628,6 +3629,8 @@ begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
     FPCupManager.CrossOS_Target:=GetTOS(s);
   end;
+
+  aOldSubarch:=GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
   Form2.SetCrossTarget(FPCupManager,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
 
   Form2.ShowModal;
@@ -3638,6 +3641,9 @@ begin
     FPCupManager.HTTPProxyPort:=Form2.HTTPProxyPort;
     FPCupManager.HTTPProxyUser:=Form2.HTTPProxyUser;
     FPCupManager.HTTPProxyPassword:=Form2.HTTPProxyPass;
+    aNewSubarch:=GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+    if ((aNewSubarch<>aOldSubarch) AND (aNewSubarch<>TSUBARCH.saNone)) then
+      AddMessage('Fpcupdeluxe: selected subarch = '+GetSubarch(aNewSubarch));
   end;
 end;
 
@@ -4465,7 +4471,7 @@ begin
 
   if SubarchForm.ModalResult=mrOk then
   begin
-    AddMessage('Fpcupdeluxe: selected subarch = '+GetSubarch(SubarchForm.GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target)));
+    AddMessage('Fpcupdeluxe: selected subarch = '+GetSubarch(GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target)));
   end;
 end;
 

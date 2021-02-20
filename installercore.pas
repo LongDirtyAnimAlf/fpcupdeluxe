@@ -286,6 +286,8 @@ type
     procedure SetSourceDirectory(value:string);
     procedure SetBaseDirectory(value:string);
     procedure SetInstallDirectory(value:string);
+    procedure SetFPCInstallDirectory(value:string);
+    procedure SetFPCSourceDirectory(value:string);
     function GetShell: string;
     function GetMake: string;
     procedure SetVerbosity(aValue:boolean);
@@ -306,10 +308,12 @@ type
   protected
     FCleanModuleSuccess: boolean;
     FNeededExecutablesChecked: boolean;
-    FBinPath: string; //path where compiler lives
+    FFPCCompilerBinPath: string; //path where compiler lives
     FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) install itself
     FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
     FInstallDirectory: string; //Top install directory for a product (FPC, Lazarus)
+    FFPCInstallDir: string;
+    FFPCSourceDir: string;
     FTempDirectory: string; //For storing temp files and logs
     FCompiler: string; // Compiler executable
     FCompilerOptions: string; //options passed when compiling (FPC or Lazarus currently)
@@ -430,6 +434,10 @@ type
     // Final install directory
     property InstallDirectory: string write SetInstallDirectory;
     //Base directory for fpc(laz)up(deluxe) itself
+    // FPC install directory
+    property FPCInstallDir: string write SetFPCInstallDirectory;
+    // FPC source directory
+    property FPCSourceDir: string write SetFPCSourceDirectory;
     property TempDirectory: string write FTempDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
     property Compiler: string {read GetCompiler} write FCompiler;
@@ -465,7 +473,7 @@ type
     // do we have musl instead of libc
     property MUSL: boolean write FMUSL;
     // Are we installing Ultibo
-    property Ultibo: boolean read FUltibo;
+    property Ultibo: boolean read FUltibo write FUltibo;
     property Log: TLogger write FLog;
     // Directory where make (and the other binutils on Windows) is located
     property MakeDirectory: string write FMakeDir;
@@ -508,10 +516,10 @@ type
     function CleanModule(ModuleName: string): boolean; virtual;
     // Config module
     function ConfigModule(ModuleName: string): boolean; virtual;
-    // Constructs compiler path from directory and architecture
+    // Constructs FPC compiler path from install directory and architecture
     // Corrects for use of our fpc.sh launcher on *nix
     // Does not verify compiler actually exists.
-    function GetCompilerInDir(Dir: string): string;
+    function GetFPCInBinDir: string;
     // Install update sources
     function GetModule(ModuleName: string): boolean; virtual;
     // Perform some checks on the sources
@@ -580,7 +588,7 @@ uses
 function TInstaller.GetCompiler: string;
 begin
   if (Self.ClassNameIs('TFPCNativeInstaller')) or (Self.ClassNameIs('TFPCInstaller'))
-    then Result := GetCompilerInDir(FInstallDirectory)
+    then Result := GetFPCInBinDir
     else Result := FCompiler;
 end;
 
@@ -664,7 +672,7 @@ begin
     aOS:='';
     aArch:='';
 
-    FPCCfg:=FBinPath+FPCCONFIGFILENAME;
+    FPCCfg:=FFPCCompilerBinPath+FPCCONFIGFILENAME;
 
     if (NOT FileExists(FPCCfg)) then exit;
 
@@ -740,7 +748,6 @@ begin
     FMinorVersion := -1;
     FReleaseVersion := -1;
     FPatchVersion := -1;
-    FUltibo:=(Pos('github.com/ultibohub',FURL)>0);
   end;
 end;
 
@@ -769,6 +776,22 @@ begin
     ForceDirectoriesSafe(FInstallDirectory);
   end;
 end;
+
+procedure TInstaller.SetFPCInstallDirectory(value:string);
+begin
+  FFPCInstallDir:=value;
+  FFPCCompilerBinPath:=ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+DirectorySeparator;
+  if (IsFPCInstaller) then
+    SetInstallDirectory(value);
+end;
+
+procedure TInstaller.SetFPCSourceDirectory(value:string);
+begin
+  FFPCSourceDir:=value;
+  if (IsFPCInstaller) then
+    SetSourceDirectory(value);
+end;
+
 
 function TInstaller.GetMake: string;
 const
@@ -1103,25 +1126,17 @@ begin
       OperationSucceeded:=True;
     end;
 
-    FUnrar := IncludeTrailingPathDelimiter(FMakeDir) + 'unrar\bin\unrar.exe';
-    if Not FileExists(FUnrar) then
+    if (NOT Ultibo) then
     begin
-      ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar');
-      //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
-      // this version of unrar does not need installation ... so we can silently get it !!
-      Output:='unrar-3.4.3-bin.zip';
-      SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
-      aURL:='https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/';
-      OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
-      // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
-      if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
+      //Unrar HG and GIT not needed for Ultibo
+
+      FUnrar := IncludeTrailingPathDelimiter(FMakeDir) + 'unrar\bin\unrar.exe';
+      if Not FileExists(FUnrar) then
       begin
-        SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
-        OperationSucceeded:=false;
-      end;
-      if NOT OperationSucceeded then
-      begin
-        // try one more time
+        ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar');
+        //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
+        // this version of unrar does not need installation ... so we can silently get it !!
+        Output:='unrar-3.4.3-bin.zip';
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
         aURL:='https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/';
         OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
@@ -1131,176 +1146,192 @@ begin
           SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
           OperationSucceeded:=false;
         end;
-      end;
-      if OperationSucceeded then
-      begin
-        with TNormalUnzipper.Create do
+        if NOT OperationSucceeded then
         begin
-          try
-            //OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\',['bin\unrar.exe','\bin\unrar3.dll']);
-            OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\',[]);
-          finally
-            Free;
+          // try one more time
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+          aURL:='https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/';
+          OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+          // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
+          if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
+          begin
+            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+            OperationSucceeded:=false;
           end;
         end;
-
         if OperationSucceeded then
         begin
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
-          OperationSucceeded:=FileExists(FUnrar);
-        end;
-      end;
-      // do not fail ... perhaps there is another unrar available in the path ... or use 7zip on windows
-      OperationSucceeded:=True;
-    end;
+          with TNormalUnzipper.Create do
+          begin
+            try
+              //OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\',['bin\unrar.exe','\bin\unrar3.dll']);
+              OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\',[]);
+            finally
+              Free;
+            end;
+          end;
 
-    with GitClient do
-    begin
-      OperationSucceeded:=False;
-      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'git'+DirectorySeparator+'cmd'+DirectorySeparator+RepoExecutableName+GetExeExt;
-      // try to find systemwide GIT
-      if (NOT ForceLocal) then
-      begin
-        OperationSucceeded:=ValidClient;
+          if OperationSucceeded then
+          begin
+            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+            OperationSucceeded:=FileExists(FUnrar);
+          end;
+        end;
+        // do not fail ... perhaps there is another unrar available in the path ... or use 7zip on windows
+        OperationSucceeded:=True;
       end;
-      // try to find fpcupdeluxe GIT
-      if (NOT OperationSucceeded) then
+
+
+      with GitClient do
       begin
-        OperationSucceeded:=FileExists(aLocalClientBinary);
-        if OperationSucceeded then RepoExecutable:=aLocalClientBinary;
-      end;
-      if (NOT OperationSucceeded) then
-      begin
-        //Source:
-        //https://github.com/git-for-windows
-        //install GIT only on Windows Vista and higher
-        if CheckWin32Version(6,0) then
+        OperationSucceeded:=False;
+        aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'git'+DirectorySeparator+'cmd'+DirectorySeparator+RepoExecutableName+GetExeExt;
+        // try to find systemwide GIT
+        if (NOT ForceLocal) then
         begin
-          ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'git');
+          OperationSucceeded:=ValidClient;
+        end;
+        // try to find fpcupdeluxe GIT
+        if (NOT OperationSucceeded) then
+        begin
+          OperationSucceeded:=FileExists(aLocalClientBinary);
+          if OperationSucceeded then RepoExecutable:=aLocalClientBinary;
+        end;
+        if (NOT OperationSucceeded) then
+        begin
+          //Source:
+          //https://github.com/git-for-windows
+          //install GIT only on Windows Vista and higher
+          if CheckWin32Version(6,0) then
+          begin
+            ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'git');
+            {$ifdef win32}
+            //Output:='git32.7z';
+            Output:='git32.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-32-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-32-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-32-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-32-bit.zip';
+            aURL:='https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/MinGit-2.23.0-32-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-32-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-32-bit.zip';
+            {$else}
+            //Output:='git64.7z';
+            Output:='git64.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-64-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-64-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-64-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-64-bit.zip';
+            aURL:='https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/MinGit-2.23.0-64-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-64-bit.zip';
+            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-64-bit.zip';
+            {$endif}
+            //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
+            Infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
+            OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+            if NOT OperationSucceeded then
+            begin
+              // try one more time
+              SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+              OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+            end;
+            if OperationSucceeded then
+            begin
+              Infoln(localinfotext+'GIT client download ready: unpacking (may take time).',etInfo);
+              with TNormalUnzipper.Create do
+              begin
+                try
+                  OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'git\',[]);
+                finally
+                  Free;
+                end;
+              end;
+              if OperationSucceeded then
+              begin
+                SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+                OperationSucceeded:=FileExists(aLocalClientBinary);
+                //Copy certificate ... might be necessary
+                //aURL:=IncludeTrailingPathDelimiter(FMakeDir)+'git\mingw32\';
+                //if (NOT FileExists(aURL+'bin\curl-ca-bundle.crt')) then FileUtil.CopyFile(aURL+'ssl\certs\ca-bundle.crt',aURL+'bin\curl-ca-bundle.crt');
+              end;
+            end;
+            if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+GetExeExt;
+          end;
+        end;
+        if RepoExecutable <> EmptyStr then
+        begin
+          // check exe, but do not fail: GIT is not 100% essential !
+          CheckExecutable(RepoExecutable, ['--version'], '');
+        end;
+        // do not fail: GIT is not 100% essential !
+        OperationSucceeded:=True;
+      end;
+
+      with HGClient do
+      begin
+        OperationSucceeded:=False;
+        aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'hg'+DirectorySeparator+RepoExecutableName+GetExeExt;
+        // try to find systemwide HG
+        if (NOT ForceLocal) then
+        begin
+          OperationSucceeded:=ValidClient;
+        end;
+        // try to find fpcupdeluxe HG
+        if (NOT OperationSucceeded) then
+        begin
+          OperationSucceeded:=FileExists(aLocalClientBinary);
+          if OperationSucceeded then RepoExecutable:=aLocalClientBinary;
+        end;
+        if (NOT OperationSucceeded) then
+        begin
+          //original source from : https://www.mercurial-scm.org/
           {$ifdef win32}
-          //Output:='git32.7z';
-          Output:='git32.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-32-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-32-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-32-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-32-bit.zip';
-          aURL:='https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/MinGit-2.23.0-32-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-32-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-32-bit.zip';
+          Output:='hg32.zip';
           {$else}
-          //Output:='git64.7z';
-          Output:='git64.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-64-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-64-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-64-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-64-bit.zip';
-          aURL:='https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/MinGit-2.23.0-64-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-64-bit.zip';
-          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-64-bit.zip';
+          Output:='hg64.zip';
           {$endif}
-          //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
-          Infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
-          OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+          aURL:=FPCUPGITREPO+'/releases/download/HG-4.7/'+Output;
+          ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
+          Infoln(localinfotext+'HG (mercurial) client not found. Downloading it (may take time) from '+aURL,etInfo);
+          OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
           if NOT OperationSucceeded then
           begin
             // try one more time
-            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-            OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
+            OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
           end;
           if OperationSucceeded then
           begin
-            Infoln(localinfotext+'GIT client download ready: unpacking (may take time).',etInfo);
+            Infoln(localinfotext+'HG download ready: unpacking (may take time).',etInfo);
             with TNormalUnzipper.Create do
             begin
               try
-                OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'git\',[]);
+                OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'hg\',[]);
               finally
                 Free;
               end;
             end;
             if OperationSucceeded then
             begin
-              SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+              SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
               OperationSucceeded:=FileExists(aLocalClientBinary);
-              //Copy certificate ... might be necessary
-              //aURL:=IncludeTrailingPathDelimiter(FMakeDir)+'git\mingw32\';
-              //if (NOT FileExists(aURL+'bin\curl-ca-bundle.crt')) then FileUtil.CopyFile(aURL+'ssl\certs\ca-bundle.crt',aURL+'bin\curl-ca-bundle.crt');
             end;
           end;
           if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+GetExeExt;
         end;
+        if RepoExecutable <> EmptyStr then
+        begin
+          // check exe, but do not fail: HG is not 100% essential !
+          CheckExecutable(RepoExecutable, ['--version'], '');
+        end;
+        // do not fail: HG is not 100% essential !
+        OperationSucceeded:=True;
       end;
-      if RepoExecutable <> EmptyStr then
-      begin
-        // check exe, but do not fail: GIT is not 100% essential !
-        CheckExecutable(RepoExecutable, ['--version'], '');
-      end;
-      // do not fail: GIT is not 100% essential !
-      OperationSucceeded:=True;
+
     end;
 
-    with HGClient do
-    begin
-      OperationSucceeded:=False;
-      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'hg'+DirectorySeparator+RepoExecutableName+GetExeExt;
-      // try to find systemwide HG
-      if (NOT ForceLocal) then
-      begin
-        OperationSucceeded:=ValidClient;
-      end;
-      // try to find fpcupdeluxe HG
-      if (NOT OperationSucceeded) then
-      begin
-        OperationSucceeded:=FileExists(aLocalClientBinary);
-        if OperationSucceeded then RepoExecutable:=aLocalClientBinary;
-      end;
-      if (NOT OperationSucceeded) then
-      begin
-        //original source from : https://www.mercurial-scm.org/
-        {$ifdef win32}
-        Output:='hg32.zip';
-        {$else}
-        Output:='hg64.zip';
-        {$endif}
-        aURL:=FPCUPGITREPO+'/releases/download/HG-4.7/'+Output;
-        ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
-        Infoln(localinfotext+'HG (mercurial) client not found. Downloading it (may take time) from '+aURL,etInfo);
-        OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
-        if NOT OperationSucceeded then
-        begin
-          // try one more time
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
-          OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
-        end;
-        if OperationSucceeded then
-        begin
-          Infoln(localinfotext+'HG download ready: unpacking (may take time).',etInfo);
-          with TNormalUnzipper.Create do
-          begin
-            try
-              OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'hg\',[]);
-            finally
-              Free;
-            end;
-          end;
-          if OperationSucceeded then
-          begin
-            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
-            OperationSucceeded:=FileExists(aLocalClientBinary);
-          end;
-        end;
-        if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+GetExeExt;
-      end;
-      if RepoExecutable <> EmptyStr then
-      begin
-        // check exe, but do not fail: HG is not 100% essential !
-        CheckExecutable(RepoExecutable, ['--version'], '');
-      end;
-      // do not fail: HG is not 100% essential !
-      OperationSucceeded:=True;
-    end;
     {$ENDIF MSWINDOWS}
 
 
@@ -2940,17 +2971,26 @@ begin
   if ToConsole then Infoln(msg,EventType);
 end;
 
-
-function TInstaller.GetCompilerInDir(Dir: string): string;
+function TInstaller.GetFPCInBinDir: string;
 begin
-  Result := IncludeTrailingPathDelimiter(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + 'fpc' + GetExeExt;
+  result := ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true),'fpc' + GetExeExt]);
   {$IFDEF UNIX}
-  if FileExists(Result + '.sh') then
+  if FileExists(result + '.sh') then
     begin
     //Use our proxy if it is installed
-    Result := Result + '.sh';
+    result := result + '.sh';
     end;
   {$ENDIF UNIX}
+
+  if (NOT FileExists(result)) then
+  begin
+    if ( (NOT IsFPCInstaller) OR (IsFPCInstaller AND Assigned(CrossInstaller)) ) then
+    begin
+      //Infoln('donalf: Compiler '+result+' not [yet] found.',etInfo);
+      raise Exception.CreateFmt('FPC compiler "%s" not found.', [result]);
+    end;
+    result:='';
+  end;
 end;
 
 procedure TInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);
@@ -3922,6 +3962,7 @@ end;
 function TInstaller.IsFPCInstaller:boolean;
 begin
   result:=GetInstallerClass(TBaseFPCInstaller);
+  //result:=Self.InheritsFrom(TBaseFPCInstaller);
 end;
 
 function TInstaller.IsLazarusInstaller:boolean;

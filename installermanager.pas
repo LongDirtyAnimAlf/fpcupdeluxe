@@ -1372,15 +1372,17 @@ end;
 
 function TSequencer.GetInstaller(ModuleName: string): boolean;
 var
-  CrossCompiling:boolean;
+  Ultibo,CrossCompiling:boolean;
   aCompiler:string;
   LocalFPCSourceDir:string;
 begin
   result:=true;
 
+  Ultibo:=((Pos('github.com/ultibohub',FParent.FPCURL)>0) OR (Pos('github.com/ultibohub',FParent.LazarusURL)>0));
+
   CrossCompiling:=(FParent.CrossCPU_Target<>TCPU.cpuNone) or (FParent.CrossOS_Target<>TOS.osNone);
 
-  if (Pos('github.com/ultibohub',FParent.FPCURL)>0) then
+  if Ultibo then
     LocalFPCSourceDir:=IncludeTrailingPathDelimiter(FParent.FPCSourceDirectory)+'source'
   else
     LocalFPCSourceDir:=FParent.FPCSourceDirectory;
@@ -1411,8 +1413,6 @@ begin
     else
       FInstaller:=TFPCNativeInstaller.Create;
 
-    FInstaller.SourceDirectory:=LocalFPCSourceDir;
-    FInstaller.InstallDirectory:=FParent.FPCInstallDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
     (FInstaller as TFPCInstaller).SourcePatches:=FParent.FPCPatches;
     (FInstaller as TFPCInstaller).SoftFloat:=FParent.SoftFloat;
@@ -1459,8 +1459,6 @@ begin
     else
       FInstaller:=TLazarusNativeInstaller.Create;
 
-    // source- and install-dir are the same for Lazarus ... could be changed
-
     FInstaller.SourceDirectory:=FParent.LazarusSourceDirectory;
     FInstaller.InstallDirectory:=FParent.LazarusInstallDirectory;
 
@@ -1471,8 +1469,6 @@ begin
     // LCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
     (FInstaller as TLazarusInstaller).LCL_Platform:=FParent.LCL_Platform;
-    (FInstaller as TLazarusInstaller).FPCSourceDir:=LocalFPCSourceDir;
-    (FInstaller as TLazarusInstaller).FPCInstallDir:=FParent.FPCInstallDirectory;
     (FInstaller as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     (FInstaller as TLazarusInstaller).SourcePatches:=FParent.FLazarusPatches;
     FInstaller.URL:=FParent.LazarusURL;
@@ -1495,7 +1491,6 @@ begin
         FInstaller.free; // get rid of old FInstaller
       end;
     FInstaller:=THelpFPCInstaller.Create;
-    FInstaller.SourceDirectory:=LocalFPCSourceDir;
   end
   {$ifndef FPCONLY}
   else if ModuleName=_HELPLAZARUS
@@ -1512,10 +1507,9 @@ begin
         FInstaller.free; // get rid of old FInstaller
     end;
     FInstaller:=THelpLazarusInstaller.Create;
+
     FInstaller.SourceDirectory:=FParent.LazarusSourceDirectory;
     FInstaller.InstallDirectory:=FParent.LazarusInstallDirectory;
-    (FInstaller as THelpLazarusInstaller).FPCBinDirectory:=IncludeTrailingPathDelimiter(FParent.FPCInstallDirectory);
-    (FInstaller as THelpLazarusInstaller).FPCSourceDirectory:=IncludeTrailingPathDelimiter(LocalFPCSourceDir);
     (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
   end
   {$endif}
@@ -1541,14 +1535,9 @@ begin
       else
         FInstaller:=TUniversalInstaller.Create;
       end;
-
       FCurrentModule:=ModuleName;
-      //assign properties
-      (FInstaller as TUniversalInstaller).FPCInstallDir:=FParent.FPCInstallDirectory;
-      (FInstaller as TUniversalInstaller).FPCSourceDir:=LocalFPCSourceDir;
       // Use compileroptions for chosen FPC compile options...
       FInstaller.CompilerOptions:=FParent.FPCOPT;
-      // ... but more importantly, pass Lazarus compiler options needed for IDE rebuild
       {$ifndef FPCONLY}
       (FInstaller as TUniversalInstaller).LazarusSourceDir:=FParent.FLazarusSourceDirectory;
       (FInstaller as TUniversalInstaller).LazarusInstallDir:=FParent.FLazarusInstallDirectory;
@@ -1561,6 +1550,8 @@ begin
   if assigned(FInstaller) then
   begin
     FInstaller.BaseDirectory:=FParent.BaseDirectory;
+    FInstaller.FPCSourceDir:=LocalFPCSourceDir;
+    FInstaller.FPCInstallDir:=FParent.FPCInstallDirectory;
     FInstaller.TempDirectory:=FParent.TempDirectory;
     if (Length(FParent.SVNExecutable)>0) then FInstaller.SVNClient.RepoExecutable:=FParent.SVNExecutable;
     {$IFDEF MSWINDOWS}
@@ -1586,7 +1577,7 @@ begin
     else
     begin
       if FParent.UseSystemFPC then aCompiler:=Which('fpc');
-      if (NOT FParent.UseSystemFPC) OR (Length(aCompiler)=0) then aCompiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory); // use FPC compiler itself
+      if (NOT FParent.UseSystemFPC) OR (Length(aCompiler)=0) then aCompiler:=FInstaller.GetFPCInBinDir; // use FPC compiler itself
     end;
     FInstaller.Compiler:=aCompiler;
 
@@ -1604,6 +1595,7 @@ begin
     FInstaller.SwitchURL:=FParent.SwitchURL;
     if FParent.SolarisOI then FInstaller.SolarisOI:=true {else if FInstaller.SolarisOI then FParent.SolarisOI:=true};
     if FParent.MUSL then FInstaller.MUSL:=true {else if FInstaller.MUSL then FParent.MUSL:=true};
+    FInstaller.Ultibo:=Ultibo;
 
     if CrossCompiling then
     begin

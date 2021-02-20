@@ -220,8 +220,6 @@ type
     InitDone: boolean;
     function LCLCrossActionNeeded:boolean;
   protected
-    FFPCInstallDir: string;
-    FFPCSourceDir: string;
     function GetVersionFromSource(aSourcePath:string):string;override;
     function GetVersionFromUrl(aUrl:string):string;override;
     function GetReleaseCandidateFromSource(aSourcePath:string):integer;override;
@@ -234,10 +232,6 @@ type
   public
     // LCL widget set to be built (NOT OS/CPU combination)
     property LCL_Platform: string write FLCL_Platform;
-    // FPC base directory
-    property FPCInstallDir: string write FFPCInstallDir;
-    // FPC source directory
-    property FPCSourceDir: string write FFPCSourceDir;
     // Lazarus primary config path
     property PrimaryConfigPath: string write FPrimaryConfigPath;
     // Build module
@@ -670,8 +664,8 @@ begin
     Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
     //Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCInstallDir));
     //Make sure Lazarus does not pick up these tools from other installs
-    Processor.Process.Parameters.Add('FPCMAKE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt);
-    Processor.Process.Parameters.Add('PPUMOVE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'ppumove'+GetExeExt);
+    Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
+    Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
 
     {$ifdef Windows}
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
@@ -1466,7 +1460,7 @@ end;
 
 function TLazarusInstaller.InitModule: boolean;
 var
-  PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
+  PlainBinDir: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
   {$IFDEF MSWINDOWS}
   SVNPath:string;
   {$ENDIF}
@@ -1477,6 +1471,8 @@ begin
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
 
+  PlainBinDir := SafeExpandFileName(FFPCCompilerBinPath+'..'+DirectorySeparator+'..');
+
   Infoln(localinfotext+'Entering ...',etDebug);
 
   WritelnLog(localinfotext+'Lazarus directory:      ' + FSourceDirectory, false);
@@ -1485,7 +1481,6 @@ begin
   result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
 
   if result then
-
   begin
     if Assigned(CrossInstaller) then
     begin
@@ -1493,9 +1488,6 @@ begin
       CrossInstaller.MUSL:=FMUSL;
     end;
 
-    // Look for make etc in the current compiler directory:
-    FBinPath := ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
-    PlainBinPath := SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath) + '..'+DirectorySeparator+'..');
     {$IFDEF MSWINDOWS}
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
@@ -1508,22 +1500,22 @@ begin
        then SVNPath:=ExcludeTrailingPathDelimiter(FSVNDirectory)+PathSeparator;
 
     SetPath(
-      FBinPath + PathSeparator +
-      PlainBinPath + PathSeparator +
+      ExcludeTrailingPathDelimiter(FFPCCompilerBinPath) + PathSeparator +
+      PlainBinDir + PathSeparator +
       FMakeDir + PathSeparator +
       SVNPath +
       ExcludeTrailingPathDelimiter(FInstallDirectory),
       false, false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
-    SetPath(FBinPath+PathSeparator+
+    SetPath(ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
     {$IFDEF DARWIN}
     // pwd is located in /bin ... the makefile needs it !!
     // tools are located in /usr/bin ... the makefile needs it !!
     // don't ask, but this is needed when fpcupdeluxe runs out of an .app package ... quirk solved this way .. ;-)
     '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
     {$ENDIF}
-    PlainBinPath, true, false);
+    PlainBinDir, true, false);
     {$ENDIF UNIX}
   end;
 
