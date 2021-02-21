@@ -2834,15 +2834,15 @@ begin
 
           AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
 
-          // Setting the name[s] for the file to download
-          BinsFileName:=UppercaseFirstChar(GetCPU(FPCupManager.CrossCPU_Target));
+          // Setting the CPU part of the name[s] for the file to download
+          if FPCupManager.CrossCPU_Target=TCPU.arm then s:='ARM' else
+            if FPCupManager.CrossCPU_Target=TCPU.x86_64 then s:='x64' else
+              if FPCupManager.CrossCPU_Target=TCPU.powerpc then s:='PowerPC' else
+                if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then s:='PowerPC64' else
+                  if FPCupManager.CrossCPU_Target=TCPU.avr then s:='AVR' else
+                    s:=UppercaseFirstChar(GetCPU(FPCupManager.CrossCPU_Target));
 
-          // Set special CPU case
-          if FPCupManager.CrossCPU_Target=TCPU.arm then BinsFileName:='ARM';
-          if FPCupManager.CrossCPU_Target=TCPU.x86_64 then BinsFileName:='x64';
-          if FPCupManager.CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
-          if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC64';
-          if FPCupManager.CrossCPU_Target=TCPU.avr then BinsFileName:='AVR';
+          BinsFileName:=s;
 
           // Set special CPU names
           if FPCupManager.CrossOS_Target=TOS.darwin then

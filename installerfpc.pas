@@ -197,6 +197,7 @@ type
     FCrossCompilerName: string;
     function GetUnitsInstallDirectory(WithMagic:boolean):string;
     function CompilerUpdateNeeded:boolean;
+    function PackagesNeeded:boolean;
     function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
     property CrossCompilerName: string read FCrossCompilerName;
   protected
@@ -441,6 +442,11 @@ begin
       end;
     end;
   end;
+end;
+
+function TFPCCrossInstaller.PackagesNeeded:boolean;
+begin
+  result:=(NOT ((CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.freertos)));
 end;
 
 function TFPCCrossInstaller.InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
@@ -1137,13 +1143,9 @@ begin
             end;
           end;
 
-          if ((CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.freertos)) then
+          if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
           begin
-            if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
-            begin
-              //Infoln(infotext+'Skipping build step '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+' for '+CrossInstaller.TargetCPUName+'.',etInfo);
-              continue;
-            end;
+            if (NOT PackagesNeeded) then continue;
           end;
 
           {$endif crosssimple}
@@ -4313,7 +4315,7 @@ begin
         else
           Infoln({infotext+}'Skipping cross-compiler clean step: seems to be up to date !!',etInfo);
         aCleanupCommandList.Append('rtl_distclean');
-        if (CrossInstaller.TargetOS<>TOS.freertos) then aCleanupCommandList.Append('packages_distclean');
+        if (Self AS TFPCCrossInstaller).PackagesNeeded then aCleanupCommandList.Append('packages_distclean');
       end;
 
       for aCleanupCommand in aCleanupCommandList do
