@@ -53,10 +53,15 @@ type
   Tany_linux = class(TCrossInstaller)
   private
     FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-    {$IFDEF MULTILIB}
+  {$IFDEF MULTILIB}
     FMultilib:boolean;
     function CheckMultilib:boolean;
-    {$ENDIF MULTILIB}
+  protected
+    function GetMultilibDir:string;virtual;
+    function GetMultilibDirShort:string;virtual;
+    function GetObjdumpOutput:string;virtual;
+    function GetLDOutput:string;virtual;
+  {$ENDIF MULTILIB}
   public
     function GetLibs(Basepath:string):boolean;override;
     {$ifndef FPCONLY}
@@ -65,6 +70,12 @@ type
     function GetBinUtils(Basepath:string):boolean;override;
     constructor Create;
     destructor Destroy; override;
+    {$IFDEF MULTILIB}
+    property MultilibDir:string read GetMultilibDir;
+    property MultilibDirShort:string read GetMultilibDirShort;
+    property ObjdumpOutput:string read GetObjdumpOutput;
+    property LDOutput:string read GetLDOutput;
+    {$ENDIF MULTILIB}
   end;
 
 implementation
@@ -72,63 +83,79 @@ implementation
 uses
   Process, FileUtil, fpcuputil;
 
-{$IFDEF MULTILIB}
-{$IFDEF CPUX64}
-const
-  MULTILIBPATH='i386-linux-gnu'; //debian (multilib) Jessie+ convention
-  MULTILIBPATHSHORT='lib32';
-{$ENDIF CPUX64}
-{$IFDEF CPUX86}
-const
-  MULTILIBPATH='x86_64-linux-gnu'; //debian (multilib) Jessie+ convention
-  MULTILIBPATHSHORT='lib64';
-{$ENDIF CPUX86}
-{$ENDIF MULTILIB}
-
 { Tany_linux }
 
 {$IFDEF MULTILIB}
-function Tany_linux.CheckMultilib:boolean;
-{$IFDEF CPUX64}
-const
-  OBJDUMPOUT='elf32-i386';
-  LDOUT='elf_i386';
-{$ENDIF CPUX64}
-{$IFDEF CPUX86}
-const
-  OBJDUMPOUT='elf64-x86-64';
-  LDOUT='elf_x86_64';
-{$ENDIF CPUX86}
-{$IFDEF CPUAARCH64}
-{$ENDIF CPUAARCH64}
-{$IFDEF CPUARM}
-{$ENDIF CPUARM}
-var
-  s:string;
+
+function Tany_linux.GetMultilibDir:string;
 begin
-  // For now, limited to i386 and x86_64
-  if (TargetCPU=TCPU.i386) OR (TargetCPU=TCPU.x86_64) then
+  case TargetCPU of
+    TCPU.i386: result:='i386-linux-gnu';
+    TCPU.x86_64: result:='x86_64-linux-gnu';
+  else
+    result:='';
+  end;
+end;
+function Tany_linux.GetMultilibDirShort:string;
+begin
+  case TargetCPU of
+    TCPU.i386: result:='lib32';
+    TCPU.x86_64: result:='lib64';
+  else
+    result:='';
+  end;
+end;
+function Tany_linux.GetObjdumpOutput:string;
+begin
+  case TargetCPU of
+    TCPU.i386: result:='elf32-i386';
+    TCPU.x86_64: result:='elf64-x86-64';
+  else
+    result:='';
+  end;
+end;
+function Tany_linux.GetLDOutput:string;
+begin
+  case TargetCPU of
+    TCPU.i386: result:='elf_i386';
+    TCPU.x86_64: result:='elf_x86_64';
+  else
+    result:='';
+  end;
+end;
+
+function Tany_linux.CheckMultilib:boolean;
+var
+  s,magic:string;
+begin
+  result:=FMultilib;
+  if result then exit;
+
+  // Check if we have the multilib binary tools
+  magic:=GetObjdumpOutput;
+  if (Length(magic)=0) then exit;
+  RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut],swoHide);
+  if AnsiPos(magic, s) <> 0 then
   begin
-    if FMultilib then exit(true);
-    // Check if we have the multilib binary tools
-    RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut],swoHide);
-    if AnsiPos(OBJDUMPOUT, s) <> 0 then
+    magic:=GetLDOutput;
+    if (Length(magic)=0) then exit;
+    RunCommand('ld',['-V'], s,[poUsePipes, poStderrToOutPut],swoHide);
+    if AnsiPos(magic, s) <> 0 then
     begin
-      RunCommand('ld',['-V'], s,[poUsePipes, poStderrToOutPut],swoHide);
-      if AnsiPos(LDOUT, s) <> 0 then
+      // Check if we have the libs
+      magic:=GetMultilibDir;
+      if (Length(magic)=0) then exit;
+      s:='/lib/'+magic; //debian (multilib) Jessie+ convention
+      if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libc.so.6') then
       begin
-        // Check if we have the libs
-        s:='/lib/'+MULTILIBPATH; //debian (multilib) Jessie+ convention
-        if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libc.so.6') then
-        begin
-          s:='/usr/lib/'+MULTILIBPATH; //debian (multilib) Jessie+ convention
-          if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libX11.so.6') then FMultilib:=True;
-        end;
+        s:='/usr/lib/'+magic; //debian (multilib) Jessie+ convention
+        if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libX11.so.6') then FMultilib:=True;
       end;
     end;
   end;
   result:=FMultilib;
 end;
+
 {$ENDIF MULTILIB}
 
 function Tany_linux.GetLibs(Basepath:string): boolean;
@@ -181,30 +208,28 @@ begin
       result:=true;
       FLibsFound:=True;
 
-      FLibsPath:='/usr/lib/'+MULTILIBPATH;
+      FLibsPath:='/lib/'+GetMultilibDir;
       AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
 
-      s:='/lib/'+MULTILIBPATH;
+      FLibsPath:='/usr/lib/'+GetMultilibDir;
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+
+      s:='/'+GetMultilibDirShort;
       if DirectoryExists(s) then
       begin
         s:=s+DirectorySeparator;
         AddFPCCFGSnippet('-Fl'+s);
       end;
 
-      s:='/'+MULTILIBPATHSHORT;
+      s:='/usr/'+GetMultilibDirShort;
       if DirectoryExists(s) then
       begin
         s:=s+DirectorySeparator;
         AddFPCCFGSnippet('-Fl'+s);
       end;
 
-      s:='/usr/'+MULTILIBPATHSHORT;
-      if DirectoryExists(s) then
-      begin
-        s:=s+DirectorySeparator;
-        AddFPCCFGSnippet('-Fl'+s);
-      end;
       // gcc multilib
+      s:='';
       {$IFDEF CPUX64}
       s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'32';
       {$ENDIF CPUX64}
@@ -216,6 +241,7 @@ begin
         s:=s+DirectorySeparator;
         AddFPCCFGSnippet('-Fl'+s);
       end;
+
     end;
     {$ENDIF MULTILIB}
   end;

@@ -1123,7 +1123,7 @@ begin
             // Do we need a new cross-compiler ?
             if (NOT CompilerUpdateNeeded) then
             begin
-              if (MakeCycle=st_Compiler) then Infoln(infotext+'Skipping cross-compiler build step: seems to be up to date !!',etWarning);
+              if (MakeCycle=st_Compiler) then Infoln({infotext+}'Skipping cross-compiler build step: seems to be up to date !!',etWarning);
               continue; // best guess: compilers stem from identical sources, so do not build the cross-compiler again
             end;
           end;
