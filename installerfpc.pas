@@ -4308,7 +4308,10 @@ begin
       if CrossCompiling then
       begin
         aCleanupCommandList.Clear;
-        if (Self AS TFPCCrossInstaller).CompilerUpdateNeeded then aCleanupCommandList.Append('compiler_distclean');
+        if (Self AS TFPCCrossInstaller).CompilerUpdateNeeded then
+          aCleanupCommandList.Append('compiler_distclean')
+        else
+          Infoln({infotext+}'Skipping cross-compiler clean step: seems to be up to date !!',etInfo);
         aCleanupCommandList.Append('rtl_distclean');
         if (CrossInstaller.TargetOS<>TOS.freertos) then aCleanupCommandList.Append('packages_distclean');
       end;
