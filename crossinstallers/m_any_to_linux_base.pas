@@ -99,24 +99,31 @@ const
   OBJDUMPOUT='elf64-x86-64';
   LDOUT='elf_x86_64';
 {$ENDIF CPUX86}
+{$IFDEF CPUAARCH64}
+{$ENDIF CPUAARCH64}
+{$IFDEF CPUARM}
+{$ENDIF CPUARM}
 var
   s:string;
 begin
-  if FMultilib then exit(true);
-
-  // Check if we have the multilib binary tools
-  RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut],swoHide);
-  if AnsiPos(OBJDUMPOUT, s) <> 0 then
+  // For now, limited to i386 and x86_64
+  if (TargetCPU=TCPU.i386) OR (TargetCPU=TCPU.x86_64) then
   begin
-    RunCommand('ld',['-V'], s,[poUsePipes, poStderrToOutPut],swoHide);
-    if AnsiPos(LDOUT, s) <> 0 then
+    if FMultilib then exit(true);
+    // Check if we have the multilib binary tools
+    RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut],swoHide);
+    if AnsiPos(OBJDUMPOUT, s) <> 0 then
     begin
-      // Check if we have the libs
-      s:='/lib/'+MULTILIBPATH; //debian (multilib) Jessie+ convention
-      if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libc.so.6') then
+      RunCommand('ld',['-V'], s,[poUsePipes, poStderrToOutPut],swoHide);
+      if AnsiPos(LDOUT, s) <> 0 then
       begin
-        s:='/usr/lib/'+MULTILIBPATH; //debian (multilib) Jessie+ convention
-        if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libX11.so.6') then FMultilib:=True;
+        // Check if we have the libs
+        s:='/lib/'+MULTILIBPATH; //debian (multilib) Jessie+ convention
+        if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libc.so.6') then
+        begin
+          s:='/usr/lib/'+MULTILIBPATH; //debian (multilib) Jessie+ convention
+          if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libX11.so.6') then FMultilib:=True;
+        end;
       end;
     end;
   end;
