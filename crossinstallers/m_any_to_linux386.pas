@@ -38,7 +38,11 @@ Adapt (add) for other setups
 
 {$mode objfpc}{$H+}
 
+{$IFDEF LINUX}
+{$IF DEFINED(CPUX86_64) OR DEFINED(CPUX86)}
 {$DEFINE MULTILIB}
+{$ENDIF}
+{$ENDIF LINUX}
 
 interface
 
@@ -50,12 +54,29 @@ implementation
 uses
   Process, FileUtil, m_crossinstaller, fpcuputil;
 
+{$IFDEF MULTILIB}
+{$IFDEF CPUX64}
+const
+  MULTILIBPATH='i386-linux-gnu'; //debian (multilib) Jessie+ convention
+  MULTILIBPATHSHORT='lib32';
+{$ENDIF CPUX64}
+{$IFDEF CPUX86}
+const
+  MULTILIBPATH='x86_64-linux-gnu'; //debian (multilib) Jessie+ convention
+  MULTILIBPATHSHORT='lib64';
+{$ENDIF CPUX86}
+{$ENDIF MULTILIB}
+
 type
 
 { Tany_linux386 }
 Tany_linux386 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
+  {$IFDEF MULTILIB}
+  FMultilib:boolean;
+  function CheckMultilib:boolean;
+  {$ENDIF MULTILIB}
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -67,6 +88,43 @@ public
 end;
 
 { Tany_linux386 }
+
+{$IFDEF MULTILIB}
+function Tany_linux386.CheckMultilib:boolean;
+{$IFDEF CPUX64}
+const
+  OBJDUMPOUT='elf32-i386';
+  LDOUT='elf_i386';
+{$ENDIF CPUX64}
+{$IFDEF CPUX86}
+const
+  OBJDUMPOUT='elf64-x86-64';
+  LDOUT='elf_x86_64';
+{$ENDIF CPUX86}
+var
+  s:string;
+begin
+  if FMultilib then exit(true);
+
+  // Check if we have the multilib binary tools
+  RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut],swoHide);
+  if AnsiPos(OBJDUMPOUT, s) <> 0 then
+  begin
+    RunCommand('ld',['-V'], s,[poUsePipes, poStderrToOutPut],swoHide);
+    if AnsiPos(LDOUT, s) <> 0 then
+    begin
+      // Check if we have the libs
+      s:='/lib/'+MULTILIBPATH; //debian (multilib) Jessie+ convention
+      if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libc.so.6') then
+      begin
+        s:='/usr/lib/'+MULTILIBPATH; //debian (multilib) Jessie+ convention
+        if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libX11.so.6') then FMultilib:=True;
+      end;
+    end;
+  end;
+  result:=FMultilib;
+end;
+{$ENDIF MULTILIB}
 
 function Tany_linux386.GetLibs(Basepath:string): boolean;
 const
@@ -115,43 +173,49 @@ begin
 
   if not result then
   begin
-    {$IFDEF LINUX}
     {$IFDEF MULTILIB}
-    FLibsPath:='/usr/lib/i386-linux-gnu'; //debian (multilib) Jessie+ convention
-    result:=DirectoryExists(FLibsPath);
-    if result then
+    if CheckMultilib then
     begin
+      result:=true;
       FLibsFound:=True;
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-      {$ifdef CPU64}
 
-      s:='/lib32';
+      FLibsPath:='/usr/lib/'+MULTILIBPATH;
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+
+      s:='/lib/'+MULTILIBPATH;
       if DirectoryExists(s) then
       begin
         s:=s+DirectorySeparator;
         AddFPCCFGSnippet('-Fl'+s);
       end;
 
-      s:='/usr/lib32';
-      if DirectoryExists(s) then
-      s:=s+DirectorySeparator;
-      AddFPCCFGSnippet('-Fl'+s);
-
-      s:='/lib/i386-linux-gnu';
-      if DirectoryExists(s) then
-      s:=s+DirectorySeparator;
-      AddFPCCFGSnippet('-Fl'+s);
-
-      // gcc 32bit multilib
-      s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'32';
+      s:='/'+MULTILIBPATHSHORT;
       if DirectoryExists(s) then
       begin
-        AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(s));
+        s:=s+DirectorySeparator;
+        AddFPCCFGSnippet('-Fl'+s);
       end;
-      {$endif}
-    end else ShowInfo('Searched but not found (multilib) libspath '+FLibsPath);
+
+      s:='/usr/'+MULTILIBPATHSHORT;
+      if DirectoryExists(s) then
+      begin
+        s:=s+DirectorySeparator;
+        AddFPCCFGSnippet('-Fl'+s);
+      end;
+      // gcc multilib
+      {$IFDEF CPUX64}
+      s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'32';
+      {$ENDIF CPUX64}
+      {$IFDEF CPUX86}
+      s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'64';
+      {$ENDIF CPUX86}
+      if DirectoryExists(s) then
+      begin
+        s:=s+DirectorySeparator;
+        AddFPCCFGSnippet('-Fl'+s);
+      end;
+    end;
     {$ENDIF MULTILIB}
-    {$ENDIF LINUX}
   end;
 
   SearchLibraryInfo(result);
@@ -176,6 +240,7 @@ var
   s:string;
 begin
   result:=inherited;
+
   if result then exit;
 
   if FMUSL then
@@ -188,40 +253,14 @@ begin
   result:=SearchBinUtil(BasePath,AsFile);
 
   {$IFDEF MULTILIB}
-    {$IFDEF CPUX64}
-    // Now also allow for empty binutilsprefix in the right directory:
-    if (NOT result) then
-    begin
-      RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut],swoHide);
-      if AnsiPos('elf32-i386', s) <> 0 then
-      begin
-        s:=Which('objdump');
-        s:=ExtractFileDir(s);
-        BinPrefixTry:='';
-        AsFile:=BinPrefixTry+'as'+GetExeExt;
-        // search local default cross-utils paths
-        result:=SearchBinUtil(s,AsFile);
-        if result then FBinUtilsPrefix:=BinPrefixTry;
-      end;
-    end;
-    {$ENDIF}
-    {$IFDEF CPUX86}
-    // Now also allow for empty binutilsprefix in the right directory:
-    if (NOT result) then
-    begin
-      RunCommand('objdump',['-i'], s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-      if AnsiPos('elf64-x86-64', s) <> 0 then
-      begin
-        s:=Which('objdump');
-        s:=ExtractFileDir(s);
-        BinPrefixTry:='';
-        AsFile:=BinPrefixTry+'as'+GetExeExt;
-        // search local default cross-utils paths
-        result:=SearchBinUtil(s,AsFile);
-        if result then FBinUtilsPrefix:=BinPrefixTry;
-      end;
-    end;
-  {$ENDIF}
+  if CheckMultilib then
+  begin
+    s:=Which('objdump');
+    s:=ExtractFileDir(s);
+    AsFile:='as'+GetExeExt;
+    result:=SearchBinUtil(s,AsFile);
+    if result then FBinUtilsPrefix:='';
+  end;
   {$ENDIF}
 
   if not result then
@@ -255,6 +294,9 @@ begin
   FTargetOS:=TOS.linux;
   Reset;
   FAlreadyWarned:=false;
+  {$IFDEF MULTILIB}
+  FMultilib:=false;
+  {$ENDIF MULTILIB}
   ShowInfo;
 end;
 

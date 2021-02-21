@@ -817,7 +817,7 @@ begin
 
     Infoln(infotext+'Looking for crosstools and crosslibs on system. Please wait.',etInfo);
 
-    // get/set cross binary utils !!
+    // first, get/set cross binary utils !!
     BinsAvailable:=false;
     CrossInstaller.SearchModeUsed:=TSearchSetting.ssUp; // default;
     if Length(CrossToolsDirectory)>0 then
@@ -832,7 +832,7 @@ begin
        else BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
     if (not BinsAvailable) then Infoln('Failed to get crossbinutils', etError);
 
-    // get/set cross libraries !!
+    // second, get/set cross libraries !!
     LibsAvailable:=false;
     CrossInstaller.SearchModeUsed:=TSearchSetting.ssUp;
     if Length(CrossLibraryDirectory)>0 then
