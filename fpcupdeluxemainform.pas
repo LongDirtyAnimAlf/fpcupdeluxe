@@ -1936,21 +1936,18 @@ begin
   end;
   }
 
-  if Sender=PicoBtn then
+  if (Sender=WioBtn) OR (Sender=PicoBtn) then
   begin
-    s:='Going to install FPC and Lazarus for Raspberry Pico.';
+    if Sender=PicoBtn then
+      s:='Going to install FPC and Lazarus for Raspberry Pico.';
+    if Sender=WioBtn then
+      s:='Going to install FPC and Lazarus for Wio Terminal.';
     aFPCTarget:='embedded-mir';
     aLazarusTarget:='embedded';
+    aModule:='develtools4fpc';
+    //aModule:='mbf-freertos';
     //aModule:='mbf,pxl';
     //aModule:='mbf';
-  end;
-
-  if Sender=WioBtn then
-  begin
-    s:='Going to install FPC and Lazarus for Wio Terminal.';
-    aFPCTarget:='embedded-mir';
-    aLazarusTarget:='embedded';
-    //aModule:='mbf-freertos';
   end;
 
   if Sender=mORMotBtn then

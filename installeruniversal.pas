@@ -155,6 +155,12 @@ type
     function GetModule(ModuleName: string): boolean; override;
   end;
 
+  { TDeveltools4FPCInstaller }
+  TDeveltools4FPCInstaller = class(TUniversalInstaller)
+  public
+    function GetModule(ModuleName: string): boolean; override;
+  end;
+
 
   // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
   function GetModuleEnabledList(var ModuleList:TStringList):boolean;
@@ -1802,6 +1808,7 @@ begin
         WritelnLog(infotext+'Going to download '+RemoteURL+' into '+aFile,false);
         try
           result:=Download(FUseWget, RemoteURL, aFile);
+          if result then result:=FileExists(aFile);
         except
           on E: Exception do
           begin
@@ -2404,6 +2411,90 @@ begin
     aTargetFile:=ConcatPaths([Workingdir,'data'])+DirectorySeparator+'PUCU.pas';
     if FileExists(aSourceFile) then
       FileUtil.CopyFile(aSourceFile,aTargetFile,[]);
+  end;
+end;
+
+function TDeveltools4FPCInstaller.GetModule(ModuleName: string): boolean;
+var
+  idx:integer;
+  PackageSettings:TStringList;
+  RemoteURL:string;
+  aName,aFile:string;
+  ResultCode: longint;
+begin
+  result:=InitModule;
+  if not result then exit;
+
+  ResultCode:=-1;
+
+  idx:=UniModuleList.IndexOf(ModuleName);
+  if idx>=0 then
+  begin
+    WritelnLog(infotext+'Getting module '+ModuleName,True);
+
+    PackageSettings:=TStringList(UniModuleList.Objects[idx]);
+    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    FSourceDirectory:=FixPath(FSourceDirectory);
+    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+
+    if (FSourceDirectory<>'') then
+    begin
+
+      ForceDirectoriesSafe(FSourceDirectory);
+
+      RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
+      if (RemoteURL<>'') then
+      begin
+        RemoteURL:=RemoteURL+'/releases/download/v1.0.0-1/develtools4fpc-'+GetTargetCPUOS+'.zip';
+        Infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
+        aName:=FileNameFromURL(RemoteURL);
+        if Length(aName)>0 then
+        begin
+          aName:=SysUtils.ExtractFileExt(aName);
+          if Length(aName)>0 then
+          begin
+            if aName[1]='.' then Delete(aName,1,1);
+          end;
+        end;
+        //If no extension, assume zip
+        if Length(aName)=0 then aName:='zip';
+        aFile := GetTempFileNameExt('FPCUPTMP',aName);
+        WritelnLog(infotext+'Going to download '+RemoteURL+' into '+aFile,false);
+        try
+          result:=Download(FUseWget, RemoteURL, aFile);
+          if result then result:=FileExists(aFile);
+        except
+          on E: Exception do
+          begin
+           result:=false;
+          end;
+        end;
+
+        if result then
+        begin
+          ResultCode:=-1;
+          WritelnLog(infotext+'Download ok',True);
+
+          if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
+
+          with TNormalUnzipper.Create do
+          begin
+            try
+              ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+            finally
+              Free;
+            end;
+          end;
+          if (ResultCode<>0) then
+          begin
+            result := False;
+            Infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+          end;
+        end;
+
+        SysUtils.Deletefile(aFile); //Get rid of temp file.
+      end;
+    end;
   end;
 end;
 
