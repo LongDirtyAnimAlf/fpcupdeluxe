@@ -1476,12 +1476,14 @@ begin
 
           {$endif}
 
-          // move arm-embedded debugger, if any
-          if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.embedded) then
+          // move debugger, if any
+          //if (CrossInstaller.TargetCPU in TCPU.arm) AND (CrossInstaller.TargetOS=TOS.embedded) then
           begin
-            if NOT FileExists(ConcatPaths([FMakeDir,'gdb','arm-embedded'])+PathDelim+'gdb'+GetExeExt) then
+            if NOT FileExists(ConcatPaths([FMakeDir,'gdb',CrossInstaller.RegisterName,'gdb'+GetExeExt])) then
             begin
               //Get cross-binaries directory
+
+
               i:=Pos('-FD',CrossInstaller.FPCCFGSnippet);
               if i>0 then
               begin
@@ -1499,9 +1501,16 @@ begin
                   s1:=s1+s2+'gdb'+GetExeExt;
                   if FileExists(s1) then
                   begin
-                    s2:=IncludeTrailingPathDelimiter(FMakeDir)+'gdb'+DirectorySeparator+'arm-embedded'+DirectorySeparator;
+                    s2:=ConcatPaths([FMakeDir,'gdb',CrossInstaller.RegisterName])+DirectorySeparator;
                     ForceDirectoriesSafe(s2);
+                    {$ifdef Darwin}
+                    SysUtils.RenameFile(s1,s2+ExtractFileName(s1));
+                    s1:=s2+ExtractFileName(s1);
+                    s2:=s2+'gdb'+GetExeExt;
+                    fpSymlink(pchar(s1),pchar(s2));
+                    {$else}
                     FileUtil.CopyFile(s1,s2+'gdb'+GetExeExt);
+                    {$endif}
                   end;
                 end;
               end;

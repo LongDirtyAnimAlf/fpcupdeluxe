@@ -50,9 +50,9 @@ const
 
   MAXDELPHIVERSION=22;
   MINDELPHIVERSION=12;
-  NDKVERSIONNAMES:array[0..21] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e','11','11b','11c','12','12b');
+  NDKVERSIONNAMES:array[0..30] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e','11','11b','11c','12','12b','13b','14b','15c','16b','17c','18b','19c','20b','21e');
   //PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
-  PLATFORMVERSIONSNUMBERS:array[0..17] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26);
+  PLATFORMVERSIONSNUMBERS:array[0..21] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30);
   {$ifdef unix}
   UnixBinDirs :array[0..2] of string = ('/usr/local/bin','/usr/bin','/bin');
   UnixLibDirs :array[0..2] of string = ('/usr/local/lib','/usr/lib','/lib');
@@ -94,25 +94,27 @@ const
 type
   TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa);
   TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo);
-  TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,lx6,lx106);
+  TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,rv32ima,rv32im,rv32i,rv64imac,rv64ima,rv64im,rv64i,lx6,lx106);
   //TABI      = (default,sysv,aix,darwin,elfv2,eabi,armeb,eabihf,oldwin32gnu,aarch64ios,riscvhf,linux386_sysv,windowed,call0);
-  TABI      = (default,sysv,elfv2,eabi,eabihf,aarch64ios,riscvhf,windowed,call0);
+  TABI      = (default,eabi,eabihf,aarch64ios,riscvhf,windowed,call0);
   TARMARCH  = (none,armel,armeb,armhf);
 
   TSUBARCHS = set of TSUBARCH;
   TABIS     = set of TABI;
 
 const
-  SUBARCH_OS         = [{TOS.osNone,}TOS.embedded,TOS.freertos,TOS.ultibo];
-  SUBARCH_CPU        = [{TCPU.cpuNone,}TCPU.arm,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.xtensa];
+  SUBARCH_OS         = [TOS.embedded,TOS.freertos,TOS.ultibo];
+  SUBARCH_CPU        = [TCPU.arm,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.riscv64,TCPU.xtensa];
   SUBARCH_ARM        = [TSUBARCH.armv4..TSUBARCH.armv7m];
   SUBARCH_AVR        = [TSUBARCH.avr1..TSUBARCH.avrxmega3];
   SUBARCH_MIPSEL     = [TSUBARCH.pic32mx];
-  SUBARCH_RISCV32    = [TSUBARCH.rv32imac];
+  SUBARCH_RISCV32    = [TSUBARCH.rv32imac..TSUBARCH.rv32i];
+  SUBARCH_RISCV64    = [TSUBARCH.rv64imac..TSUBARCH.rv64i];
   SUBARCH_XTENSA     = [TSUBARCH.lx6..TSUBARCH.lx106];
 
   ABI_ARM            = [TABI.default,TABI.eabi,TABI.eabihf];
   ABI_XTENSA         = [TABI.default,TABI.windowed,TABI.call0];
+  ABI_RISCV64        = [TABI.default,TABI.riscvhf];
 
 type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
@@ -371,6 +373,7 @@ begin
       TCPU.avr:      if (aOS=TOS.embedded) then result:=SUBARCH_AVR;
       TCPU.mipsel:   if (aOS=TOS.embedded) then result:=SUBARCH_MIPSEL;
       TCPU.riscv32:  if (aOS=TOS.embedded) then result:=SUBARCH_RISCV32;
+      TCPU.riscv64:  if (aOS=TOS.embedded) then result:=SUBARCH_RISCV64;
       TCPU.xtensa:   if (aOS<>TOS.ultibo) then result:=SUBARCH_XTENSA;
     end;
     // Limit some special targets
@@ -431,6 +434,7 @@ begin
     case aCPU of
       TCPU.arm:      if (aOS<>TOS.ultibo) then result:=ABI_ARM;
       TCPU.xtensa:   if (aOS<>TOS.ultibo) then result:=ABI_XTENSA;
+      TCPU.riscv64:  if (aOS<>TOS.ultibo) then result:=ABI_RISCV64;
     end;
   end;
 end;

@@ -2998,10 +2998,11 @@ begin
 
           //{$IF defined(CPUAARCH64) AND defined(DARWIN)}
           {$ifndef MSWINDOWS}
+          // For most targets, FreeRTOS is a special version of embedded, so just use the embedded tools !!
           if FPCupManager.CrossOS_Target=TOS.freertos then
           begin
-            // use embedded arm tools for freertos arm:
-            if (FPCupManager.CrossCPU_Target=TCPU.arm) then
+            // use embedded tools for freertos:
+            if (FPCupManager.CrossCPU_Target in SUBARCH_CPU) then
             begin
               BinsFileName:=StringReplace(BinsFileName,'FreeRTOS','Embedded',[]);
             end;

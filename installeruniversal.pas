@@ -2425,8 +2425,6 @@ begin
   result:=InitModule;
   if not result then exit;
 
-  ResultCode:=-1;
-
   idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
   begin
@@ -2472,30 +2470,34 @@ begin
 
         if result then
         begin
-          ResultCode:=-1;
-          WritelnLog(infotext+'Download ok',True);
-
-          if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
-
-          with TNormalUnzipper.Create do
+          if (FileSize(aFile)>5000) then
           begin
-            try
-              ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
-            finally
-              Free;
+            ResultCode:=-1;
+            WritelnLog(infotext+'Download ok',True);
+            if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
+            with TNormalUnzipper.Create do
+            begin
+              try
+                ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+              finally
+                Free;
+              end;
+            end;
+            if (ResultCode<>0) then
+            begin
+              result := False;
+              Infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
             end;
           end;
-          if (ResultCode<>0) then
-          begin
-            result := False;
-            Infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
-          end;
         end;
-
         SysUtils.Deletefile(aFile); //Get rid of temp file.
+
       end;
     end;
   end;
+
+  // Do not fail
+  result:=true;
 end;
 
 procedure ClearUniModuleList;
