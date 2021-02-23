@@ -446,7 +446,7 @@ end;
 
 function TFPCCrossInstaller.PackagesNeeded:boolean;
 begin
-  result:=(NOT ((CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.freertos)));
+  result:=(NOT ((CrossInstaller.TargetCPU in [TCPU.arm,TCPU.avr]) AND (CrossInstaller.TargetOS in [TOS.freertos,TOS.embedded])));
 end;
 
 function TFPCCrossInstaller.InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;

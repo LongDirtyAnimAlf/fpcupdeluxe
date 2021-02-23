@@ -2058,7 +2058,7 @@ begin
         sStatus:=s;
 
         {$ifdef RemoteLog}
-        aDataClient.UpInfo.CrossCPUOS:=GetOS(aOS)+'-'+GetCPU(aCPU);
+        aDataClient.UpInfo.CrossCPUOS:=GetCPU(aCPU)+'-'+GetOS(aOS);
         aDataClient.UpInfo.UpFunction:=TUpFunction.ufInstallCross;
         {$endif}
 
@@ -2473,7 +2473,7 @@ begin
   FPCupManager.CrossOS_SubArch:=GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
 
   {$ifdef RemoteLog}
-  aDataClient.UpInfo.CrossCPUOS:=GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target);
+  aDataClient.UpInfo.CrossCPUOS:=GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target);
   {$endif}
 
   if Sender=ButtonRemoveCrossCompiler then
