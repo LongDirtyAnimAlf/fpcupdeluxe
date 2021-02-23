@@ -2057,6 +2057,11 @@ begin
         AddMessage(s+'.');
         sStatus:=s;
 
+        {$ifdef RemoteLog}
+        aDataClient.UpInfo.CrossCPUOS:=GetOS(aOS)+'-'+GetCPU(aCPU);
+        aDataClient.UpInfo.UpFunction:=TUpFunction.ufInstallCross;
+        {$endif}
+
         success:=ButtonProcessCrossCompiler(nil);
 
         if success
