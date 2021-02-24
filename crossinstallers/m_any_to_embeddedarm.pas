@@ -30,6 +30,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
+// Not yet. First we need to have libs that are well organized.
+{.$define DETECTMAGIC}
+
 interface
 
 uses
@@ -65,7 +68,10 @@ var
   aSubarchName:string;
   aIndex:integer;
   aABI:TABI;
+  {$ifdef DETECTMAGIC}
   aPath:TStringArray;
+  {$endif DETECTMAGIC}
+
 begin
   // Arm-embedded does not need libs by default, but user can add them.
   result:=FLibsFound;
@@ -102,9 +108,9 @@ begin
   if result then
   begin
     FLibsFound:=True;
-
     SearchLibraryInfo(true);
 
+    {$ifdef DETECTMAGIC}
     //aIndex:=GetDirs(FLibsPath,aPath);
     aPath:=FLibsPath.Split(DirectorySeparator);
 
@@ -143,6 +149,9 @@ begin
     // If we do not have magic, add subarch to enclose
     if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
       AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
+    {$else}
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    {$endif DETECTMAGIC}
   end;
 end;
 
