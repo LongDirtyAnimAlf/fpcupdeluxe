@@ -294,26 +294,6 @@ begin
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
-
-    // Set some defaults if user hasn't specified otherwise
-    // Architecture: e.g. ARMv6, ARMv7,...
-    i:=StringListStartsWith(FCrossOpts,'-Cp');
-    if i=-1 then
-    begin
-      aOption:='-CpARMV6';  // Raspberry Pi 1 and up
-      FCrossOpts.Add(aOption+' ');
-      ShowInfo('Did not find any -Cp architecture parameter; using '+aOption+' (RPi default).');
-    end else aOption:=Trim(FCrossOpts[i]);
-    AddFPCCFGSnippet(aOption);
-
-    // Warn user to check things
-    if (StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1) AND (NOT hardfloat) then
-    begin
-      // Source: http://forum.lazarus.freepascal.org/index.php/topic,23075.msg137838.html#msg137838
-      // http://lists.freepascal.org/lists/fpc-devel/2013-May/032093.html
-      // -dFPC_ARMHF is only used for (cross) compiler generation, not useful when compiling end user
-      ShowInfo('Found -CaEABIHF cross compile option. Please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
-    end;
   end;
 end;
 

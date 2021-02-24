@@ -226,17 +226,9 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    //option: check as version with something like as --version, and check the targte against what is needed !!
-    // Architecture etc:
-    if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
-      FCrossOpts.Add('-CpMIPS32R2'); //Probably supported by most devices today
-    // Softfloat unless otherwise specified (probably equivalent to -msoft-float for gcc):
-    if StringListStartsWith(FCrossOpts,'-Cf')=-1 then
-      FCrossOpts.Add('-CfSOFT');
     // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
   end
   else
   begin

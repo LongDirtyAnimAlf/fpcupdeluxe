@@ -1641,6 +1641,9 @@ begin
       if FileExists(ExtractFilePath(FCompiler) + 'make' + GetExeExt)
          then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', ExtractFilePath(FCompiler) + 'make' + GetExeExt)
          else LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', IncludeTrailingPathDelimiter(FMakeDir) + 'make' + GetExeExt);
+      {$ELSE}
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerSearchPath/Value',
+        IncludeTrailingPathDelimiter(FMakeDir) + 'gdb' + DirectorySeparator + '$(TargetCPU)-$(TargetOS)');
       {$ENDIF MSWINDOWS}
 
       {$IFDEF UNIX}

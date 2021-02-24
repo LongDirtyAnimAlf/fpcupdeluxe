@@ -893,17 +893,15 @@ begin
 
           if (OS=TOS.wince) then
           begin
-            //Disable for now : setting ARMV6 or higher gives problems with FPC 3.0.4 and lower
-            //aCrossOptionSetting:='-CpARMV6 ';
           end
           else
           if ((OS=TOS.darwin) OR (OS=TOS.ios)) then
           begin
-            aCrossOptionSetting:='-CpARMV7 -CfVFPV3 -CaEABI ';
+            aCrossOptionSetting:='-CfVFPV3 -CaEABI ';
           end
           else
           begin
-            aCrossOptionSetting:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF ';
+            aCrossOptionSetting:='-CfVFPV3 -OoFASTMATH -CaEABIHF ';
           end;
         end;
 
@@ -936,7 +934,7 @@ begin
             //   armeabi-v7a-hard ABI (but only using armeabi-v7a) like
             //   http://repo.or.cz/openal-soft/android.git or
             //   https://github.com/michaliskambi/tremolo-android .
-            aCrossOptionSetting:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -CaEABI ';
+            aCrossOptionSetting:='-CfVFPV3 -CaEABI ';
           end;
         end;
 
@@ -948,32 +946,25 @@ begin
           begin
             // for Uno (ATMega328P) use avr5
             // for Mega (ATMega2560) use avr6
-            if SUBARCH=TSubarch.avr5 then
-              aCrossOptionSetting:='-Cpavr5 ';
-            if SUBARCH=TSubarch.avr6 then
-              aCrossOptionSetting:='-Cpavr6 ';
           end;
 
           if (CPU=TCPU.xtensa) then
           begin
             if SUBARCH=TSubarch.lx6 then
-              aCrossOptionSetting:='-Cplx6 -Cfhard ';
+              aCrossOptionSetting:='-Cfhard ';
           end;
 
           if (CPU=TCPU.arm) then
           begin
             aARMABISetting:=TARMARCH.armhf;
-            aCrossOptionSetting:='-Cp'+GetSubarch(SUBARCH)+' ';
             if (SUBARCH<>TSubarch.armv7em) then
-              aCrossOptionSetting:=aCrossOptionSetting+' -CaEABI '
+              aCrossOptionSetting:='-CaEABI '
             else
-              aCrossOptionSetting:=aCrossOptionSetting+' -CfFPV4_SP_D16 -OoFASTMATH -CaEABIHF '
+              aCrossOptionSetting:='-CfFPV4_SP_D16 -OoFASTMATH -CaEABIHF '
           end;
 
           if ((CPU=TCPU.mipsel) AND (OS=TOS.embedded)) then
           begin
-            if SUBARCH=TSubarch.pic32mx then
-              aCrossOptionSetting:='-Cpmips32 ';
           end;
 
         end;
@@ -987,9 +978,9 @@ begin
             aARMABISetting:=TARMARCH.armhf;
 
             if SUBARCH=TSubarch.armv6 then
-              aCrossOptionSetting:='-CpARMV6 -CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
+              aCrossOptionSetting:='-CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
             if SUBARCH=TSubarch.armv7a then
-              aCrossOptionSetting:='-CpARMV7A -CfVFPV3 -CIARM -CaEABIHF -OoFASTMATH ';
+              aCrossOptionSetting:='-CfVFPV3 -CIARM -CaEABIHF -OoFASTMATH ';
           end;
         end;
 
@@ -1013,6 +1004,15 @@ begin
           begin
             // for now, little endian only on Linux (IBM CPU's) !!
             aCrossOptionSetting:='-Cb- -Caelfv2 ';
+          end;
+        end;
+
+        //mips[el] predefined settings
+        if (CPU in [TCPU.mips,TCPU.mipsel]) then
+        begin
+          if ((OS=TOS.linux)) then
+          begin
+            aCrossOptionSetting:='-CfSOFT ';
           end;
         end;
 

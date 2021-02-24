@@ -999,6 +999,8 @@ begin
         if AnsiContainsText(line,'Circular dependency detected when compiling target') then exit;
         if AnsiContainsText(line,'overriding recipe for target') then exit;
         if AnsiContainsText(line,'ignoring old recipe for target') then exit;
+        if AnsiContainsText(line,'overriding commands for target') then exit;
+        if AnsiContainsText(line,'ignoring old commands for target') then exit;
         if AnsiContainsText(line,'Case statement does not handle all possible cases') then exit;
 
         if AnsiContainsText(line,'(5059)') then exit; //function result not initialized
@@ -1054,7 +1056,7 @@ begin
       s:='/usr/bin/diff ';
       if AnsiStartsText(s,line) then exit;
       s:='svnversion: error: ';
-      if AnsiStartsText(s,line) then exit;
+      if AnsiStartsText(s,line) OR AnsiContainsText(line,s) then exit;
       {$endif}
 
       if AnsiContainsText(line,'is up to date.') then exit;

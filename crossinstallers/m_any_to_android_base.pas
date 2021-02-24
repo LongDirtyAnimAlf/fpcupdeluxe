@@ -496,25 +496,9 @@ begin
   if result then
   begin
     FBinsFound:=true;
-
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names};
-
-    if (TargetCPU=TCPU.arm) then
-    begin
-      // Set some defaults if user hasn't specified otherwise
-      // Architecture: e.g. ARMv6, ARMv7,...
-      i:=StringListStartsWith(FCrossOpts,'-Cp');
-      if i=-1 then
-      begin
-        aOption:='-Cp'+DEFAULTARMCPU;
-        FCrossOpts.Add(aOption+' ');
-        ShowInfo('Did not find any [-Cp] architecture parameter; using '+aOption+'.');
-      end else aOption:=Trim(FCrossOpts[i]);
-      AddFPCCFGSnippet(aOption);
-    end;
-
   end
   else
   begin

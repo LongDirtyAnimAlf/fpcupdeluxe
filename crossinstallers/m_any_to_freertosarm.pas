@@ -116,19 +116,6 @@ begin
     end;
   end;
 
-  {
-  if (SubArch<>TSUBARCH.saNone) then
-    AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(Self.SubArchName));
-  for i:=0 to FCrossOpts.Count-1 do
-  begin
-    if ((SubArch<>TSUBARCH.saNone) AND AnsiContainsText(FCrossOpts[i],'-Cp'+Self.SubArchName)) then continue;
-    AddFPCCFGSnippet(FCrossOpts[i]);
-  end;
-  if (SubArch<>TSUBARCH.saNone) then
-    AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(Self.SubArchName));
-  }
-
-
   if result then
   begin
     FLibsFound:=True;

@@ -446,7 +446,17 @@ end;
 
 function TFPCCrossInstaller.PackagesNeeded:boolean;
 begin
-  result:=(NOT ((CrossInstaller.TargetCPU in [TCPU.arm,TCPU.avr]) AND (CrossInstaller.TargetOS in [TOS.freertos,TOS.embedded])));
+  result:=true;
+
+  // registry.pp does not build for arm-freertos, so disable
+  if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.freertos) then result:=false;
+
+  // disable by default for avr-embedded (due to unicode not compiled-in)
+  if (CrossInstaller.TargetCPU=TCPU.avr) AND (CrossInstaller.TargetOS=TOS.embedded) then result:=false;
+
+  // Safeguards
+  if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.embedded) then result:=false;
+
 end;
 
 function TFPCCrossInstaller.InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
@@ -1055,7 +1065,7 @@ begin
               if (NOT FileExists(s2)) then
                 s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
               Processor.Process.Parameters.Add('FPC='+s2);
-              Processor.Process.Parameters.Add('rtl');
+              Processor.Process.Parameters.Add('rtl_all');
             end;
             st_RtlInstall:
             begin
@@ -1073,7 +1083,7 @@ begin
               if (NOT FileExists(s2)) then
                 s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
               Processor.Process.Parameters.Add('FPC='+s2);
-              Processor.Process.Parameters.Add('packages');
+              Processor.Process.Parameters.Add('packages_all');
             end;
             st_PackagesInstall:
             begin
@@ -1368,9 +1378,7 @@ begin
             on E: Exception do
             begin
               WritelnLog(infotext+'Running cross compiler fpc '+Processor.Executable+' generated an exception!'+LineEnding+'Details: '+E.Message,true);
-              WritelnLog(infotext+'We are going to try again !',true);
-              exit(false);
-              //result:=false;
+              result:=false;
             end;
           end;
 
@@ -1398,7 +1406,16 @@ begin
           if result then
             Infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
           else
+          begin
             Infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code.',etError);
+            // If we were building a crosscompiler itself when the failure occured, remove all fpc.cfg settings of this target
+            if MakeCycle in [st_Compiler,st_CompilerInstall] then
+            begin
+              Infoln(infotext+'Removing all '+GetFPCTarget(false)+' compiler settings from fpc.cfg.',etError);
+              InsertFPCCFGSnippet(FPCCfg,'');
+            end;
+          end;
+
         end
         else
         begin

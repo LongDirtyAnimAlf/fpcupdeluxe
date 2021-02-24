@@ -755,8 +755,6 @@ begin
                 s:=ConfigText.Strings[i];
                 Delete(s,1,Length('#IFDEF CPU'));
                 aArch:=s;
-                //Still todo: add this architecture into the cross-compile options [-Cp...]
-                //FPCupManager.CrossOPT:='-Cp'+s+' ';
                 break;
               end;
             end;
