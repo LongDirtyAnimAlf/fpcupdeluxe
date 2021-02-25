@@ -43,8 +43,10 @@ function Tanyinternallinker_win386.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
   if result then exit;
+
   FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
+
   result:=true;
   FBinsFound:=true;
 end;

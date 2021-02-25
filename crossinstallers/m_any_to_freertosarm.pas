@@ -30,8 +30,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
-{$define DETECTMAGIC}
-
 interface
 
 uses
@@ -60,23 +58,16 @@ const
   StaticLibName1='libfreertos.a';
   StaticLibName2='libc_nano.a';
 var
-  aSubarchName:string;
-  aIndex:integer;
   aABI:TABI;
-  {$ifdef DETECTMAGIC}
-  aPath:TStringArray;
-  {$endif DETECTMAGIC}
 begin
   result:=FLibsFound;
 
   if result then exit;
 
   if (FSubArch<>TSUBARCH.saNone) then
-  begin
-    aSubarchName:=GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(FSubArch));
-    ShowInfo('Cross-libs: We have a subarch: '+aSubarchName);
-  end
-  else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
+    ShowInfo('Cross-libs: We have a subarch: '+SubarchName)
+  else
+    ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LIBCNAME);
@@ -84,7 +75,7 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubarchName,LIBCNAME);
 
   // do the same as above, but look for a static freertos lib
   if not result then
@@ -93,7 +84,7 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName1);
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibName1);
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubarchName,StaticLibName1);
 
   // do the same as above, but look for a static libc_nano lib
   if not result then
@@ -103,73 +94,42 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName2);
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibName2);
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubarchName,StaticLibName2);
 
   // search local paths based on libbraries provided for or adviced by https://github.com/michael-ring/freertos4fpc
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
   begin
-    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,aSubarchName]),StaticLibName2);
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubarchName]),StaticLibName2);
     if (not result) then
     begin
       for aABI in TABI do
       begin
         if aABI=TABI.default then continue;
-        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,aSubarchName,GetABI(aABI)]),StaticLibName2);
+        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubarchName,GetABI(aABI)]),StaticLibName2);
         if result then break;
       end;
     end;
   end;
 
+  SearchLibraryInfo(result);
+
   if result then
   begin
     FLibsFound:=True;
-    SearchLibraryInfo(true);
 
-    {$ifdef DETECTMAGIC}
-    //aIndex:=GetDirs(FLibsPath,aPath);
-    aPath:=FLibsPath.Split(DirectorySeparator);
-
-    // Perform Subarch magic for libpath
-    if (FSubArch<>TSUBARCH.saNone) then
+    if PerformLibraryPathMagic then
     begin
-      aIndex:=StringsSame(aPath,aSubarchName);
-      if (aIndex<>-1) then
-        aPath[aIndex]:=FPC_SUBARCH_MAGIC;
-    end;
-
-    // Perform ABI magic for libpath
-    aIndex:=StringsSame(aPath,RegisterName);
-    if (aIndex<>-1) then
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    end
+    else
     begin
-      for aABI in TABI do
-      begin
-        if aABI=TABI.default then continue;
-        aIndex:=StringsSame(aPath,GetABI(aABI));
-        if (aIndex<>-1) then
-        begin
-          aPath[aIndex]:=FPC_ABI_MAGIC;
-          break;
-        end;
-      end;
-    end;
-
-    FLibsPath:=ConcatPaths(aPath);
-
-    // If we do not have magic, add subarch to enclose
-    if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
+      // If we do not have magic, add subarch to enclose
       AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
-
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-
-    // If we do not have magic, add subarch to enclose
-    if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
       AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
-
-    {$else}
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-    {$endif DETECTMAGIC}
-
+    end;
   end;
+
 end;
 
 function TAny_FreeRTOSArm.GetBinUtils(Basepath:string): boolean;

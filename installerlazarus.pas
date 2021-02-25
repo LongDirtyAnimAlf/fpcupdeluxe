@@ -174,6 +174,10 @@ const
     _BUILDMODULE+_LCLCROSS+_SEP +
     _END+
 
+    _DECLARE+_CONFIG+_LAZARUS+_SEP +
+    _CONFIGMODULE+_LAZARUS+_SEP +
+    _END +
+
     _DECLARE+_MAKEFILECHECKLAZARUS+_SEP+
     _BUILDMODULE+_MAKEFILECHECKLAZARUS+_SEP+
 
@@ -278,7 +282,7 @@ type
 implementation
 
 uses
-  {$ifdef Darwin}
+  {$ifdef Unix}
   BaseUnix,
   {$ifdef LCLQT5}
   LazFileUtils,
@@ -295,7 +299,9 @@ function TLazarusCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   Options: string;
   LazBuildApp: string;
+  {$ifdef MSWindows}
   OldPath:string;
+  {$endif}
   s:string;
 begin
   Result:=inherited;
@@ -1561,12 +1567,18 @@ begin
 end;
 
 function TLazarusInstaller.ConfigModule(ModuleName: string): boolean;
+{$IFDEF DARWIN}
+const
+ CONFIGRENAMEMAGIC='ConfigRenameNeeded';
+{$ENDIF DARWIN}
 var
-  DebuggerPath,DebuggerType: string;
-  VersionSnippet: string;
+  GDBPath: string;
+  {$IFDEF DARWIN}
+  LLDBPath: string;
+  RenameNeeded:boolean;
+  {$ENDIF DARWIN}
   LazarusConfig: TUpdateLazConfig;
   PCPSnippet: TStringList;
-  i,j:integer;
   aFileName:string;
   s,s2:string;
 begin
@@ -1574,9 +1586,6 @@ begin
   Result := true;
 
   GetVersion;
-
-  //Set GDB as standard debugger
-  DebuggerType:='TGDBMIDebugger';
 
   if DirectoryExists(FPrimaryConfigPath) = false then
   begin
@@ -1601,6 +1610,10 @@ begin
     PCPSnippet.Free;
   end;
 
+  {$IFDEF DARWIN}
+  RenameNeeded:=False;
+  {$ENDIF DARWIN}
+
   // Set up a minimal config so we can use LazBuild
   LazarusConfig := TUpdateLazConfig.Create(FPrimaryConfigPath, FMajorVersion, FMinorVersion, FReleaseVersion, FPatchVersion);
   try
@@ -1613,133 +1626,100 @@ begin
       // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', FCompiler);
 
-      {$IFDEF MSWINDOWS}
-      // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.
-      // the platform specific compiler. In order to be able to cross compile
-      // we'd rather use fpc
-      //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', ExtractFilePath(FCompiler) + 'fpc' + GetExeExt);
-
-      // do we supply GDB in the installdir from mingw for win32 and/or win64
-      if FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + '..\mingw\' + GetFPCTarget(true) + '\bin\gdb.exe') then
-        LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
-          '$(LazarusDir)\..\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb.exe')
-
-      // have we downloaded GDB in the makedir for win32 and/or win64
-      else if FileExists(IncludeTrailingPathDelimiter(FMakeDir) + 'gdb\' + GetFPCTarget(true) + '\gdb.exe') then
-        LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
-          IncludeTrailingPathDelimiter(FMakeDir) + 'gdb\' + '$(TargetCPU)-$(TargetOS)\gdb.exe')
-      else
+      if (LazarusConfig.IfNewFile(EnvironmentConfig)) then
       begin
-        // if no debugger found, just set some default paths
-        LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
-          IncludeTrailingPathDelimiter(FMakeDir) + 'gdb.exe');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerSearchPath/Value',
-          //'$(LazarusDir)\..\mingw\$(TargetCPU)-$(TargetOS)\bin');
-          IncludeTrailingPathDelimiter(FMakeDir) + 'gdb\' + '$(TargetCPU)-$(TargetOS)');
-      end;
-
-      if FileExists(ExtractFilePath(FCompiler) + 'make' + GetExeExt)
-         then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', ExtractFilePath(FCompiler) + 'make' + GetExeExt)
-         else LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', IncludeTrailingPathDelimiter(FMakeDir) + 'make' + GetExeExt);
-      {$ELSE}
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerSearchPath/Value',
-        IncludeTrailingPathDelimiter(FMakeDir) + 'gdb' + DirectorySeparator + '$(TargetCPU)-$(TargetOS)');
-      {$ENDIF MSWINDOWS}
-
-      {$IFDEF UNIX}
-      {$IF (defined(FREEBSD)) or (defined(Darwin))}
-      // Check for newer user-installed debugger (e.g. from ports tree
-      // The system gdb is ancient (gdb 6.1.1 in FreeBSD 9) and does not work well with Laz
-      DebuggerPath := '/usr/local/bin/gdb';
-      if (NOT FileExists(DebuggerPath)) OR (NOT CheckExecutable(DebuggerPath, ['--version'], 'GNU gdb')) then DebuggerPath := '/usr/libexec/gdb';
-      if (NOT FileExists(DebuggerPath)) OR (NOT CheckExecutable(DebuggerPath, ['--version'], 'GNU gdb')) then DebuggerPath := which('gdb');
-
-      {$IF (defined(Darwin))}
-      if Length(DebuggerPath)=0 then
-      begin
-        if (NumericalVersion>=CalculateFullVersion(2,0,0)) then
+        {$IFDEF MSWINDOWS}
+        // On Windows, we provide our own GDB
+        GDBPath:=ConcatPaths([FMakeDir,'gdb',GetTargetCPUOS])+DirectorySeparator+'gdb.exe';
+        if FileExists(GDBPath) then
+          GDBPath:=ConcatPaths([FMakeDir,'gdb','$(TargetCPU)-$(TargetOS)'])+DirectorySeparator+'gdb.exe'
+        else
+          GDBPath:='';
+        {$ELSE}
+        {$IF (defined(FREEBSD)) or (defined(Darwin))}
+        // Check for newer user-installed debugger (e.g. from ports tree
+        // The system gdb is ancient (gdb 6.1.1 in FreeBSD 9) and does not work well with Laz
+        GDBPath := '/usr/local/bin/gdb';
+        if (NOT FileExists(GDBPath)) OR (NOT CheckExecutable(GDBPath, ['--version'], 'GNU gdb')) then GDBPath := '/usr/libexec/gdb';
+        if (NOT FileExists(GDBPath)) OR (NOT CheckExecutable(GDBPath, ['--version'], 'GNU gdb')) then GDBPath := which('gdb');
+        {$ELSE}//other *nix
+        GDBPath := which('gdb');  //assume in path
+        {$ENDIF}
+        if FileExists(GDBPath) then
         begin
-          //Check for newest lldb debugger ... does work !!
-          Infoln(infotext+'Looking for LLDB debugger for Lazarus.', etInfo);
-          DebuggerPath:='/Library/Developer/CommandLineTools/usr/bin/lldb';
-          if NOT FileExists(DebuggerPath) then DebuggerPath:='/usr/bin/lldb';
-          if FileExists(DebuggerPath) then
-            DebuggerType:='TLldbDebugger'
-          else
-            DebuggerPath:='';
-        end;
-      end;
-      {$endif}
-
-      {$ELSE}//other *nix
-      DebuggerPath := which('gdb');  //assume in path
-      {$ENDIF FREEBSD}
-
-      if Length(DebuggerPath)>0 then
-      begin
-        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value', DebuggerPath)
-      end
-      else
-      begin
-        Infoln(infotext+'No debugger found.' + FPrimaryConfigPath, etWarning);
-      end;
-
-      {$IFDEF BSD}
-      {$IFDEF DARWIN}
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', which('make')); //assume in path
-
-      //Available in latest trunk:
-      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/DisableStartupShell', 'True');
-
-      // extra gdb settings
-      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/WarnOnTimeOut', 'False');
-      // for newer versions Mac OSX versions (>=10.8) perhaps needed:
-      //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerOptions/DebuggerResetAfterRun', 'True');
-      if length(DebuggerPath)>0 then
-      begin
-        // we have a gdb ... check version
-        Processor.Executable := DebuggerPath;
-        Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
-
-        Processor.Process.Parameters.Clear;
-        Processor.Process.Parameters.Add('--version');
-        ProcessorResult:=Processor.ExecuteAndWait;
-        if ProcessorResult = 0 then
-        begin
-          i:=Processor.WorkerOutput.Count;
-          if i>0 then
+          s:=ConcatPaths([FMakeDir,'gdb',GetTargetCPUOS]);
+          ForceDirectoriesSafe(s);
+          s:=s+DirectorySeparator+'gdb';
+          if (fpSymlink(pchar(GDBPath),pchar(s))=0) then
           begin
-            // gdb outputs version info on first line
-            VersionSnippet:=Processor.WorkerOutput.Strings[0];
-            Infoln(infotext+'GDB --version output: ' + VersionSnippet, etInfo);
-            // e.g. GNU gdb (GDB) 7.7.1-kjhkjh
-            i:=1;
-            // move towards first numerical
-            while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
-            j:=0;
-            // get only major version
-            while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
-            begin
-              j:=j*10+Ord(VersionSnippet[i])-$30;
-              Inc(i);
-            end;
-            Infoln(infotext+'GDB major version: ' + InttoStr(j), etInfo);
-            // for newer versions Mac OSX versions (>=10.11) and GDB >= 8.0 [perhaps] needed:
-            if j>=8 then LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/Debugger_Startup_Options', '--eval-command="set startup-with-shell off"');
+            s:=ConcatPaths([FMakeDir,'gdb','$(TargetCPU)-$(TargetOS)']);
+            s:=s+DirectorySeparator+'gdb';
           end;
-        end;
-      end;
-      {$ELSE}//*BSD: FreeBSD, NetBSD, OpenBSD
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', which('gmake')); //GNU make; assume in path
-      {$ENDIF DARWIN}
-      {$ENDIF BSD}
-      {$IFDEF Solaris}
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', which('gmake')); //GNU make; assume in path
-      {$ENDIF}
-      {$ENDIF UNIX}
+          GDBPath:=s;
+        end else GDBPath:='';
+        {$ENDIF MSWINDOWS}
 
-      // Debugger type needs to be specified at least since Lazarus 1.1
-      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/Class', DebuggerType);
+        if (Length(GDBPath)>0) then
+        begin
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigName', 'Standard GDB');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigClass', 'TGDBMIDebugger');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/DebuggerFilename',GDBPath);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',True);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',GDBPath);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Count',1);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Item1/Value',GDBPath);
+          {$IFDEF DARWIN}
+          //Available in latest trunk: extra gdb settings
+          LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/DisableStartupShell', 'True');
+          LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/WarnOnTimeOut', 'False');
+          LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/Debugger_Startup_Options', '--eval-command="set startup-with-shell off"');
+          {$ENDIF DARWIN}
+        end;
+
+        {$IFDEF DARWIN}
+        Infoln(infotext+'Looking for LLDB debugger for Lazarus.', etInfo);
+        LLDBPath:='/Library/Developer/CommandLineTools/usr/bin/lldb';
+        if NOT FileExists(LLDBPath) then LLDBPath:='/usr/bin/lldb';
+        if NOT FileExists(LLDBPath) then LLDBPath:=which('lldb'); // assume in path
+
+        if FileExists(LLDBPath) then
+        begin
+
+          if LazarusConfig.GetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',false) then
+          begin
+            // We have already GDB
+            // Make LLDB the preferred debugger and prepare for GDB as second debugger
+            // Disable gdb as primary debugger
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',False);
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Count',2);
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Item2/Value',GDBPath);
+            // Perpare for dirty trick
+            s:=CONFIGRENAMEMAGIC;
+            RenameNeeded:=True;
+          end
+          else
+          begin
+            s:='Config';
+          end;
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/ConfigName', 'Standard LLDB');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/ConfigClass', 'TLldbDebugger');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/DebuggerFilename',LLDBPath);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/Active',True);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',LLDBPath);
+          if NOT RenameNeeded then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TLldbDebugger/History/Count',1);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TLldbDebugger/History/Item1/Value',LLDBPath);
+        end;
+        {$ENDIF DARWIN}
+      end;
+
+      {$IFDEF MSWINDOWS}
+      s:=ExtractFilePath(FCompiler)+'make.exe';
+      if FileExists(s)
+         then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', s)
+         else LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', Make);
+      {$ELSE}
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', Make);
+      {$ENDIF MSWINDOWS}
 
       // Source dir in stock Lazarus on windows is something like
       // $(LazarusDir)fpc\$(FPCVer)\source\
@@ -1763,9 +1743,9 @@ begin
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'MsgView/Filters/Filter1/FilterNotesWithoutPos', 'False');
 
       // add default projects path
-      DebuggerPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
-      ForceDirectoriesSafe(DebuggerPath);
-      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
+      GDBPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
+      ForceDirectoriesSafe(GDBPath);
+      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(GDBPath));
       {$IFDEF UNIX}
       {$IFNDEF DARWIN}
       {$IFDEF LCLQT5}
@@ -1786,13 +1766,13 @@ begin
       {$ENDIF UNIX}
 
       // Set file history towards default project directory
-      LazarusConfig.SetVariableIfNewFile(History, 'InputHistory/FileDialog/InitialDir', IncludeTrailingPathDelimiter(DebuggerPath));
+      LazarusConfig.SetVariableIfNewFile(History, 'InputHistory/FileDialog/InitialDir', IncludeTrailingPathDelimiter(GDBPath));
 
       {$IFDEF DARWIN}
       {$IFDEF CPUX86_64}
       {$IFDEF LCLCOCOA}
       // Prevent crash on Darwin Cocoa: set and make available initial project
-      aFileName:=IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi';
+      aFileName:=IncludeTrailingPathDelimiter(GDBPath)+'project1.lpi';
 
       // Create a default project
       SysUtils.DeleteFile(aFileName);
@@ -1841,6 +1821,23 @@ begin
   finally
     LazarusConfig.Free;
   end;
+
+  {$IFDEF DARWIN}
+  if RenameNeeded then
+  begin
+    // Rename second degugger node .... very tricky ... :-(
+    PCPSnippet:=TStringList.Create;
+    try
+      PCPSnippet.LoadFromFile(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+EnvironmentConfig);
+      s:=PCPSnippet.Text;
+      PCPSnippet.Text:=StringReplace(s,CONFIGRENAMEMAGIC,'Config',[]);
+      PCPSnippet.SaveToFile(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+EnvironmentConfig);
+    finally
+      PCPSnippet.Free;
+    end;
+  end;
+  {$ENDIF DARWIN}
+
 end;
 
 function TLazarusInstaller.CleanModule(ModuleName: string): boolean;

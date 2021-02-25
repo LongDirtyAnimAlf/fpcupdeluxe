@@ -170,7 +170,7 @@ type
     FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
     FSolarisOI:boolean;
     FMUSL:boolean;
-    // Sets FBinutilspath if file LookFor found in Directory. Returns true if found.
+    function PerformLibraryPathMagic:boolean;
     function SearchLibrary(Directory, LookFor: string): boolean;
     function SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string): boolean;
     function SearchBinUtil(Directory, LookFor: string): boolean;
@@ -553,6 +553,49 @@ begin
   //if Length(extrainfo)>0 then Infoln(CrossModuleName + ' bins : '+extrainfo, etInfo);
 end;
 
+function TCrossInstaller.PerformLibraryPathMagic:boolean;
+var
+  aPath:TStringArray;
+  aIndex:integer;
+  aABI:TABI;
+begin
+  result:=false;
+
+  // Skip for some combo's until we have structured libs
+  if (Self.TargetOS=TOS.embedded) then exit;
+  if (Self.TargetOS=TOS.ultibo) then exit;
+  if (Self.TargetOS=TOS.freertos) AND (Self.TargetCPU<>TCPU.arm) then exit;
+
+  aPath:=FLibsPath.Split(DirectorySeparator);
+
+  // Perform Subarch magic for libpath
+  if (FSubArch<>TSUBARCH.saNone) then
+  begin
+    aIndex:=StringsSame(aPath,SubArchName);
+    if (aIndex<>-1) then
+    begin
+      aPath[aIndex]:=FPC_SUBARCH_MAGIC;
+      result:=true;
+    end;
+  end;
+
+  // Perform ABI magic for libpath
+  aIndex:=StringsSame(aPath,RegisterName);
+  if (aIndex<>-1) then
+  begin
+    for aABI in TABI do
+    begin
+      if aABI=TABI.default then continue;
+      aIndex:=StringsSame(aPath,GetABI(aABI));
+      if (aIndex<>-1) then
+      begin
+        aPath[aIndex]:=FPC_ABI_MAGIC;
+        result:=true;
+        break;
+      end;
+    end;
+  end;
+end;
 
 function TCrossInstaller.SearchLibrary(Directory, LookFor: string): boolean;
 begin

@@ -66,9 +66,7 @@ var
   PresetLibPath:string;
   StaticLibNameESP:string;
   S:string;
-  aSubarchName:string;
-  aIndex:integer;
-  aPath:TStringArray;
+  aABI:TABI;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -79,8 +77,7 @@ begin
   begin
     if (FSubArch=TSUBARCH.lx6) then StaticLibNameESP:='libesp32.a';
     if (FSubArch=TSUBARCH.lx106) then StaticLibNameESP:='libesp8266.a';
-    aSubarchName:=GetSubarch(FSubArch);
-    ShowInfo('Cross-libs: We have a subarch: '+aSubarchName);
+    ShowInfo('Cross-libs: We have a subarch: '+SubarchName);
   end
   else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
@@ -94,7 +91,7 @@ begin
     if not result then
       result:=SimpleSearchLibrary(BasePath,DirName,StaticLibNameESP);
     if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-      result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibNameESP);
+      result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubarchName,StaticLibNameESP);
   end;
 
   // do the same as above, but look for a static freertos lib
@@ -104,7 +101,7 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName1);
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibName1);
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubarchName,StaticLibName1);
 
   // do the same as above, but look for a static libc_nano lib
   if not result then
@@ -114,40 +111,39 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName2);
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,StaticLibName2);
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubarchName,StaticLibName2);
 
-  // search local paths based on libbraries provided for or adviced by https://github.com/michael-ring/freertos4fpc
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,aSubarchName]),StaticLibName2);
+  begin
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubarchName]),StaticLibName2);
+    if (not result) then
+    begin
+      for aABI in TABI do
+      begin
+        if aABI=TABI.default then continue;
+        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubarchName,GetABI(aABI)]),StaticLibName2);
+        if result then break;
+      end;
+    end;
+  end;
+
+  SearchLibraryInfo(result);
 
   if result then
   begin
     FLibsFound:=True;
 
-    SearchLibraryInfo(true);
-
-    //aIndex:=GetDirs(FLibsPath,aPath);
-    aPath:=FLibsPath.Split(DirectorySeparator);
-
-    // Perform Subarch magic for libpath
-    if (FSubArch<>TSUBARCH.saNone) then
+    if PerformLibraryPathMagic then
     begin
-      aIndex:=StringsSame(aPath,aSubarchName);
-      if (aIndex<>-1) then
-        aPath[aIndex]:=FPC_SUBARCH_MAGIC;
-    end;
-
-    FLibsPath:=ConcatPaths(aPath);
-
-    // If we do not have magic, add subarch to enclose
-    if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    end
+    else
+    begin
+      // If we do not have magic, add subarch to enclose
       AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
-
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-
-    // If we do not have magic, add subarch to enclose
-    if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
       AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
+    end;
   end;
 
   if (true) then

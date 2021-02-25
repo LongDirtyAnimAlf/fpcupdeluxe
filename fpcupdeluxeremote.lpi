@@ -862,4 +862,11 @@ if TargetOS=&apos;openbsd&apos; then
       <CustomOptions Value="-dRemoteLog"/>
     </Other>
   </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="1">
+      <Item1>
+        <Name Value="EInOutError"/>
+      </Item1>
+    </Exceptions>
+  </Debugging>
 </CONFIG>

@@ -1441,6 +1441,7 @@ begin
     or (ModuleName=_USERIDE)
     or (ModuleName=_INSTALLLAZARUS)
     or (ModuleName=_MAKEFILECHECKLAZARUS)
+    or (ModuleName=_CONFIG+_LAZARUS)
   then
   begin
     if assigned(FInstaller) then

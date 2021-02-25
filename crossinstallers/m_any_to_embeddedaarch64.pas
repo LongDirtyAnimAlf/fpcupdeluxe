@@ -61,8 +61,6 @@ end;
 function TAny_Embeddedaarch64.GetLibs(Basepath:string): boolean;
 const
   LibName='libgcc.a';  // is this correct ??
-var
-  aSubarchName:string;
 begin
   // Arm-embedded does not need libs by default, but user can add them.
   result:=FLibsFound;
@@ -71,8 +69,7 @@ begin
 
   if (FSubArch<>TSUBARCH.saNone) then
   begin
-    aSubarchName:=GetSubarch(FSubArch);
-    ShowInfo('Cross-libs: We have a subarch: '+aSubarchName);
+    ShowInfo('Cross-libs: We have a subarch: '+SubArchName);
   end
   else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
@@ -80,25 +77,28 @@ begin
   result:=SearchLibrary(Basepath,LibName);
   // search local paths based on libraries provided for or adviced by fpc itself
   if not result then
-     if (FSubArch<>TSUBARCH.saNone) then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,LibName);
+     if (FSubArch<>TSUBARCH.saNone) then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubArchName,LibName);
   if not result then
      result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   if result then
   begin
     FLibsFound:=True;
-    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
+    SearchLibraryInfo(true);
 
-    if (FSubArch<>TSUBARCH.saNone) then
+    if PerformLibraryPathMagic then
     begin
-      if (Pos(aSubarchName,FLibsPath)>0) then
-        // we have a libdir with a subarch inside: make it universal !!
-        FLibsPath:=StringReplace(FLibsPath,aSubarchName,'$FPCSUBARCH',[]);
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    end
+    else
+    begin
+      // If we do not have magic, add subarch to enclose
+      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
     end;
-
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
-    SearchLibraryInfo(result);
   end;
+
   if not result then
   begin
     //libs path is optional; it can be empty
@@ -120,9 +120,11 @@ end;
 
 function TAny_Embeddedaarch64.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile,aOption: string;
+  AsFile: string;
   BinPrefixTry: string;
+  {$ifdef unix}
   i:integer;
+  {$endif unix}
 begin
   result:=inherited;
   if result then exit;

@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 101
+  Left = 443
   Height = 650
-  Top = 97
+  Top = 89
   Width = 1078
   Anchors = []
   Caption = 'Form1'
@@ -4065,7 +4065,7 @@ object Form1: TForm1
     end
     object ExtraSheet: TTabSheet
       Caption = 'Extras'
-      ClientHeight = 400
+      ClientHeight = 460
       ClientWidth = 302
       ParentFont = False
       object btnGetOpenSSL: TButton
@@ -4149,6 +4149,22 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 4
         Visible = False
+      end
+      object btnCreateLazarusConfig: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = btnUpdateLazarusMakefiles
+        AnchorSideTop.Side = asrBottom
+        Left = 62
+        Height = 25
+        Top = 221
+        Width = 179
+        AutoSize = True
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 16
+        Caption = 'Create Lazarus Configuration'
+        OnClick = btnCreateLazarusConfigClick
+        TabOrder = 5
       end
     end
   end

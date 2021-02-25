@@ -30,9 +30,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
-// Not yet. First we need to have libs that are well organized.
-{.$define DETECTMAGIC}
-
 interface
 
 uses
@@ -65,13 +62,7 @@ function TAny_Embeddedarm.GetLibs(Basepath:string): boolean;
 const
   LibName='libgcc.a';
 var
-  aSubarchName:string;
-  aIndex:integer;
   aABI:TABI;
-  {$ifdef DETECTMAGIC}
-  aPath:TStringArray;
-  {$endif DETECTMAGIC}
-
 begin
   // Arm-embedded does not need libs by default, but user can add them.
   result:=FLibsFound;
@@ -79,11 +70,9 @@ begin
   if result then exit;
 
   if (FSubArch<>TSUBARCH.saNone) then
-  begin
-    aSubarchName:=GetSubarch(FSubArch);
-    ShowInfo('Cross-libs: We have a subarch: '+aSubarchName);
-  end
-  else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
+    ShowInfo('Cross-libs: We have a subarch: '+SubArchName)
+  else
+    ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
@@ -93,65 +82,35 @@ begin
 
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
   begin
-    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,aSubarchName]),LibName);
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubArchName]),LibName);
     if (not result) then
     begin
       for aABI in TABI do
       begin
         if aABI=TABI.default then continue;
-        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,aSubarchName,GetABI(aABI)]),LibName);
+        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubArchName,GetABI(aABI)]),LibName);
         if result then break;
       end;
     end;
   end;
 
+  SearchLibraryInfo(result);
+
   if result then
   begin
     FLibsFound:=True;
-    SearchLibraryInfo(true);
 
-    {$ifdef DETECTMAGIC}
-    //aIndex:=GetDirs(FLibsPath,aPath);
-    aPath:=FLibsPath.Split(DirectorySeparator);
-
-    // Perform Subarch magic for libpath
-    if (FSubArch<>TSUBARCH.saNone) then
+    if PerformLibraryPathMagic then
     begin
-      aIndex:=StringsSame(aPath,aSubarchName);
-      if (aIndex<>-1) then
-        aPath[aIndex]:=FPC_SUBARCH_MAGIC;
-    end;
-
-    // Perform ABI magic for libpath
-    aIndex:=StringsSame(aPath,RegisterName);
-    if (aIndex<>-1) then
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    end
+    else
     begin
-      for aABI in TABI do
-      begin
-        if aABI=TABI.default then continue;
-        aIndex:=StringsSame(aPath,GetABI(aABI));
-        if (aIndex<>-1) then
-        begin
-          aPath[aIndex]:=FPC_ABI_MAGIC;
-          break;
-        end;
-      end;
-    end;
-
-    FLibsPath:=ConcatPaths(aPath);
-
-    // If we do not have magic, add subarch to enclose
-    if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
+      // If we do not have magic, add subarch to enclose
       AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
-
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-
-    // If we do not have magic, add subarch to enclose
-    if ((SubArch<>TSUBARCH.saNone) AND (Pos('$',FLibsPath)=0)) then
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
       AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
-    {$else}
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-    {$endif DETECTMAGIC}
+    end;
   end;
 end;
 
@@ -166,9 +125,11 @@ end;
 
 function TAny_Embeddedarm.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile,aOption: string;
+  AsFile: string;
   BinPrefixTry: string;
+  {$ifdef unix}
   i:integer;
+  {$endif unix}
 begin
   result:=inherited;
   if result then exit;

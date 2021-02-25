@@ -34,6 +34,7 @@ type
 
   TForm1 = class(TForm)
     ActionList1: TActionList;
+    btnCreateLazarusConfig: TButton;
     ButtonSubarchSelect: TButton;
     BitBtnFPCandLazarus: TBitBtn;
     BitBtnFPCOnly: TBitBtn;
@@ -119,7 +120,7 @@ type
     procedure InstallClick(Sender: TObject);
     procedure BitBtnHaltClick({%H-}Sender: TObject);
     procedure btnGetOpenSSLClick({%H-}Sender: TObject);
-    procedure Button1Click({%H-}Sender: TObject);
+    procedure btnCreateLazarusConfigClick({%H-}Sender: TObject);
     procedure ChkMakefileFPCClick(Sender: TObject);
     procedure Edit1KeyUp({%H-}Sender: TObject; var {%H-}Key: Word; {%H-}Shift: TShiftState);
     procedure FPCVersionLabelClick({%H-}Sender: TObject);
@@ -1073,9 +1074,12 @@ begin
   {$endif MSWindows}
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.btnCreateLazarusConfigClick(Sender: TObject);
 begin
-
+  PrepareRun;
+  FPCupManager.OnlyModules:=_CONFIG+_LAZARUS;
+  sStatus:='Going to create basic Lazarus config only.';
+  RealRun;
 end;
 
 procedure TForm1.ChkMakefileFPCClick(Sender: TObject);
@@ -3834,7 +3838,6 @@ begin
   sInstallDir:=IncludeTrailingPathDelimiter(sInstallDir);
 
   FPCupManager.MakeDirectory:=sInstallDir+'fpcbootstrap';
-
   FPCupManager.BootstrapCompilerDirectory:=sInstallDir+'fpcbootstrap';
 
   FPCupManager.FPCInstallDirectory:=sInstallDir+'fpc';
