@@ -1746,6 +1746,7 @@ begin
       GDBPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
       ForceDirectoriesSafe(GDBPath);
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(GDBPath));
+
       {$IFDEF UNIX}
       {$IFNDEF DARWIN}
       {$IFDEF LCLQT5}
@@ -1755,7 +1756,7 @@ begin
         if FileExists(s) then
         begin
           // Strange: running needs a .so.1 file .... but linking needs a .so file ...
-          s2:=IncludeTrailingPathDelimiter(DebuggerPath)+LIBQT5;
+          s2:=IncludeTrailingPathDelimiter(GDBPath)+LIBQT5;
           if (NOT FileExists(s2)) then FileUtil.CopyFile(s,s2);
           s2:=s2+'.1';
           if (NOT FileExists(s2)) then FileUtil.CopyFile(s,s2);
