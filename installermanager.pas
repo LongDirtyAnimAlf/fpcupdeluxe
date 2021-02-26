@@ -1529,11 +1529,12 @@ begin
       end;
 
       case ModuleName of
-        'awgg'           : FInstaller:=TAWGGInstaller.Create;
-        'mORMotPXL'      : FInstaller:=TmORMotPXLInstaller.Create;
-        'internettools'  : FInstaller:=TInternetToolsInstaller.Create;
-        'develtools4fpc' : FInstaller:=TDeveltools4FPCInstaller.Create;
-        'pas2js-rtl'     : FInstaller:=TPas2jsInstaller.Create;
+        'awgg'             : FInstaller:=TAWGGInstaller.Create;
+        'mORMotPXL'        : FInstaller:=TmORMotPXLInstaller.Create;
+        'internettools'    : FInstaller:=TInternetToolsInstaller.Create;
+        'develtools4fpc'   : FInstaller:=TDeveltools4FPCInstaller.Create;
+        'mbf-freertos-don' : FInstaller:=TMBFFreeRTOSByDonInstaller.Create;
+        'pas2js-rtl'       : FInstaller:=TPas2jsInstaller.Create;
       else
         FInstaller:=TUniversalInstaller.Create;
       end;

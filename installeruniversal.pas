@@ -161,6 +161,13 @@ type
     function GetModule(ModuleName: string): boolean; override;
   end;
 
+  { TMBFFreeRTOSByDonInstaller }
+  TMBFFreeRTOSByDonInstaller = class(TUniversalInstaller)
+  public
+    function GetModule(ModuleName: string): boolean; override;
+  end;
+
+
 
   // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
   function GetModuleEnabledList(var ModuleList:TStringList):boolean;
@@ -1399,6 +1406,7 @@ begin
   result:=inherited;
   result:=InitModule;
   if not result then exit;
+
   // Log to console only:
   Infoln(infotext+'Building module '+ModuleName+'...',etInfo);
   idx:=UniModuleList.IndexOf(ModuleName);
@@ -1667,6 +1675,7 @@ begin
   result:=inherited;
   result:=InitModule;
   if not result then exit;
+
   SourceOK:=false;
   idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
@@ -2222,7 +2231,6 @@ var
   sl:TStringList;
 begin
   result:=inherited;
-  result:=InitModule;
   if not result then exit;
 
   //Perform some extra magic for this module
@@ -2299,7 +2307,6 @@ var
   LazarusConfig: TUpdateLazConfig;
 begin
   result:=inherited;
-  result:=InitModule;
   if not result then exit;
 
   //Perform some extra magic for this module
@@ -2329,8 +2336,6 @@ begin
   result := (ProcessorResult=0);
 
   if not result then exit;
-
-  Self.GetFPCTarget(true);
 
   LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
   try
@@ -2373,7 +2378,6 @@ var
   sl:TStringList;
 begin
   result:=inherited;
-  result:=InitModule;
   if not result then exit;
 
   //Perform some extra magic for this module
@@ -2492,6 +2496,63 @@ begin
         end;
         SysUtils.Deletefile(aFile); //Get rid of temp file.
 
+      end;
+    end;
+  end;
+
+  // Do not fail
+  result:=true;
+end;
+
+function TMBFFreeRTOSByDonInstaller.GetModule(ModuleName: string): boolean;
+var
+  idx:integer;
+  PackageSettings:TStringList;
+  aList,aFileList:TStringList;
+  aDir,aLine,aFile:string;
+begin
+  result:=inherited;
+
+  // Ignore errors due to GitHub
+  result:=true;
+
+  if not result then exit;
+
+  idx:=UniModuleList.IndexOf(ModuleName);
+  if idx>=0 then
+  begin
+    WritelnLog(infotext+'Getting module '+ModuleName,True);
+
+    PackageSettings:=TStringList(UniModuleList.Objects[idx]);
+    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    FSourceDirectory:=FixPath(FSourceDirectory);
+    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+
+    if (FSourceDirectory<>'') then
+    begin
+      aList:=TStringList.Create;
+      try
+        aLine:='set CROSS=';
+        aDir:=ConcatPaths([FSourceDirectory,'SamplesBoardSpecific','WioTerminal','Examples']);
+        aFileList := TStringList.Create;
+        try
+          FindAllFiles(aFileList, aDir,'upload.bat', true);
+          for aFile in aFileList do
+          begin
+            aList.LoadFromFile(aFile);
+            idx:=StringListStartsWith(aList,aLine);
+            if (idx<>-1) then
+            begin
+              aList.Strings[idx]:='set CROSS='+ConcatPaths([FBaseDirectory,'cross']);
+              aList.SaveToFile(aFile);
+            end;
+            aList.Clear;
+          end;
+        finally
+          aFileList.Free;
+        end;
+      finally
+        aList.Free;
       end;
     end;
   end;

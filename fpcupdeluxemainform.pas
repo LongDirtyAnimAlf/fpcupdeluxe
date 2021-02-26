@@ -3250,6 +3250,7 @@ begin
 
             if MissingCrossLibs then
             begin
+              (*
               if ((FPCupManager.CrossCPU_Target=TCPU.arm) AND (FPCupManager.CrossOS_Target=TOS.freertos)) then
               begin
                 // Use deticated libs by Michael Ring !
@@ -3280,6 +3281,7 @@ begin
                   end;
                 end;
               end;
+              *)
             end;
 
             if MissingCrossLibs then

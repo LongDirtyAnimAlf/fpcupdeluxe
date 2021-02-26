@@ -562,7 +562,7 @@ begin
   result:=false;
 
   // Skip for some combo's until we have structured libs
-  if (Self.TargetOS=TOS.embedded) then exit;
+  if (Self.TargetOS=TOS.embedded) AND (Self.TargetCPU<>TCPU.arm) then exit;
   if (Self.TargetOS=TOS.ultibo) then exit;
   if (Self.TargetOS=TOS.freertos) AND (Self.TargetCPU<>TCPU.arm) then exit;
 
@@ -595,6 +595,8 @@ begin
       end;
     end;
   end;
+
+  if result then FLibsPath:=ConcatPaths(aPath);
 end;
 
 function TCrossInstaller.SearchLibrary(Directory, LookFor: string): boolean;
