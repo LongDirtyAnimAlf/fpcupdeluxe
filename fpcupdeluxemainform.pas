@@ -1918,6 +1918,15 @@ begin
     aLazarusTarget:='stable';
   end;
 
+  {$ifdef Darwin}
+  if (Sender=TrunkBtn) OR (Sender=StableBtn) then
+  begin
+    // No SVN anymore on darwin: use GIT repos
+    aFPCTarget:=aFPCTarget+'.git';
+    aLazarusTarget:=aLazarusTarget+'.git';
+  end;
+  {$endif}
+
   if Sender=OldBtn then
   begin
     //s:='Going to install FPC 2.6.4 and Lazarus 1.4.';

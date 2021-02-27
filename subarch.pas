@@ -30,13 +30,13 @@ type
     procedure btnSelectDirClick(Sender: TObject);
     procedure EditCrossBuildOptionsEditingDone(Sender: TObject);
     procedure EditDeleteDblClick(Sender: TObject);
-    procedure FormClose(Sender: TObject; var {%H-}CloseAction: TCloseAction);
-    procedure FormCreate(Sender: TObject);
-    procedure FormShow(Sender: TObject);
+    procedure FormClose({%H-}Sender: TObject; var {%H-}CloseAction: TCloseAction);
+    procedure FormCreate({%H-}Sender: TObject);
+    procedure FormShow({%H-}Sender: TObject);
     procedure RadioGroupABISelectionChanged(Sender: TObject);
     procedure RadioGroupARMArchSelectionChanged(Sender: TObject);
     procedure rgrpSelectCPUSelectionChanged(Sender: TObject);
-    procedure rgrpSelectSubarchSelectionChanged(Sender: TObject);
+    procedure rgrpSelectSubarchSelectionChanged({%H-}Sender: TObject);
   private
     LocalCPU:TCPU;
     LocalOS:TOS;
@@ -64,7 +64,6 @@ uses
 procedure TSubarchForm.FormCreate(Sender: TObject);
 var
   aCPU:TCPU;
-  aOS:TOS;
   ARMArch:TARMARCH;
   aABI:TABI;
 begin
