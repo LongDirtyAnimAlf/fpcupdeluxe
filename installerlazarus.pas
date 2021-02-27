@@ -1661,19 +1661,26 @@ begin
 
         if (Length(GDBPath)>0) then
         begin
-          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigName', 'Standard GDB');
-          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigClass', 'TGDBMIDebugger');
-          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/DebuggerFilename',GDBPath);
-          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',True);
+          if (NumericalVersion<CalculateFullVersion(2,1,0)) then
+          begin
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Class', 'TGDBMIDebugger');
+          end
+          else
+          begin
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigName', 'Standard GDB');
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigClass', 'TGDBMIDebugger');
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/DebuggerFilename',GDBPath);
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',True);
+            {$IFDEF DARWIN}
+            //Available in latest trunk: extra gdb settings
+            LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/DisableStartupShell', 'True');
+            LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/WarnOnTimeOut', 'False');
+            LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/Debugger_Startup_Options', '--eval-command="set startup-with-shell off"');
+            {$ENDIF DARWIN}
+          end;
           LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',GDBPath);
           LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Count',1);
           LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Item1/Value',GDBPath);
-          {$IFDEF DARWIN}
-          //Available in latest trunk: extra gdb settings
-          LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/DisableStartupShell', 'True');
-          LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/WarnOnTimeOut', 'False');
-          LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/Debugger_Startup_Options', '--eval-command="set startup-with-shell off"');
-          {$ENDIF DARWIN}
         end;
 
         {$IFDEF DARWIN}
@@ -1684,27 +1691,34 @@ begin
 
         if FileExists(LLDBPath) then
         begin
-
-          if LazarusConfig.GetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',false) then
+          if (NumericalVersion<CalculateFullVersion(2,1,0)) then
           begin
-            // We have already GDB
-            // Make LLDB the preferred debugger and prepare for GDB as second debugger
-            // Disable gdb as primary debugger
-            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',False);
-            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Count',2);
-            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Item2/Value',GDBPath);
-            // Perpare for dirty trick
-            s:=CONFIGRENAMEMAGIC;
-            RenameNeeded:=True;
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Class', 'TLldbDebugger');
           end
           else
           begin
-            s:='Config';
+            if LazarusConfig.GetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',false) then
+            begin
+              // We have already GDB
+              // Make LLDB the preferred debugger and prepare for GDB as second debugger
+              // Disable gdb as primary debugger
+              LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',False);
+              LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Count',2);
+              LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Item2/Value',GDBPath);
+              // Perpare for dirty trick
+              s:=CONFIGRENAMEMAGIC;
+              RenameNeeded:=True;
+            end
+            else
+            begin
+              s:='Config';
+            end;
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/ConfigName', 'Standard LLDB');
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/ConfigClass', 'TLldbDebugger');
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/DebuggerFilename',LLDBPath);
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/Active',True);
           end;
-          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/ConfigName', 'Standard LLDB');
-          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/ConfigClass', 'TLldbDebugger');
-          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/DebuggerFilename',LLDBPath);
-          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/Active',True);
+
           LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',LLDBPath);
           if NOT RenameNeeded then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TLldbDebugger/History/Count',1);
           LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TLldbDebugger/History/Item1/Value',LLDBPath);

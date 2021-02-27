@@ -394,6 +394,9 @@ begin
   if Length(aARMArch)=0 then
     result:=TARMARCH.none
   else
+  if aARMArch='default' then
+    result:=TARMARCH.none
+  else
     result:=TARMARCH(GetEnumValueSimple(TypeInfo(TARMARCH),aARMArch));
   if Ord(result) < 0 then
     raise Exception.CreateFmt('Invalid ARM Arch name "%s" for GetARMArch.', [aARMArch]);
