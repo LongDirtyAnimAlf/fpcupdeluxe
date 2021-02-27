@@ -2223,7 +2223,7 @@ begin
   begin
     result:=true;
     Infoln(infotext+'Downloading ' + ModuleName + ' sources.',etInfo);
-    result:=DownloadFromFTP(ModuleName);
+    result:=DownloadFromURL(ModuleName);
     FActualRevision:=FPreviousRevision;
 
     if result and Ultibo then

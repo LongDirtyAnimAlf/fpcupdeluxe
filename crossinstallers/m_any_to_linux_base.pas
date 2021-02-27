@@ -149,7 +149,7 @@ begin
       if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libc.so.6') then
       begin
         s:='/usr/lib/'+magic; //debian (multilib) Jessie+ convention
-        if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libX11.so.6') then FMultilib:=True;
+        if DirectoryExists(s) AND FileExists(s+DirectorySeparator+'libX11.so.6')  AND FileExists(s+DirectorySeparator+'libgdk-x11-2.0.so') then FMultilib:=True;
       end;
     end;
   end;

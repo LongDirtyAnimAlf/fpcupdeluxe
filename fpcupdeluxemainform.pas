@@ -111,9 +111,9 @@ type
     CommandOutputScreen: TSynEdit;
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
-    procedure ButtonSubarchSelectClick(Sender: TObject);
-    procedure IniPropStorageAppRestoringProperties(Sender: TObject);
-    procedure IniPropStorageAppSavingProperties(Sender: TObject);
+    procedure ButtonSubarchSelectClick({%H-}Sender: TObject);
+    procedure IniPropStorageAppRestoringProperties({%H-}Sender: TObject);
+    procedure IniPropStorageAppSavingProperties({%H-}Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick(Sender: TObject);
@@ -1191,14 +1191,14 @@ begin
   begin
     // warn about time consuming FPC and Lazarus operations
     if (
-      (ExistWordInString(PChar(s),'downloadfromftp',[soWholeWord,soDown]))
+      (ExistWordInString(PChar(s),'downloadfromurl',[soWholeWord,soDown]))
       OR
       (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown]))
       OR
       (ExistWordInString(PChar(s),'clone',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord,soDown]))
     ) then
     begin
-      memoSummary.Lines.Append(BeginSnippet + ' Performing a SVN/GIT/HG/FTP checkout ... please wait, could take some time.');
+      memoSummary.Lines.Append(BeginSnippet + ' Performing SVN/GIT/HG/FTP/URL checkout/download. Please wait, could take some time.');
     end;
   end;
 
@@ -4452,7 +4452,6 @@ end;
 
 procedure TForm1.ButtonSubarchSelectClick(Sender: TObject);
 var
-  i:integer;
   s:string;
 begin
   if radgrpCPU.ItemIndex<>-1 then

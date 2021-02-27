@@ -370,7 +370,7 @@ type
     // Check for existence of required binutils; if not there, get them if possible
     function CheckAndGetNeededBinUtils: boolean;
     // Make a list (in FUtilFiles) of all binutils that can be downloaded
-    procedure CreateBinutilsList(aVersion:string='');
+    procedure CreateBinutilsList({%H-}aVersion:string='');
     // Get a diff of all modified files in and below the directory and save it
     procedure CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
     // Clone/update using HG; use FSourceDirectory as local repository
@@ -383,7 +383,7 @@ type
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromSVN(aModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
     function SimpleExportFromSVN(ModuleName: string; aFileURL,aLocalPath:string): boolean;
-    function DownloadFromFTP(ModuleName: string): boolean;
+    function DownloadFromURL(ModuleName: string): boolean;
     // Clone/update using Git; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     {$IFDEF MSWINDOWS}
@@ -1403,9 +1403,9 @@ var
   {$IFDEF MSWINDOWS}
   AllThere: boolean;
   i: integer;
+  InstallPath:string;
   {$ENDIF MSWINDOWS}
   OperationSucceeded: boolean;
-  InstallPath:string;
   s1,s2: string;
 begin
   s2:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
@@ -2083,7 +2083,7 @@ begin
 
 end;
 
-function TInstaller.DownloadFromFTP(ModuleName: string): boolean;
+function TInstaller.DownloadFromURL(ModuleName: string): boolean;
 var
   i:integer;
   FilesList:TStringList;
@@ -2091,7 +2091,7 @@ var
 begin
   result:=false;
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFromFTP: '+ModuleName+'): ';
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFromURL: '+ModuleName+'): ';
 
   if (NOT DirectoryIsEmpty(ExcludeTrailingPathDelimiter(FSourceDirectory))) then
   begin
@@ -3146,7 +3146,8 @@ begin
   // No repo client ...
   if aRepoClient=nil then
   begin
-    Infoln(infotext+'Could not determine what repoclient to use for ' + ModuleName + ' sources !',etError);
+    // We might have zip-sources or custom sources.
+    // Just exit silently ... no extra checking needed.
     if (IsFPCInstaller OR IsLazarusInstaller) then
     begin
       exit;

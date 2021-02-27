@@ -4501,7 +4501,7 @@ begin
   begin
     result:=true;
     Infoln(infotext+'Downloading ' + ModuleName + ' sources.',etInfo);
-    result:=DownloadFromFTP(ModuleName);
+    result:=DownloadFromURL(ModuleName);
     FActualRevision:=FPreviousRevision;
     if result and Ultibo then
     begin
@@ -4509,7 +4509,7 @@ begin
       s:=URL;
       URL:=StringReplace(URL,'/FPC','/Core',[]);
       Infoln(infotext+'Downloading Ultibo Core sources.',etInfo);
-      result:=DownloadFromFTP('Core');
+      result:=DownloadFromURL('Core');
       URL:=s;
       FActualRevision:='32846';
       FPreviousRevision:=FActualRevision;
