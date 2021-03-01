@@ -29,6 +29,8 @@ type
     btnAddLazPatch: TButton;
     btnRemLazPatch: TButton;
     btnSelectCompiler: TButton;
+    chkFPCDebug: TCheckBox;
+    chkLazarusDebug: TCheckBox;
     ComboBoxCPU: TComboBox;
     ComboBoxOS: TComboBox;
     IniPropStorageSettings: TIniPropStorage;
@@ -172,6 +174,12 @@ type
     procedure SetFPCOptions(value:string);
     function GetLazarusOptions:string;
     procedure SetLazarusOptions(value:string);
+
+    function GetFPCDebug:boolean;
+    procedure SetFPCDebug(value:boolean);
+    function GetLazarusDebug:boolean;
+    procedure SetLazarusDebug(value:boolean);
+
     function GetFPCRevision:string;
     procedure SetFPCRevision(value:string);
     function GetLazarusRevision:string;
@@ -239,6 +247,10 @@ type
 
     property FPCOptions:string read GetFPCOptions write SetFPCOptions;
     property LazarusOptions:string read GetLazarusOptions write SetLazarusOptions;
+
+    property FPCDebug:boolean read GetFPCDebug write SetFPCDebug;
+    property LazarusDebug:boolean read GetLazarusDebug write SetLazarusDebug;
+
     property FPCRevision:string read GetFPCRevision write SetFPCRevision;
     property LazarusRevision:string read GetLazarusRevision write SetLazarusRevision;
     property FPCBranch:string read GetFPCBranch write SetFPCBranch;
@@ -1101,7 +1113,7 @@ end;
 
 procedure TForm2.SetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH; aValue:boolean);
 begin
-  CrossUtils[aCPU,aOS,saNone].Available:=aValue;
+  CrossUtils[aCPU,aOS,aSubarch].Available:=aValue;
 end;
 
 function TForm2.GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
@@ -1329,6 +1341,25 @@ procedure TForm2.SetLazarusOptions(value:string);
 begin
   EditLazarusOptions.Text:=value;
 end;
+
+function TForm2.GetFPCDebug:boolean;
+begin
+  result:=chkFPCDebug.Checked;
+end;
+procedure TForm2.SetFPCDebug(value:boolean);
+begin
+  chkFPCDebug.Checked:=value;
+end;
+function TForm2.GetLazarusDebug:boolean;
+begin
+  result:=chkLazarusDebug.Checked;
+end;
+procedure TForm2.SetLazarusDebug(value:boolean);
+begin
+  chkLazarusDebug.Checked:=value;
+end;
+
+
 
 function TForm2.GetFPCRevision:string;
 begin
