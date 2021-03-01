@@ -200,7 +200,7 @@ Const
 implementation
 
 uses
-  StrUtils, typinfo,inifiles, process,
+  StrUtils, typinfo,inifiles, process, fpjson,
   FileUtil,
   fpcuputil;
 
@@ -2420,17 +2420,21 @@ end;
 
 function TDeveltools4FPCInstaller.GetModule(ModuleName: string): boolean;
 var
-  idx:integer;
-  PackageSettings:TStringList;
-  RemoteURL:string;
-  aName,aFile:string;
-  ResultCode: longint;
+  idx,iassets                         : integer;
+  PackageSettings                     : TStringList;
+  Ss                                  : TStringStream;
+  RemoteURL                           : string;
+  aName,aFile,aURL,aContent,aVersion  : string;
+  ResultCode                          : longint;
+  Json                                : TJSONData;
+  Release,Asset                       : TJSONObject;
+  Assets                              : TJSONArray;
 begin
   result:=InitModule;
   if not result then exit;
 
   idx:=UniModuleList.IndexOf(ModuleName);
-  if idx>=0 then
+  if (idx>=0) then
   begin
     WritelnLog(infotext+'Getting module '+ModuleName,True);
 
@@ -2447,54 +2451,122 @@ begin
       RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
       if (RemoteURL<>'') then
       begin
-        RemoteURL:=RemoteURL+'/releases/download/v1.0.0-1/develtools4fpc-'+GetTargetCPUOS+'.zip';
-        Infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
-        aName:=FileNameFromURL(RemoteURL);
-        if Length(aName)>0 then
-        begin
-          aName:=SysUtils.ExtractFileExt(aName);
-          if Length(aName)>0 then
-          begin
-            if aName[1]='.' then Delete(aName,1,1);
-          end;
-        end;
-        //If no extension, assume zip
-        if Length(aName)=0 then aName:='zip';
-        aFile := GetTempFileNameExt('FPCUPTMP',aName);
-        WritelnLog(infotext+'Going to download '+RemoteURL+' into '+aFile,false);
+        // Get latest release through api
+        aURL:=StringReplace(RemoteURL,'//github.com','//api.github.com/repos',[]);
+        aURL:=aURL+'/releases';
+        Ss := TStringStream.Create('');
         try
-          result:=Download(FUseWget, RemoteURL, aFile);
-          if result then result:=FileExists(aFile);
-        except
-          on E: Exception do
+          result:=Download(False,aURL,Ss);
+          if (NOT result) then
           begin
-           result:=false;
+            {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
+            Ss.Clear;
+            {$ENDIF}
+            Ss.Position:=0;
+            result:=Download(True,aURL,Ss);
+          end;
+          if result then aContent:=Ss.DataString;
+        finally
+          Ss.Free;
+        end;
+
+        if result then
+        begin
+          result:=false;
+          if (Length(aContent)>0) then
+          begin
+            try
+              Json:=GetJSON(aContent);
+            except
+              Json:=nil;
+            end;
+            if JSON.IsNull then exit;
+
+            try
+              for idx:=0 to Pred(Json.Count) do
+              begin
+                Release := TJSONObject(Json.Items[idx]);
+                aVersion:=Release.Get('tag_name');
+                {$ifdef Windows}
+                aFile:='develtools4fpc-x86_64-win64';
+                {$else}
+                aFile:='develtools4fpc-'+GetTargetCPUOS;
+                {$endif}
+                Assets:=Release.Get('assets',TJSONArray(nil));
+                for iassets:=0 to Pred(Assets.Count) do
+                begin
+                  Asset := TJSONObject(Assets[iassets]);
+                  aName:=Asset.Get('name');
+                  if (Pos(aFile,aName)=1) then
+                  begin
+                    aURL:=Asset.Get('browser_download_url');
+                    result:=true;
+                  end;
+                  if result then break;
+                end;
+                if result then break;
+              end;
+            finally
+              Json.Free;
+            end;
           end;
         end;
 
         if result then
         begin
-          if (FileSize(aFile)>5000) then
+          aName:=FileNameFromURL(aURL);
+          Infoln(infotext+'Going to download '+aVersion+' of develtools4fpc ['+aName+'] from '+aURL,etInfo);
+          if Length(aName)>0 then
           begin
-            ResultCode:=-1;
-            WritelnLog(infotext+'Download ok',True);
-            if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
-            with TNormalUnzipper.Create do
+            aName:=SysUtils.ExtractFileExt(aName);
+            if Length(aName)>0 then
             begin
-              try
-                ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
-              finally
-                Free;
-              end;
-            end;
-            if (ResultCode<>0) then
-            begin
-              result := False;
-              Infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+              if aName[1]='.' then Delete(aName,1,1);
             end;
           end;
+          //If no extension, assume zip
+          if Length(aName)=0 then aName:='zip';
+          aFile := GetTempFileNameExt('FPCUPTMP',aName);
+          WritelnLog(infotext+'Going to download '+aURL+' into '+aFile,false);
+          try
+            result:=Download(FUseWget, aURL, aFile);
+            if result then result:=FileExists(aFile);
+          except
+            on E: Exception do
+            begin
+             result:=false;
+            end;
+          end;
+
+          if result then
+          begin
+            if (FileSize(aFile)>5000) then
+            begin
+              ResultCode:=-1;
+              WritelnLog(infotext+'Download ok',True);
+              if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
+              with TNormalUnzipper.Create do
+              begin
+                try
+                  ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+                finally
+                  Free;
+                end;
+              end;
+              if (ResultCode<>0) then
+              begin
+                result := False;
+                Infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+              end;
+            end;
+          end;
+          SysUtils.Deletefile(aFile); //Get rid of temp file.
         end;
-        SysUtils.Deletefile(aFile); //Get rid of temp file.
+
+        if (NOT result) then
+        begin
+          Infoln(infotext+'Getting develtools4fpc failure. Will continue anyhow.',etInfo);
+        end;
 
       end;
     end;

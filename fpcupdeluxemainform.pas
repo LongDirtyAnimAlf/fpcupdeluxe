@@ -378,8 +378,10 @@ begin
 
   {$ifdef Darwin}
   radgrpOS.Items.Strings[radgrpOS.Items.IndexOf(GetOS(TOS.wince))]:='i-sim';
+  {$ifndef CPUX86}
+  UltiboBtn.Enabled:=False;
+  {$endif}
   {$endif Darwin}
-
 
   (*
   oldoutput := System.Output;
