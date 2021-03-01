@@ -805,7 +805,7 @@ begin
             for i:=(SnipBegin+6) to (SnipEnd-2) do
             begin
               s:=ConfigText.Strings[i];
-              if Pos('#IFDEF CPU'+UpperCase(GetSubarch(aTSUBARCH)),s)=1 then
+              if (s='#IFDEF CPU'+UpperCase(GetSubarch(aTSUBARCH))) then
                 Include(RebuildSubarchs,aTSUBARCH);
             end;
           end;
