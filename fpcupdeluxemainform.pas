@@ -818,7 +818,6 @@ begin
             // Only build for subarch if we do have subarchs
             if (aTOS in SUBARCH_OS) AND (aTCPU in SUBARCH_CPU) AND (aTSUBARCH=saNone) then continue;
 
-
             if aTSUBARCH=saNone then
               AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS)
             else
@@ -830,9 +829,17 @@ begin
               CommandOutputScreen.ClearAll;
               aResultMessage:='Finished building of cross-compilers.';
               AddMessage(upBuildAllCrossCompilersUpdate);
+
+              // Set subarch
+              SetSelectedSubArch(aTCPU,aTOS,aTSUBARCH);
+
+              // Set CPU and OS
               radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aCPU);
               radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aOS);
+
+              // Build !!
               success:=ButtonProcessCrossCompiler(nil);
+
               if success
                 then memoSummary.Lines.Append('Cross-compiler update ok.')
                 else memoSummary.Lines.Append('Failure during update of cross-compiler !!');
