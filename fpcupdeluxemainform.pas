@@ -666,24 +666,27 @@ end;
 
 function TForm1.AutoUpdateCrossCompiler(Sender: TObject):boolean;
 var
-  //CPUType:TCPU;
-  //OSType:TOS;
   FPCCfg:string;
   BinPath:string;
   ConfigText: TStringList;
   aCPU, aOS: string;
-  aSubArch: string;
-  //aArch: string;
-  // tricky: to be changed; todo
-  aRadiogroup_CPU,aRadiogroup_OS: string;
+  aTCPU:TCPU;
+  aTOS:TOS;
+  aTSUBARCH:TSUBARCH;
+  Subarchs:TSUBARCHS;
+  RebuildSubarchs:TSUBARCHS;
   CheckAutoClearStore:boolean;
   success:boolean;
-  SnipBegin,i:integer;
+  SnipBegin,SnipEnd: integer;
+  i:integer;
   s,aResultMessage:string;
 begin
   aOS := GetTargetOS;
   aCPU := GetTargetCPU;
-  aSubArch :='';
+
+  aTCPU:=TCPU.cpuNone;
+  aTOS:=TOS.osNone;
+  aTSUBARCH:=TSUBARCH.saNone;
 
   //BinPath:=ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',aCPU+'-'+aOS]);
   BinPath:=ConcatPaths([sInstallDir,'fpc','bin',aCPU+'-'+aOS]);
@@ -734,44 +737,36 @@ begin
     ConfigText.LoadFromFile(FPCCFG);
 
     SnipBegin:=0;
-    while (SnipBegin<ConfigText.Count) do
+    SnipEnd:=0;
+    while ((SnipBegin<>-1) AND (SnipEnd<>-1) AND (SnipBegin<ConfigText.Count)) do
     begin
-      if Pos(SnipMagicBegin,ConfigText.Strings[SnipBegin])>0 then
+      SnipBegin:=StringListStartsWith(ConfigText,SnipMagicBegin,SnipEnd);
+      SnipEnd:=-1;
+      if (SnipBegin<>-1) then
+      begin
+        SnipEnd:=SnipBegin+1;
+        if (Pos('-',ConfigText.Strings[SnipBegin])>0) then
+          SnipEnd:=StringListSame(ConfigText,SnipMagicEnd,SnipEnd)
+      end;
+
+
+      if (SnipBegin<>-1) AND (SnipEnd<>-1) then
       begin
         s:=ConfigText.Strings[SnipBegin];
         Delete(s,1,Length(SnipMagicBegin));
         i:=Pos('-',s);
-        if i>0 then
+        if (i>0) then
         begin
           aCPU:=Copy(s,1,i-1);
           aOS:=Trim(Copy(s,i+1,MaxInt));
 
-          {
-          aArch:='';
-          // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
-          if (UpperCase(aCPU)=GetCPU(TCPU.arm)) AND (UpperCase(aOS)=GetOS(TOS.linux)) then
-          begin
-            for i:=SnipBegin to SnipBegin+5 do
-            begin
-              if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
-              begin
-                s:=ConfigText.Strings[i];
-                Delete(s,1,Length('#IFDEF CPU'));
-                aArch:=s;
-                break;
-              end;
-            end;
-          end;
-          }
-
-          if (Sender=nil) then
-            Form2.SetCrossAvailable(GetTCPU(aCPU),GetTOS(aOS),GetTSubarch(aSubArch),true);
+          aTCPU:=GetTCPU(aCPU);
+          aTOS:=GetTOS(aOS);
 
           // try to distinguish between different Solaris versons
-          if (aOS=GetOS(TOS.solaris)) then
+          if (aTOS=TOS.solaris) then
           begin
-            i:=SnipBegin;
-            while true do
+            for i:=SnipBegin to SnipEnd do
             begin
               s:=ConfigText.Strings[i];
               if (Pos('-FD',s)>0) AND (Pos('-solaris-oi',s)>0) then
@@ -779,16 +774,13 @@ begin
                 aOS:='solaris-oi';
                 break;
               end;
-              Inc(i);
-              if (i>=ConfigText.Count) OR (s=SnipMagicEnd) then break;
             end;
           end;
 
           // try to distinguish between different Linux versons
-          if (aOS=GetOS(TOS.linux)) then
+          if (aTOS=TOS.linux) then
           begin
-            i:=SnipBegin;
-            while true do
+            for i:=SnipBegin to SnipEnd do
             begin
               s:=ConfigText.Strings[i];
               if (Pos('-FD',s)>0) AND (Pos('-musllinux',s)>0) then
@@ -796,38 +788,50 @@ begin
                 aOS:='linux-musl';
                 break;
               end;
-              Inc(i);
-              if (i>=ConfigText.Count) OR (s=SnipMagicEnd) then break;
             end;
           end;
 
-          // try to get a subarch
-          aSubArch:='';
-          if (GetTOS(aOS) in SUBARCH_OS) then
+          if aTCPU=TCPU.powerpc then aCPU:='ppc';
+          if aTCPU=TCPU.powerpc64 then aCPU:='ppc64';
+          if aTOS=TOS.iphonesim then aOS:='i-sim';
+          if ( (aTOS=TOS.win32) or (aTOS=TOS.win64) ) then aOS:='windows';
+
+          // Get subarchs
+          RebuildSubarchs:=[TSUBARCH.saNone];
+          Subarchs:=GetSubarchs(aTCPU,aTOS);
+          for aTSUBARCH in Subarchs do
           begin
+            if (aTSUBARCH=saNone) then continue;
+            for i:=(SnipBegin+6) to (SnipEnd-2) do
+            begin
+              s:=ConfigText.Strings[i];
+              if Pos('#IFDEF CPU'+UpperCase(GetSubarch(aTSUBARCH)),s)=1 then
+                Include(RebuildSubarchs,aTSUBARCH);
+            end;
           end;
 
-          aRadiogroup_CPU:=aCPU;
-          aRadiogroup_OS:=aOS;
-          if aRadiogroup_CPU=GetCPU(TCPU.powerpc) then aRadiogroup_CPU:='ppc';
-          if aRadiogroup_CPU=GetCPU(TCPU.powerpc64) then aRadiogroup_CPU:='ppc64';
-          if aRadiogroup_OS='iphonesim' then aRadiogroup_OS:='i-sim';
-          if ( (aOS=GetOS(TOS.win32)) or (aOS=GetOS(TOS.win64)) ) then aRadiogroup_OS:='windows';
-
-          //this chek is redundant, but ok for a final check ... ;-)
-          //if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
+          for aTSUBARCH in RebuildSubarchs do
           begin
-            // list all available compilers
-            if (Sender=nil) then AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS);
-            // build all available compilers
+            if (Sender=nil) then
+              Form2.SetCrossAvailable(aTCPU,aTOS,aTSubArch,true);
+
+            // Only build for subarch if we do have subarchs
+            if (aTOS in SUBARCH_OS) AND (aTCPU in SUBARCH_CPU) AND (aTSUBARCH=saNone) then continue;
+
+
+            if aTSUBARCH=saNone then
+              AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS)
+            else
+              AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS+ '-' + GetSubarch(aTSUBARCH));
+
+            // build compiler
             if (Sender<>nil) then
             begin
               CommandOutputScreen.ClearAll;
               aResultMessage:='Finished building of cross-compilers.';
-              AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS);
               AddMessage(upBuildAllCrossCompilersUpdate);
-              radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
-              radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aRadiogroup_OS);
+              radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aCPU);
+              radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aOS);
               success:=ButtonProcessCrossCompiler(nil);
               if success
                 then memoSummary.Lines.Append('Cross-compiler update ok.')
@@ -842,70 +846,8 @@ begin
           end;
         end;
       end;
-      Inc(SnipBegin);
     end;
 
-    (*
-    for OSType := Low(TOS) to High(TOS) do
-    begin
-
-      if (NOT success) then break;
-
-      aOS:=GetOS(OSType);
-
-      for CPUType := Low(TCPU) to High(TCPU) do
-      begin
-
-        if (NOT success) then break;
-
-        aCPU:=GetCPU(CPUType);
-
-        // tricky; see above; improvement todo
-        aRadiogroup_CPU:=aCPU;
-        aRadiogroup_OS:=aOS;
-        if aRadiogroup_CPU=GetCPU(TCPU.powerpc) then aRadiogroup_CPU:='ppc';
-        if aRadiogroup_CPU=GetCPU(TCPU.powerpc64) then aRadiogroup_CPU:='ppc64';
-        if aRadiogroup_OS='iphonesim' then aRadiogroup_OS:='i-sim';
-
-        if (aOS='windows') or (aOS=GetOS(TOS.win32)) or (aOS=GetOS(TOS.win64)) then
-        begin
-          if aCPU=GetCPU(TCPU.i386) then aOS:=GetOS(TOS.win32);
-          if aCPU=GetCPU(TCPU.x86_64) then aOS:=GetOS(TOS.win64);
-          aRadiogroup_OS:='windows';
-        end;
-
-        {$ifdef win32}
-        // On win32, we always build a win64 cross-compiler.
-        // So, if the win32 install is updated, this cross-compiler is also updated already auto-magically.
-        // We can skip it here, in that case.
-        if aOS=GetOS(TOS.win64) then continue;
-        {$endif}
-
-        // take into account that there are more ARM CPU settings !!
-        // important todo
-
-        if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
-        begin
-          // list all available compilers
-          if (Sender=nil) then AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
-          // build all available compilers
-          if (Sender<>nil) then
-          begin
-            CommandOutputScreen.Clear;
-            AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
-            AddMessage('Going to update cross-compiler.');
-            radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
-            radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aRadiogroup_OS);
-            success:=InstallCrossCompiler(nil);
-            if success
-              then memoSummary.Lines.Append('Cross-compiler update ok.')
-              else memoSummary.Lines.Append('Failure during update of cross-compiler !!');
-            memoSummary.Lines.Append('');
-          end;
-        end;
-      end;
-    end;
-    *)
     if (Sender<>nil) then
     begin
       radgrpCPU.ItemIndex:=-1;
