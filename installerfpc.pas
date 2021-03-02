@@ -424,6 +424,7 @@ function TFPCCrossInstaller.CompilerUpdateNeeded:boolean;
 var
   NativeVersion,CrossVersion:string;
   NativeCompiler,CrossCompiler:string;
+  NativeAge,CrossAge:Longint;
 begin
   result:=true;
   NativeCompiler:=GetFPCInBinDir;
@@ -432,6 +433,7 @@ begin
     CrossCompiler:=ExtractFilePath(NativeCompiler)+CrossCompilerName;
     if FileExists(CrossCompiler) then
     begin
+      // Look at version and revision
       NativeVersion:=CompilerVersion(NativeCompiler);
       CrossVersion:=CompilerVersion(CrossCompiler);
       if  (Length(CrossVersion)>0) AND (CrossVersion<>'0.0.0') AND (CompareVersionStrings(CrossVersion,NativeVersion)=0) then
@@ -439,6 +441,13 @@ begin
         NativeVersion:=CompilerRevision(NativeCompiler);
         CrossVersion:=CompilerRevision(CrossCompiler);
         if (Length(CrossVersion)>0) AND (CrossVersion=NativeVersion) then result:=false;
+      end;
+      if (NOT result) then
+      begin
+        // Look at fileage
+        NativeAge:=FileAge(NativeCompiler);
+        CrossAge:=FileAge(CrossCompiler);
+        if (NativeAge>=CrossAge) then result:=true
       end;
     end;
   end;
@@ -4339,7 +4348,7 @@ begin
         if (Self AS TFPCCrossInstaller).CompilerUpdateNeeded then
           aCleanupCommandList.Append('compiler_distclean')
         else
-          Infoln({infotext+}'Skipping cross-compiler clean step: seems to be up to date !!',etInfo);
+          Infoln({infotext+}'Skipping cross-compiler clean step: seems to be up to date !!',etWarning);
         aCleanupCommandList.Append('rtl_distclean');
         if (Self AS TFPCCrossInstaller).PackagesNeeded then aCleanupCommandList.Append('packages_distclean');
       end;
