@@ -1378,7 +1378,7 @@ var
 begin
   result:=true;
 
-  Ultibo:=((Pos('github.com/ultibohub',FParent.FPCURL)>0) OR (Pos('github.com/ultibohub',FParent.LazarusURL)>0));
+  Ultibo:=((Pos('github.com/ultibohub',FParent.FPCURL)>0){$ifndef FPCONLY} OR (Pos('github.com/ultibohub',FParent.LazarusURL)>0){$endif});
 
   CrossCompiling:=(FParent.CrossCPU_Target<>TCPU.cpuNone) or (FParent.CrossOS_Target<>TOS.osNone);
 

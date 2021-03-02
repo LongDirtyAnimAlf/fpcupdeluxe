@@ -204,7 +204,7 @@ begin
       FManager.ConfigFile:=Options.GetOption('','moduleconfig',SafeGetApplicationPath+installerUniversal.CONFIGFILENAME);
       s:=Options.GetOption('','cputarget','');
       if (s<>'') then FManager.CrossCPU_Target:=GetTCPU(s);
-      FManager.CrossOS_SubArch:=Options.GetOption('','subarch','');
+      FManager.CrossOS_SubArch:=GetTSubarch(Options.GetOption('','subarch',''));
       FManager.CrossOPT:=Options.GetOption('','crossopt','');
 
       {$ifdef LCL}

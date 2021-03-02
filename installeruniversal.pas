@@ -2233,6 +2233,8 @@ begin
   result:=inherited;
   if not result then exit;
 
+  {$ifndef FPCONLY}
+
   //Perform some extra magic for this module
 
   Workingdir:='';
@@ -2297,6 +2299,8 @@ begin
   Infoln(infotext+Processor.GetExeInfo,etDebug);
   ProcessorResult:=Processor.ExecuteAndWait;
   result := (ProcessorResult=0);
+
+  {$endif}
 end;
 
 function TPas2jsInstaller.BuildModule(ModuleName: string): boolean;
@@ -2304,10 +2308,14 @@ var
   Workingdir,FilePath:string;
   idx:integer;
   sl:TStringList;
+  {$ifndef FPCONLY}
   LazarusConfig: TUpdateLazConfig;
+  {$endif}
 begin
   result:=inherited;
   if not result then exit;
+
+  {$ifndef FPCONLY}
 
   //Perform some extra magic for this module
 
@@ -2368,6 +2376,7 @@ begin
   result:=InstallPackage(FilePath,WorkingDir,False);
   if not result then exit;
 
+  {$endif}
 end;
 
 function TInternetToolsInstaller.GetModule(ModuleName: string): boolean;
