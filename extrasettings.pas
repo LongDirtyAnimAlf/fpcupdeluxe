@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls,
-  Dialogs, CheckLst, IniPropStorage, ComCtrls, m_crossinstaller, installerCore;
+  Dialogs, CheckLst, IniPropStorage, ComCtrls, m_crossinstaller;
 
 type
   TString = class(TObject)
@@ -86,11 +86,11 @@ type
     procedure ComboBoxCPUOSChange({%H-}Sender: TObject);
     procedure EditCrossBuildOptionsEditingDone(Sender: TObject);
     procedure EditDblClickDelete(Sender: TObject);
-    procedure FormClose(Sender: TObject; var {%H-}CloseAction: TCloseAction);
+    procedure FormClose({%H-}Sender: TObject; var {%H-}CloseAction: TCloseAction);
     procedure FormCreate({%H-}Sender: TObject);
     procedure FormDestroy({%H-}Sender: TObject);
-    procedure IniPropStorageSettingsRestoringProperties(Sender: TObject);
-    procedure IniPropStorageSettingsSavingProperties(Sender: TObject);
+    procedure IniPropStorageSettingsRestoringProperties({%H-}Sender: TObject);
+    procedure IniPropStorageSettingsSavingProperties({%H-}Sender: TObject);
     procedure OnDirectorySelect(Sender: TObject);
     procedure rgrpSearchOptionsSelectionChanged(Sender: TObject);
     procedure RadioGroupARMArchSelectionChanged(Sender: TObject);
@@ -365,8 +365,6 @@ procedure TForm2.FormCreate(Sender: TObject);
 var
   CPU       :TCPU;
   OS        :TOS;
-  SUBARCH   :TSUBARCH;
-  Subarchs  :TSUBARCHS;
   ARMArch   :TARMARCH;
   s         :string;
   SortedList:TStringList;
@@ -481,6 +479,8 @@ begin
 
   SplitFPC:=true;
   MakeJobs:=true;
+
+  Self.LazarusDebug:=true;
 
   {$ifdef win64}
   MakeJobs:=False;

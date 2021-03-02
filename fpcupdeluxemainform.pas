@@ -2634,20 +2634,14 @@ begin
         end;
       end;
 
-      // Set FPC options
-      FPCupManager.FPCOPT:=Form2.FPCOptions;
       if (FPCupManager.CrossCPU_Target=TCPU.arm) then
       begin
-        if (Length(FPCupManager.FPCOPT)=0) then
+        if (Pos('-dFPC_ARM',FPCupManager.FPCOPT)=0) then
         begin
           // Set arm abi build option
-          FPCupManager.FPCOPT:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
+          FPCupManager.FPCOPT:=FPCupManager.FPCOPT+' '+Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
+          FPCupManager.FPCOPT:=Trim(FPCupManager.FPCOPT);
         end;
-
-        // Set ABI option
-        //FPCupManager.CrossOS_ABI:=TABI.abiNone;
-
-
       end;
 
       // Set FPC cross-compile options
@@ -3758,6 +3752,12 @@ begin
   FPCupManager.MUSL:=false;
 
   FPCupManager.FPCOPT:=Form2.FPCOptions;
+  if Form2.FPCDebug then
+  begin
+    FPCupManager.FPCOPT:=FPCupManager.FPCOPT+' -g -gl -O1';
+    FPCupManager.FPCOPT:=Trim(FPCupManager.FPCOPT);
+  end;
+
   FPCupManager.CrossOPT:='';
 
   FPCupManager.CrossLibraryDirectory:='';
@@ -3778,6 +3778,11 @@ begin
   FPCupManager.LazarusURL:=LazarusTarget;
 
   FPCupManager.LazarusOPT:=Form2.LazarusOptions;
+  if Form2.LazarusDebug then
+  begin
+    FPCupManager.LazarusOPT:=FPCupManager.LazarusOPT+' -g -gl -O1';
+    FPCupManager.LazarusOPT:=Trim(FPCupManager.LazarusOPT);
+  end;
 
   FPCupManager.UseSystemFPC:=Form2.SystemFPC;
 
@@ -4169,6 +4174,10 @@ begin
 
       Form2.FPCOptions:=ReadString('General','FPCOptions',Form2.FPCOptions);
       Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
+
+      Form2.FPCDebug:=ReadBool('General','FPCDebug',Form2.FPCDebug);
+      Form2.LazarusDebug:=ReadBool('General','LazarusDebug',Form2.LazarusDebug);
+
       Form2.FPCRevision:=ReadString('General','FPCRevision','');
       Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
       Form2.FPCBranch:=ReadString('General','FPCBranch','');
@@ -4250,6 +4259,10 @@ begin
 
       WriteString('General','FPCOptions',Form2.FPCOptions);
       WriteString('General','LazarusOptions',Form2.LazarusOptions);
+
+      WriteBool('General','FPCDebug',Form2.FPCDebug);
+      WriteBool('General','LazarusDebug',Form2.LazarusDebug);
+
       WriteString('General','FPCRevision',Form2.FPCRevision);
       WriteString('General','LazarusRevision',Form2.LazarusRevision);
       WriteString('General','FPCBranch',Form2.FPCBranch);
