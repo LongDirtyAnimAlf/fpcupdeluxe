@@ -2350,6 +2350,13 @@ begin
     if FinalVersion<CalculateNumericalVersion('3.2.0') then FinalVersion:=CalculateNumericalVersion('3.2.0');
     {$ENDIF}
 
+    //3.3.1 allows 3.0.4 but 3.0.4 does not work anymore for 3.3.1 ... so only allow 3.2.0 or higher
+    if (NumericalVersion=CalculateNumericalVersion('3.3.1')) then
+    begin
+      RequiredVersion:=CalculateNumericalVersion('3.2.0');
+      if (FinalVersion<RequiredVersion) then FinalVersion:=RequiredVersion;
+    end;
+
     result:=InttoStr(FinalVersion DIV 10000);
     FinalVersion:=FinalVersion MOD 10000;
     result:=result+'.'+InttoStr(FinalVersion DIV 100);
@@ -2718,8 +2725,6 @@ begin
       if NativeFPCBootstrapCompiler then
       begin
         // first, try official FPC binaries
-        Infoln(localinfotext+'Looking for a bootstrap compiler from official FPC bootstrap binaries.',etInfo);
-
         aCompilerList:=TStringList.Create;
         try
           while ((NOT aCompilerFound) AND (CalculateNumericalVersion(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do

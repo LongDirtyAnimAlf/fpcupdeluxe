@@ -167,6 +167,11 @@ type
     function GetModule(ModuleName: string): boolean; override;
   end;
 
+  { TmORMot2Installer }
+  TmORMot2Installer = class(TUniversalInstaller)
+  public
+    function GetModule(ModuleName: string): boolean; override;
+  end;
 
 
   // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
@@ -2634,6 +2639,172 @@ begin
         end;
       finally
         aList.Free;
+      end;
+    end;
+  end;
+
+  // Do not fail
+  result:=true;
+end;
+
+function TmORMot2Installer.GetModule(ModuleName: string): boolean;
+var
+  idx,iassets                                    : integer;
+  PackageSettings                                : TStringList;
+  Ss                                             : TStringStream;
+  RemoteURL                                      : string;
+  aName,aFile,aURL,aContent,aVersion,aDirectory  : string;
+  ResultCode                                     : longint;
+  Json                                           : TJSONData;
+  Release,Asset                                  : TJSONObject;
+  Assets                                         : TJSONArray;
+begin
+  result:=inherited;
+  if not result then exit;
+
+  idx:=UniModuleList.IndexOf(ModuleName);
+  if (idx>=0) then
+  begin
+    WritelnLog(infotext+'Getting module '+ModuleName,True);
+
+    PackageSettings:=TStringList(UniModuleList.Objects[idx]);
+    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    FSourceDirectory:=FixPath(FSourceDirectory);
+    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+
+    if (FSourceDirectory<>'') then
+    begin
+      ForceDirectoriesSafe(FSourceDirectory);
+
+      RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
+      if (RemoteURL<>'') then
+      begin
+        // Get latest release through api
+        aURL:=StringReplace(RemoteURL,'//github.com','//api.github.com/repos',[]);
+        aURL:=aURL+'/releases';
+        Ss := TStringStream.Create('');
+        try
+          result:=Download(False,aURL,Ss);
+          if (NOT result) then
+          begin
+            {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
+            Ss.Clear;
+            {$ENDIF}
+            Ss.Position:=0;
+            result:=Download(True,aURL,Ss);
+          end;
+          if result then aContent:=Ss.DataString;
+        finally
+          Ss.Free;
+        end;
+
+        if result then
+        begin
+          result:=false;
+          if (Length(aContent)>0) then
+          begin
+            try
+              Json:=GetJSON(aContent);
+            except
+              Json:=nil;
+            end;
+            if JSON.IsNull then exit;
+
+            try
+              for idx:=0 to Pred(Json.Count) do
+              begin
+                Release := TJSONObject(Json.Items[idx]);
+                aVersion:=Release.Get('tag_name');
+                aFile:='mormot2static.7z';
+                Assets:=Release.Get('assets',TJSONArray(nil));
+                for iassets:=0 to Pred(Assets.Count) do
+                begin
+                  Asset := TJSONObject(Assets[iassets]);
+                  aName:=Asset.Get('name');
+                  if (Pos(aFile,aName)=1) then
+                  begin
+                    aURL:=Asset.Get('browser_download_url');
+                    result:=true;
+                  end;
+                  if result then break;
+                end;
+                if result then break;
+              end;
+            finally
+              Json.Free;
+            end;
+          end;
+        end;
+
+        if result then
+        begin
+          aName:=FileNameFromURL(aURL);
+          Infoln(infotext+'Going to download '+aVersion+' of mormot sqlite3 static libs ['+aName+'] from '+aURL,etInfo);
+          if Length(aName)>0 then
+          begin
+            aName:=SysUtils.ExtractFileExt(aName);
+            if Length(aName)>0 then
+            begin
+              if aName[1]='.' then Delete(aName,1,1);
+            end;
+          end;
+          //If no extension, assume zip
+          if Length(aName)=0 then aName:='zip';
+          aFile := GetTempFileNameExt('FPCUPTMP',aName);
+          WritelnLog(infotext+'Going to download '+aURL+' into '+aFile,false);
+          try
+            result:=Download(FUseWget, aURL, aFile);
+            if result then result:=FileExists(aFile);
+          except
+            on E: Exception do
+            begin
+             result:=false;
+            end;
+          end;
+
+          if result then
+          begin
+            if (FileSize(aFile)>5000) then
+            begin
+              ResultCode:=-1;
+              WritelnLog(infotext+'Download ok',True);
+
+              aDirectory:=FSourceDirectory+DirectorySeparator+'static';
+              if DirectoryExists(aDirectory) then DeleteDirectoryEx(aDirectory);
+
+              ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+              {$ifdef MSWINDOWS}
+              // try winrar
+              if (ResultCode<>0) then
+              begin
+                ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(FSourceDirectory)+'"',FVerbose);
+              end;
+              {$endif}
+              if (ResultCode<>0) then
+              begin
+                ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+              end;
+              if (ResultCode<>0) then
+              begin
+                ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+              end;
+
+              if (ResultCode<>0) then
+              begin
+                result := False;
+                Infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+              end;
+
+            end;
+          end;
+          SysUtils.Deletefile(aFile); //Get rid of temp file.
+        end;
+
+        if (NOT result) then
+        begin
+          Infoln(infotext+'Getting develtools4fpc failure. Will continue anyhow.',etInfo);
+        end;
+
       end;
     end;
   end;
