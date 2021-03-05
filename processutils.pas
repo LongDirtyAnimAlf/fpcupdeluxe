@@ -1066,6 +1066,7 @@ begin
       if AnsiContainsText(line,'Info: (lazarus)') then exit;
       if AnsiStartsText('  File=',line) then exit;
       if AnsiStartsText('  State file=',line) then exit;
+      if AnsiStartsText('### TCodeToolManager.HandleException:',line) then exit;
 
       //Remove some not so very interesting info
       if AnsiContainsText(line,'Writing Resource String Table') then exit;

@@ -1901,15 +1901,17 @@ begin
   if (Sender=WioBtn) OR (Sender=PicoBtn) then
   begin
     if Sender=PicoBtn then
+    begin
       s:='Going to install FPC and Lazarus for Raspberry Pico.';
+      aModule:='develtools4fpc';
+    end;
     if Sender=WioBtn then
+    begin
       s:='Going to install FPC and Lazarus for Wio Terminal.';
+      aModule:='develtools4fpc,mbf-freertos-wio';
+    end;
     aFPCTarget:='embedded-mir';
     aLazarusTarget:='embedded';
-    aModule:='develtools4fpc';
-    //aModule:='mbf-freertos';
-    //aModule:='mbf,pxl';
-    //aModule:='mbf';
   end;
 
   if Sender=mORMotBtn then

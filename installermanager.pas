@@ -1533,8 +1533,9 @@ begin
         'mORMotPXL'        : FInstaller:=TmORMotPXLInstaller.Create;
         'internettools'    : FInstaller:=TInternetToolsInstaller.Create;
         'develtools4fpc'   : FInstaller:=TDeveltools4FPCInstaller.Create;
-        'mbf-freertos-don' : FInstaller:=TMBFFreeRTOSByDonInstaller.Create;
+        'mbf-freertos-wio' : FInstaller:=TMBFFreeRTOSWioInstaller.Create;
         'mORMot2'          : FInstaller:=TmORMot2Installer.Create;
+        'wst'              : FInstaller:=TWSTInstaller.Create;
         'pas2js-rtl'       : FInstaller:=TPas2jsInstaller.Create;
       else
         FInstaller:=TUniversalInstaller.Create;
