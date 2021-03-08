@@ -1910,8 +1910,8 @@ begin
       s:='Going to install FPC and Lazarus for Wio Terminal.';
       aModule:='develtools4fpc,mbf-freertos-wio';
     end;
-    aFPCTarget:='embedded-mir';
-    aLazarusTarget:='embedded';
+    aFPCTarget:='embedded';
+    aLazarusTarget:='trunk';
   end;
 
   if Sender=mORMotBtn then
