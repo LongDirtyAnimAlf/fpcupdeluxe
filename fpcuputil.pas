@@ -3138,11 +3138,17 @@ function GetDarwinSDKLocation:string;
 var
   Output:string;
 begin
-  Output:='';
-  RunCommand('xcrun',['--show-sdk-path'], Output);
-  Output:=Trim(Output);
-  if (Length(Output)>0) then
-    result:=Output;
+  Output:=ConcatPaths([GetXCodeLocation,'Platforms','MacOSX.platform','Developer','SDKs','MacOSX.sdk']);
+  if DirectoryExists(Output) then
+    result:=Output
+  else
+  begin
+    Output:='';
+    RunCommand('xcrun',['--show-sdk-path'], Output);
+    Output:=Trim(Output);
+    if (Length(Output)>0) then
+      result:=Output;
+  end;
 end;
 function GetDarwinToolsLocation:string;
 const
@@ -3150,13 +3156,19 @@ const
 var
   Output:string;
 begin
-  Output:='';
-  RunCommand('xcrun',['-f',BINARY], Output);
-  Output:=Trim(Output);
-  if (Length(Output)>0) then
+  //Output:=ConcatPaths([GetXCodeLocation,'Toolchains','XcodeDefault.xctoolchain','usr','bin']);
+  //if DirectoryExists(Output) then
+  //  result:=Output
+  //else
   begin
-    Delete(Output,Length(Output)-Length(BINARY),MaxInt);
-    result:=Output;
+    Output:='';
+    RunCommand('xcrun',['-f',BINARY], Output);
+    Output:=Trim(Output);
+    if (Length(Output)>0) then
+    begin
+      Delete(Output,Length(Output)-Length(BINARY),MaxInt);
+      result:=Output;
+    end;
   end;
 end;
 function GetXCodeLocation:string;
