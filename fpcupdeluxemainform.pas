@@ -2796,11 +2796,12 @@ begin
 
           // Setting the CPU part of the name[s] for the file to download
           if FPCupManager.CrossCPU_Target=TCPU.arm then s:='ARM' else
-            if FPCupManager.CrossCPU_Target=TCPU.x86_64 then s:='x64' else
-              if FPCupManager.CrossCPU_Target=TCPU.powerpc then s:='PowerPC' else
-                if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then s:='PowerPC64' else
-                  if FPCupManager.CrossCPU_Target=TCPU.avr then s:='AVR' else
-                    s:=UppercaseFirstChar(GetCPU(FPCupManager.CrossCPU_Target));
+            if FPCupManager.CrossCPU_Target=TCPU.i386 then s:='i386' else
+              if FPCupManager.CrossCPU_Target=TCPU.x86_64 then s:='x64' else
+                if FPCupManager.CrossCPU_Target=TCPU.powerpc then s:='PowerPC' else
+                  if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then s:='PowerPC64' else
+                    if FPCupManager.CrossCPU_Target=TCPU.avr then s:='AVR' else
+                      s:=UppercaseFirstChar(GetCPU(FPCupManager.CrossCPU_Target));
 
           BinsFileName:=s;
 

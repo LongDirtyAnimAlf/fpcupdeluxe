@@ -498,8 +498,10 @@ begin
         // There is a repository here, but it was checked out
         // from a different URL...
         // Keep result false; show caller what's going on.
-        FLocalRevision := FRET_UNKNOWN_REVISION;
-        FReturnCode := FRET_LOCAL_REMOTE_URL_NOMATCH;
+        FLocalRevision          := FRET_UNKNOWN_REVISION;
+        //FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
+        FReturnCode             := FRET_LOCAL_REMOTE_URL_NOMATCH;
+        Repository              := URL;
       end;
     end;
   end;
