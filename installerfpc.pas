@@ -904,6 +904,71 @@ begin
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
         begin
 
+          if (MakeCycle=Low(TSTEPS)) then
+          begin
+
+            // Things to be done once and first
+
+            if (CrossInstaller.TargetCPU=TCPU.arm) then
+            begin
+
+              // what to do ...
+              // always build hardfloat for ARM ?
+              // or default to softfloat for ARM ?
+              // if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
+              // decision: (nearly) always build hardfloat ... not necessary correct however !
+              s2:=ARMArchFPCStr[TARMARCH.armhf];
+              for ARMArch := Low(TARMARCH) to High(TARMARCH) do
+              begin
+                s1:=ARMArchFPCStr[ARMArch];
+                if (Length(s1)>0) and (Pos(s1,FCompilerOptions)>0) then
+                begin
+                  s2:='';
+                  break;
+                end;
+              end;
+              if Length(s2)>0 then FCompilerOptions:=FCompilerOptions+' '+s2;
+
+              //Check for EABI + FPC_ARMHF combo that is invalid for everything < 3.3
+              s2:='-CaEABI';
+              i:=StringListSame(CrossInstaller.CrossOpt,s2);
+              if (i<>-1) then
+              begin
+                if (Self.NumericalVersion<CalculateFullVersion(3,3,0)) then
+                begin
+                  if (Pos(ARMArchFPCStr[TARMARCH.armhf],FCompilerOptions)>0) then
+                  begin
+                    // Remove this option: not allowed for FPC < 3.3
+                    Infoln(infotext+'Removing '+s2+' crosscompiler option: not allowed for ARMHF FPC < 3.3 !',etWarning);
+                    CrossInstaller.CrossOpt.Delete(i);
+                    // The cfg snipped also contains this define: remove it
+                    // Bit tricky
+                    CrossInstaller.ReplaceFPCCFGSnippet(s2,'');
+                  end;
+                end;
+              end;
+
+              //Check for FPV4_SP_D16 that is invalid for everything < 3.3
+              s1:='-CfVFPV3_D16';
+              s2:='-CfFPV4_SP_D16';
+              i:=StringListSame(CrossInstaller.CrossOpt,s2);
+              if (i<>-1) then
+              begin
+                if (Self.NumericalVersion<CalculateFullVersion(3,3,0)) then
+                begin
+                  // Rename this option: not allowed for FPC < 3.3
+                  Infoln(infotext+'Renaming '+s2+' crosscompiler option to '+s1+' for FPC < 3.3 !',etWarning);
+                  CrossInstaller.CrossOpt[i]:=s1;
+                  // The cfg snipped also contains this define: rename it
+                  // Bit tricky
+                  CrossInstaller.ReplaceFPCCFGSnippet(s2,s1);
+                end;
+              end;
+
+            end;
+
+          end;
+
           // Modify fpc.cfg
           // always add this, to be able to detect which cross-compilers are installed
           // helpfull for later bulk-update of all cross-compilers
@@ -911,7 +976,6 @@ begin
 
           if (MakeCycle=Low(TSTEPS)) OR (MakeCycle=High(TSTEPS)) then
           begin
-
             //Set basic config text
             s1:='# Dummy (blank) config just to replace dedicated settings during build of cross-compiler'+LineEnding;
 
@@ -1190,26 +1254,6 @@ begin
             end;
           end;
 
-          if (CrossInstaller.TargetCPU=TCPU.arm) then
-          begin
-            // what to do ...
-            // always build hardfloat for ARM ?
-            // or default to softfloat for ARM ?
-            // if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
-            // decision: (nearly) always build hardfloat ... not necessary correct however !
-            s2:=' -dFPC_ARMHF';
-            for ARMArch := Low(TARMARCH) to High(TARMARCH) do
-            begin
-              s1:=ARMArchFPCStr[ARMArch];
-              if (Length(s1)>0) and (Pos(s1,Options)>0) then
-              begin
-                s2:='';
-                break;
-              end;
-            end;
-            if Length(s2)>0 then Options:=Options+s2;
-          end;
-
           s2:=GetRevision(ModuleName);
           if (Length(s2)>0) then
           begin
@@ -1237,9 +1281,7 @@ begin
           CrossOptions:='';
 
           for i:=0 to CrossInstaller.CrossOpt.Count-1 do
-          begin
             CrossOptions:=CrossOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
-          end;
           CrossOptions:=TrimRight(CrossOptions);
 
           if UseLibc then CrossOptions:=CrossOptions+' -dFPC_USE_LIBC';

@@ -190,6 +190,7 @@ type
     function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual;
     {$endif}
     procedure AddFPCCFGSnippet(aSnip: string);
+    procedure ReplaceFPCCFGSnippet(aOldSnip,aNewSnip: string);
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
     procedure SetCrossOpt(CrossOpts: string);
     // Pass subarch if any
@@ -524,6 +525,17 @@ begin
   end
   else FFPCCFGSnippet:=aSnippd;
 
+end;
+
+procedure TCrossInstaller.ReplaceFPCCFGSnippet(aOldSnip,aNewSnip: string);
+begin
+  if Length(Trim(aOldSnip))=0 then exit;
+  if (Pos(aOldSnip,FFPCCFGSnippet)>0) then
+  begin
+    FFPCCFGSnippet:=StringReplace(FFPCCFGSnippet,aOldSnip,aNewSnip,[rfIgnoreCase]);
+    // Remove double line-endings, if any
+    FFPCCFGSnippet:=StringReplace(FFPCCFGSnippet,LineEnding+LineEnding,LineEnding,[rfReplaceAll]);
+  end;
 end;
 
 procedure TCrossInstaller.SearchLibraryInfo(found:boolean; const extrainfo:string='');
