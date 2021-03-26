@@ -141,8 +141,6 @@ type
 
   TCrossUtils = array[TCPU,TOS,TSUBARCH] of TCrossUtil;
 
-  TCompilerType=(ctBootstrap,ctInstalled);
-
   { TCrossInstaller }
   TCrossInstaller = class(TObject)
   private
@@ -152,11 +150,11 @@ type
     function GetSubarchName:string;
     function GetABIName:string;
   protected
+    FFPCVersion: string;
     FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
     FBinutilsPathInPath: boolean;
     FBinUtilsDirectoryID: string; //where to find the binutils themselves
-    FCompilerUsed: TCompilerType;
     FSearchMode: TSearchSetting;
     FCrossModuleNamePrefix: string; //used for identifying module to user in messages
     FCrossOpts: TStringList; //Options to be added to CROSSOPT by the calling code. XP= (binutils prefix) is already done, no need to add it
@@ -191,6 +189,7 @@ type
     {$endif}
     procedure AddFPCCFGSnippet(aSnip: string);
     procedure ReplaceFPCCFGSnippet(aOldSnip,aNewSnip: string);
+    procedure SetFPCVersion(aVersion: string);
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
     procedure SetCrossOpt(CrossOpts: string);
     // Pass subarch if any
@@ -200,10 +199,6 @@ type
     procedure ShowInfo(info: string = ''; Level: TEventType = etInfo);
     // Reset some variables to default values
     procedure Reset; virtual;
-    // Which compiler should be used for cross compilation.
-    // Normally the bootstrap compiler, but cross compilers may need the installed compiler
-    // (often a trunk version, though there's no tests yet that check trunk is installed)
-    property CompilerUsed: TCompilerType read FCompilerUsed;
     property SearchModeUsed: TSearchSetting read FSearchMode write FSearchMode;
     property CrossModuleName: string read GetCrossModuleName;
     // Represents arguments for CROSSOPT parameter
@@ -211,6 +206,7 @@ type
     // CROSSOPT: Compiler makefile allows to specify compiler options that are only used during the actual crosscompiling phase (i.e. not during the initial bootstrap cycle)
     // Also used in fpc.cfg snippet to set options when compiling for cross target
     property CrossOpt: TStringList read FCrossOpts;
+    property FPCVersion: string read FFPCVersion;
     // Conditional define snippet for fpc.cfg used to specify library locations etc
     // Can be empty
     // Does not include the #IFDEF CPU<x> and #ENDIF parts where the target cpu is filled in
@@ -805,6 +801,11 @@ begin
   FCrossOptsAdded:=true;
 end;
 
+procedure TCrossInstaller.SetFPCVersion(aVersion: string);
+begin
+  FFPCVersion:=aVersion;
+end;
+
 procedure TCrossInstaller.SetCrossOpt(CrossOpts: string);
 // A bit rough-and-ready but hopefully there won't be too many quoting etc problems
 var
@@ -884,11 +885,6 @@ begin
   FTargetOS:=TOS.osNone;
 
   FBinUtilsPrefix:='Error: cross compiler extension must set FBinUtilsPrefix: can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it';
-
-  // use installed source compiler for cross compiling by default
-  // bootstrap compiler was only usefull in some cornercases
-  // see: http://lists.freepascal.org/pipermail/fpc-devel/2018-August/039494.html
-  FCompilerUsed:=ctInstalled;
 
   FCrossModuleNamePrefix:='TAny';
 

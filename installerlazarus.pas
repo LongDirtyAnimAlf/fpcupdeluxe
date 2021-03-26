@@ -317,6 +317,7 @@ begin
     // Actually not using crossopts - they're only for building an FPC compiler; the
     // relevant options should have been written as a snippet to fpc.cfg and picked
     // up from there.
+    CrossInstaller.SetFPCVersion(CompilerVersion(FCompiler));
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     CrossInstaller.SetSubArch(CrossOS_SubArch);
     CrossInstaller.SetABI(CrossOS_ABI);
@@ -559,6 +560,7 @@ begin
     if ((CrossInstaller.TargetCPU=TCPU.cpuNone) OR (CrossInstaller.TargetOS=TOS.osNone)) then exit;
 
     CrossInstaller.Reset;
+    CrossInstaller.SetFPCVersion(CompilerVersion(FCompiler));
 
     case ModuleName of
       _LCL:
@@ -1894,6 +1896,7 @@ begin
   begin
     if CrossCompiling then
     begin
+      CrossInstaller.SetFPCVersion(CompilerVersion(FCompiler));
       CrossInstaller.SetCrossOpt(CrossOPT);
       CrossInstaller.SetSubArch(CrossOS_SubArch);
       CrossInstaller.SetABI(CrossOS_ABI);

@@ -802,7 +802,7 @@ type
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
   CrossOptions:String;
-  ChosenCompiler:String; //Compiler to be used for cross compiling
+  ChosenCompiler:String; //Compiler to be used for cross compiling: FPC itself
   i,j:integer;
   OldPath:String;
   Options:String;
@@ -833,9 +833,10 @@ begin
     end;
     {$endif win32}
 
+
     if CrossInstaller.TargetCPU=TCPU.jvm then DownloadJasmin;
 
-    //pass on user-requested cross compile options
+    CrossInstaller.SetFPCVersion(GetFPCVersion);
     CrossInstaller.SetCrossOpt(CrossOPT);
     CrossInstaller.SetSubArch(CrossOS_SubArch);
     CrossInstaller.SetABI(CrossOS_ABI);
@@ -878,16 +879,7 @@ begin
     begin
       result:=false;
 
-      if CrossInstaller.CompilerUsed=ctInstalled then
-      begin
-        Infoln(infotext+'Using FPC itself to compile and build the cross-compiler',etInfo);
-        ChosenCompiler:=GetFPCInBinDir;
-      end
-      else //ctBootstrap
-      begin
-        Infoln(infotext+'Using the original bootstrapper to compile and build the cross-compiler',etInfo);
-        ChosenCompiler:=FCompiler;
-      end;
+      ChosenCompiler:=GetFPCInBinDir;
 
       s1:=CompilerVersion(ChosenCompiler);
 
@@ -1624,6 +1616,7 @@ begin
     if ((CrossInstaller.TargetCPU=TCPU.cpuNone) OR (CrossInstaller.TargetOS=TOS.osNone)) then exit;
 
     CrossInstaller.Reset;
+    CrossInstaller.SetFPCVersion(GetFPCVersion);
 
     DirectoryAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
     if DirectoryAvailable then
@@ -4323,7 +4316,7 @@ begin
     // Delete any existing buildstamp file
     Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'build-stamp.'+CPUOS_Signature);
     Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'base.build-stamp.'+CPUOS_Signature);
-    //pass on user-requested cross compile options
+
     CrossInstaller.SetCrossOpt(CrossOPT);
     CrossInstaller.SetSubArch(CrossOS_SubArch);
     CrossInstaller.SetABI(CrossOS_ABI);
@@ -4353,6 +4346,9 @@ begin
 
   if FileExists(aCleanupCompiler) then
   begin
+    if CrossCompiling then
+      CrossInstaller.SetFPCVersion(aCleanupCompiler);
+
     Processor.Executable:=Make;
     Processor.Process.Parameters.Clear;
     {$IFDEF MSWINDOWS}
