@@ -909,7 +909,7 @@ begin
               // or default to softfloat for ARM ?
               // FPC sources default: ARMHF for versions >= 3.2.0
               // decision: always build hardfloat for FPC >= 3.2.0
-              if (CalculateNumericalVersion(GetFPCVersion)>=CalculateFullVersion(3,2,0)) then
+              if (CalculateNumericalVersion(CrossInstaller.FPCVersion)>=CalculateFullVersion(3,2,0)) then
               begin
                 s2:=ARMArchFPCStr[TARMARCH.armhf];
                 for ARMArch := Low(TARMARCH) to High(TARMARCH) do
@@ -923,7 +923,7 @@ begin
                 end;
                 if (Length(s2)>0) then
                 begin
-                  Infoln(infotext+'Adding ARMHF compiler option for FPC >= 3.2.0 !',etWarning);
+                  Infoln('Adding ARMHF compiler option for FPC >= 3.2.0 !',etWarning);
                   FCompilerOptions:=FCompilerOptions+' '+s2;
                 end;
               end;
@@ -933,12 +933,12 @@ begin
               i:=StringListSame(CrossInstaller.CrossOpt,s2);
               if (i<>-1) then
               begin
-                if (CalculateNumericalVersion(GetFPCVersion)<CalculateFullVersion(3,3,0)) then
+                if (CalculateNumericalVersion(CrossInstaller.FPCVersion)<CalculateFullVersion(3,3,0)) then
                 begin
                   if (Pos(ARMArchFPCStr[TARMARCH.armhf],FCompilerOptions)>0) then
                   begin
                     // Remove this option: not allowed for FPC < 3.3
-                    Infoln(infotext+'Removing '+s2+' crosscompiler option: not allowed for ARMHF FPC < 3.3 !',etWarning);
+                    Infoln('Removing '+s2+' crosscompiler option: not allowed for ARMHF FPC < 3.3 !',etWarning);
                     CrossInstaller.CrossOpt.Delete(i);
                     // The cfg snipped might also contains this define: remove it
                     // Bit tricky
@@ -953,10 +953,10 @@ begin
               i:=StringListSame(CrossInstaller.CrossOpt,s2);
               if (i<>-1) then
               begin
-                if (CalculateNumericalVersion(GetFPCVersion)<CalculateFullVersion(3,3,0)) then
+                if (CalculateNumericalVersion(CrossInstaller.FPCVersion)<CalculateFullVersion(3,3,0)) then
                 begin
                   // Rename this option: not allowed for FPC < 3.3
-                  Infoln(infotext+'Renaming '+s2+' crosscompiler option to '+s1+' for FPC < 3.3 !',etWarning);
+                  Infoln('Renaming '+s2+' crosscompiler option to '+s1+' for FPC < 3.3 !',etWarning);
                   CrossInstaller.CrossOpt[i]:=s1;
                   // The cfg snipped might also contains this define: rename it
                   // Bit tricky
