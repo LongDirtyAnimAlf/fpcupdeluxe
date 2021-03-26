@@ -915,33 +915,40 @@ begin
               // what to do ...
               // always build hardfloat for ARM ?
               // or default to softfloat for ARM ?
-              // if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
-              // decision: (nearly) always build hardfloat ... not necessary correct however !
-              s2:=ARMArchFPCStr[TARMARCH.armhf];
-              for ARMArch := Low(TARMARCH) to High(TARMARCH) do
+              // FPC sources default: ARMHF for versions >= 3.2.0
+              // decision: always build hardfloat for FPC >= 3.2.0
+              if (CalculateNumericalVersion(GetFPCVersion)>=CalculateFullVersion(3,2,0)) then
               begin
-                s1:=ARMArchFPCStr[ARMArch];
-                if (Length(s1)>0) and (Pos(s1,FCompilerOptions)>0) then
+                s2:=ARMArchFPCStr[TARMARCH.armhf];
+                for ARMArch := Low(TARMARCH) to High(TARMARCH) do
                 begin
-                  s2:='';
-                  break;
+                  s1:=ARMArchFPCStr[ARMArch];
+                  if (Length(s1)>0) and (Pos(s1,FCompilerOptions)>0) then
+                  begin
+                    s2:='';
+                    break;
+                  end;
+                end;
+                if (Length(s2)>0) then
+                begin
+                  Infoln(infotext+'Adding ARMHF compiler option for FPC >= 3.2.0 !',etWarning);
+                  FCompilerOptions:=FCompilerOptions+' '+s2;
                 end;
               end;
-              if Length(s2)>0 then FCompilerOptions:=FCompilerOptions+' '+s2;
 
               //Check for EABI + FPC_ARMHF combo that is invalid for everything < 3.3
               s2:='-CaEABI';
               i:=StringListSame(CrossInstaller.CrossOpt,s2);
               if (i<>-1) then
               begin
-                if (Self.NumericalVersion<CalculateFullVersion(3,3,0)) then
+                if (CalculateNumericalVersion(GetFPCVersion)<CalculateFullVersion(3,3,0)) then
                 begin
                   if (Pos(ARMArchFPCStr[TARMARCH.armhf],FCompilerOptions)>0) then
                   begin
                     // Remove this option: not allowed for FPC < 3.3
                     Infoln(infotext+'Removing '+s2+' crosscompiler option: not allowed for ARMHF FPC < 3.3 !',etWarning);
                     CrossInstaller.CrossOpt.Delete(i);
-                    // The cfg snipped also contains this define: remove it
+                    // The cfg snipped might also contains this define: remove it
                     // Bit tricky
                     CrossInstaller.ReplaceFPCCFGSnippet(s2,'');
                   end;
@@ -954,12 +961,12 @@ begin
               i:=StringListSame(CrossInstaller.CrossOpt,s2);
               if (i<>-1) then
               begin
-                if (Self.NumericalVersion<CalculateFullVersion(3,3,0)) then
+                if (CalculateNumericalVersion(GetFPCVersion)<CalculateFullVersion(3,3,0)) then
                 begin
                   // Rename this option: not allowed for FPC < 3.3
                   Infoln(infotext+'Renaming '+s2+' crosscompiler option to '+s1+' for FPC < 3.3 !',etWarning);
                   CrossInstaller.CrossOpt[i]:=s1;
-                  // The cfg snipped also contains this define: rename it
+                  // The cfg snipped might also contains this define: rename it
                   // Bit tricky
                   CrossInstaller.ReplaceFPCCFGSnippet(s2,s1);
                 end;
