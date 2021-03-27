@@ -2267,6 +2267,7 @@ begin
   result:='0.0.0';
 
   if s=FPCTRUNKVERSION then result:=FPCTRUNKBOOTVERSION
+  else if s='3.2.2' then result:='3.2.0'
   else if s='3.2.0' then result:='3.0.4'
   else if ((s='3.0.5') OR (s='3.0.4')) then result:='3.0.2'
   else if ((s='3.0.3') OR (s='3.0.2') OR (s='3.0.1')) then result:='3.0.0'
@@ -3426,8 +3427,16 @@ begin
       // get the bootstrapper, among other things (binutils)
       // start with the highest requirement ??!!
       RequiredBootstrapVersion:=RequiredBootstrapVersionHigh;
-
       result:=InitModule(RequiredBootstrapVersion);
+
+      {
+      if (NOT result) then
+      begin
+        // Retry with the lowest requirement
+        //RequiredBootstrapVersion:=RequiredBootstrapVersionLow;
+        result:=InitModule(RequiredBootstrapVersionLow);
+      end;
+      }
 
       if (CompilerVersion(FCompiler)=RequiredBootstrapVersion)
         then Infoln(infotext+'To compile this FPC, we will use a fresh compiler with version : '+RequiredBootstrapVersion,etInfo)
