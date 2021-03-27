@@ -615,7 +615,7 @@ begin
   if (NOT Assigned(FCrossInstaller)) then
   begin
     Infoln(localinfotext+'Could not find crosscompiler logic for '+target+' !!',etError);
-    Infoln(localinfotext+'This is a fatal error. Exception wil be created.',etError);
+    Infoln(localinfotext+'This is a fatal error. Exception will be created.',etError);
     Infoln(localinfotext+'Please file a bug-report.',etError);
     raise Exception.CreateFmt('%s fpcup cross-logic not found. Please report this issue.',[target]);
     end
@@ -810,7 +810,7 @@ begin
     if FMake='' then
     begin
       Infoln(localinfotext+'Could not find '+GNUMake+' executable.',etError);
-      Infoln(localinfotext+'This is a fatal error. Exception wil be created.',etError);
+      Infoln(localinfotext+'This is a fatal error. Exception will be created.',etError);
       Infoln(localinfotext+'Please make sure it is installed.',etError);
       raise Exception.CreateFmt('%s not found. Please install %s',[GNUMake,GNUMake]);
     end;
@@ -3400,14 +3400,14 @@ begin
 
         if (PatchAccepted) then
         begin
-          Infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil be applied !',etInfo);
+          Infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' will be applied !',etInfo);
           ForceDirectoriesSafe(PatchDirectory);
           s:=FileNameFromURL(PatchFilePath);
           GetFile(PatchFilePath,PatchDirectory+DirectorySeparator+s,true);
         end
         else
         begin
-          Infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil not be applied !',etDebug);
+          Infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' will not be applied !',etDebug);
         end;
       end;
     finally
