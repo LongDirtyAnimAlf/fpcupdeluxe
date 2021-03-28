@@ -1,4 +1,5 @@
 unit installerFpc;
+
 { FPC installer/updater module
 Copyright (C) 2012-2014 Ludo Brands, Reinier Olislagers
 
@@ -907,7 +908,7 @@ begin
               // what to do ...
               // always build hardfloat for ARM ?
               // or default to softfloat for ARM ?
-              // FPC sources default: ARMHF for versions >= 3.2.0
+              // FPC sources default (ppcarm.lpi): ARMHF for versions >= 3.2.0
               // decision: always build hardfloat for FPC >= 3.2.0
               if (CalculateNumericalVersion(CrossInstaller.FPCVersion)>=CalculateFullVersion(3,2,0)) then
               begin
