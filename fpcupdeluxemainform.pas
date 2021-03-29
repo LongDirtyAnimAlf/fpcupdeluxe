@@ -2853,7 +2853,6 @@ begin
           LibsFileName:=BinsFileName;
 
 
-          // Set special BinsFile for universal tools for Darwin
           {$IF (defined(Windows)) OR (defined(Linux))}
           if (
             ((FPCupManager.CrossOS_Target=TOS.darwin) AND (FPCupManager.CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
@@ -2861,7 +2860,14 @@ begin
             ((FPCupManager.CrossOS_Target=TOS.ios) AND (FPCupManager.CrossCPU_Target in [TCPU.arm,TCPU.aarch64]))
             ) then
           begin
+            // Set special BinsFile for universal tools for Darwin
             BinsFileName:='AppleAll';
+          end;
+
+          if FPCupManager.CrossOS_Target=TOS.android then
+          begin
+            // Android has universal binaries
+            BinsFileName:='AndroidAll';
           end;
           {$endif}
 
@@ -2883,9 +2889,8 @@ begin
             BinPath:=BinPath+'-oi';
           end;
 
-
-          // Set special Bins directory for universal tools for Darwin based on clang
           {$IF (defined(Windows)) OR (defined(Linux))}
+          // Set special Bins directory for universal tools for Darwin based on clang
           if (
             ((FPCupManager.CrossOS_Target=TOS.darwin) AND (FPCupManager.CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
             OR
@@ -2894,6 +2899,12 @@ begin
           begin
             BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
             BinPath:=StringReplace(BinPath,GetOS(FPCupManager.CrossOS_Target),'apple',[]);
+          end;
+
+          // Set special Bins directory for universal tools for Android based on clang
+          if FPCupManager.CrossOS_Target=TOS.android then
+          begin
+            BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
           end;
           {$endif}
 

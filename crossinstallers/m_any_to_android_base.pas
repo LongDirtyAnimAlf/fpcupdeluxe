@@ -312,6 +312,9 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
+  if not result then
+    result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
+
   // if libs already found, search for binutils belonging to this lib !!
   if (not result) AND (Length(FLibsPath)>0) AND (Pos('Error:',FLibsPath)=0) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
