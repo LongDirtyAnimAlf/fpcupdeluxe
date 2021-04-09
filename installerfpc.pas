@@ -910,7 +910,8 @@ begin
               // or default to softfloat for ARM ?
               // FPC sources default (ppcarm.lpi): ARMHF for versions >= 3.2.0
               // decision: always build hardfloat for FPC >= 3.2.0
-              if (CalculateNumericalVersion(CrossInstaller.FPCVersion)>=CalculateFullVersion(3,2,0)) then
+              j:=CalculateNumericalVersion(CrossInstaller.FPCVersion);
+              if (j<>0) AND (j>=CalculateFullVersion(3,2,0)) then
               begin
                 s2:=ARMArchFPCStr[TARMARCH.armhf];
                 for ARMArch := Low(TARMARCH) to High(TARMARCH) do
@@ -934,7 +935,8 @@ begin
               i:=StringListSame(CrossInstaller.CrossOpt,s2);
               if (i<>-1) then
               begin
-                if (CalculateNumericalVersion(CrossInstaller.FPCVersion)<CalculateFullVersion(3,3,0)) then
+                j:=CalculateNumericalVersion(CrossInstaller.FPCVersion);
+                if (j<>0) AND (j<CalculateFullVersion(3,3,0)) then
                 begin
                   if (Pos(ARMArchFPCStr[TARMARCH.armhf],FCompilerOptions)>0) then
                   begin
@@ -954,7 +956,8 @@ begin
               i:=StringListSame(CrossInstaller.CrossOpt,s2);
               if (i<>-1) then
               begin
-                if (CalculateNumericalVersion(CrossInstaller.FPCVersion)<CalculateFullVersion(3,3,0)) then
+                j:=CalculateNumericalVersion(CrossInstaller.FPCVersion);
+                if (j<>0) AND (j<CalculateFullVersion(3,3,0)) then
                 begin
                   // Rename this option: not allowed for FPC < 3.3
                   Infoln('Renaming '+s2+' crosscompiler option to '+s1+' for FPC < 3.3 !',etWarning);

@@ -241,15 +241,42 @@ begin
     if (TargetOS in [TOS.darwin,TOS.ios]) AND (NOT (TargetCPU in [TCPU.powerpc64,TCPU.powerpc])) then
     begin
       // Search in special Apple directory for LD
-      AsFile:=LDSEARCHFILE+GetExeExt;
-      result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
-      if (NOT result) then
+
+      for DarwinRelease:=MAXDARWINVERSION downto MINDARWINVERSION do
       begin
-        AsFile:=TargetCPUName+'-w64-mingw32-'+LDSEARCHFILE+GetExeExt;
+        if DarwinRelease=MINDARWINVERSION then
+          AsFile:=BinUtilsPrefix
+        else
+          AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(DarwinRelease),[]);
+        AsFile:=AsFile+LDSEARCHFILE+GetExeExt;
+
         result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
+        {$ifdef MSWINDOWS}
+        if (NOT result) then
+        begin
+          AsFile:=TargetCPUName+'-w64-mingw32-'+LDSEARCHFILE+GetExeExt;
+          result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
+        end;
+        {$endif MSWINDOWS}
+        if result then break;
       end;
+
+      if (not result) then
+      begin
+        AsFile:=LDSEARCHFILE+GetExeExt;
+        result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
+        {$ifdef MSWINDOWS}
+        if (NOT result) then
+        begin
+          AsFile:=TargetCPUName+'-w64-mingw32-'+LDSEARCHFILE+GetExeExt;
+          result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
+        end;
+        {$endif MSWINDOWS}
+      end;
+
     end;
   end;
+
   if not result then
   begin
     // Search in special all-targetos directory

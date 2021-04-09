@@ -79,6 +79,7 @@ end;
 function Tany_darwinaarch64.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
+  //cpu_armv84a
 end;
 
 constructor Tany_darwinaarch64.Create;
