@@ -3010,7 +3010,7 @@ begin
     if (FCrossOS_Target=TOS.ios) then
     begin
       FCrossOS_ABI:=aABI;
-      if (aABI<>TABI.default) OR (aABI<>TABI.aarch64ios) then
+      if (aABI<>TABI.default) AND (aABI<>TABI.aarch64ios) then
         raise Exception.CreateFmt('Invalid ARM ABI "%s" for SetABI for iOS.', [aABI]);
     end
     else
