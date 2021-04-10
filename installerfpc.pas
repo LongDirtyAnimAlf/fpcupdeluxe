@@ -884,9 +884,14 @@ begin
 
       s1:=CompilerVersion(ChosenCompiler);
 
-      if s1<>'0.0.0'
-        then Infoln('FPC '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+' cross-builder: Using compiler with version: '+s1, etInfo)
-        else Infoln(infotext+'FPC compiler ('+ChosenCompiler+') version error: '+s1+' ! Should never happen: expect many errors !!', etError);
+      if s1<>'0.0.0' then
+        Infoln('FPC '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+' cross-builder: Using compiler with version: '+s1, etInfo)
+      else
+        Infoln(infotext+'FPC compiler ('+ChosenCompiler+') version error: '+s1+' ! Should never happen: expect many errors !!', etError);
+
+      {$ifdef MSWINDOWS}
+      CreateBinutilsList(CrossInstaller.FPCVersion);
+      {$endif MSWINDOWS}
 
       // Add binutils path to path if necessary
       OldPath:=GetPath;
@@ -1215,7 +1220,7 @@ begin
             // Do we need a new cross-compiler ?
             if (NOT CompilerUpdateNeeded) then
             begin
-              if (MakeCycle=st_Compiler) then Infoln({infotext+}'Skipping cross-compiler build step: seems to be up to date !!',etWarning);
+              if (MakeCycle=st_Compiler) then Infoln({infotext+}'Skipping cross-compiler build step: compiler seems to be up to date !!',etWarning);
               continue; // best guess: compilers stem from identical sources, so do not build the cross-compiler again
             end;
           end;
@@ -1515,8 +1520,6 @@ begin
           Compiler:=GetCompiler;
 
           {$ifdef MSWINDOWS}
-          CreateBinutilsList(CompilerVersion(ChosenCompiler));
-
           // get wince debugger
           if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.wince) then
           begin
@@ -3339,15 +3342,15 @@ begin
     begin
       VersionSnippet:=CompilerVersion(s);
       if VersionSnippet<>'0.0.0' then
-      begin
-        VersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
         s2:='FPC native builder: Detected source version FPC (compiler): ';
-      end;
     end;
   end;
 
   if VersionSnippet<>'0.0.0' then
+  begin
     Infoln(s2+VersionSnippet, etInfo);
+    VersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
+  end;
 
   // if cross-compiling, skip a lot of code
   // trust the previous work done by this code for the native installer!
@@ -3466,9 +3469,9 @@ begin
     {$ENDIF}
 
     // get the correct binutils (Windows only)
-    //CreateBinutilsList(GetBootstrapCompilerVersionFromSource(FSourceDirectory));
-    //CreateBinutilsList(GetFPCVersionFromSource(FSourceDirectory));
-    CreateBinutilsList(RequiredBootstrapVersion);
+    //CreateBinutilsList(RequiredBootstrapVersion);
+    CreateBinutilsList(VersionSnippet);
+
     result:=CheckAndGetNeededBinUtils;
 
     {$ifdef Solaris}
@@ -4411,7 +4414,7 @@ begin
         if (Self AS TFPCCrossInstaller).CompilerUpdateNeeded then
           aCleanupCommandList.Append('compiler_distclean')
         else
-          Infoln({infotext+}'Skipping cross-compiler clean step: seems to be up to date !!',etWarning);
+          Infoln({infotext+}'Skipping cross-compiler clean step: compiler seems to be up to date !!',etWarning);
         aCleanupCommandList.Append('rtl_distclean');
         if (Self AS TFPCCrossInstaller).PackagesNeeded then aCleanupCommandList.Append('packages_distclean');
       end;
