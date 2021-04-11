@@ -1384,12 +1384,19 @@ function CalculateNumericalVersion(VersionSnippet: string): dword;
 var
   Major,Minor,Build,Patch: Integer;
 begin
-  Major:=0;
-  Minor:=0;
-  Build:=0;
-  Patch:=0;
-  VersionFromString(VersionSnippet,Major,Minor,Build,Patch);
-  result:=CalculateFullVersion(Major,Minor,Build);
+  if (Length(VersionSnippet)=0) OR (VersionSnippet='0.0.0') then
+  begin
+    result:=0;
+  end
+  else
+  begin
+    Major:=0;
+    Minor:=0;
+    Build:=0;
+    Patch:=0;
+    VersionFromString(VersionSnippet,Major,Minor,Build,Patch);
+    result:=CalculateFullVersion(Major,Minor,Build);
+  end;
 end;
 
 function VersionFromUrl(URL:string): string;

@@ -803,7 +803,6 @@ type
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
   CrossOptions:String;
-  ChosenCompiler:String; //Compiler to be used for cross compiling: FPC itself
   i,j:integer;
   OldPath:String;
   Options:String;
@@ -833,7 +832,6 @@ begin
       end;
     end;
     {$endif win32}
-
 
     if CrossInstaller.TargetCPU=TCPU.jvm then DownloadJasmin;
 
@@ -880,14 +878,12 @@ begin
     begin
       result:=false;
 
-      ChosenCompiler:=GetFPCInBinDir;
-
-      s1:=CompilerVersion(ChosenCompiler);
+      s1:=CompilerVersion(FCompiler);
 
       if s1<>'0.0.0' then
         Infoln('FPC '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+' cross-builder: Using compiler with version: '+s1, etInfo)
       else
-        Infoln(infotext+'FPC compiler ('+ChosenCompiler+') version error: '+s1+' ! Should never happen: expect many errors !!', etError);
+        Infoln(infotext+'FPC compiler ('+FCompiler+') version error: '+s1+' ! Should never happen: expect many errors !!', etError);
 
       {$ifdef MSWINDOWS}
       CreateBinutilsList(CrossInstaller.FPCVersion);
@@ -946,7 +942,7 @@ begin
                   if (Pos(ARMArchFPCStr[TARMARCH.armhf],FCompilerOptions)>0) then
                   begin
                     // Remove this option: not allowed for FPC < 3.3
-                    Infoln('Removing '+s2+' crosscompiler option: not allowed for ARMHF FPC < 3.3 !',etWarning);
+                    Infoln('Removing '+s2+' crosscompiler option: not allowed for ARMHF FPC '+CrossInstaller.FPCVersion+' !',etWarning);
                     CrossInstaller.CrossOpt.Delete(i);
                     // The cfg snipped might also contains this define: remove it
                     // Bit tricky
@@ -965,7 +961,7 @@ begin
                 if (j<>0) AND (j<CalculateFullVersion(3,3,0)) then
                 begin
                   // Rename this option: not allowed for FPC < 3.3
-                  Infoln('Renaming '+s2+' crosscompiler option to '+s1+' for FPC < 3.3 !',etWarning);
+                  Infoln('Renaming '+s2+' crosscompiler option to '+s1+' for FPC '+CrossInstaller.FPCVersion+' !',etWarning);
                   CrossInstaller.CrossOpt[i]:=s1;
                   // The cfg snipped might also contains this define: rename it
                   // Bit tricky
@@ -1076,13 +1072,6 @@ begin
           Processor.Process.Parameters.Add('FPCDIR=' + s1);
 
           {$IFDEF MSWINDOWS}
-          if ChosenCompiler=GetFPCInBinDir then
-          begin
-            if FileExists(FPCCfg) then
-            begin
-              //Processor.Process.Parameters.Add('CFGFILE=' + FPCCfg);
-            end;
-          end;
           Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           {$ELSE}
@@ -1097,10 +1086,10 @@ begin
 
           //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
           //Todo: to be investigated
-          Processor.Process.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
+          Processor.Process.Parameters.Add('FPCFPMAKE='+FCompiler);
 
           {$ifdef crosssimple}
-          Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
+          Processor.Process.Parameters.Add('FPC='+FCompiler);
           case MakeCycle of
             st_MakeAll:
             begin
@@ -1115,7 +1104,7 @@ begin
           case MakeCycle of
             st_Compiler:
             begin
-              Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
+              Processor.Process.Parameters.Add('FPC='+FCompiler);
               Processor.Process.Parameters.Add('compiler_cycle');
             end;
             st_CompilerInstall:
@@ -1136,7 +1125,7 @@ begin
               end;
               {$endif}
               {$endif}
-              Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
+              Processor.Process.Parameters.Add('FPC='+FCompiler);
               Processor.Process.Parameters.Add('compiler_install');
             end;
             st_Rtl:
@@ -3315,6 +3304,7 @@ var
 
 begin
   result:=inherited;
+
   result:=InitModule;
 
   if not result then exit;
@@ -3328,10 +3318,10 @@ begin
     exit(false);
   end;
 
-  s:=GetFPCInBinDir;
   if (Self is TFPCCrossInstaller) then
   begin
-    VersionSnippet:=CompilerVersion(s);
+    Compiler:=GetFPCInBinDir;
+    VersionSnippet:=CompilerVersion(FCompiler);
     s2:='FPC '+CrossInstaller.RegisterName+' cross-builder: Detected source version FPC (compiler): '
   end
   else
@@ -3340,7 +3330,7 @@ begin
     s2:='FPC native builder: Detected source version FPC (source): ';
     if VersionSnippet='0.0.0' then
     begin
-      VersionSnippet:=CompilerVersion(s);
+      VersionSnippet:=CompilerVersion(GetFPCInBinDir);
       if VersionSnippet<>'0.0.0' then
         s2:='FPC native builder: Detected source version FPC (compiler): ';
     end;
@@ -3626,18 +3616,6 @@ begin
       pchar(s));
   end;
   {$ENDIF UNIX}
-
-  // Let everyone know of our shiny new compiler (or proxy) when NOT crosscompiling !
-  if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) then
-  begin
-    Compiler:=GetCompiler;
-    // Verify it exists
-    if not(FileExists(FCompiler)) then
-    begin
-      WritelnLog(etError, infotext+'Could not find compiler '+FCompiler+' that should have been created.',true);
-      OperationSucceeded:=false;
-    end;
-  end;
 
   // only create fpc.cfg and other configs with fpcmkcfg when NOT crosscompiling !
   if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) then
@@ -4166,7 +4144,7 @@ begin
 
         {$ENDIF UNIX}
 
-        {$ifdef Darwin}
+        {$IFDEF DARWIN}
         ConfigText.Append('');
         ConfigText.Append('# Add some extra OSX options');
         ConfigText.Append('#IFDEF DARWIN');
@@ -4202,7 +4180,7 @@ begin
           if (Length(s)>0) AND (DirectoryExists(s)) then
             ConfigText.Append('-FD'+s);
         end;
-        {$endif Darwin}
+        {$ENDIF DARWIN}
 
         {$ifndef FPCONLY}
         {$ifdef LCLQT5}
