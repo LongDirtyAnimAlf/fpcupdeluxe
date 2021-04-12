@@ -45,8 +45,6 @@ type
 
 { Tany_iosarm }
 Tany_iosarm = class(Tany_apple)
-private
-  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 protected
   function GetOSName:string;override;
   function GetLibName:string;override;
@@ -62,7 +60,7 @@ end;
 
 function Tany_iosarm.GetOSName:string;
 begin
-  result:='iPhoneOS';
+  result:=iOSNAME;
 end;
 function Tany_iosarm.GetLibName:string;
 begin

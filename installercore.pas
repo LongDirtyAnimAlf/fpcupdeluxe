@@ -299,6 +299,7 @@ type
     // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
     function GetCrossCompilerPresent:boolean;
+    function GetFullVersionString:string;
     function GetFullVersion:dword;
     function GetDefaultCompilerFilename(const TargetCPU: TCPU; Cross: boolean): string;
     function GetInstallerClass(aClassToFind:TClass):boolean;
@@ -402,8 +403,6 @@ type
     {$IFDEF MSWINDOWS}
     function FindSVNSubDirs: boolean;
     {$ENDIF}
-    // Finds compiler in fpcdir path if TFPCInstaller descendant
-    function GetCompiler: string;
     // Returns CPU-OS in the format used by the FPC bin directory, e.g. x86_64-win64:
     function GetFPCTarget(Native: boolean): string;
     // Sets the search/binary path to NewPath or adds NewPath before or after existing path:
@@ -496,7 +495,8 @@ type
     // get cross-installer
     property CrossInstaller:TCrossInstaller read GetCrossInstaller;
     property CrossCompilerPresent: boolean read GetCrossCompilerPresent;
-    property NumericalVersion:dword read GetFullVersion;
+    property SourceVersionStr:string read GetFullVersionString;
+    property SourceVersionNum:dword read GetFullVersion;
     property SanityCheck:boolean read GetSanityCheck;
     function GetCompilerName(Cpu_Target:TCPU):string;overload;
     function GetCompilerName(Cpu_Target:string):string;overload;
@@ -584,13 +584,6 @@ uses
   ;
 
 { TInstaller }
-
-function TInstaller.GetCompiler: string;
-begin
-  if (Self.ClassNameIs('TFPCNativeInstaller')) or (Self.ClassNameIs('TFPCInstaller'))
-    then Result := GetFPCInBinDir
-    else Result := FCompiler;
-end;
 
 function TInstaller.GetCrossInstaller: TCrossInstaller;
 var
@@ -2771,7 +2764,7 @@ begin
 
   // for now, just put jasmin.jar in FPC bin-directory ... easy and simple and working
 
-  TargetBin:=ConcatPaths([FInstallDirectory,'bin',GetFPCTarget(true)])+PathDelim+TARGETNAME;
+  TargetBin:=FFPCCompilerBinPath+TARGETNAME;
 
   if (NOT FileExists(TargetBin)) then
   begin
@@ -2973,7 +2966,7 @@ end;
 
 function TInstaller.GetFPCInBinDir: string;
 begin
-  result := ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true),'fpc' + GetExeExt]);
+  result := FFPCCompilerBinPath+'fpc'+GetExeExt;
   {$IFDEF UNIX}
   if FileExists(result + '.sh') then
     begin
@@ -3386,7 +3379,7 @@ begin
           // Should be removed in future fpcup versions !!
           if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
           begin
-            if NumericalVersion<>PatchVersion then PatchAccepted:=False;
+            if SourceVersionNum<>PatchVersion then PatchAccepted:=False;
             if (PatchVersion=TrunkVersion) then
             begin
               // only patch trunk when HEAD is requested
@@ -3886,8 +3879,17 @@ begin
   end;
 end;
 
+function TInstaller.GetFullVersionString:string;
+begin
+  if ((Self.FMajorVersion=-1) OR (Self.FMinorVersion=-1) OR (Self.FReleaseVersion=-1)) then
+    raise Exception.Create('Fatal: wrong version number(s) !!');
+  result:=InttoStr(Self.FMajorVersion)+'.'+InttoStr(Self.FMinorVersion)+'.'+InttoStr(Self.FReleaseVersion);
+end;
+
 function TInstaller.GetFullVersion:dword;
 begin
+  if ((Self.FMajorVersion=-1) OR (Self.FMinorVersion=-1) OR (Self.FReleaseVersion=-1)) then
+    raise Exception.Create('Fatal: wrong version number(s) !!');
   result:=CalculateFullVersion(Self.FMajorVersion,Self.FMinorVersion,Self.FReleaseVersion);
 end;
 
@@ -3930,7 +3932,7 @@ var
 begin
   s:=GetVersionFromSource(FSourceDirectory);
   if s='0.0.0' then s:=GetVersionFromURL(FURL);
-  if s<>'0.0.0' then
+  if (s<>'0.0.0') then
   begin
     FMajorVersion := -1;
     FMinorVersion := -1;

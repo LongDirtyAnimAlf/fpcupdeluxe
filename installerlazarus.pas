@@ -384,8 +384,8 @@ begin
         //Make sure our FPC units can be found by Lazarus
         Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
         //Make sure Lazarus does not pick up these tools from other installs
-        Processor.Process.Parameters.Add('FPCMAKE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt);
-        Processor.Process.Parameters.Add('PPUMOVE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'ppumove'+GetExeExt);
+        Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
+        Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
 
         {$ifdef Windows}
         Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
@@ -409,7 +409,7 @@ begin
         //Always limit the search for fpc.cfg to our own fpc.cfg
         //Only needed on Windows. On Linux, we have already our own fpc.sh
         {$ifdef Windows}
-        Options := Options+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpc.cfg';
+        Options := Options+' -n @'+FFPCCompilerBinPath+'fpc.cfg';
         {$endif}
 
         // Add remaining options
@@ -479,7 +479,7 @@ begin
         {$ifdef MSWindows}
         //Prepend FPC binary directory to PATH to prevent pickup of strange tools
         OldPath:=Processor.Environment.GetVar(PATHVARNAME);
-        s:=ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)]);
+        s:=ExcludeTrailingPathDelimiter(FFPCCompilerBinPath);
         if OldPath<>'' then
            Processor.Environment.SetVar(PATHVARNAME, s+PathSeparator+OldPath)
         else
@@ -639,7 +639,7 @@ begin
   end;
 
   //Note: available in more recent Lazarus : use "make lazbuild useride" to build ide with installed packages
-  if ((ModuleName<>_USERIDE) OR (NumericalVersion>=CalculateFullVersion(1,6,2))) then
+  if ((ModuleName<>_USERIDE) OR (SourceVersionNum>=CalculateFullVersion(1,6,2))) then
   begin
     // Make all (should include lcl & ide), lazbuild, lcl etc
     // distclean was already run; otherwise specify make clean all
@@ -694,7 +694,7 @@ begin
     //Always limit the search for fpc.cfg to our own fpc.cfg
     //Only needed on Windows. On Linux, we have already our own fpc.sh
     {$ifdef Windows}
-    //s:=s+' -n @'+ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true),'fpc.cfg']);
+    //s:=s+' -n @'+FFPCCompilerBinPath+'fpc.cfg';
     {$endif}
 
     // Add remaining options
@@ -886,7 +886,7 @@ begin
       {$ifdef MSWindows}
       //Prepend FPC binary directory to PATH to prevent pickup of strange tools
       OldPath:=Processor.Environment.GetVar(PATHVARNAME);
-      s:=ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)]);
+      s:=ExcludeTrailingPathDelimiter(FFPCCompilerBinPath);
       if OldPath<>'' then
          Processor.Environment.SetVar(PATHVARNAME, s+PathSeparator+OldPath)
       else
@@ -1546,7 +1546,7 @@ begin
   end;
 
   VersionSnippet:=GetVersion;
-  if VersionSnippet<>'0.0.0' then
+  if (VersionSnippet<>'0.0.0') then
   begin
     // only report once
     if (ModuleName=_LAZBUILD) OR (ModuleName=_LAZARUS) OR ((Self is TLazarusCrossInstaller) AND (ModuleName=_LCL)) then
@@ -1663,7 +1663,7 @@ begin
 
         if (Length(GDBPath)>0) then
         begin
-          if (NumericalVersion<CalculateFullVersion(2,1,0)) then
+          if (SourceVersionNum<CalculateFullVersion(2,1,0)) then
           begin
             LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Class', 'TGDBMIDebugger');
           end
@@ -1693,7 +1693,7 @@ begin
 
         if FileExists(LLDBPath) then
         begin
-          if (NumericalVersion<CalculateFullVersion(2,1,0)) then
+          if (SourceVersionNum<CalculateFullVersion(2,1,0)) then
           begin
             LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Class', 'TLldbDebugger');
           end
@@ -2263,7 +2263,7 @@ begin
         end;
       end;
 
-      Processor.Executable := ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'fpcmake'+GetExeExt;
+      Processor.Executable := FFPCCompilerBinPath+'fpcmake'+GetExeExt;
       Processor.Process.Parameters.Clear;
 
       s:=Processor.Environment.GetVar('FPCDIR');

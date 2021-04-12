@@ -36,6 +36,11 @@ interface
 uses
   Classes, SysUtils, m_crossinstaller;
 
+const
+  iOSNAME='iPhoneOS';
+  macOSNAME='MacOSX';
+
+
 type
   { Tany_apple }
   Tany_apple = class(TCrossInstaller)
@@ -77,23 +82,47 @@ begin
   found:=false;
 
   // begin simple: check presence of library file in basedir
-  if not result then
-    result:=SearchLibrary(Basepath,LibName);
+  result:=SearchLibrary(Basepath,LibName);
   if not result then
     result:=SearchLibrary(Basepath,TDBLibName);
 
-  if not result then
-    result:=SearchLibrary(IncludeTrailingPathDelimiter(Basepath)+'usr'+DirectorySeparator+'lib',LibName);
-  if not result then
-    result:=SearchLibrary(IncludeTrailingPathDelimiter(Basepath)+'usr'+DirectorySeparator+'lib',TDBLibName);
+  if (not result) then
+  begin
+    s:=ConcatPaths([Basepath,'usr','lib']);
+    result:=SearchLibrary(s,LibName);
+    if not result then
+      result:=SearchLibrary(s,TDBLibName);
+  end;
 
-  if not result then
+  if (not result) then
+  begin
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,TDBLibName);
+    if not result then
+      result:=SimpleSearchLibrary(BasePath,DirName,TDBLibName);
+  end;
+
+  if (not result) then
+  begin
+    s:=ConcatPaths([DirName,'usr','lib']);
+    result:=SimpleSearchLibrary(BasePath,s,LibName);
+    if not result then
+      result:=SimpleSearchLibrary(BasePath,s,TDBLibName);
+  end;
+
+  // universal libs for old aarch64-darwin: also search in arm-darwin
+  if ((TargetOS=TOS.darwin) AND (TargetCPU=TCPU.aarch64) AND (OSNAME=iOSNAME)) then
+  begin
+    if (not result) then
+    begin
+      s:=ConcatPaths(['arm-'+TargetOSName,'usr','lib']);
+      result:=SimpleSearchLibrary(BasePath,s,LibName);
+      if not result then
+        result:=SimpleSearchLibrary(BasePath,s,TDBLibName);
+    end;
+  end;
 
   // also for cctools or special fpcupdeluxe tools
-  if not result then
+  if (not result) then
   begin
     for Major:=MAXOSVERSION downto MINOSVERSION do
     begin
@@ -249,6 +278,12 @@ begin
         else
           AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(DarwinRelease),[]);
         AsFile:=AsFile+LDSEARCHFILE+GetExeExt;
+
+        if ((TargetOS=TOS.darwin) AND (OSNAME=iOSNAME)) then
+        begin
+          // special: before FPC 3.3 ios did not exists as os target: darwin itself was used ... handle it !!
+          AsFile:=StringReplace(AsFile,TargetOSName,'ios',[]);
+        end;
 
         result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
         {$ifdef MSWINDOWS}

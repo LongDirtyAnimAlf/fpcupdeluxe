@@ -677,10 +677,7 @@ begin
       end;
 
       // Check for proper fpdoc
-      FPDocExe:=IncludeTrailingPathDelimiter(FFPCInstallDir)+
-        'bin'+DirectorySeparator+
-        GetFPCTarget(true)+DirectorySeparator+
-        'fpdoc'+GetExeExt;
+      FPDocExe:=FFPCCompilerBinPath+'fpdoc'+GetExeExt;
       if (CheckExecutable(FPDocExe, ['--help'], 'FPDoc')=false) then
       begin
       FPDocExe:=IncludeTrailingPathDelimiter(FFPCSourceDir)+

@@ -116,6 +116,7 @@ uses
   {$else}
   m_any_to_darwin386,
   m_any_to_darwinx64,
+  m_any_to_darwinarm,
   m_any_to_darwinaarch64,
   m_any_to_iosarm,
   m_any_to_iosaarch64,

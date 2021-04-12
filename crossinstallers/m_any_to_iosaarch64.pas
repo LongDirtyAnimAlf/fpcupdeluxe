@@ -62,7 +62,7 @@ end;
 
 function Tany_iosaarch64.GetOSName:string;
 begin
-  result:='iPhoneOS';
+  result:=iOSNAME;
 end;
 function Tany_iosaarch64.GetLibName:string;
 begin

@@ -131,7 +131,6 @@ Const
     _DO+_DEFAULT+_UNINSTALL+_SEP+
     _END+
 
-
 //default install sequence for docker
     _DECLARE+_DOCKER+_SEP+
     _CLEANMODULE+_FPC+_SEP+
@@ -139,13 +138,9 @@ Const
     _GETMODULE+_FPC+_SEP+
     _BUILDMODULE+_FPC+_SEP+
     {$ifndef FPCONLY}
-    _CLEANMODULE+_LAZBUILD+_SEP +
-    _CHECKMODULE+_LAZBUILD+_SEP +
-    _GETMODULE+_LAZBUILD+_SEP +
-    _CONFIGMODULE+_LAZBUILD+_SEP +
-    _BUILDMODULE+_LAZBUILD+_SEP +
+    _DO+_LAZBUILD+_ONLY+_SEP +
     {$endif}
-    _END+ //keyword End specifies the end of the sequence
+    _END+
 
 //default check sequence
     _DECLARE+_DEFAULT+_CHECK+_SEP+

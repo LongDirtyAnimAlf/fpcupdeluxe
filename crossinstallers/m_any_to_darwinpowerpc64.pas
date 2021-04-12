@@ -62,7 +62,7 @@ end;
 
 function Tany_darwinpowerpc64.GetOSName:string;
 begin
-  result:='MacOSX';
+  result:=macOSNAME;
 end;
 function Tany_darwinpowerpc64.GetLibName:string;
 begin

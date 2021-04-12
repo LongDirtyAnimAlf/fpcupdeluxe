@@ -141,9 +141,6 @@ type
     function CreateFPCScript:boolean;
     // Downloads bootstrap compiler for relevant platform, reports result.
     function DownloadBootstrapCompiler: boolean;
-    // Another way to get the compiler version string
-    //todo: choose either GetCompilerVersion or GetFPCVersion
-    function GetFPCVersion: string;
     function GetFPCRevision: string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
@@ -825,7 +822,7 @@ begin
     {$ifdef win32}
     if (CrossInstaller.TargetCPU=TCPU.x86_64) and ((CrossInstaller.TargetOS=TOS.win64) or (CrossInstaller.TargetOS=TOS.win32)) then
     begin
-      if (CalculateNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,2)) then
+      if (SourceVersionNum<CalculateFullVersion(2,4,2)) then
       begin
         result:=true;
         exit;
@@ -835,7 +832,7 @@ begin
 
     if CrossInstaller.TargetCPU=TCPU.jvm then DownloadJasmin;
 
-    CrossInstaller.SetFPCVersion(GetFPCVersion);
+    CrossInstaller.SetFPCVersion(SourceVersionStr);
     CrossInstaller.SetCrossOpt(CrossOPT);
     CrossInstaller.SetSubArch(CrossOS_SubArch);
     CrossInstaller.SetABI(CrossOS_ABI);
@@ -880,7 +877,7 @@ begin
 
       s1:=CompilerVersion(FCompiler);
 
-      if s1<>'0.0.0' then
+      if (s1<>'0.0.0') then
         Infoln('FPC '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+' cross-builder: Using compiler with version: '+s1, etInfo)
       else
         Infoln(infotext+'FPC compiler ('+FCompiler+') version error: '+s1+' ! Should never happen: expect many errors !!', etError);
@@ -1411,7 +1408,7 @@ begin
                 begin
                   // copy over / rename the cross-compiler towards the FPC bin-directory, with the right compilername.
                   Infoln(infotext+'Copy cross-compiler ('+s1+') into: '+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath),etInfo);
-                  s1:=ConcatPaths([FFPCCompilerBinPath,CrossCompilerName]);
+                  s1:=FFPCCompilerBinPath+CrossCompilerName;
                   //FileUtil.CopyFile(s2,s1);
                   SysUtils.DeleteFile(s1);
                   SysUtils.RenameFile(s2,s1);
@@ -1506,7 +1503,6 @@ begin
           {$IFDEF UNIX}
           result:=CreateFPCScript;
           {$ENDIF UNIX}
-          Compiler:=GetCompiler;
 
           {$ifdef MSWINDOWS}
           // get wince debugger
@@ -1612,7 +1608,7 @@ begin
     if ((CrossInstaller.TargetCPU=TCPU.cpuNone) OR (CrossInstaller.TargetOS=TOS.osNone)) then exit;
 
     CrossInstaller.Reset;
-    CrossInstaller.SetFPCVersion(GetFPCVersion);
+    CrossInstaller.SetFPCVersion(SourceVersionStr);
 
     DirectoryAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
     if DirectoryAvailable then
@@ -1724,7 +1720,7 @@ begin
   OperationSucceeded:=true;
 
   s1:=CompilerVersion(FCompiler);
-  if s1<>'0.0.0'
+  if (s1<>'0.0.0')
     then Infoln('FPC native builder: Using FPC bootstrap compiler with version: '+s1, etInfo)
     else Infoln(infotext+'FPC bootstrap version error: '+s1+' ! Should never happen: expect many errors !!', etError);
 
@@ -1752,7 +1748,7 @@ begin
     if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYPARSE,s1);
 
     {$IFDEF UNIX}
-    s1:=ConcatPaths([FInstallDirectory,'lib','fpc',GetFPCVersion]);
+    s1:=ConcatPaths([FInstallDirectory,'lib','fpc',SourceVersionStr]);
     ForceDirectoriesSafe(s1);
     s1:=s1+'/lexyacc';
     DeleteFile(s1);
@@ -1844,7 +1840,7 @@ begin
   Processor.Process.Parameters.Add('OS_TARGET=' + GetTargetOS);
   Processor.Process.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
 
-  if (CalculateNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,4)) then
+  if (SourceVersionNum<CalculateFullVersion(2,4,4)) then
     Processor.Process.Parameters.Add('DATA2INC=echo');
   {else
     Processor.Process.Parameters.Add('DATA2INC=' + FFPCCompilerBinPath+'data2inc'+GetExeExt);}
@@ -2004,7 +2000,7 @@ begin
     // Let everyone know of our shiny new compiler:
     if OperationSucceeded then
     begin
-      Compiler:=GetCompiler;
+      Compiler:=GetFPCInBinDir;
       // Verify it exists
       if not(FileExists(FCompiler)) then
       begin
@@ -2390,7 +2386,7 @@ begin
     {$ENDIF}
 
     //3.3.1 allows 3.0.4 but 3.0.4 does not work anymore for 3.3.1 ... so only allow 3.2.0 or higher
-    if (NumericalVersion=CalculateNumericalVersion('3.3.1')) then
+    if (SourceVersionNum=CalculateNumericalVersion('3.3.1')) then
     begin
       RequiredVersion:=CalculateNumericalVersion('3.2.0');
       if (FinalVersion<RequiredVersion) then FinalVersion:=RequiredVersion;
@@ -2645,31 +2641,6 @@ begin
   Result := OperationSucceeded;
 end;
 
-function TFPCInstaller.GetFPCVersion: string;
-var
-  testcompiler:string;
-begin
-  result:='0.0.0';
-
-  testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc1'+GetExeExt;
-
-  if not FileExists(testcompiler) then
-    testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc'+GetExeExt;
-
-  if not FileExists(testcompiler) then
-    testcompiler:=GetCompiler;
-
-  if FileExists(testcompiler) then
-  begin
-    result:=CompilerVersion(testcompiler);
-  end
-  else
-  begin
-    result:=GetVersionFromSource(FSourceDirectory);
-    if result='0.0.0' then result:=GetVersionFromUrl(URL);
-  end;
-end;
-
 function TFPCInstaller.GetFPCRevision: string;
 var
   testcompiler:string;
@@ -2682,7 +2653,7 @@ begin
     testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc'+GetExeExt;
 
   if not FileExists(testcompiler) then
-    testcompiler:=GetCompiler;
+    testcompiler:=GetFPCInBinDir;
 
   if FileExists(testcompiler) then
   begin
@@ -3318,17 +3289,16 @@ begin
     exit(false);
   end;
 
+  VersionSnippet:=GetVersion;
   if (Self is TFPCCrossInstaller) then
   begin
     Compiler:=GetFPCInBinDir;
-    VersionSnippet:=CompilerVersion(FCompiler);
-    s2:='FPC '+CrossInstaller.RegisterName+' cross-builder: Detected source version FPC (compiler): '
+    s2:='FPC '+CrossInstaller.RegisterName+' cross-builder: Detected source version FPC (source): '
   end
   else
   begin
-    VersionSnippet:=GetVersion;
     s2:='FPC native builder: Detected source version FPC (source): ';
-    if VersionSnippet='0.0.0' then
+    if (VersionSnippet='0.0.0') then
     begin
       VersionSnippet:=CompilerVersion(GetFPCInBinDir);
       if VersionSnippet<>'0.0.0' then
@@ -3336,11 +3306,8 @@ begin
     end;
   end;
 
-  if VersionSnippet<>'0.0.0' then
-  begin
+  if (VersionSnippet<>'0.0.0') then
     Infoln(s2+VersionSnippet, etInfo);
-    VersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
-  end;
 
   // if cross-compiling, skip a lot of code
   // trust the previous work done by this code for the native installer!
@@ -3580,13 +3547,13 @@ begin
   begin
     if (CrossInstaller.TargetOS=TOS.dragonfly) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.freebsd) then FUseLibc:=True;
-    if (CrossInstaller.TargetOS=TOS.openbsd) AND (NumericalVersion>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
+    if (CrossInstaller.TargetOS=TOS.openbsd) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end
   else
   begin
     if (GetTargetOS=GetOS(TOS.dragonfly)) then FUseLibc:=True;
     if (GetTargetOS=GetOS(TOS.freebsd)) then FUseLibc:=True;
-    if (GetTargetOS=GetOS(TOS.openbsd)) AND (NumericalVersion>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
+    if (GetTargetOS=GetOS(TOS.openbsd)) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end;
 
   // Now: the real build of FPC !!!
@@ -3612,7 +3579,7 @@ begin
     // <somewhere>/lib/fpc/$fpcversion/units
     s:=IncludeTrailingPathDelimiter(FInstallDirectory)+'units';
     DeleteFile(s);
-    fpSymlink(pchar(IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc/'+GetFPCVersion+'/units'),
+    fpSymlink(pchar(IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc/'+SourceVersionStr+'/units'),
       pchar(s));
   end;
   {$ENDIF UNIX}
@@ -3623,7 +3590,7 @@ begin
     // Find out where fpcmkcfg lives
     if (OperationSucceeded) then
     begin
-      FPCMkCfg:=ConcatPaths([FFPCCompilerBinPath,FPCMAKECONFIG+GetExeExt]);
+      FPCMkCfg:=FFPCCompilerBinPath+FPCMAKECONFIG+GetExeExt;
       OperationSucceeded:=CheckExecutable(FPCMkCfg,['-h'],FPCMAKECONFIG);
       if (NOT OperationSucceeded) then
       begin
@@ -4448,7 +4415,7 @@ begin
       DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
       {$IFDEF UNIX}
       // Delete any fpc.sh shell scripts
-      Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+'fpc.sh');
+      Sysutils.DeleteFile(FFPCCompilerBinPath+'fpc.sh');
       {$ENDIF UNIX}
     end;
 
@@ -4456,7 +4423,7 @@ begin
     // Delete units
     // Alf: does this work and is it still needed: todo check
     DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'units');
-    DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'lib/fpc/'+GetFPCVersion+'/units');
+    DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'lib/fpc/'+SourceVersionStr+'/units');
     {$ENDIF UNIX}
 
     {$IFDEF MSWINDOWS}

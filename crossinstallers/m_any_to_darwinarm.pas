@@ -1,6 +1,6 @@
-unit m_any_to_darwinaarch64;
+unit m_any_to_darwinarm;
 
-{ Cross compiles to Darwin ARM64
+{ Cross compiles to Darwin ARM
 Copyright (C) 2014 Reinier Olislagers / DonAlfredo
 
 This library is free software; you can redistribute it and/or modify it
@@ -43,8 +43,8 @@ uses
 
 type
 
-{ Tany_darwinaarch64 }
-Tany_darwinaarch64 = class(Tany_apple)
+{ Tany_darwinarm }
+Tany_darwinarm = class(Tany_apple)
 protected
   function GetOSName:string;override;
   function GetLibName:string;override;
@@ -56,62 +56,55 @@ public
   destructor Destroy; override;
 end;
 
-{ Tany_darwinaarch64 }
+{ Tany_darwinarm }
 
-function Tany_darwinaarch64.GetOSName:string;
-var
-  j:dword;
+function Tany_darwinarm.GetOSName:string;
 begin
-  j:=CalculateNumericalVersion(FPCVersion);
-  if (j<>0) AND (j<CalculateFullVersion(3,3,0)) then
-    result:=iOSNAME
-  else
-    result:=macOSNAME;
+  result:=iOSNAME
 end;
-function Tany_darwinaarch64.GetLibName:string;
+function Tany_darwinarm.GetLibName:string;
 begin
   result:='libc.dylib';
 end;
-function Tany_darwinaarch64.GetTDBLibName:string;
+function Tany_darwinarm.GetTDBLibName:string;
 begin
   result:='libc.tbd';
 end;
 
-function Tany_darwinaarch64.GetLibs(Basepath:string): boolean;
+function Tany_darwinarm.GetLibs(Basepath:string): boolean;
 begin
   result:=inherited;
 end;
 
-function Tany_darwinaarch64.GetBinUtils(Basepath:string): boolean;
+function Tany_darwinarm.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
-  //cpu_armv84a
 end;
 
-constructor Tany_darwinaarch64.Create;
+constructor Tany_darwinarm.Create;
 begin
   inherited Create;
-  FTargetCPU:=TCPU.aarch64;
+  FTargetCPU:=TCPU.arm;
   FTargetOS:=TOS.darwin;
   Reset;
   ShowInfo;
 end;
 
-destructor Tany_darwinaarch64.Destroy;
+destructor Tany_darwinarm.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$ifndef Darwin}
 var
-  any_darwinaarch64:Tany_darwinaarch64;
+  any_darwinarm:Tany_darwinarm;
 
 initialization
-  any_darwinaarch64:=Tany_darwinaarch64.Create;
-  RegisterCrossCompiler(any_darwinaarch64.RegisterName,any_darwinaarch64);
+  any_darwinarm:=Tany_darwinarm.Create;
+  RegisterCrossCompiler(any_darwinarm.RegisterName,any_darwinarm);
 
 finalization
-  any_darwinaarch64.Destroy;
+  any_darwinarm.Destroy;
 
 {$endif Darwin}
 end.
