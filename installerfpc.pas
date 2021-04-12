@@ -807,7 +807,7 @@ var
   UnitSearchPath:string;
   LibsAvailable,BinsAvailable:boolean;
   MakeCycle:TSTEPS;
-  ARMArch:TARMARCH;
+  //ARMArch:TARMARCH;
   SupportedList:TStringList;
   {$ifdef MSWINDOWS}
   Counter:integer;
@@ -886,6 +886,8 @@ begin
       {$ifdef MSWINDOWS}
       CreateBinutilsList(CrossInstaller.FPCVersion);
       {$endif MSWINDOWS}
+
+      FPCCfg := FFPCCompilerBinPath + FPCCONFIGFILENAME;
 
       // Add binutils path to path if necessary
       OldPath:=GetPath;
@@ -1022,7 +1024,6 @@ begin
           // Modify fpc.cfg
           // always add this, to be able to detect which cross-compilers are installed
           // helpfull for later bulk-update of all cross-compilers
-          FPCCfg := FFPCCompilerBinPath + FPCCONFIGFILENAME;
 
           if (MakeCycle=Low(TSTEPS)) OR (MakeCycle=High(TSTEPS)) then
           begin
