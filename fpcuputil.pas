@@ -300,6 +300,8 @@ function FileNameFromURL(URL:string):string;
 function StripUrl(URL:string): string;
 function CompilerVersion(CompilerPath: string): string;
 function CompilerRevision(CompilerPath: string): string;
+function CompilerABI(CompilerPath: string): string;
+function CompilerFPU(CompilerPath: string): string;
 procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build:integer; var Patch: Integer);
 function CalculateFullVersion(const Major,Minor,Release:integer):dword;overload;
 function CalculateFullVersion(const Major,Minor,Release,Patch:integer):qword;overload;
@@ -1249,26 +1251,30 @@ begin
   result:=URI.Host+URI.Path;
 end;
 
+function CompilerCommand(CompilerPath,Command: string): string;
+var
+  Output: string;
+begin
+  Result:='';
+  if ((CompilerPath='') OR (NOT FileExists(CompilerPath))) then exit;
+  try
+    Output:='';
+    if RunCommand(CompilerPath,[Command], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}{$ENDIF}) then
+    begin
+      Output:=TrimRight(Output);
+      if Length(Output)>0 then Result:=Output;
+    end;
+  except
+  end;
+end;
+
 function CompilerVersion(CompilerPath: string): string;
 var
   Output: string;
 begin
   Result:='0.0.0';
-  if ((CompilerPath='') OR (NOT FileExists(CompilerPath))) then exit;
-  try
-    Output:='';
-    // -iW does not work on older compilers : use -iV
-    if RunCommand(CompilerPath,['-iV'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}{$ENDIF}) then
-    //-iVSPTPSOTO
-    begin
-      Output:=TrimRight(Output);
-      if Length(Output)>0 then
-      begin
-        Result:=Output;
-      end;
-    end;
-  except
-  end;
+  Output:=CompilerCommand(CompilerPath,'-iV');
+  if Length(Output)>0 then Result:=Output;
 end;
 
 function CompilerRevision(CompilerPath: string): string;
@@ -1277,25 +1283,36 @@ var
   i:integer;
 begin
   Result:='';
-  if ((CompilerPath='') OR (NOT FileExists(CompilerPath))) then exit;
-  try
-    Output:='';
-    if RunCommand(CompilerPath,['-iW'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
+  Output:=CompilerCommand(CompilerPath,'-iW');
+  if Length(Output)>0 then
+  begin
+    i:=Pos('-r',Output);
+    if (i>0) then
     begin
-      Output:=TrimRight(Output);
-      if Length(Output)>0 then
-      begin
-        i:=Pos('-r',Output);
-        if (i>0) then
-        begin
-          Delete(Output,1,i+1);
-          Result:=Trim(Output);
-        end;
-      end;
+      Delete(Output,1,i+1);
+      Result:=Trim(Output);
     end;
-  except
   end;
 end;
+
+function CompilerABI(CompilerPath: string): string;
+var
+  Output: string;
+begin
+  Result:='';
+  Output:=CompilerCommand(CompilerPath,'-ia');
+  if Length(Output)>0 then Result:=Output;
+end;
+
+function CompilerFPU(CompilerPath: string): string;
+var
+  Output: string;
+begin
+  Result:='';
+  Output:=CompilerCommand(CompilerPath,'-if');
+  if Length(Output)>0 then Result:=Output;
+end;
+
 
 procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build:integer; var Patch: Integer);
 var

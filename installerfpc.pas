@@ -808,6 +808,7 @@ var
   LibsAvailable,BinsAvailable:boolean;
   MakeCycle:TSTEPS;
   ARMArch:TARMARCH;
+  SupportedList:TStringList;
   {$ifdef MSWINDOWS}
   Counter:integer;
   {$endif}
@@ -895,13 +896,13 @@ begin
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
         begin
 
-          if (MakeCycle=Low(TSTEPS)) then
+          // ARMHF crosscompiler build option
+          if (MakeCycle=st_Compiler) then
           begin
-
-            // Things to be done once and first
-
             if (CrossInstaller.TargetCPU=TCPU.arm) then
             begin
+
+              (*
 
               // what to do ...
               // always build hardfloat for ARM ?
@@ -928,41 +929,89 @@ begin
                 end;
               end;
 
+              *)
+
+            end;
+          end;
+
+          if (MakeCycle=st_Rtl) then
+          begin
+
+            if (CrossInstaller.TargetCPU=TCPU.arm) then
+            begin
+
               //Check for EABI + FPC_ARMHF combo that is invalid for everything < 3.3
+              //This is tricky
               s2:='-CaEABI';
               i:=StringListSame(CrossInstaller.CrossOpt,s2);
               if (i<>-1) then
               begin
-                j:=CalculateNumericalVersion(CrossInstaller.FPCVersion);
-                if (j<>0) AND (j<CalculateFullVersion(3,3,0)) then
+                // Get the correct name of the cross-compiler in source-directory
+                s1:=ConcatPaths([FSourceDirectory,'compiler','ppcross'+ppcSuffix[CrossInstaller.TargetCPU]]);
+                // Get the correct name of the cross-compiler in install-directory
+                if (NOT FileExists(s1)) then
+                  s1:=FFPCCompilerBinPath+CrossCompilerName;
+                if FileExists(s1) then
                 begin
-                  if (Pos(ARMArchFPCStr[TARMARCH.armhf],FCompilerOptions)>0) then
+                  // Get compiler ABI's
+                  s1:=CompilerABI(s1);
+                  if (Length(s1)>0) then
                   begin
-                    // Remove this option: not allowed for FPC < 3.3
-                    Infoln('Removing '+s2+' crosscompiler option: not allowed for ARMHF FPC '+CrossInstaller.FPCVersion+' !',etWarning);
-                    CrossInstaller.CrossOpt.Delete(i);
-                    // The cfg snipped might also contains this define: remove it
-                    // Bit tricky
-                    CrossInstaller.ReplaceFPCCFGSnippet(s2,'');
+                    SupportedList:=TStringList.Create;
+                    try
+                      SupportedList.Text:=s1;
+                      j:=StringListSame(SupportedList,'EABI');
+                      if (j=-1) then
+                      begin
+                        // -CaEABI not allowed: remove it from config !!
+                        Infoln('Removing '+s2+' crosscompiler option: not allowed for ARMHF FPC '+CrossInstaller.FPCVersion+' !',etWarning);
+                        CrossInstaller.CrossOpt.Delete(i);
+                        // The cfg snipped might also contains this define: remove it
+                        // Bit tricky
+                        CrossInstaller.ReplaceFPCCFGSnippet(s2,'');
+                      end;
+                    finally
+                      SupportedList.Free;
+                    end;
                   end;
                 end;
               end;
 
               //Check for FPV4_SP_D16 that is invalid for everything < 3.3
-              s1:='-CfVFPV3_D16';
+              //This is tricky
               s2:='-CfFPV4_SP_D16';
               i:=StringListSame(CrossInstaller.CrossOpt,s2);
               if (i<>-1) then
               begin
-                j:=CalculateNumericalVersion(CrossInstaller.FPCVersion);
-                if (j<>0) AND (j<CalculateFullVersion(3,3,0)) then
+                // Get the correct name of the cross-compiler in source-directory
+                s1:=ConcatPaths([FSourceDirectory,'compiler','ppcross'+ppcSuffix[CrossInstaller.TargetCPU]]);
+                // Get the correct name of the cross-compiler in install-directory
+                if (NOT FileExists(s1)) then
+                  s1:=FFPCCompilerBinPath+CrossCompilerName;
+                if FileExists(s1) then
                 begin
-                  // Rename this option: not allowed for FPC < 3.3
-                  Infoln('Renaming '+s2+' crosscompiler option to '+s1+' for FPC '+CrossInstaller.FPCVersion+' !',etWarning);
-                  CrossInstaller.CrossOpt[i]:=s1;
-                  // The cfg snipped might also contains this define: rename it
-                  // Bit tricky
-                  CrossInstaller.ReplaceFPCCFGSnippet(s2,s1);
+                  // Get compiler FPU's
+                  s1:=CompilerFPU(s1);
+                  if (Length(s1)>0) then
+                  begin
+                    SupportedList:=TStringList.Create;
+                    try
+                      SupportedList.Text:=s1;
+                      j:=StringListSame(SupportedList,'FPV4_SP_D16');
+                      if (j=-1) then
+                      begin
+                        // Rename this option: not allowed for FPC < 3.3
+                        s1:='-CfVFPV3_D16';
+                        Infoln('Renaming '+s2+' crosscompiler option to '+s1+' for FPC '+CrossInstaller.FPCVersion+' !',etWarning);
+                        CrossInstaller.CrossOpt[i]:=s1;
+                        // The cfg snipped might also contains this define: rename it
+                        // Bit tricky
+                        CrossInstaller.ReplaceFPCCFGSnippet(s2,s1);
+                      end;
+                    finally
+                      SupportedList.Free;
+                    end;
+                  end;
                 end;
               end;
 
