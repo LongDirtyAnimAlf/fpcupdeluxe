@@ -1296,23 +1296,14 @@ begin
 end;
 
 function CompilerABI(CompilerPath: string): string;
-var
-  Output: string;
 begin
-  Result:='';
-  Output:=CompilerCommand(CompilerPath,'-ia');
-  if Length(Output)>0 then Result:=Output;
+  Result:=CompilerCommand(CompilerPath,'-ia');
 end;
 
 function CompilerFPU(CompilerPath: string): string;
-var
-  Output: string;
 begin
-  Result:='';
-  Output:=CompilerCommand(CompilerPath,'-if');
-  if Length(Output)>0 then Result:=Output;
+  Result:=CompilerCommand(CompilerPath,'-if');
 end;
-
 
 procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build:integer; var Patch: Integer);
 var

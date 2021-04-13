@@ -1224,7 +1224,7 @@ begin
                 then
               begin
                 Infoln(infotext+'Building native compiler for '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+'.',etInfo);
-                Processor.Process.Parameters.Add('FPC='+ChosenCompiler);
+                Processor.Process.Parameters.Add('FPC='+FCompiler);
                 //s1:=CrossCompilerName;
                 //Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
                 Processor.Process.Parameters.Add('-C');
@@ -1497,11 +1497,11 @@ begin
           if (CrossInstaller.TargetCPU=TCPU.i386) and (CrossInstaller.TargetOS=TOS.win32) then
             result:=true;
           {$endif win64}
-          FCompiler:='////\\\Error trying to compile FPC\|!';
           if result then
             Infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
           else
           begin
+            Compiler := '////\\\Error trying to compile FPC\|!';
             Infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code.',etError);
             // If we were building a crosscompiler itself when the failure occured, remove all fpc.cfg settings of this target
             if MakeCycle in [st_Compiler,st_CompilerInstall] then
@@ -2171,9 +2171,10 @@ end;
 
 function TFPCInstaller.GetVersionFromSource(aSourcePath: string): string;
 const
-  VNO='version_nr';
-  RNO='release_nr';
-  PNO='patch_nr';
+  VNO  = 'version_nr';
+  RNO  = 'release_nr';
+  PNO  = 'patch_nr';
+  //MPNO = 'minorpatch';
   MAKEVERSION='version=';
   //MAKEVERSION='PACKAGE_VERSION=';
 var
@@ -2181,9 +2182,11 @@ var
   version_nr:string;
   release_nr:string;
   build_nr:string;
+  //minorbuild_nr:string;
   found_version_nr:boolean;
   found_release_nr:boolean;
   found_build_nr:boolean;
+  //found_minorbuild_nr:boolean;
   s:string;
   x,y:integer;
 begin
@@ -2192,10 +2195,12 @@ begin
   version_nr:='';
   release_nr:='';
   build_nr:='';
+  //minorbuild_nr:='';
 
   found_version_nr:=false;
   found_release_nr:=false;
   found_build_nr:=false;
+  //found_minorbuild_nr:=false;
 
   s:=IncludeTrailingPathDelimiter(aSourcePath) + 'compiler' + DirectorySeparator + 'version.pas';
   if FileExists(s) then
@@ -2252,6 +2257,23 @@ begin
         end;
       end;
 
+      {
+      x:=Pos(MPNO,s);
+      if x>0 then
+      begin
+        y:=x+Length(MPNO);
+        // move towards first numerical
+        while (Length(s)>=y) AND (NOT (s[y] in ['0'..'9'])) do Inc(y);
+        // get version
+        while (Length(s)>=y) AND (s[y] in ['0'..'9']) do
+        begin
+          minorbuild_nr:=minorbuild_nr+s[y];
+          found_minorbuild_nr:=true;
+          Inc(y);
+        end;
+      end;
+      }
+
       // check if ready
       if found_version_nr AND found_release_nr AND found_build_nr then break;
     end;
@@ -2296,8 +2318,57 @@ begin
 end;
 
 function TFPCInstaller.GetReleaseCandidateFromSource(aSourcePath:string):integer;
+const
+  MPNO = 'minorpatch';
+var
+  TxtFile:Text;
+  minorbuild_nr:string;
+  found_minorbuild_nr:boolean;
+  s:string;
+  x,y:integer;
 begin
-  result:=-1;
+  result := 0;
+
+  minorbuild_nr:='';
+  found_minorbuild_nr:=false;
+
+  s:=IncludeTrailingPathDelimiter(aSourcePath) + 'compiler' + DirectorySeparator + 'version.pas';
+  if FileExists(s) then
+  begin
+
+    AssignFile(TxtFile,s);
+    Reset(TxtFile);
+    while NOT EOF (TxtFile) do
+    begin
+      Readln(TxtFile,s);
+
+      x:=Pos(MPNO,s);
+      if x>0 then
+      begin
+        y:=x+Length(MPNO);
+        // move towards first numerical
+        while (Length(s)>=y) AND (NOT (s[y] in ['0'..'9'])) do Inc(y);
+        // get version
+        while (Length(s)>=y) AND (s[y] in ['0'..'9']) do
+        begin
+          minorbuild_nr:=minorbuild_nr+s[y];
+          found_minorbuild_nr:=true;
+          Inc(y);
+        end;
+      end;
+
+      // check if ready
+      if found_minorbuild_nr then break;
+    end;
+
+    CloseFile(TxtFile);
+
+    if found_minorbuild_nr then
+    begin
+      result:=StrToIntDef(minorbuild_nr,0);
+    end;
+
+  end;
 end;
 
 function TFPCInstaller.GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
@@ -3477,7 +3548,12 @@ begin
 
     // get the correct binutils (Windows only)
     //CreateBinutilsList(RequiredBootstrapVersion);
-    CreateBinutilsList(VersionSnippet);
+
+    s:=VersionSnippet;
+    x:=GetReleaseCandidateFromSource(FSourceDirectory);
+    if (x<>0) then
+      s:=s+'.rc'+InttoStr(x);
+    CreateBinutilsList(s);
 
     result:=CheckAndGetNeededBinUtils;
 
