@@ -193,12 +193,12 @@ type
   TFPCCrossInstaller = class(TFPCInstaller)
   private
     FCrossCompilerName: string;
-    function GetUnitsInstallDirectory(WithMagic:boolean):string;
     function CompilerUpdateNeeded:boolean;
     function PackagesNeeded:boolean;
     function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
     property CrossCompilerName: string read FCrossCompilerName;
   protected
+    function GetUnitsInstallDirectory(WithMagic:boolean):string;
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; override;
   public
@@ -383,13 +383,25 @@ end;
 
 function TFPCCrossInstaller.GetUnitsInstallDirectory(WithMagic:boolean):string;
 var
+  aDir:string;
   ABIMagic:string;
   SUBARCHMagic:string;
 begin
   if NOT Assigned(CrossInstaller) then exit;
 
   // Standard directory
-  result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName]);
+  aDir:=ConcatPaths([FInstallDirectory,'units']);
+  {$ifdef UNIX}
+  if FileIsSymlink(aDir) then
+  begin
+    try
+      aDir:=GetPhysicalFilename(aDir,pfeException);
+    except
+    end;
+  end;
+  {$endif UNIX}
+  result:=ConcatPaths([aDir,CrossInstaller.RegisterName]);
+  //result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName]);
 
   // Specials
   if (CrossInstaller.TargetOS in SUBARCH_OS) then
@@ -1720,16 +1732,6 @@ begin
     end;
 
     aDir:=GetUnitsInstallDirectory(false);
-
-    {$ifdef UNIX}
-    if FileIsSymlink(aDir) then
-    begin
-      try
-        aDir:=GetPhysicalFilename(aDir,pfeException);
-      except
-      end;
-    end;
-    {$endif}
     if DirectoryExists(aDir) then
     begin
       // Only allow unit directories inside our own install te be deleted
@@ -4548,27 +4550,42 @@ begin
 
     // Delete units
     // Alf: is it still needed: todo check
-    aDir:=ConcatPaths([FInstallDirectory,'units']);
-    {$IFDEF UNIX}
-    if FileIsSymlink(aDir) then
+
+    if CrossCompiling then
     begin
-      try
-        aDir:=GetPhysicalFilename(aDir,pfeException);
-      except
+     aDir:=(Self AS TFPCCrossInstaller).GetUnitsInstallDirectory(false);
+    end
+    else
+    begin
+      aDir:=ConcatPaths([FInstallDirectory,'units']);
+      {$IFDEF UNIX}
+      if FileIsSymlink(aDir) then
+      begin
+        try
+          aDir:=GetPhysicalFilename(aDir,pfeException);
+        except
+        end;
       end;
+      {$ENDIF UNIX}
+      aDir:=aDir+DirectorySeparator+CPUOS_Signature;
     end;
-    {$ENDIF UNIX}
-    aDir:=aDir+DirectorySeparator+CPUOS_Signature;
-    DeleteDirectoryEx(aDir);
+
+    if DirectoryExists(aDir) then
+    begin
+      // Only allow unit directories inside our own install te be deleted
+      if (Pos(FBaseDirectory,aDir)=1) then
+        DeleteDirectoryEx(aDir);
+    end;
 
     {$IFDEF MSWINDOWS}
     // delete the units directory !!
     // this is needed due to the fact that make distclean will not cleanout this units directory
     // make distclean will only remove the results of a make, not a make install
     aDir:=ConcatPaths([FSourceDirectory,'units',CPUOS_Signature]);
-    DeleteDirectoryEx(aDir);
+    // Only allow unit directories inside our own install te be deleted
+    if (Pos(FBaseDirectory,aDir)=1) then
+      DeleteDirectoryEx(aDir);
     {$ENDIF}
-
 
     // finally ... if something is still still still floating around ... delete it !!
     DeleteList := TStringList.Create;
