@@ -880,8 +880,13 @@ begin
     if AnsiContainsText(line,'lpk file expected') then exit;
   end;
 
-  //Makefile error we are not interested in
+  //Makefile error(s) we are not interested in
   if AnsiContainsText(line,'CreateProcess(') then exit;
+  if AnsiContainsText(line,'make') then
+  begin
+    if AnsiContainsText(line,'error 87') then exit;
+    if AnsiContainsText(line,'(e=87)') then exit;
+  end;
 
   //Various harmless OpenBSD errors
   if AnsiContainsText(line,'misused, please use') then exit;
@@ -958,8 +963,6 @@ begin
       begin
         if AnsiContainsText(line,'error 1') then exit;
         if AnsiContainsText(line,'(e=1)') then exit;
-        if AnsiContainsText(line,'error 87') then exit;
-        if AnsiContainsText(line,'(e=87)') then exit;
         if AnsiContainsText(line,'-iTP:') then exit;
         //if AnsiContainsText(line,'dependency dropped') then exit;
       end;

@@ -1526,7 +1526,7 @@ begin
     PlainBinDir, true, false);
     {$ENDIF UNIX}
   end;
-
+  GetVersion;
   InitDone := Result;
 end;
 
