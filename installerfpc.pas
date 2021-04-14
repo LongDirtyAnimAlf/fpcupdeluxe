@@ -4383,7 +4383,7 @@ var
   FileCounter:integer;
   DeleteList: TStringList;
   CPUOS_Signature:string;
-  aCleanupCompiler,aCleanupCommand:string;
+  aCleanupCompiler,aCleanupCommand,aDir:string;
   aCleanupCommandList:TStringList;
   RunTwice:boolean;
 begin
@@ -4546,18 +4546,27 @@ begin
       {$ENDIF UNIX}
     end;
 
-    {$IFDEF UNIX}
     // Delete units
-    // Alf: does this work and is it still needed: todo check
-    DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'units');
-    DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc/'+SourceVersionStr+'/units/'+CPUOS_Signature);
+    // Alf: is it still needed: todo check
+    aDir:=ConcatPaths([FInstallDirectory,'units']);
+    {$IFDEF UNIX}
+    if FileIsSymlink(aDir) then
+    begin
+      try
+        aDir:=GetPhysicalFilename(aDir,pfeException);
+      except
+      end;
+    end;
     {$ENDIF UNIX}
+    aDir:=aDir+DirectorySeparator+CPUOS_Signature;
+    DeleteDirectoryEx(aDir);
 
     {$IFDEF MSWINDOWS}
     // delete the units directory !!
     // this is needed due to the fact that make distclean will not cleanout this units directory
     // make distclean will only remove the results of a make, not a make install
-    DeleteDirectoryEx(IncludeTrailingPathDelimiter(FSourceDirectory)+'units'+DirectorySeparator+CPUOS_Signature);
+    aDir:=ConcatPaths([FSourceDirectory,'units',CPUOS_Signature]);
+    DeleteDirectoryEx(aDir);
     {$ENDIF}
 
 
@@ -4590,8 +4599,10 @@ begin
       // delete stray executables, if any !!
       if (NOT CrossCompiling) then
       begin
-        FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'utils', '*'+GetExeExt, False);
-        FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'utils', '*'+GetExeExt, True);
+        aDir:=ConcatPaths([FSourceDirectory,'compiler','utils']);
+        FindAllFiles(DeleteList,aDir, '*'+GetExeExt, False);
+        aDir:=ConcatPaths([FSourceDirectory,'utils']);
+        FindAllFiles(DeleteList,aDir, '*'+GetExeExt, True);
       end;
       if DeleteList.Count > 0 then
       begin
