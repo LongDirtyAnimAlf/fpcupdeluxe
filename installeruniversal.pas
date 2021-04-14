@@ -2827,8 +2827,10 @@ const
 var
   idx,cnt                      : integer;
   PackageSettings              : TStringList;
-  LazarusConfig                : TUpdateLazConfig;
   xmlfile                      : string;
+  {$ifndef FPCONLY}
+  LazarusConfig                : TUpdateLazConfig;
+  {$endif}
 begin
   result:=inherited;
   if (not result) then exit;

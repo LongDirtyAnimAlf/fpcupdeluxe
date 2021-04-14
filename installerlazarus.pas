@@ -1545,7 +1545,7 @@ begin
     exit(false);
   end;
 
-  VersionSnippet:=GetVersion;
+  VersionSnippet:=SourceVersionStr;
   if (VersionSnippet<>'0.0.0') then
   begin
     // only report once

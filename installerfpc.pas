@@ -3327,6 +3327,7 @@ begin
       true,false);
     {$ENDIF UNIX}
   end;
+  GetVersion;
   InitDone:=result;
 end;
 
@@ -3410,7 +3411,7 @@ begin
     exit(false);
   end;
 
-  VersionSnippet:=GetVersion;
+  VersionSnippet:=SourceVersionStr;
   if (Self is TFPCCrossInstaller) then
   begin
     Compiler:=GetFPCInBinDir;
@@ -4549,7 +4550,7 @@ begin
     // Delete units
     // Alf: does this work and is it still needed: todo check
     DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'units');
-    DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'lib/fpc/'+SourceVersionStr+'/units');
+    DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc/'+SourceVersionStr+'/units/'+CPUOS_Signature);
     {$ENDIF UNIX}
 
     {$IFDEF MSWINDOWS}
@@ -4688,7 +4689,7 @@ begin
 
   if result then
   begin
-  SourceVersion:=GetVersion;
+    SourceVersion:=GetVersion;
     if (SourceVersion<>'0.0.0') then
     begin
       s:=GetRevisionFromVersion(ModuleName,SourceVersion);
