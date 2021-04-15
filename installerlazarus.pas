@@ -1640,7 +1640,10 @@ begin
         // On Windows, we provide our own GDB
         GDBPath:=ConcatPaths([FMakeDir,'gdb',GetTargetCPUOS])+DirectorySeparator+'gdb.exe';
         if FileExists(GDBPath) then
-          GDBPath:=ConcatPaths([FMakeDir,'gdb','$(TargetCPU)-$(TargetOS)'])+DirectorySeparator+'gdb.exe'
+        begin
+          if (SourceVersionNum>=CalculateFullVersion(0,9,31)) then
+            GDBPath:=ConcatPaths([FMakeDir,'gdb','$(TargetCPU)-$(TargetOS)'])+DirectorySeparator+'gdb.exe'
+        end
         else
           GDBPath:='';
         {$ELSE}

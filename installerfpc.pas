@@ -833,6 +833,7 @@ begin
     CrossInstaller.Reset;
 
     {$ifdef win32}
+    // Skip cross-builing towards win64 for old versions of FPC
     if (CrossInstaller.TargetCPU=TCPU.x86_64) and ((CrossInstaller.TargetOS=TOS.win64) or (CrossInstaller.TargetOS=TOS.win32)) then
     begin
       if (SourceVersionNum<CalculateFullVersion(2,4,2)) then
