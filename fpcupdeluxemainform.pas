@@ -34,6 +34,7 @@ type
 
   TForm1 = class(TForm)
     ActionList1: TActionList;
+    OPMBtn: TBitBtn;
     BitBtnFPCSetRevision: TBitBtn;
     BitBtnLazarusSetRevision: TBitBtn;
     btnCreateLazarusConfig: TButton;
@@ -1936,6 +1937,13 @@ begin
     s:='Going to install the Ultibo.';
     aFPCTarget:='ultibo';
     aLazarusTarget:='ultibo';
+  end;
+
+  if Sender=OPMBtn then
+  begin
+    s:='Going to install the Online Package Manager ';
+    aModule:='opm';
+    //FPCupManager.OnlyModules:='mORMot,zeos';
   end;
 
   s:=s+sLineBreak;
