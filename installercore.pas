@@ -3798,6 +3798,13 @@ begin
     finally
       RevisionStringList.Free;
     end;
+  end
+  else
+  begin
+    if ModuleName=_FPC then
+    begin
+      result:=CompilerRevision(GetFPCInBinDir);
+    end;
   end;
 end;
 

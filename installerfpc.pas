@@ -1310,13 +1310,15 @@ begin
             end;
           end;
 
-          s2:=GetRevision(ModuleName);
-          if (Length(s2)>0) then
+          if ((SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0))) then
           begin
-            Processor.Process.Parameters.Add('REVSTR='+s2);
-            Processor.Process.Parameters.Add('REVINC=force');
+            s2:=GetRevision(ModuleName);
+            if (Length(s2)>0) then
+            begin
+              Processor.Process.Parameters.Add('REVSTR='+s2);
+              Processor.Process.Parameters.Add('REVINC=force');
+            end;
           end;
-
           {$ifdef solaris}
           {$IF defined(CPUX64) OR defined(CPUX86)}
           //Still not sure if this is needed
@@ -1943,13 +1945,16 @@ begin
   end;
   {$ENDIF}
 
-  // Revision should be something like : "[r]123456" !!
-  s2:=Trim(ActualRevision);
-  s2:=AnsiDequotedStr(s2,'''');
-  if (Length(s2)>1) AND (s2<>'failure') AND ((s2[1] in ['0'..'9']) OR (s2[2] in ['0'..'9'])) then
+  if ((SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0))) then
   begin
-    Processor.Process.Parameters.Add('REVSTR='+s2);
-    Processor.Process.Parameters.Add('REVINC=force');
+    // Revision should be something like : "[r]123456" !!
+    s2:=Trim(ActualRevision);
+    s2:=AnsiDequotedStr(s2,'''');
+    if (Length(s2)>1) AND (s2<>'failure') AND ((s2[1] in ['0'..'9']) OR (s2[2] in ['0'..'9'])) then
+    begin
+      Processor.Process.Parameters.Add('REVSTR='+s2);
+      Processor.Process.Parameters.Add('REVINC=force');
+    end;
   end;
 
   {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
@@ -2193,6 +2198,8 @@ var
   x,y:integer;
 begin
   result := '0.0.0';
+
+  if (NOT DirectoryExists(aSourcePath)) then exit;
 
   version_nr:='';
   release_nr:='';
