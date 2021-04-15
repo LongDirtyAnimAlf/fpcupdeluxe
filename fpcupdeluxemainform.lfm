@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 309
+  Left = 394
   Height = 650
-  Top = 128
+  Top = 109
   Width = 1078
   Anchors = []
   Caption = 'Form1'
@@ -3564,7 +3564,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = Memo1
         Left = 8
-        Height = 329
+        Height = 335
         Top = 8
         Width = 286
         Anchors = [akTop, akLeft, akRight, akBottom]
@@ -3628,8 +3628,8 @@ object Form1: TForm1
         AnchorSideRight.Control = OPMBtn
         AnchorSideBottom.Control = btnInstallModule
         Left = 8
-        Height = 66
-        Top = 349
+        Height = 60
+        Top = 355
         Width = 189
         Anchors = [akTop, akLeft, akRight, akBottom]
         BorderSpacing.Left = 8
@@ -3646,14 +3646,14 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = btnInstallModule
         Left = 205
-        Height = 66
+        Height = 42
         Hint = 'Will install/update the Online Package Manager'
-        Top = 349
+        Top = 355
         Width = 89
-        Anchors = [akTop, akRight, akBottom]
+        Anchors = [akRight, akBottom]
         AutoSize = True
         BorderSpacing.Right = 8
-        BorderSpacing.Bottom = 12
+        BorderSpacing.Bottom = 30
         Caption = 'OPM'
         Glyph.Data = {
           36100000424D3610000000000000360000002800000020000000200000000100
@@ -4219,17 +4219,18 @@ object Form1: TForm1
       ClientHeight = 460
       ClientWidth = 302
       object FPCHistoryLabel: TLabel
-        AnchorSideLeft.Control = ListBoxFPCHistory
-        AnchorSideTop.Control = TagSheet
-        AnchorSideRight.Control = BasicSheet
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = HistorySheet
+        AnchorSideRight.Control = HistorySheet
         AnchorSideRight.Side = asrCenter
-        AnchorSideBottom.Control = ListBoxFPCHistory
         Left = 8
         Height = 18
         Top = 8
-        Width = 87
+        Width = 140
+        Anchors = [akLeft]
+        BorderSpacing.Left = 8
         BorderSpacing.Top = 8
-        Caption = 'FPC version'
+        Caption = 'FPC revision history'
         Font.CharSet = ANSI_CHARSET
         Font.Height = -16
         Font.Name = 'Arial'
@@ -4240,16 +4241,18 @@ object Form1: TForm1
         OnClick = FPCVersionLabelClick
       end
       object LazarusHistoryLabel: TLabel
-        AnchorSideLeft.Control = ListBoxLazarusHistory
-        AnchorSideTop.Control = TagSheet
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = ListBoxFPCHistory
+        AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = BasicSheet
         AnchorSideRight.Side = asrBottom
-        Left = 163
+        Left = 8
         Height = 18
-        Top = 8
-        Width = 109
-        BorderSpacing.Top = 8
-        Caption = 'Lazarus version'
+        Top = 152
+        Width = 162
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 16
+        Caption = 'Lazarus revision history'
         Font.CharSet = ANSI_CHARSET
         Font.Height = -16
         Font.Name = 'Arial'
@@ -4259,56 +4262,20 @@ object Form1: TForm1
         ParentFont = False
         OnClick = LazarusVersionLabelClick
       end
-      object ListBoxFPCHistory: TListBox
-        AnchorSideLeft.Control = TagSheet
-        AnchorSideTop.Control = TagSheet
-        AnchorSideBottom.Control = BitBtnFPCSetRevision
-        Left = 8
-        Height = 246
-        Top = 42
-        Width = 131
-        Anchors = [akTop, akLeft, akBottom]
-        BorderSpacing.Left = 8
-        BorderSpacing.Top = 42
-        BorderSpacing.Bottom = 8
-        ItemHeight = 0
-        ParentFont = False
-        ScrollWidth = 133
-        TabOrder = 0
-      end
-      object ListBoxLazarusHistory: TListBox
-        AnchorSideLeft.Control = FPCHistoryLabel
-        AnchorSideTop.Control = TagSheet
-        AnchorSideRight.Control = TagSheet
-        AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = BitBtnLazarusSetRevision
-        Left = 163
-        Height = 248
-        Top = 40
-        Width = 131
-        Anchors = [akTop, akRight, akBottom]
-        BorderSpacing.Top = 40
-        BorderSpacing.Right = 8
-        BorderSpacing.Bottom = 8
-        ItemHeight = 0
-        ParentFont = False
-        ScrollWidth = 133
-        TabOrder = 1
-      end
       object BitBtnFPCSetRevision: TBitBtn
-        AnchorSideLeft.Control = ListBoxFPCHistory
-        AnchorSideTop.Control = ListBoxFPCHistory
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = ListBoxLazarusHistory
         AnchorSideTop.Side = asrBottom
-        AnchorSideRight.Control = ListBoxFPCHistory
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = MemoHistory
         Left = 8
-        Height = 70
+        Height = 61
         Hint = 'Set FPC revision'
         Top = 304
-        Width = 131
-        Anchors = [akLeft, akRight, akBottom]
-        BorderSpacing.Top = 16
+        Width = 86
+        AutoSize = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 24
         BorderSpacing.Bottom = 8
         Caption = 'Set revision'
         Glyph.Data = {
@@ -4444,25 +4411,27 @@ object Form1: TForm1
           83FEA99484FEA89383FEB09B8BFDC6B8AEEE0000000000000000
         }
         Layout = blGlyphTop
+        OnClick = BitBtnSetRevisionClick
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 2
+        TabOrder = 0
       end
       object BitBtnLazarusSetRevision: TBitBtn
-        AnchorSideLeft.Control = ListBoxLazarusHistory
         AnchorSideTop.Control = ListBoxLazarusHistory
         AnchorSideTop.Side = asrBottom
-        AnchorSideRight.Control = ListBoxLazarusHistory
+        AnchorSideRight.Control = HistorySheet
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = MemoHistory
-        Left = 163
-        Height = 70
+        Left = 208
+        Height = 61
         Hint = 'Set Lazarus revision'
         Top = 304
-        Width = 131
-        Anchors = [akLeft, akRight, akBottom]
-        BorderSpacing.Top = 16
+        Width = 86
+        Anchors = [akTop, akRight]
+        AutoSize = True
+        BorderSpacing.Top = 24
+        BorderSpacing.Right = 8
         BorderSpacing.Bottom = 8
         Caption = 'Set revision'
         Glyph.Data = {
@@ -4598,28 +4567,102 @@ object Form1: TForm1
           0000000000000000000000000000000000000000000000000000
         }
         Layout = blGlyphTop
+        OnClick = BitBtnSetRevisionClick
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 3
+        TabOrder = 1
       end
       object MemoHistory: TMemo
-        AnchorSideLeft.Control = TagSheet
-        AnchorSideRight.Control = TagSheet
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = BitBtnFPCSetRevision
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = HistorySheet
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = TagSheet
         AnchorSideBottom.Side = asrBottom
         Left = 8
-        Height = 70
-        Top = 382
+        Height = 79
+        Top = 373
         Width = 286
-        Anchors = [akLeft, akRight, akBottom]
+        Anchors = [akTop, akLeft, akRight, akBottom]
         BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
         BorderSpacing.Right = 8
         BorderSpacing.Bottom = 8
         ParentFont = False
         ReadOnly = True
+        TabOrder = 2
+      end
+      object ListBoxFPCHistory: TListView
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = FPCHistoryLabel
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = HistorySheet
+        AnchorSideRight.Side = asrBottom
+        Left = 8
+        Height = 102
+        Top = 34
+        Width = 286
+        Anchors = [akTop, akLeft, akRight]
+        AutoWidthLastColumn = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
+        BorderSpacing.Right = 8
+        Columns = <        
+          item
+            Caption = 'Revision'
+            Width = 80
+          end        
+          item
+            Caption = 'Date'
+            Width = 202
+          end>
+        ColumnClick = False
+        HideSelection = False
+        Items.LazData = {
+          3C00000001000000FFFFFFFFFFFFFFFFFFFFFFFF010000000600000031323334
+          35361200000031322D30342D323132332031323A32313334FFFFFFFF
+        }
+        ReadOnly = True
+        RowSelect = True
+        TabOrder = 3
+        ViewStyle = vsReport
+      end
+      object ListBoxLazarusHistory: TListView
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = LazarusHistoryLabel
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = HistorySheet
+        AnchorSideRight.Side = asrBottom
+        Left = 8
+        Height = 102
+        Top = 178
+        Width = 286
+        Anchors = [akTop, akLeft, akRight]
+        AutoWidthLastColumn = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
+        BorderSpacing.Right = 8
+        Columns = <        
+          item
+            Caption = 'Revision'
+            Width = 80
+          end        
+          item
+            Caption = 'Date'
+            Width = 202
+          end>
+        ColumnClick = False
+        HideSelection = False
+        Items.LazData = {
+          3C00000001000000FFFFFFFFFFFFFFFFFFFFFFFF010000000600000031323334
+          35361200000031322D30342D323132332031323A32313334FFFFFFFF
+        }
+        ReadOnly = True
+        RowSelect = True
         TabOrder = 4
+        ViewStyle = vsReport
       end
     end
     object ExtraSheet: TTabSheet

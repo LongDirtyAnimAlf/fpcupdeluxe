@@ -34,6 +34,8 @@ type
 
   TForm1 = class(TForm)
     ActionList1: TActionList;
+    ListBoxFPCHistory: TListView;
+    ListBoxLazarusHistory: TListView;
     OPMBtn: TBitBtn;
     BitBtnFPCSetRevision: TBitBtn;
     BitBtnLazarusSetRevision: TBitBtn;
@@ -64,8 +66,6 @@ type
     FPCHistoryLabel: TLabel;
     HistorySheet: TTabSheet;
     LazarusHistoryLabel: TLabel;
-    ListBoxFPCHistory: TListBox;
-    ListBoxLazarusHistory: TListBox;
     MemoHistory: TMemo;
     WioBtn: TBitBtn;
     FPCVersionLabel: TLabel;
@@ -119,6 +119,7 @@ type
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
     procedure actFileSaveAccept({%H-}Sender: TObject);
+    procedure BitBtnSetRevisionClick(Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
     procedure ButtonSubarchSelectClick({%H-}Sender: TObject);
     procedure IniPropStorageAppRestoringProperties({%H-}Sender: TObject);
@@ -1841,6 +1842,31 @@ begin
   CommandOutputScreen.Lines.SaveToFile(actFileSave.Dialog.FileName);
 end;
 
+procedure TForm1.BitBtnSetRevisionClick(Sender: TObject);
+var
+  valid:boolean;
+begin
+  valid:=false;
+  if (Sender=BitBtnFPCSetRevision) then
+  begin
+    if Assigned(ListBoxFPCHistory.Selected) then
+    begin
+      Form2.ForceFPCRevision:=ListBoxFPCHistory.Selected.Caption;
+      valid:=true;
+    end;
+  end;
+  if (Sender=BitBtnLazarusSetRevision) then
+  begin
+    if Assigned(ListBoxLazarusHistory.Selected) then
+    begin
+      Form2.ForceLazarusRevision:=ListBoxLazarusHistory.Selected.Caption;
+      valid:=true;
+    end;
+  end;
+  if valid then
+    btnSetupPlusClick(nil);
+end;
+
 procedure TForm1.QuickBtnClick(Sender: TObject);
 var
   s:string;
@@ -1930,7 +1956,6 @@ begin
     aModule:='mORMot';
     //aModule:='mORMot,zeos';
   end;
-
 
   if Sender=UltiboBtn then
   begin
@@ -4543,74 +4568,87 @@ end;
 {$endif}
 
 procedure TForm1.ParseRevisions(IniDirectory:string);
+type
+  TTarget       = (FPC,LAZARUS);
 const
-  FPCPREVMAGIC='FPC previous revision: ';
-  LAZPREVMAGIC='Lazarus previous revision: ';
+  FPCREVMAGIC   = 'FPC previous revision: ';
+  LAZREVMAGIC   = 'Lazarus previous revision: ';
+
+  FPCDATEMAGIC  = 'FPC update at: ';
+  LAZDATEMAGIC  = 'Lazarus update at: ';
+
+  TargetRevMagic      : array[TTarget] of string = (FPCREVMAGIC,LAZREVMAGIC);
+  TargetDateMagic     : array[TTarget] of string = (FPCDATEMAGIC,LAZDATEMAGIC);
 var
-  RevList:TStringList;
-  RevFile:string;
-  index:integer;
-  s:string;
+  aTarget             : TTarget;
+  RevList             : TStringList;
+  RevFile             : string;
+  index               : integer;
+  date,revision       : string;
+  AItem               : TListItem;
+  TargetViewArray     : array[TTarget] of TListView;
 begin
+
+  TargetViewArray[TTarget.FPC]:=ListBoxFPCHistory;
+  TargetViewArray[TTarget.Lazarus]:=ListBoxLazarusHistory;
+
   RevFile:=IncludeTrailingPathDelimiter(IniDirectory)+REVISIONSLOG;
   if FileExists(RevFile) then
   begin
-    ListBoxFPCHistory.Items.BeginUpdate;
-    ListBoxLazarusHistory.Items.BeginUpdate;
+    RevList:=TStringList.Create;
     try
+      RevList.LoadFromFile(RevFile);
 
-      ListBoxFPCHistory.Items.Clear;
-      ListBoxLazarusHistory.Items.Clear;
+      for aTarget in TTarget do
+      begin
+        TargetViewArray[aTarget].Items.BeginUpdate;
+        try
+          TargetViewArray[aTarget].Items.Clear;
 
-      RevList:=TStringList.Create;
-      try
-        RevList.LoadFromFile(RevFile);
-
-        index:=0;
-        while true do
-        begin
-          index:=StringListStartsWith(RevList,FPCPREVMAGIC,index);
-          if index=-1 then
-            break
-          else
-            begin
-              s:=RevList[index];
-              Delete(s,1,Length(FPCPREVMAGIC));
-              if ((s<>'failure') AND (s<>'unknown')) then
+          index:=0;
+          while true do
+          begin
+            index:=StringListStartsWith(RevList,TargetRevMagic[aTarget],index);
+            if index=-1 then
+              break
+            else
               begin
-                if ListBoxFPCHistory.Items.IndexOf(s)=-1 then
-                  ListBoxFPCHistory.Items.Append(s);
-              end;
-              Inc(index);
-            end;
-        end;
-
-        index:=0;
-        while true do
-        begin
-          index:=StringListStartsWith(RevList,LAZPREVMAGIC,index);
-          if index=-1 then
-            break
-          else
-            begin
-              s:=RevList[index];
-              Delete(s,1,Length(LAZPREVMAGIC));
-              if ((s<>'failure') AND (s<>'unknown')) then
+                revision:=RevList[index];
+                Delete(revision,1,Length(TargetRevMagic[aTarget]));
+                if ((revision<>'failure') AND (revision<>'unknown')) then
                 begin
-                  if ListBoxLazarusHistory.Items.IndexOf(s)=-1 then
-                    ListBoxLazarusHistory.Items.Append(s);
+                  AItem:=TargetViewArray[aTarget].FindCaption(0,revision,false,true,false);
+                  if (aItem=nil) then
+                  begin
+                    date:='error';
+                    Dec(index,2);
+                    if (index>=0) then
+                    begin
+                      date:=RevList[index];
+                      if Pos(TargetDateMagic[aTarget],date)=1 then
+                        Delete(date,1,Length(TargetDateMagic[aTarget]))
+                      else
+                        date:='unknown';
+                    end;
+                    Inc(index,2);
+                    with TargetViewArray[aTarget].Items.Add do
+                    begin
+                      Caption:=revision;
+                      SubItems.Add(date);
+                    end;
+                  end;
                 end;
-                  Inc(index);
-            end;
-        end;
+                Inc(index);
+              end;
+          end;
 
-      finally
-        RevList.Free;
+        finally
+          TargetViewArray[aTarget].Items.EndUpdate;
+        end;
       end;
 
     finally
-      ListBoxLazarusHistory.Items.EndUpdate;
-      ListBoxFPCHistory.Items.EndUpdate;
+      RevList.Free;
     end;
 
   end;

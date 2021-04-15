@@ -182,8 +182,10 @@ type
 
     function GetFPCRevision:string;
     procedure SetFPCRevision(value:string);
+    procedure ForceSetFPCRevision(value:string);
     function GetLazarusRevision:string;
     procedure SetLazarusRevision(value:string);
+    procedure ForceSetLazarusRevision(value:string);
     function GetFPCBranch:string;
     procedure SetFPCBranch(value:string);
     function GetLazarusBranch:string;
@@ -253,6 +255,10 @@ type
 
     property FPCRevision:string read GetFPCRevision write SetFPCRevision;
     property LazarusRevision:string read GetLazarusRevision write SetLazarusRevision;
+
+    property ForceFPCRevision:string write ForceSetFPCRevision;
+    property ForceLazarusRevision:string write ForceSetLazarusRevision;
+
     property FPCBranch:string read GetFPCBranch write SetFPCBranch;
     property LazarusBranch:string read GetLazarusBranch write SetLazarusBranch;
 
@@ -702,6 +708,8 @@ begin
   LocalCPU:=TCPU.cpuNone;
   LocalOS:=TOS.osNone;
   PageControl1.PageIndex:=0;
+  EditFPCRevision.Color:=clDefault;
+  EditLazarusRevision.Color:=clDefault;
 end;
 
 procedure TForm2.btnAddPatchClick(Sender: TObject);
@@ -1369,6 +1377,11 @@ procedure TForm2.SetFPCRevision(value:string);
 begin
   EditFPCRevision.Text:=value;
 end;
+procedure TForm2.ForceSetFPCRevision(value:string);
+begin
+  FPCRevision:=value;
+  EditFPCRevision.Color:=clRed;
+end;
 
 function TForm2.GetLazarusRevision:string;
 begin
@@ -1377,6 +1390,11 @@ end;
 procedure TForm2.SetLazarusRevision(value:string);
 begin
   EditLazarusRevision.Text:=value;
+end;
+procedure TForm2.ForceSetLazarusRevision(value:string);
+begin
+  LazarusRevision:=value;
+  EditLazarusRevision.Color:=clRed;
 end;
 
 function TForm2.GetFPCBranch:string;
