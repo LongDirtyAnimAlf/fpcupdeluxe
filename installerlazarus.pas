@@ -852,6 +852,12 @@ begin
       end;
       _INSTALLLAZARUS:
       begin
+        if ((SourceVersionNum<>0) AND (SourceVersionNum<CalculateFullVersion(1,8,0))) then
+        begin
+          Infoln(infotext+'Deleting '+FPCDefines+' to force rescan of FPC sources.', etInfo);
+          s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+FPCDefines;
+          SysUtils.DeleteFile(s);
+        end;
         if (FInstallDirectory<>FSourceDirectory) then
         begin
           Processor.Process.Parameters.Add('install');
