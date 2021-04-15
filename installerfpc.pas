@@ -4744,7 +4744,7 @@ begin
     end;
     UpdateWarnings:=TStringList.Create;
     try
-      s:=SafeExpandFileName(SafeGetApplicationPath+'fpcuprevisions.log');
+      s:=SafeExpandFileName(IncludeTrailingPathDelimiter(FBaseDirectory)+REVISIONSLOG);
       if FileExists(s) then
         UpdateWarnings.LoadFromFile(s)
       else

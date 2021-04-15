@@ -34,6 +34,8 @@ type
 
   TForm1 = class(TForm)
     ActionList1: TActionList;
+    BitBtnFPCSetRevision: TBitBtn;
+    BitBtnLazarusSetRevision: TBitBtn;
     btnCreateLazarusConfig: TButton;
     ButtonSubarchSelect: TButton;
     BitBtnFPCandLazarus: TBitBtn;
@@ -58,6 +60,12 @@ type
     ChkMakefileLaz: TButton;
     actFileExit: TFileExit;
     actFileSave: TFileSaveAs;
+    FPCHistoryLabel: TLabel;
+    HistorySheet: TTabSheet;
+    LazarusHistoryLabel: TLabel;
+    ListBoxFPCHistory: TListBox;
+    ListBoxLazarusHistory: TListBox;
+    MemoHistory: TMemo;
     WioBtn: TBitBtn;
     FPCVersionLabel: TLabel;
     FPCTagLabel: TLabel;
@@ -198,6 +206,7 @@ type
     procedure InitFPCupManager;
     function  GetCmdFontSize:integer;
     procedure SetCmdFontSize(aValue:integer);
+    procedure ParseRevisions(IniDirectory:string);
     {$ifndef usealternateui}
     property  FPCTarget:string read FFPCTarget write SetFPCTarget;
     property  LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
@@ -4228,6 +4237,8 @@ begin
 
     Form2.SetInstallDir(IniDirectory);
 
+    ParseRevisions(IniDirectory);
+
     {$ifdef usealternateui}
     alternateui_update_interface_buttons;
     {$endif}
@@ -4522,6 +4533,81 @@ begin
 
 end;
 {$endif}
+
+procedure TForm1.ParseRevisions(IniDirectory:string);
+const
+  FPCPREVMAGIC='FPC previous revision: ';
+  LAZPREVMAGIC='Lazarus previous revision: ';
+var
+  RevList:TStringList;
+  RevFile:string;
+  index:integer;
+  s:string;
+begin
+  RevFile:=IncludeTrailingPathDelimiter(IniDirectory)+REVISIONSLOG;
+  if FileExists(RevFile) then
+  begin
+    ListBoxFPCHistory.Items.BeginUpdate;
+    ListBoxLazarusHistory.Items.BeginUpdate;
+    try
+
+      ListBoxFPCHistory.Items.Clear;
+      ListBoxLazarusHistory.Items.Clear;
+
+      RevList:=TStringList.Create;
+      try
+        RevList.LoadFromFile(RevFile);
+
+        index:=0;
+        while true do
+        begin
+          index:=StringListStartsWith(RevList,FPCPREVMAGIC,index);
+          if index=-1 then
+            break
+          else
+            begin
+              s:=RevList[index];
+              Delete(s,1,Length(FPCPREVMAGIC));
+              if ((s<>'failure') AND (s<>'unknown')) then
+              begin
+                if ListBoxFPCHistory.Items.IndexOf(s)=-1 then
+                  ListBoxFPCHistory.Items.Append(s);
+              end;
+              Inc(index);
+            end;
+        end;
+
+        index:=0;
+        while true do
+        begin
+          index:=StringListStartsWith(RevList,LAZPREVMAGIC,index);
+          if index=-1 then
+            break
+          else
+            begin
+              s:=RevList[index];
+              Delete(s,1,Length(LAZPREVMAGIC));
+              if ((s<>'failure') AND (s<>'unknown')) then
+                begin
+                  if ListBoxLazarusHistory.Items.IndexOf(s)=-1 then
+                    ListBoxLazarusHistory.Items.Append(s);
+                end;
+                  Inc(index);
+            end;
+        end;
+
+      finally
+        RevList.Free;
+      end;
+
+    finally
+      ListBoxLazarusHistory.Items.EndUpdate;
+      ListBoxFPCHistory.Items.EndUpdate;
+    end;
+
+  end;
+
+end;
 
 procedure TForm1.CheckForUpdates(Data: PtrInt);
 var

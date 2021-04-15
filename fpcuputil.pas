@@ -2660,6 +2660,8 @@ var
   Found:boolean=false;
   i:integer;
 begin
+  result:=-1;
+  if (StartIndex>=SearchIn.Count) then exit;
   for i:=StartIndex to Pred(SearchIn.Count) do
   begin
     if CS then
@@ -2669,9 +2671,7 @@ begin
     if Found then break;
   end;
   if Found then
-    result:=i
-  else
-    result:=-1;
+    result:=i;
 end;
 
 function StringListContains(SearchIn:TStringList; SearchFor:string; StartIndex:integer; CS:boolean): integer;
@@ -2679,6 +2679,8 @@ var
   Found:boolean=false;
   i:integer;
 begin
+  result:=-1;
+  if (StartIndex>=SearchIn.Count) then exit;
   for i:=StartIndex to Pred(SearchIn.Count) do
   begin
     if CS then
@@ -2688,9 +2690,7 @@ begin
     if Found then break;
   end;
   if Found then
-    result:=i
-  else
-    result:=-1;
+    result:=i;
 end;
 
 function StringListSame(SearchIn:TStringList; SearchFor:string; StartIndex:integer; CS:boolean): integer;
@@ -2698,6 +2698,8 @@ var
   Found:boolean=false;
   i:integer;
 begin
+  result:=-1;
+  if (StartIndex>=SearchIn.Count) then exit;
   for i:=StartIndex to Pred(SearchIn.Count) do
   begin
     if CS then
@@ -2707,9 +2709,7 @@ begin
     if Found then break;
   end;
   if Found then
-    result:=i
-  else
-    result:=-1;
+    result:=i;
 end;
 
 function GetTotalPhysicalMemory: DWord;
