@@ -109,7 +109,7 @@ type
     TrunkBtn: TBitBtn;
     FixesBtn: TBitBtn;
     StableBtn: TBitBtn;
-    OldBtn: TBitBtn;
+    AndroidBtn: TBitBtn;
     mORMotBtn: TBitBtn;
     btnInstallDirSelect: TButton;
     InstallDirEdit: TEdit;
@@ -378,13 +378,13 @@ begin
 
   {$IF defined(Haiku) OR defined(AROS) OR defined(Morphos) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2)) OR (defined(CPUPOWERPC) AND defined(Darwin)) OR (defined(CPUPOWERPC64) AND defined(Darwin))}
   // disable some features
-  OldBtn.Visible:=False;
+  AndroidBtn.Visible:=False;
   {DinoBtn.Visible:=False;}
   CrossSheet.TabVisible:=false;
   {$endif}
   {$IF defined(CPUAARCH64) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2))}
   // disable some features
-  OldBtn.Visible:=False;
+  AndroidBtn.Visible:=False;
   {$endif}
 
   {$ifdef Darwin}
@@ -1914,6 +1914,7 @@ begin
   end;
   {$endif}
 
+  {
   if Sender=OldBtn then
   begin
     //s:='Going to install FPC 2.6.4 and Lazarus 1.4.';
@@ -1922,6 +1923,15 @@ begin
     s:='Going to install FPC 3.0.4 and Lazarus 1.8.4.';
     aFPCTarget:='3.0.4';
     aLazarusTarget:='1.8.4';
+  end;
+  }
+
+  if Sender=AndroidBtn then
+  begin
+    s:='Going to install FPC and Lazarus stable, armv7/arm64 cross-android compilers and LAMW.';
+    aFPCTarget:='stable';
+    aLazarusTarget:='stable';
+    aModule:='lamw';
   end;
 
   {
@@ -2053,7 +2063,15 @@ begin
         aSUBARCH:=TSUBARCH.armv7a;
       end;
 
-      if (Sender=PicoBtn) OR (Sender=WioBtn) OR (Sender=UltiboBtn) then
+      if Sender=AndroidBtn then
+      begin
+        s:='Going to install FPC cross-compiler for Android arm.';
+        aCPU:=TCPU.arm;
+        aOS:=TOS.android;
+        aSUBARCH:=TSUBARCH.saNone;
+      end;
+
+      if (Sender=PicoBtn) OR (Sender=WioBtn) OR (Sender=UltiboBtn) OR (Sender=AndroidBtn) then
       begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
@@ -2076,6 +2094,39 @@ begin
 
         memoSummary.Lines.Append('');
       end;
+
+      if (Sender=AndroidBtn) then
+      begin
+        s:='Going to install FPC cross-compiler for Android arm64.';
+        aCPU:=TCPU.aarch64;
+        aOS:=TOS.android;
+        aSUBARCH:=TSUBARCH.saNone;
+      end;
+
+      if (Sender=AndroidBtn) then
+      begin
+        radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
+        radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
+        Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
+        SetSelectedSubArch(aCPU,aOS,aSUBARCH);
+
+        AddMessage(s+'.');
+        sStatus:=s;
+
+        {$ifdef RemoteLog}
+        aDataClient.UpInfo.CrossCPUOS:=GetCPU(aCPU)+'-'+GetOS(aOS);
+        aDataClient.UpInfo.UpFunction:=TUpFunction.ufInstallCross;
+        {$endif}
+
+        success:=ButtonProcessCrossCompiler(nil);
+
+        if success
+           then memoSummary.Lines.Append('Cross-compiler install/update ok.')
+           else memoSummary.Lines.Append('Failure during install update of cross-compiler !!');
+
+        memoSummary.Lines.Append('');
+      end;
+
 
     end;
 

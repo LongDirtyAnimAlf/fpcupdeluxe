@@ -796,7 +796,8 @@ end;
 procedure TFPCCrossInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);
 begin
   inherited;
-  if Assigned(CrossInstaller) then FCrossCompilerName:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+  if Assigned(CrossInstaller) then
+    FCrossCompilerName:=GetCrossCompilerName(CrossInstaller.TargetCPU);
 end;
 
 function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;

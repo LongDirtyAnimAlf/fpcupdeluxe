@@ -3037,7 +3037,10 @@ procedure TInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);
 begin
   FCrossCPU_Target:=aCPU;
   FCrossOS_Target:=aOS;
-  FCrossOS_SubArch:=aSubArch;
+  if (FCrossOS_Target in SUBARCH_OS) then
+    FCrossOS_SubArch:=aSubArch
+  else
+    FCrossOS_SubArch:=TSUBARCH.saNone;
 end;
 
 procedure TInstaller.SetABI(aABI:TABI);
