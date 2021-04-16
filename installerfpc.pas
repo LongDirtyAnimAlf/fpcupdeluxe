@@ -4762,10 +4762,12 @@ begin
         UpdateWarnings.Add('Location: '+FBaseDirectory);
         UpdateWarnings.Add('');
       end;
-      UpdateWarnings.Add(ModuleName+' update at: '+DateTimeToStr(now));
+      UpdateWarnings.Add(FPCDATEMAGIC+DateTimeToStr(now));
       if aRepoClient<>nil then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
       UpdateWarnings.Add(ModuleName+' previous revision: '+PreviousRevision);
-      UpdateWarnings.Add(ModuleName+' new revision: '+ActualRevision);
+      UpdateWarnings.Add(FPCREVMAGIC+ActualRevision);
+      if (aRepoClient.ClassType=FGitClient.ClassType) then
+        UpdateWarnings.Add(FPCHASHMAGIC+aRepoClient.LocalRevision);
       UpdateWarnings.Add('');
       UpdateWarnings.SaveToFile(s);
     finally

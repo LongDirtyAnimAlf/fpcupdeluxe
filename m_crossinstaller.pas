@@ -59,30 +59,7 @@ const
   {$endif}
   DEFAULTARMCPU = 'ARMV7A';
 
-  NEWPASCALGITREPO='https://github.com/LongDirtyAnimAlf';
-  FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
-
-  BOOTSTRAPPERVERSION='bootstrappers_v1.0';
-  FPCUPGITREPOBOOTSTRAPPER=FPCUPGITREPO+'/releases/download/'+BOOTSTRAPPERVERSION;
-  FPCUPGITREPOAPI='https://api.github.com/repos/LongDirtyAnimAlf/fpcupdeluxe/releases';
-  FPCUPGITREPOBOOTSTRAPPERAPI=FPCUPGITREPOAPI+'/tags/'+BOOTSTRAPPERVERSION;
-
-  SOURCEPATCHES='patches_v1.0';
-  FPCUPGITREPOSOURCEPATCHESAPI=FPCUPGITREPOAPI+'/tags/'+SOURCEPATCHES;
-
-  FPCUPPRIVATEGITREPO='https://www.consulab.nl/git/Alfred/FPCbootstrappers/raw/master';
-
-  FPCUP_ACKNOWLEDGE='acknowledgement_fpcup.txt';
-
   LIBCNAME='libc.so';
-
-  {
-  LINKERNAMEBASE='ld-linux.so.2';
-  LINKERNAMEARM='ld-linux-arm.so.2';
-  LINKERNAMEARMHF='ld-linux-armhf.so.2';
-  LINKERNAMECPUX64='ld-linux-x86-64.so.2';
-  LINKERNAMECPUAARCH64='ld-linux-aarch64.so.2';
-  }
 
   CROSSPATH      = 'cross';
   CROSSBINPATH   = CROSSPATH+DirectorySeparator+'bin';
@@ -231,9 +208,9 @@ type
     property SubArchName:string read GetSubarchName;
     property ABIName:string read GetABIName;
     property RegisterName:string read FRegisterName;
-
     property SolarisOI: boolean write FSolarisOI;
     property MUSL: boolean write FMUSL;
+
     constructor Create;
     destructor Destroy; override;
   end;

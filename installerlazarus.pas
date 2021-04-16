@@ -2358,10 +2358,12 @@ begin
         UpdateWarnings.Add('Location: '+FBaseDirectory);
         UpdateWarnings.Add('');
       end;
-      UpdateWarnings.Add(ModuleName+' update at: '+DateTimeToStr(now));
+      UpdateWarnings.Add(LAZDATEMAGIC+DateTimeToStr(now));
       if aRepoClient<>nil then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
       UpdateWarnings.Add(ModuleName+' previous revision: '+PreviousRevision);
-      UpdateWarnings.Add(ModuleName+' new revision: '+ActualRevision);
+      UpdateWarnings.Add(LAZREVMAGIC+ActualRevision);
+      if (aRepoClient.ClassType=FGitClient.ClassType) then
+        UpdateWarnings.Add(LAZHASHMAGIC+aRepoClient.LocalRevision);
       UpdateWarnings.Add('');
       UpdateWarnings.SaveToFile(s);
     finally

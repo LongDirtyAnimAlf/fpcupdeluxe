@@ -4569,22 +4569,17 @@ end;
 
 procedure TForm1.ParseRevisions(IniDirectory:string);
 type
-  TTarget       = (FPC,LAZARUS);
+  TTarget             = (FPC,LAZARUS);
 const
-  FPCREVMAGIC   = 'FPC previous revision: ';
-  LAZREVMAGIC   = 'Lazarus previous revision: ';
-
-  FPCDATEMAGIC  = 'FPC update at: ';
-  LAZDATEMAGIC  = 'Lazarus update at: ';
-
   TargetRevMagic      : array[TTarget] of string = (FPCREVMAGIC,LAZREVMAGIC);
+  TargetHashMagic     : array[TTarget] of string = (FPCHASHMAGIC,LAZHASHMAGIC);
   TargetDateMagic     : array[TTarget] of string = (FPCDATEMAGIC,LAZDATEMAGIC);
 var
   aTarget             : TTarget;
   RevList             : TStringList;
   RevFile             : string;
   index               : integer;
-  date,revision       : string;
+  date,revision,hash  : string;
   AItem               : TListItem;
   TargetViewArray     : array[TTarget] of TListView;
 begin
@@ -4608,38 +4603,49 @@ begin
           index:=0;
           while true do
           begin
-            index:=StringListStartsWith(RevList,TargetRevMagic[aTarget],index);
+            index:=StringListStartsWith(RevList,TargetDateMagic[aTarget],index);
             if index=-1 then
               break
             else
               begin
-                revision:=RevList[index];
-                Delete(revision,1,Length(TargetRevMagic[aTarget]));
-                if ((revision<>'failure') AND (revision<>'unknown')) then
+                date:=RevList[index];
+                revision:='';
+                hash:='';
+                Delete(date,1,Length(TargetDateMagic[aTarget]));
+                Inc(index);
+                while (index<RevList.Count) do
+                begin
+                  if (Length(RevList[index])=0) then break;
+                  if (Pos(TargetRevMagic[aTarget],RevList[index])=1) then
+                  begin
+                    revision:=RevList[index];
+                    Delete(revision,1,Length(TargetRevMagic[aTarget]))
+                  end
+                  else
+                  if (Pos(TargetHashMagic[aTarget],RevList[index])=1) then
+                  begin
+                    hash:=RevList[index];
+                    Delete(hash,1,Length(TargetHashMagic[aTarget]))
+                  end;
+                  Inc(index);
+                end;
+
+                if ( (Length(revision)>0) AND (revision<>'failure') AND (revision<>'unknown') ) then
                 begin
                   AItem:=TargetViewArray[aTarget].FindCaption(0,revision,false,true,false);
                   if (aItem=nil) then
                   begin
-                    date:='error';
-                    Dec(index,2);
-                    if (index>=0) then
-                    begin
-                      date:=RevList[index];
-                      if Pos(TargetDateMagic[aTarget],date)=1 then
-                        Delete(date,1,Length(TargetDateMagic[aTarget]))
-                      else
-                        date:='unknown';
-                    end;
-                    Inc(index,2);
                     with TargetViewArray[aTarget].Items.Add do
                     begin
                       Caption:=revision;
                       SubItems.Add(date);
+                      SubItems.Add(hash);
                     end;
                   end;
                 end;
-                Inc(index);
+
               end;
+
           end;
 
         finally

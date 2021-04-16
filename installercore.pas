@@ -118,6 +118,21 @@ const
   NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.14/win64/nasm-2.14-win64.zip';
   NASMFPCURL=BINUTILSURL + '/trunk/install/crossbinmsdos/nasm.exe';
 
+  GITREPO='https://github.com/LongDirtyAnimAlf';
+  FPCUPGITREPO=GITREPO+'/fpcupdeluxe';
+
+  BOOTSTRAPPERVERSION='bootstrappers_v1.0';
+  FPCUPGITREPOBOOTSTRAPPER=FPCUPGITREPO+'/releases/download/'+BOOTSTRAPPERVERSION;
+  FPCUPGITREPOAPI='https://api.github.com/repos/LongDirtyAnimAlf/fpcupdeluxe/releases';
+  FPCUPGITREPOBOOTSTRAPPERAPI=FPCUPGITREPOAPI+'/tags/'+BOOTSTRAPPERVERSION;
+
+  SOURCEPATCHES='patches_v1.0';
+  FPCUPGITREPOSOURCEPATCHESAPI=FPCUPGITREPOAPI+'/tags/'+SOURCEPATCHES;
+
+  FPCUPPRIVATEGITREPO='https://www.consulab.nl/git/Alfred/FPCbootstrappers/raw/master';
+
+  FPCUP_ACKNOWLEDGE='acknowledgement_fpcup.txt';
+
   {$IF (defined(OpenBSD)) and (defined(CPU64))}
   // 2.6.2 and older do not work anymore on newer OpenBSD64 versions
   FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION=(2*10000+6*100+2);
@@ -148,6 +163,15 @@ const
   SnipMagicBegin = '# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd   = '# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
   FPCSnipMagic   = '# If you don''t want so much verbosity use'; //denotes end of standard fpc.cfg
+
+  FPCREVMAGIC   = 'FPC new revision: ';
+  LAZREVMAGIC   = 'Lazarus new revision: ';
+
+  FPCDATEMAGIC  = 'FPC update at: ';
+  LAZDATEMAGIC  = 'Lazarus update at: ';
+
+  FPCHASHMAGIC   = 'FPC new GIT hash: ';
+  LAZHASHMAGIC   = 'Lazarus new GIT hash: ';
 
   //Sequence contants for statemachine
 
@@ -267,6 +291,11 @@ type
     OS: string; // For now, OS field is not used as compiler defines manage filling the initial list
     RootURL: string; //URL including trailing / but without filename
     Category: TUtilCategory;
+  end;
+
+  TRevision= record
+    SVNRevision: string;
+    GITHash: string;
   end;
 
   { TInstaller }
