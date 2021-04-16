@@ -4620,10 +4620,6 @@ object Form1: TForm1
           end>
         ColumnClick = False
         HideSelection = False
-        Items.LazData = {
-          3C00000001000000FFFFFFFFFFFFFFFFFFFFFFFF010000000600000031323334
-          35361200000031322D30342D323132332031323A32313334FFFFFFFF
-        }
         ReadOnly = True
         RowSelect = True
         TabOrder = 3
@@ -4655,10 +4651,6 @@ object Form1: TForm1
           end>
         ColumnClick = False
         HideSelection = False
-        Items.LazData = {
-          3C00000001000000FFFFFFFFFFFFFFFFFFFFFFFF010000000600000031323334
-          35361200000031322D30342D323132332031323A32313334FFFFFFFF
-        }
         ReadOnly = True
         RowSelect = True
         TabOrder = 4

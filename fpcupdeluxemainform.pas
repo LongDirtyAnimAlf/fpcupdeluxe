@@ -4572,14 +4572,15 @@ type
   TTarget             = (FPC,LAZARUS);
 const
   TargetRevMagic      : array[TTarget] of string = (FPCREVMAGIC,LAZREVMAGIC);
-  TargetHashMagic     : array[TTarget] of string = (FPCHASHMAGIC,LAZHASHMAGIC);
   TargetDateMagic     : array[TTarget] of string = (FPCDATEMAGIC,LAZDATEMAGIC);
+  //TargetHashMagic     : array[TTarget] of string = (FPCHASHMAGIC,LAZHASHMAGIC);
 var
   aTarget             : TTarget;
   RevList             : TStringList;
   RevFile             : string;
   index               : integer;
-  date,revision,hash  : string;
+  date,revision       : string;
+  //hash                : string;
   AItem               : TListItem;
   TargetViewArray     : array[TTarget] of TListView;
 begin
@@ -4610,7 +4611,7 @@ begin
               begin
                 date:=RevList[index];
                 revision:='';
-                hash:='';
+                //hash:='';
                 Delete(date,1,Length(TargetDateMagic[aTarget]));
                 Inc(index);
                 while (index<RevList.Count) do
@@ -4620,13 +4621,15 @@ begin
                   begin
                     revision:=RevList[index];
                     Delete(revision,1,Length(TargetRevMagic[aTarget]))
-                  end
+                  end;
+                  {
                   else
                   if (Pos(TargetHashMagic[aTarget],RevList[index])=1) then
                   begin
                     hash:=RevList[index];
                     Delete(hash,1,Length(TargetHashMagic[aTarget]))
                   end;
+                  }
                   Inc(index);
                 end;
 
@@ -4639,7 +4642,7 @@ begin
                     begin
                       Caption:=revision;
                       SubItems.Add(date);
-                      SubItems.Add(hash);
+                      //SubItems.Add(hash);
                     end;
                   end;
                 end;

@@ -71,6 +71,7 @@ type
     procedure Revert; override;
     procedure Update; override;
     function GetSVNRevision: string;
+    function GetGitHash: string;
   end;
 
 implementation
@@ -602,5 +603,32 @@ begin
     end;
   end;
 end;
+
+function TGitClient.GetGitHash: string;
+var
+  Output:string;
+  i,j:integer;
+begin
+  result:='';
+
+  if ExportOnly then exit;
+  if NOT ValidClient then exit;
+  if NOT DirectoryExists(LocalRepository) then exit;
+
+  if (Length(DesiredRevision)=0) OR (Uppercase(trim(DesiredRevision)) = 'HEAD') then exit;
+
+  Output:='';
+  i:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['log','--all','--grep=@'+DesiredRevision,'--pretty=oneline'],LocalRepository, Output, '', Verbose);
+  if (i=0) then
+  begin
+    j:=Pos(' ',Output);
+    if (j>0) then
+    begin
+      Delete(Output,j,MaxInt);
+      result:=Output;
+    end;
+  end;
+end;
+
 
 end.

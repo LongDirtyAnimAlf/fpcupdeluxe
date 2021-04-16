@@ -1710,7 +1710,7 @@ var
   ReturnCode: integer;
   DiffFile,DiffFileCorrectedPath: String;
   LocalPatchCmd : string;
-  Output:string;
+  s,Output:string;
 begin
   Result := false;
 
@@ -1766,7 +1766,23 @@ begin
   aClient.DesiredBranch := FDesiredBranch; //We want to update to this specific branch
   Output:=localinfotext+'Running '+UpperCase(aClient.RepoExecutableName)+' checkout or update';
   if Length(aClient.DesiredRevision)>0 then
+  begin
     Output:=Output+' of revision '+aClient.DesiredRevision;
+    if ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
+    begin
+      // A normal (short) githash is 7 or longer
+      if (Length(FDesiredRevision)<7) then
+      begin
+        s:=(aClient as TGitClient).GetGitHash;
+        if (Length(s)>0) then
+        begin
+          Output:=Output+' with GIT hash '+s;
+          aClient.DesiredRevision := s;
+        end;
+      end;
+
+    end;
+  end;
   Output:=Output+'.';
   Infoln(Output,etInfo);
 
