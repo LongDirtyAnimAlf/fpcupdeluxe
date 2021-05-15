@@ -2202,6 +2202,7 @@ begin
   result := '0.0.0';
 
   if (NOT DirectoryExists(aSourcePath)) then exit;
+  if DirectoryIsEmpty(aSourcePath) then exit;
 
   version_nr:='';
   release_nr:='';
@@ -3559,13 +3560,18 @@ begin
     {$ENDIF}
 
     // get the correct binutils (Windows only)
-    //CreateBinutilsList(RequiredBootstrapVersion);
-
-    s:=VersionSnippet;
-    x:=GetReleaseCandidateFromSource(FSourceDirectory);
-    if (x<>0) then
-      s:=s+'.rc'+InttoStr(x);
-    CreateBinutilsList(s);
+    if (Pos('/branches/',URL)>0) then
+    begin
+      CreateBinutilsList(RequiredBootstrapVersion);
+    end
+    else
+    begin
+      s:=VersionSnippet;
+      x:=GetReleaseCandidateFromSource(FSourceDirectory);
+      if (x<>0) then
+        s:=s+'.rc'+InttoStr(x);
+      CreateBinutilsList(s);
+    end;
 
     result:=CheckAndGetNeededBinUtils;
 

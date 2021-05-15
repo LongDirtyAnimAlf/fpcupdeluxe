@@ -1941,6 +1941,26 @@ begin
     aFPCTarget:='2.0.2';
     //aLazarusTarget:='0.9.4';
     aLazarusTarget:='0.9.16';
+    By @MarkMLl
+    lazarus-0.9.24+2.2.4
+    lazarus-0.9.26+2.2.4
+    lazarus-0.9.28+2.4.0
+    lazarus-0.9.30+2.4.4
+    lazarus-1.0.0+2.4.4
+    lazarus-1.0.0+2.6.0
+    lazarus-1.0.14+2.6.4
+    lazarus-1.0.8+2.6.2
+    lazarus-1.2.6+2.6.4
+    lazarus-1.4.4+3.0.0
+    lazarus-1.6.0+3.0.0
+    lazarus-1.6.2+3.0.0
+    lazarus-1.6.4+3.0.2
+    lazarus-1.8.0+3.0.4
+    lazarus-1.8.2+3.0.4
+    lazarus-1.8.4+3.0.4
+    lazarus-2.0.10+3.2.0
+    lazarus-2.0.6+3.0.4
+    lazarus-2.0.8+3.0.4
   end;
   }
 
