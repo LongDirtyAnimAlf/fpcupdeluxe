@@ -63,7 +63,7 @@ var
   j:dword;
 begin
   j:=CalculateNumericalVersion(FPCVersion);
-  if (j<>0) AND (j<CalculateFullVersion(3,3,0)) then
+  if (j<>0) AND (j<CalculateFullVersion(3,2,2)) then
     result:=iOSNAME
   else
     result:=macOSNAME;
