@@ -1419,7 +1419,6 @@ begin
   if Pos('newpascal',URL)>0 then result:='trunk' else
   if Pos('freepascal.git',URL)>0 then result:='trunk' else
   if Pos('lazarus.git',URL)>0 then result:='trunk' else
-  //if Pos('fpcsource_3_2_0.git',URL)>0 then result:='3.2.0' else
   begin
 
     VersionSnippet := UpperCase(URL);

@@ -35,7 +35,7 @@ uses
 {$i revision.inc}
 
 const
-  DEFAULTFPCVERSION     = '3.2.0';
+  DEFAULTFPCVERSION     = '3.2.2';
   DEFAULTLAZARUSVERSION = '2.0.12';
 
   FPCTRUNKVERSION       = '3.3.1';
@@ -3846,14 +3846,15 @@ type
     Revision:string;
   end;
 const
-  FPCVersionsTable: array[0..4] of TVersionTable = (
+  FPCVersionsTable: array[0..5] of TVersionTable = (
     (Version:'2.6.4';Revision:'26970'),
     (Version:'3.0.0';Revision:'32319'),
     (Version:'3.0.2';Revision:'35401'),
     (Version:'3.0.4';Revision:'37149'),
-    (Version:'3.2.0';Revision:'45643')
+    (Version:'3.2.0';Revision:'45643'),
+    (Version:'3.2.2';Revision:'49371')
     );
-  LazarusVersionsTable: array[0..9] of TVersionTable = (
+  LazarusVersionsTable: array[0..10] of TVersionTable = (
     (Version:'1.6.4';Revision:'54278'),
     (Version:'1.8.0';Revision:'56623'),
     (Version:'1.8.2';Revision:'57369'),
@@ -3863,7 +3864,8 @@ const
     (Version:'2.0.4';Revision:'61665'),
     (Version:'2.0.6';Revision:'62129'),
     (Version:'2.0.8';Revision:'62944'),
-    (Version:'2.0.10';Revision:'63526')
+    (Version:'2.0.10';Revision:'63526'),
+    (Version:'2.0.12';Revision:'64642')
     );
 var
   aVersionTable:TVersionTable;

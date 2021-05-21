@@ -4709,7 +4709,7 @@ begin
   begin
     Infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
 
-    //git svn clone -r HEAD https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_12
+    //git svn clone -r HEAD https://svn.freepascal.org/svn/fpc/tags/release_3_2_2
 
     UpdateWarnings:=TStringList.Create;
     try
