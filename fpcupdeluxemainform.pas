@@ -2415,6 +2415,49 @@ begin
     exit;
   end;
 
+  success:=true;
+  if radgrpOS.ItemIndex<>-1 then
+  begin
+    s:=radgrpOS.Items[radgrpOS.ItemIndex];
+    if s=GetOS(TOS.wasi) then
+    begin
+      success:=false;
+      if radgrpCPU.ItemIndex<>-1 then
+      begin
+        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
+        if (s=GetCPU(TCPU.wasm32)) then
+          success:=true;
+      end;
+    end;
+  end;
+
+  if (NOT success) then
+  begin
+    if Sender<>nil then ShowMessage('No valid CPU target for WebAssembly.');
+    exit;
+  end;
+
+  success:=true;
+  if radgrpCPU.ItemIndex<>-1 then
+  begin
+    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
+    if s=GetCPU(TCPU.wasm32) then
+    begin
+      success:=false;
+      if radgrpOS.ItemIndex<>-1 then
+      begin
+        s:=radgrpOS.Items[radgrpOS.ItemIndex];
+        if ((s=GetOS(TOS.wasi)) OR (s=GetOS(TOS.embedded))) then success:=true;
+      end;
+    end;
+  end;
+
+  if (NOT success) then
+  begin
+    if Sender<>nil then ShowMessage('No valid OS target for WebAssembly.');
+    exit;
+  end;
+
   // OS=amiga) AND (CPU<>m68k))
   // OS=morphos) AND (CPU<>powerpc))
 

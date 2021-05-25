@@ -476,6 +476,7 @@ begin
   // Safeguards
   if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.embedded) then result:=false;
 
+  if (CrossInstaller.TargetCPU=TCPU.wasm32) then result:=false;
 end;
 
 function TFPCCrossInstaller.InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
@@ -1275,15 +1276,6 @@ begin
             end;
           end;
 
-          if (CrossInstaller.TargetCPU=TCPU.jvm) then
-          begin
-            if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
-            begin
-              //Infoln(infotext+'Skipping build step '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+' for '+CrossInstaller.TargetCPUName+'.',etInfo);
-              //continue;
-            end;
-          end;
-
           if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
           begin
             if (NOT PackagesNeeded) then continue;
@@ -1311,6 +1303,21 @@ begin
               exit(false);
             end;
           end;
+
+          if (CrossInstaller.TargetCPU=TCPU.wasm32) then
+          begin
+            i:=pos('-O',Options);
+            if (i>0) then
+            begin
+              // Remove -O option
+              while ((i<Length(Options)) AND (Options[i]<>' ')) do
+              begin
+                Delete(Options,i,1);
+              end;
+            end;
+            Options:=Options+' -O-';
+          end;
+
 
           if ((SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0))) then
           begin

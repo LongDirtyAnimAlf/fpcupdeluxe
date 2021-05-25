@@ -935,6 +935,8 @@ begin
         if (OS=haiku) AND ((CPU<>i386) AND (CPU<>x86_64) {AND (CPU<>arm)}) then continue;
         if (OS=solaris) AND ((CPU<>x86_64) AND (CPU<>sparc)) then continue;
         if (OS=ios) AND ((CPU<>arm) AND (CPU<>aarch64)) then continue;
+        if ((OS=wasi) AND (CPU<>wasm32)) then continue;
+
 
         if (CPU=xtensa) AND ((OS<>linux) AND (OS<>freertos)) then continue;
         if (CPU=powerpc) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
@@ -944,6 +946,7 @@ begin
         if (CPU=avr) AND (OS<>embedded) then continue;
         if (CPU=sparc64) AND (OS<>linux) then continue;
         if ((CPU=riscv32) OR (CPU=riscv64)) AND ((OS<>linux) AND (OS<>embedded)) then continue;
+        if (CPU=wasm32) AND ((OS<>wasi) AND (OS<>embedded)) then continue;
 
         s1:=GetCPU(CPU)+'-'+GetOS(OS);
 

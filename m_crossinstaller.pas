@@ -69,8 +69,8 @@ const
   SEARCHFILE    = 'as';
 
 type
-  TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa);
-  TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo);
+  TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa,wasm32);
+  TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo,wasi);
   TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,rv32ima,rv32im,rv32i,rv64imac,rv64ima,rv64im,rv64i,lx6,lx106);
   //TABI      = (default,sysv,aix,darwin,elfv2,eabi,armeb,eabihf,oldwin32gnu,aarch64ios,riscvhf,linux386_sysv,windowed,call0);
   TABI      = (default,eabi,eabihf,aarch64ios,riscvhf,windowed,call0);

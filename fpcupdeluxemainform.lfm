@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 27
-  Height = 650
-  Top = 40
+  Left = 74
+  Height = 689
+  Top = 62
   Width = 1078
   Anchors = []
   Caption = 'Form1'
-  ClientHeight = 630
+  ClientHeight = 669
   ClientWidth = 1078
   Constraints.MinHeight = 400
   Menu = MainMenu1
@@ -24,7 +24,7 @@ object Form1: TForm1
     Left = 12
     Height = 31
     Hint = 'Open the extended settings form.'
-    Top = 531
+    Top = 570
     Width = 310
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
@@ -95,7 +95,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = memoSummary
     Left = 336
-    Height = 376
+    Height = 415
     Top = 62
     Width = 730
     BorderSpacing.Top = 6
@@ -565,10 +565,6 @@ object Form1: TForm1
     SelectedColor.ItalicPriority = 50
     SelectedColor.UnderlinePriority = 50
     SelectedColor.StrikeOutPriority = 50
-    ScrollOnEditLeftOptions.ScrollExtraPercent = 20
-    ScrollOnEditLeftOptions.ScrollExtraMax = 10
-    ScrollOnEditRightOptions.ScrollExtraPercent = 30
-    ScrollOnEditRightOptions.ScrollExtraMax = 25
     IncrementColor.Background = clNone
     IncrementColor.Foreground = clNone
     HighlightAllColor.Background = clNone
@@ -675,7 +671,7 @@ object Form1: TForm1
     AnchorSideBottom.Side = asrBottom
     Left = 6
     Height = 56
-    Top = 570
+    Top = 609
     Width = 1060
     Align = alBottom
     AutoSize = True
@@ -2410,7 +2406,7 @@ object Form1: TForm1
     Left = 336
     Height = 120
     Hint = 'Will show error'
-    Top = 446
+    Top = 485
     Width = 730
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
@@ -2428,7 +2424,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = btnSetupPlus
     Left = 12
-    Height = 488
+    Height = 527
     Top = 35
     Width = 310
     ActivePage = BasicSheet
@@ -2442,7 +2438,7 @@ object Form1: TForm1
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet
       Caption = 'Basic'
-      ClientHeight = 460
+      ClientHeight = 499
       ClientWidth = 302
       ParentFont = False
       object FPCVersionLabel: TLabel
@@ -2472,7 +2468,7 @@ object Form1: TForm1
         AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = BitBtnFPCOnly
         Left = 8
-        Height = 272
+        Height = 311
         Top = 34
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
@@ -2513,7 +2509,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = BitBtnLazarusOnly
         Left = 163
-        Height = 272
+        Height = 311
         Top = 34
         Width = 131
         Anchors = [akTop, akRight, akBottom]
@@ -2535,7 +2531,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Only install/update selected FPC version.'
-        Top = 322
+        Top = 361
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -2690,7 +2686,7 @@ object Form1: TForm1
         Left = 163
         Height = 61
         Hint = 'Only install/update selected Lazarus version.'
-        Top = 322
+        Top = 361
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -2846,7 +2842,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Will install/update the selected version of both FPC and Lazarus.'
-        Top = 391
+        Top = 430
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3350,7 +3346,7 @@ object Form1: TForm1
     end
     object CrossSheet: TTabSheet
       Caption = 'Cross'
-      ClientHeight = 460
+      ClientHeight = 499
       ClientWidth = 302
       ParentFont = False
       object radgrpCPU: TRadioGroup
@@ -3358,7 +3354,7 @@ object Form1: TForm1
         AnchorSideTop.Control = CrossSheet
         AnchorSideBottom.Control = ButtonInstallCrossCompiler
         Left = 8
-        Height = 320
+        Height = 359
         Top = 8
         Width = 128
         Anchors = [akTop, akLeft, akBottom]
@@ -3374,7 +3370,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 300
+        ClientHeight = 339
         ClientWidth = 124
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -3392,6 +3388,7 @@ object Form1: TForm1
           'sparc'
           'm68k'
           'xtensa'
+          'wasm32'
         )
         OnSelectionChanged = radgrpTargetChanged
         ParentFont = False
@@ -3407,7 +3404,7 @@ object Form1: TForm1
         AnchorSideBottom.Control = CrossSheet
         AnchorSideBottom.Side = asrBottom
         Left = 152
-        Height = 446
+        Height = 485
         Top = 8
         Width = 140
         Anchors = [akTop, akRight, akBottom]
@@ -3424,7 +3421,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 426
+        ClientHeight = 465
         ClientWidth = 136
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -3451,6 +3448,7 @@ object Form1: TForm1
           'ios'
           'freertos'
           'ultibo'
+          'wasi'
         )
         OnSelectionChanged = radgrpTargetChanged
         ParentFont = False
@@ -3467,7 +3465,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Install the selected CPU-OS cross-compiler.'
-        Top = 336
+        Top = 375
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3491,7 +3489,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Select a subarch for embedded target.'
-        Top = 429
+        Top = 468
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3515,7 +3513,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Remove the selected CPU-OS cross-compiler.'
-        Top = 367
+        Top = 406
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3538,7 +3536,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Auto-update all installed cross-compilers.'
-        Top = 398
+        Top = 437
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True

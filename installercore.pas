@@ -273,7 +273,7 @@ const
 
 const
   ppcSuffix : array[TCPU] of string=(
-    'none','386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','68k','xtensa'
+    'none','386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','68k','xtensa','wasm32'
   );
 
 type
