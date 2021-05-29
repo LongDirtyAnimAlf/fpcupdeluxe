@@ -1304,20 +1304,20 @@ begin
             end;
           end;
 
+          // wasm only works with -O-
           if (CrossInstaller.TargetCPU=TCPU.wasm32) then
           begin
             i:=pos('-O',Options);
             if (i>0) then
             begin
-              // Remove -O option
-              while ((i<Length(Options)) AND (Options[i]<>' ')) do
+              s2:=Copy(Options,i,3);
+              if s2[3]<>'-' then
               begin
-                Delete(Options,i,1);
+                Infoln(infotext+'Specified optimization: '+s2+'. Must be -O- for this target. Replacing.',etInfo);
+                Options[i+2]:='-';
               end;
             end;
-            Options:=Options+' -O-';
           end;
-
 
           if ((SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0))) then
           begin

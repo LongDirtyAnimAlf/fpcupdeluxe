@@ -3008,7 +3008,6 @@ begin
           // normally, we have the same names for libs and bins URL
           LibsFileName:=BinsFileName;
 
-
           {$IF (defined(Windows)) OR (defined(Linux))}
           if (
             ((FPCupManager.CrossOS_Target=TOS.darwin) AND (FPCupManager.CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
@@ -3026,6 +3025,13 @@ begin
             BinsFileName:='AndroidAll';
           end;
           {$endif}
+
+          if FPCupManager.CrossCPU_Target=TCPU.wasm32 then
+          begin
+            // wasm has some universal binaries
+            BinsFileName:='AllWasm32';
+          end;
+
 
           // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
           // Normally, we have the standard names for libs and bins paths
@@ -3063,6 +3069,12 @@ begin
             BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
           end;
           {$endif}
+
+          // Set special Bins directory for universal tools for wasm32
+          if FPCupManager.CrossCPU_Target=TCPU.wasm32 then
+          begin
+            BinPath:=StringReplace(BinPath,GetOS(FPCupManager.CrossOS_Target),'all',[]);
+          end;
 
           if FPCupManager.CrossOS_Target=TOS.darwin then
           begin

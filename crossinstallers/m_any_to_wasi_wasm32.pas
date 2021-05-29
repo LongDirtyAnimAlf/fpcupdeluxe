@@ -33,95 +33,18 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils;
+  Classes;
 
 implementation
 
 uses
-  m_crossinstaller;
+  m_crossinstaller, m_any_to_all_wasm32;
 
 type
-
-{ TAny_WasiWasm32 }
-TAny_WasiWasm32 = class(TCrossInstaller)
-public
-  function GetLibs(Basepath:string):boolean;override;
-  function GetBinUtils(Basepath:string):boolean;override;
-  constructor Create;
-  destructor Destroy; override;
-end;
-
-{ TAny_WasiWasm32 }
-
-function TAny_WasiWasm32.GetLibs(Basepath:string): boolean;
-const
-  LibName='libc.a';
-begin
-  result:=FLibsFound;
-  if result then exit;
-
-  result:=SearchLibrary(Basepath,LibName);
-  if not result then
-     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
-
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,TargetCPUName+'-all',LibName);
-
-  SearchLibraryInfo(result);
-
-  if result then
-  begin
-    FLibsFound:=True;
-
-    if PerformLibraryPathMagic then
-    begin
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-    end
-    else
-    begin
-      FLibsFound:=true;
-      FLibsPath:='';
-      result:=true;
-    end;
+  TAny_WasiWasm32 = class(TAny_AllWasm32)
+  public
+    constructor Create;
   end;
-
-end;
-
-function TAny_WasiWasm32.GetBinUtils(Basepath:string): boolean;
-var
-  AsFile: string;
-begin
-  result:=inherited;
-  if result then exit;
-
-  FBinUtilsPrefix:='';
-
-  AsFile:='clang'+GetExeExt;
-  //AsFile:='llvm-mc'+GetExeExt; // = asmbin from agllvmmc.pas
-
-  result:=SearchBinUtil(BasePath,AsFile);
-  if not result then
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-  if not result then
-    result:=SimpleSearchBinUtil(BasePath,TargetCPUName+'-all',AsFile);
-
-  SearchBinUtilsInfo(result);
-
-  if result then
-  begin
-    FBinsFound:=true;
-    // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
-    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
-  end
-  else
-  begin
-    //FBinsFound:=true;
-    //FBinUtilsPrefix:='';
-    //FBinUtilsPath:='';
-    //result:=true;
-  end;
-end;
 
 constructor TAny_WasiWasm32.Create;
 begin
@@ -130,11 +53,6 @@ begin
   FTargetOS:=TOS.wasi;
   Reset;
   ShowInfo;
-end;
-
-destructor TAny_WasiWasm32.Destroy;
-begin
-  inherited Destroy;
 end;
 
 var

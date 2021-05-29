@@ -918,6 +918,15 @@ begin
 
   if (NOT result) then
   begin
+
+    {$ifdef Darwin}
+    // Skip harmless error on Darwin
+    //if AnsiStartsText('cannot execute a binary file',line) then exit;
+    //if AnsiStartsText('could not find libgcc',line) then exit;
+    if AnsiStartsText('svnversion: error:',line) then exit;
+    {$endif Darwin}
+
+
     // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
     // will be a bit redundant , but just to be sure !
     if (AnsiContainsText(line,'error:'))
@@ -1017,6 +1026,8 @@ begin
         if AnsiContainsText(line,'This code is not thread-safe') then exit;
 
         if AnsiContainsText(line,'Range check error while') then exit;
+
+        if AnsiContainsText(line,'linker'' input unused') then exit;
 
         // when generating help
         if AnsiContainsText(line,'is unknown') then exit;
