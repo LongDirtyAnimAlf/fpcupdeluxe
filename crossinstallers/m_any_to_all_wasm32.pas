@@ -73,6 +73,16 @@ begin
   begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+  end
+  else
+  begin
+    if TargetOS=TOS.embedded then
+    begin
+      // Do not fail
+      FLibsPath:='';
+      FLibsFound:=True;
+      result:=true;
+    end;
   end;
 
 end;

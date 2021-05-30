@@ -813,7 +813,7 @@ end;
 
 procedure TCrossInstaller.ShowInfo(info: string = ''; Level: TEventType = etInfo);
 begin
-  if (Length(info)>0) then ThreadLog(CrossModuleName+': '+info,Level)
+  //if (Length(info)>0) then ThreadLog(CrossModuleName+': '+info,Level)
 end;
 
 procedure TCrossInstaller.Reset;
