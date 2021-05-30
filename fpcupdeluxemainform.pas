@@ -2292,7 +2292,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>GetCPU(TCPU.mipsel)) then
+        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>GetCPU(TCPU.mipsel))  and (s<>GetCPU(TCPU.wasm32)) then
         begin
           success:=false;
         end;

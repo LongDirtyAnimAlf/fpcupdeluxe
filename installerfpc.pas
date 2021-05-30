@@ -1316,6 +1316,10 @@ begin
                 Infoln(infotext+'Specified optimization: '+s2+'. Must be -O- for this target. Replacing.',etInfo);
                 Options[i+2]:='-';
               end;
+            end
+            else
+            begin
+              Options:=Options+' -O-';
             end;
             // wasm: remove debugging settings
             i:=pos('-g',Options);
