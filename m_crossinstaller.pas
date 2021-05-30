@@ -811,17 +811,9 @@ begin
   FABI:=ABI;
 end;
 
-
 procedure TCrossInstaller.ShowInfo(info: string = ''; Level: TEventType = etInfo);
 begin
-  (*
-  if Length(info)>0 then Infoln(CrossModuleName+': '+info,Level)
-  {$ifndef LCL}
-  else Infoln(CrossModuleName+' crosscompiler loading',etDebug);
-  {$else}
-  ;
-  {$endif}
-  *)
+  if (Length(info)>0) then ThreadLog(CrossModuleName+': '+info,Level)
 end;
 
 procedure TCrossInstaller.Reset;

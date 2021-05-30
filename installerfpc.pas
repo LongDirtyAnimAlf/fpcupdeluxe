@@ -1304,9 +1304,9 @@ begin
             end;
           end;
 
-          // wasm only works with -O-
           if (CrossInstaller.TargetCPU=TCPU.wasm32) then
           begin
+            // wasm only works with -O-
             i:=pos('-O',Options);
             if (i>0) then
             begin
@@ -1316,6 +1316,15 @@ begin
                 Infoln(infotext+'Specified optimization: '+s2+'. Must be -O- for this target. Replacing.',etInfo);
                 Options[i+2]:='-';
               end;
+            end;
+            // wasm: remove debugging settings
+            i:=pos('-g',Options);
+            while (i<>0) do
+            begin
+              s2:=Trim(Copy(Options,i,3));
+              Infoln(infotext+'Specified debug option: '+s2+'. Removing for this target.',etInfo);
+              Delete(Options,i,3);
+              i:=pos('-g',Options);
             end;
           end;
 

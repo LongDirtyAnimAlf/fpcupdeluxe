@@ -48,6 +48,9 @@ type
 
 implementation
 
+uses
+  fpcuputil;
+
 { TAny_AllWasm32 }
 
 function TAny_AllWasm32.GetLibs(Basepath:string): boolean;
@@ -75,6 +78,8 @@ begin
 end;
 
 function TAny_AllWasm32.GetBinUtils(Basepath:string): boolean;
+const
+  AsName='llvm-mc'; // = asmbin from agllvmmc.pas
 var
   AsFile: string;
 begin
@@ -83,14 +88,55 @@ begin
 
   FBinUtilsPrefix:='';
 
-  //AsFile:='clang'+GetExeExt;
-  AsFile:='llvm-mc'+GetExeExt; // = asmbin from agllvmmc.pas
+  AsFile:=AsName+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   if not result then
     result:=SimpleSearchBinUtil(BasePath,TargetCPUName+'-all',AsFile);
+
+  {$ifdef UNIX}
+  if (not result) then
+  begin
+    // Look in PATH for suitable binaries
+    if (not result) then
+    begin
+      AsFile:=Which(AsName);
+      if ((Length(AsFile)>0) AND FileExists(AsFile)) then
+      begin
+        if AsFile=AsName then AsFile:=ExpandFileName(AsFile);
+        FBinUtilsPath:=ExtractFilePath(AsFile);
+        result:=true;
+      end;
+    end;
+    if (not result) then
+    begin
+      AsFile:=Which(TargetCPUName+'-'+TargetOSName+'-'+AsName);
+      if ((Length(AsFile)>0) AND FileExists(AsFile)) then
+      begin
+        if AsFile=AsName then AsFile:=ExpandFileName(AsFile);
+        FBinUtilsPath:=ExtractFilePath(AsFile);
+        FBinUtilsPrefix:=TargetCPUName+'-'+TargetOSName+'-';
+        result:=true;
+      end;
+    end;
+
+    {$ifdef DARWIN}
+    // Look for brew installs
+    if (not result) then
+    begin
+      AsFile:='/usr/local/opt/llvm/bin/'+AsName;
+      if (FileExists(AsFile)) then
+      begin
+        FBinUtilsPath:=ExtractFilePath(AsFile);
+        result:=true;
+      end;
+    end;
+    {$endif DARWIN}
+
+  end;
+  {$endif UNIX}
 
   SearchBinUtilsInfo(result);
 
