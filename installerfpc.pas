@@ -435,8 +435,7 @@ function TFPCCrossInstaller.SubarchTarget:boolean;
 begin
   result:=false;
   if (NOT Assigned(CrossInstaller)) then exit;
-  if (CrossInstaller.TargetCPU=TCPU.wasm32) then exit;
-  if (CrossInstaller.TargetOS in SUBARCH_OS) then result:=true;
+  result:=((CrossInstaller.TargetCPU<>TCPU.cpuNone) AND (CrossInstaller.TargetOS<>TOS.osNone) AND (CrossInstaller.TargetOS in SUBARCH_OS) AND (CrossInstaller.TargetCPU in SUBARCH_CPU));
 end;
 
 function TFPCCrossInstaller.CompilerUpdateNeeded:boolean;

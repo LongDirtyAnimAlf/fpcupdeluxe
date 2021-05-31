@@ -3037,7 +3037,7 @@ procedure TInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);
 begin
   FCrossCPU_Target:=aCPU;
   FCrossOS_Target:=aOS;
-  if (FCrossOS_Target in SUBARCH_OS) then
+  if ((FCrossOS_Target in SUBARCH_OS) AND (FCrossCPU_Target in SUBARCH_CPU)) then
     FCrossOS_SubArch:=aSubArch
   else
     FCrossOS_SubArch:=TSUBARCH.saNone;
