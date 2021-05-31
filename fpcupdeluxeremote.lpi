@@ -858,9 +858,6 @@ if TargetOS=&apos;openbsd&apos; then
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <CustomOptions Value="-dRemoteLog"/>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="1">

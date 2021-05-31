@@ -193,6 +193,7 @@ type
   TFPCCrossInstaller = class(TFPCInstaller)
   private
     FCrossCompilerName: string;
+    function SubarchTarget:boolean;
     function CompilerUpdateNeeded:boolean;
     function PackagesNeeded:boolean;
     function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
@@ -404,7 +405,7 @@ begin
   //result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName]);
 
   // Specials
-  if (CrossInstaller.TargetOS in SUBARCH_OS) then
+  if (SubarchTarget) then
   begin
 
     if WithMagic then
@@ -428,6 +429,14 @@ begin
         result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic]);
     end;
   end;
+end;
+
+function TFPCCrossInstaller.SubarchTarget:boolean;
+begin
+  result:=false;
+  if (NOT Assigned(CrossInstaller)) then exit;
+  if (CrossInstaller.TargetCPU=TCPU.wasm32) then exit;
+  if (CrossInstaller.TargetOS in SUBARCH_OS) then result:=true;
 end;
 
 function TFPCCrossInstaller.CompilerUpdateNeeded:boolean;
@@ -1062,7 +1071,7 @@ begin
                 //s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units','$FPCTARGET','rtl','org','freepascal','rtl'])+LineEnding;
                 s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl'])+LineEnding;
 
-              if (CrossInstaller.TargetOS in SUBARCH_OS) then
+              if (SubarchTarget) then
               begin
                 UnitSearchPath:=GetUnitsInstallDirectory(true);
                 s1:=s1+'-Fu'+UnitSearchPath+DirectorySeparator+'rtl'+LineEnding;
@@ -1256,7 +1265,7 @@ begin
 
           if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
           begin
-            if (CrossInstaller.TargetOS in SUBARCH_OS) then
+            if (SubarchTarget) then
             begin
               UnitSearchPath:=GetUnitsInstallDirectory(false);
               if (MakeCycle=st_RtlInstall) then
