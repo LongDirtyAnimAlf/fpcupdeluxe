@@ -5372,7 +5372,7 @@ begin
 
         if res=CURLE_OK then res:=curl_easy_perform(hCurl);
         if res=CURLE_OK then res:=curl_easy_getinfo(hCurl,CURLINFO_RESPONSE_CODE, @response);
-        result:=((res=CURLE_OK) {AND (response=200)} AND (aDataStream.Size>0));
+        result:=((res=CURLE_OK) AND (response<>404) AND (aDataStream.Size>0));
 
         try
           if Assigned(curl_headers) then
