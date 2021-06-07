@@ -54,7 +54,7 @@ type
 implementation
 
 uses
-  dateutils,variants,fphttpclient;
+  dateutils,variants,fphttpclient, fpjson;
 
 constructor TDataClient.Create;
 var
@@ -109,6 +109,8 @@ var
   HTTPClient: TFPHTTPClient;
   RawData: string;
   doc:variant;
+  LocationParams: TJSONData;
+  success:boolean;
 begin
   if (Length(FUpInfo.IPV4Address)=0) then
   begin
@@ -118,31 +120,34 @@ begin
       HTTPClient.IOTimeout:=1000;
       try
         RawData:=HTTPClient.Get('http://ip-api.com/json');
-        {$ifdef SynCrossPlatform}
-        doc := JSONVariant(RawData);
-        RawData:=doc.status;
-        if RawData='success' then
+        success:=((Length(RawData)>0) AND (Pos('Not Found',RawData)=0));
+        LocationParams:=nil;
+        if success then
         begin
-          FUpInfo.IPV4Address:=doc.query;
-          FUpInfo.City:=doc.city;
-          FUpInfo.Country:=doc.country;
-          FUpInfo.Latitude:=doc.lat;
-          FUpInfo.Longitude:=doc.lon;
-          FLocReady:=true;
+          try
+            LocationParams:=GetJSON(RawData);
+          except
+            LocationParams:=nil;
+          end;
         end;
-        {$else}
-        doc := {%H-}_JSON(RawData);
-        RawData:=VariantToString(doc.status);
-        if RawData='success' then
+        success:=Assigned(LocationParams);
+        if success then
         begin
-          FUpInfo.IPV4Address:=VariantToUTF8(doc.query);
-          FUpInfo.City:=VariantToUTF8(doc.city);
-          FUpInfo.Country:=VariantToUTF8(doc.country);
-          FUpInfo.Latitude:=VariantToUTF8(doc.lat);
-          FUpInfo.Longitude:=VariantToUTF8(doc.lon);
-          FLocReady:=true;
+          try
+            RawData:=LocationParams.FindPath('status').AsString;
+            if RawData='success' then
+            begin
+              FUpInfo.IPV4Address:=LocationParams.FindPath('query').AsString;
+              FUpInfo.City:=LocationParams.FindPath('city').AsString;
+              FUpInfo.Country:=LocationParams.FindPath('country').AsString;
+              FUpInfo.Latitude:=LocationParams.FindPath('lat').AsString;
+              FUpInfo.Longitude:=LocationParams.FindPath('lon').AsString;
+              FLocReady:=true;
+            end;
+          finally
+            LocationParams.Free;
+          end;
         end;
-        {$endif}
       except
         //Swallow exceptions
       end;
@@ -182,7 +187,7 @@ begin
   ClientConnect;
   if Connected then
   begin
-    //if (NOT LocationReady) then ClientGetInfo;
+    if (NOT LocationReady) then ClientGetInfo;
     FUpInfo.DateOfUse:=LocalTimeToUniversal(Now);
     result:=Add(FUpInfo,True);
   end;
