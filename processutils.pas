@@ -955,6 +955,7 @@ begin
       if AnsiContainsText(line,': leaving directory ') then exit;
       // when generating help
       if AnsiContainsText(line,'illegal XML element: ') then exit;
+      if AnsiContainsText(line,'Invalid paragraph content') then exit;
       if AnsiContainsText(line,'parsing used unit ') then exit;
       if AnsiContainsText(line,'extracting ') then exit;
       if AnsiContainsText(line,'directory not found for option') then exit;
