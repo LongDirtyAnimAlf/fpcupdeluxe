@@ -52,6 +52,7 @@ type
   { Tany_android }
   Tany_android = class(TCrossInstaller)
   private
+    FBuildArch:string;
   protected
     FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
     ARCH:string;
@@ -61,6 +62,7 @@ type
     NDKTOOLCHAINVERSIONS:array of string;
     NDKARCHDIRNAME:string;
     PLATFORMVERSIONBASENAME:string;
+    property BuildArch:string read FBuildArch;
   public
     function GetLibs(Basepath:string):boolean;override;
     function GetBinUtils(Basepath:string):boolean;override;
@@ -125,7 +127,7 @@ begin
     result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
   // if binaries already found, search for library belonging to these binaries !!
-  if (not result) AND (Length(FBinUtilsPath)>0) AND (Pos('Error:',FBinUtilsPath)=0) AND (SearchModeUsed=TSearchSetting.ssAuto) then
+  if (not result) AND (Length(FBinUtilsPath)>0) AND (Pos('Error:',FBinUtilsPath)=0) {AND (SearchModeUsed=TSearchSetting.ssAuto)} then
   begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FBinUtilsPath);
     if ndkversion>0 then
@@ -138,6 +140,18 @@ begin
         begin
           FLibsPath := IncludeTrailingPathDelimiter(PresetLibPath)+'platforms'+DirectorySeparator+
                        PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          result:=DirectoryExists(FLibsPath);
+          if (NOT result) then
+          begin
+            FLibsPath := ConcatPaths([PresetLibPath,'toolchains','llvm','prebuilt',BuildArch,'sysroot','usr','lib']);
+            FLibsPath:=FLibsPath+DirectorySeparator;
+            if TargetCPU=TCPU.i386 then
+              FLibsPath:=FLibsPath+'i686-linux-android'
+            else
+              FLibsPath:=FLibsPath+ARCH+'-linux-android';
+            if TargetCPU=TCPU.arm then FLibsPath:=FLibsPath+'eabi';
+            FLibsPath:=FLibsPath+DirectorySeparator+InttoStr(PLATFORMVERSIONSNUMBERS[platform]);
+          end;
           result:=DirectoryExists(FLibsPath);
           if not result
              then ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
@@ -282,6 +296,8 @@ begin
     //' with Android libs, e.g. from the Android NDK. See http://wiki.lazarus.freepascal.org/Android.'
     //,etError);
     FAlreadyWarned:=true;
+    FLibsFound:=true;
+    result:=true;
   end;
 end;
 
@@ -328,25 +344,7 @@ begin
         for toolchain:=High(NDKTOOLCHAINVERSIONS) downto Low(NDKTOOLCHAINVERSIONS) do
         begin
           PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+'toolchains'+DirectorySeparator+NDKTOOLCHAINVERSIONS[toolchain]+DirectorySeparator+'prebuilt'+DirectorySeparator;
-          PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+
-          {$IFDEF MSWINDOWS}
-          WinPath+
-          {$ENDIF}
-          {$IFDEF LINUX}
-          {$IFDEF CPU64}
-          'linux-x86_64'+
-          {$ELSE}
-          'linux-x86'+
-          {$ENDIF}
-          {$ENDIF}
-          {$IFDEF DARWIN}
-          {$IFDEF CPU64}
-          'darwin-x86_64'+
-          {$ELSE}
-          'darwin-x86'+
-          {$ENDIF}
-          {$ENDIF}
-          DirectorySeparator+'bin';
+          PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+BuildArch+DirectorySeparator+'bin';
           result:=SearchBinUtil(PresetBinPath,AsFile);
           if result then break;
         end;
@@ -367,25 +365,7 @@ begin
           if FpGetEUid=0 then PresetBinPath:='/usr/local/';
           {$ENDIF}
           PresetBinPath:=PresetBinPath+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'toolchains'+DirectorySeparator+NDKTOOLCHAINVERSIONS[toolchain]+DirectorySeparator+'prebuilt'+DirectorySeparator;
-          PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+
-          {$IFDEF MSWINDOWS}
-          WinPath+
-          {$ENDIF}
-          {$IFDEF LINUX}
-          {$IFDEF CPU64}
-          'linux-x86_64'+
-          {$ELSE}
-          'linux-x86'+
-          {$ENDIF}
-          {$ENDIF}
-          {$IFDEF DARWIN}
-          {$IFDEF CPU64}
-          'darwin-x86_64'+
-          {$ELSE}
-          'darwin-x86'+
-          {$ENDIF}
-          {$ENDIF}
-          DirectorySeparator+'bin';
+          PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+BuildArch+DirectorySeparator+'bin';
           result:=SearchBinUtil(PresetBinPath,AsFile);
           if result then break;
         end;
@@ -510,10 +490,40 @@ begin
 end;
 
 constructor Tany_android.Create;
+var
+  {$IFDEF MSWINDOWS}
+  WinPath:string;
+  {$ENDIF}
 begin
   inherited Create;
   FTargetOS:=TOS.android;
   FAlreadyWarned:=false;
+
+  {$IFDEF MSWINDOWS}
+  if IsWindows64
+     then WinPath:='windows-x86_64'
+     else WinPath:='windows';
+  {$ENDIF}
+
+  FBuildArch:=
+  {$IFDEF MSWINDOWS}
+  WinPath+
+  {$ENDIF}
+  {$IFDEF LINUX}
+  {$IFDEF CPU64}
+  'linux-x86_64'+
+  {$ELSE}
+  'linux-x86'+
+  {$ENDIF}
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  {$IFDEF CPU64}
+  'darwin-x86_64'+
+  {$ELSE}
+  'darwin-x86'+
+  {$ENDIF}
+  {$ENDIF}
+  '';
 
   OS:=TargetOSName;
   NDKVERSIONBASENAME:=OS+'-ndk-r';

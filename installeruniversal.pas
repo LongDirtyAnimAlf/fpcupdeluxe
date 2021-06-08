@@ -2170,7 +2170,7 @@ begin
             FileContents.LoadFromFile(aFile);
 
             //Process Gradle settings
-            s:=ConcatPaths([Workingdir,'..','mORMot-gradle','gradle-6.3']);
+            s:=ConcatPaths([Workingdir,'..','mORMot-gradle','gradle-6.5']);
             s:=SafeExpandFileName(s);
             if DirectoryExists(s) then
             begin

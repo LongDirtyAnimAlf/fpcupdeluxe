@@ -1341,10 +1341,10 @@ begin
             end;
             if OperationSucceeded then
             begin
-              SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
               OperationSucceeded:=FileExists(aLocalClientBinary);
             end;
           end;
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
           if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+GetExeExt;
         end;
         if RepoExecutable <> EmptyStr then
