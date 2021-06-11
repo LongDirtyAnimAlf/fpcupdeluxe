@@ -156,7 +156,7 @@ object Form2: TForm2
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = GroupBox1
     AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = GroupBox4
+    AnchorSideRight.Control = ScrollBox1
     AnchorSideBottom.Control = btnAddFPCPatch
     Left = 8
     Height = 430
@@ -188,7 +188,7 @@ object Form2: TForm2
       TabOrder = 0
     end
   end
-  object GroupBox4: TGroupBox
+  object ScrollBox1: TScrollBox
     AnchorSideLeft.Control = GroupBox2
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = GroupBox2
@@ -199,24 +199,25 @@ object Form2: TForm2
     Height = 419
     Top = 140
     Width = 366
+    HorzScrollBar.Page = 223
+    VertScrollBar.Page = 398
     Anchors = [akTop, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Right = 8
     BorderSpacing.Bottom = 4
-    Caption = 'Custom tools location and build options'
-    ClientHeight = 399
+    ClientHeight = 415
     ClientWidth = 362
     ParentFont = False
     TabOrder = 4
     object EditLibLocation: TEdit
-      AnchorSideLeft.Control = GroupBox4
+      AnchorSideLeft.Control = ScrollBox1
       AnchorSideTop.Control = rgrpSearchOptions
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = btnSelectLibDir
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 179
+      Top = 185
       Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -231,14 +232,14 @@ object Form2: TForm2
       TabOrder = 0
     end
     object EditBinLocation: TEdit
-      AnchorSideLeft.Control = GroupBox4
+      AnchorSideLeft.Control = ScrollBox1
       AnchorSideTop.Control = EditLibLocation
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = btnSelectBinDir
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 208
+      Top = 214
       Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -256,11 +257,11 @@ object Form2: TForm2
       AnchorSideLeft.Control = EditLibLocation
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = EditLibLocation
-      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Control = ScrollBox1
       AnchorSideRight.Side = asrBottom
       Left = 276
       Height = 25
-      Top = 179
+      Top = 185
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -277,11 +278,11 @@ object Form2: TForm2
       AnchorSideLeft.Control = EditBinLocation
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = EditBinLocation
-      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Control = ScrollBox1
       AnchorSideRight.Side = asrBottom
       Left = 276
       Height = 25
-      Top = 208
+      Top = 214
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -295,14 +296,14 @@ object Form2: TForm2
       TabOrder = 3
     end
     object EditCrossBuildOptions: TEdit
-      AnchorSideLeft.Control = GroupBox4
+      AnchorSideLeft.Control = ScrollBox1
       AnchorSideTop.Control = LabelCrossBuildOptions
       AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Control = ScrollBox1
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 23
-      Top = 262
+      Top = 268
       Width = 344
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -315,12 +316,12 @@ object Form2: TForm2
       TabOrder = 4
     end
     object LabelCrossBuildOptions: TLabel
-      AnchorSideLeft.Control = GroupBox4
+      AnchorSideLeft.Control = ScrollBox1
       AnchorSideTop.Control = EditBinLocation
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 243
+      Top = 249
       Width = 219
       BorderSpacing.Left = 4
       BorderSpacing.Top = 12
@@ -329,14 +330,14 @@ object Form2: TForm2
       ParentFont = False
     end
     object EditCompilerOverride: TEdit
-      AnchorSideLeft.Control = GroupBox4
+      AnchorSideLeft.Control = ScrollBox1
       AnchorSideTop.Control = LabelCompilerOverride
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = btnSelectLibDir
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 310
+      Top = 316
       Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -354,11 +355,11 @@ object Form2: TForm2
       AnchorSideLeft.Control = EditLibLocation
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = EditCompilerOverride
-      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Control = ScrollBox1
       AnchorSideRight.Side = asrBottom
       Left = 276
       Height = 25
-      Top = 310
+      Top = 316
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -372,12 +373,12 @@ object Form2: TForm2
       TabOrder = 6
     end
     object LabelCompilerOverride: TLabel
-      AnchorSideLeft.Control = GroupBox4
+      AnchorSideLeft.Control = ScrollBox1
       AnchorSideTop.Control = EditCrossBuildOptions
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 291
+      Top = 297
       Width = 97
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -386,14 +387,14 @@ object Form2: TForm2
       ParentFont = False
     end
     object RadioGroupARMArch: TRadioGroup
-      AnchorSideLeft.Control = GroupBox4
+      AnchorSideLeft.Control = ScrollBox1
       AnchorSideTop.Control = EditCompilerOverride
       AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Control = ScrollBox1
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 51
-      Top = 341
+      Top = 347
       Width = 344
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True
@@ -415,17 +416,18 @@ object Form2: TForm2
       TabOrder = 7
     end
     object PageControl1: TPageControl
-      AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = GroupBox4
-      AnchorSideRight.Control = GroupBox4
+      AnchorSideLeft.Control = ScrollBox1
+      AnchorSideTop.Control = ScrollBox1
+      AnchorSideRight.Control = ScrollBox1
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 128
-      Top = 0
+      Top = 6
       Width = 352
       ActivePage = tsCPUOS
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
       BorderSpacing.Right = 6
       TabIndex = 0
       TabOrder = 8
@@ -543,16 +545,15 @@ object Form2: TForm2
       end
     end
     object rgrpSearchOptions: TRadioGroup
-      AnchorSideLeft.Control = GroupBox4
+      AnchorSideLeft.Control = ScrollBox1
       AnchorSideTop.Control = PageControl1
       AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Control = ScrollBox1
       AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = tsCPUOS
       AnchorSideBottom.Side = asrBottom
       Left = 4
       Height = 39
-      Top = 132
+      Top = 138
       Width = 352
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True

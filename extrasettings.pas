@@ -49,7 +49,7 @@ type
     EditCompilerOverride: TEdit;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
-    GroupBox4: TGroupBox;
+    ScrollBox1: TScrollBox;
     EditHTTPProxyHost: TEdit;
     EditHTTPProxyPort: TEdit;
     EditHTTPProxyUser: TEdit;
