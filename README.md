@@ -68,9 +68,11 @@ FreeBSD 9+
 ------------
 - none, but *strongly recommended* to use a newer gdb than the 6.1 version
 supplied with the system, e.g. by
+```
 cd /usr/ports/devel/gdb
 make -DBATCH install clean
-Use gdb in /usr/local/bin/gdb
+```
+Use gdb in `/usr/local/bin/gdb`
 - for Lazarus, you'll need XWindows with GTK (default) or Qt
 
 
