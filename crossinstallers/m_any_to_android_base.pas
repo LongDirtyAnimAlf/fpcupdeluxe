@@ -495,10 +495,10 @@ begin
 end;
 
 constructor Tany_android.Create;
+{$IFDEF MSWINDOWS}
 var
-  {$IFDEF MSWINDOWS}
   WinPath:string;
-  {$ENDIF}
+{$ENDIF}
 begin
   inherited Create;
   FTargetOS:=TOS.android;
@@ -530,6 +530,14 @@ begin
   {$ENDIF}
   '';
 
+  if (Length(FBuildArch)=0) then
+  begin
+    FBuildArch:=GetTargetOS+'-';
+    if GetTargetCPU='i386' then
+      FBuildArch:=FBuildArch+'x86'
+    else
+      FBuildArch:=FBuildArch+GetTargetCPU;
+  end;
   OS:=TargetOSName;
   NDKVERSIONBASENAME:=OS+'-ndk-r';
   PLATFORMVERSIONBASENAME:=OS+'-';

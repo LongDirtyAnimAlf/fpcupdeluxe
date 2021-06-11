@@ -918,6 +918,11 @@ begin
         if CrossInstaller.BinUtilsPathInPath then
            SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
 
+        // Use own tools first
+        {$ifdef MSWINDOWS}
+        SetPath(IncludeTrailingPathDelimiter(FMakeDir),true,false);
+        {$endif MSWINDOWS}
+
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
         begin
 
