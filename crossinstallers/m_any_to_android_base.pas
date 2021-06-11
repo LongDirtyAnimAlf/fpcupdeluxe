@@ -289,20 +289,12 @@ begin
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     AddFPCCFGSnippet('-FLlibdl.so'); {buildfaq 3.3.1: the name of the dynamic linker on the target}
-  end
-  else
-  begin
-    //Infoln(FCrossModuleName + ': Please fill '+SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
-    //' with Android libs, e.g. from the Android NDK. See http://wiki.lazarus.freepascal.org/Android.'
-    //,etError);
-    FAlreadyWarned:=true;
-    FLibsFound:=true;
-    result:=true;
   end;
 end;
 
 function Tany_android.GetBinUtils(Basepath:string): boolean;
 var
+  AsFiles:TStringList;
   AsFile,aOption: string;
   PresetBinPath:string;
   ndkversion,toolchain:byte;
@@ -466,7 +458,20 @@ begin
     if DirectoryExists(aOption) then
       PresetBinPath:=aOption;
 
-    PresetBinPath:=FindFileInDir(AsFile,PresetBinPath);
+    AsFiles := FindAllFiles(PresetBinPath, AsFile, true);
+    try
+      if (AsFiles.Count>0) then
+      begin
+        for PresetBinPath in AsFiles do
+        begin
+          if (Pos(DirectorySeparator+'llvm'+DirectorySeparator,PresetBinPath)>0) then break;
+        end;
+      end;
+    finally
+      AsFiles.Free;
+    end;
+
+    //PresetBinPath:=FindFileInDir(AsFile,PresetBinPath);
     if (Length(PresetBinPath)>0) then
     begin
       PresetBinPath:=ExtractFilePath(PresetBinPath);

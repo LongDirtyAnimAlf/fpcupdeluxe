@@ -2728,7 +2728,7 @@ begin
 
       if warning then
       begin
-        s:='Be forwarned: this will only work with FPC [(>= 3.3) OR (embedded) OR (trunk)].' + sLineBreak +
+        s:='Be forwarned: this will only work with FPC [(>= 3.2.2) OR (embedded) OR (trunk)].' + sLineBreak +
            'Do you want to continue ?';
       end;
 
