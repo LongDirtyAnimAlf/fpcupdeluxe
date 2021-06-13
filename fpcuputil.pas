@@ -3227,7 +3227,11 @@ end;
 
 function GetAndroidNDKDir:string;
 const
+{$ifdef MSWINOWS}
   SEARCHFILE='ndk-build.cmd';
+{$ELSE}
+  SEARCHFILE='ndk-build';
+{$ENDIF}
 var
   aSDKDir,aNDKDir:string;
   FilesList:TStringList;

@@ -3028,7 +3028,7 @@ begin
   begin
     if ( (NOT IsFPCInstaller) OR (IsFPCInstaller AND Assigned(CrossInstaller)) ) then
     begin
-      //Infoln('donalf: Compiler '+result+' not [yet] found.',etInfo);
+      Infoln('FPC compiler '+result+' not found. Fatal.',etError);
       raise Exception.CreateFmt('FPC compiler "%s" not found.', [result]);
     end;
     result:='';

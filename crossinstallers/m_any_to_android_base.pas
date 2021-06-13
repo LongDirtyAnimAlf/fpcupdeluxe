@@ -115,7 +115,6 @@ var
   PresetLibPath,aOption:string;
   FilesFound,FilesFoundFiltered: TStringList;
 begin
-
   result:=FLibsFound;
   if result then exit;
 
@@ -138,8 +137,7 @@ begin
         PresetLibPath:=LeftStr(FBinUtilsPath,ndkversion);
         for platform:=High(PLATFORMVERSIONSNUMBERS) downto Low(PLATFORMVERSIONSNUMBERS) do
         begin
-          FLibsPath := IncludeTrailingPathDelimiter(PresetLibPath)+'platforms'+DirectorySeparator+
-                       PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          FLibsPath := ConcatPaths([PresetLibPath,'platforms',PLATFORMVERSIONBASENAME+InttoStr(PLATFORMVERSIONSNUMBERS[platform]),NDKARCHDIRNAME,'usr','lib']);
           result:=DirectoryExists(FLibsPath);
           if (NOT result) then
           begin
@@ -288,6 +286,15 @@ begin
     FLibsFound:=true;
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    //if using the llvm sysroot (NDK version >= 22), also add the base directory for static libs
+    s:=DirectorySeparator+ConcatPaths(['sysroot','usr','lib']);
+    if ( (Pos('llvm',FLibsPath)>0) AND (Pos(s,FLibsPath)>0) ) then
+    begin
+      s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator;
+      s:=ExpandFileName(s);
+      if FileExists(s+'libc.a') then
+        AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(s));
+    end;
     AddFPCCFGSnippet('-FLlibdl.so'); {buildfaq 3.3.1: the name of the dynamic linker on the target}
   end;
 end;
@@ -295,23 +302,17 @@ end;
 function Tany_android.GetBinUtils(Basepath:string): boolean;
 var
   AsFiles:TStringList;
+  ndkversion,toolchain:byte;
+  s:string;
   AsFile,aOption: string;
   PresetBinPath:string;
-  ndkversion,toolchain:byte;
   i:integer;
   {$IFDEF MSWINDOWS}
   delphiversion:byte;
-  WinPath:string;
   {$ENDIF}
 begin
   result:=inherited;
   if result then exit;
-
-  {$IFDEF MSWINDOWS}
-  if IsWindows64
-     then WinPath:='windows-x86_64'
-     else WinPath:='windows';
-  {$ENDIF}
 
   AsFile:=BinUtilsPrefix+'as'+GetExeExt;
 
@@ -324,7 +325,7 @@ begin
     result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
 
   // if libs already found, search for binutils belonging to this lib !!
-  if (not result) AND (Length(FLibsPath)>0) AND (Pos('Error:',FLibsPath)=0) AND (SearchModeUsed=TSearchSetting.ssAuto) then
+  if (not result) AND (Length(FLibsPath)>0) AND (Pos('Error:',FLibsPath)=0){ AND (SearchModeUsed=TSearchSetting.ssAuto)} then
   begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FLibsPath);
     if ndkversion>0 then
@@ -332,11 +333,10 @@ begin
       ndkversion:=PosEx(DirectorySeparator,FLibsPath,ndkversion);
       if ndkversion>0 then
       begin
-        PresetBinPath:=LeftStr(FLibsPath,ndkversion);
+        s:=LeftStr(FLibsPath,ndkversion);
         for toolchain:=High(NDKTOOLCHAINVERSIONS) downto Low(NDKTOOLCHAINVERSIONS) do
         begin
-          PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+'toolchains'+DirectorySeparator+NDKTOOLCHAINVERSIONS[toolchain]+DirectorySeparator+'prebuilt'+DirectorySeparator;
-          PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+BuildArch+DirectorySeparator+'bin';
+          PresetBinPath := ConcatPaths([s,'toolchains',NDKTOOLCHAINVERSIONS[toolchain],'prebuilt',BuildArch,'bin']);
           result:=SearchBinUtil(PresetBinPath,AsFile);
           if result then break;
         end;
@@ -346,18 +346,17 @@ begin
 
   if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
+    s:=IncludeTrailingPathDelimiter(GetUserDir);
+    {$IFDEF LINUX}
+    if FpGetEUid=0 then s:='/usr/local/';
+    {$ENDIF}
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
     begin
-      if not result then
+      if (not result) then
       begin
         for toolchain:=High(NDKTOOLCHAINVERSIONS) downto Low(NDKTOOLCHAINVERSIONS) do
         begin
-          PresetBinPath:=IncludeTrailingPathDelimiter(GetUserDir);
-          {$IFDEF LINUX}
-          if FpGetEUid=0 then PresetBinPath:='/usr/local/';
-          {$ENDIF}
-          PresetBinPath:=PresetBinPath+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'toolchains'+DirectorySeparator+NDKTOOLCHAINVERSIONS[toolchain]+DirectorySeparator+'prebuilt'+DirectorySeparator;
-          PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+BuildArch+DirectorySeparator+'bin';
+          PresetBinPath := ConcatPaths([s,NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion],'toolchains',NDKTOOLCHAINVERSIONS[toolchain],'prebuilt',BuildArch,'bin']);
           result:=SearchBinUtil(PresetBinPath,AsFile);
           if result then break;
         end;
@@ -382,15 +381,13 @@ begin
           if not result then
           begin
             {$IFDEF CPU64}
-            result:=SearchBinUtil(IncludeTrailingPathDelimiter(GetEnvironmentVariable('ProgramFiles(x86)'))+
-            UppercaseFirstChar(OS)+'\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+
-            '\prebuilt\windows\bin',AsFile);
+            s:=ConcatPaths([GetEnvironmentVariable('ProgramFiles(x86)'),UppercaseFirstChar(OS),NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion],'toolchains',NDKTOOLCHAINVERSIONS[toolchain],'prebuilt','windows','bin']);
+            result:=SearchBinUtil(s,AsFile);
             if result then break else
             {$ENDIF}
             begin
-              result:=SearchBinUtil(IncludeTrailingPathDelimiter(GetEnvironmentVariable('ProgramFiles'))+
-              UppercaseFirstChar(OS)+'\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+
-              '\prebuilt\windows\bin',AsFile);
+              s:=ConcatPaths([GetEnvironmentVariable('ProgramFiles'),UppercaseFirstChar(OS),NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion],'toolchains',NDKTOOLCHAINVERSIONS[toolchain],'prebuilt','windows','bin']);
+              result:=SearchBinUtil(s,AsFile);
               if result then break;
             end;
           end else break;
@@ -464,7 +461,17 @@ begin
       begin
         for PresetBinPath in AsFiles do
         begin
-          if (Pos(DirectorySeparator+'llvm'+DirectorySeparator,PresetBinPath)>0) then break;
+          // This need a fix:
+          // https://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=49498
+          // So, only trunk or newer.
+          if (CalculateNumericalVersion(FPCVersion)<CalculateFullVersion(3,3,1)) then
+          begin
+            if (Pos(DirectorySeparator+'llvm'+DirectorySeparator,PresetBinPath)=0) then break;
+          end
+          else
+          begin
+            if (Pos(DirectorySeparator+'llvm'+DirectorySeparator,PresetBinPath)>0) then break;
+          end;
         end;
       end;
     finally

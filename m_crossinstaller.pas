@@ -50,9 +50,9 @@ const
 
   MAXDELPHIVERSION=22;
   MINDELPHIVERSION=12;
-  NDKVERSIONNAMES:array[0..30] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e','11','11b','11c','12','12b','13b','14b','15c','16b','17c','18b','19c','20b','21e');
+  NDKVERSIONNAMES:array[0..31] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e','11','11b','11c','12','12b','13b','14b','15c','16b','17c','18b','19c','20b','21e','22b');
   //PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
-  PLATFORMVERSIONSNUMBERS:array[0..21] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30);
+  PLATFORMVERSIONSNUMBERS:array[0..22] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31);
   {$ifdef unix}
   UnixBinDirs :array[0..2] of string = ('/usr/local/bin','/usr/bin','/bin');
   UnixLibDirs :array[0..2] of string = ('/usr/local/lib','/usr/lib','/lib');
