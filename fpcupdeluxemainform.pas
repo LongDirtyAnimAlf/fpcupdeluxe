@@ -4051,6 +4051,11 @@ var
 begin
   result:=false;
 
+  if Pos(' ',FPCupManager.BaseDirectory)>0 then
+  begin
+    if (MessageDlg('Having a space in your install path is ill-advised !'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+  end;
+
   StatusMessage.Text:=sStatus;
 
   AddMessage('FPCUP(deluxe) is starting up.');
