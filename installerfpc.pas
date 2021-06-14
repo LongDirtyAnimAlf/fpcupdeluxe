@@ -920,7 +920,18 @@ begin
 
         // Use own tools first
         {$ifdef MSWINDOWS}
-        SetPath(IncludeTrailingPathDelimiter(FMakeDir),true,false);
+        s2:=Which('echo.exe');
+        if (Length(s2)=0) then s2:=Which('sh.exe');
+        if (Length(s2)>0) then
+        begin
+          // We may have a stray shell (msys among others ... remove from path
+          s1:=GetPath;
+          s2:=ExtractFileDir(s2);
+          s1:=StringReplace(s1,s2+';','',[]);
+          s1:=StringReplace(s1,s2+DirectorySeparator+';','',[]);
+          s1:=StringReplace(s1,s2,'',[]);
+          SetPath(s1,false,false);
+        end;
         {$endif MSWINDOWS}
 
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
@@ -1147,6 +1158,7 @@ begin
           Processor.Process.Parameters.Add('FPCDIR=' + s1);
 
           {$IFDEF MSWINDOWS}
+          //Processor.Process.Parameters.Add('ECHO='+ExtractFilePath(Make)+'gecho.exe');
           Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           {$ELSE}

@@ -1104,6 +1104,11 @@ begin
             s2:=ReadString('NewProject',s,s2);
             if DirectoryExists(s2) then WriteString('NewProject',s,s2);
 
+            s:='PathToAndroidNDK';
+            s2:=GetAndroidNDKDir;
+            s2:=ReadString('NewProject',s,s2);
+            if DirectoryExists(s2) then WriteString('NewProject',s,s2);
+
           finally
             Free;
           end;
