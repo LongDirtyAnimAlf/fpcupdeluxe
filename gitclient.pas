@@ -536,6 +536,7 @@ end;
 function TGitClient.GetLocalRevision: string;
 var
   Output: string = '';
+  i:integer;
 begin
   Result := Output;
   FReturnCode := 0;
@@ -549,9 +550,14 @@ begin
     //todo: find out: without max-count, I can get multiple entries. No idea what these mean!??
     // alternative command: rev-parse --verify "HEAD^0" but that doesn't look as low-level ;)
     try
-      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' rev-list --max-count=1 HEAD ', LocalRepository, Output, Verbose);
-      if FReturnCode = 0
-        then FLocalRevision := trim(Output)
+      //FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' rev-list --max-count=1 HEAD ', LocalRepository, Output, Verbose);
+      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' describe --tags --all --long --always ', LocalRepository, Output, Verbose);
+      if FReturnCode = 0 then
+      begin
+        i:=RPos('/',Output);
+        if (i>0) then Delete(Output,1,i);
+        FLocalRevision := trim(Output)
+      end
         else FLocalRevision := FRET_UNKNOWN_REVISION; //for compatibility with the svnclient code
     except
       FLocalRevision := FRET_UNKNOWN_REVISION; //for compatibility with the svnclient code

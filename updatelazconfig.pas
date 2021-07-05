@@ -95,7 +95,7 @@ const
   // Lazarus pre 1.0: 106
   // We can assume Lazarus trunk can parse this version:
   TrunkVersionNewEnvironmentConfig='110';
-  TrunkLazarusNewEnvironmentConfig='2.1.0';
+  TrunkLazarusNewEnvironmentConfig='2.3.0';
   // We use a hardcoded version for Lazarus below
   VersionNewHelpConfig='1';
   VersionNewPackageConfig='3';

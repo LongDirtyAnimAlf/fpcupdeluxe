@@ -918,6 +918,9 @@ begin
         if CrossInstaller.BinUtilsPathInPath then
            SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
 
+        //SetPath(ConcatPaths([FSourceDirectory,'rtl',CrossInstaller.TargetOSName]),true,false);
+        //SetPath(ConcatPaths([FSourceDirectory,'rtl',CrossInstaller.TargetOSName,CrossInstaller.TargetCPUName]),true,false);
+
         // Use own tools first
         {$ifdef MSWINDOWS}
         s2:=Which('echo.exe');

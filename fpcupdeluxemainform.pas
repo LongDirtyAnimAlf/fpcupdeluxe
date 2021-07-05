@@ -4076,6 +4076,9 @@ begin
   {$endif}
 
   // default branch and revision overrides
+  if (Pos('gitlab.com/freepascal.org',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='main';
+  if (Pos('gitlab.com/freepascal.org',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='master';
+
   // for https://github.com/graemeg (FPC/Lazarus mirrors of GitHub) ... always get the right branch
   if (Pos('github.com/graemeg',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='master';
   if (Pos('github.com/graemeg',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='upstream';

@@ -156,7 +156,7 @@ begin
     ]);
 
 
-  PlatformLabel.Caption:= 'https://github.com/newpascal/fpcupdeluxe/releases/latest';
+  PlatformLabel.Caption:= 'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/latest';
 
   // Reinier Olislagers
   // 4-dec-2014

@@ -4063,7 +4063,7 @@ begin
             begin
               JsonObject := TJSONObject(Releases[i]);
               // Example ---
-              // browser_download_url: "https://github.com/newpascal/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
+              // browser_download_url: "https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
               // name: "fpcupdeluxe-aarch64-linux"
               // created_at: "2018-10-14T06:58:44Z"
               s:=JsonObject.Get('name');

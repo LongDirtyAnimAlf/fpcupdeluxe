@@ -41,7 +41,7 @@ const
   FPCTRUNKVERSION       = '3.3.1';
   FPCTRUNKBOOTVERSION   = '3.2.2';
 
-  LAZARUSTRUNKVERSION   = '2.1.0';
+  LAZARUSTRUNKVERSION   = '2.3.0';
 
   DEFAULTFREEBSDVERSION = 12;
 
@@ -1739,9 +1739,13 @@ begin
   begin
     Output:=(aClient as TGitClient).GetSVNRevision;
     if (Length(Output)>0) then
-    begin
-      aBeforeRevision := Output;
-    end;
+      aBeforeRevision := Output
+    else
+      begin
+        Output:=(aClient as TGitClient).LocalRevision;
+        if (Length(Output)>0) then
+          aBeforeRevision := Output;
+      end;
   end;
 
   if Assigned(UpdateWarnings) then
@@ -2267,8 +2271,11 @@ begin
 
       if NOT DownloadSuccess then
       begin
-        Infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + '.',etError);
-        Inc(Errors);
+        if (FUtilFiles[Counter].FileName<>'libiconv-2.dll') then
+        begin
+          Infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + '.',etError);
+          Inc(Errors);
+        end;
       end
       else
       begin
@@ -3079,7 +3086,8 @@ begin
 
   // Do we need GIT
   if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') then result:=GitClient;
-  if result=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then result:=GitClient;
+  if result=nil then if ( {(Pos('github',LowerCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then result:=GitClient;
+  if result=nil then if (Pos('gitlab.com/freepascal.org',LowerCase(FURL))>0) then result:=GitClient;
 
   // Do we need HG
   if result=nil then if ( (Pos('hg.code.sf.net',LowerCase(FURL))>0) ) then result:=HGClient;
@@ -3736,7 +3744,7 @@ begin
   // Only handle Lazarus !
   if (ModuleName<>_LAZARUS) then exit;
 
-  if TryStrToInt(aRevision,NumRevision) then
+  //if TryStrToInt(aRevision,NumRevision) then
   begin
     RevFileName:='';
 
@@ -3752,11 +3760,13 @@ begin
         begin
           RevisionStringList.Add(RevisionIncComment);
           ConstStart := Format('const %s = ''', [ConstName]);
-          RevisionStringList.Add(ConstStart+InttoStr(NumRevision)+''';');
+          //RevisionStringList.Add(ConstStart+InttoStr(NumRevision)+''';');
+          RevisionStringList.Add(ConstStart+aRevision+''';');
         end;
         if (ModuleName=_FPC) then
         begin
-          RevisionStringList.Add(''''+InttoStr(NumRevision)+'''');
+          //RevisionStringList.Add(''''+InttoStr(NumRevision)+'''');
+          RevisionStringList.Add(''''+aRevision+'''');
         end;
         RevisionStringList.SaveToFile(RevFileName);
         result:=true;
