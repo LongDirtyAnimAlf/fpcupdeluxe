@@ -36,7 +36,9 @@ msgid "Only use fpcup bootstrappers (default=no)"
 msgstr "仅使用fpcup bootstrappers (default=no)"
 
 #: extrasettings.captioncheckgetupdates
-msgid "Check for updates (default=no)"
+#, fuzzy
+#| msgid "Check for updates (default=no)"
+msgid "Check for fpcupdeluxe updates (default=no)"
 msgstr "检查更新(default=no)"
 
 #: extrasettings.captioncheckincludehelp
@@ -89,7 +91,9 @@ msgid "Enable software emulation of 80 bit floats."
 msgstr "启用80位浮点的软件仿真."
 
 #: extrasettings.hintcheckaddcontext
-msgid "Double clicking on FPC and LAzarus files will open Lazarus."
+#, fuzzy
+#| msgid "Double clicking on FPC and LAzarus files will open Lazarus."
+msgid "Double clicking on FPC and Lazarus files will open Lazarus."
 msgstr "在FPC和Lazarus文件上双击将打开Lazarus."
 
 #: extrasettings.hintcheckenableonlinepatching
@@ -101,7 +105,9 @@ msgid "Use the repo-client by fpcupdeluxe."
 msgstr "通过fpcupdluxe的回购(repo)客户端."
 
 #: extrasettings.hintcheckgetupdates
-msgid "Check for updates of fpcupdeluxe."
+#, fuzzy
+#| msgid "Check for updates of fpcupdeluxe."
+msgid "Check for updates of fpcupdeluxe binaries."
 msgstr "检查fpcupdeluxe的更新."
 
 #: extrasettings.hintcheckrepo
@@ -153,69 +159,67 @@ msgstr "新的fpcupdeluxe版本可获得的"
 msgid "No updates found."
 msgstr "未找到更新."
 
-#: taboutform.builddatelabel.caption
-msgid "Date:"
-msgstr "日期:"
+#: processutils.lisaborted
+msgid "Aborted"
+msgstr ""
 
-#: taboutform.caption
-msgid "About fpcupdeluxe"
-msgstr "关于fpcupdeluxe"
+#: processutils.liscannotexecute
+#, object-pascal-format
+msgid "cannot execute \"%s\""
+msgstr ""
 
-#: taboutform.closebutton.caption
-msgid "&Close"
-msgstr "关闭(&C)"
+#: processutils.liscannotfindexecutable
+#, object-pascal-format
+msgid "cannot find executable \"%s\""
+msgstr ""
 
-#: taboutform.creditspage.caption
-msgid "Credits"
-msgstr "荣誉"
+#: processutils.lisexecutableisadirectory
+#, object-pascal-format
+msgid "executable \"%s\" is a directory"
+msgstr ""
 
-#: taboutform.documentationlabel.caption
-msgid "DocumentationLabel"
-msgstr "文档标签"
+#: processutils.lisexecutablelacksthepermissiontorun
+#, object-pascal-format
+msgid "executable \"%s\" lacks the permission to run"
+msgstr ""
 
-#: taboutform.documentationurllabel.caption
-msgid "DocumentationURLLabel"
-msgstr "文档URL标签"
+#: processutils.lisexitcode
+#, object-pascal-format
+msgid "Exit code %s"
+msgstr ""
 
-#: taboutform.forumlabel.caption
-msgid "ForumLabel"
-msgstr "论坛标签"
+#: processutils.lisfreeingbufferlines
+#, object-pascal-format
+msgid "freeing buffer lines: %s"
+msgstr ""
 
-#: taboutform.forumurllabel.caption
-msgid "ForumURLLabel"
-msgstr "论坛URL标签"
+#: processutils.lismissingdirectory
+#, object-pascal-format
+msgid "missing directory \"%s\""
+msgstr ""
 
-#: taboutform.fpcversionlabel.caption
-msgid "FPCUPVersionLabel"
-msgstr "FPCUP版本标签"
+#: processutils.lismissingexecutable
+#, object-pascal-format
+msgid "missing executable \"%s\""
+msgstr ""
 
-#: taboutform.officiallabel.caption
-msgid "OfficialLabel"
-msgstr "官方标签"
+#: processutils.lissuccess
+msgid "Success"
+msgstr ""
 
-#: taboutform.officialurllabel.caption
-msgid "OfficialURLLabel"
-msgstr "官方URL标签"
+#: processutils.listoolhasnoexecutable
+#, object-pascal-format
+msgid "tool \"%s\" has no executable"
+msgstr ""
 
-#: taboutform.platformlabel.caption
-msgid "PlatformLabel"
-msgstr "平台标签"
+#: processutils.lisunabletoexecute
+#, object-pascal-format
+msgid "unable to execute: %s"
+msgstr ""
 
-#: taboutform.reinierlabel.caption
-msgid "ReinierLabel"
-msgstr "Reinier标签"
-
-#: taboutform.reinierurllabel.caption
-msgid "ReinierURLLabel"
-msgstr "ReinierURL标签"
-
-#: taboutform.versionlabel.caption
-msgid "Version #:"
-msgstr "版本#:"
-
-#: taboutform.versionpage.caption
-msgid "Version"
-msgstr "版本"
+#: processutils.lisunabletoreadprocessexitstatus
+msgid "unable to read process ExitStatus"
+msgstr ""
 
 #: tform1.autocrossupdate.caption
 msgid "Auto-update compilers"
@@ -433,181 +437,3 @@ msgstr "Trunk(主干)版本"
 msgid "Will install/update trunk version of both FPC and Lazarus."
 msgstr "将安装/更新FPC和Lazarus的主干的(trunk)版本."
 
-#: tform2.btnaddfpcpatch.caption
-msgid "Add FPC patch"
-msgstr "添加FPC补丁"
-
-#: tform2.btnaddlazpatch.caption
-msgid "Add Laz patch"
-msgstr "添加Lazarus补丁"
-
-#: tform2.btnlistcustomoptions.caption
-msgid "List All"
-msgstr "列出全部"
-
-#: tform2.btnremfpcpatch.caption
-msgid "Rem. FPC patch"
-msgstr "快速FPC修补"
-
-#: tform2.btnremlazpatch.caption
-msgid "Rem. Laz patch"
-msgstr "快速Lazarus修补"
-
-#: tform2.btnselectbindir.caption
-msgid "Tools"
-msgstr "工具"
-
-#: tform2.btnselectcompiler.caption
-msgid "Compiler"
-msgstr "编译器"
-
-#: tform2.btnselectlibdir.caption
-msgid "Libraries"
-msgstr "库"
-
-#: tform2.caption
-msgid "Advanced settings"
-msgstr "高级设置"
-
-#: tform2.editbinlocation.hint
-msgctxt "tform2.editbinlocation.hint"
-msgid "Double click to clear"
-msgstr "双击以清理"
-
-#: tform2.editcompileroverride.hint
-msgctxt "tform2.editcompileroverride.hint"
-msgid "Double click to clear"
-msgstr "双击以清理"
-
-#: tform2.editliblocation.hint
-msgctxt "tform2.editliblocation.hint"
-msgid "Double click to clear"
-msgstr "双击以清理"
-
-#: tform2.groupbox1.caption
-msgid "Proxy settings"
-msgstr "代理设置"
-
-#: tform2.groupbox2.caption
-msgid "Miscellaneous settings"
-msgstr "杂项设置"
-
-#: tform2.groupbox4.caption
-msgid "Custom tools location and build options"
-msgstr "自定义工具位置和构建选项"
-
-#: tform2.groupboxcompileoptions.caption
-msgid "Options Override"
-msgstr "选项覆盖"
-
-#: tform2.groupboxfpclazbranchrevision.caption
-msgid "FPC/Laz branch and revision"
-msgstr "FPC/Lazarus分支和修订版本(default=no)"
-
-#: tform2.label1.caption
-msgid "HTTP proxy URL:"
-msgstr "HTTP代理URL:"
-
-#: tform2.label2.caption
-msgid "HTTP proxy port:"
-msgstr "HTTP代理端口:"
-
-#: tform2.label3.caption
-msgid "HTTP proxy username:"
-msgstr "HTTP代理用户名称:"
-
-#: tform2.label4.caption
-msgid "HTTP proxy password:"
-msgstr "HTTP代理密码:"
-
-#: tform2.labelcompileroverride.caption
-msgid "Compiler Override"
-msgstr "编译器覆盖"
-
-#: tform2.labelcpu.caption
-msgid "Select CPU"
-msgstr "选择CPU"
-
-#: tform2.labelcrossbuildoptions.caption
-msgid "Cross Build Options Override (i.e. -CfSoft)"
-msgstr "交叉构建选项覆盖(例如 -CfSoft)"
-
-#: tform2.labelcrosssubarch.caption
-msgid "Cross SubArch Override (i.e. armv7m, ...)"
-msgstr "交叉子结构(SubArch)覆盖(例如 armv7m, ...t)"
-
-#: tform2.labelfpcbranch.caption
-msgid "FPC branch"
-msgstr "FPC分支"
-
-#: tform2.labelfpcoptions.caption
-msgid "FPC options"
-msgstr "FPC选项"
-
-#: tform2.labelfpcrevision.caption
-msgid "FPC revision"
-msgstr "FPC修订版本"
-
-#: tform2.labellazarusbranch.caption
-msgid "Lazarus branch"
-msgstr "Lazarus分支"
-
-#: tform2.labellazarusoptions.caption
-msgid "Lazarus options"
-msgstr "lazarus选项"
-
-#: tform2.labellazarusrevision.caption
-msgid "Lazarus revision"
-msgstr "Lazarus修订版本"
-
-#: tform2.labelos.caption
-msgid "Select OS"
-msgstr "选择操作系统"
-
-#: tform2.radiogroup3.caption
-msgid "Search options"
-msgstr "搜索选项"
-
-#: tform2.radiogrouparmarch.caption
-msgid "ARM target"
-msgstr "ARM目标"
-
-#: tform3.button1.caption
-msgid "Install selected module"
-msgstr "安装选择的模块"
-
-#: tform3.button2.caption
-msgid "Un-install selected module"
-msgstr "卸载选择的模块"
-
-#: tform3.button3.caption
-msgid "Cancel"
-msgstr "取消"
-
-#: tform3.caption
-msgid "Module settings"
-msgstr "模块设置"
-
-#: tform3.listview1.columns[0].caption
-msgid "Name"
-msgstr "名称"
-
-#: tform3.listview1.columns[1].caption
-msgid "Category"
-msgstr "分类"
-
-#: tform3.listview1.columns[2].caption
-msgid "Description"
-msgstr "描述"
-
-#: tform3.radiogroup1.caption
-msgid "Categories"
-msgstr "类别"
-
-#: tinfoform.caption
-msgid "InfoForm"
-msgstr "信息窗体"
-
-#: tinfoform.label1.caption
-msgid "Listing of all custom CPU and OS settings"
-msgstr "所有自定义CPU和操作系统设置的列表"

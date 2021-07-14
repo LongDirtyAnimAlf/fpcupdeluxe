@@ -100,6 +100,10 @@ type
 
 implementation
 
+uses
+  fphttpclient,
+  fpcuputil;
+
 constructor TCustomNSHTTPSendAndReceive.Create;
 begin
   inherited Create;
@@ -204,11 +208,11 @@ end;
 
 function TCustomNSHTTPSendAndReceive.IndexOfHeader(const AHeader: String): Integer;
 var
-  LH : Integer;
+  //LH : Integer;
   H : String;
 begin
   H:=LowerCase(AHeader);
-  LH:=Length(AHeader);
+  //LH:=Length(AHeader);
   Result:=FRequestHeaders.Count-1;
   while (Result>=0) and (LowerCase(FRequestHeaders.Names[Result])<>H) do
     Dec(Result);
@@ -243,65 +247,92 @@ function TCustomNSHTTPSendAndReceive.SendAndReceive(ARequest : TStream; ARespons
    return False and set LastErrMsg.
   Optional ARequest stream can be used to set the HTTP request body.}
 var
+  FPCClient   : TFPHTTPClient;
   urlRequest  : NSMutableURLRequest;
   requestData : NSMutableData;
   HdrNum      : Integer;
   urlResponse : NSHTTPURLResponse;
   error       : NSError;
   urlData     : NSData;
+  s           : string;
 begin
   Result := False;
-  try
-    FMethod := aMethod;
-    urlRequest := NSMutableURLRequest.requestWithURL_cachePolicy_timeoutInterval(
-                   NSURL.URLWithString(StrToNSStr(Address)), 
-                   NSURLRequestUseProtocolCachePolicy, Timeout);
 
-    if Method <> '' then
-      urlRequest.setHTTPMethod(StrToNSStr(Method));
+  FMethod := aMethod;
 
-    if Assigned(ARequest) and (ARequest.Size > 0) then
-    begin
-      try
-        requestData := NSMutableData.alloc.initWithLength(ARequest.Size);
-        ARequest.Position := 0;
-        ARequest.ReadBuffer(requestData.mutableBytes^, ARequest.Size);
-        urlRequest.setHTTPBody(requestData);
-      finally
-        requestData.release;
-      end;
+  s:=GetDarwinSDKVersion('macosx');
+
+  //if (true) then
+  if (false) then
+  //if (Length(s)<>0) AND (CompareVersionStrings('10.12',s)>=0) then
+  begin
+
+    FPCClient := TFPHttpClient.Create(nil);
+    try
+      FPCClient.AllowRedirect := true;
+      FPCClient.RequestHeaders:=RequestHeaders;
+      FPCClient.HTTPMethod(Method,Address,AResponse,[]);
+    finally
+      FPCClient.Free;
     end;
 
-    if Assigned(RequestHeaders) then
-    begin
-      for HdrNum := 0 to RequestHeaders.Count-1 do
+  end
+  else
+  begin
+
+    try
+      urlRequest := NSMutableURLRequest.requestWithURL_cachePolicy_timeoutInterval(
+                     NSURL.URLWithString(StrToNSStr(Address)),
+                     NSURLRequestUseProtocolCachePolicy, Timeout);
+
+      if Method <> '' then
+        urlRequest.setHTTPMethod(StrToNSStr(Method));
+
+      if Assigned(ARequest) and (ARequest.Size > 0) then
       begin
-        urlRequest.addValue_forHTTPHeaderField(StrToNSStr(RequestHeaders.ValueFromIndex[HdrNum]),
-                                               StrToNSStr(RequestHeaders.Names[HdrNum]));
+        try
+          requestData := NSMutableData.alloc.initWithLength(ARequest.Size);
+          ARequest.Position := 0;
+          ARequest.ReadBuffer(requestData.mutableBytes^, ARequest.Size);
+          urlRequest.setHTTPBody(requestData);
+        finally
+          requestData.release;
+        end;
+      end;
+
+      if Assigned(RequestHeaders) then
+      begin
+        for HdrNum := 0 to RequestHeaders.Count-1 do
+        begin
+          urlRequest.addValue_forHTTPHeaderField(StrToNSStr(RequestHeaders.ValueFromIndex[HdrNum]),
+                                                 StrToNSStr(RequestHeaders.Names[HdrNum]));
+        end;
+      end;
+
+      urlData := NSURLConnection.sendSynchronousRequest_returningResponse_error(
+                  urlRequest, @urlResponse, @error);
+      if not Assigned(urlData) then
+      begin
+        FLastErrMsg := NSStrToStr(error.localizedDescription);
+        Exit;
+      end;
+
+      FResponseStatusCode:=urlResponse.statusCode;
+
+      AResponse.Position := 0;
+      AResponse.WriteBuffer(urlData.bytes^, urlData.length);
+      AResponse.Position := 0;
+      Result := True;
+
+    except
+      on E : Exception do
+      begin
+        FLastErrMsg := E.Message;
       end;
     end;
 
-    urlData := NSURLConnection.sendSynchronousRequest_returningResponse_error(
-                urlRequest, @urlResponse, @error);
-    if not Assigned(urlData) then
-    begin
-      FLastErrMsg := NSStrToStr(error.localizedDescription);
-      Exit;
-    end;
-
-    FResponseStatusCode:=urlResponse.statusCode;
-
-    AResponse.Position := 0;
-    AResponse.WriteBuffer(urlData.bytes^, urlData.length);
-    AResponse.Position := 0;
-    Result := True;
-
-  except
-    on E : Exception do
-    begin
-      FLastErrMsg := E.Message;
-    end;
   end;
+
 end;
 
 function TCustomNSHTTPSendAndReceive.Get(const AURL: String): String;

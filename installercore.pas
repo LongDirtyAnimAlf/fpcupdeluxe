@@ -2467,9 +2467,6 @@ begin
       if OperationSucceeded then
         OperationSucceeded:=SimpleExportFromSVN('DownloadOpenSSL',OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath);
     end;
-
-    if OperationSucceeded
-       then Infoln(localinfotext+'SVN OpenSLL library files download from '+OPENSSL_URL_LATEST_SVN+' ok.',etWarning)
   end;
 
   // Direct download OpenSSL from from Lazarus binaries
@@ -2482,14 +2479,15 @@ begin
       OpenSSLFileName:='ssleay32.dll';
       OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
     end;
-
-    if OperationSucceeded
-       then Infoln(localinfotext+'Direct OpenSLL library files download from '+OPENSSL_URL_LATEST_SVN+' ok.',etWarning)
   end;
 
   // Direct download OpenSSL from public sources
   if (NOT OperationSucceeded) then
   begin
+    localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
+
+    Infoln(localinfotext+'Got OpenSLL from '+OPENSSL_URL_LATEST_SVN+'.',etWarning);
+
     OpenSSLFileName := GetTempFileNameExt('FPCUPTMP','zip');
 
     for i:=0 to (Length(OpenSSLSourceURL)-1) do

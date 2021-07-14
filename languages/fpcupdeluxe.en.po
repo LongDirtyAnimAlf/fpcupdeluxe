@@ -26,7 +26,7 @@ msgid "Only use fpcup bootstrappers (default=no)"
 msgstr ""
 
 #: extrasettings.captioncheckgetupdates
-msgid "Check for updates (default=no)"
+msgid "Check for fpcupdeluxe updates (default=no)"
 msgstr ""
 
 #: extrasettings.captioncheckincludehelp
@@ -79,7 +79,7 @@ msgid "Enable software emulation of 80 bit floats."
 msgstr ""
 
 #: extrasettings.hintcheckaddcontext
-msgid "Double clicking on FPC and LAzarus files will open Lazarus."
+msgid "Double clicking on FPC and Lazarus files will open Lazarus."
 msgstr ""
 
 #: extrasettings.hintcheckenableonlinepatching
@@ -91,7 +91,7 @@ msgid "Use the repo-client by fpcupdeluxe."
 msgstr ""
 
 #: extrasettings.hintcheckgetupdates
-msgid "Check for updates of fpcupdeluxe."
+msgid "Check for updates of fpcupdeluxe binaries."
 msgstr ""
 
 #: extrasettings.hintcheckrepo
@@ -143,68 +143,66 @@ msgstr ""
 msgid "No updates found."
 msgstr ""
 
-#: taboutform.builddatelabel.caption
-msgid "Date:"
+#: processutils.lisaborted
+msgid "Aborted"
 msgstr ""
 
-#: taboutform.caption
-msgid "About fpcupdeluxe"
+#: processutils.liscannotexecute
+#, object-pascal-format
+msgid "cannot execute \"%s\""
 msgstr ""
 
-#: taboutform.closebutton.caption
-msgid "&Close"
+#: processutils.liscannotfindexecutable
+#, object-pascal-format
+msgid "cannot find executable \"%s\""
 msgstr ""
 
-#: taboutform.creditspage.caption
-msgid "Credits"
+#: processutils.lisexecutableisadirectory
+#, object-pascal-format
+msgid "executable \"%s\" is a directory"
 msgstr ""
 
-#: taboutform.documentationlabel.caption
-msgid "DocumentationLabel"
+#: processutils.lisexecutablelacksthepermissiontorun
+#, object-pascal-format
+msgid "executable \"%s\" lacks the permission to run"
 msgstr ""
 
-#: taboutform.documentationurllabel.caption
-msgid "DocumentationURLLabel"
+#: processutils.lisexitcode
+#, object-pascal-format
+msgid "Exit code %s"
 msgstr ""
 
-#: taboutform.forumlabel.caption
-msgid "ForumLabel"
+#: processutils.lisfreeingbufferlines
+#, object-pascal-format
+msgid "freeing buffer lines: %s"
 msgstr ""
 
-#: taboutform.forumurllabel.caption
-msgid "ForumURLLabel"
+#: processutils.lismissingdirectory
+#, object-pascal-format
+msgid "missing directory \"%s\""
 msgstr ""
 
-#: taboutform.fpcversionlabel.caption
-msgid "FPCUPVersionLabel"
+#: processutils.lismissingexecutable
+#, object-pascal-format
+msgid "missing executable \"%s\""
 msgstr ""
 
-#: taboutform.officiallabel.caption
-msgid "OfficialLabel"
+#: processutils.lissuccess
+msgid "Success"
 msgstr ""
 
-#: taboutform.officialurllabel.caption
-msgid "OfficialURLLabel"
+#: processutils.listoolhasnoexecutable
+#, object-pascal-format
+msgid "tool \"%s\" has no executable"
 msgstr ""
 
-#: taboutform.platformlabel.caption
-msgid "PlatformLabel"
+#: processutils.lisunabletoexecute
+#, object-pascal-format
+msgid "unable to execute: %s"
 msgstr ""
 
-#: taboutform.reinierlabel.caption
-msgid "ReinierLabel"
-msgstr ""
-
-#: taboutform.reinierurllabel.caption
-msgid "ReinierURLLabel"
-msgstr ""
-
-#: taboutform.versionlabel.caption
-msgid "Version #:"
-msgstr ""
-
-#: taboutform.versionpage.caption
-msgid "Version"
+#: processutils.lisunabletoreadprocessexitstatus
+msgid "unable to read process ExitStatus"
 msgstr ""
 
 #: tform1.autocrossupdate.caption
@@ -421,184 +419,5 @@ msgstr ""
 
 #: tform1.trunkbtn.hint
 msgid "Will install/update trunk version of both FPC and Lazarus."
-msgstr ""
-
-#: tform2.btnaddfpcpatch.caption
-msgid "Add FPC patch"
-msgstr ""
-
-#: tform2.btnaddlazpatch.caption
-msgid "Add Laz patch"
-msgstr ""
-
-#: tform2.btnlistcustomoptions.caption
-msgid "List All"
-msgstr ""
-
-#: tform2.btnremfpcpatch.caption
-msgid "Rem. FPC patch"
-msgstr ""
-
-#: tform2.btnremlazpatch.caption
-msgid "Rem. Laz patch"
-msgstr ""
-
-#: tform2.btnselectbindir.caption
-msgid "Tools"
-msgstr ""
-
-#: tform2.btnselectcompiler.caption
-msgid "Compiler"
-msgstr ""
-
-#: tform2.btnselectlibdir.caption
-msgid "Libraries"
-msgstr ""
-
-#: tform2.caption
-msgid "Advanced settings"
-msgstr ""
-
-#: tform2.editbinlocation.hint
-msgctxt "tform2.editbinlocation.hint"
-msgid "Double click to clear"
-msgstr ""
-
-#: tform2.editcompileroverride.hint
-msgctxt "tform2.editcompileroverride.hint"
-msgid "Double click to clear"
-msgstr ""
-
-#: tform2.editliblocation.hint
-msgctxt "tform2.editliblocation.hint"
-msgid "Double click to clear"
-msgstr ""
-
-#: tform2.groupbox1.caption
-msgid "Proxy settings"
-msgstr ""
-
-#: tform2.groupbox2.caption
-msgid "Miscellaneous settings"
-msgstr ""
-
-#: tform2.groupbox4.caption
-msgid "Custom tools location and build options"
-msgstr ""
-
-#: tform2.groupboxcompileoptions.caption
-msgid "Options Override"
-msgstr ""
-
-#: tform2.groupboxfpclazbranchrevision.caption
-msgid "FPC/Laz branch and revision"
-msgstr ""
-
-#: tform2.label1.caption
-msgid "HTTP proxy URL:"
-msgstr ""
-
-#: tform2.label2.caption
-msgid "HTTP proxy port:"
-msgstr ""
-
-#: tform2.label3.caption
-msgid "HTTP proxy username:"
-msgstr ""
-
-#: tform2.label4.caption
-msgid "HTTP proxy password:"
-msgstr ""
-
-#: tform2.labelcompileroverride.caption
-msgid "Compiler Override"
-msgstr ""
-
-#: tform2.labelcpu.caption
-msgid "Select CPU"
-msgstr ""
-
-#: tform2.labelcrossbuildoptions.caption
-msgid "Cross Build Options Override (i.e. -CfSoft)"
-msgstr ""
-
-#: tform2.labelcrosssubarch.caption
-msgid "Cross SubArch Override (i.e. armv7m, ...)"
-msgstr ""
-
-#: tform2.labelfpcbranch.caption
-msgid "FPC branch"
-msgstr ""
-
-#: tform2.labelfpcoptions.caption
-msgid "FPC options"
-msgstr ""
-
-#: tform2.labelfpcrevision.caption
-msgid "FPC revision"
-msgstr ""
-
-#: tform2.labellazarusbranch.caption
-msgid "Lazarus branch"
-msgstr ""
-
-#: tform2.labellazarusoptions.caption
-msgid "Lazarus options"
-msgstr ""
-
-#: tform2.labellazarusrevision.caption
-msgid "Lazarus revision"
-msgstr ""
-
-#: tform2.labelos.caption
-msgid "Select OS"
-msgstr ""
-
-#: tform2.radiogroup3.caption
-msgid "Search options"
-msgstr ""
-
-#: tform2.radiogrouparmarch.caption
-msgid "ARM target"
-msgstr ""
-
-#: tform3.button1.caption
-msgid "Install selected module"
-msgstr ""
-
-#: tform3.button2.caption
-msgid "Un-install selected module"
-msgstr ""
-
-#: tform3.button3.caption
-msgid "Cancel"
-msgstr ""
-
-#: tform3.caption
-msgid "Module settings"
-msgstr ""
-
-#: tform3.listview1.columns[0].caption
-msgid "Name"
-msgstr ""
-
-#: tform3.listview1.columns[1].caption
-msgid "Category"
-msgstr ""
-
-#: tform3.listview1.columns[2].caption
-msgid "Description"
-msgstr ""
-
-#: tform3.radiogroup1.caption
-msgid "Categories"
-msgstr ""
-
-#: tinfoform.caption
-msgid "InfoForm"
-msgstr ""
-
-#: tinfoform.label1.caption
-msgid "Listing of all custom CPU and OS settings"
 msgstr ""
 
