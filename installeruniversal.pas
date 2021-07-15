@@ -1710,6 +1710,7 @@ begin
       // Common keywords for all repo methods
       FDesiredRevision:=GetValueFromKey('Revision',PackageSettings);
       FDesiredBranch:=GetValueFromKey('Branch',PackageSettings);
+      FDesiredTag:=GetValueFromKey('Tag',PackageSettings);
 
       // Handle Git URLs
       RemoteURL:=GetValueFromKey('GITURL',PackageSettings);

@@ -57,6 +57,7 @@ type
     FLocalRepository: string;
     FDesiredRevision: string;
     FDesiredBranch: string;
+    FDesiredTag: string;
     FHTTPProxyHost: string;
     FHTTPProxyPassword: string;
     FHTTPProxyPort: integer;
@@ -71,14 +72,15 @@ type
     FRepoExecutableName: string;
     FReturnCode: integer;
     FReturnOutput: string;
-    // Makes sure non-empty strings have a / at the end.
     function IncludeTrailingSlash(AValue: string): string;
+    function ExcludeTrailingSlash(AValue: string): string;
     //Performs a checkout/initial download
     //Note: it's often easier to call CheckOutOrUpdate
     procedure CheckOut(UseForce:boolean=false); virtual;
     function GetLocalRevision: string; virtual;
     procedure SetDesiredRevision(AValue: string); virtual;
     procedure SetDesiredBranch(AValue: string); virtual;
+    procedure SetDesiredTag(AValue: string); virtual;
     procedure SetLocalRepository(AValue: string); virtual;
     procedure SetRepositoryURL(AValue: string); virtual;
     procedure SetRepoExecutable(AValue: string); virtual;
@@ -114,6 +116,8 @@ type
     property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
     // Get/set desired branch to checkout/pull
     property DesiredBranch: string read FDesiredBranch write SetDesiredBranch;
+    // Get/set desired tag to checkout/pull
+    property DesiredTag: string read FDesiredTag write SetDesiredTag;
     // If using http transport, an http proxy can be used. Proxy hostname/ip address
     property HTTPProxyHost: string read FHTTPProxyHost write FHTTPProxyHost;
     // If using http transport, an http proxy can be used. Proxy port
@@ -181,6 +185,13 @@ begin
     Result := Result + '/';
 end;
 
+function TRepoClient.ExcludeTrailingSlash(AValue: string): string;
+begin
+  Result := AValue;
+  if (Result <> '') and (Result[Length(Result)] = '/') then
+    SetLength(Result,Length(Result)-1);
+end;
+
 procedure TRepoClient.SetDesiredRevision(AValue: string);
 begin
   if FDesiredRevision = AValue then
@@ -195,6 +206,12 @@ begin
   FDesiredBranch := AValue;
 end;
 
+procedure TRepoClient.SetDesiredTag(AValue: string);
+begin
+  if FDesiredTag = AValue then
+    Exit;
+  FDesiredTag := AValue;
+end;
 
 procedure TRepoClient.SetLocalRepository(AValue: string);
  // Sets local repository, converting relative path to absolute path

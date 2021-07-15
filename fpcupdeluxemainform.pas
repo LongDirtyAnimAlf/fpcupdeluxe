@@ -34,6 +34,8 @@ type
 
   TForm1 = class(TForm)
     ActionList1: TActionList;
+    chkGitlab: TCheckBox;
+    imgSource: TImage;
     ListBoxFPCHistory: TListView;
     ListBoxLazarusHistory: TListView;
     OPMBtn: TBitBtn;
@@ -122,6 +124,7 @@ type
     procedure BitBtnSetRevisionClick(Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
     procedure ButtonSubarchSelectClick({%H-}Sender: TObject);
+    procedure chkGitlabChange(Sender: TObject);
     procedure IniPropStorageAppRestoringProperties({%H-}Sender: TObject);
     procedure IniPropStorageAppSavingProperties({%H-}Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
@@ -474,15 +477,6 @@ begin
   aTarget:='';
   if IniFilesOk then
   begin
-    if ListBoxFPCTarget.Count=0 then
-    begin
-      ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
-    end;
-    if ListBoxLazarusTarget.Count=0 then
-    begin
-      ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
-    end;
-
     sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
 
     InstallDirEdit.Text:=sInstallDir;
@@ -3949,10 +3943,14 @@ begin
   FPCupManager.CrossLibraryDirectory:='';
   FPCupManager.CrossToolsDirectory:='';
 
-  FPCupManager.FPCDesiredBranch:='';
-  FPCupManager.LazarusDesiredBranch:='';
   FPCupManager.FPCDesiredRevision:='';
   FPCupManager.LazarusDesiredRevision:='';
+
+  FPCupManager.FPCDesiredBranch:='';
+  FPCupManager.LazarusDesiredBranch:='';
+
+  FPCupManager.FPCDesiredTag:='';
+  FPCupManager.LazarusDesiredTag:='';
 
   {$IFDEF DEBUG}
   FPCupManager.Verbose:=True;
@@ -4092,16 +4090,19 @@ begin
   if (Pos('github.com/LongDirtyAnimAlf',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
   if (Pos('github.com/LongDirtyAnimAlf/lazarussource',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='master';
 
+
+
+
   // branch and revision overrides from setup+
-  s:=Form2.FPCBranch;
-  if Length(s)>0 then FPCupManager.FPCDesiredBranch:=s;
   s:=Form2.FPCRevision;
   if Length(s)>0 then FPCupManager.FPCDesiredRevision:=s;
+  s:=Form2.FPCBranch;
+  if Length(s)>0 then FPCupManager.FPCDesiredBranch:=s;
 
-  s:=Form2.LazarusBranch;
-  if Length(s)>0 then FPCupManager.LazarusDesiredBranch:=s;
   s:=Form2.LazarusRevision;
   if Length(s)>0 then FPCupManager.LazarusDesiredRevision:=s;
+  s:=Form2.LazarusBranch;
+  if Length(s)>0 then FPCupManager.LazarusDesiredBranch:=s;
 
   // overrides for old versions of Lazarus
   aLazarusVersion:=CalculateNumericalVersion(LazarusTarget);
@@ -4310,6 +4311,26 @@ begin
       AddMessage('Got settings from install directory');
       AddMessage('');
 
+      chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
+
+      ListBoxFPCTarget.Items.Clear;
+      if ListBoxFPCTarget.Count=0 then
+      begin
+        if chkGitlab.Checked then
+          ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcTAG','list')
+        else
+          ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
+      end;
+
+      ListBoxLazarusTarget.Items.Clear;
+      if ListBoxLazarusTarget.Count=0 then
+      begin
+        if chkGitlab.Checked then
+          ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazTAG','list')
+        else
+          ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
+      end;
+
       // get names of cross-compilers
       AutoUpdateCrossCompiler(nil);
 
@@ -4442,11 +4463,21 @@ begin
   try
     with TMemIniFile.Create(aDir+DirectorySeparator+installerUniversal.DELUXEFILENAME) do
     try
+      WriteBool('General','Gitlab',chkGitlab.Checked);
+
       // mmm, is this correct ?  See extrasettings !!
       WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
 
-      if FPCTarget<>'skip' then WriteString('URL','fpcURL',FPCTarget);
-      if LazarusTarget<>'skip' then WriteString('URL','lazURL',LazarusTarget);
+      if chkGitlab.Checked then
+      begin
+        WriteString('URL','fpcTag',FPCTarget);
+        WriteString('URL','lazTag',LazarusTarget);
+      end
+      else
+      begin
+        if FPCTarget<>'skip' then WriteString('URL','fpcURL',FPCTarget);
+        if LazarusTarget<>'skip' then WriteString('URL','lazURL',LazarusTarget);
+      end;
 
       if (radgrpCPU.ItemIndex<>-1) then WriteInteger('Cross','CPUTarget',radgrpCPU.ItemIndex);
       if (radgrpOS.ItemIndex<>-1) then WriteInteger('Cross','OSTarget',radgrpOS.ItemIndex);
@@ -4642,6 +4673,21 @@ begin
   if SubarchForm.ModalResult=mrOk then
   begin
     AddMessage('Fpcupdeluxe: selected subarch = '+GetSubarch(GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target)));
+  end;
+end;
+
+procedure TForm1.chkGitlabChange(Sender: TObject);
+begin
+  RealFPCURL.Visible:=(NOT TCheckBox(Sender).Checked);
+  RealLazURL.Visible:=(NOT TCheckBox(Sender).Checked);
+
+  if TCheckBox(Sender).Checked then
+  begin
+    imgSource.Picture.LoadFromResourceName(hInstance,'GITLABLABEL');
+  end
+  else
+  begin
+    imgSource.Picture.LoadFromResourceName(hInstance,'SVNLABEL');
   end;
 end;
 

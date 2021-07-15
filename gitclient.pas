@@ -224,6 +224,9 @@ begin
     if (Length(DesiredRevision)>0) AND (Uppercase(trim(DesiredRevision)) <> 'HEAD') then
       Command := Command+ ' ' + DesiredRevision;
 
+    if (Length(DesiredTag)>0) AND (Uppercase(trim(DesiredTag)) <> 'MAIN') AND (Uppercase(trim(DesiredTag)) <> 'MASTER') then
+      Command := Command+ ' --depth 1 --branch ' + DesiredTag;
+
     Command := Command + ' ' +  Repository + ' ' + LocalRepository;
 
     FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);

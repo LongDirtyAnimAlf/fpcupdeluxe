@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="12"/>
+    <Version Value="11"/>
     <PathDelim Value="\"/>
     <General>
-      <Flags>
-        <CompatibilityMode Value="True"/>
-      </Flags>
       <SessionStorage Value="InProjectDir"/>
+      <MainUnit Value="0"/>
       <Title Value="fpcupdeluxeremote"/>
       <Scaled Value="True"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
       <XPManifest>
-        <DpiAware Value="True/PM_V2"/>
         <TextName Value="don.alfredo.fpcupdeluxe"/>
         <TextDesc Value="Installer for FPC and Lazarus."/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="5">
+      <Resources Count="7">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
         <Resource_3 FileName="languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
         <Resource_4 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
+        <Resource_5 FileName="icons\gitlablabel.png" Type="RCDATA" ResourceName="GITLABLABEL"/>
+        <Resource_6 FileName="icons\svnlabel.png" Type="RCDATA" ResourceName="SVNLABEL"/>
       </Resources>
     </General>
     <i18n>
@@ -838,10 +837,10 @@
       <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot;..\mORMot\SQLite3;..\mORMot\CrossPlatform"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <Conditionals Value="if TargetOS=&apos;darwin&apos; then
-   CustomOptions := &apos; -Cg-&apos;;
-if TargetOS=&apos;openbsd&apos; then
-   CustomOptions := &apos; -Cg-&apos;;"/>
+    <Conditionals Value="if TargetOS='darwin' then
+   CustomOptions := ' -Cg-';
+if TargetOS='openbsd' then
+   CustomOptions := ' -Cg-';"/>
     <CodeGeneration>
       <Optimizations>
         <OptimizationLevel Value="2"/>

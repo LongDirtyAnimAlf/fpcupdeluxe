@@ -189,6 +189,7 @@ type
     FCrossOS_SubArch: TSUBARCH;
     FFPCDesiredRevision: string;
     FFPCDesiredBranch: string;
+    FFPCDesiredTag: string;
     FFPCSourceDirectory: string;
     FFPCInstallDirectory: string;
     FFPCOPT: string;
@@ -199,6 +200,7 @@ type
     {$ifndef FPCONLY}
     FLazarusDesiredRevision: string;
     FLazarusDesiredBranch: string;
+    FLazarusDesiredTag: string;
     FLazarusSourceDirectory: string;
     FLazarusInstallDirectory: string;
     FLazarusOPT: string;
@@ -307,6 +309,7 @@ type
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision: string read FFPCDesiredRevision write FFPCDesiredRevision;
     property FPCDesiredBranch: string read FFPCDesiredBranch write FFPCDesiredBranch;
+    property FPCDesiredTag: string read FFPCDesiredTag write FFPCDesiredTag;
     property HTTPProxyHost: string read FHTTPProxyHost write FHTTPProxyHost;
     property HTTPProxyPassword: string read FHTTPProxyPassword write FHTTPProxyPassword;
     property HTTPProxyPort: integer read FHTTPProxyPort write FHTTPProxyPort;
@@ -321,6 +324,7 @@ type
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
     property LazarusDesiredBranch:string read FLazarusDesiredBranch write FLazarusDesiredBranch;
+    property LazarusDesiredTag:string read FLazarusDesiredTag write FLazarusDesiredTag;
 
     {$endif}
     // Location where fpcup log will be written to.
@@ -1438,6 +1442,7 @@ begin
     FInstaller.CompilerOptions:=FParent.FPCOPT;
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
     FInstaller.DesiredBranch:=FParent.FPCDesiredBranch;
+    FInstaller.DesiredTag:=FParent.FPCDesiredTag;
     FInstaller.URL:=FParent.FPCURL;
   end
 
@@ -1482,6 +1487,7 @@ begin
 
     FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
     FInstaller.DesiredBranch:=FParent.LazarusDesiredBranch;
+    FInstaller.DesiredTag:=FParent.LazarusDesiredTag;
     // LCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
     (FInstaller as TLazarusInstaller).LCL_Platform:=FParent.LCL_Platform;

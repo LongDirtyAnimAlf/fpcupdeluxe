@@ -357,6 +357,7 @@ type
     FDesiredRevision: string;
     FActualRevision: string;
     FDesiredBranch: string;
+    FDesiredTag: string;
     // Stores tprocessex exception info:
     FErrorLog: TStringList;
     FHTTPProxyHost: string;
@@ -488,6 +489,7 @@ type
     property DesiredRevision: string write FDesiredRevision;
     property ActualRevision: string read FActualRevision;
     property DesiredBranch: string write FDesiredBranch;
+    property DesiredTag: string write FDesiredTag;
     // If using HTTP proxy: host
     property HTTPProxyHost: string read FHTTPProxyHost write SetHTTPProxyHost;
     // If using HTTP proxy: port (optional, default 8080)
@@ -2271,7 +2273,7 @@ begin
 
       if NOT DownloadSuccess then
       begin
-        if (FUtilFiles[Counter].FileName<>'libiconv-2.dll') then
+        //if (FUtilFiles[Counter].FileName<>'libiconv-2.dll') then
         begin
           Infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + '.',etError);
           Inc(Errors);
