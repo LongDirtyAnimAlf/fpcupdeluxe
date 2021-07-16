@@ -35,7 +35,8 @@ type
   TForm1 = class(TForm)
     ActionList1: TActionList;
     chkGitlab: TCheckBox;
-    imgSource: TImage;
+    imgSVN: TImage;
+    imgGitlab: TImage;
     ListBoxFPCHistory: TListView;
     ListBoxLazarusHistory: TListView;
     OPMBtn: TBitBtn;
@@ -4073,8 +4074,8 @@ begin
 
   if chkGitlab.Checked then
   begin
-    FPCupManager.FPCURL:='https://gitlab.com/freepascal.org/fpc/testconversion2.git';
-    FPCupManager.LazarusURL:='https://gitlab.com/freepascal.org/lazarus/lazarus_test_conversion_2.git';
+    FPCupManager.FPCURL:=FPCGITLABREPO;
+    FPCupManager.LazarusURL:=LAZARUSGITLABREPO;
     if FPCTarget='trunk' then
       FPCupManager.FPCDesiredBranch:='main'
     else
@@ -4722,14 +4723,9 @@ begin
   RealFPCURL.Visible:=(NOT TCheckBox(Sender).Checked);
   RealLazURL.Visible:=(NOT TCheckBox(Sender).Checked);
 
-  if TCheckBox(Sender).Checked then
-  begin
-    imgSource.Picture.LoadFromResourceName(hInstance,'GITLABLABEL');
-  end
-  else
-  begin
-    imgSource.Picture.LoadFromResourceName(hInstance,'SVNLABEL');
-  end;
+  imgSVN.Visible:=(NOT TCheckBox(Sender).Checked);
+  imgGitlab.Visible:=(TCheckBox(Sender).Checked);
+
   FillSourceListboxes;
 end;
 

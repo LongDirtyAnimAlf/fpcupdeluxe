@@ -1794,41 +1794,6 @@ begin
       // Set file history towards default project directory
       LazarusConfig.SetVariableIfNewFile(History, 'InputHistory/FileDialog/InitialDir', IncludeTrailingPathDelimiter(GDBPath));
 
-      {$IFDEF DARWIN}
-      {$IFDEF CPUX86_64}
-      {$IFDEF LCLCOCOA}
-      // Prevent crash on Darwin Cocoa: set and make available initial project
-      aFileName:=IncludeTrailingPathDelimiter(GDBPath)+'project1.lpi';
-
-      // Create a default project
-      SysUtils.DeleteFile(aFileName);
-      SysUtils.DeleteFile(ChangeFileExt(aFileName,'.lpr'));
-      PCPSnippet:=TStringList.Create;
-      {$IF FPC_FULLVERSION > 30100}
-      //PCPSnippet.DefaultEncoding:=TEncoding.ASCII;
-      {$ENDIF}
-      try
-        PCPSnippet.Clear;
-        PCPSnippet.Text:=DEFAULTLPI;
-        PCPSnippet.SaveToFile(aFileName);
-        PCPSnippet.Clear;
-        PCPSnippet.Text:=DEFAULTLPR;
-        PCPSnippet.SaveToFile(ChangeFileExt(aFileName,'.lpr'));
-      finally
-        PCPSnippet.Free;
-      end;
-
-      if FileExists(aFileName) then
-      begin
-        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Recent/AlreadyPopulated', 'True');
-        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Recent/ProjectFiles/Count', '1');
-        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Recent/ProjectFiles/Item1/Value', aFileName);
-        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/AutoSave/LastSavedProjectFile', aFileName);
-      end;
-      {$ENDIF LCLCOCOA}
-      {$ENDIF CPUX86_64}
-      {$ENDIF DARWIN}
-
       //Setup basic fppkg things
       s2 := IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR;
       s  := IncludeTrailingPathDelimiter(s2)+FPCPKGCONFIGFILENAME;

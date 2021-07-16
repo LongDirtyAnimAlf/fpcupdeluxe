@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <PathDelim Value="\"/>
     <General>
+      <Flags>
+        <CompatibilityMode Value="True"/>
+      </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
       <Title Value="fpcupdeluxeremotespecials"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -42,10 +44,10 @@
             <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS='darwin' then
-   CustomOptions := ' -Cg-';
-if TargetOS='openbsd' then
-   CustomOptions := ' -Cg-';"/>
+          <Conditionals Value="if TargetOS=&apos;darwin&apos; then
+   CustomOptions := &apos; -Cg-&apos;;
+if TargetOS=&apos;openbsd&apos; then
+   CustomOptions := &apos; -Cg-&apos;;"/>
           <CodeGeneration>
             <Checks>
               <IOChecks Value="True"/>
@@ -680,10 +682,10 @@ if TargetOS='openbsd' then
       <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <Conditionals Value="if TargetOS='darwin' then
-   CustomOptions := ' -Cg-';
-if TargetOS='openbsd' then
-   CustomOptions := ' -Cg-';"/>
+    <Conditionals Value="if TargetOS=&apos;darwin&apos; then
+   CustomOptions := &apos; -Cg-&apos;;
+if TargetOS=&apos;openbsd&apos; then
+   CustomOptions := &apos; -Cg-&apos;;"/>
     <CodeGeneration>
       <Optimizations>
         <OptimizationLevel Value="2"/>

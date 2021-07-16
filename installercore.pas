@@ -39,9 +39,9 @@ const
   DEFAULTLAZARUSVERSION = '2.0.12';
 
   FPCTRUNKVERSION       = '3.3.1';
-  FPCTRUNKBOOTVERSION   = '3.2.2';
-
   LAZARUSTRUNKVERSION   = '2.3.0';
+
+  FPCTRUNKBOOTVERSION   = '3.2.2';
 
   DEFAULTFREEBSDVERSION = 12;
 
@@ -64,6 +64,14 @@ const
   FPCPKGCOMPILERTEMPLATE= 'default'; // fppkg default compiler template
 
   FPCCONFIGFILENAME     = 'fpc.cfg';
+
+  GITLAB                = 'https://gitlab.com/freepascal.org/';
+
+  FPCGITLAB             = GITLAB + 'fpc';
+  FPCGITLABREPO         = FPCGITLAB + '/testconversion2.git';
+
+  LAZARUSGITLAB         = GITLAB + 'lazarus';
+  LAZARUSGITLABREPO     = LAZARUSGITLAB + '/lazarus_test_conversion_2.git';
 
   SVNBASEHTTP           = 'https://svn.';
   SVNBASESVN            = 'svn://svn.';
