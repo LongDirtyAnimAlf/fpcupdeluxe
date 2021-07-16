@@ -175,17 +175,12 @@ var
   Command: string = '';
   Output: string = '';
   RetryAttempt: integer;
-  aBranch: string = '';
   //TargetFile: string;
 begin
   if NOT ValidClient then exit;
 
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
-
-  if DesiredBranch=''
-     then aBranch:='master'
-     else aBranch:=DesiredBranch;
 
   // Actual clone/checkout
   if ExportOnly then
@@ -199,28 +194,38 @@ begin
     }
     if DirectoryExists(IncludeTrailingPathDelimiter(LocalRepository)+'.git') then
     begin
-      TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' fetch --all', LocalRepository, Verbose);
-      TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard origin/'+aBranch, LocalRepository, Verbose);
+      Command:=DoubleQuoteIfNeeded(FRepoExecutable) + ' fetch --all';
+      TInstaller(Parent).ExecuteCommandInDir(Command, LocalRepository, Verbose);
+      if (DesiredBranch<>'') then
+        Command:=DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard origin/'+DesiredBranch
+      else
+        Command:=DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard';
+      TInstaller(Parent).ExecuteCommandInDir(Command, LocalRepository, Verbose);
+      Command:='';
     end
     else
     begin
       // initial : very shallow clone = fast !!
-      Command := ' clone --recurse-submodules --depth 1 -b ' + aBranch
+      Command := ' clone --recurse-submodules --depth 1';
+      if (DesiredBranch<>'') then
+        Command := Command +' -b ' + DesiredBranch;
+
     end;
   end
   else
   begin
     //On Haiku, arm and aarch64, always get a shallow copy of the repo
     {$if defined(CPUAARCH64) OR defined(CPUARM) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2)) OR defined(Haiku) OR defined(AROS) OR defined(Morphos)}
-    Command := ' clone --recurse-submodules --depth 1 -b ' + aBranch;
+    Command := ' clone --recurse-submodules --depth 1';
     {$else}
-    Command := ' clone --recurse-submodules -b ' + aBranch;
+    Command := ' clone --recurse-submodules';
     {$endif}
+    if (DesiredBranch<>'') then
+      Command := Command +' -b ' + DesiredBranch;
   end;
 
-  if Command<>'' then
+  if (Command<>'') then
   begin
-
     if (Length(DesiredRevision)>0) AND (Uppercase(trim(DesiredRevision)) <> 'HEAD') then
       Command := Command+ ' ' + DesiredRevision;
 

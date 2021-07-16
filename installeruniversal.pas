@@ -2932,7 +2932,7 @@ begin
 
   try
     ini.ReadSectionValues('ALIAS'+aDictionary,sl);
-    for i:=0 to sl.Count-1 do
+    for i:=0 to Pred(sl.Count) do
     begin
       if sl.ValueFromIndex[i]=aAlias then
       begin
@@ -2975,6 +2975,11 @@ begin
           if aDictionary='fpcURL' then result:=FPCBASESVNURL+'/svn/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
           {$ifndef FPCONLY}
           if aDictionary='lazURL' then result:=FPCBASESVNURL+'/svn/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
+          {$endif}
+          if aDictionary='fpcTAG' then result:=StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
+          {$ifndef FPCONLY}
+          //if aDictionary='lazTAG' then result:=StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
+          if aDictionary='lazTAG' then result:='master';
           {$endif}
         end;
 

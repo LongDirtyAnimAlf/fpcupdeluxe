@@ -1772,6 +1772,8 @@ begin
 
   aClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
   aClient.DesiredBranch := FDesiredBranch; //We want to update to this specific branch
+  aClient.DesiredTag := FDesiredTag; //We want to update to this specific branch
+
   Output:=localinfotext+'Running '+UpperCase(aClient.RepoExecutableName)+' checkout or update';
   if Length(aClient.DesiredRevision)>0 then
   begin

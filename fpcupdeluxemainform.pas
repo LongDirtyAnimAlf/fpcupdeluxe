@@ -206,6 +206,7 @@ type
     function  RealRun:boolean;
     function  GetFPCUPSettings(IniDirectory:string):boolean;
     function  SetFPCUPSettings(IniDirectory:string):boolean;
+    procedure FillSourceListboxes;
     procedure AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
     procedure SetTarget(aControl:TControl;const aTarget:string='');
     procedure InitFPCupManager;
@@ -891,9 +892,6 @@ begin
   FPCupManager.ConfigFile:=SafeGetApplicationPath+installerUniversal.CONFIGFILENAME;
 
   FPCupManager.LoadFPCUPConfig;
-
-  FPCTarget:='stable';
-  LazarusTarget:='stable';
 
   FPCupManager.FPCURL:='stable';
   FPCupManager.LazarusURL:='stable';
@@ -3958,8 +3956,8 @@ begin
   FPCupManager.Verbose:=Form2.ExtraVerbose;
   {$ENDIF}
 
-  FPCupManager.FPCURL:=FPCTarget;
-  FPCupManager.LazarusURL:=LazarusTarget;
+  FPCupManager.FPCURL:='';
+  FPCupManager.LazarusURL:='';
 
   FPCupManager.LazarusOPT:=Form2.LazarusOptions;
   if Form2.LazarusDebug then
@@ -4073,23 +4071,37 @@ begin
   FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib -Fl/usr/pkg/lib -Fl/usr/X11R7/lib';
   {$endif}
 
-  // default branch and revision overrides
-  if (Pos('gitlab.com/freepascal.org',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='main';
-  if (Pos('gitlab.com/freepascal.org',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='master';
+  if chkGitlab.Checked then
+  begin
+    FPCupManager.FPCURL:='https://gitlab.com/freepascal.org/fpc/testconversion2.git';
+    FPCupManager.LazarusURL:='https://gitlab.com/freepascal.org/lazarus/lazarus_test_conversion_2.git';
+    if FPCTarget='trunk' then
+      FPCupManager.FPCDesiredBranch:='main'
+    else
+      FPCupManager.FPCDesiredTag:={'refs/tags/'+}'release_'+installerUniversal.GetAlias('fpcTAG',FPCTarget);
+    if LazarusTarget='trunk' then
+      FPCupManager.LazarusDesiredBranch:='trunk'
+    else
+      FPCupManager.LazarusDesiredTag:={'refs/tags/'+}'lazarus_'+installerUniversal.GetAlias('lazTAG',LazarusTarget);
+  end
+  else
+  begin
+    FPCupManager.FPCURL:=FPCTarget;
+    FPCupManager.LazarusURL:=LazarusTarget;
 
-  // for https://github.com/graemeg (FPC/Lazarus mirrors of GitHub) ... always get the right branch
-  if (Pos('github.com/graemeg',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='master';
-  if (Pos('github.com/graemeg',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
+    // for https://github.com/graemeg (FPC/Lazarus mirrors of GitHub) ... always get the right branch
+    if (Pos('github.com/graemeg',FPCupManager.FPCURL)>0) then FPCupManager.FPCDesiredBranch:='master';
+    if (Pos('github.com/graemeg',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
 
-  // for https://github.com/newpascal (FPC/Lazarus NP mirrors of GitHub) ... always get the right branch
-  if (Pos('github.com/newpascal',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='release';
-  if (Pos('github.com/newpascal',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='release';
-  //if (Pos('github.com/newpascal',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='freepascal';
-  //if (Pos('github.com/newpascal',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='lazarus';
-  if (Pos('github.com/LongDirtyAnimAlf',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='master';
-  if (Pos('github.com/LongDirtyAnimAlf',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
-  if (Pos('github.com/LongDirtyAnimAlf/lazarussource',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='master';
-
+    // for https://github.com/newpascal (FPC/Lazarus NP mirrors of GitHub) ... always get the right branch
+    if (Pos('github.com/newpascal',FPCupManager.FPCURL)>0) then FPCupManager.FPCDesiredBranch:='release';
+    if (Pos('github.com/newpascal',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='release';
+    //if (Pos('github.com/newpascal',FPCupManager.FPCURL>0) then FPCupManager.FPCDesiredBranch:='freepascal';
+    //if (Pos('github.com/newpascal',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='lazarus';
+    if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.FPCURL)>0) then FPCupManager.FPCDesiredBranch:='master';
+    if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
+    if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='master';
+  end;
 
 
 
@@ -4313,23 +4325,7 @@ begin
 
       chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
 
-      ListBoxFPCTarget.Items.Clear;
-      if ListBoxFPCTarget.Count=0 then
-      begin
-        if chkGitlab.Checked then
-          ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcTAG','list')
-        else
-          ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
-      end;
-
-      ListBoxLazarusTarget.Items.Clear;
-      if ListBoxLazarusTarget.Count=0 then
-      begin
-        if chkGitlab.Checked then
-          ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazTAG','list')
-        else
-          ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
-      end;
+      FillSourceListboxes;
 
       // get names of cross-compilers
       AutoUpdateCrossCompiler(nil);
@@ -4349,13 +4345,20 @@ begin
       aTarget:='stable.git';
       {$endif}
 
-      aURL:=installerUniversal.GetAlias('fpcURL',aTarget);
-      aURL:=ReadString('URL','fpcURL',aURL);
-      // correct for [unsafe] URL in old fpcup.ini
-      if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
-      aURL:=ExcludeTrailingPathDelimiter(aURL);
+      if chkGitlab.Checked then
+      begin
+        aURL:=installerUniversal.GetAlias('fpcTAG',aTarget);
+        aURL:=ReadString('URL','fpcTAG',aURL);
+      end
+      else
+      begin
+        aURL:=installerUniversal.GetAlias('fpcURL',aTarget);
+        aURL:=ReadString('URL','fpcURL',aURL);
+        // correct for [unsafe] URL in old fpcup.ini
+        if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
+        aURL:=ExcludeTrailingPathDelimiter(aURL);
+      end;
       FPCTarget:=aURL;
-
 
       //Default Lazarus target
 
@@ -4375,11 +4378,19 @@ begin
       {$endif}
       {$endif}
 
-      aURL:=installerUniversal.GetAlias('lazURL',aTarget);
-      aURL:=ReadString('URL','lazURL',aURL);
-      // correct for [unsafe] URL in old fpcup.ini
-      if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
-      aURL:=ExcludeTrailingPathDelimiter(aURL);
+      if chkGitlab.Checked then
+      begin
+        aURL:=installerUniversal.GetAlias('lazTAG',aTarget);
+        aURL:=ReadString('URL','lazTAG',aURL);
+      end
+      else
+      begin
+        aURL:=installerUniversal.GetAlias('lazURL',aTarget);
+        aURL:=ReadString('URL','lazURL',aURL);
+        // correct for [unsafe] URL in old fpcup.ini
+        if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
+        aURL:=ExcludeTrailingPathDelimiter(aURL);
+      end;
       LazarusTarget:=aURL;
 
       radgrpCPU.ItemIndex:=ReadInteger('Cross','CPUTarget',radgrpCPU.ItemIndex);
@@ -4470,8 +4481,8 @@ begin
 
       if chkGitlab.Checked then
       begin
-        WriteString('URL','fpcTag',FPCTarget);
-        WriteString('URL','lazTag',LazarusTarget);
+        WriteString('URL','fpcTag',installerUniversal.GetAlias('fpcTAG',FPCTarget));
+        WriteString('URL','lazTag',installerUniversal.GetAlias('lazTAG',LazarusTarget));
       end
       else
       begin
@@ -4600,11 +4611,28 @@ begin
 
   if Length(aLocalTarget)=0 then exit;
 
-  if Pos('://',aLocalTarget)=0 then
+  if (aEdit=RealFPCURL) then
   begin
-    // translate keyword into a real URL
-    if aEdit=RealFPCURL then aLocalTarget:=installerUniversal.GetAlias('fpcURL',aLocalTarget);
-    if aEdit=RealLazURL then aLocalTarget:=installerUniversal.GetAlias('lazURL',aLocalTarget);
+    if (chkGitlab.Checked) then
+    begin
+      if (aControl<>ListBoxFPCTarget) then aLocalTarget:=installerUniversal.GetKeyword('fpcTAG',aLocalTarget);
+    end
+    else
+    begin
+      if (aControl=ListBoxFPCTarget) then aLocalTarget:=installerUniversal.GetAlias('fpcURL',aLocalTarget);
+    end;
+  end;
+
+  if (aEdit=RealLazURL) then
+  begin
+    if (chkGitlab.Checked) then
+    begin
+      if (aControl<>ListBoxLazarusTarget) then aLocalTarget:=installerUniversal.GetKeyword('lazTAG',aLocalTarget);
+    end
+    else
+    begin
+      if (aControl=ListBoxLazarusTarget) then aLocalTarget:=installerUniversal.GetAlias('lazURL',aLocalTarget);
+    end;
   end;
 
   if aEdit=RealFPCURL then
@@ -4624,28 +4652,41 @@ begin
     begin
       if aEdit=RealFPCURL then
       begin
-        aKeyword:=installerUniversal.GetKeyword('fpcURL',aLocalTarget);
-        i:=ListBoxFPCTarget.Items.IndexOf(aKeyword);
-        if i<>-1 then
+        if (ListBoxFPCTarget.Items.Count>0) then
         begin
-          ListBoxFPCTarget.Selected[i]:=true;
-          if i>5 then ListBoxFPCTarget.TopIndex:=(i-1);
-        end else ListBoxFPCTarget.ClearSelection;
+          if chkGitlab.Checked then
+            aKeyword:=aLocalTarget
+          else
+            aKeyword:=installerUniversal.GetKeyword('fpcURL',aLocalTarget);
+          i:=ListBoxFPCTarget.Items.IndexOf(aKeyword);
+          if i<>-1 then
+          begin
+            ListBoxFPCTarget.Selected[i]:=true;
+            if i>5 then ListBoxFPCTarget.TopIndex:=(i-1);
+          end else ListBoxFPCTarget.ClearSelection;
+        end;
       end;
       if aEdit=RealLazURL then
       begin
-        aKeyword:=installerUniversal.GetKeyword('lazURL',aLocalTarget);
-        i:=ListBoxLazarusTarget.Items.IndexOf(aKeyword);
-        if i<>-1 then
+        if (ListBoxLazarusTarget.Items.Count>0) then
         begin
-          ListBoxLazarusTarget.Selected[i]:=true;
-          if i>5 then ListBoxLazarusTarget.TopIndex:=(i-1);
-        end else ListBoxLazarusTarget.ClearSelection;
+          if chkGitlab.Checked then
+            aKeyword:=aLocalTarget
+          else
+            aKeyword:=installerUniversal.GetKeyword('lazURL',aLocalTarget);
+          i:=ListBoxLazarusTarget.Items.IndexOf(aKeyword);
+          if i<>-1 then
+          begin
+            ListBoxLazarusTarget.Selected[i]:=true;
+            if i>5 then ListBoxLazarusTarget.TopIndex:=(i-1);
+          end else ListBoxLazarusTarget.ClearSelection;
+        end;
       end;
     end;
     if (aControl is TListBox) OR (Length(aTarget)>0) then
     begin
-      aEdit.Text:=aLocalTarget;
+      if (NOT chkGitlab.Checked) then
+        aEdit.Text:=aLocalTarget;
     end;
   end;
 end;
@@ -4689,6 +4730,7 @@ begin
   begin
     imgSource.Picture.LoadFromResourceName(hInstance,'SVNLABEL');
   end;
+  FillSourceListboxes;
 end;
 
 procedure TForm1.HandleInfo(var Msg: TLMessage);
@@ -4871,6 +4913,27 @@ end;
 procedure TForm1.SetCmdFontSize(aValue:integer);
 begin
   CommandOutputScreen.Font.Size:=aValue;
+end;
+
+procedure TForm1.FillSourceListboxes;
+begin
+  ListBoxFPCTarget.Items.Clear;
+  if ListBoxFPCTarget.Count=0 then
+  begin
+    if chkGitlab.Checked then
+      ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcTAG','list')
+    else
+      ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
+  end;
+
+  ListBoxLazarusTarget.Items.Clear;
+  if ListBoxLazarusTarget.Count=0 then
+  begin
+    if chkGitlab.Checked then
+      ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazTAG','list')
+    else
+      ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
+  end;
 end;
 
 
