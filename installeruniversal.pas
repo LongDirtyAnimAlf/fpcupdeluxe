@@ -2978,8 +2978,7 @@ begin
           {$endif}
           if aDictionary='fpcTAG' then result:=StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
           {$ifndef FPCONLY}
-          //if aDictionary='lazTAG' then result:=StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
-          if aDictionary='lazTAG' then result:='master';
+          if aDictionary='lazTAG' then result:=StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
           {$endif}
         end;
 
