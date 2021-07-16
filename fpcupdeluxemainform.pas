@@ -4079,11 +4079,11 @@ begin
     if FPCTarget='trunk' then
       FPCupManager.FPCDesiredBranch:='main'
     else
-      FPCupManager.FPCDesiredTag:={'refs/tags/'+}'release_'+installerUniversal.GetAlias('fpcTAG',FPCTarget);
+      FPCupManager.FPCDesiredTag:=installerUniversal.GetAlias('fpcTAG',FPCTarget);
     if LazarusTarget='trunk' then
       FPCupManager.LazarusDesiredBranch:='trunk'
     else
-      FPCupManager.LazarusDesiredTag:={'refs/tags/'+}'lazarus_'+installerUniversal.GetAlias('lazTAG',LazarusTarget);
+      FPCupManager.LazarusDesiredTag:=installerUniversal.GetAlias('lazTAG',LazarusTarget);
   end
   else
   begin
