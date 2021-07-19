@@ -477,6 +477,34 @@ begin
   aTarget:='';
   if IniFilesOk then
   begin
+    aTarget:='stable';
+
+    //Default FPC target
+    {$ifdef LCLCOCOA}
+    aTarget:='stable.git';
+    {$endif}
+    {$ifdef Haiku}
+    aTarget:='stable.git';
+    {$endif}
+    FPCTarget:=aTarget;
+
+    //Default Lazarus target
+
+    {$ifdef LCLCOCOA}
+    aTarget:='stable.git';
+    {$endif}
+    {$ifdef Haiku}
+    {$ifdef CPUX86}
+    aTarget:='stable.git';
+    {$endif}
+    {$ifdef CPUX86_64}
+    aTarget:='trunk.git';
+    {$endif}
+    {$endif}
+    LazarusTarget:=aTarget;
+
+    FillSourceListboxes;
+
     sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
 
     InstallDirEdit.Text:=sInstallDir;
@@ -4289,25 +4317,13 @@ begin
       AddMessage('');
 
       chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
-      if (NOT chkGitlab.Checked) then FillSourceListboxes;
 
       // get names of cross-compilers
       AutoUpdateCrossCompiler(nil);
 
       FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
 
-      aTarget:='stable';
-
-      //Default FPC target
-
-      {$ifdef LCLCOCOA}
-      aTarget:='stable.git';
-      {$endif}
-      {$ifdef Haiku}
-      aTarget:='stable.git';
-      {$endif}
-
-      // Read target from settngs
+      // Read FPC target from settngs
       aStoredTarget:=ReadString('Target','fpcVersion','');
       if (Length(aStoredTarget)=0) then
       begin
@@ -4317,25 +4333,9 @@ begin
           aStoredTarget:=installerUniversal.GetKeyword('fpcURL',aStoredTarget);
       end;
       if (Length(aStoredTarget)<>0) then
-        aTarget:=aStoredTarget;
-      FPCTarget:=aTarget;
+        FPCTarget:=aStoredTarget;
 
-      //Default Lazarus target
-
-      {$ifdef LCLCOCOA}
-      aTarget:='stable.git';
-      {$endif}
-
-      {$ifdef Haiku}
-      {$ifdef CPUX86}
-      aTarget:='stable.git';
-      {$endif}
-      {$ifdef CPUX86_64}
-      aTarget:='trunk.git';
-      {$endif}
-      {$endif}
-
-      // Read target from settngs
+      // Read Lazarus target from settngs
       aStoredTarget:=ReadString('Target','lazVersion','');
       if (Length(aStoredTarget)=0) then
       begin
@@ -4345,8 +4345,7 @@ begin
           aStoredTarget:=installerUniversal.GetKeyword('lazURL',aStoredTarget);
       end;
       if (Length(aStoredTarget)<>0) then
-        aTarget:=aStoredTarget;
-      LazarusTarget:=aTarget;
+        LazarusTarget:=aStoredTarget;
 
       radgrpCPU.ItemIndex:=ReadInteger('Cross','CPUTarget',radgrpCPU.ItemIndex);
       radgrpOS.ItemIndex:=ReadInteger('Cross','OSTarget',radgrpOS.ItemIndex);

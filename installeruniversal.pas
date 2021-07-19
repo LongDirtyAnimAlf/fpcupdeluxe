@@ -2946,6 +2946,8 @@ begin
 end;
 
 function GetAlias(aDictionary,aKeyWord: string): string;
+const
+  ALIASMAGIC='ALIAS';
 var
   ini:TMemIniFile;
   sl:TStringList;
@@ -2961,33 +2963,36 @@ begin
   {$ENDIF}
 
   try
-    ini.ReadSection('ALIAS'+aDictionary,sl);
+    ini.ReadSection(ALIASMAGIC+aDictionary,sl);
     if Uppercase(aKeyWord)='LIST' then
       result:=sl.CommaText
     else
     begin
-      result:=ini.ReadString('ALIAS'+aDictionary,aKeyWord,'');
-      if result='' then
+      result:=ini.ReadString(ALIASMAGIC+aDictionary,aKeyWord,'');
+      if (result='') then
       begin
-        if (result='') then
+        if (Pos('fpcURL',aDictionary)=1) OR (Pos('fpcTAG',aDictionary)=1) OR (Pos('fpcBRANCH',aDictionary)=1) then
         begin
-          if aDictionary='fpcURL' then result:=FPCBASESVNURL+'/svn/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
-          {$ifndef FPCONLY}
-          if aDictionary='lazURL' then result:=FPCBASESVNURL+'/svn/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
-          {$endif}
-          if aDictionary='fpcTAG' then result:='release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
-          {$ifndef FPCONLY}
-          if aDictionary='lazTAG' then result:='lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
-          {$endif}
-        end;
-
+          //if (aDictionary<>'fpcURL')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcURL',   aKeyWord,'');
+          if (aDictionary='fpcTAG')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcBRANCH',   aKeyWord,'');
+          if (aDictionary='fpcBRANCH') AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcTAG',aKeyWord,'');
+        end
+        {$ifndef FPCONLY}
+        else
+        if (Pos('lazURL',aDictionary)=1) OR (Pos('lazTAG',aDictionary)=1) OR (Pos('lazBRANCH',aDictionary)=1) then
+        begin
+          //if (aDictionary<>'lazURL')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazURL',   aKeyWord,'');
+          if (aDictionary='lazTAG')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazBRANCH',   aKeyWord,'');
+          if (aDictionary='lazBRANCH') AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazTAG',aKeyWord,'');
+        end
+        {$endif}
+        else
         if (result='') then
         begin
           e:=Exception.CreateFmt('--%s=%s : Invalid keyword. Accepted keywords are: %s',[aDictionary,aKeyWord,sl.CommaText]);
           raise e;
         end;
       end;
-
     end;
   finally
     ini.Free;

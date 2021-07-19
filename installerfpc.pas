@@ -2223,7 +2223,10 @@ var
   aVersion: string;
 begin
   aVersion:=VersionFromUrl(aUrl);
-  if aVersion='trunk' then result:=FPCTRUNKVERSION else result:=aVersion;
+  if aVersion='trunk' then
+    result:=FPCTRUNKVERSION
+  else
+    result:=aVersion;
 end;
 
 function TFPCInstaller.GetVersionFromSource(aSourcePath: string): string;
