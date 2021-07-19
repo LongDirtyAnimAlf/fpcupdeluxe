@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 309
+  Left = 33
   Height = 689
-  Top = 280
+  Top = 48
   Width = 1078
   Anchors = []
   Caption = 'Form1'
@@ -630,10 +630,8 @@ object Form1: TForm1
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
-    Width = 345
+    Width = 433
     BorderSpacing.Top = 4
-    OnChange = RealURLChange
-    OnDblClick = RealURLDblClick
     ParentFont = False
     ParentShowHint = False
     ReadOnly = True
@@ -646,17 +644,15 @@ object Form1: TForm1
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 689
+    Left = 777
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
-    Width = 377
+    Width = 289
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 4
     BorderSpacing.Right = 12
-    OnChange = RealURLChange
-    OnDblClick = RealURLDblClick
     ParentFont = False
     ParentShowHint = False
     ReadOnly = True

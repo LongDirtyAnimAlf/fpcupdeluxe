@@ -157,8 +157,6 @@ type
     procedure MIssuesGitHubClick({%H-}Sender: TObject);
     procedure MLazarusBugsClick({%H-}Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
-    procedure RealURLChange(Sender: TObject);
-    procedure RealURLDblClick(Sender: TObject);
     procedure CommandOutputScreenChange({%H-}Sender: TObject);
     procedure CommandOutputScreenSpecialLineMarkup({%H-}Sender: TObject; Line: integer;
       var Special: boolean; Markup: TSynSelectedColor);
@@ -655,17 +653,6 @@ begin
   OpenURL('https://bugs.freepascal.org/view_all_bug_page.php?project_id=1');
 end;
 
-procedure TForm1.RealURLChange(Sender: TObject);
-begin
-  SetTarget(TEdit(Sender));
-end;
-
-procedure TForm1.RealURLDblClick(Sender: TObject);
-begin
-  TEdit(Sender).Color:=clRed;
-  TEdit(Sender).ReadOnly:=false;
-end;
-
 procedure TForm1.ButtonAutoUpdateCrossCompiler(Sender: TObject);
 begin
   AutoUpdateCrossCompiler(Sender);
@@ -1069,12 +1056,6 @@ begin
   finally
     DisEnable(Sender,True);
   end;
-end;
-
-procedure TForm1.TargetSelectionChange(Sender: TObject; User: boolean);
-begin
-  if (NOT User) then exit;
-  SetTarget(TListBox(Sender));
 end;
 
 procedure TForm1.MenuItem1Click(Sender: TObject);
@@ -3901,9 +3882,7 @@ begin
   LazarusVersionLabel.Font.Color:=clDefault;
 
   RealFPCURL.Color:=clDefault;
-  RealFPCURL.ReadOnly:=true;
   RealLazURL.Color:=clDefault;
-  RealLazURL.ReadOnly:=true;
 
   if CheckAutoClear.Checked then btnClearLog.Click;
 
@@ -4074,8 +4053,8 @@ begin
 
   if chkGitlab.Checked then
   begin
-    FPCupManager.FPCURL:=FPCGITLABREPO;
-    FPCupManager.LazarusURL:=LAZARUSGITLABREPO;
+    FPCupManager.FPCURL:=FPCGITLABREPO+'.git';
+    FPCupManager.LazarusURL:=LAZARUSGITLABREPO+'.git';
     if FPCTarget='trunk' then
       FPCupManager.FPCDesiredBranch:='main'
     else
@@ -4259,7 +4238,7 @@ end;
 
 function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
-  aTarget,aURL:string;
+  aTarget,aStoredTarget:string;
   Cores,MemAvailable,SwapAvailable:DWord;
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
@@ -4325,49 +4304,41 @@ begin
       AddMessage('');
 
       chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
-
-      FillSourceListboxes;
+      if (NOT chkGitlab.Checked) then FillSourceListboxes;
 
       // get names of cross-compilers
       AutoUpdateCrossCompiler(nil);
 
       FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
 
+      aTarget:='stable';
+
       //Default FPC target
 
-      aTarget:='stable';
-      {$ifdef CPUAARCH64}
-      aTarget:='fixes';
+      {$ifdef LCLCOCOA}
+      aTarget:='stable.git';
       {$endif}
-      {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
-      aTarget:='fixes';
-      {$ENDIF}
       {$ifdef Haiku}
       aTarget:='stable.git';
       {$endif}
 
-      if chkGitlab.Checked then
+      // Read target from settngs
+      aStoredTarget:=ReadString('Target','fpcVersion','');
+      if (Length(aStoredTarget)=0) then
       begin
-        aURL:=installerUniversal.GetAlias('fpcTAG',aTarget);
-        aURL:=ReadString('URL','fpcTAG',aURL);
-      end
-      else
-      begin
-        aURL:=installerUniversal.GetAlias('fpcURL',aTarget);
-        aURL:=ReadString('URL','fpcURL',aURL);
-        // correct for [unsafe] URL in old fpcup.ini
-        if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
-        aURL:=ExcludeTrailingPathDelimiter(aURL);
+        //Fallback to previous settings
+        aStoredTarget:=ReadString('URL','fpcURL','');
+        if (Length(aStoredTarget)>0) then
+          aStoredTarget:=installerUniversal.GetKeyword('fpcURL',aStoredTarget);
       end;
-      FPCTarget:=aURL;
+      if (Length(aStoredTarget)<>0) then
+        aTarget:=aStoredTarget;
+      FPCTarget:=aTarget;
 
       //Default Lazarus target
 
-      {$ifdef LCLQT5}
-      aTarget:='fixes';
-      {$endif}
       {$ifdef LCLCOCOA}
-      aTarget:='fixes';
+      aTarget:='stable.git';
       {$endif}
 
       {$ifdef Haiku}
@@ -4379,20 +4350,18 @@ begin
       {$endif}
       {$endif}
 
-      if chkGitlab.Checked then
+      // Read target from settngs
+      aStoredTarget:=ReadString('Target','lazVersion','');
+      if (Length(aStoredTarget)=0) then
       begin
-        aURL:=installerUniversal.GetAlias('lazTAG',aTarget);
-        aURL:=ReadString('URL','lazTAG',aURL);
-      end
-      else
-      begin
-        aURL:=installerUniversal.GetAlias('lazURL',aTarget);
-        aURL:=ReadString('URL','lazURL',aURL);
-        // correct for [unsafe] URL in old fpcup.ini
-        if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
-        aURL:=ExcludeTrailingPathDelimiter(aURL);
+        //Fallback to previous settings
+        aStoredTarget:=ReadString('URL','lazURL','');
+        if (Length(aStoredTarget)>0) then
+          aStoredTarget:=installerUniversal.GetKeyword('lazURL',aStoredTarget);
       end;
-      LazarusTarget:=aURL;
+      if (Length(aStoredTarget)<>0) then
+        aTarget:=aStoredTarget;
+      LazarusTarget:=aTarget;
 
       radgrpCPU.ItemIndex:=ReadInteger('Cross','CPUTarget',radgrpCPU.ItemIndex);
       radgrpOS.ItemIndex:=ReadInteger('Cross','OSTarget',radgrpOS.ItemIndex);
@@ -4480,15 +4449,16 @@ begin
       // mmm, is this correct ?  See extrasettings !!
       WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
 
-      if chkGitlab.Checked then
+      if FPCTarget<>'skip' then
       begin
-        WriteString('URL','fpcTag',installerUniversal.GetAlias('fpcTAG',FPCTarget));
-        WriteString('URL','lazTag',installerUniversal.GetAlias('lazTAG',LazarusTarget));
-      end
-      else
+        if (ListBoxFPCTarget.ItemIndex<>-1) then
+          WriteString('Target','fpcVersion',ListBoxFPCTarget.GetSelectedText);
+      end;
+
+      if LazarusTarget<>'skip' then
       begin
-        if FPCTarget<>'skip' then WriteString('URL','fpcURL',FPCTarget);
-        if LazarusTarget<>'skip' then WriteString('URL','lazURL',LazarusTarget);
+        if (ListBoxLazarusTarget.ItemIndex<>-1) then
+          WriteString('Target','lazVersion',ListBoxLazarusTarget.GetSelectedText);
       end;
 
       if (radgrpCPU.ItemIndex<>-1) then WriteInteger('Cross','CPUTarget',radgrpCPU.ItemIndex);
@@ -4569,6 +4539,12 @@ begin
   Application.ProcessMessages;
 end;
 
+procedure TForm1.TargetSelectionChange(Sender: TObject; User: boolean);
+begin
+  if (NOT User) then exit;
+  SetTarget(TListBox(Sender));
+end;
+
 procedure TForm1.SetFPCTarget(aFPCTarget:string);
 begin
   SetTarget(RealFPCURL,aFPCTarget);
@@ -4583,112 +4559,85 @@ procedure TForm1.SetTarget(aControl:TControl;const aTarget:string='');
 var
   i:integer;
   aEdit:TEdit;
+  aListBox:TListBox;
   change:boolean;
   aLocalTarget:string;
-  aKeyword:string;
+  aLocalAlias:string;
 begin
   aEdit:=nil;
+  aListBox:=nil;
   change:=false;
   aLocalTarget:=aTarget;
 
-  if (aControl is TEdit) then
+  if (aControl is TEdit) then aEdit:=TEdit(aControl);
+  if (aControl is TListBox) then aListBox:=TListBox(aControl);
+
+  if (aListBox=nil) then
   begin
-    aEdit:=TEdit(aControl);
-    if (Length(aLocalTarget)=0) then aLocalTarget:=aEdit.Text;
-  end
-  else
+    if aEdit=RealFPCURL then
+      aListBox:=ListBoxFPCTarget;
+    if aEdit=RealLazURL then
+      aListBox:=ListBoxLazarusTarget;
+  end;
+
+  if (aEdit=nil) then
   begin
-    if aControl=ListBoxFPCTarget then
-    begin
+    if aListBox=ListBoxFPCTarget then
       aEdit:=RealFPCURL;
-      if (ListBoxFPCTarget.ItemIndex<>-1) AND (Length(aLocalTarget)=0) then aLocalTarget:=ListBoxFPCTarget.GetSelectedText;
-    end;
-    if aControl=ListBoxLazarusTarget then
-    begin
+    if aListBox=ListBoxLazarusTarget then
       aEdit:=RealLazURL;
-      if (ListBoxLazarusTarget.ItemIndex<>-1) AND (Length(aLocalTarget)=0) then aLocalTarget:=ListBoxLazarusTarget.GetSelectedText;
-    end;
   end;
 
-  if Length(aLocalTarget)=0 then exit;
+  if (aListBox.ItemIndex<>-1) AND (Length(aLocalTarget)=0) then aLocalTarget:=aListBox.GetSelectedText;
 
-  if (aEdit=RealFPCURL) then
+  if (aEdit=nil) OR (aListBox=nil) OR (Length(aLocalTarget)=0)then
+  begin
+    ShowMessage('Something serious went wrong when setting target FPC and/or Lazarus target.');
+    exit;
+  end;
+
+  if (aListBox=ListBoxFPCTarget) then
   begin
     if (chkGitlab.Checked) then
-    begin
-      if (aControl<>ListBoxFPCTarget) then aLocalTarget:=installerUniversal.GetKeyword('fpcTAG',aLocalTarget);
-    end
+      aLocalAlias:=FPCGITLABREPO+'/-/tree/'+installerUniversal.GetAlias('fpcTAG',aLocalTarget)
     else
-    begin
-      if (aControl=ListBoxFPCTarget) then aLocalTarget:=installerUniversal.GetAlias('fpcURL',aLocalTarget);
-    end;
+      aLocalAlias:=installerUniversal.GetAlias('fpcURL',aLocalTarget);
   end;
 
-  if (aEdit=RealLazURL) then
+  if (aListBox=ListBoxLazarusTarget) then
   begin
     if (chkGitlab.Checked) then
-    begin
-      if (aControl<>ListBoxLazarusTarget) then aLocalTarget:=installerUniversal.GetKeyword('lazTAG',aLocalTarget);
-    end
+      aLocalAlias:=LAZARUSGITLABREPO+'/-/tree/'+installerUniversal.GetAlias('lazTAG',aLocalTarget)
     else
-    begin
-      if (aControl=ListBoxLazarusTarget) then aLocalTarget:=installerUniversal.GetAlias('lazURL',aLocalTarget);
-    end;
+      aLocalAlias:=installerUniversal.GetAlias('lazURL',aLocalTarget);
   end;
 
-  if aEdit=RealFPCURL then
+  if (aListBox=ListBoxFPCTarget) then
   begin
     change:=(aLocalTarget<>FFPCTarget);
     if change then FFPCTarget:=aLocalTarget;
   end;
-  if aEdit=RealLazURL then
+  if (aListBox=ListBoxLazarusTarget) then
   begin
     change:=(aLocalTarget<>FLazarusTarget);
     if change then FLazarusTarget:=aLocalTarget;
   end;
 
-  if change then
+  //if change then
   begin
-    if (aControl is TEdit) OR (Length(aTarget)>0) then
+    if (NOT (aControl is TListBox)) then
     begin
-      if aEdit=RealFPCURL then
+      if (aListBox.Items.Count>0) then
       begin
-        if (ListBoxFPCTarget.Items.Count>0) then
+        i:=aListBox.Items.IndexOf(aLocalTarget);
+        if (i<>-1) then
         begin
-          if chkGitlab.Checked then
-            aKeyword:=aLocalTarget
-          else
-            aKeyword:=installerUniversal.GetKeyword('fpcURL',aLocalTarget);
-          i:=ListBoxFPCTarget.Items.IndexOf(aKeyword);
-          if i<>-1 then
-          begin
-            ListBoxFPCTarget.Selected[i]:=true;
-            if i>5 then ListBoxFPCTarget.TopIndex:=(i-1);
-          end else ListBoxFPCTarget.ClearSelection;
-        end;
-      end;
-      if aEdit=RealLazURL then
-      begin
-        if (ListBoxLazarusTarget.Items.Count>0) then
-        begin
-          if chkGitlab.Checked then
-            aKeyword:=aLocalTarget
-          else
-            aKeyword:=installerUniversal.GetKeyword('lazURL',aLocalTarget);
-          i:=ListBoxLazarusTarget.Items.IndexOf(aKeyword);
-          if i<>-1 then
-          begin
-            ListBoxLazarusTarget.Selected[i]:=true;
-            if i>5 then ListBoxLazarusTarget.TopIndex:=(i-1);
-          end else ListBoxLazarusTarget.ClearSelection;
-        end;
+          aListBox.Selected[i]:=true;
+          aListBox.MakeCurrentVisible;
+        end else aListBox.ClearSelection;
       end;
     end;
-    if (aControl is TListBox) OR (Length(aTarget)>0) then
-    begin
-      if (NOT chkGitlab.Checked) then
-        aEdit.Text:=aLocalTarget;
-    end;
+    aEdit.Text:=aLocalAlias;
   end;
 end;
 
@@ -4720,8 +4669,8 @@ end;
 
 procedure TForm1.chkGitlabChange(Sender: TObject);
 begin
-  RealFPCURL.Visible:=(NOT TCheckBox(Sender).Checked);
-  RealLazURL.Visible:=(NOT TCheckBox(Sender).Checked);
+  //RealFPCURL.Visible:=(NOT TCheckBox(Sender).Checked);
+  //RealLazURL.Visible:=(NOT TCheckBox(Sender).Checked);
 
   imgSVN.Visible:=(NOT TCheckBox(Sender).Checked);
   imgGitlab.Visible:=(TCheckBox(Sender).Checked);
@@ -4916,7 +4865,15 @@ begin
 end;
 
 procedure TForm1.FillSourceListboxes;
+var
+  aFPCKeyword,aLazarusKeyword:string;
+  i:integer;
 begin
+  if (ListBoxFPCTarget.SelCount=1)
+    then aFPCKeyword:=ListBoxFPCTarget.GetSelectedText
+  else
+    aFPCKeyword:=FPCTarget;
+
   ListBoxFPCTarget.Items.Clear;
   if ListBoxFPCTarget.Count=0 then
   begin
@@ -4926,6 +4883,11 @@ begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
   end;
 
+  if (ListBoxLazarusTarget.SelCount=1)
+    then aLazarusKeyword:=ListBoxLazarusTarget.GetSelectedText
+  else
+    aLazarusKeyword:=LazarusTarget;
+
   ListBoxLazarusTarget.Items.Clear;
   if ListBoxLazarusTarget.Count=0 then
   begin
@@ -4934,6 +4896,21 @@ begin
     else
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
   end;
+
+  if ((Length(aFPCKeyword)>0) AND (ListBoxFPCTarget.Items.Count>0)) then
+  begin
+    i:=ListBoxFPCTarget.Items.IndexOf(aFPCKeyword);
+    if (i<>-1) then
+      FPCTarget:=aFPCKeyword;
+  end;
+
+  if ((Length(aLazarusKeyword)>0) AND (ListBoxLazarusTarget.Items.Count>0)) then
+  begin
+    i:=ListBoxLazarusTarget.Items.IndexOf(aLazarusKeyword);
+    if (i<>-1) then
+      LazarusTarget:=aLazarusKeyword;
+  end;
+
 end;
 
 

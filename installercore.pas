@@ -68,10 +68,10 @@ const
   GITLAB                = 'https://gitlab.com/freepascal.org/';
 
   FPCGITLAB             = GITLAB + 'fpc';
-  FPCGITLABREPO         = FPCGITLAB + '/testconversion2.git';
+  FPCGITLABREPO         = FPCGITLAB + '/testconversion2';
 
   LAZARUSGITLAB         = GITLAB + 'lazarus';
-  LAZARUSGITLABREPO     = LAZARUSGITLAB + '/lazarus_test_conversion_2.git';
+  LAZARUSGITLABREPO     = LAZARUSGITLAB + '/lazarus_test_conversion_2';
 
   SVNBASEHTTP           = 'https://svn.';
   SVNBASESVN            = 'svn://svn.';
