@@ -230,7 +230,8 @@ begin
       Command := Command+ ' ' + DesiredRevision;
 
     if (Length(DesiredTag)>0) AND (Uppercase(trim(DesiredTag)) <> 'MAIN') AND (Uppercase(trim(DesiredTag)) <> 'MASTER') then
-      Command := Command+ ' --depth 1 --branch ' + DesiredTag;
+      //Command := Command+ ' --depth 1 --branch ' + DesiredTag;
+      Command := Command+ ' --branch ' + DesiredTag;
 
     Command := Command + ' ' +  Repository + ' ' + LocalRepository;
 
@@ -329,6 +330,7 @@ procedure TGitClient.Update;
 var
   Command: string;
   Output: string = '';
+  bSwitch: boolean;
 begin
   FReturnCode := 0;
   if ExportOnly then exit;
@@ -336,30 +338,51 @@ begin
 
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
+  bSwitch:=false;
 
-  // Get updates (equivalent to git fetch and git merge)
-  // --all: fetch all remotes
-  Command := ' pull --all --recurse-submodules=yes';
-  FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-  FReturnOutput := Output;
-
-  if FReturnCode = 0 then
+  if (Length(DesiredTag)>0) then
   begin
-    // Notice that the result of a merge will not be checked out in the submodule,
-    //"git submodule update" has to be called afterwards to bring the work tree up to date with the merge result.
-    Command := ' submodule update ';
-    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Verbose);
+    Command := ' describe --tags --exact-match';
+    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+    if FReturnCode = 0 then
+    begin
+      if (DesiredTag<>Trim(Output)) then
+      begin
+        Command := ' checkout '+DesiredTag;
+        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+        FReturnOutput := Output;
+        bSwitch:=true;
+      end;
+    end;
   end;
 
-  if (FReturnCode = 0){ and (Length(DesiredRevision)>0) and (uppercase(trim(DesiredRevision)) <> 'HEAD')}
-  then
+  if (NOT bSwitch) then
   begin
-    //SSL Certificate problem
-    //git config --system http.sslCAPath /absolute/path/to/git/certificates
-    // always reset hard towards desired revision
-    Command := ' reset --hard ' + DesiredRevision;
-    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Verbose);
+    // Get updates (equivalent to git fetch and git merge)
+    // --all: fetch all remotes
+    Command := ' pull --all --recurse-submodules=yes';
+    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+    FReturnOutput := Output;
+
+    if FReturnCode = 0 then
+    begin
+      // Notice that the result of a merge will not be checked out in the submodule,
+      //"git submodule update" has to be called afterwards to bring the work tree up to date with the merge result.
+      Command := ' submodule update ';
+      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Verbose);
+    end;
+
+    if (FReturnCode = 0){ and (Length(DesiredRevision)>0) and (uppercase(trim(DesiredRevision)) <> 'HEAD')}
+    then
+    begin
+      //SSL Certificate problem
+      //git config --system http.sslCAPath /absolute/path/to/git/certificates
+      // always reset hard towards desired revision
+      Command := ' reset --hard ' + DesiredRevision;
+      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Verbose);
+    end;
   end;
+
 end;
 
 procedure TGitClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);

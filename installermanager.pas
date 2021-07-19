@@ -189,23 +189,23 @@ type
     FCrossOS_SubArch: TSUBARCH;
     FFPCDesiredRevision: string;
     FFPCDesiredBranch: string;
-    FFPCDesiredTag: string;
     FFPCSourceDirectory: string;
     FFPCInstallDirectory: string;
     FFPCOPT: string;
     FFPCURL: string;
+    FFPCTAG: string;
     FIncludeModules: string;
     FKeepLocalDiffs: boolean;
     FUseSystemFPC: boolean;
     {$ifndef FPCONLY}
     FLazarusDesiredRevision: string;
     FLazarusDesiredBranch: string;
-    FLazarusDesiredTag: string;
     FLazarusSourceDirectory: string;
     FLazarusInstallDirectory: string;
     FLazarusOPT: string;
     FLazarusPrimaryConfigPath: string;
     FLazarusURL: string;
+    FLazarusTAG: string;
     {$endif}
     FCrossToolsDirectory: string;
     FCrossLibraryDirectory: string;
@@ -244,6 +244,7 @@ type
     procedure SetLazarusSourceDirectory(AValue: string);
     procedure SetLazarusInstallDirectory(AValue: string);
     procedure SetLazarusURL(AValue: string);
+    procedure SetLazarusTAG(AValue: string);
     {$endif}
     function GetLogFileName: string;
     procedure SetBaseDirectory(AValue: string);
@@ -251,6 +252,7 @@ type
     procedure SetFPCSourceDirectory(AValue: string);
     procedure SetFPCInstallDirectory(AValue: string);
     procedure SetFPCURL(AValue: string);
+    procedure SetFPCTAG(AValue: string);
     procedure SetCrossToolsDirectory(AValue: string);
     procedure SetCrossLibraryDirectory(AValue: string);
     procedure SetLogFileName(AValue: string);
@@ -306,10 +308,10 @@ type
     property FPCSourceDirectory: string read FFPCSourceDirectory write SetFPCSourceDirectory;
     property FPCInstallDirectory: string read FFPCInstallDirectory write SetFPCInstallDirectory;
     property FPCURL: string read FFPCURL write SetFPCURL;
+    property FPCTAG: string read FFPCTAG write SetFPCTAG;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision: string read FFPCDesiredRevision write FFPCDesiredRevision;
     property FPCDesiredBranch: string read FFPCDesiredBranch write FFPCDesiredBranch;
-    property FPCDesiredTag: string read FFPCDesiredTag write FFPCDesiredTag;
     property HTTPProxyHost: string read FHTTPProxyHost write FHTTPProxyHost;
     property HTTPProxyPassword: string read FHTTPProxyPassword write FHTTPProxyPassword;
     property HTTPProxyPort: integer read FHTTPProxyPort write FHTTPProxyPort;
@@ -321,11 +323,10 @@ type
     property LazarusInstallDirectory: string read FLazarusInstallDirectory write SetLazarusInstallDirectory;
     property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
     property LazarusURL: string read FLazarusURL write SetLazarusURL;
+    property LazarusTAG: string read FLazarusTAG write SetLazarusTAG;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
     property LazarusDesiredBranch:string read FLazarusDesiredBranch write FLazarusDesiredBranch;
-    property LazarusDesiredTag:string read FLazarusDesiredTag write FLazarusDesiredTag;
-
     {$endif}
     // Location where fpcup log will be written to.
     property LogFileName: string read GetLogFileName write SetLogFileName;
@@ -505,7 +506,6 @@ begin
   FFPCInstallDirectory:=SafeExpandFileName(AValue);
 end;
 
-
 procedure TFPCupManager.SetFPCURL(AValue: string);
 begin
   if FFPCURL=AValue then Exit;
@@ -515,6 +515,15 @@ begin
     FFPCURL:=installerUniversal.GetAlias('fpcURL',AValue);
 end;
 
+procedure TFPCupManager.SetFPCTAG(AValue: string);
+begin
+  if FFPCTAG=AValue then Exit;
+  if (Pos('_',AValue)=0) then
+    FFPCTAG:=installerUniversal.GetAlias('fpcTAG',AValue)
+  else
+    FFPCTAG:=aValue;
+  FFPCURL:=FPCGITLABREPO{+'.git/'};
+end;
 
 procedure TFPCupManager.SetCrossToolsDirectory(AValue: string);
 begin
@@ -546,6 +555,17 @@ begin
   else
     FLazarusURL:=installerUniversal.GetAlias('lazURL',AValue);
 end;
+
+procedure TFPCupManager.SetLazarusTAG(AValue: string);
+begin
+  if FLazarusTAG=AValue then Exit;
+  if (Pos('_',AValue)=0) then
+    FLazarusTAG:=installerUniversal.GetAlias('lazTAG',AValue)
+  else
+    FLazarusTAG:=aValue;
+  FLazarusURL:=LAZARUSGITLABREPO{+'.git/'};
+end;
+
 {$endif}
 
 procedure TFPCupManager.SetLogFileName(AValue: string);
@@ -1442,8 +1462,8 @@ begin
     FInstaller.CompilerOptions:=FParent.FPCOPT;
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
     FInstaller.DesiredBranch:=FParent.FPCDesiredBranch;
-    FInstaller.DesiredTag:=FParent.FPCDesiredTag;
     FInstaller.URL:=FParent.FPCURL;
+    FInstaller.TAG:=FParent.FPCTag;
   end
 
   {$ifndef FPCONLY}
@@ -1487,13 +1507,13 @@ begin
 
     FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
     FInstaller.DesiredBranch:=FParent.LazarusDesiredBranch;
-    FInstaller.DesiredTag:=FParent.LazarusDesiredTag;
     // LCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
     (FInstaller as TLazarusInstaller).LCL_Platform:=FParent.LCL_Platform;
     (FInstaller as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     (FInstaller as TLazarusInstaller).SourcePatches:=FParent.FLazarusPatches;
     FInstaller.URL:=FParent.LazarusURL;
+    FInstaller.TAG:=FParent.LazarusTag;
   end
 
   //Convention: help modules start with HelpFPC

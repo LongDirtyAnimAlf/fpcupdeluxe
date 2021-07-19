@@ -1710,7 +1710,7 @@ begin
       // Common keywords for all repo methods
       FDesiredRevision:=GetValueFromKey('Revision',PackageSettings);
       FDesiredBranch:=GetValueFromKey('Branch',PackageSettings);
-      FDesiredTag:=GetValueFromKey('Tag',PackageSettings);
+      TAG:=GetValueFromKey('Tag',PackageSettings);
 
       // Handle Git URLs
       RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
@@ -1802,7 +1802,6 @@ begin
       end;
 
       RemoteURL:=GetValueFromKey('ArchiveURL',PackageSettings);
-
       if (RemoteURL<>'') AND (NOT SourceOK) then
       begin
         if (NOT DirectoryIsEmpty(ExcludeTrailingPathDelimiter(FSourceDirectory))) then
@@ -2976,9 +2975,9 @@ begin
           {$ifndef FPCONLY}
           if aDictionary='lazURL' then result:=FPCBASESVNURL+'/svn/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
           {$endif}
-          if aDictionary='fpcTAG' then result:=StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
+          if aDictionary='fpcTAG' then result:='release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
           {$ifndef FPCONLY}
-          if aDictionary='lazTAG' then result:=StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
+          if aDictionary='lazTAG' then result:='lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
           {$endif}
         end;
 
@@ -2988,6 +2987,7 @@ begin
           raise e;
         end;
       end;
+
     end;
   finally
     ini.Free;

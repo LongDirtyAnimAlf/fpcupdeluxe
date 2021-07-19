@@ -68,10 +68,10 @@ const
   GITLAB                = 'https://gitlab.com/freepascal.org/';
 
   FPCGITLAB             = GITLAB + 'fpc';
-  FPCGITLABREPO         = FPCGITLAB + '/testconversion2';
+  FPCGITLABREPO         = FPCGITLAB + '/testconversion';
 
   LAZARUSGITLAB         = GITLAB + 'lazarus';
-  LAZARUSGITLABREPO     = LAZARUSGITLAB + '/lazarus_test_conversion_2';
+  LAZARUSGITLABREPO     = LAZARUSGITLAB + '/sandbox/lazarus_testconversion';
 
   SVNBASEHTTP           = 'https://svn.';
   SVNBASESVN            = 'svn://svn.';
@@ -313,6 +313,7 @@ type
   TInstaller = class(TObject)
   private
     FURL                   : string;
+    FTAG                   : string;
     FUltibo                : boolean;
     FKeepLocalChanges      : boolean;
     FReApplyLocalChanges   : boolean;
@@ -365,7 +366,6 @@ type
     FDesiredRevision: string;
     FActualRevision: string;
     FDesiredBranch: string;
-    FDesiredTag: string;
     // Stores tprocessex exception info:
     FErrorLog: TStringList;
     FHTTPProxyHost: string;
@@ -497,7 +497,6 @@ type
     property DesiredRevision: string write FDesiredRevision;
     property ActualRevision: string read FActualRevision;
     property DesiredBranch: string write FDesiredBranch;
-    property DesiredTag: string write FDesiredTag;
     // If using HTTP proxy: host
     property HTTPProxyHost: string read FHTTPProxyHost write SetHTTPProxyHost;
     // If using HTTP proxy: port (optional, default 8080)
@@ -523,8 +522,9 @@ type
     property PatchCmd:string write FPatchCmd;
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
-    // URL for download. HTTP, ftp or svn
+    // URL for download. HTTP, ftp or svn or git or hg
     property URL: string read FURL write SetURL;
+    property TAG: string read FURL write FTAG;
     // patches
     property SourcePatches: string write FSourcePatches;
     // do not download the repo itself, but only get the files (of master)
@@ -1780,7 +1780,7 @@ begin
 
   aClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
   aClient.DesiredBranch := FDesiredBranch; //We want to update to this specific branch
-  aClient.DesiredTag := FDesiredTag; //We want to update to this specific branch
+  aClient.DesiredTag := FTAG; //We want to update to this specific branch
 
   Output:=localinfotext+'Running '+UpperCase(aClient.RepoExecutableName)+' checkout or update';
   if Length(aClient.DesiredRevision)>0 then

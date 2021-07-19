@@ -3927,8 +3927,8 @@ begin
   FPCupManager.FPCDesiredBranch:='';
   FPCupManager.LazarusDesiredBranch:='';
 
-  FPCupManager.FPCDesiredTag:='';
-  FPCupManager.LazarusDesiredTag:='';
+  FPCupManager.FPCTag:='';
+  FPCupManager.LazarusTag:='';
 
   {$IFDEF DEBUG}
   FPCupManager.Verbose:=True;
@@ -4053,16 +4053,8 @@ begin
 
   if chkGitlab.Checked then
   begin
-    FPCupManager.FPCURL:=FPCGITLABREPO+'.git';
-    FPCupManager.LazarusURL:=LAZARUSGITLABREPO+'.git';
-    if FPCTarget='trunk' then
-      FPCupManager.FPCDesiredBranch:='main'
-    else
-      FPCupManager.FPCDesiredTag:=installerUniversal.GetAlias('fpcTAG',FPCTarget);
-    if LazarusTarget='trunk' then
-      FPCupManager.LazarusDesiredBranch:='trunk'
-    else
-      FPCupManager.LazarusDesiredTag:=installerUniversal.GetAlias('lazTAG',LazarusTarget);
+    FPCupManager.FPCTag:=FPCTarget;
+    FPCupManager.LazarusTag:=LazarusTarget;
   end
   else
   begin
@@ -4082,8 +4074,6 @@ begin
     if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
     if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='master';
   end;
-
-
 
   // branch and revision overrides from setup+
   s:=Form2.FPCRevision;
@@ -4144,13 +4134,8 @@ begin
   Application.ProcessMessages;
 
   {$ifdef RemoteLog}
-  aVersion:=FPCTarget;
-  if (ListBoxFPCTarget.ItemIndex<>-1) then aVersion:=ListBoxFPCTarget.GetSelectedText;
-  aDataClient.UpInfo.FPCVersion:=ExtractFileName(aVersion);
-
-  aVersion:=LazarusTarget;
-  if (ListBoxLazarusTarget.ItemIndex<>-1) then aVersion:=ListBoxLazarusTarget.GetSelectedText;
-  aDataClient.UpInfo.LazarusVersion:=ExtractFileName(aVersion);
+  aDataClient.UpInfo.FPCVersion:=FPCTarget;
+  aDataClient.UpInfo.LazarusVersion:=LazarusTarget;
 
   aDataClient.UpInfo.UpInstallDir:=FPCupManager.BaseDirectory;
   {$endif}
@@ -4599,18 +4584,22 @@ begin
   if (aListBox=ListBoxFPCTarget) then
   begin
     if (chkGitlab.Checked) then
-      aLocalAlias:=FPCGITLABREPO+'/-/tree/'+installerUniversal.GetAlias('fpcTAG',aLocalTarget)
+      aLocalAlias:=FPCGITLABREPO{+'/-/tree/'+installerUniversal.GetAlias('fpcTAG',aLocalTarget)}
+      //aLocalAlias:=installerUniversal.GetAlias('fpcTAG',aLocalTarget)
     else
       aLocalAlias:=installerUniversal.GetAlias('fpcURL',aLocalTarget);
   end;
-
   if (aListBox=ListBoxLazarusTarget) then
   begin
     if (chkGitlab.Checked) then
-      aLocalAlias:=LAZARUSGITLABREPO+'/-/tree/'+installerUniversal.GetAlias('lazTAG',aLocalTarget)
+      aLocalAlias:=LAZARUSGITLABREPO{+'/-/tree/'+installerUniversal.GetAlias('lazTAG',aLocalTarget)}
+      //aLocalAlias:=installerUniversal.GetAlias('lazTAG',aLocalTarget)
     else
       aLocalAlias:=installerUniversal.GetAlias('lazURL',aLocalTarget);
   end;
+  //i:=Pos('.git',aLocalAlias);
+  //if (i>0) then
+  //  Delete(aLocalAlias,i,4);
 
   if (aListBox=ListBoxFPCTarget) then
   begin
