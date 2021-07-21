@@ -2274,19 +2274,18 @@ begin
         end;
       end;
 
+      if (FUtilFiles[Counter].FileName='libiconv-2.dll') then continue;
+
       if (NOT DownloadSuccess) then
       begin
         Infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' with SVN failed. Now trying normal download.',etInfo);
         DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath+FUtilFiles[Counter].FileName);
       end;
 
-      if NOT DownloadSuccess then
+      if (NOT DownloadSuccess) then
       begin
-        //if (FUtilFiles[Counter].FileName<>'libiconv-2.dll') then
-        begin
-          Infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + '.',etError);
-          Inc(Errors);
-        end;
+        Infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + '.',etError);
+        Inc(Errors);
       end
       else
       begin
