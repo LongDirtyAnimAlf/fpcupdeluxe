@@ -77,6 +77,7 @@ type
 implementation
 
 uses
+  Process,
   StrUtils,
   installerCore,
   processutils,
@@ -330,7 +331,11 @@ procedure TGitClient.Update;
 var
   Command: string;
   Output: string = '';
+  Tags: string = '';
   bSwitch: boolean;
+  aCurrentTag,aCurrentBranch:string;
+  aNewTag,aNewBranch:string;
+  i:integer;
 begin
   FReturnCode := 0;
   if ExportOnly then exit;
@@ -340,15 +345,52 @@ begin
   FLocalRevision := FRET_UNKNOWN_REVISION;
   bSwitch:=false;
 
+  {
+  //FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['tag'], LocalRepository, Tags, '', Verbose);
+  FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['show','--no-color','--oneline','-s'], LocalRepository, Output, '', Verbose);
+  //FReturnCode := TInstaller(Parent).ExecuteCommand(FRepoExecutable,['show','--no-color','--oneline','-s',LocalRepository], Output, Verbose);
+  //RunCommandInDir(LocalRepository,FRepoExecutable,['show','--no-color','--oneline','-s'], Output,FReturnCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+  if FReturnCode = 0 then
+  begin
+    i:=Pos('tag: ',Output);
+    if (i>0) then
+    begin
+      aCurrentTag:=Copy(Output,i+5,MaxInt);
+      i:=Pos(')',aCurrentTag);
+      if (i>0) then
+      begin
+        SetLength(aCurrentTag,i-1);
+      end;
+    end;
+  end;
+  }
+
   if (Length(DesiredTag)>0) then
   begin
-    Command := ' describe --tags --exact-match';
+    Command := ' describe --tags --abbrev=0';
     FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
     if FReturnCode = 0 then
     begin
       if (DesiredTag<>Trim(Output)) then
       begin
         Command := ' checkout '+DesiredTag;
+        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+        FReturnOutput := Output;
+        bSwitch:=true;
+      end;
+    end;
+  end;
+
+  if (Length(DesiredBranch)>0) then
+  begin
+    Command := ' rev-parse --abbrev-ref HEAD';
+    //Command := ' symbolic-ref --short HEAD';
+    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+    if FReturnCode = 0 then
+    begin
+      if (DesiredBranch<>Trim(Output)) then
+      begin
+        Command := ' checkout '+DesiredBranch;
         FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
         FReturnOutput := Output;
         bSwitch:=true;

@@ -31,10 +31,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
-{.$DEFINE crosssimple}
-{$IFDEF WINDOWS}
-{.$DEFINE buildnative}
-{$ENDIF WINDOWS}
+{$i fpcupdefines.inc}
 
 interface
 
@@ -1363,12 +1360,14 @@ begin
           if ((SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0))) then
           begin
             s2:=GetRevision(ModuleName);
-            if (Length(s2)>0) then
+            s2:=AnsiDequotedStr(s2,'''');
+            if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
             begin
               Processor.Process.Parameters.Add('REVSTR='+s2);
               Processor.Process.Parameters.Add('REVINC=force');
             end;
           end;
+
           {$ifdef solaris}
           {$IF defined(CPUX64) OR defined(CPUX86)}
           //Still not sure if this is needed
@@ -1997,10 +1996,9 @@ begin
 
   if ((SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0))) then
   begin
-    // Revision should be something like : "[r]123456" !!
     s2:=Trim(ActualRevision);
     s2:=AnsiDequotedStr(s2,'''');
-    if (Length(s2)>1) AND (s2<>'failure') AND ((s2[1] in ['0'..'9']) OR (s2[2] in ['0'..'9'])) then
+    if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
     begin
       Processor.Process.Parameters.Add('REVSTR='+s2);
       Processor.Process.Parameters.Add('REVINC=force');
@@ -4610,8 +4608,12 @@ begin
       DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
       {$IFDEF UNIX}
       // Delete any fpc.sh shell scripts
+      Infoln(infotext+'Deleting fpc.sh script.', etInfo);
       Sysutils.DeleteFile(FFPCCompilerBinPath+'fpc.sh');
       {$ENDIF UNIX}
+      Infoln(infotext+'Deleting revision.inc.', etInfo);
+      aDir:=ConcatPaths([FSourceDirectory,'compiler']);
+      DeleteFile(aDir+DirectorySeparator+'revision.inc');
     end;
 
     // Delete units

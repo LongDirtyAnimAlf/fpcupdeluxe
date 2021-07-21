@@ -272,6 +272,10 @@ uses
 
 //{$I message.inc}
 
+function NaturalCompare(aList: TStringList; aIndex1, aIndex2: Integer): Integer;
+begin
+  Result := NaturalCompareText(aList[aIndex2], aList[aIndex1]);
+end;
 
 procedure TSynEditHelper.SetFiltered(line: string);
 begin
@@ -3952,8 +3956,8 @@ begin
   FPCupManager.FPCDesiredRevision:='';
   FPCupManager.LazarusDesiredRevision:='';
 
-  FPCupManager.FPCDesiredBranch:='';
-  FPCupManager.LazarusDesiredBranch:='';
+  FPCupManager.FPCBranch:='';
+  FPCupManager.LazarusBranch:='';
 
   FPCupManager.FPCTag:='';
   FPCupManager.LazarusTag:='';
@@ -4090,29 +4094,29 @@ begin
     FPCupManager.LazarusURL:=LazarusTarget;
 
     // for https://github.com/graemeg (FPC/Lazarus mirrors of GitHub) ... always get the right branch
-    if (Pos('github.com/graemeg',FPCupManager.FPCURL)>0) then FPCupManager.FPCDesiredBranch:='master';
-    if (Pos('github.com/graemeg',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
+    if (Pos('github.com/graemeg',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='master';
+    if (Pos('github.com/graemeg',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='upstream';
 
     // for https://github.com/newpascal (FPC/Lazarus NP mirrors of GitHub) ... always get the right branch
-    if (Pos('github.com/newpascal',FPCupManager.FPCURL)>0) then FPCupManager.FPCDesiredBranch:='release';
-    if (Pos('github.com/newpascal',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='release';
-    //if (Pos('github.com/newpascal',FPCupManager.FPCURL>0) then FPCupManager.FPCDesiredBranch:='freepascal';
-    //if (Pos('github.com/newpascal',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='lazarus';
-    if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.FPCURL)>0) then FPCupManager.FPCDesiredBranch:='master';
-    if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
-    if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusDesiredBranch:='master';
+    if (Pos('github.com/newpascal',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='release';
+    if (Pos('github.com/newpascal',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='release';
+    //if (Pos('github.com/newpascal',FPCupManager.FPCURL>0) then FPCupManager.FPCBranch:='freepascal';
+    //if (Pos('github.com/newpascal',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='lazarus';
+    if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='master';
+    if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='upstream';
+    if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='master';
   end;
 
   // branch and revision overrides from setup+
   s:=Form2.FPCRevision;
   if Length(s)>0 then FPCupManager.FPCDesiredRevision:=s;
   s:=Form2.FPCBranch;
-  if Length(s)>0 then FPCupManager.FPCDesiredBranch:=s;
+  if Length(s)>0 then FPCupManager.FPCBranch:=s;
 
   s:=Form2.LazarusRevision;
   if Length(s)>0 then FPCupManager.LazarusDesiredRevision:=s;
   s:=Form2.LazarusBranch;
-  if Length(s)>0 then FPCupManager.LazarusDesiredBranch:=s;
+  if Length(s)>0 then FPCupManager.LazarusBranch:=s;
 
   // overrides for old versions of Lazarus
   aLazarusVersion:=CalculateNumericalVersion(LazarusTarget);
@@ -4855,6 +4859,7 @@ end;
 procedure TForm1.FillSourceListboxes;
 var
   aFPCKeyword,aLazarusKeyword:string;
+  aList:TStringList;
   i:integer;
 begin
   if (ListBoxFPCTarget.SelCount=1)
@@ -4862,27 +4867,49 @@ begin
   else
     aFPCKeyword:=FPCTarget;
 
-  ListBoxFPCTarget.Items.Clear;
-  if ListBoxFPCTarget.Count=0 then
-  begin
-    if chkGitlab.Checked then
-      ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcTAG','list')
-    else
-      ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
-  end;
-
   if (ListBoxLazarusTarget.SelCount=1)
     then aLazarusKeyword:=ListBoxLazarusTarget.GetSelectedText
   else
     aLazarusKeyword:=LazarusTarget;
 
-  ListBoxLazarusTarget.Items.Clear;
-  if ListBoxLazarusTarget.Count=0 then
-  begin
-    if chkGitlab.Checked then
-      ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazTAG','list')
-    else
-      ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
+  aList:=TStringList.Create;
+  try
+    aList.Clear;
+
+    ListBoxFPCTarget.Items.BeginUpdate;
+    ListBoxFPCTarget.Items.Clear;
+    if ListBoxFPCTarget.Count=0 then
+    begin
+      if chkGitlab.Checked then
+      begin
+        aList.CommaText:=installerUniversal.GetAlias('fpcTAG','list')+','+installerUniversal.GetAlias('fpcBRANCH','list');
+      end
+      else
+        aList.CommaText:=installerUniversal.GetAlias('fpcURL','list');
+      if chkGitlab.Checked then aList.CustomSort(@NaturalCompare);
+      ListBoxFPCTarget.Items.AddStrings(aList);
+    end;
+    ListBoxFPCTarget.Items.EndUpdate;
+
+    aList.Clear;
+
+    ListBoxLazarusTarget.Items.BeginUpdate;
+    ListBoxLazarusTarget.Items.Clear;
+    if ListBoxLazarusTarget.Count=0 then
+    begin
+      if chkGitlab.Checked then
+      begin
+        aList.CommaText:=installerUniversal.GetAlias('lazTAG','list')+','+installerUniversal.GetAlias('lazBRANCH','list');
+      end
+      else
+        aList.CommaText:=installerUniversal.GetAlias('lazURL','list');
+      if chkGitlab.Checked then aList.CustomSort(@NaturalCompare);
+      ListBoxLazarusTarget.Items.AddStrings(aList);
+    end;
+    ListBoxLazarusTarget.Items.EndUpdate;
+
+  finally
+    aList.Free;
   end;
 
   if ((Length(aFPCKeyword)>0) AND (ListBoxFPCTarget.Items.Count>0)) then
@@ -4898,9 +4925,7 @@ begin
     if (i<>-1) then
       LazarusTarget:=aLazarusKeyword;
   end;
-
 end;
-
 
 end.
 

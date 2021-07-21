@@ -1287,6 +1287,7 @@ begin
   if Length(Output)>0 then
   begin
     i:=Pos('-r',Output);
+    if (i=0) then i:=Pos('-',Output);
     if (i>0) then
     begin
       Delete(Output,1,i+1);
@@ -2226,6 +2227,7 @@ var
 begin
   result:=false;
   if RunCommand('git',['ls-remote','--tags','--sort=-refname',aURL,'refs/tags/release*'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}{$ENDIF}) then
+  //if RunCommand('git',['ls-remote','--tags','--abbrev=0','--sort=-refname',aURL], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}{$ENDIF}) then
   begin
     if (Output<>'') then
     begin

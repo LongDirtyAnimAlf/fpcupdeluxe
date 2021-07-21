@@ -364,7 +364,7 @@ type
     FPreviousRevision: string;
     FDesiredRevision: string;
     FActualRevision: string;
-    FDesiredBranch: string;
+    FBranch: string;
     // Stores tprocessex exception info:
     FErrorLog: TStringList;
     FHTTPProxyHost: string;
@@ -495,7 +495,7 @@ type
     property PreviousRevision: string read FPreviousRevision;
     property DesiredRevision: string write FDesiredRevision;
     property ActualRevision: string read FActualRevision;
-    property DesiredBranch: string write FDesiredBranch;
+    property Branch: string write FBranch;
     // If using HTTP proxy: host
     property HTTPProxyHost: string read FHTTPProxyHost write SetHTTPProxyHost;
     // If using HTTP proxy: port (optional, default 8080)
@@ -1778,7 +1778,7 @@ begin
   end;
 
   aClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
-  aClient.DesiredBranch := FDesiredBranch; //We want to update to this specific branch
+  aClient.DesiredBranch := FBranch; //We want to update to this specific branch
   aClient.DesiredTag := FTAG; //We want to update to this specific branch
 
   Output:=localinfotext+'Running '+UpperCase(aClient.RepoExecutableName)+' checkout or update';
@@ -3750,8 +3750,10 @@ var
 begin
   result:=false;
 
+  if (Pos(' ',aRevision)>0) then exit;
+
   // Only handle Lazarus !
-  if (ModuleName<>_LAZARUS) then exit;
+  // if (ModuleName<>_LAZARUS) then exit;
 
   //if TryStrToInt(aRevision,NumRevision) then
   begin
@@ -3825,6 +3827,9 @@ begin
           end;
         end;
 
+        result:=RevString;
+
+        {
         if (Length(RevString)>0) then
         begin
           NumbersExtr := TRegExpr.Create;
@@ -3846,6 +3851,8 @@ begin
             NumbersExtr.Free;
           end;
         end;
+        }
+
       end;
     finally
       RevisionStringList.Free;

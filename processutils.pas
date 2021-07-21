@@ -898,6 +898,10 @@ begin
   if AnsiStartsText('Compiling Release Version',line) then exit;
   if AnsiStartsText('Compiling Debug Version',line) then exit;
 
+  //Skip debug message
+  //if AnsiStartsText('TExternalToolsConsole.HandleMesages: Calling CheckSynchronize!',line) then exit;
+  if AnsiStartsText('TExternalToolsConsole',line) then exit;
+
   //Haiku error we are not interested in
   {$ifdef Haiku}
   if AnsiStartsText('runtime_loader:',line) then exit;

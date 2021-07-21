@@ -29,11 +29,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {$mode objfpc}{$H+}
-(*
-{Define NOCONSOLE e.g. if using Windows GUI {$APPTYPE GUI} or -WG
-this will disable writeln calls
-*)
-{not $DEFINE NOCONSOLE}
 
 interface
 
@@ -188,23 +183,23 @@ type
     FCrossOS_Target: TOS;
     FCrossOS_SubArch: TSUBARCH;
     FFPCDesiredRevision: string;
-    FFPCDesiredBranch: string;
     FFPCSourceDirectory: string;
     FFPCInstallDirectory: string;
     FFPCOPT: string;
     FFPCURL: string;
+    FFPCBranch: string;
     FFPCTAG: string;
     FIncludeModules: string;
     FKeepLocalDiffs: boolean;
     FUseSystemFPC: boolean;
     {$ifndef FPCONLY}
     FLazarusDesiredRevision: string;
-    FLazarusDesiredBranch: string;
     FLazarusSourceDirectory: string;
     FLazarusInstallDirectory: string;
     FLazarusOPT: string;
     FLazarusPrimaryConfigPath: string;
     FLazarusURL: string;
+    FLazarusBranch: string;
     FLazarusTAG: string;
     {$endif}
     FCrossToolsDirectory: string;
@@ -308,10 +303,10 @@ type
     property FPCSourceDirectory: string read FFPCSourceDirectory write SetFPCSourceDirectory;
     property FPCInstallDirectory: string read FFPCInstallDirectory write SetFPCInstallDirectory;
     property FPCURL: string read FFPCURL write SetFPCURL;
+    property FPCBranch: string read FFPCBranch write FFPCBranch;
     property FPCTAG: string read FFPCTAG write SetFPCTAG;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision: string read FFPCDesiredRevision write FFPCDesiredRevision;
-    property FPCDesiredBranch: string read FFPCDesiredBranch write FFPCDesiredBranch;
     property HTTPProxyHost: string read FHTTPProxyHost write FHTTPProxyHost;
     property HTTPProxyPassword: string read FHTTPProxyPassword write FHTTPProxyPassword;
     property HTTPProxyPort: integer read FHTTPProxyPort write FHTTPProxyPort;
@@ -323,10 +318,10 @@ type
     property LazarusInstallDirectory: string read FLazarusInstallDirectory write SetLazarusInstallDirectory;
     property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
     property LazarusURL: string read FLazarusURL write SetLazarusURL;
+    property LazarusBranch:string read FLazarusBranch write FLazarusBranch;
     property LazarusTAG: string read FLazarusTAG write SetLazarusTAG;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
-    property LazarusDesiredBranch:string read FLazarusDesiredBranch write FLazarusDesiredBranch;
     {$endif}
     // Location where fpcup log will be written to.
     property LogFileName: string read GetLogFileName write SetLogFileName;
@@ -524,6 +519,35 @@ begin
     FFPCTAG:=aValue;
   FFPCURL:=FPCGITLABREPO{+'.git/'};
 end;
+
+{
+procedure TFPCupManager.SetFPCTAG(AValue: string);
+var
+  aBranch:string;
+begin
+  if FFPCTAG=AValue then Exit;
+  if (Pos('_',AValue)=0) then
+  begin
+    aBranch:=installerUniversal.GetAlias('fpcBRANCH',AValue);
+    if aBranch='' then
+    begin
+      //aBranch:='main';
+      FFPCTAG:=installerUniversal.GetAlias('fpcTAG',AValue);
+    end
+    else
+    begin
+      FFPCTAG:='';
+    end;
+    if aBranch='main' then aBranch:='HEAD';
+    if aBranch='master' then aBranch:='HEAD';
+    if aBranch='trunk' then aBranch:='HEAD';
+    FFPCBranch:=aBranch;
+  end
+  else
+    FFPCTAG:=aValue;
+  FFPCURL:=FPCGITLABREPO{+'.git/'};
+end;
+}
 
 procedure TFPCupManager.SetCrossToolsDirectory(AValue: string);
 begin
@@ -1461,8 +1485,8 @@ begin
       (FInstaller as TFPCInstaller).NativeFPCBootstrapCompiler:=FParent.NativeFPCBootstrapCompiler;
     FInstaller.CompilerOptions:=FParent.FPCOPT;
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
-    FInstaller.DesiredBranch:=FParent.FPCDesiredBranch;
     FInstaller.URL:=FParent.FPCURL;
+    FInstaller.Branch:=FParent.FPCBranch;
     FInstaller.TAG:=FParent.FPCTag;
   end
 
@@ -1506,13 +1530,13 @@ begin
     FInstaller.CompilerOptions:=FParent.LazarusOPT;
 
     FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
-    FInstaller.DesiredBranch:=FParent.LazarusDesiredBranch;
     // LCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
     (FInstaller as TLazarusInstaller).LCL_Platform:=FParent.LCL_Platform;
     (FInstaller as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     (FInstaller as TLazarusInstaller).SourcePatches:=FParent.FLazarusPatches;
     FInstaller.URL:=FParent.LazarusURL;
+    FInstaller.Branch:=FParent.LazarusBranch;
     FInstaller.TAG:=FParent.LazarusTag;
   end
 
