@@ -121,6 +121,7 @@ type
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
+    Win95Btn: TBitBtn;
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure BitBtnSetRevisionClick(Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
@@ -1623,6 +1624,8 @@ begin
     OR
     (ExistWordInString(PChar(s),'Skipped package',[soWholeWord,soDown]))
     OR
+    (ExistWordInString(PChar(s),'Processing Makefile.fpc',[soDown]))
+    OR
     (
       (ExistWordInString(PChar(s),'writing',[soDown]))
       AND
@@ -1909,6 +1912,13 @@ begin
     s:='Going to install FPC stable and Lazarus stable.';
     aFPCTarget:='stable';
     aLazarusTarget:='stable';
+  end;
+
+  if Sender=Win95Btn then
+  begin
+    s:='Going to install FPC and Lazarus for Win95.';
+    aFPCTarget:='2.6.2';
+    aLazarusTarget:='1.2';
   end;
 
   {$ifdef Darwin}

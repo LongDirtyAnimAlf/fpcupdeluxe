@@ -886,7 +886,9 @@ begin
   begin
     if AnsiContainsText(line,'error 87') then exit;
     if AnsiContainsText(line,'(e=87)') then exit;
+    if AnsiContainsText(line,':294:') then exit;
   end;
+
 
   //Various harmless OpenBSD errors
   if AnsiContainsText(line,'misused, please use') then exit;
@@ -1051,6 +1053,7 @@ begin
       if AnsiContainsText(line,'mv.exe ') then exit;
       if AnsiContainsText(line,'cmp.exe ') then exit;
       if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then exit;
+      //if AnsiContainsText(line,'ginstall.exe ') then exit;
       {$endif}
 
       s:='rm ';

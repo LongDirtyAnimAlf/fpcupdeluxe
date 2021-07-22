@@ -1,12 +1,12 @@
 object Form1: TForm1
-  Left = 33
-  Height = 689
-  Top = 48
-  Width = 1078
+  Left = 48
+  Height = 701
+  Top = 79
+  Width = 1199
   Anchors = []
   Caption = 'Form1'
-  ClientHeight = 669
-  ClientWidth = 1078
+  ClientHeight = 681
+  ClientWidth = 1199
   Constraints.MinHeight = 400
   Menu = MainMenu1
   OnClose = FormClose
@@ -24,7 +24,7 @@ object Form1: TForm1
     Left = 12
     Height = 31
     Hint = 'Open the extended settings form.'
-    Top = 570
+    Top = 582
     Width = 310
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
@@ -44,7 +44,7 @@ object Form1: TForm1
     Left = 336
     Height = 23
     Top = 33
-    Width = 472
+    Width = 593
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
@@ -59,7 +59,7 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = btnSendLog
-    Left = 820
+    Left = 941
     Height = 19
     Top = 35
     Width = 74
@@ -75,7 +75,7 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 993
+    Left = 1114
     Height = 25
     Top = 33
     Width = 73
@@ -95,9 +95,9 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = memoSummary
     Left = 336
-    Height = 415
+    Height = 427
     Top = 62
-    Width = 730
+    Width = 851
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 8
@@ -648,7 +648,7 @@ object Form1: TForm1
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
-    Width = 289
+    Width = 410
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 4
@@ -667,8 +667,8 @@ object Form1: TForm1
     AnchorSideBottom.Side = asrBottom
     Left = 6
     Height = 56
-    Top = 609
-    Width = 1060
+    Top = 621
+    Width = 1181
     Align = alBottom
     AutoSize = True
     BorderSpacing.Left = 6
@@ -678,7 +678,7 @@ object Form1: TForm1
     BorderSpacing.CellAlignVertical = ccaCenter
     BevelInner = bvLowered
     ClientHeight = 56
-    ClientWidth = 1060
+    ClientWidth = 1181
     Constraints.MinHeight = 50
     ParentFont = False
     TabOrder = 3
@@ -1322,10 +1322,10 @@ object Form1: TForm1
       TabOrder = 3
     end
     object WioBtn: TBitBtn
-      AnchorSideLeft.Control = AndroidBtn
+      AnchorSideLeft.Control = Win95Btn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 468
+      Left = 578
       Height = 42
       Hint = 'Get FPC for SAMD51 embedded on Wio Terminal'
       Top = 8
@@ -1517,7 +1517,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = WioBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 569
+      Left = 679
       Height = 42
       Hint = 'Get FPC for armv6m RPi Pico'
       Top = 8
@@ -1709,7 +1709,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = PicoBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 672
+      Left = 782
       Height = 42
       Hint = 'Install baremetal Ultibo for RPi3'
       Top = 8
@@ -2092,7 +2092,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = UltiboBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 816
+      Left = 926
       Height = 42
       Hint = 'Get the mORMot for FPC'
       Top = 8
@@ -2244,7 +2244,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
-      Left = 963
+      Left = 1084
       Height = 42
       Hint = 'Try to stop current install process'
       Top = 8
@@ -2393,6 +2393,186 @@ object Form1: TForm1
       ShowHint = True
       TabOrder = 8
     end
+    object Win95Btn: TBitBtn
+      AnchorSideLeft.Control = AndroidBtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 468
+      Height = 42
+      Hint = 'Get FPC for SAMD51 embedded on Wio Terminal'
+      Top = 8
+      Width = 102
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Win95'
+      Glyph.Data = {
+        B6130000424DB613000000000000360000002800000027000000200000000100
+        2000000000008013000064000000640000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000033000000290000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000000003D00000000000000000000008F0000
+        008F0101011400000066000000FF000000A30000001E000000700000005C0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000CC000000E10000003D00000099000000FF0000
+        00F500000066000000FF000000FF000000CC00000099000000FF000000D50000
+        00420000001D0000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000101011401010114000000000000000000000000000000660000
+        0029000000000000008F000000FF0000006600000084000000FF000000FF0000
+        003D000000EB000000FF000000CC00000099000000FF000000FF000000CC0000
+        00C8000000A30000002900000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000330000
+        0098000000F50000003200000029010101140000000000000090000000FF0000
+        0000000000000000002900000033A562010A0000003D000000C1A56200479D5D
+        006600000070000000B800000066000000F5000000FF000000CC000000C80000
+        00FF000000FF000000B800000070000000310000000000000000000000000000
+        000000000000010101150000004700000085000000DE000000FF000000FF0000
+        00FF0000003200000052000000FF000000000101010A0000007A00000000A562
+        0052A562010A00000000A5620099A56200A3A5620029A5620066A56200FFA562
+        00C8A562003DA5620085995A00852C160099000000C2000000C8000000FF0000
+        00FF000000FF000000FF000000FF000000FF000000E9000000CC000000D40000
+        00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+        0032000000000000002900000000000000000000000000000000A56200CCA562
+        00F5A5620047A5620099A56200FFA56200FFA5620066A56200FFA56200FFA562
+        00CCA5620099A56200FFA56200EB9E5E0070643900C8210F00FF000000FF0000
+        00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+        00FF000000FF000000FF000000FF000000FF000000FF000000FF000000320000
+        00000000000000000000A5620082A562005C00000000A562006BA56200EBA562
+        0066A5620066A56200F5A56200FFA5620033A56200D6A56200FFA56200CCA562
+        0099A56200FFA56200FFA56200CCA56200C89F5E00FF834D00FF5B3400FF210F
+        00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+        00FF004361FF006590FF000000FF000000FF000000FF00000032A562003DA562
+        003D00000000A5620085A56200FF0000000000000000A562010AA562001FA562
+        003BA5620024A562008FA562005CA562008FA5620070A56200A3A562004DA562
+        00D8A56200FFA56200CCA56200C8A56200FFA56200FFA56200FFA56200FF9558
+        00FF432500FF000000FF006996FF0090CBFF0090CBFF009BDBFF00ABF1FF00B5
+        FFFF0090CBFF000000FF000000FF000000FF00000032A562003DA56200EB0000
+        000000000000A562005C00000000A562008FA562004E00000000A5620099A562
+        00F2A5620082A5620066A56200FFA56200F5A562007AA562008FA562008FA562
+        0070A56200A3A56200CBA56200FFA56200FFA56200FFA56200FFA56200FF4E2B
+        00FF000000FF0085BDFF00B5FFFF00B5FFFF00B5FFFF00B5FFFF00B5FFFF0090
+        CBFF000000FF000000FF000000FF0000003200000000A562010A00000000A562
+        01150000000000000000A56200CCA56200FFA5620066A5620099A56200FFA562
+        00FFA5620066A56200FFA56200FFA56200CCA5620099A56200FFA56200F5A562
+        007AA56200CCA56200FFA56200FFA56200FFA56200FFA56200FF4E2B00FF0000
+        00FF0085BDFF00B5FFFF00B5FFFF00B5FFFF00B5FFFF00B5FFFF0090CBFF0000
+        00FF000000FF000000FF00000032000000000000000000000000A5620099A562
+        00A300000000A5620029A56200A3A5620066A5620033A56200C2A56200FF8B52
+        001EA562008FA56200F5A56200CCA5620099A56200FFA56200FFA56200CCA562
+        00CCA56200FFA56200FFA56200FFA56200FFA56200FF4E2B00FF000000FF0085
+        BDFF00B5FFFF00B5FFFF00B5FFFF00B5FFFF00B5FFFF0090CBFF000000FF0000
+        00FF000000FF00000032A5620051A562008F00000000A5620051A56200F50000
+        00000000000000000000000000000000004701010115A562003D000000660000
+        00A46339003DA56200668A510051A56200CAA56200FFA56200CCA56200CCA562
+        00FFA56200FFA56200FFA56200FFA56200FF4E2B00FF000000FF0085BDFF00B5
+        FFFF00B5FFFF00B5FFFF00B5FFFF00B5FFFF0090CCFF000000FF000000FF0000
+        00FF00000032A562001DA56200A30000000000000000A5620114000000000000
+        00AD000000700101010A00000099000000F50000009200000066000000FF0000
+        00FF0000008F00000099000000C2814B0093A56200A3A56200CCA56200FFA562
+        00FFA56200FFA56200FFA56200FF4E2B00FF000000FF0085BDFF00B5FFFF00B5
+        FFFF00B5FFFF00B5FFFF00B5FFFF0090CCFF000000FF000000FF000000FF0000
+        0032000000000000000000000000000000240000000000000000000000CC0000
+        00FF0000006600000099000000FF000000FF00000066000000FF000000FF0000
+        00CC00000099000000FF000000FF000000A39D5D00CCA56200FFA56200FFA562
+        00FFA56200FFA56200FF4E2B00FF000000FF0085BDFF00B5FFFF00B5FFFF00B5
+        FFFF00B5FFFF00B5FFFF0090CCFF000000FF000000FF000000FF000000320000
+        0000000000000000000000000099000000C200000000010101140000008F0000
+        005C00000029000000A3000000FF2247C71F00000070000000EB000000CC0000
+        0099000000FF000000FF000000CC000000CC583200FF834D00FF9F5E00FFA562
+        00FFA56200FF4E2B00FF000000FF0085BDFF00B5FFFF00B5FFFF00B5FFFF00B5
+        FFFF00B5FFFF0090CCFF000000FF000000FF000000FF000000320000005F0000
+        00A30000000000000047000000EB000000002B57EE0A00000000000000002B57
+        EE662B57EE3D000000292B57EE662B57EED62953E36600000052234ACC480513
+        4499000000F5000000CC000000CC000000FF000000FF000000FF462600FF6439
+        00FF301900FF000000FF0078ABFF00A4E7FF00A4E7FF00A2E5FF008DC8FF006B
+        99FF002539FF000000FF000000FF000000FF00000033010101130000008F0000
+        0000000000000101010A000000002B57EEC22B57EE8F2B57EE142B57EE992B57
+        EEFF2B57EEC62B57EE662B57EEFF2B57EEFF2B57EEB82B57EE992B57EEEB2750
+        DD84000000662044BECC11297BFF000000FF000000FF000000FF000000FF0000
+        00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+        00FF000000FF000000FF000000FF000000330000000000000000000000002B57
+        EE372B57EE0A000000002B57EEC22B57EEFF2B57EE662B57EE992B57EEFF2B57
+        EEFF2B57EE5C2B57EEFF2B57EEFF2B57EECC2B57EE992B57EEFF2B57EEFF2B57
+        EEB82B57EECC2B57EEFF2852E1FF1D3FB2FF142D86FF0A1C5AFF000000FF0000
+        00FF000000FF000000FF000000FF000000FF0D260BFF2B5E26FF2E6429FF0000
+        00FF000000FF000000FF000000332B57EE0B00000000000000002B57EE992B57
+        EEEB000000002B57EE0A2B57EE712B57EE4E2B57EE0A2B57EE702B57EEEB2B57
+        EE3A2B57EE662B57EEC22B57EECC2B57EE962B57EEFF2B57EEFF2B57EECC2B57
+        EECC2B57EEFF2B57EEFF2B57EEFF2B57EEFF2B57EEFF0F2673FF000000FF2B5E
+        26FF45913FFF45913FFF489742FF4DA046FF4DA046FF397A34FF000000FF0000
+        00FF000000FF000000332B57EE352B57EED6000000002B57EE292B57EEC20000
+        00002B57EE3D00000000000000002B57EE8F2B57EE8F2B57EE1E2B57EE662B57
+        EEFF2B57EEA32B57EE522B57EE582B57EE8F2B57EED72B57EECC2B57EECC2B57
+        EEFF2B57EEFF2B57EEFF2B57EEFF2B57EEFF0F2673FF000000FF30692BFF4DA0
+        46FF4DA046FF4DA046FF4DA046FF4DA046FF397A34FF000000FF000000FF0000
+        00FF00000033000000002B57EE5C000000000000000000000000000000002B57
+        EECC2B57EED62B57EE332B57EE992B57EEFF2B57EEF72B57EE662B57EEFF2B57
+        EEFF2B57EECC2B57EE992B57EEFF2B57EEA32B57EE512B57EECC2B57EEFF2B57
+        EEFF2B57EEFF2B57EEFF2B57EEFF0F2673FF000000FF30692BFF4DA046FF4DA0
+        46FF4DA046FF4DA046FF4DA046FF397A34FF000000FF000000FF000000FF0000
+        00330000000000000000000000002B57EE662B57EE3D000000002B57EE8F2B57
+        EEFF2B57EE662B57EE702B57EEFF2B57EEFF2B57EE3D2B57EEEB2B57EEFF2B57
+        EECC2B57EE992B57EEFF2B57EEFF2B57EECC2B57EECC2B57EEFF2B57EEFF2B57
+        EEFF2B57EEFF2B57EEFF0F2673FF000000FF30692BFF4DA046FF4DA046FF4DA0
+        46FF4DA046FF4DA046FF397A34FF000000FF000000FF000000FF000000332B57
+        EE262B57EE29000000002B57EE8F2B57EEFF00000000000000002B57EE272B57
+        EE300101010A2B57EE292B57EEA30000003F0B1E5F4C2B57EE702B57EEB82B57
+        EE852B57EEFF2B57EEFF2B57EECC2B57EECC2B57EEFF2B57EEFF2B57EEFF2B57
+        EEFF2B57EEFF0F2673FF000000FF30682BFF4DA046FF4DA046FF4DA046FF4DA0
+        46FF4DA046FF397A34FF000000FF000000FF000000FF000000332B57EE4C2B57
+        EEFF000000002B57EE0A2B57EE7A00000000000000540101010D000000000000
+        0099000000A30000002900000066000000FF000000C700000043000000661D3E
+        AF7A2B57EEC22B57EECC2B57EECC2B57EEFF2B57EEFF2B57EEFF2B57EEFF2B57
+        EEFF0F2673FF000000FF30682BFF4DA046FF4DA046FF4DA046FF4DA046FF4DA0
+        46FF397A34FF000000FF000000FF000000FF00000033000000002B57EE200000
+        0000000000000000000000000000000000CC000000F400000047000000990000
+        00FF000000FF00000066000000FF000000FF000000CC00000099000000FF0000
+        00C219379E662953E3CC2B57EEFF2B57EEFF2B57EEFF2B57EEFF2B57EEFF0F26
+        73FF000000FF30682BFF4DA046FF4DA046FF4DA046FF4DA046FF4DA046FF397A
+        34FF000000FF000000FF000000FF000000330000000000000000000000000000
+        00720000005C0000000000000066000000EB0000006600000066000000F50000
+        00FF00000029000000C7000000FF000000CC00000099000000FF000000FF0000
+        00CC000000CC132D84FF2044BEFF2954E5FF2B57EEFF2B57EEFF0F2673FF0000
+        00FF30682BFF4DA046FF4DA046FF4DA046FF4DA046FF4DA046FF377732FF0000
+        00FF000000FF000000FF000000330000003D0000003D00000000000000850000
+        00FF00000000000000000101010A0000001F00000000010101140000008E0000
+        0000000000000000005A000000A300000070000000FC000000FF000000CC0000
+        00CC000000FF000000FF000000FF0D2168FF19369DFF06154AFF000000FF2A5E
+        26FF45913FFF45913FFF418A3BFF377732FF285823FF000000FF000000FF0000
+        00FF000000FF000000330000003D000000EB00000000000000000000005B0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000010101150000008F000000C2000000CC0000
+        00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+        00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+        00FF00000033000000000101010A000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000101010A00000070000000E90000
+        00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+        00FF000000FF000000FF000000FF000000FF000000FF000000CC0000005C0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000470000
+        0085000000C2000000FE000000FF000000FF000000FF000000FF000000FF0000
+        00FF000000FE000000C200000083000000330000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000002800000033000000330000003300000033000000280000
+        0000000000000000000000000000000000000000000000000000
+      }
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 9
+    end
   end
   object memoSummary: TMemo
     AnchorSideLeft.Control = CommandOutputScreen
@@ -2402,8 +2582,8 @@ object Form1: TForm1
     Left = 336
     Height = 120
     Hint = 'Will show error'
-    Top = 485
-    Width = 730
+    Top = 497
+    Width = 851
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 4
@@ -2420,7 +2600,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = btnSetupPlus
     Left = 12
-    Height = 527
+    Height = 539
     Top = 35
     Width = 310
     ActivePage = BasicSheet
@@ -2434,7 +2614,7 @@ object Form1: TForm1
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet
       Caption = 'Basic'
-      ClientHeight = 499
+      ClientHeight = 511
       ClientWidth = 302
       ParentFont = False
       object FPCVersionLabel: TLabel
@@ -2463,7 +2643,7 @@ object Form1: TForm1
         AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = BitBtnFPCOnly
         Left = 8
-        Height = 265
+        Height = 277
         Top = 80
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
@@ -2502,7 +2682,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = BitBtnLazarusOnly
         Left = 163
-        Height = 265
+        Height = 277
         Top = 80
         Width = 131
         Anchors = [akTop, akRight, akBottom]
@@ -2524,7 +2704,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Only install/update selected FPC version.'
-        Top = 361
+        Top = 373
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -2679,7 +2859,7 @@ object Form1: TForm1
         Left = 163
         Height = 61
         Hint = 'Only install/update selected Lazarus version.'
-        Top = 361
+        Top = 373
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -2835,7 +3015,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Will install/update the selected version of both FPC and Lazarus.'
-        Top = 430
+        Top = 442
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3708,7 +3888,7 @@ object Form1: TForm1
     end
     object CrossSheet: TTabSheet
       Caption = 'Cross'
-      ClientHeight = 499
+      ClientHeight = 511
       ClientWidth = 302
       ParentFont = False
       object radgrpCPU: TRadioGroup
@@ -3716,7 +3896,7 @@ object Form1: TForm1
         AnchorSideTop.Control = CrossSheet
         AnchorSideBottom.Control = ButtonInstallCrossCompiler
         Left = 8
-        Height = 359
+        Height = 371
         Top = 8
         Width = 128
         Anchors = [akTop, akLeft, akBottom]
@@ -3732,7 +3912,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 339
+        ClientHeight = 351
         ClientWidth = 124
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -3766,7 +3946,7 @@ object Form1: TForm1
         AnchorSideBottom.Control = CrossSheet
         AnchorSideBottom.Side = asrBottom
         Left = 152
-        Height = 485
+        Height = 497
         Top = 8
         Width = 140
         Anchors = [akTop, akRight, akBottom]
@@ -3783,7 +3963,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 465
+        ClientHeight = 477
         ClientWidth = 136
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -3827,7 +4007,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Install the selected CPU-OS cross-compiler.'
-        Top = 375
+        Top = 387
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3851,7 +4031,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Select a subarch for embedded target.'
-        Top = 468
+        Top = 480
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3875,7 +4055,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Remove the selected CPU-OS cross-compiler.'
-        Top = 406
+        Top = 418
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3898,7 +4078,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Auto-update all installed cross-compilers.'
-        Top = 437
+        Top = 449
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3914,7 +4094,7 @@ object Form1: TForm1
     end
     object ModuleSheet: TTabSheet
       Caption = 'Modules'
-      ClientHeight = 499
+      ClientHeight = 511
       ClientWidth = 302
       ParentFont = False
       object listModules: TListBox
@@ -3924,7 +4104,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = Memo1
         Left = 8
-        Height = 374
+        Height = 386
         Top = 8
         Width = 286
         Anchors = [akTop, akLeft, akRight, akBottom]
@@ -3948,7 +4128,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Install the selected module.'
-        Top = 466
+        Top = 478
         Width = 101
         Anchors = [akLeft, akBottom]
         AutoSize = True
@@ -3969,7 +4149,7 @@ object Form1: TForm1
         Left = 178
         Height = 25
         Hint = 'Uninstall the selected module.'
-        Top = 466
+        Top = 478
         Width = 116
         Anchors = [akRight, akBottom]
         AutoSize = True
@@ -3989,7 +4169,7 @@ object Form1: TForm1
         AnchorSideBottom.Control = btnInstallModule
         Left = 8
         Height = 60
-        Top = 394
+        Top = 406
         Width = 189
         Anchors = [akTop, akLeft, akRight, akBottom]
         BorderSpacing.Left = 8
@@ -4008,7 +4188,7 @@ object Form1: TForm1
         Left = 205
         Height = 42
         Hint = 'Will install/update the Online Package Manager'
-        Top = 394
+        Top = 406
         Width = 89
         Anchors = [akRight, akBottom]
         AutoSize = True
@@ -4155,7 +4335,7 @@ object Form1: TForm1
     end
     object TagSheet: TTabSheet
       Caption = 'Tags'
-      ClientHeight = 499
+      ClientHeight = 511
       ClientWidth = 302
       ParentFont = False
       object FPCTagLabel: TLabel
@@ -4202,7 +4382,7 @@ object Form1: TForm1
         AnchorSideTop.Control = TagSheet
         AnchorSideBottom.Control = BitBtnFPCOnlyTag
         Left = 8
-        Height = 285
+        Height = 297
         Top = 42
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
@@ -4226,7 +4406,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = BitBtnLazarusOnlyTag
         Left = 163
-        Height = 287
+        Height = 299
         Top = 40
         Width = 131
         Anchors = [akTop, akRight, akBottom]
@@ -4253,7 +4433,7 @@ object Form1: TForm1
         Left = 8
         Height = 70
         Hint = 'Add tag/url into FPC install list'
-        Top = 343
+        Top = 355
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 16
@@ -4408,7 +4588,7 @@ object Form1: TForm1
         Left = 163
         Height = 70
         Hint = 'Add tag/url into Lazarus install list'
-        Top = 343
+        Top = 355
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 16
@@ -4561,7 +4741,7 @@ object Form1: TForm1
         AnchorSideBottom.Side = asrBottom
         Left = 8
         Height = 70
-        Top = 421
+        Top = 433
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Left = 8
@@ -4574,7 +4754,7 @@ object Form1: TForm1
     end
     object HistorySheet: TTabSheet
       Caption = 'History'
-      ClientHeight = 499
+      ClientHeight = 511
       ClientWidth = 302
       object FPCHistoryLabel: TLabel
         AnchorSideLeft.Control = HistorySheet
@@ -4938,7 +5118,7 @@ object Form1: TForm1
         AnchorSideBottom.Control = TagSheet
         AnchorSideBottom.Side = asrBottom
         Left = 8
-        Height = 117
+        Height = 129
         Top = 374
         Width = 286
         Anchors = [akTop, akLeft, akRight, akBottom]
@@ -5015,7 +5195,7 @@ object Form1: TForm1
     end
     object ExtraSheet: TTabSheet
       Caption = 'Extras'
-      ClientHeight = 499
+      ClientHeight = 511
       ClientWidth = 302
       ParentFont = False
       object btnGetOpenSSL: TButton
@@ -5121,7 +5301,7 @@ object Form1: TForm1
   object btnSendLog: TButton
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = btnClearLog
-    Left = 906
+    Left = 1027
     Height = 25
     Hint = 'Send email to fpcup maintainer containing Commandscreen output.'
     Top = 33
