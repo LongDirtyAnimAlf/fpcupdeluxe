@@ -1264,14 +1264,15 @@ object Form1: TForm1
       ParentFont = False
       object ListBoxFPCTargetTag: TListBox
         AnchorSideLeft.Control = TagSheet
-        AnchorSideTop.Control = TagSheet
+        AnchorSideTop.Control = FPCTagLabel
+        AnchorSideTop.Side = asrBottom
         Left = 8
-        Height = 313
-        Top = 42
+        Height = 321
+        Top = 34
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
         BorderSpacing.Left = 8
-        BorderSpacing.Top = 42
+        BorderSpacing.Top = 8
         BorderSpacing.Bottom = 8
         Items.Strings = (
           'Please wait.'
@@ -1284,15 +1285,16 @@ object Form1: TForm1
         TabOrder = 1
       end
       object ListBoxLazarusTargetTag: TListBox
-        AnchorSideTop.Control = TagSheet
+        AnchorSideTop.Control = LazarusTagLabel
+        AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = TagSheet
         AnchorSideRight.Side = asrBottom
         Left = 163
-        Height = 315
-        Top = 40
+        Height = 321
+        Top = 34
         Width = 131
         Anchors = [akTop, akRight, akBottom]
-        BorderSpacing.Top = 40
+        BorderSpacing.Top = 8
         BorderSpacing.Right = 8
         BorderSpacing.Bottom = 8
         Items.Strings = (
