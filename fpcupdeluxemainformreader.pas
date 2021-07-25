@@ -45,10 +45,17 @@ type
     BitBtnLazarusSetRevision: TButton;
     chkGitlab: TCheckBox;
     FixesBtn: TButton;
+    FPCHistoryLabel: TStaticText;
+    FPCTagLabel: TStaticText;
+    FPCVersionLabel: TStaticText;
     imgSVN: TImage;
     imgGitlab: TImage;
+    LazarusHistoryLabel: TStaticText;
+    LazarusTagLabel: TStaticText;
+    LazarusVersionLabel: TStaticText;
     ListBoxFPCHistory: TListView;
     ListBoxLazarusHistory: TListView;
+    CommandOutputScreen: TMemo;
     mORMotBtn: TButton;
     btnCreateLazarusConfig: TButton;
     ButtonSubarchSelect: TButton;
@@ -68,9 +75,7 @@ type
     ChkMakefileLaz: TButton;
     actFileExit: TFileExit;
     actFileSave: TFileSaveAs;
-    FPCHistoryLabel: TLabel;
     HistorySheet: TTabSheet;
-    LazarusHistoryLabel: TLabel;
     MemoHistory: TMemo;
     OPMBtn: TButton;
     PicoBtn: TButton;
@@ -78,11 +83,7 @@ type
     TrunkBtn: TButton;
     UltiboBtn: TButton;
     Win95Btn: TButton;
-    FPCVersionLabel: TLabel;
-    FPCTagLabel: TLabel;
     IniPropStorageApp: TIniPropStorage;
-    LazarusVersionLabel: TLabel;
-    LazarusTagLabel: TLabel;
     ListBoxFPCTarget: TListBox;
     ListBoxFPCTargetTag: TListBox;
     ListBoxLazarusTarget: TListBox;
@@ -120,7 +121,6 @@ type
     RealFPCURL: TEdit;
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
-    CommandOutputScreen: TSynEdit;
     WioBtn: TButton;
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure BitBtnSetRevisionClick(Sender: TObject);
@@ -853,7 +853,7 @@ begin
             // build compiler
             if (Sender<>nil) then
             begin
-              CommandOutputScreen.ClearAll;
+              CommandOutputScreen.Clear;
               aResultMessage:='Finished building of cross-compilers.';
               AddMessage(upBuildAllCrossCompilersUpdate);
 
@@ -1116,7 +1116,7 @@ var
   s,searchstring:string;
   x,y:integer;
 begin
-  s:=CommandOutputScreen.LineText;
+  s:=CommandOutputScreen.Lines[Pred(CommandOutputScreen.Lines.Count)];
   //if Length(s)=0 then s:=CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2];
   s:=Trim(s);
   if Length(s)=0 then exit;
@@ -1277,7 +1277,6 @@ begin
       InternalError:=Copy(s,x+1,MaxInt);
       memoSummary.Lines.Append('URL: '+InternalError);
       memoSummary.Lines.Append('Please check your connection. Or run the SVN command to try yourself:');
-      memoSummary.Lines.Append(CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2]);
     end;
   end;
 
@@ -1362,12 +1361,10 @@ begin
     else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
     begin
       memoSummary.Lines.Append('We have had a SVN connection failure. Just start again !');
-      memoSummary.Lines.Append(CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2]);
     end
     else if (ExistWordInString(PChar(s),'fatal:',[soDown])) then
     begin
       memoSummary.Lines.Append(s);
-      memoSummary.Lines.Append(CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2]);
     end
     else if (ExistWordInString(PChar(s),'error:',[soDown])) then
     begin
@@ -1432,36 +1429,6 @@ begin
     end;
   end;
 
-  // go back a few lines to find a special error case
-  x:=(CommandOutputScreen.CaretY-4);
-  if (x>0) then
-  begin
-    s:=CommandOutputScreen.Lines[x];
-    s:=Trim(s);
-    s:=LowerCase(s);
-    if Length(s)=0 then exit;
-    // check if "error:" at the end of the line.
-    // if so:
-    // the real error will follow on the next line(s).
-    // and we have to wait for these lines !!
-    // if not, just print the error message (done somewhere else in this procedure).
-    if (Pos('error:',s)>0) AND (Pos('error:',s)=(Length(s)-Length('error:')+1))
-    then
-    begin
-      // print the error itself and the next 2 lines (good or lucky guess)
-      memoSummary.Lines.Append(BeginSnippet+' Start of special error summary:');
-      memoSummary.Lines.Append(CommandOutputScreen.Lines[x]);
-      memoSummary.Lines.Append(CommandOutputScreen.Lines[x+1]);
-      //temporary for trunk
-      if Pos('BuildUnit_cocoaint.pp',CommandOutputScreen.Lines[x+1])>0 then
-      begin
-        memoSummary.Lines.Append('');
-        memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32809');
-        memoSummary.Lines.Append('');
-      end else
-      memoSummary.Lines.Append(CommandOutputScreen.Lines[x+2]);
-    end;
-  end;
 end;
 
 procedure TForm1.CommandOutputScreenSpecialLineMarkup(Sender: TObject; Line: integer;
@@ -3641,11 +3608,11 @@ begin
   end;
 
   s:='';
-  if Sender=BitBtnFPCOnly then s:='Going to install/update FPC.';
-  if Sender=BitBtnLazarusOnly then s:='Going to install/update Lazarus.';
-  if Sender=BitBtnFPCandLazarus then s:='Going to install/update FPC and Lazarus.';
+  if Sender=BitBtnFPCOnly then s:='Going to install or update FPC '+FPCTarget;
+  if Sender=BitBtnLazarusOnly then s:='Going to install or update Lazarus '+LazarusTarget;
+  if Sender=BitBtnFPCandLazarus then s:='Going to install or update FPC '+FPCTarget+' and Lazarus '+LazarusTarget;
   s:=s+sLineBreak;
-  s:=s+'Install directory: '+Self.sInstallDir;
+  s:=s+'Install directory is '+Self.sInstallDir;
   s:=s+sLineBreak;
   s:=s+'Do you want to continue ?';
   if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
@@ -3810,7 +3777,7 @@ procedure TForm1.btnLogClick(Sender: TObject);
 begin
   if (Sender=btnClearLog) then
   begin
-    CommandOutputScreen.ClearAll;
+    CommandOutputScreen.Clear;
     memoSummary.Clear;
   end;
   if (Sender=btnSendLog) then
@@ -4270,7 +4237,7 @@ var
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
-  CommandOutputScreen.ClearAll;
+  CommandOutputScreen.Clear;
 
   AddMessage('Welcome @ FPCUPdeluxe.');
   AddMessage(Self.Caption);
@@ -4529,8 +4496,7 @@ begin
       aMessageStrings.Free;
     end;
   end;
-  CommandOutputScreen.CaretX:=0;
-  CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
+  CommandOutputScreen.CaretPos.SetLocation(0,CommandOutputScreen.Lines.Count);
   {$ifdef usealternateui}
   alternateui_AddMessage(amessage,updatestatus);
   {$endif}
@@ -4691,7 +4657,8 @@ var
 begin
   MsgStr := {%H-}PChar(Msg.wparam);
   MsgPasStr := StrPas(MsgStr);
-  CommandOutputScreen.SetFiltered(MsgPasStr);
+  //CommandOutputScreen.SetFiltered(MsgPasStr);
+  CommandOutputScreen.Append(MsgPasStr);
   StrDispose(MsgStr)
 end;
 
