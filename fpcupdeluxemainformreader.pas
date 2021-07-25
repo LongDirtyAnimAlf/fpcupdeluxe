@@ -4134,7 +4134,14 @@ begin
   AddMessage('');
 
   try
-    result:=FPCupManager.Run;
+    try
+      //Form1.SetFocusedControl(BitBtnHalt);
+      CommandOutputScreen.Enabled:=false;
+      result:=FPCupManager.Run;
+    finally
+      //Form1.SetFocusedControl(btnInstallDirSelect);
+      CommandOutputScreen.Enabled:=true;
+    end;
     if (NOT result) then
     begin
       AddMessage('');
