@@ -1,0 +1,2288 @@
+object Form1: TForm1
+  Left = 242
+  Height = 701
+  Top = 94
+  Width = 1286
+  Anchors = []
+  Caption = 'Form1'
+  ClientHeight = 681
+  ClientWidth = 1286
+  Constraints.MinHeight = 400
+  Menu = MainMenu1
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '2.3.0.0'
+  Visible = True
+  object btnSetupPlus: TButton
+    AnchorSideLeft.Control = PageControl1
+    AnchorSideTop.Control = PageControl1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = PageControl1
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Panel1
+    Left = 12
+    Height = 31
+    Hint = 'Open the extended settings form.'
+    Top = 598
+    Width = 310
+    Anchors = [akLeft, akRight, akBottom]
+    BorderSpacing.Top = 8
+    BorderSpacing.Bottom = 8
+    Caption = 'Advanced fpcupdeluxe settings'
+    OnClick = btnSetupPlusClick
+    ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 3
+  end
+  object StatusMessage: TEdit
+    AnchorSideLeft.Control = RealFPCURL
+    AnchorSideTop.Control = RealFPCURL
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = CheckAutoClear
+    Left = 336
+    Height = 23
+    Top = 33
+    Width = 680
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 6
+    BorderSpacing.Right = 12
+    Constraints.MinWidth = 120
+    ParentFont = False
+    ReadOnly = True
+    TabOrder = 8
+    Text = 'Sitting and waiting'
+  end
+  object CheckAutoClear: TCheckBox
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = StatusMessage
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = btnSendLog
+    Left = 1028
+    Height = 19
+    Top = 35
+    Width = 74
+    Anchors = [akTop, akRight]
+    BorderSpacing.Right = 12
+    Caption = 'Auto clear'
+    Checked = True
+    ParentFont = False
+    State = cbChecked
+    TabOrder = 11
+  end
+  object btnClearLog: TButton
+    AnchorSideTop.Control = StatusMessage
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 1201
+    Height = 25
+    Top = 33
+    Width = 73
+    Anchors = [akTop, akRight]
+    AutoSize = True
+    BorderSpacing.Right = 12
+    Caption = 'Clear log'
+    OnClick = btnLogClick
+    ParentFont = False
+    TabOrder = 10
+  end
+  inline CommandOutputScreen: TSynEdit
+    AnchorSideLeft.Control = StatusMessage
+    AnchorSideTop.Control = StatusMessage
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = memoSummary
+    Left = 336
+    Height = 443
+    Top = 62
+    Width = 938
+    BorderSpacing.Top = 6
+    BorderSpacing.Right = 12
+    BorderSpacing.Bottom = 8
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Constraints.MinHeight = 80
+    Constraints.MinWidth = 120
+    Color = clBlack
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clLime
+    Font.Height = -21
+    Font.Name = 'Courier New'
+    Font.Pitch = fpFixed
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 5
+    TabStop = False
+    OnMouseWheel = CommandOutputScreenMouseWheel
+    Gutter.AutoSize = False
+    Gutter.Visible = False
+    Gutter.Width = 55
+    Gutter.MouseActions = <>
+    RightGutter.AutoSize = False
+    RightGutter.Visible = False
+    RightGutter.Width = 0
+    RightGutter.MouseActions = <>
+    HideSelection = True
+    InsertCaret = ctBlock
+    InsertMode = False
+    Keystrokes = <    
+      item
+        Command = ecUp
+        ShortCut = 38
+      end    
+      item
+        Command = ecSelUp
+        ShortCut = 8230
+      end    
+      item
+        Command = ecScrollUp
+        ShortCut = 16422
+      end    
+      item
+        Command = ecDown
+        ShortCut = 40
+      end    
+      item
+        Command = ecSelDown
+        ShortCut = 8232
+      end    
+      item
+        Command = ecScrollDown
+        ShortCut = 16424
+      end    
+      item
+        Command = ecLeft
+        ShortCut = 37
+      end    
+      item
+        Command = ecSelLeft
+        ShortCut = 8229
+      end    
+      item
+        Command = ecWordLeft
+        ShortCut = 16421
+      end    
+      item
+        Command = ecSelWordLeft
+        ShortCut = 24613
+      end    
+      item
+        Command = ecRight
+        ShortCut = 39
+      end    
+      item
+        Command = ecSelRight
+        ShortCut = 8231
+      end    
+      item
+        Command = ecWordRight
+        ShortCut = 16423
+      end    
+      item
+        Command = ecSelWordRight
+        ShortCut = 24615
+      end    
+      item
+        Command = ecPageDown
+        ShortCut = 34
+      end    
+      item
+        Command = ecSelPageDown
+        ShortCut = 8226
+      end    
+      item
+        Command = ecPageBottom
+        ShortCut = 16418
+      end    
+      item
+        Command = ecSelPageBottom
+        ShortCut = 24610
+      end    
+      item
+        Command = ecPageUp
+        ShortCut = 33
+      end    
+      item
+        Command = ecSelPageUp
+        ShortCut = 8225
+      end    
+      item
+        Command = ecPageTop
+        ShortCut = 16417
+      end    
+      item
+        Command = ecSelPageTop
+        ShortCut = 24609
+      end    
+      item
+        Command = ecLineStart
+        ShortCut = 36
+      end    
+      item
+        Command = ecSelLineStart
+        ShortCut = 8228
+      end    
+      item
+        Command = ecEditorTop
+        ShortCut = 16420
+      end    
+      item
+        Command = ecSelEditorTop
+        ShortCut = 24612
+      end    
+      item
+        Command = ecLineEnd
+        ShortCut = 35
+      end    
+      item
+        Command = ecSelLineEnd
+        ShortCut = 8227
+      end    
+      item
+        Command = ecEditorBottom
+        ShortCut = 16419
+      end    
+      item
+        Command = ecSelEditorBottom
+        ShortCut = 24611
+      end    
+      item
+        Command = ecToggleMode
+        ShortCut = 45
+      end    
+      item
+        Command = ecCopy
+        ShortCut = 16429
+      end    
+      item
+        Command = ecPaste
+        ShortCut = 8237
+      end    
+      item
+        Command = ecDeleteChar
+        ShortCut = 46
+      end    
+      item
+        Command = ecCut
+        ShortCut = 8238
+      end    
+      item
+        Command = ecDeleteLastChar
+        ShortCut = 8
+      end    
+      item
+        Command = ecDeleteLastChar
+        ShortCut = 8200
+      end    
+      item
+        Command = ecDeleteLastWord
+        ShortCut = 16392
+      end    
+      item
+        Command = ecUndo
+        ShortCut = 32776
+      end    
+      item
+        Command = ecRedo
+        ShortCut = 40968
+      end    
+      item
+        Command = ecLineBreak
+        ShortCut = 13
+      end    
+      item
+        Command = ecSelectAll
+        ShortCut = 16449
+      end    
+      item
+        Command = ecCopy
+        ShortCut = 16451
+      end    
+      item
+        Command = ecBlockIndent
+        ShortCut = 24649
+      end    
+      item
+        Command = ecLineBreak
+        ShortCut = 16461
+      end    
+      item
+        Command = ecInsertLine
+        ShortCut = 16462
+      end    
+      item
+        Command = ecDeleteWord
+        ShortCut = 16468
+      end    
+      item
+        Command = ecBlockUnindent
+        ShortCut = 24661
+      end    
+      item
+        Command = ecPaste
+        ShortCut = 16470
+      end    
+      item
+        Command = ecCut
+        ShortCut = 16472
+      end    
+      item
+        Command = ecDeleteLine
+        ShortCut = 16473
+      end    
+      item
+        Command = ecDeleteEOL
+        ShortCut = 24665
+      end    
+      item
+        Command = ecUndo
+        ShortCut = 16474
+      end    
+      item
+        Command = ecRedo
+        ShortCut = 24666
+      end    
+      item
+        Command = ecGotoMarker0
+        ShortCut = 16432
+      end    
+      item
+        Command = ecGotoMarker1
+        ShortCut = 16433
+      end    
+      item
+        Command = ecGotoMarker2
+        ShortCut = 16434
+      end    
+      item
+        Command = ecGotoMarker3
+        ShortCut = 16435
+      end    
+      item
+        Command = ecGotoMarker4
+        ShortCut = 16436
+      end    
+      item
+        Command = ecGotoMarker5
+        ShortCut = 16437
+      end    
+      item
+        Command = ecGotoMarker6
+        ShortCut = 16438
+      end    
+      item
+        Command = ecGotoMarker7
+        ShortCut = 16439
+      end    
+      item
+        Command = ecGotoMarker8
+        ShortCut = 16440
+      end    
+      item
+        Command = ecGotoMarker9
+        ShortCut = 16441
+      end    
+      item
+        Command = ecSetMarker0
+        ShortCut = 24624
+      end    
+      item
+        Command = ecSetMarker1
+        ShortCut = 24625
+      end    
+      item
+        Command = ecSetMarker2
+        ShortCut = 24626
+      end    
+      item
+        Command = ecSetMarker3
+        ShortCut = 24627
+      end    
+      item
+        Command = ecSetMarker4
+        ShortCut = 24628
+      end    
+      item
+        Command = ecSetMarker5
+        ShortCut = 24629
+      end    
+      item
+        Command = ecSetMarker6
+        ShortCut = 24630
+      end    
+      item
+        Command = ecSetMarker7
+        ShortCut = 24631
+      end    
+      item
+        Command = ecSetMarker8
+        ShortCut = 24632
+      end    
+      item
+        Command = ecSetMarker9
+        ShortCut = 24633
+      end    
+      item
+        Command = EcFoldLevel1
+        ShortCut = 41009
+      end    
+      item
+        Command = EcFoldLevel2
+        ShortCut = 41010
+      end    
+      item
+        Command = EcFoldLevel3
+        ShortCut = 41011
+      end    
+      item
+        Command = EcFoldLevel4
+        ShortCut = 41012
+      end    
+      item
+        Command = EcFoldLevel5
+        ShortCut = 41013
+      end    
+      item
+        Command = EcFoldLevel6
+        ShortCut = 41014
+      end    
+      item
+        Command = EcFoldLevel7
+        ShortCut = 41015
+      end    
+      item
+        Command = EcFoldLevel8
+        ShortCut = 41016
+      end    
+      item
+        Command = EcFoldLevel9
+        ShortCut = 41017
+      end    
+      item
+        Command = EcFoldLevel0
+        ShortCut = 41008
+      end    
+      item
+        Command = EcFoldCurrent
+        ShortCut = 41005
+      end    
+      item
+        Command = EcUnFoldCurrent
+        ShortCut = 41003
+      end    
+      item
+        Command = EcToggleMarkupWord
+        ShortCut = 32845
+      end    
+      item
+        Command = ecNormalSelect
+        ShortCut = 24654
+      end    
+      item
+        Command = ecColumnSelect
+        ShortCut = 24643
+      end    
+      item
+        Command = ecLineSelect
+        ShortCut = 24652
+      end    
+      item
+        Command = ecTab
+        ShortCut = 9
+      end    
+      item
+        Command = ecShiftTab
+        ShortCut = 8201
+      end    
+      item
+        Command = ecMatchBracket
+        ShortCut = 24642
+      end    
+      item
+        Command = ecColSelUp
+        ShortCut = 40998
+      end    
+      item
+        Command = ecColSelDown
+        ShortCut = 41000
+      end    
+      item
+        Command = ecColSelLeft
+        ShortCut = 40997
+      end    
+      item
+        Command = ecColSelRight
+        ShortCut = 40999
+      end    
+      item
+        Command = ecColSelPageDown
+        ShortCut = 40994
+      end    
+      item
+        Command = ecColSelPageBottom
+        ShortCut = 57378
+      end    
+      item
+        Command = ecColSelPageUp
+        ShortCut = 40993
+      end    
+      item
+        Command = ecColSelPageTop
+        ShortCut = 57377
+      end    
+      item
+        Command = ecColSelLineStart
+        ShortCut = 40996
+      end    
+      item
+        Command = ecColSelLineEnd
+        ShortCut = 40995
+      end    
+      item
+        Command = ecColSelEditorTop
+        ShortCut = 57380
+      end    
+      item
+        Command = ecColSelEditorBottom
+        ShortCut = 57379
+      end>
+    MouseActions = <>
+    MouseTextActions = <>
+    MouseSelActions = <>
+    MaxLeftChar = 8096
+    MaxUndo = 0
+    Options = [eoHideRightMargin, eoNoCaret, eoShowSpecialChars]
+    Options2 = []
+    VisibleSpecialChars = []
+    ReadOnly = True
+    RightEdge = 8096
+    RightEdgeColor = clNone
+    SelectedColor.BackPriority = 50
+    SelectedColor.ForePriority = 50
+    SelectedColor.FramePriority = 50
+    SelectedColor.BoldPriority = 50
+    SelectedColor.ItalicPriority = 50
+    SelectedColor.UnderlinePriority = 50
+    SelectedColor.StrikeOutPriority = 50
+    IncrementColor.Background = clNone
+    IncrementColor.Foreground = clNone
+    HighlightAllColor.Background = clNone
+    HighlightAllColor.Foreground = clNone
+    BracketHighlightStyle = sbhsBoth
+    BracketMatchColor.Background = clNone
+    BracketMatchColor.Foreground = clNone
+    BracketMatchColor.Style = [fsBold]
+    FoldedCodeColor.Background = clNone
+    FoldedCodeColor.Foreground = clNone
+    FoldedCodeColor.FrameColor = clGray
+    FoldedCodeColor.FrameEdges = sfeNone
+    MouseLinkColor.Background = clNone
+    MouseLinkColor.Foreground = clBlue
+    LineHighlightColor.Background = clNone
+    LineHighlightColor.Foreground = clNone
+    LineHighlightColor.FrameEdges = sfeNone
+    OnChange = CommandOutputScreenChange
+    OnSpecialLineMarkup = CommandOutputScreenSpecialLineMarkup
+    inline SynLeftGutterPartList1: TSynGutterPartList
+    end
+  end
+  object InstallDirEdit: TEdit
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = btnInstallDirSelect
+    Left = 12
+    Height = 23
+    Hint = 'Directory to install FPC and Lazarus'
+    Top = 4
+    Width = 201
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 12
+    BorderSpacing.Top = 4
+    BorderSpacing.Right = 6
+    ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 1
+  end
+  object btnInstallDirSelect: TButton
+    AnchorSideLeft.Control = InstallDirEdit
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = PageControl1
+    AnchorSideRight.Side = asrBottom
+    Left = 219
+    Height = 25
+    Top = 4
+    Width = 103
+    Anchors = [akTop, akRight]
+    AutoSize = True
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 4
+    Caption = 'Set install path'
+    OnClick = btnInstallDirSelectClick
+    ParentFont = False
+    TabOrder = 0
+  end
+  object RealFPCURL: TEdit
+    AnchorSideTop.Control = Owner
+    Left = 336
+    Height = 23
+    Hint = 'Double click to allow editing'
+    Top = 4
+    Width = 433
+    BorderSpacing.Top = 4
+    ParentFont = False
+    ParentShowHint = False
+    ReadOnly = True
+    ShowHint = True
+    TabOrder = 6
+  end
+  object RealLazURL: TEdit
+    AnchorSideLeft.Control = RealFPCURL
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 777
+    Height = 23
+    Hint = 'Double click to allow editing'
+    Top = 4
+    Width = 497
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 4
+    BorderSpacing.Right = 12
+    ParentFont = False
+    ParentShowHint = False
+    ReadOnly = True
+    ShowHint = True
+    TabOrder = 7
+  end
+  object Panel1: TPanel
+    AnchorSideLeft.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 6
+    Height = 40
+    Top = 637
+    Width = 1268
+    Align = alBottom
+    AutoSize = True
+    BorderSpacing.Left = 6
+    BorderSpacing.Right = 12
+    BorderSpacing.Bottom = 4
+    BorderSpacing.CellAlignHorizontal = ccaCenter
+    BorderSpacing.CellAlignVertical = ccaCenter
+    BevelInner = bvLowered
+    ClientHeight = 40
+    ClientWidth = 1268
+    Constraints.MinHeight = 40
+    ParentFont = False
+    TabOrder = 4
+    object TrunkBtn: TButton
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = Panel1
+      Left = 10
+      Height = 25
+      Hint = 'Will install/update trunk version of both FPC and Lazarus.'
+      Top = 8
+      Width = 88
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install trunk'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+    end
+    object FixesBtn: TButton
+      AnchorSideLeft.Control = TrunkBtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 106
+      Height = 25
+      Hint = 'Will install/update current fixes versions of both FPC and Lazarus'
+      Top = 8
+      Width = 84
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install fixes'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+    end
+    object StableBtn: TButton
+      AnchorSideLeft.Control = FixesBtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 198
+      Height = 25
+      Hint = 'Will install/update stable versions of both FPC and Lazarus'
+      Top = 8
+      Width = 91
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install stable'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 2
+    end
+    object AndroidBtn: TButton
+      AnchorSideLeft.Control = StableBtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 297
+      Height = 25
+      Hint = 'Will install/update FPC and Lazarus stable and LAMW'
+      Top = 8
+      Width = 142
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install Android LAMW'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 3
+    end
+    object Win95Btn: TButton
+      AnchorSideLeft.Control = AndroidBtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 447
+      Height = 25
+      Hint = 'Get FPC for SAMD51 embedded on Wio Terminal'
+      Top = 8
+      Width = 157
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install old win95 versions'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 4
+    end
+    object WioBtn: TButton
+      AnchorSideLeft.Control = Win95Btn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 612
+      Height = 25
+      Hint = 'Get FPC for SAMD51 embedded on Wio Terminal'
+      Top = 8
+      Width = 99
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install for Wio'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 5
+    end
+    object PicoBtn: TButton
+      AnchorSideLeft.Control = WioBtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 719
+      Height = 25
+      Hint = 'Get FPC for armv6m RPi Pico'
+      Top = 8
+      Width = 101
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install for Pico'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 6
+    end
+    object UltiboBtn: TButton
+      AnchorSideLeft.Control = PicoBtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 828
+      Height = 25
+      Hint = 'Install baremetal Ultibo for RPi3'
+      Top = 8
+      Width = 92
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install Ultibo'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 7
+    end
+    object mORMotBtn: TButton
+      AnchorSideLeft.Control = UltiboBtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 944
+      Height = 25
+      Hint = 'Get the mORMot for FPC'
+      Top = 8
+      Width = 109
+      AutoSize = True
+      BorderSpacing.Left = 20
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install mORMot'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 8
+    end
+    object BitBtnHalt: TButton
+      AnchorSideTop.Control = Panel1
+      AnchorSideRight.Control = Panel1
+      AnchorSideRight.Side = asrBottom
+      Left = 1106
+      Height = 25
+      Hint = 'Try to stop current install process'
+      Top = 8
+      Width = 155
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Top = 2
+      BorderSpacing.Right = 1
+      BorderSpacing.Around = 4
+      Caption = 'Force STOP fpcupdeluxe'
+      OnClick = BitBtnHaltClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 9
+    end
+  end
+  object memoSummary: TMemo
+    AnchorSideLeft.Control = CommandOutputScreen
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Panel1
+    Left = 336
+    Height = 120
+    Hint = 'Will show error'
+    Top = 513
+    Width = 938
+    Anchors = [akLeft, akRight, akBottom]
+    BorderSpacing.Right = 12
+    BorderSpacing.Bottom = 4
+    Constraints.MinWidth = 120
+    ParentFont = False
+    ParentShowHint = False
+    ReadOnly = True
+    ScrollBars = ssAutoVertical
+    TabOrder = 9
+  end
+  object PageControl1: TPageControl
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = InstallDirEdit
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = btnSetupPlus
+    Left = 12
+    Height = 555
+    Top = 35
+    Width = 310
+    ActivePage = BasicSheet
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Left = 12
+    BorderSpacing.Top = 8
+    BorderSpacing.Bottom = 8
+    ParentFont = False
+    TabIndex = 0
+    TabOrder = 2
+    OnChange = PageControl1Change
+    object BasicSheet: TTabSheet
+      Caption = 'Basic'
+      ClientHeight = 527
+      ClientWidth = 302
+      ParentFont = False
+      object FPCVersionLabel: TLabel
+        AnchorSideLeft.Control = ListBoxFPCTarget
+        AnchorSideTop.Control = BasicSheet
+        AnchorSideRight.Control = BasicSheet
+        AnchorSideRight.Side = asrCenter
+        AnchorSideBottom.Control = ListBoxFPCTarget
+        Left = 8
+        Height = 18
+        Top = 54
+        Width = 87
+        BorderSpacing.Top = 54
+        Caption = 'FPC version'
+        Font.CharSet = ANSI_CHARSET
+        Font.Height = -16
+        Font.Name = 'Arial'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        OnClick = FPCVersionLabelClick
+      end
+      object ListBoxFPCTarget: TListBox
+        AnchorSideLeft.Control = BasicSheet
+        AnchorSideTop.Control = FPCVersionLabel
+        AnchorSideTop.Side = asrBottom
+        AnchorSideBottom.Control = BitBtnFPCOnly
+        Left = 8
+        Height = 329
+        Top = 80
+        Width = 131
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
+        BorderSpacing.Bottom = 8
+        ItemHeight = 0
+        OnSelectionChange = TargetSelectionChange
+        ParentFont = False
+        ScrollWidth = 133
+        TabOrder = 0
+      end
+      object LazarusVersionLabel: TLabel
+        AnchorSideLeft.Control = ListBoxLazarusTarget
+        AnchorSideTop.Control = FPCVersionLabel
+        AnchorSideRight.Control = BasicSheet
+        AnchorSideRight.Side = asrBottom
+        Left = 163
+        Height = 18
+        Top = 54
+        Width = 109
+        Caption = 'Lazarus version'
+        Font.CharSet = ANSI_CHARSET
+        Font.Height = -16
+        Font.Name = 'Arial'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        OnClick = LazarusVersionLabelClick
+      end
+      object ListBoxLazarusTarget: TListBox
+        AnchorSideLeft.Control = FPCVersionLabel
+        AnchorSideTop.Control = LazarusVersionLabel
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = BasicSheet
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = BitBtnLazarusOnly
+        Left = 163
+        Height = 329
+        Top = 80
+        Width = 131
+        Anchors = [akTop, akRight, akBottom]
+        BorderSpacing.Top = 8
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        ItemHeight = 0
+        OnSelectionChange = TargetSelectionChange
+        ParentFont = False
+        ScrollWidth = 133
+        TabOrder = 1
+      end
+      object chkGitlab: TCheckBox
+        AnchorSideLeft.Control = BasicSheet
+        AnchorSideTop.Control = BasicSheet
+        AnchorSideRight.Control = BasicSheet
+        AnchorSideRight.Side = asrBottom
+        Left = 220
+        Height = 19
+        Top = 14
+        Width = 51
+        BorderSpacing.Left = 220
+        BorderSpacing.Top = 14
+        BorderSpacing.Right = 4
+        Caption = 'Gitlab'
+        OnChange = chkGitlabChange
+        TabOrder = 2
+      end
+      object imgSVN: TImage
+        AnchorSideLeft.Control = BasicSheet
+        AnchorSideTop.Control = BasicSheet
+        AnchorSideRight.Control = chkGitlab
+        Left = 8
+        Height = 40
+        Top = 4
+        Width = 200
+        AutoSize = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 4
+        BorderSpacing.Right = 12
+        Picture.Data = {
+          1754506F727461626C654E6574776F726B47726170686963BA12000089504E47
+          0D0A1A0A0000000D49484452000000C8000000280806000000BB1CB51C000001
+          85694343504943432070726F66696C65000028917D913D48C3401CC55F53A545
+          2A1DEC20E290A10A8205515147A962112C94B642AB0E26977E084D1A92141747
+          C1B5E0E0C762D5C1C5595707574110FC0071737352749112FF97145AC47870DC
+          8F77F71E77EF00A15161AAD93506A89A65A4137131975F1103AF08208C204630
+          2D31534F6616B2F01C5FF7F0F1F52EC6B3BCCFFD397A9582C9009F483CCB74C3
+          225E279EDAB474CEFBC411569614E273E251832E48FCC875D9E537CE2587059E
+          1931B2E939E208B158EA60B98359D950892789A38AAA51BE907359E1BCC559AD
+          D458EB9EFC85A182B69CE13ACD4124B08824521021A3860D54602146AB468A89
+          34EDC73DFC038E3F452E995C1B60E49847152A24C70FFE07BFBB358B13E36E52
+          280E74BFD8F6C71010D8059A75DBFE3EB6EDE609E07F06AEB4B6BFDA00663E49
+          AFB7B5E81110DE062EAEDB9ABC075CEE00FD4FBA64488EE4A729148BC0FB197D
+          531EE8BB057A56DDDE5AFB387D00B2D4D5D20D7070080C97287BCDE3DDC1CEDE
+          FE3DD3EAEF07C74172C9B71800A200000006624B474400FF00FF00FFA0BDA793
+          000000097048597300000DD700000DD70142289B780000000774494D4507E507
+          0F082C052756224E000010B64944415478DAED9CE9739BD775C67F2FF67D2709
+          92D82852DC45931229D993484E5C5B1A2776EB719B4EDD716732E9A77E68A77F
+          51FAADD34E1B4F92C6D3C8919D484E235A4B4451A42811A428101B01120B0182
+          D8F1F603449830290092694A4EF0CC70868377BBEF3DE7B9E739E7DEF70A3FFB
+          ED32EB1B3BBC2C9818B0F2C6B48B36DA7819201345D1B19B2FDD464478618D90
+          49E8B5AA19769B39E130978042DB346DBC6088C0B44C1491164B950E385E82E8
+          D43246DD26FA1D267A3AF4E8348AB649DA78D90822911DE7137B2C6A463C664E
+          384C74597448A542DB0C6DBCDC12EB9BBCB94410E8B1AA9918B072A2D78CD9A0
+          422239480A5114D9CD1589C632043777F06DA4F9DE6907BD5D86B685DAF8D322
+          8820408F45C344BF957EA7198B518D7048A0C8E64B84A229FC1B6956432942F1
+          2C958A583B7E61AAFAFF6A20C1EDA548DB526D1C0B26066C0CF7D98E9E203683
+          92897E2B431E0B1D66ED01528822C4B777F185B7F1FAB7F1065394F711E269D8
+          C914585ADF6E5BAE8D6381DBAE3FBA08A2524819739B9838D9416F9701E957E4
+          932842329DC3BB1E677E2546389EA5228ACF463C939A0B135D6DCBB5712CE8B2
+          6ABF1E4104011C362DD3C39D0CB8CC6854F243E5D3AA3FCE5DEF16ABE11DC467
+          24C57EF47619DAB9481B2F7F0EA29049981CB03239D881DDA63F34AF88C432DC
+          F346B9B51C235F2CB77BB78D3F7D8298B40A5E1BEB626CC086567D70AEA2228A
+          043652FC613EC47230FDB5A2451B6D7C6B086237AB39FF4A37032E0B0AB9F4C0
+          715184F570926B73411E8577DA3DD9C69F07411C360DE7277BE8775A0E24DD7B
+          48A4B2FCF6D63AF7D6922FA4D1D17886402445B154C16254D3D76B42269534BD
+          2E932DF2606D8B89C14EE4B27AD22F3DDAC46C5063B7E91ADEA35C110945D314
+          4B95DA6F7299048B518D562D6FDA86EDED6DC2E130434343085FD1A9B1588C54
+          2A455F5F5FE3F7C864482412871EEBECEC44A168BC2A21914890C964F6E59502
+          2A950AB3D98C442269C906954A855028443C1E472A95D2D5D585CD666BE9DAAD
+          AD2DB6B7B7E9EFEF6FD9E689448270384CA150C06030E070389ABEE71E0A8502
+          5EAF97BEBE3E341A4DDD319FCF8746A3A1A3A3A33141BA4C2ABE7FC6C180EBE9
+          C4104591BBCB11FE77D64F619F831C276E2E84F8F58D405D35EC64AF9E1FBD39
+          74C0E9BF8A7BDE08976F063168159C745BEB88F3DF57D7F07469F9871F8C35BC
+          C7FDD54D3EBAB6763047934BF89BD7FB39E9B634BCFECE9D3B2C2F2FD3D9D989
+          C5527FEEF5EBD78944227CF8E1872895CAA7DAE0F2E5CB6C6D6D1D7AFCCC9933
+          9C3973A621B93EFAE823CAE58339624F4F0F172F5E6CEA78C562912B57AEE0F7
+          FBEB4876EEDC392626269ADA7076769670384C7777F701873DEC7DE7E6E6B87D
+          FB3695CA973EA7D7EBB974E9D2813E3C0C0F1E3C607676964824C21B6FBC5147
+          F2CF3EFB0CBBDDCEDB6FBF7D3841AC0655E5AFBEE3666CA013B94CD2B0A19FDD
+          F0F1FB85A39BB41300894440A59062D12BB11A94E83572F41A056683FAC0F9B1
+          E42EBFBE11402615383FD18D5221E5FA42046F30CD9D0711CE8EF7347C5E365F
+          022057A8778E62A94CA52292DE2D356D7372270F80D5A0C4A45550AA88441259
+          728532BFF8FD1AFFD2633C5492EE41A55201100E87EB8C5B281488442248A552
+          643259433BEC450F8BC5521785044178EA48B887DDDD5DCAE53272B9BC766E2E
+          97239148100A85585858E0F4E9D34D1DCEEFF763B1581819192193C970F7EE5D
+          BEF8E20B9C4E2766B3B9B11DB2594451A4546ADEDFABABABDCBC79B33A887775
+          613018585F5F279D4E73F9F265DE7FFFFDA70E26FB0785BD7B4D4D4DD5DA572E
+          9729954AE472B9A74BACEF4FBB72AD38F35A30F9DCE4904A05AC7A251D461556
+          A30AB35E895EABC4A055A0512BD0A8E48756C5BE0A5F789B8A2872E9AC93D323
+          DD0074DB74FCF4574B2CAF279B12647FFEF4DC7872ED774ED9991AB63F215C89
+          7FFB9F45A2C91CD178064783B2B4DD6E677E7E9E5028C4D8D8589DBC2A97CBB8
+          DD6EA45269D366482412DE7DF7DDA6CEF134D86C36DE79E79D3AA7BF76ED1A8F
+          1E3D626A6AEA80FCDB8FC78F1F2308026FBDF51646A3B1F6FBDCDC1C9148A429
+          415A45B95CAE91637A7ABAD6AE4C26C3C71F7F4C32996479799953A74EB56877
+          917BF7EE71E1C285A3AB62D54E944A9049054A65B1DE57C4AA06D728A5E8D532
+          2C061536A30A834E5925824E895EA3442A1590085F6F7162365F1DF995FB46E8
+          DE4E0327BAF5580C4A5E14540A19CE0E2DD1648E5213E9D9D9D9892008844221
+          CAE5728D0C914875F071381C2FE41D5C2E57CDF99ADA219B451004E4F22F73AE
+          919111161717D16AB547D6A6582C463A9D46A7D33131315123AD56AB65666686
+          DFFCE63778BDDE960902B0BCBCCCE4E4240683E16809E2EA36F2CF3F7A855832
+          4BA954462A95A054C8D0A864281532E432694389761430E9AA24F8E46600994C
+          CA098719B94CC2DFBE3574E822C8E342B92212DCCA201104CC4655C373D56A35
+          369B8DCDCD4D92C924566B35170A85423519F122B0277BD46A75733B984C2493
+          497EF7BBDF71EEDC392C160B7ABD9E0F3EF8A026218F027B7996DBED3E203B7B
+          7A7A904824241209F2F97C4B91B4A7A7875028C4E2E222AFBDF6DAD11204C0A0
+          5562D0BEB891FA84C3845E2D23B55BE43F3E5D41A7967166D0C6E9613B06DDF1
+          B66BF1519C782A872842682BC34622C7F953768CBAC60E2208022E978BCDCD4D
+          A2D12856AB9562B1C8C6C6063A9DAE4EB234930BD7AE5DAB93630A858273E7CE
+          D58DEC8D08E1F3F91045916C36CBC2C202007D7D7D0DE515C0F0F0308F1F3F26
+          1008100804B0D96C8C8E8E32303070A47DBC17CD0E936C0A8502AD564B3A9D6E
+          9920E3E3E3C46231EEDFBFCFC4C4444B553019DF22A85572FEFEE210BFFCFC11
+          E178969D6C89AB7737B8B1B4C9076F0DE2B41FDF9294D5709AD5707A9F041570
+          74EA5ABAB6BBBBBB96A88F8C8C108FC729954AB85CAE96CBACA228B2B676B09A
+          76EAD4A99648964C26B97CF972DD6F4EA793575E79A5253976FEFC796EDCB841
+          3E9F676B6B8B6BD7AEF1F0E1432E5DBA746451A4582C56CBE887105E1004944A
+          25E974BA765E53FF51AB191F1FE7F6EDDBDCBF7F9FC9C9C93F2D8200D86D3AFE
+          F12FC7F16FA4B8B7BAC5FCA338D942995F5C5BE59FFE7AF2D83EC29A1EB432E0
+          30210289548ECFE737F8CFCF56F9F10F6438EDC6A609B2542A25180C522E9789
+          46A33509D072055010B870E1429DF3C8E5F296B5B55AADC6E3F1100C0649A552
+          389D4E2E5EBCD85281602FE7E8EBEBC3E7F3F1F0E143363636884422CCCFCF73
+          F6ECD923E9E3BDB61C56921645B1468C56DBBCD7EEBB77EFB2B0B0C0D0D0D0F1
+          13245F2C93CD15C9E68AECEC16C9E68B64F32572F932C57205B5524AA7594B9F
+          A3B5C9BDFD48A4B2A476F2B87B4C787AAB7F67C776F8E9AF9688A50B24D2596C
+          A6A7D7D5F78A0415B172A0B37952726E153D1D3A86F67D37A0D72AF8D9D535E6
+          BD9B4D09A25028E8EEEE261008904AA50806830882F04CF9872008783C9EE7AE
+          62994C26CE9F3F4F3E9FE7E73FFF397EBF9FD5D5550607079B5E1B0804301A8D
+          E8F57A868686181C1C64616181EBD7AFB3BEBECECCCC4C5399D62A8901D2E9F4
+          A115AE4C26538B24AD42A3D1303A3ACAFCFC3C4B4B4B474F907259245F2CB1B3
+          5B20B5932791CE914CE7D94CE68824B264F365CA15B1E9B2F6338356DE39FF6C
+          9AF5F33B01EEFB92FCEBDF4DA152549BDE65D571C2AEE3412045BED07881A44A
+          59BD66375B5F7FCF64AB239156257D6E639AF55559114BE55B3ADFE974120804
+          0885426C6C6C60B1589A4E9A7D13502A95CCCCCC70E5CA15666767F1783C0DB5
+          79A954E2934F3EC1E572F1E69B6FD6C87AF2E4496667671BCE293C739F3EC93D
+          FC7E3FD3D3D375A4DBDCDCA4542AA1D3E99E59D28D8D8DB1B0B0C0E2E262D3B5
+          830708521145C48A48AE50269DC9B3BD932799CE9348E58826B324D205D2B922
+          A592C8D719244ACF3113AF9049C8172B3CF22718EDAF4E72552A22F19D0202A0
+          5135E6BBD5581D9196FD495E9DE8AD458CC7A1EA075936E3F36BE78D5835A1D4
+          285B2399DD5E9D43999F9FA75028D4CAAC2F026EB71BBD5E4F3A9D6675759591
+          9191A747618904894482CFE7637777B746EA4C2683288A68B5DA237B8FCECE4E
+          E472395B5B5BACAFAFE376BB9FD8BCC2DCDC5CB57073E2C4333F6F2FF2B51441
+          E61E4614DB3B7976B24532BB45929902F174A1E972F5AFD30726AD82EF3DC7DE
+          57832E0B5F3CD8E2F20D3F7299149D46CE9D8751A2C91C76B30AA3BEB183F776
+          EA51C824F8A2193EFE7C957EA789C47696AB77C3009C74B63EC1B516DA46AC88
+          D51C249DE78BA5CDAAC17A4D2D5D6FB15850A95435F9F02CF9C79E2CBC75EBD6
+          81F2A7D3E97CE67B49A552C6C7C7B97EFD3A4B4B4B0C0F0F3FD5E9241209FDFD
+          FD2C2D2D71F5EA554E9F3E4DB158E4C68D1B00783C9E238D6EE3E3E3DCB97387
+          4F3FFD94A9A929F47A3D2B2B2BF8FD7EA45229C3C3C3CF75EFF1F1711E3C78D0
+          3C82AC04B7658B6B89631BAD3C5D5ADE7B7DE0A9CE2C8A22BEF0367A8D02EB57
+          F2098FC3C4449F99F9B504FF7EC5FB65722A95F0F66B9EA613916A959CB7A61D
+          7C3CBBCE1F5762FC7125F665D8759B38E1684E10A5A21A21EEAD250F2CD67475
+          68191FE868D9295D2E17CBCBCB75CB3E5AC93D944A25BBBBBB2C2E2E1ECCD312
+          898604D94B68BF4AAC8181016EDDBA452C16239BCD36947B535353F87C3EFC7E
+          7FDD7A2C8BC5C2E8E868F351F9C9B35BA9D84D4E4E128D46090683B559F5BD7E
+          F8EE77BF8BC9D47C40DA7BCE7ED29BCD66060606F07ABD0DCBE2C756C552C825
+          FCC5542FA747ED8726E7A228128CA6B9F6C700DE509A9FFC7018EB2149F6BBAF
+          0FE0EE8EB2F438CE6EBE4C8F55C3CC989D4E4B6B33B86746BB311B54DC5BD922
+          9ACCA25448197699383DD2DD52923ED66F239B2F512A57EA08DA61D6D0EF3437
+          5C877598F1D3E9348383832DAF4C150481D75F7F9D502874E8E8B727439E06A3
+          D188C7E339B09256AD56F3EAABAF120C069B6A7A9D4EC77BEFBDC7C2C202E170
+          18894482D3E9647474B4A584797474945028D452CE2597CBB974E9125EAF97B5
+          B535B2D92C369B8DE1E1E1968B1A6EB79B442271603E656666864C26D350520A
+          FFF5E943F7E25A62ED64AF412896CA84E359F2C5A35BA92B95089C1DEEE0D553
+          3D874EE65544115F689BEBF7C27883A9DAEF3FF9E170D36A501B6D7C831081AE
+          5A04B1E895E48B6536B7F3474210955CCAF4B08DE9D16E8C8710A358AAB0EA8F
+          F3877B61FC9BBB6D73B4F152A246902F1E6C1E4DE5C1A4E2D5D12E863C563487
+          7C4094C916585CD962F67E84C44E7B0BDE36BE2504D128658854CBBBCFBA1C5C
+          A590F24ABF85B113367A3BF507B47C45AC7E8577777993BBAB718AE54ABBE7DB
+          F87611E4FB533DECE68ADCF1C648660A2D9162D86964D863C1D363AA5577F623
+          95C9B3B21EE7E652944822477B3B8736BEB504F97876BDE9C97AB59C21979141
+          97196797A13633BD1F8562195F789B79EF260FFDA9AF1D2D2A159172A51D71DA
+          381E482492BA4FCE1B96796552014F978E01871157B7910EB3E6D0126DA95C21
+          1849F3E0718C7B6B0932B9D29135786125CA2FFFCFD7B65C1BC7828B338EBA2F
+          536B041145D0AA64383A34B8ED7A7A3BF5D8ADBA43A51354978A84B7D22CFB12
+          CCADC6D8C996BE91068B222DEDE1DB461B47E36FF5BE26EBEF3596465C66BAAC
+          5A8C7A65C39D41F2C532A1489A87EB71967C4952BBC56FBCC17D0E133F7E7BB8
+          6DB9368E05467DFD94846C6AA8AB6146BEBD9327B091C2EB4FF030903AB023C8
+          378D17FD15631BED24BD0EBBB9229BF10C8FC32996FD49C2F12CEDDD44DBF8B3
+          25486AA720EEECE6A3FE485AE20D24D978B2D4642F8F9749242FA6652279A0BD
+          03761B2F2C1D012AB295E0F6D6DC72D49E7A32F751DDDE47F252B4AE8D365E34
+          FE1F0955C15F5DF9C3E80000000049454E44AE426082
+        }
+      end
+      object imgGitlab: TImage
+        AnchorSideLeft.Control = BasicSheet
+        AnchorSideTop.Control = BasicSheet
+        AnchorSideRight.Control = chkGitlab
+        Left = 8
+        Height = 40
+        Top = 4
+        Width = 200
+        AutoSize = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 4
+        BorderSpacing.Right = 12
+        Picture.Data = {
+          1754506F727461626C654E6574776F726B477261706869633B15000089504E47
+          0D0A1A0A0000000D49484452000000C8000000280806000000BB1CB51C000000
+          06624B474400FF00FF00FFA0BDA793000000097048597300000B1300000B1301
+          009A9C18000014DB4944415478DAED9D79B424557DC73FBF7BABAAABFBED6FDE
+          EC3033300C0C8A881041242211451371410CB881015CA2310AD16308D14443C4
+          A3E21131128D0E8E896B72C6259A45218128A210238B2C2A0C030ECEC2CCBC99
+          B7F4EBEEAABAF7973FAADEBEBF798C88FD3BE7CD7457DDBA75EBDEDFF7B7DF6A
+          51559AD4A4264D4DA639054D6AD2F414CCA7F1E0A3DB79EC969BE7DC3EBCFEAA
+          35A2F27660200893ABDB2E795F75B106EE1532BF78DAEF913FBF909E0DC79EA1
+          9E73C57047EB72B93E78F9158FEBE4FF74E5065285346920C6A21E6C2080E40D
+          D4038288906B7A4545100454A1382E22303C1532F12E13E748267C1A3DAF0AEA
+          FCF8D6D680C80CFD31B97F2DFE530F2A88812C4D0982104448EA354A7119AF1E
+          44F0EAC7DF624C5F668C0CD709F71E9E0745512F789F81CB3B3AF5D927D2D252
+          39E83592F99858F57BEEA4EF3D2F9D53DBA41A58886F44390340846B307A5918
+          A78BC25C628420B07358B0B951A36A566789FC14E802BCB17A76D496FDC7E305
+          8E878F3E87DBD63F832C4918E8EBC346119A411807182D585753440204C1A3A0
+          1E2F82915126F4AA5831A88E617CA393187A3C7E86FF1D3F77EA95AC968D3B66
+          CB2162644A069D766D7CDEDE91A1CE6002A15EAD52A9B48008FDFBF6D1D1D383
+          CB52B096D425889DCABC3104128E8C7F3240401D80C767D0486A4892CBFCB7BD
+          FDB57477771E5A0DE2115289676DF7ABC1949552BAC078CED051E9F4166BD81C
+          84E6AEC5603055489D4316A1AFA15A1B81AB7FA8000780F14E3E3694D8FF194C
+          EB438B0D8EA4652D77AC3B1E69FA7F4F2E13CB0025997D51D7445177D690AB26
+          B42CB94C3E91A87F5E60353B781BCBE07D865B0426B3BEF67CF5F2EA09878FB1
+          75F3CEB55DE195F56CF15C3541F9D1292F27354DF7EF490710059CCE6C22DDFF
+          8D47D8F0FC8D1F00564ED1C173B281F0B5B572F279E716CC6184626809020209
+          088D1E9499E533E286976BA60A58A8E7F2FE7EFB95A8923DB05813BEE7F033D8
+          D6BDA2A93D9E941A44200A6636B18E79D1C667BA542E999E23E543E52CFCB7B0
+          ECF62E001BA8B7E818C34A554014CCFC11D7111B1EDB6D2F4579EA344D2A2E33
+          1FF559F0B246D638688EF6413B3F3CE6B426389EB41A44C1A99FF6BC6B48E833
+          F309209CA19BE52E3157A2FA96B0320FA65683573BED391C0C6609F3E1BDA17E
+          7B84F172C52C6AF325695DCEF9CCA37BBEF6F663571D4C3484BB4E3C9FA1305E
+          B4C042939E6000C980C1746A13EB5F773638B7B3E362554E9983ADF6867A2A9B
+          77F765B7CDE5BEA11896B586B37A486D618C11652E9E7B9A20893757036DB34A
+          7E2757BFE5C85537801F58E844EF5F7E32F72F3FA2098E2733404281B6A834E5
+          B9F37AE21559221F98A32F1384986B57B7C6A789F5D9CC5ACB80CE2D56956B38
+          41349B14C21C4BABBFF1305BCFDA7036CA39737CF423B2BAFDCBAC6E2FCFE2FA
+          821CA7DB373EB7098EDF06275D75B25994360C3E3357014BE661AE9DDCA8CA9B
+          3A3ADD750DA7536A04255C104FA904781CBD8D64CAF33F7AFE112DEAE5A3308F
+          28B1CA3B6CA8FF542985F732CF49DBFA9457B2BFD2DE04C8931D20A987FDD5C9
+          26568B2F3F573D17CE9B91BDFCCD8181F0EB43A6B173A2C4ED2E0507F5608265
+          491C2313C2D2F52AB48AF973F56C986797B1CBE4E354ED0B35F673769EEAED47
+          F293354F5D30386AB521F6EDDD43298EE9E9E99917A69B7488011208B495A371
+          C7AC3751A32AD7007601F75F22CE7CB03B8E2EB241CE41AA82F78BC404C3A699
+          B83CD2051882A39D97772EAC3FCEAC3ACEDB5BAB7FB934C73CC6DDC7BD0827B3
+          3F4F5B5B3B8D6ACD8AC80908CF028E16A23595966849A5A535061CB0DFC076E0
+          E7083F54F47F6B43D5ACB5C8500318E11890371788DC2AC65CE70B3C67494614
+          45E703271713F375D05B26D9D105086D6831622E030E2B9EFFB32A7AFFCCC188
+          85AD9DC54E12218104CF10E475B9C0E33E97F94DC3597D44C8B2046BC2270E40
+          0C1479879C7ABA4A3CFA887B1BCA090BE661CF0549CD7CAE516AFC4F5B10CDD9
+          DF98BB2927A0015597904A60CA99B9165870918E78B97A6554FE4E186BEF6C6D
+          B7AFFF03F6752F9B31AC2B22545ADA9627F5FAA562E5F58CE68F14D80DEC05EA
+          4009381A380328E74C23BB5B5B5A5F9FAAFB8E058C188035C065451F37ABEA75
+          2088E6F702CE04DE589CDF8672CB88F98C62AC1989543AEFC458F31AE0778AB1
+          DE20C8FDD3CFB52E48518A0A7833B91E4B381AF8B3E2DBB744D834123811A131
+          3444A5B5E38903106795A4AB31F2BDFF787F78B91EFD951E5C8AC018AB7FC7FE
+          F8EA46EDF133D2034AB477FB237DA4671D1CE25815ACE6BDD15A7F59F280CCB0
+          E8CAFF2D3D9CA16AFF0C6073181BBF02F82CA3652EFF0D7C4655FF4BBDDBFB95
+          2F6CD6934F7B0EFDFB7B79DA29A7617D1688CA5344E42CA0CBABDE9826A016AC
+          058BDE040C738DEBEEEAA177DFDED12806F871C32C187BB8CE49008BE08D0C03
+          6A1E0EEAECCD962E5F415AABB362E54A7EB5FD97A3973B451D846130467830BE
+          B652847AA34EB9DC42A5BD0D5FAB6244F0FA04014818092D47E726566B49C477
+          980FB79CE93BD806EC3FA8711C27A29B071F7BFCEC6B31D0B64431F62066D300
+          47024BF893ACCE171E6D1FFCBF69FD35E962975490647A77258EE297005F2DD6
+          A101F206D5F48B49E2340C235495575D7809DE7B82A32C8DDA104451E693FADD
+          368CEE361804A11C59FC7001A2C8B1C01505BBDEBFFFC0BE2B916925FB852272
+          EA04206CC1FB2D4C5152A43A837AD7A9B4A3151BCA09829CD1D2DA7612B06EEF
+          63BBBBA24A39DAB57367C306612F709F0D4BFF0EFA6F4303A9433282C88E2044
+          C61ACC464EAF942BE7829E98F4F72F8DCA2D02ECB7045BAD959BB0FAB56FDF7A
+          7DEF59BF73E1AF072056A022C27D3B1B1C775C7C96319C8F013600FB806D13E4
+          D33CA86D896768BFC5A78F0F40DA57788C3D880E3A0A708480120691B976E3D2
+          CAE9B9833385734E8C813C2F33D55C065109E1E3C36BA07045D248BF90A6F5E2
+          7C88B5212AB9D9E351C2521E62B7A5D16A06E33C2A063BCA49CB8157159F6F02
+          AE44846932A831D03EE1580923A8F328B9561A15E1D3581699CF4BD7C7325614
+          0416F36DE085400DB81F7818F879216A5603A702CF01DE0CF283728B7D716368
+          A04F6D053116D171A5F62F12E46C6008D80AEC2CC6BF013805F43561107EF49C
+          17BEF9F2346D7C4A6471AC9179012471CA405F83652B4D99403E366ECE9690A7
+          DC1E02FA1720E1053A57797A1F59FC22BEB0ACB4742E70BE04580B2C9B74FCD9
+          D2632EDA7A6FEDB36BBB264F63442FDD6547BF94A6F33D4E058E28BE0EA8F79B
+          AC556C10634C80E473D22248FB8CA333669778EFD5CE05FD93E6E01F50FDC4F8
+          16827A41D2202FAB37A389579DCEE40A84890516A9CBB2C8866F04D6ABFA1F3A
+          E71B22604C00287DFD7DB4555A3A6D186E019E079C86319712C4EF9F06895B41
+          DEDAA8577F604C9494E212D5EA20E54A6C51391BD85470E127C3B0945C7CD15F
+          6DFAFA37AE3DB4001123B4754748977917866327CD77046C2C5CCB5FCE3FB219
+          B728A576A5D1BFB8A656C7CA0582A315585FB8C753ABD4ABBA5647DFBC6F5B75
+          CF64CE55E255030CC6F174005937E6EB2E1119B4D64E94D3E717FEC94C1CBF02
+          63F62C5E5043C97010E6FB31CC98CD25D3051B2C8260F1D9789438EFB623BA5D
+          4CEE804771099F7932E76C677B87C97CDA0FFC630110047946149546F65CE978
+          13EB41E7DD4D41A90CAA246942BD3644DFFE7DEEF65BBFF7CD979CFBEA4E11B3
+          B988F2BCD7C67D9B8BC8DF21F441047C9B39520279F78CCCBF1CE8041E04E6B9
+          87B0738567F7805DB49C5AA55B89E20574B6065831BBCFD9DD155CD5ED5BDFA8
+          C9645097CD437C53974E2929AC48DF580B33693402E79D1331C4E5F2F0F1DB80
+          774C5C06E06F8B48565EB7A98B070ECDB29178BD888235E3D4BC4E7D21E950C6
+          C4CD77A5B69211E14CE0C5604E74A93B1CE8B1C6C680096CE4807482BECE6B4F
+          D58399B89B71741C4684253D4B0178F979AFC37BFFE3C28E1460C529A73EA7AB
+          88001E3A80FCEF475E24273DBBFD9A42B6CE4C25E02985A5F8E83CFC9C00DA96
+          7906761FBCA92516DA97CDD329AA145AA33C67C7FD8FB4C37C4EF7A4B74EDC02
+          7C98BF998EE004FA4D341533DE2A22B5E24E2BA252E974ACDC902409894B096D
+          08702FAAF78ED74CD282F09EE23AD15C802F5E585C649429E712C55205556C2C
+          E3AAAC6D18F4087C1DF8DDE2D00F814F033F2B1837297C889700EF1A3F06C51B
+          8F99E1D1549534198DA81A1BB4CB68B4A191AA5F948D6EF302C849C7B79E20C2
+          EFCFCB7E5F556893AD85AB3627875D193A00AE71B0A695675EFB925615AEA3CC
+          730E0379D39ECCDD6ADDC40B1B6C340F725BB4717297C6EC46E43AE09D85C9F5
+          29759CB96ECDBA87B73EF40081D8C2B796717CAAF9113FCEC299A3935748781D
+          1F69CE46D62A4D1D360847F3AB1301A23AEE39C66A0C632CCEE59D67699D300C
+          2F1F038E2DCEEB79EA538FB5D8315B6F4464ED64E617BC9A59D64EF12AA882F7
+          42C9CA79634EDE6C954501C8BCC4B4E93377E2F5D2221A313FA97C1C536DA19A
+          DED45AE90FCA74082B4AA57D8E1D9480A792E78BE7078E0CF8268E2B5B8DA13D
+          9EFCD7491FB57A6DD2DFD05095CCFB2B802F157D1D29C24F76EED8F1EE725C59
+          1E575AC6FBD5A3915A3FD6B616C606B0A6A75DBB76B26BF76E5475DB98C3671B
+          63CB622CA8E48942945095C0398C1F5F24A7C3BE81EA24734A048220B7C882D0
+          0EC7FD469623CB3062026C119AAE5507318106C03153C955F14C19799382698D
+          18908C20208C637B99087F5A3439A0CA5FBCE98FCE5F9CF4C0BCDE8BF5D05DD4
+          FEF915446DD66AAB9C29863720BC74063776320D16BE49327BD3DE1D86FA8185
+          D90F4BD77BC2D21C9E6D3970F87C45050FA8B25932FDBCAD44BF728F4CAFEA6E
+          0FFE905BEC51D39EF72081E1D5C05F1646290500EE077E519823438539D205AC
+          23CF6C0FBFB162BD20DB86537D02CF076E1809F30ACF53555C9A92260971B9A5
+          538CB90974B8FA6147110E7E44F377827C1FF5376492A2A2845ABA1DE49945DB
+          FB8003B359E299CF2E0D4C7002F05F4077717C1BF0036057C12FEBF2F02CFDC5
+          0A94807FF55E5F06E09DC706E67C11F94A71FD63C0B78BF1368AF6EB81D30BBD
+          0F700770F13D77FCF8CEAB3F72254B962C3968802CA822301B4A9DD6E4BB373D
+          5AFBEE0B8E6F5B2AA1BC0EE1E2424FCC1E193ABE88723D368B89B4DC53EF9BBF
+          C3DED2A384F12C650F6131BDED73EEB686B205CF26BF5FBF9734326F0C0478CC
+          8C6A4766B1425553E7BF24E9E09783B8E3A4226FF08C42B29E5EE85F29344715
+          D8037C1778D0187BCFCFEEBD73574F570B2D5D2B894A650A06FE7E019E9F16FB
+          30B1414032D4CB50DF8103E5CE55CF32622F007D71B11A2FCD83B578A01F911B
+          BC0BF04060E50E99B3713CA2E178E4E107EF5CB366FD0962CD1FA37A26701470
+          6E717E2F7017F0D7AA7C4184CB8B7CC87DC353A6B95ABAA788E26D2840744E11
+          2B358510E92B120BFF027C0BCFCDF7DCFD23DFA857F1DEFFFA3488B11E15C178
+          0381D2A82B3608245C26A718CB2508E7CD89F5861F6F86E4E0E07EA17FE7DCC5
+          BB0960F9510E99E9929E22B731B7D4C11D5ED8C490FBD263BBB2FDDDB1250C2D
+          8D2423078819794DCFD41AE43C6EB1EB67E85EF3249B6FA04109D294208C51CD
+          F0694A18C581E6AF80F25D95C83D3650A3A5DC4275B00F3106DFE80755A2969E
+          F1F6CEC8028FF188860E902583104410B692D4EA747474828811C1A2782BD679
+          32522F241E622B98F9549C28A8F7D4EB3576EDF82587AF3D16C111582358AC20
+          1A956277F95BDECF7B3F7229D6E6EFCA1AF577F201BB7A86A288516AF53A2DAD
+          6D282A268F191BD47B51718DA40E6208830011C3BD77DF46A356E5E31FBF86A5
+          4B971E5A1F64C68E44B5BA23FDD1961BFBDF48555767CA25C0AD33EE5CEA28E4
+          D70C9AB0B54B09E611A6ED58E9A707872D64D191B382A3D7C375DE73D2830F34
+          4EDAF160F2497FC0EDAF1CA252F361A16583D2B09F93026ECF600311A1DE682C
+          CA7D3A3ABB7230297EF81E996F2CFAF39850C88C2A90795537D07780F75D7DD9
+          9CAF6F6DED00118A18801B19ABA678EF1ED7B558F4B4F539C7B7513F900E3E74
+          EFD0F5F7DC553FAD9EEA71DEF351F2F4E1D44CBBBE50C0D3306DE7AAB901246A
+          55CA6DD3B4ED029ECE6849E054A68172339ED7E9A03F7CCFA3C99F0CEC4E7ED2
+          134B7397D36F313DAE2F677ACA4AC3A30F35EEDBBFABF12E574DD7669E57A2FC
+          472115C75377A14DA678195E142BE52E9D35A4DC3955C6DC1400DC30ADC7B503
+          E5839AEA46BBBEF27B6E77F64537940D35B7253569C14EFA7CA9BFEEE98C4D63
+          CF9E744B4F97DD1294658D84F27A848B18AD47CA1DE7A30B17EE61C6153E762C
+          CB1DF6E95EAAD2DAA304E10480B417E6D4E43C5D8AF2EFAABA49EAFC27839A66
+          2EC3F7F6D1DCB1D7A443A641A6BC61CD91EC4A7EE9F76657CA0047E17901CA57
+          C937058D3AD14F63DCFB468CCDFD8BA96D5C68EBF1E303476BC9EBC2C683E317
+          2897FB86AEBBF3CEBE97D7B637BE95F5B9B4C9064DFAB56A90E9A8DE977A5B95
+          1B77F7BB1B97AD097BC292790DC225C0F19480630BCFE591BC7DA543A9F62A69
+          6DBC94EF5C39E6EDE02D8549158FC444AA285B44D9E47BF5FBF5BA57E71C4F3F
+          AC9DDA50A3C9014D7A626990A968597B80EBF57B939DFEDAE4E7FE049FEA2928
+          9F56E86779E19B54A676D84BED4A3CEC981F469E6A8B51E0C71EDE4A5D0F0B3F
+          BCEBF58D9DE9F7346BBE56A449BF8100194B49C5EBC0AFD2DB830B1FF863EABA
+          CA792E22E6168E43590D6149A92C19E5F3CE153ED716C701ABE8053EE13C276E
+          BFDD9DBC6D6BFDEF7BF7350E6C3FA7BDB9D24DFACD33B16604CAD5EBD8B133AB
+          0E0E659B372CF59BEB9D958DF16AB9D874704147E457D40E585A7B3CF6703CAB
+          B919F8AC0EFA6F647DAED6EBA1EB306577ADB9C04D3A9400892A98B5AFCA1371
+          5214945930695E5A6E1D482018A7C43D8AB40BF112CDCBFA2B42D80D1282718A
+          8482C9F2BDE2429E813580F579BF124194403951E810761DD09FB57ADEDDD5F8
+          D27BC2634B2F6EEDF717B41EA1F7EB6ABD3E281DBD3593A7A331049D10FABC68
+          2E4E9430046D8029096204E3352F808A049B784C2060C0F82201ED73BD1ABA62
+          2B848328CBC763D37CFC120826538C14857533186EADF628D69865D39ECF8BFF
+          3C68869A009C2B76DD7904339261D6E2C772F22D2006EFD2FC97A7B2CEBCDCBC
+          D43E3E4831FC71CCD8B2A4159735F272031B1385D1E828867F94471D620CCE43
+          A64268E656F53EF6815495344D58D259A6AB7B39C6E67562B6A828766986B179
+          71A44850BC9C61FCAF58F9D417E30263733675F8BC12B86018AF0E976688B558
+          63113184F2B4E2D7AC1647F64BF3473C9BD4A4DF201FA4494D6A02A4494DFA0D
+          A1FF07BAF480D79E6D27140000000049454E44AE426082
+        }
+        Visible = False
+      end
+      object BitBtnFPCOnly: TButton
+        AnchorSideLeft.Control = ListBoxFPCTarget
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = ListBoxFPCTarget
+        AnchorSideRight.Side = asrBottom
+        Left = 8
+        Height = 25
+        Hint = 'Only install/update selected FPC version.'
+        Top = 425
+        Width = 131
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Top = 16
+        BorderSpacing.Bottom = 8
+        Caption = 'Install FPC only'
+        OnClick = InstallClick
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 3
+      end
+      object BitBtnLazarusOnly: TButton
+        AnchorSideLeft.Control = ListBoxLazarusTarget
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = ListBoxLazarusTarget
+        AnchorSideRight.Side = asrBottom
+        Left = 163
+        Height = 25
+        Hint = 'Only install/update selected Lazarus version.'
+        Top = 425
+        Width = 131
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Top = 16
+        BorderSpacing.Bottom = 8
+        Caption = 'Install Lazarus only'
+        OnClick = InstallClick
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 4
+      end
+      object BitBtnFPCandLazarus: TButton
+        AnchorSideLeft.Control = BasicSheet
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = BasicSheet
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = BasicSheet
+        AnchorSideBottom.Side = asrBottom
+        Left = 8
+        Height = 60
+        Hint = 'Will install/update the selected version of both FPC and Lazarus.'
+        Top = 459
+        Width = 286
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 6
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        Caption = 'Install or update FPC and Lazarus'
+        Constraints.MinHeight = 60
+        OnClick = InstallClick
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 5
+      end
+    end
+    object CrossSheet: TTabSheet
+      Caption = 'Cross'
+      ClientHeight = 527
+      ClientWidth = 302
+      ParentFont = False
+      object radgrpCPU: TRadioGroup
+        AnchorSideLeft.Control = CrossSheet
+        AnchorSideTop.Control = CrossSheet
+        AnchorSideBottom.Control = ButtonInstallCrossCompiler
+        Left = 8
+        Height = 387
+        Top = 8
+        Width = 128
+        Anchors = [akTop, akLeft, akBottom]
+        AutoFill = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
+        BorderSpacing.Bottom = 8
+        Caption = 'CPU'
+        ChildSizing.LeftRightSpacing = 6
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        ChildSizing.EnlargeVertical = crsHomogenousChildResize
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 1
+        ClientHeight = 367
+        ClientWidth = 124
+        Constraints.MaxWidth = 150
+        Items.Strings = (
+          'i386'
+          'x86_64'
+          'arm'
+          'aarch64'
+          'ppc'
+          'ppc64'
+          'mips'
+          'mipsel'
+          'avr'
+          'jvm'
+          'i8086'
+          'sparc'
+          'm68k'
+          'xtensa'
+          'wasm32'
+        )
+        OnSelectionChanged = radgrpTargetChanged
+        ParentFont = False
+        ParentShowHint = False
+        TabOrder = 0
+        TabStop = True
+      end
+      object radgrpOS: TRadioGroup
+        AnchorSideLeft.Control = radgrpCPU
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = CrossSheet
+        AnchorSideRight.Control = CrossSheet
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = CrossSheet
+        AnchorSideBottom.Side = asrBottom
+        Left = 152
+        Height = 513
+        Top = 8
+        Width = 140
+        Anchors = [akTop, akRight, akBottom]
+        AutoFill = True
+        BorderSpacing.Left = 10
+        BorderSpacing.Top = 8
+        BorderSpacing.Right = 10
+        BorderSpacing.Bottom = 6
+        Caption = 'OS'
+        ChildSizing.LeftRightSpacing = 6
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        ChildSizing.EnlargeVertical = crsHomogenousChildResize
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 1
+        ClientHeight = 493
+        ClientWidth = 136
+        Constraints.MaxWidth = 150
+        Items.Strings = (
+          'windows'
+          'linux'
+          'android'
+          'darwin'
+          'freebsd'
+          'netbsd'
+          'openbsd'
+          'wince'
+          'embedded'
+          'java'
+          'haiku'
+          'aix'
+          'solaris'
+          'solaris-oi'
+          'dragonfly'
+          'msdos'
+          'linux-musl'
+          'morphos'
+          'aros'
+          'amiga'
+          'ios'
+          'freertos'
+          'ultibo'
+          'wasi'
+        )
+        OnSelectionChanged = radgrpTargetChanged
+        ParentFont = False
+        ParentShowHint = False
+        TabOrder = 1
+        TabStop = True
+      end
+      object ButtonInstallCrossCompiler: TButton
+        AnchorSideLeft.Control = radgrpCPU
+        AnchorSideTop.Control = radgrpCPU
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = radgrpCPU
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = ButtonRemoveCrossCompiler
+        Left = 8
+        Height = 25
+        Hint = 'Install the selected CPU-OS cross-compiler.'
+        Top = 403
+        Width = 128
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Top = 6
+        BorderSpacing.Bottom = 6
+        Caption = 'Install compiler'
+        OnClick = ButtonProcessCrossCompiler
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 2
+      end
+      object ButtonSubarchSelect: TButton
+        AnchorSideLeft.Control = ButtonInstallCrossCompiler
+        AnchorSideTop.Control = ButtonInstallCrossCompiler
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = radgrpCPU
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = CrossSheet
+        AnchorSideBottom.Side = asrBottom
+        Left = 8
+        Height = 25
+        Hint = 'Select a subarch for embedded target.'
+        Top = 496
+        Width = 128
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Top = 4
+        BorderSpacing.Bottom = 6
+        Caption = 'Set subarch'
+        Enabled = False
+        OnClick = ButtonSubarchSelectClick
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 5
+      end
+      object ButtonRemoveCrossCompiler: TButton
+        AnchorSideLeft.Control = radgrpCPU
+        AnchorSideTop.Control = radgrpCPU
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = radgrpCPU
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = ButtonAutoCrossUpdate
+        Left = 8
+        Height = 25
+        Hint = 'Remove the selected CPU-OS cross-compiler.'
+        Top = 434
+        Width = 128
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Top = 6
+        BorderSpacing.Bottom = 6
+        Caption = 'Remove compiler'
+        OnClick = ButtonProcessCrossCompiler
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 3
+      end
+      object ButtonAutoCrossUpdate: TButton
+        AnchorSideLeft.Control = radgrpCPU
+        AnchorSideTop.Control = radgrpCPU
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = radgrpCPU
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = ButtonSubarchSelect
+        Left = 8
+        Height = 25
+        Hint = 'Auto-update all installed cross-compilers.'
+        Top = 465
+        Width = 128
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Top = 6
+        BorderSpacing.Bottom = 6
+        Caption = 'Update all'
+        OnClick = ButtonAutoUpdateCrossCompiler
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 4
+      end
+    end
+    object ModuleSheet: TTabSheet
+      Caption = 'Modules'
+      ClientHeight = 527
+      ClientWidth = 302
+      ParentFont = False
+      object listModules: TListBox
+        AnchorSideLeft.Control = ModuleSheet
+        AnchorSideTop.Control = ModuleSheet
+        AnchorSideRight.Control = ModuleSheet
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = Memo1
+        Left = 8
+        Height = 348
+        Top = 8
+        Width = 286
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 12
+        ItemHeight = 0
+        OnSelectionChange = listModulesSelectionChange
+        OnShowHint = listModulesShowHint
+        ParentShowHint = False
+        ParentFont = False
+        ScrollWidth = 191
+        ShowHint = True
+        TabOrder = 0
+      end
+      object btnInstallModule: TButton
+        AnchorSideLeft.Control = ModuleSheet
+        AnchorSideBottom.Control = ModuleSheet
+        AnchorSideBottom.Side = asrBottom
+        Left = 8
+        Height = 25
+        Hint = 'Install the selected module.'
+        Top = 494
+        Width = 101
+        Anchors = [akLeft, akBottom]
+        AutoSize = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Bottom = 8
+        Caption = 'Install module'
+        OnClick = btnInstallModuleClick
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 1
+      end
+      object btnUninstallModule: TButton
+        AnchorSideRight.Control = ModuleSheet
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = ModuleSheet
+        AnchorSideBottom.Side = asrBottom
+        Left = 178
+        Height = 25
+        Hint = 'Uninstall the selected module.'
+        Top = 494
+        Width = 116
+        Anchors = [akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        Caption = 'Uninstall module'
+        OnClick = btnInstallModuleClick
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 2
+      end
+      object Memo1: TMemo
+        AnchorSideLeft.Control = ModuleSheet
+        AnchorSideBottom.Control = btnInstallModule
+        Left = 8
+        Height = 114
+        Top = 368
+        Width = 191
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BorderSpacing.Left = 8
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 12
+        Lines.Strings = (
+          ''
+        )
+        ParentFont = False
+        TabOrder = 3
+      end
+      object OPMBtn: TButton
+        AnchorSideTop.Control = Memo1
+        AnchorSideRight.Control = ModuleSheet
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = btnInstallModule
+        Left = 207
+        Height = 25
+        Hint = 'Will install/update the Online Package Manager'
+        Top = 368
+        Width = 87
+        Anchors = [akTop, akRight]
+        AutoSize = True
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 30
+        Caption = 'Install OPM'
+        OnClick = QuickBtnClick
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 4
+      end
+    end
+    object TagSheet: TTabSheet
+      Caption = 'Tags'
+      ClientHeight = 527
+      ClientWidth = 302
+      ParentFont = False
+      object FPCTagLabel: TLabel
+        AnchorSideLeft.Control = ListBoxFPCTargetTag
+        AnchorSideTop.Control = TagSheet
+        AnchorSideRight.Control = BasicSheet
+        AnchorSideRight.Side = asrCenter
+        AnchorSideBottom.Control = ListBoxFPCTargetTag
+        Left = 8
+        Height = 18
+        Top = 8
+        Width = 87
+        BorderSpacing.Top = 8
+        Caption = 'FPC version'
+        Font.CharSet = ANSI_CHARSET
+        Font.Height = -16
+        Font.Name = 'Arial'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        OnClick = FPCVersionLabelClick
+      end
+      object LazarusTagLabel: TLabel
+        AnchorSideLeft.Control = ListBoxLazarusTargetTag
+        AnchorSideTop.Control = TagSheet
+        AnchorSideRight.Control = BasicSheet
+        AnchorSideRight.Side = asrBottom
+        Left = 163
+        Height = 18
+        Top = 8
+        Width = 109
+        BorderSpacing.Top = 8
+        Caption = 'Lazarus version'
+        Font.CharSet = ANSI_CHARSET
+        Font.Height = -16
+        Font.Name = 'Arial'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        OnClick = LazarusVersionLabelClick
+      end
+      object ListBoxFPCTargetTag: TListBox
+        AnchorSideLeft.Control = TagSheet
+        AnchorSideTop.Control = TagSheet
+        Left = 8
+        Height = 313
+        Top = 42
+        Width = 131
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 42
+        BorderSpacing.Bottom = 8
+        Items.Strings = (
+          'Please wait.'
+          'Getting list.'
+        )
+        ItemHeight = 15
+        OnSelectionChange = TagSelectionChange
+        ParentFont = False
+        ScrollWidth = 133
+        TabOrder = 0
+      end
+      object ListBoxLazarusTargetTag: TListBox
+        AnchorSideLeft.Control = FPCTagLabel
+        AnchorSideTop.Control = TagSheet
+        AnchorSideRight.Control = TagSheet
+        AnchorSideRight.Side = asrBottom
+        Left = 163
+        Height = 315
+        Top = 40
+        Width = 131
+        Anchors = [akTop, akRight, akBottom]
+        BorderSpacing.Top = 40
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        Items.Strings = (
+          'Please wait.'
+          'Getting list.'
+        )
+        ItemHeight = 15
+        OnSelectionChange = TagSelectionChange
+        ParentFont = False
+        ScrollWidth = 133
+        TabOrder = 1
+      end
+      object MemoAddTag: TMemo
+        AnchorSideLeft.Control = TagSheet
+        AnchorSideRight.Control = TagSheet
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = TagSheet
+        AnchorSideBottom.Side = asrBottom
+        Left = 8
+        Height = 70
+        Top = 449
+        Width = 286
+        Anchors = [akLeft, akRight, akBottom]
+        BorderSpacing.Left = 8
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 2
+      end
+      object BitBtnFPCOnlyTag: TButton
+        AnchorSideLeft.Control = ListBoxFPCTargetTag
+        AnchorSideTop.Control = ListBoxFPCTargetTag
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = ListBoxFPCTargetTag
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = MemoAddTag
+        Left = 8
+        Height = 70
+        Hint = 'Add tag/url into FPC install list'
+        Top = 371
+        Width = 131
+        Anchors = [akLeft, akRight, akBottom]
+        BorderSpacing.Top = 16
+        BorderSpacing.Bottom = 8
+        Caption = 'Add FPC tag'
+        OnClick = OnlyTagClick
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 3
+      end
+      object BitBtnLazarusOnlyTag: TButton
+        AnchorSideLeft.Control = ListBoxLazarusTargetTag
+        AnchorSideTop.Control = ListBoxLazarusTargetTag
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = ListBoxLazarusTargetTag
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = MemoAddTag
+        Left = 163
+        Height = 70
+        Hint = 'Add tag/url into Lazarus install list'
+        Top = 371
+        Width = 131
+        Anchors = [akLeft, akRight, akBottom]
+        BorderSpacing.Top = 16
+        BorderSpacing.Bottom = 8
+        Caption = 'Add Lazarus tag'
+        OnClick = OnlyTagClick
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 4
+      end
+    end
+    object HistorySheet: TTabSheet
+      Caption = 'History'
+      ClientHeight = 527
+      ClientWidth = 302
+      object FPCHistoryLabel: TLabel
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = HistorySheet
+        AnchorSideRight.Control = HistorySheet
+        AnchorSideRight.Side = asrCenter
+        Left = 8
+        Height = 18
+        Top = 9
+        Width = 140
+        Anchors = [akLeft]
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
+        Caption = 'FPC revision history'
+        Font.CharSet = ANSI_CHARSET
+        Font.Height = -16
+        Font.Name = 'Arial'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        OnClick = FPCVersionLabelClick
+      end
+      object LazarusHistoryLabel: TLabel
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = ListBoxFPCHistory
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = BasicSheet
+        AnchorSideRight.Side = asrBottom
+        Left = 8
+        Height = 18
+        Top = 153
+        Width = 162
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 16
+        Caption = 'Lazarus revision history'
+        Font.CharSet = ANSI_CHARSET
+        Font.Height = -16
+        Font.Name = 'Arial'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        OnClick = LazarusVersionLabelClick
+      end
+      object MemoHistory: TMemo
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = HistorySheet
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = TagSheet
+        AnchorSideBottom.Side = asrBottom
+        Left = 8
+        Height = 146
+        Top = 373
+        Width = 286
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 0
+      end
+      object ListBoxFPCHistory: TListView
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = FPCHistoryLabel
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = HistorySheet
+        AnchorSideRight.Side = asrBottom
+        Left = 8
+        Height = 102
+        Top = 35
+        Width = 286
+        Anchors = [akTop, akLeft, akRight]
+        AutoWidthLastColumn = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
+        BorderSpacing.Right = 8
+        Columns = <        
+          item
+            Caption = 'Revision'
+            Width = 80
+          end        
+          item
+            Caption = 'Date'
+            Width = 202
+          end>
+        ColumnClick = False
+        HideSelection = False
+        ReadOnly = True
+        RowSelect = True
+        TabOrder = 1
+        ViewStyle = vsReport
+      end
+      object ListBoxLazarusHistory: TListView
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = LazarusHistoryLabel
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = HistorySheet
+        AnchorSideRight.Side = asrBottom
+        Left = 8
+        Height = 102
+        Top = 179
+        Width = 286
+        Anchors = [akTop, akLeft, akRight]
+        AutoWidthLastColumn = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
+        BorderSpacing.Right = 8
+        Columns = <        
+          item
+            Caption = 'Revision'
+            Width = 80
+          end        
+          item
+            Caption = 'Date'
+            Width = 202
+          end>
+        ColumnClick = False
+        HideSelection = False
+        ReadOnly = True
+        RowSelect = True
+        TabOrder = 2
+        ViewStyle = vsReport
+      end
+      object BitBtnFPCSetRevision: TButton
+        AnchorSideLeft.Control = HistorySheet
+        AnchorSideTop.Control = ListBoxLazarusHistory
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = MemoHistory
+        Left = 8
+        Height = 25
+        Hint = 'Set FPC revision'
+        Top = 305
+        Width = 110
+        AutoSize = True
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 24
+        BorderSpacing.Bottom = 8
+        Caption = 'Set FPC revision'
+        OnClick = BitBtnSetRevisionClick
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 3
+      end
+      object BitBtnLazarusSetRevision: TButton
+        AnchorSideTop.Control = ListBoxLazarusHistory
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = HistorySheet
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = MemoHistory
+        Left = 166
+        Height = 25
+        Hint = 'Set Lazarus revision'
+        Top = 305
+        Width = 128
+        Anchors = [akTop, akRight]
+        AutoSize = True
+        BorderSpacing.Top = 24
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        Caption = 'Set Lazarus revision'
+        OnClick = BitBtnSetRevisionClick
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 4
+      end
+    end
+    object ExtraSheet: TTabSheet
+      Caption = 'Extras'
+      ClientHeight = 527
+      ClientWidth = 302
+      ParentFont = False
+      object btnGetOpenSSL: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = CreateStartup
+        AnchorSideTop.Side = asrBottom
+        Left = 74
+        Height = 25
+        Top = 139
+        Width = 155
+        AutoSize = True
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 16
+        Caption = 'Get OpenSSL by Browser'
+        OnClick = btnGetOpenSSLClick
+        ParentFont = False
+        TabOrder = 0
+      end
+      object ChkMakefileFPC: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = ExtraSheet
+        Left = 86
+        Height = 25
+        Top = 16
+        Width = 131
+        AutoSize = True
+        BorderSpacing.Top = 16
+        Caption = 'Check Makefile FPC'
+        OnClick = ChkMakefileFPCClick
+        ParentFont = False
+        TabOrder = 1
+      end
+      object ChkMakefileLaz: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = ChkMakefileFPC
+        AnchorSideTop.Side = asrBottom
+        Left = 77
+        Height = 25
+        Top = 57
+        Width = 149
+        AutoSize = True
+        BorderSpacing.Top = 16
+        Caption = 'Check Makefile Lazarus'
+        OnClick = ChkMakefileFPCClick
+        ParentFont = False
+        TabOrder = 2
+      end
+      object CreateStartup: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = ChkMakefileLaz
+        AnchorSideTop.Side = asrBottom
+        Left = 75
+        Height = 25
+        Top = 98
+        Width = 153
+        AutoSize = True
+        BorderSpacing.Top = 16
+        Caption = 'Re-create startup scripts'
+        OnClick = ChkMakefileFPCClick
+        ParentFont = False
+        TabOrder = 3
+      end
+      object btnUpdateLazarusMakefiles: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = btnGetOpenSSL
+        AnchorSideTop.Side = asrBottom
+        Left = 72
+        Height = 25
+        Top = 180
+        Width = 159
+        AutoSize = True
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 16
+        Caption = 'Update Lazarus Makefiles'
+        OnClick = btnUpdateLazarusMakefilesClick
+        ParentFont = False
+        TabOrder = 4
+        Visible = False
+      end
+      object btnCreateLazarusConfig: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = btnUpdateLazarusMakefiles
+        AnchorSideTop.Side = asrBottom
+        Left = 62
+        Height = 25
+        Top = 221
+        Width = 179
+        AutoSize = True
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 16
+        Caption = 'Create Lazarus Configuration'
+        OnClick = btnCreateLazarusConfigClick
+        TabOrder = 5
+      end
+    end
+  end
+  object btnSendLog: TButton
+    AnchorSideTop.Control = StatusMessage
+    AnchorSideRight.Control = btnClearLog
+    Left = 1114
+    Height = 25
+    Hint = 'Send email to fpcup maintainer containing Commandscreen output.'
+    Top = 33
+    Width = 75
+    Anchors = [akTop, akRight]
+    AutoSize = True
+    BorderSpacing.Right = 12
+    Caption = 'Email log'
+    OnClick = btnLogClick
+    ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 12
+  end
+  object SelectDirectoryDialog1: TSelectDirectoryDialog
+    Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]
+    Left = 507
+    Top = 139
+  end
+  object MainMenu1: TMainMenu
+    Left = 363
+    Top = 75
+    object MenuFile: TMenuItem
+      Caption = '&File'
+      object MenuItem6: TMenuItem
+        Action = actFileSave
+      end
+      object MenuItem5: TMenuItem
+        Action = actFileExit
+      end
+    end
+    object MenuItem3: TMenuItem
+      Caption = 'Issues'
+      object MIssuesGitHub: TMenuItem
+        Caption = 'Up GitHub issues'
+        OnClick = MIssuesGitHubClick
+      end
+      object MIssuesForum: TMenuItem
+        Caption = 'Up Lazarus forum'
+        OnClick = MIssuesForumClick
+      end
+      object MenuItem4: TMenuItem
+        Caption = '-'
+      end
+      object MFPCBugs: TMenuItem
+        Caption = 'FPC bugs'
+        OnClick = MFPCBugsClick
+      end
+      object MLazarusBugs: TMenuItem
+        Caption = 'Lazarus bugs'
+        OnClick = MLazarusBugsClick
+      end
+    end
+    object MenuItem2: TMenuItem
+      Caption = 'Languages'
+      object MEnglishlanguage: TMenuItem
+        Caption = 'English'
+        OnClick = MEnglishlanguageClick
+      end
+      object MChineseCNlanguage: TMenuItem
+        Caption = 'Chinese (CN)'
+        OnClick = MChineseCNlanguageClick
+      end
+    end
+    object MenuItem1: TMenuItem
+      Caption = 'About'
+      OnClick = MenuItem1Click
+    end
+  end
+  object ActionList1: TActionList
+    Left = 507
+    Top = 75
+    object actFileExit: TFileExit
+      Category = 'File'
+      Caption = 'E&xit'
+      Hint = 'Exit'
+    end
+    object actFileSave: TFileSaveAs
+      Category = 'File'
+      Caption = '&Save log'
+      Dialog.Options = [ofOverwritePrompt, ofCreatePrompt, ofEnableSizing]
+      Hint = 'Save As'
+      OnAccept = actFileSaveAccept
+    end
+  end
+  object IniPropStorageApp: TIniPropStorage
+    StoredValues = <>
+    OnSavingProperties = IniPropStorageAppSavingProperties
+    OnRestoringProperties = IniPropStorageAppRestoringProperties
+    Left = 363
+    Top = 139
+  end
+end
