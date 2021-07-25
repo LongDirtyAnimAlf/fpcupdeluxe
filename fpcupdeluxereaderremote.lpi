@@ -67,7 +67,7 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item2>
@@ -111,8 +111,7 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dDEBUG
--dRemoteLog"/>
+            <CustomOptions Value="-dDEBUG -dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item3>
@@ -148,7 +147,7 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item4>
@@ -180,8 +179,7 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog
--dlibcurlstatic"/>
+            <CustomOptions Value="-dRemoteLog -dReader -dlibcurlstatic"/>
           </Other>
         </CompilerOptions>
       </Item5>
@@ -219,7 +217,7 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item6>
@@ -250,7 +248,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item7>
@@ -281,7 +279,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item8>
@@ -311,7 +309,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item9>
@@ -342,7 +340,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item10>
@@ -374,8 +372,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog
--CpARMV6"/>
+            <CustomOptions Value="-dRemoteLog -dReader -CpARMV6"/>
           </Other>
         </CompilerOptions>
       </Item11>
@@ -408,7 +405,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog
+            <CustomOptions Value="-dRemoteLog -dReader
 -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
@@ -443,7 +440,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog
+            <CustomOptions Value="-dRemoteLog -dReader
 -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
@@ -475,7 +472,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item14>
@@ -506,7 +503,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item15>
@@ -537,7 +534,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item16>
@@ -568,7 +565,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item17>
@@ -599,7 +596,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item18>
@@ -630,7 +627,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item19>
@@ -664,7 +661,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item20>
@@ -697,7 +694,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog
+            <CustomOptions Value="-dRemoteLog -dReader
 -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
@@ -729,7 +726,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog"/>
+            <CustomOptions Value="-dRemoteLog -dReader"/>
           </Other>
         </CompilerOptions>
       </Item22>
@@ -763,7 +760,7 @@
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="fpcupdeluxemainformreader.pas"/>
+        <Filename Value="fpcupdeluxemainform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
@@ -859,6 +856,9 @@ if TargetOS=&apos;openbsd&apos; then
         </Win32>
       </Options>
     </Linking>
+    <Other>
+      <CustomOptions Value="-dReader"/>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="1">

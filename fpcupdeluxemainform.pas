@@ -2,6 +2,12 @@ unit fpcupdeluxemainform;
 
 {$mode objfpc}{$H+}
 
+{$i fpcupdefines.inc}
+
+{$ifdef READER}
+{$else}
+{$endif}
+
 interface
 
 uses
@@ -39,17 +45,8 @@ type
     imgGitlab: TImage;
     ListBoxFPCHistory: TListView;
     ListBoxLazarusHistory: TListView;
-    OPMBtn: TBitBtn;
-    BitBtnFPCSetRevision: TBitBtn;
-    BitBtnLazarusSetRevision: TBitBtn;
     btnCreateLazarusConfig: TButton;
     ButtonSubarchSelect: TButton;
-    BitBtnFPCandLazarus: TBitBtn;
-    BitBtnFPCOnly: TBitBtn;
-    BitBtnFPCOnlyTag: TBitBtn;
-    BitBtnHalt: TBitBtn;
-    BitBtnLazarusOnly: TBitBtn;
-    BitBtnLazarusOnlyTag: TBitBtn;
     btnSendLog: TButton;
     btnUpdateLazarusMakefiles: TButton;
     btnInstallModule: TButton;
@@ -66,16 +63,8 @@ type
     ChkMakefileLaz: TButton;
     actFileExit: TFileExit;
     actFileSave: TFileSaveAs;
-    FPCHistoryLabel: TLabel;
     HistorySheet: TTabSheet;
-    LazarusHistoryLabel: TLabel;
-    MemoHistory: TMemo;
-    WioBtn: TBitBtn;
-    FPCVersionLabel: TLabel;
-    FPCTagLabel: TLabel;
     IniPropStorageApp: TIniPropStorage;
-    LazarusVersionLabel: TLabel;
-    LazarusTagLabel: TLabel;
     ListBoxFPCTarget: TListBox;
     ListBoxFPCTargetTag: TListBox;
     ListBoxLazarusTarget: TListBox;
@@ -86,7 +75,6 @@ type
     MemoAddTag: TMemo;
     memoSummary: TMemo;
     MenuItem1: TMenuItem;
-    PicoBtn: TBitBtn;
     MenuItem2: TMenuItem;
     MEnglishlanguage: TMenuItem;
     MChineseCNlanguage: TMenuItem;
@@ -99,7 +87,6 @@ type
     MLazarusBugs: TMenuItem;
     MIssuesGitHub: TMenuItem;
     MIssuesForum: TMenuItem;
-    UltiboBtn: TBitBtn;
     PageControl1: TPageControl;
     radgrpCPU: TRadioGroup;
     radgrpOS: TRadioGroup;
@@ -109,19 +96,66 @@ type
     ModuleSheet: TTabSheet;
     ExtraSheet: TTabSheet;
     TagSheet: TTabSheet;
-    TrunkBtn: TBitBtn;
-    FixesBtn: TBitBtn;
-    StableBtn: TBitBtn;
-    AndroidBtn: TBitBtn;
-    mORMotBtn: TBitBtn;
     btnInstallDirSelect: TButton;
     InstallDirEdit: TEdit;
     Panel1: TPanel;
     RealFPCURL: TEdit;
     RealLazURL: TEdit;
+    MemoHistory: TMemo;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
+    {$ifdef READER}
+    CommandOutputScreen: TMemo;
+    FPCVersionLabel: TStaticText;
+    LazarusVersionLabel: TStaticText;
+    FPCHistoryLabel: TStaticText;
+    LazarusHistoryLabel: TStaticText;
+    FPCTagLabel: TStaticText;
+    LazarusTagLabel: TStaticText;
+    TrunkBtn: TButton;
+    FixesBtn: TButton;
+    StableBtn: TButton;
+    AndroidBtn: TButton;
+    Win95Btn: TButton;
+    WioBtn: TButton;
+    PicoBtn: TButton;
+    UltiboBtn: TButton;
+    mORMotBtn: TButton;
+    BitBtnHalt: TButton;
+    BitBtnFPCandLazarus: TButton;
+    BitBtnFPCOnly: TButton;
+    BitBtnFPCOnlyTag: TButton;
+    BitBtnLazarusOnly: TButton;
+    BitBtnLazarusOnlyTag: TButton;
+    BitBtnFPCSetRevision: TButton;
+    BitBtnLazarusSetRevision: TButton;
+    OPMBtn: TButton;
+    {$else}
     CommandOutputScreen: TSynEdit;
+    FPCVersionLabel: TLabel;
+    LazarusVersionLabel: TLabel;
+    FPCHistoryLabel: TLabel;
+    LazarusHistoryLabel: TLabel;
+    FPCTagLabel: TLabel;
+    LazarusTagLabel: TLabel;
+    TrunkBtn: TBitBtn;
+    FixesBtn: TBitBtn;
+    StableBtn: TBitBtn;
+    AndroidBtn: TBitBtn;
     Win95Btn: TBitBtn;
+    WioBtn: TBitBtn;
+    PicoBtn: TBitBtn;
+    UltiboBtn: TBitBtn;
+    mORMotBtn: TBitBtn;
+    BitBtnHalt: TBitBtn;
+    BitBtnFPCandLazarus: TBitBtn;
+    BitBtnFPCOnly: TBitBtn;
+    BitBtnFPCOnlyTag: TBitBtn;
+    BitBtnLazarusOnly: TBitBtn;
+    BitBtnLazarusOnlyTag: TBitBtn;
+    BitBtnFPCSetRevision: TBitBtn;
+    BitBtnLazarusSetRevision: TBitBtn;
+    OPMBtn: TBitBtn;
+    {$endif}
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure BitBtnSetRevisionClick(Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
@@ -243,7 +277,11 @@ var
 
 implementation
 
-{$R *.lfm}
+{$ifdef READER}
+  {$R fpcupdeluxemainformreader.lfm}
+{$else}
+  {$R fpcupdeluxemainform.lfm}
+{$endif}
 
 uses
   InterfaceBase, // for WidgetSet
@@ -858,7 +896,12 @@ begin
             // build compiler
             if (Sender<>nil) then
             begin
+              {$ifdef READER}
+              CommandOutputScreen.Clear;
+              {$else}
               CommandOutputScreen.ClearAll;
+              {$endif}
+
               aResultMessage:='Finished building of cross-compilers.';
               AddMessage(upBuildAllCrossCompilersUpdate);
 
@@ -1121,7 +1164,12 @@ var
   s,searchstring:string;
   x,y:integer;
 begin
+  {$ifdef READER}
+  s:=CommandOutputScreen.Lines[Pred(CommandOutputScreen.Lines.Count)];
+  {$else}
   s:=CommandOutputScreen.LineText;
+  {$endif}
+
   //if Length(s)=0 then s:=CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2];
   s:=Trim(s);
   if Length(s)=0 then exit;
@@ -1282,7 +1330,10 @@ begin
       InternalError:=Copy(s,x+1,MaxInt);
       memoSummary.Lines.Append('URL: '+InternalError);
       memoSummary.Lines.Append('Please check your connection. Or run the SVN command to try yourself:');
+      {$ifdef READER}
+      {$else}
       memoSummary.Lines.Append(CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2]);
+      {$endif}
     end;
   end;
 
@@ -1339,12 +1390,18 @@ begin
     else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
     begin
       memoSummary.Lines.Append('We have had a SVN connection failure. Just start again !');
+      {$ifdef READER}
+      {$else}
       memoSummary.Lines.Append(CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2]);
+      {$endif}
     end
     else if (ExistWordInString(PChar(s),'fatal:',[soDown])) then
     begin
       memoSummary.Lines.Append(s);
+      {$ifdef READER}
+      {$else}
       memoSummary.Lines.Append(CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2]);
+      {$endif}
     end
     else if (ExistWordInString(PChar(s),'error:',[soDown])) then
     begin
@@ -1410,6 +1467,8 @@ begin
   end;
 
   // go back a few lines to find a special error case
+  {$ifdef READER}
+  {$else}
   x:=(CommandOutputScreen.CaretY-4);
   if (x>0) then
   begin
@@ -1435,10 +1494,12 @@ begin
         memoSummary.Lines.Append('');
         memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32809');
         memoSummary.Lines.Append('');
-      end else
-      memoSummary.Lines.Append(CommandOutputScreen.Lines[x+2]);
+      end
+      else
+        memoSummary.Lines.Append(CommandOutputScreen.Lines[x+2]);
     end;
   end;
+  {$endif}
 end;
 
 procedure TForm1.CommandOutputScreenSpecialLineMarkup(Sender: TObject; Line: integer;
@@ -3787,7 +3848,11 @@ procedure TForm1.btnLogClick(Sender: TObject);
 begin
   if (Sender=btnClearLog) then
   begin
+    {$ifdef READER}
+    CommandOutputScreen.Clear;
+    {$else}
     CommandOutputScreen.ClearAll;
+    {$endif}
     memoSummary.Clear;
   end;
   if (Sender=btnSendLog) then
@@ -4254,7 +4319,11 @@ var
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
+  {$ifdef READER}
+  CommandOutputScreen.Clear;
+  {$else}
   CommandOutputScreen.ClearAll;
+  {$endif}
 
   AddMessage('Welcome @ FPCUPdeluxe.');
   AddMessage(Self.Caption);
@@ -4513,8 +4582,13 @@ begin
       aMessageStrings.Free;
     end;
   end;
+  {$ifdef READER}
+  CommandOutputScreen.CaretPos.SetLocation(0,CommandOutputScreen.Lines.Count);
+  {$else}
   CommandOutputScreen.CaretX:=0;
   CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
+  {$endif}
+
   {$ifdef usealternateui}
   alternateui_AddMessage(amessage,updatestatus);
   {$endif}
@@ -4675,8 +4749,12 @@ var
 begin
   MsgStr := {%H-}PChar(Msg.wparam);
   MsgPasStr := StrPas(MsgStr);
+
+  {$ifdef READER}
+  CommandOutputScreen.Append(MsgPasStr);
+  {$else}
   CommandOutputScreen.SetFiltered(MsgPasStr);
-  //CommandOutputScreen.Append(MsgPasStr);
+  {$endif}
 
   if (ExistWordInString(PChar(MsgPasStr),'failed to get crossbinutils',[soDown])) then
   begin

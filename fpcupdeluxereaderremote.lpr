@@ -51,6 +51,7 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, Classes, SysUtils,
+  fpcupdeluxemainform,
   //extrasettings,
   //installerManager, installerUniversal,
   //modulesettings, unzipprogress, infounit, fpcuputil,
@@ -153,13 +154,13 @@ uses
   m_anyinternallinker_to_winx64,
   {$endif MSWINDOWS}
   m_any_to_wasi_wasm32,
-  m_any_to_embedded_wasm32,
-  fpcupdeluxemainformreader;
+  m_any_to_embedded_wasm32;
 
 {$R *.res}
 
 begin
   RequireDerivedFormResource:=True;
+  Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);
   Application.Run;

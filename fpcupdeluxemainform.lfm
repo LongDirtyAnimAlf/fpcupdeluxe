@@ -1,12 +1,12 @@
 object Form1: TForm1
-  Left = 48
+  Left = 37
   Height = 701
-  Top = 79
-  Width = 1199
+  Top = 68
+  Width = 1337
   Anchors = []
   Caption = 'Form1'
   ClientHeight = 681
-  ClientWidth = 1199
+  ClientWidth = 1337
   Constraints.MinHeight = 400
   Menu = MainMenu1
   OnClose = FormClose
@@ -44,7 +44,7 @@ object Form1: TForm1
     Left = 336
     Height = 23
     Top = 33
-    Width = 593
+    Width = 731
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
@@ -59,7 +59,7 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = btnSendLog
-    Left = 941
+    Left = 1079
     Height = 19
     Top = 35
     Width = 74
@@ -75,7 +75,7 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 1114
+    Left = 1252
     Height = 25
     Top = 33
     Width = 73
@@ -97,7 +97,7 @@ object Form1: TForm1
     Left = 336
     Height = 427
     Top = 62
-    Width = 851
+    Width = 989
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 8
@@ -648,7 +648,7 @@ object Form1: TForm1
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
-    Width = 410
+    Width = 548
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 4
@@ -668,7 +668,7 @@ object Form1: TForm1
     Left = 6
     Height = 56
     Top = 621
-    Width = 1181
+    Width = 1319
     Align = alBottom
     AutoSize = True
     BorderSpacing.Left = 6
@@ -678,7 +678,7 @@ object Form1: TForm1
     BorderSpacing.CellAlignVertical = ccaCenter
     BevelInner = bvLowered
     ClientHeight = 56
-    ClientWidth = 1181
+    ClientWidth = 1319
     Constraints.MinHeight = 50
     ParentFont = False
     TabOrder = 3
@@ -2244,7 +2244,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
-      Left = 1084
+      Left = 1222
       Height = 42
       Hint = 'Try to stop current install process'
       Top = 8
@@ -2583,7 +2583,7 @@ object Form1: TForm1
     Height = 120
     Hint = 'Will show error'
     Top = 497
-    Width = 851
+    Width = 989
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 4
@@ -4379,15 +4379,16 @@ object Form1: TForm1
       end
       object ListBoxFPCTargetTag: TListBox
         AnchorSideLeft.Control = TagSheet
-        AnchorSideTop.Control = TagSheet
+        AnchorSideTop.Control = FPCTagLabel
+        AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = BitBtnFPCOnlyTag
         Left = 8
-        Height = 297
-        Top = 42
+        Height = 305
+        Top = 34
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
         BorderSpacing.Left = 8
-        BorderSpacing.Top = 42
+        BorderSpacing.Top = 8
         BorderSpacing.Bottom = 8
         Items.Strings = (
           'Please wait.'
@@ -4401,16 +4402,17 @@ object Form1: TForm1
       end
       object ListBoxLazarusTargetTag: TListBox
         AnchorSideLeft.Control = FPCTagLabel
-        AnchorSideTop.Control = TagSheet
+        AnchorSideTop.Control = LazarusTagLabel
+        AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = TagSheet
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = BitBtnLazarusOnlyTag
         Left = 163
-        Height = 299
-        Top = 40
+        Height = 305
+        Top = 34
         Width = 131
         Anchors = [akTop, akRight, akBottom]
-        BorderSpacing.Top = 40
+        BorderSpacing.Top = 8
         BorderSpacing.Right = 8
         BorderSpacing.Bottom = 8
         Items.Strings = (
@@ -5301,7 +5303,7 @@ object Form1: TForm1
   object btnSendLog: TButton
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = btnClearLog
-    Left = 1027
+    Left = 1165
     Height = 25
     Hint = 'Send email to fpcup maintainer containing Commandscreen output.'
     Top = 33
