@@ -4659,6 +4659,20 @@ begin
   MsgPasStr := StrPas(MsgStr);
   //CommandOutputScreen.SetFiltered(MsgPasStr);
   CommandOutputScreen.Append(MsgPasStr);
+
+  if (ExistWordInString(PChar(MsgPasStr),'failed to get crossbinutils',[soDown])) then
+  begin
+    MissingCrossBins:=true;
+  end
+  else if (ExistWordInString(PChar(MsgPasStr),'failed to get crosslibrary',[soDown])) then
+  begin
+    MissingCrossLibs:=true;
+  end
+  else if ((ExistWordInString(PChar(MsgPasStr),'CheckAndGetTools',[soDown])) OR (ExistWordInString(PChar(MsgPasStr),'Required package is not installed',[soDown]))) then
+  begin
+    MissingTools:=true;
+  end;
+
   StrDispose(MsgStr)
 end;
 
