@@ -1330,26 +1330,6 @@ begin
         end;
       end;
     end
-    else if (ExistWordInString(PChar(s),'failed to get crossbinutils',[soDown])) then
-    begin
-      if (NOT MissingCrossBins) then memoSummary.Lines.Append('Missing correct cross binary utilities');
-      MissingCrossBins:=true;
-    end
-    else if (ExistWordInString(PChar(s),'failed to get crosslibrary',[soDown])) then
-    begin
-      if (NOT MissingCrossLibs) then memoSummary.Lines.Append('Missing correct cross libraries');
-      MissingCrossLibs:=true;
-    end
-    else if ((ExistWordInString(PChar(s),'CheckAndGetTools',[soDown])) OR (ExistWordInString(PChar(s),'Required package is not installed',[soDown]))) then
-    begin
-      MissingTools:=true;
-      {$ifdef Darwin}
-      memoSummary.Lines.Append('Missing some tools: please install Xcode command line tools !');
-      memoSummary.Lines.Append('xcode-select --install');
-      {$else}
-      memoSummary.Lines.Append('Missing some tools: please install missing tools!');
-      {$endif}
-    end
     {$ifdef Darwin}
     else if (ExistWordInString(PChar(s),'The subversion command line tools are no longer provided by Xcode',[soDown])) then
     begin
@@ -4654,23 +4634,41 @@ procedure TForm1.HandleInfo(var Msg: TLMessage);
 var
   MsgStr: PChar;
   MsgPasStr: string;
+  aFocussedControl:TWinControl;
 begin
   MsgStr := {%H-}PChar(Msg.wparam);
   MsgPasStr := StrPas(MsgStr);
+
   //CommandOutputScreen.SetFiltered(MsgPasStr);
   CommandOutputScreen.Append(MsgPasStr);
 
   if (ExistWordInString(PChar(MsgPasStr),'failed to get crossbinutils',[soDown])) then
   begin
+    memoSummary.Lines.Append('Missing correct cross libraries');
     MissingCrossBins:=true;
   end
   else if (ExistWordInString(PChar(MsgPasStr),'failed to get crosslibrary',[soDown])) then
   begin
+    memoSummary.Lines.Append('Missing correct cross libraries');
     MissingCrossLibs:=true;
   end
   else if ((ExistWordInString(PChar(MsgPasStr),'CheckAndGetTools',[soDown])) OR (ExistWordInString(PChar(MsgPasStr),'Required package is not installed',[soDown]))) then
   begin
     MissingTools:=true;
+    {$ifdef Darwin}
+    memoSummary.Lines.Append('Missing some tools: please install Xcode command line tools !');
+    memoSummary.Lines.Append('xcode-select --install');
+    {$else}
+    memoSummary.Lines.Append('Missing some tools: please install missing tools!');
+    {$endif}
+  {$ifdef Darwin}
+  end
+  else if (ExistWordInString(PChar(MsgPasStr),'The subversion command line tools are no longer provided by Xcode',[soDown])) then
+  begin
+    MissingTools:=true;
+    memoSummary.Lines.Append('SVN is no longer included in Xcode command line tools !');
+    memoSummary.Lines.Append('Use a GIT repo (preferred) or install SVN by yourself (brew).');
+  {$endif}
   end;
 
   StrDispose(MsgStr)
