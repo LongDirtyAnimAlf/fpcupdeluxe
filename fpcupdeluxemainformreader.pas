@@ -459,6 +459,11 @@ begin
     AddMessage('Current base directory : '+GetCurrentDir);
   {$endif}
 
+  if NOT FileExists(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME) then
+  begin
+    chkGitlab.Checked:=true;
+  end;
+
   // get last used install directory, proxy and visual settings
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
@@ -1330,14 +1335,6 @@ begin
         end;
       end;
     end
-    {$ifdef Darwin}
-    else if (ExistWordInString(PChar(s),'The subversion command line tools are no longer provided by Xcode',[soDown])) then
-    begin
-      MissingTools:=true;
-      memoSummary.Lines.Append('SVN is no longer included in Xcode command line tools !');
-      memoSummary.Lines.Append('Use a GIT repo (preferred) or install SVN by yourself (brew).');
-    end
-    {$endif}
     else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
     begin
       memoSummary.Lines.Append('We have had a SVN connection failure. Just start again !');
@@ -4641,7 +4638,6 @@ procedure TForm1.HandleInfo(var Msg: TLMessage);
 var
   MsgStr: PChar;
   MsgPasStr: string;
-  aFocussedControl:TWinControl;
 begin
   MsgStr := {%H-}PChar(Msg.wparam);
   MsgPasStr := StrPas(MsgStr);
