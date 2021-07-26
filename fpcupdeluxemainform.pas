@@ -952,7 +952,8 @@ end;
 
 procedure TForm1.InitFPCupManager;
 var
-  SortedModules: TStringList;
+  ModulesList: TStringList;
+  SelectedModulesList: TStringList;
   i:integer;
   s,v:string;
   SettingsSuccess:boolean;
@@ -971,35 +972,28 @@ begin
 
   if listModules.Count=0 then
   begin
-    SortedModules:=TStringList.Create;
+    ModulesList:=TStringList.Create;
+    SelectedModulesList:=TStringList.Create;
     try
-      SortedModules.Delimiter:=_SEP;
-      SortedModules.StrictDelimiter:=true;
-      SortedModules.DelimitedText:=GetModuleList;
+      ModulesList.Delimiter:=_SEP;
+      ModulesList.StrictDelimiter:=true;
+      ModulesList.DelimitedText:=GetModuleList;
       // filter modulelist from trivial entries
-      for i:=(SortedModules.Count-1) downto 0 do
+      for i:=0 to Pred(ModulesList.Count) do
       begin
-        s:=SortedModules[i];
+        s:=ModulesList[i];
         if Pos(_DECLARE,s)=0 then
-        begin
-          SortedModules.Delete(i);
           continue;
-        end;
         if (AnsiStartsText(_DECLARE+_SUGGESTED,s)) OR (AnsiStartsText(_DECLARE+_SUGGESTEDADD,s)) then
-        begin
-          SortedModules.Delete(i);
           continue;
-        end;
         if (AnsiEndsText(_CLEAN,s)) OR (AnsiEndsText(_UNINSTALL,s)) OR (AnsiEndsText(_BUILD+_ONLY,s)) then
-        begin
-          SortedModules.Delete(i);
           continue;
-        end;
+        SelectedModulesList.Append(s);
       end;
-      SortedModules.Sort;
-      for i:=0 to (SortedModules.Count-1) do
+      SelectedModulesList.Sort;
+      for i:=0 to (SelectedModulesList.Count-1) do
       begin
-        s:=SortedModules[i];
+        s:=SelectedModulesList[i];
         Delete(s,1,Length(_DECLARE));
         // get module descriptions
         v:=FPCupManager.ModulePublishedList.Values[s];
@@ -1007,7 +1001,8 @@ begin
         listModules.Items.AddObject(s,TObject(pointer(StrNew(Pchar(v)))));
       end;
     finally
-      SortedModules.Free;
+      SelectedModulesList.Free;
+      ModulesList.Free;
     end;
   end;
 
@@ -1802,10 +1797,10 @@ begin
     ListBoxLazarusTargetTag.Items.BeginUpdate;
     try
       aFileList.Clear;
-      GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=fpc',aFileList);
+      //GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=fpc',aFileList);
       ListBoxFPCTargetTag.Items.Text:=aFileList.Text;
       aFileList.Clear;
-      GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=lazarus',aFileList);
+      //GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=lazarus',aFileList);
       ListBoxLazarusTargetTag.Items.Text:=aFileList.Text;
     finally
       aFileList.Free;
@@ -1823,7 +1818,7 @@ var
 begin
   if Sender=BitBtnFPCOnlyTag then
   begin
-    aNewURL:=FPCBASESVNURL+'/svn/fpc/tags/'+ListBoxFPCTargetTag.GetSelectedText;
+    //aNewURL:=FPCBASESVNURL+'/svn/fpc/tags/'+ListBoxFPCTargetTag.GetSelectedText;
     if SetAlias('fpcURL',ListBoxFPCTargetTag.GetSelectedText,aNewURL) then
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
@@ -1834,7 +1829,7 @@ begin
   end;
   if Sender=BitBtnLazarusOnlyTag then
   begin
-    aNewURL:=FPCBASESVNURL+'/svn/lazarus/tags/'+ListBoxLazarusTargetTag.GetSelectedText;
+    //aNewURL:=FPCBASESVNURL+'/svn/lazarus/tags/'+ListBoxLazarusTargetTag.GetSelectedText;
     if SetAlias('lazURL',ListBoxLazarusTargetTag.GetSelectedText,aNewURL) then
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');

@@ -2157,7 +2157,8 @@ begin
        then aDownLoader:=TWGetDownLoader.Create
        else aDownLoader:=TNativeDownLoader.Create;
     try
-      result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+      if aDownLoader.checkURL(URL) then
+        result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
     finally
       aDownLoader.Destroy;
     end;

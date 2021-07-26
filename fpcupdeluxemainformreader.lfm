@@ -1262,6 +1262,7 @@ object Form1: TForm1
       ClientHeight = 527
       ClientWidth = 302
       ParentFont = False
+      TabVisible = False
       object ListBoxFPCTargetTag: TListBox
         AnchorSideLeft.Control = TagSheet
         AnchorSideTop.Control = FPCTagLabel

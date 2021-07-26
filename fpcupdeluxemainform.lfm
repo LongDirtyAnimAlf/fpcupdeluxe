@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 238
+  Left = 27
   Height = 701
-  Top = 87
+  Top = 68
   Width = 1337
   Anchors = []
   Caption = 'Form1'
@@ -4338,6 +4338,7 @@ object Form1: TForm1
       ClientHeight = 511
       ClientWidth = 302
       ParentFont = False
+      TabVisible = False
       object FPCTagLabel: TLabel
         AnchorSideLeft.Control = ListBoxFPCTargetTag
         AnchorSideTop.Control = TagSheet

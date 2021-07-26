@@ -69,19 +69,20 @@ const
   FPCGITLAB             = GITLAB + 'fpc';
   FPCGITLABREPO         = FPCGITLAB + '/testconversion2';
   FPCGITLABBINARIES     = FPCGITLAB + '/build';
-  FPCBINARIES           = FPCGITLABBINARIES + '/-/raw/master';
+  FPCTRUNKBRANCH        = 'master';
+  FPCBINARIES           = FPCGITLABBINARIES + '/-/raw/'+FPCTRUNKBRANCH;
 
   LAZARUSGITLAB         = GITLAB + 'lazarus';
   LAZARUSGITLABREPO     = LAZARUSGITLAB + '/lazarus';
   LAZARUSGITLABBINARIES = LAZARUSGITLAB + '/binaries';
-  LAZARUSBINARIES       = LAZARUSGITLABBINARIES + '/-/raw/main';
+  LAZARUSTRUNKBRANCH    = 'main';
+  LAZARUSBINARIES       = LAZARUSGITLABBINARIES + '/-/raw/'+LAZARUSTRUNKBRANCH;
 
   SVNBASEHTTP           = 'https://svn.';
   SVNBASESVN            = 'svn://svn.';
   FTPBASEHTTP           = 'https://ftp.';
   FTPBASEFTP            = 'ftp://ftp.';
 
-  FPCBASESVNURL         = SVNBASEHTTP+'freepascal.org';
   FTPBASEURL            = FTPBASEFTP+'freepascal.org';
   FPCFTPURL             = FTPBASEURL+'/pub/fpc/';
   LAZARUSFTPURL         = FTPBASEURL+'/pub/lazarus/';
@@ -90,7 +91,6 @@ const
 
   LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
 
-  BINUTILSURL           = FPCBASESVNURL + '/svn/fpcbuild';
 
   PACKAGESLOCATION      = 'packages.fppkg';
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';
@@ -99,9 +99,7 @@ const
   REVINCFILENAME        = 'revision.inc';
 
   {$IFDEF WINDOWS}
-  //FPC prebuilt binaries of the GNU Binutils
-  PREBUILTBINUTILSURL      = BINUTILSURL + '/binaries/i386-win32';
-  PREBUILTBINUTILSURLWINCE = BINUTILSURL + '/tags/release_3_0_4/install/crossbinwce';
+  PREBUILTBINUTILSURLWINCE = FPCBINARIES+'/install/crossbinwce';
   {$ENDIF}
 
   {$ifdef win64}
@@ -123,7 +121,7 @@ const
   //NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win64/nasm-2.13-win64.zip';
   NASMWIN32URL='https://www.nasm.us/pub/nasm/releasebuilds/2.14/win32/nasm-2.14-win32.zip';
   NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.14/win64/nasm-2.14-win64.zip';
-  NASMFPCURL=BINUTILSURL + '/trunk/install/crossbinmsdos/nasm.exe';
+  NASMFPCURL=FPCBINARIES+'/install/crossbinmsdos/nasm.exe';
 
   GITREPO='https://github.com/LongDirtyAnimAlf';
   FPCUPGITREPO=GITREPO+'/fpcupdeluxe';
@@ -982,12 +980,6 @@ begin
     {$IFDEF MSWINDOWS}
     ForceDirectoriesSafe(FMakeDir);
 
-    (*
-    // check if we have make ... otherwise get it from standard URL
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+
-            '/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make),Make);
-    *)
-
     {$ifdef win64}
     // the standard make by FPC does not work when Git is present (and in the path), but this one works ??!!
     // (but the FPC installer sets its own path to isolate itself from the system, so FPC make still works)
@@ -1082,7 +1074,7 @@ begin
     {$endif}
 
     // Get patch binary from default binutils URL
-    aURL:=BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
+    aURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
 
     OperationSucceeded:=false;
     aLocalClientBinary:=FPatchCmd;
@@ -1090,16 +1082,8 @@ begin
       aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir) + FPatchCmd;
     if Not FileExists(aLocalClientBinary) then
     begin
-      if SVNClient.ValidClient then
-        OperationSucceeded:=SimpleExportFromSVN('CheckAndGetTools',aURL+'patch.exe',ExcludeTrailingPathDelimiter(FMakeDir));
-      if (NOT OperationSucceeded) then
-        OperationSucceeded:=GetFile(aURL+'patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
-
-      OperationSucceeded:=false;
-      if SVNClient.ValidClient then
-        OperationSucceeded:=SimpleExportFromSVN('CheckAndGetTools',aURL+'patch.exe.manifest',ExcludeTrailingPathDelimiter(FMakeDir));
-      if (NOT OperationSucceeded) then
-        OperationSucceeded:=GetFile(aURL+'patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
+      GetFile(aURL+'patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
+      GetFile(aURL+'patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
     end;
 
     // do not fail
@@ -1495,7 +1479,7 @@ begin
     // check if we have make ... otherwise get it from standard URL
     if (NOT FileExists(Make)) then
     begin
-      s1:=BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
+      s1:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
       Infoln(s2+'Make binary not found. Getting it from: '+s1+'.',etInfo);
       GetFile(s1,Make);
       OperationSucceeded:=FileExists(Make);
@@ -1587,12 +1571,13 @@ begin
 
   //trunk is special
   if aVersion=FPCTRUNKVERSION
-     then aTag:='trunk'
-     else aTag:='tags/release_'+StringReplace(aVersion,'.','_',[rfReplaceAll]);
+     then aTag:=FPCTRUNKBRANCH
+     else aTag:='release_'+StringReplace(aVersion,'.','_',[rfReplaceAll]);
 
-  aSourceURL:=BINUTILSURL+'/'+aTag+'/install/binw32/';
+  aSourceURL:=FPCGITLABBINARIES+'/-/raw/'+aTag+'/install/binw32/';
+
   {$ifdef win64}
-  aSourceURL64:=BINUTILSURL+'/'+aTag+'/install/binw64/';
+  aSourceURL64:=FPCGITLABBINARIES+'/-/raw/'+aTag+'/install/binw64/';
   {$endif}
 
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)
@@ -2260,27 +2245,9 @@ begin
 
       RemotePath:=FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName;
 
-      DownloadSuccess:=false;
+      //if (FUtilFiles[Counter].FileName='libiconv-2.dll') then continue;
 
-      // FPC owned binutils are always served by SVN, so use SVN client and related.
-      if (SVNClient.ValidClient) AND (Pos(FPCBASESVNURL,RemotePath)>0) then
-      begin
-        //first check remote URL
-        DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,'');
-        if DownloadSuccess then
-        begin
-          DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,InstallPath);
-          DownloadSuccess:=DownloadSuccess AND FileExists(InstallPath+FUtilFiles[Counter].FileName);
-        end;
-      end;
-
-      if (FUtilFiles[Counter].FileName='libiconv-2.dll') then continue;
-
-      if (NOT DownloadSuccess) then
-      begin
-        Infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' with SVN failed. Now trying normal download.',etInfo);
-        DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath+FUtilFiles[Counter].FileName);
-      end;
+      DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath+FUtilFiles[Counter].FileName);
 
       if (NOT DownloadSuccess) then
       begin

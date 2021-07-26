@@ -372,7 +372,7 @@ begin
         if Length(HelpUrl)=0 then
           //Help version determination failed totally.
           //Get help from latest !!
-          OperationSucceeded:=Download(FUseWget, LAZARUSGITLABBINARIES+'/-/archive/main/binaries-main.zip?path=docs/chm', DocsZip)
+          OperationSucceeded:=Download(FUseWget, LAZARUSGITLABBINARIES+'/-/archive/'+LAZARUSTRUNKBRANCH+'/binaries-main.zip?path=docs/chm', DocsZip)
         else
           OperationSucceeded:=Download(FUseWget, HELP_URL_BASE+HelpUrl+'/download', DocsZip);
       except
