@@ -70,7 +70,6 @@ const
   FPCGITLABREPO         = FPCGITLAB + '/testconversion2';
   FPCGITLABBINARIES     = FPCGITLAB + '/build';
   FPCBINARIES           = FPCGITLABBINARIES + '/-/raw/master';
-  BINUTILSURL           = FPCBINARIES;
 
   LAZARUSGITLAB         = GITLAB + 'lazarus';
   LAZARUSGITLABREPO     = LAZARUSGITLAB + '/lazarus';
@@ -90,6 +89,8 @@ const
   FPCFTPSNAPSHOTURL     = FPCFTPURL+'snapshot/';
 
   LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
+
+  BINUTILSURL           = FPCBASESVNURL + '/svn/fpcbuild';
 
   PACKAGESLOCATION      = 'packages.fppkg';
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';
