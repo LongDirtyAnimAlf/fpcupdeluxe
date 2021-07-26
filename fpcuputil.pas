@@ -1416,6 +1416,7 @@ var
 begin
   result:='0.0.0';
 
+  //if Pos('https://gitlab.com/freepascal.org/',URL)=1 then result:='0.0.0' else
   if Pos('trunk',URL)>0 then result:='trunk' else
   if Pos('newpascal',URL)>0 then result:='trunk' else
   if Pos('freepascal.git',URL)>0 then result:='trunk' else
@@ -1445,14 +1446,14 @@ begin
     VersionSnippet := Copy(VersionSnippet, i + 1, MaxInt);
 
     // if url contains a version, this version always starts with first _#
-    i:=0;
+    i:=1;
     repeat
-      Inc(i);
       if (CharInSet(VersionSnippet[i],['0'..'9'])) then
       begin
         if (i>1) AND (VersionSnippet[i-1]='_') then break;
       end;
-      if (i=Length(VersionSnippet)) then break;
+      Inc(i);
+      if (i>Length(VersionSnippet)) then break;
     until false;
 
     Delete(VersionSnippet,1,(i-1));

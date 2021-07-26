@@ -68,9 +68,14 @@ const
 
   FPCGITLAB             = GITLAB + 'fpc';
   FPCGITLABREPO         = FPCGITLAB + '/testconversion2';
+  FPCGITLABBINARIES     = FPCGITLAB + '/build';
+  FPCBINARIES           = FPCGITLABBINARIES + '/-/raw/master';
+  BINUTILSURL           = FPCBINARIES;
 
   LAZARUSGITLAB         = GITLAB + 'lazarus';
-  LAZARUSGITLABREPO     = LAZARUSGITLAB + '/sandbox/lazarus_test_conversion_2';
+  LAZARUSGITLABREPO     = LAZARUSGITLAB + '/lazarus';
+  LAZARUSGITLABBINARIES = LAZARUSGITLAB + '/binaries';
+  LAZARUSBINARIES       = LAZARUSGITLABBINARIES + '/-/raw/main';
 
   SVNBASEHTTP           = 'https://svn.';
   SVNBASESVN            = 'svn://svn.';
@@ -86,8 +91,6 @@ const
 
   LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
 
-  BINUTILSURL           = FPCBASESVNURL + '/svn/fpcbuild';
-
   PACKAGESLOCATION      = 'packages.fppkg';
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';
   //PACKAGESCONFIGDIR     = PACKAGESLOCATION+DirectorySeparator+'fpcpkgconfig';
@@ -100,15 +103,11 @@ const
   PREBUILTBINUTILSURLWINCE = BINUTILSURL + '/tags/release_3_0_4/install/crossbinwce';
   {$ENDIF}
 
-  LAZARUSBINARIES = FPCBASESVNURL + '/svn/lazarus/binaries';
-
-  CHM_URL_LATEST_SVN = LAZARUSBINARIES + '/docs/chm';
-
   {$ifdef win64}
-  OPENSSL_URL_LATEST_SVN = LAZARUSBINARIES + '/x86_64-win64/openssl';
+  OPENSSL_URL_LATEST = LAZARUSBINARIES + '/x86_64-win64/openssl';
   {$endif}
   {$ifdef win32}
-  OPENSSL_URL_LATEST_SVN = LAZARUSBINARIES + '/i386-win32/openssl';
+  OPENSSL_URL_LATEST = LAZARUSBINARIES + '/i386-win32/openssl';
   {$endif}
 
   {$IFDEF DEBUG}
@@ -2458,36 +2457,15 @@ begin
 
   Infoln(localinfotext+'No OpenSLL library files available for SSL. Going to download them.',etWarning);
 
-  if (NOT OperationSucceeded) {AND (NOT CheckWin32Version(6,2))} then
-  begin
-    if SVNClient.ValidClient then
-    begin
-      OpenSSLFileName:='libeay32.dll';
-      // First check remote URL
-      OperationSucceeded:=SimpleExportFromSVN('DownloadOpenSSL',OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,'');
-      // Perform download
-      if OperationSucceeded then
-        OperationSucceeded:=SimpleExportFromSVN('DownloadOpenSSL',OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath);
-
-      OpenSSLFileName:='ssleay32.dll';
-      // First check remote URL
-      if OperationSucceeded then
-        OperationSucceeded:=SimpleExportFromSVN('DownloadOpenSSL',OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,'');
-      // Perform download
-      if OperationSucceeded then
-        OperationSucceeded:=SimpleExportFromSVN('DownloadOpenSSL',OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath);
-    end;
-  end;
-
   // Direct download OpenSSL from from Lazarus binaries
-  if (NOT OperationSucceeded) AND (NOT SVNClient.ValidClient) then
+  if (NOT OperationSucceeded) then
   begin
     OpenSSLFileName:='libeay32.dll';
-    OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
+    OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
     if OperationSucceeded then
     begin
       OpenSSLFileName:='ssleay32.dll';
-      OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
+      OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
     end;
   end;
 
@@ -2496,7 +2474,7 @@ begin
   begin
     localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
 
-    Infoln(localinfotext+'Got OpenSLL from '+OPENSSL_URL_LATEST_SVN+'.',etWarning);
+    Infoln(localinfotext+'Got OpenSLL from '+OPENSSL_URL_LATEST+'.',etWarning);
 
     OpenSSLFileName := GetTempFileNameExt('FPCUPTMP','zip');
 
@@ -3594,30 +3572,33 @@ begin
 
         PatchFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME;
 
-        PatchList.LoadFromFile(PatchFilePath);
-
-        // are we able to patch
-        j:=-1;
-        PatchAccepted:=True;
-        for i:=0 to (PatchList.Count-1) do
+        if (FileExists(PatchFilePath)) then
         begin
-          s:=PatchList.Strings[i];
-          if (Pos(DARWINHACKMAGIC,s)>0) then
+          PatchList.LoadFromFile(PatchFilePath);
+
+          // are we able to patch
+          j:=-1;
+          PatchAccepted:=True;
+          for i:=0 to (PatchList.Count-1) do
           begin
-            PatchAccepted:=False;
-            break; // we were here already ... ;-)
+            s:=PatchList.Strings[i];
+            if (Pos(DARWINHACKMAGIC,s)>0) then
+            begin
+              PatchAccepted:=False;
+              break; // we were here already ... ;-)
+            end;
+            if (Pos(DARWINCHECKMAGIC,s)>0) then j:=i; //store position
           end;
-          if (Pos(DARWINCHECKMAGIC,s)>0) then j:=i; //store position
-        end;
 
-        if (PatchAccepted AND (j<>-1)) then
-        begin
-          Inc(j);
-          PatchList.Insert(j+1,'endif');
-          PatchList.Insert(j,'else');
-          PatchList.Insert(j,#9+DARWINHACKMAGIC);
-          PatchList.Insert(j,'ifdef LCL_PLATFORM');
-          PatchList.SaveToFile(PatchFilePath);
+          if (PatchAccepted AND (j<>-1)) then
+          begin
+            Inc(j);
+            PatchList.Insert(j+1,'endif');
+            PatchList.Insert(j,'else');
+            PatchList.Insert(j,#9+DARWINHACKMAGIC);
+            PatchList.Insert(j,'ifdef LCL_PLATFORM');
+            PatchList.SaveToFile(PatchFilePath);
+          end;
         end;
 
       finally
@@ -3758,11 +3739,13 @@ begin
   begin
     RevFileName:='';
 
-    if (ModuleName=_LAZARUS) then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+REVINCFILENAME;
-    if (ModuleName=_FPC) then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+    if (ModuleName=_LAZARUS) then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide';
+    if (ModuleName=_FPC) then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler';
 
     if (Length(RevFileName)>0) then
     begin
+      if (NOT DirectoryExists(RevFileName)) then exit;
+      RevFileName:=RevFileName+PathDelim+REVINCFILENAME;
       DeleteFile(RevFileName);
       RevisionStringList:=TStringList.Create;
       try

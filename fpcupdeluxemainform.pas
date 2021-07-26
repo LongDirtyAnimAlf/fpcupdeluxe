@@ -499,7 +499,7 @@ begin
 
   if NOT FileExists(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME) then
   begin
-    // chkGitlab.Checked:=true;
+    chkGitlab.Checked:=true;
   end;
 
   // get last used install directory, proxy and visual settings
@@ -4229,6 +4229,7 @@ begin
   AddMessage('');
 
   try
+    {$ifdef READER}
     try
       //Form1.SetFocusedControl(BitBtnHalt);
       CommandOutputScreen.Enabled:=false;
@@ -4237,6 +4238,9 @@ begin
       //Form1.SetFocusedControl(btnInstallDirSelect);
       CommandOutputScreen.Enabled:=true;
     end;
+    {$else}
+    result:=FPCupManager.Run;
+    {$endif}
     if (NOT result) then
     begin
       AddMessage('');
@@ -4383,7 +4387,7 @@ begin
       AddMessage('Got settings from install directory');
       AddMessage('');
 
-      //chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
+      chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
 
       // get names of cross-compilers
       AutoUpdateCrossCompiler(nil);
@@ -4495,7 +4499,7 @@ begin
   try
     with TMemIniFile.Create(aDir+DirectorySeparator+installerUniversal.DELUXEFILENAME) do
     try
-      //WriteBool('General','Gitlab',chkGitlab.Checked);
+      WriteBool('General','Gitlab',chkGitlab.Checked);
 
       // mmm, is this correct ?  See extrasettings !!
       WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
@@ -4758,30 +4762,36 @@ begin
 
   if (ExistWordInString(PChar(MsgPasStr),'failed to get crossbinutils',[soDown])) then
   begin
-    memoSummary.Lines.Append('Missing correct cross libraries');
+    if (NOT MissingCrossBins) then memoSummary.Lines.Append('Missing correct cross libraries');
     MissingCrossBins:=true;
   end
   else if (ExistWordInString(PChar(MsgPasStr),'failed to get crosslibrary',[soDown])) then
   begin
-    memoSummary.Lines.Append('Missing correct cross libraries');
+    if (NOT MissingCrossLibs) then memoSummary.Lines.Append('Missing correct cross libraries');
     MissingCrossLibs:=true;
   end
   else if ((ExistWordInString(PChar(MsgPasStr),'CheckAndGetTools',[soDown])) OR (ExistWordInString(PChar(MsgPasStr),'Required package is not installed',[soDown]))) then
   begin
+    if (NOT MissingTools) then
+    begin
+      {$ifdef Darwin}
+      memoSummary.Lines.Append('Missing some tools: please install Xcode command line tools !');
+      memoSummary.Lines.Append('xcode-select --install');
+      {$else}
+      memoSummary.Lines.Append('Missing some tools: please install missing tools!');
+      {$endif}
+    end;
     MissingTools:=true;
-    {$ifdef Darwin}
-    memoSummary.Lines.Append('Missing some tools: please install Xcode command line tools !');
-    memoSummary.Lines.Append('xcode-select --install');
-    {$else}
-    memoSummary.Lines.Append('Missing some tools: please install missing tools!');
-    {$endif}
   {$ifdef Darwin}
   end
   else if (ExistWordInString(PChar(MsgPasStr),'The subversion command line tools are no longer provided by Xcode',[soDown])) then
   begin
+    if (NOT MissingTools) then
+    begin
+      memoSummary.Lines.Append('SVN is no longer included in Xcode command line tools !');
+      memoSummary.Lines.Append('Use a GIT repo (preferred) or install SVN by yourself (brew).');
+    end;
     MissingTools:=true;
-    memoSummary.Lines.Append('SVN is no longer included in Xcode command line tools !');
-    memoSummary.Lines.Append('Use a GIT repo (preferred) or install SVN by yourself (brew).');
   {$endif}
   end;
 

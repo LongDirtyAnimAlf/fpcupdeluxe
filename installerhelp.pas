@@ -305,10 +305,13 @@ var
   i: longint;
   HelpUrl:string;
   LazarusVersion:string;
+  RunTwice:boolean;
 begin
   result:=inherited;
   result:=InitModule;
   if not result then exit;
+
+  OperationSucceeded:=false;
 
   if FileExists(FTargetDirectory+'fcl.chm') and
     FileExists(FTargetDirectory+'rtl.chm') then
@@ -358,46 +361,20 @@ begin
       end;
     end;
 
-    if Length(HelpUrl)=0 then
-    begin
-      //Help version determination failed totally.
-      //Get help from latest !!
-      //HelpUrl:=HELPSOURCEURL[High(HELPSOURCEURL),1];
-      HelpUrl:=CHM_URL_LATEST_SVN;
-    end;
-
     ForceDirectoriesSafe(ExcludeTrailingPathDelimiter(FTargetDirectory));
-
-    if (HelpUrl=CHM_URL_LATEST_SVN) then
-    begin
-      result:=SimpleExportFromSVN(ModuleName,HelpUrl,FTargetDirectory);
-      if (NOT result) then Infoln(ModuleName+': SVN download documents failed. URL: '+HelpUrl, etWarning);
-      result:=true;
-      exit;
-    end;
-
     DocsZip := GetTempFileNameExt('FPCUPTMP','zip');
 
-    OperationSucceeded:=true;
-
-    try
-      OperationSucceeded:=Download(FUseWget, HELP_URL_BASE+HelpUrl+'/download', DocsZip);
-    except
-      on E: Exception do
-      begin
-        // Deal with timeouts, wrong URLs etc
-        OperationSucceeded:=false;
-        Infoln(ModuleName+': Download documents failed. URL: '+HELP_URL_BASE+HelpUrl+LineEnding+
-          'Exception: '+E.ClassName+'/'+E.Message, etWarning);
-      end;
-    end;
-
-    if NOT OperationSucceeded then
+    for RunTwice in boolean do
     begin
-      //Try again
+      if OperationSucceeded then break;
       SysUtils.DeleteFile(DocsZip); //Get rid of temp zip
       try
-        OperationSucceeded:=Download(FUseWget, HELP_URL_BASE+HelpUrl+'/download', DocsZip);
+        if Length(HelpUrl)=0 then
+          //Help version determination failed totally.
+          //Get help from latest !!
+          OperationSucceeded:=Download(FUseWget, LAZARUSGITLABBINARIES+'/-/archive/main/binaries-main.zip?path=docs/chm', DocsZip)
+        else
+          OperationSucceeded:=Download(FUseWget, HELP_URL_BASE+HelpUrl+'/download', DocsZip);
       except
         on E: Exception do
         begin
@@ -409,26 +386,9 @@ begin
       end;
     end;
 
-    if NOT OperationSucceeded then
+    for RunTwice in boolean do
     begin
-      //Try again with alternative URL
-      SysUtils.DeleteFile(DocsZip); //Get rid of temp zip
-      try
-        OperationSucceeded:=Download(FUseWget, HELP_URL_BASE_ALTERNATIVE+HelpUrl, DocsZip);
-      except
-        on E: Exception do
-        begin
-          // Deal with timeouts, wrong URLs etc
-          OperationSucceeded:=false;
-          Infoln(ModuleName+': Download documents failed. URL: '+HELP_URL_BASE_ALTERNATIVE+HelpUrl+LineEnding+
-            'Exception: '+E.ClassName+'/'+E.Message, etWarning);
-        end;
-      end;
-    end;
-
-    if NOT OperationSucceeded then
-    begin
-      //Try a second time with alternative URL
+      if OperationSucceeded then break;
       SysUtils.DeleteFile(DocsZip); //Get rid of temp zip
       try
         OperationSucceeded:=Download(FUseWget, HELP_URL_BASE_ALTERNATIVE+HelpUrl, DocsZip);
