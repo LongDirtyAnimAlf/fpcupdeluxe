@@ -499,7 +499,7 @@ begin
 
   if NOT FileExists(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME) then
   begin
-    chkGitlab.Checked:=true;
+    // chkGitlab.Checked:=true;
   end;
 
   // get last used install directory, proxy and visual settings
@@ -4383,7 +4383,7 @@ begin
       AddMessage('Got settings from install directory');
       AddMessage('');
 
-      chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
+      //chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
 
       // get names of cross-compilers
       AutoUpdateCrossCompiler(nil);
@@ -4495,7 +4495,7 @@ begin
   try
     with TMemIniFile.Create(aDir+DirectorySeparator+installerUniversal.DELUXEFILENAME) do
     try
-      WriteBool('General','Gitlab',chkGitlab.Checked);
+      //WriteBool('General','Gitlab',chkGitlab.Checked);
 
       // mmm, is this correct ?  See extrasettings !!
       WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));

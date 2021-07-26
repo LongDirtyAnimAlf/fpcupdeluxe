@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 37
+  Left = 238
   Height = 701
-  Top = 68
+  Top = 87
   Width = 1337
   Anchors = []
   Caption = 'Form1'
@@ -3531,6 +3531,7 @@ object Form1: TForm1
         Caption = 'Gitlab'
         OnChange = chkGitlabChange
         TabOrder = 5
+        Visible = False
       end
       object imgSVN: TImage
         AnchorSideLeft.Control = BasicSheet
