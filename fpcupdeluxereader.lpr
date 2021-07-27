@@ -1,4 +1,4 @@
-program fpcupdeluxereaderremote;
+program fpcupdeluxereader;
 
 {$mode objfpc}{$H+}
 {$ifdef Windows}

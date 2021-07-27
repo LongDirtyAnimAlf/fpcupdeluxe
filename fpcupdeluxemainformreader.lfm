@@ -477,6 +477,7 @@ object Form1: TForm1
         Caption = 'Gitlab'
         OnChange = chkGitlabChange
         TabOrder = 0
+        Visible = False
       end
       object imgSVN: TImage
         AnchorSideLeft.Control = BasicSheet

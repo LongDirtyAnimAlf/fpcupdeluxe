@@ -582,7 +582,6 @@ object Form1: TForm1
     LineHighlightColor.Background = clNone
     LineHighlightColor.Foreground = clNone
     LineHighlightColor.FrameEdges = sfeNone
-    OnChange = CommandOutputScreenChange
     OnSpecialLineMarkup = CommandOutputScreenSpecialLineMarkup
     inline SynLeftGutterPartList1: TSynGutterPartList
     end

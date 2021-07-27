@@ -85,6 +85,8 @@ begin
           LeftOverOptions.Add('lazsplit');
           LeftOverOptions.Add('verbose');
           LeftOverOptions.Add('version');
+          LeftOverOptions.Add('usegitlab');
+
           try
             for i:=Options.Params.Count-1 downto 0 do
             begin
@@ -363,19 +365,32 @@ begin
     end;
     FManager.LoadFPCUPConfig;
     //load URLs after LoadFPCUPConfig so we're sure we have loaded/parsed the URL aliases
+
+
     try
-      s:=Options.GetOption('','fpcVersion','');
-      if (Length(s)>0) then
-        FManager.FPCTAG:=s
-      else
-        FManager.FPCURL:=Options.GetOption('','fpcURL',installerUniversal.GetAlias('fpcURL','stable'));
-      {$ifndef FPCONLY}
-      s:=Options.GetOption('','lazVersion','');
-      if (Length(s)>0) then
-        FManager.LazarusTAG:=s
-      else
-        FManager.LazarusURL:=Options.GetOption('','lazURL',installerUniversal.GetAlias('lazURL','stable'));
+      if Options.GetOptionNoParam('','usegitlab')
+      then
+      begin
+        FManager.FPCTAG:=Options.GetOption('','fpcVersion','stable');
+        {$ifndef FPCONLY}
+        FManager.LazarusTAG:=Options.GetOption('','lazVersion','stable');
       {$endif}
+      end
+      else
+      begin
+        s:=Options.GetOption('','fpcVersion','');
+        if (Length(s)>0) then
+          FManager.FPCURL:=s
+        else
+          FManager.FPCURL:=Options.GetOption('','fpcURL',installerUniversal.GetAlias('fpcURL','stable'));
+        {$ifndef FPCONLY}
+        s:=Options.GetOption('','lazVersion','');
+        if (Length(s)>0) then
+          FManager.LazarusURL:=s
+        else
+          FManager.LazarusURL:=Options.GetOption('','lazURL',installerUniversal.GetAlias('lazURL','stable'));
+        {$endif}
+      end;
     except
       on E:Exception do
       begin
