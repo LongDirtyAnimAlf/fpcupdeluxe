@@ -4490,7 +4490,10 @@ begin
   end;
   {$ENDIF}
 
-  aCleanupCompiler:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+GetCompilerName(GetTargetCPU);
+  aCleanupCompiler:='';
+  if (FSourceDirectory<>FInstallDirectory) then
+    aCleanupCompiler:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+GetCompilerName(GetTargetCPU);
+
   if (NOT FileExists(aCleanupCompiler)) then
   begin
     if FileExists(FCompiler)
@@ -4707,6 +4710,10 @@ begin
     finally
       DeleteList.Free;
     end;
+  end
+  else
+  begin
+    Infoln(infotext+'Cleaning of sources unsuccessfull. Will try later.',etInfo);
   end;
 
 end;
