@@ -1218,7 +1218,7 @@ begin
     SysUtils.DeleteFile(ScriptFile); //Get rid of any existing remnants
     ScriptText.Add('#!/bin/sh');
     ScriptText.Add('# '+BeginSnippet+' home startlink script');
-    ScriptText.Add(Target+' '+TargetArguments);
+    ScriptText.Add(Target+' '+TargetArguments+' "$@"');
     try
       ScriptText.SaveToFile(ScriptFile);
       FpChmod(ScriptFile, &755); //rwxr-xr-x
