@@ -988,12 +988,6 @@ begin
     {$IFDEF MSWINDOWS}
     ForceDirectoriesSafe(FMakeDir);
 
-    (*
-    // check if we have make ... otherwise get it from standard URL
-    GetFile(FPCBINARIES+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+
-            '/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make),Make);
-    *)
-
     {$ifdef win64}
     // the standard make by FPC does not work when Git is present (and in the path), but this one works ??!!
     // (but the FPC installer sets its own path to isolate itself from the system, so FPC make still works)
@@ -1426,13 +1420,22 @@ begin
       end;
     end;
 
-    {$IFNDEF MSWINDOWS}
     if OperationSucceeded then
     begin
+    {$IFDEF MSWINDOWS}
+      // check if we have make ... otherwise get it from standard URL
+      if (NOT FileExists(Make)) then
+      begin
+        aURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
+        Infoln(localinfotext+'Make binary not found. Getting it from: '+aURL+'.',etInfo);
+        GetFile(aURL,Make);
+        OperationSucceeded:=FileExists(Make);
+      end;
+    {$ELSE}
       OperationSucceeded := CheckExecutable(Make, ['-v'], '');
       if (NOT OperationSucceeded) then Infoln(localinfotext+Make+' not found.',etError);
-    end;
     {$ENDIF}
+    end;
 
     FNeededExecutablesChecked:=OperationSucceeded;
   end;
@@ -1496,17 +1499,6 @@ begin
 
   if OperationSucceeded then
   begin
-
-    {$IFDEF MSWINDOWS}
-    // check if we have make ... otherwise get it from standard URL
-    if (NOT FileExists(Make)) then
-    begin
-      s1:=FPCBINARIES+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
-      Infoln(s2+'Make binary not found. Getting it from: '+s1+'.',etInfo);
-      GetFile(s1,Make);
-      OperationSucceeded:=FileExists(Make);
-    end;
-    {$ENDIF MSWINDOWS}
 
     // Check for proper make executable
     if OperationSucceeded then
