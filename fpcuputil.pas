@@ -1854,7 +1854,9 @@ begin
 
   if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
 
+  {$ifdef mswindows}
   if (NOT aDownLoader.checkURL(URL)) then exit;
+  {$endif}
 
   result:=aDownLoader.getStream(URL,aDataStream);
 end;
