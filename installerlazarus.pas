@@ -1624,7 +1624,8 @@ begin
   Result := inherited;
   Result := true;
 
-  GetVersion;
+  s:=GetVersion;
+  if ((Length(s)=0) OR (s='0.0.0')) then exit;
 
   if DirectoryExists(FPrimaryConfigPath) = false then
   begin

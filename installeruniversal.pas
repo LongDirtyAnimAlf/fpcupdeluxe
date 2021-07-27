@@ -2979,6 +2979,8 @@ begin
 end;
 
 function GetKeyword(aDictionary,aAlias: string): string;
+const
+  ALIASMAGIC='ALIAS';
 var
   ini:TMemIniFile;
   sl:TStringList;
@@ -2995,20 +2997,27 @@ begin
   ini.CaseSensitive:=false;
   {$ENDIF}
 
-  try
-    ini.ReadSectionValues('ALIAS'+aDictionary,sl);
-    for i:=0 to Pred(sl.Count) do
-    begin
-      if sl.ValueFromIndex[i]=aAlias then
+  if ((aDictionary='fpcTAG') OR (aDictionary='fpcBRANCH')) AND (aAlias=FPCTRUNKBRANCH) then result:='trunk';
+  if ((aDictionary='lazTAG') OR (aDictionary='lazBRANCH')) AND (aAlias=LAZARUSTRUNKBRANCH) then result:='trunk';
+
+  if (Length(result)=0) then
+  begin
+    try
+      ini.ReadSectionValues(ALIASMAGIC+aDictionary,sl);
+      for i:=0 to Pred(sl.Count) do
       begin
-        result:=sl.Names[i];
-        break;
+        if sl.ValueFromIndex[i]=aAlias then
+        begin
+          result:=sl.Names[i];
+          break;
+        end;
       end;
+    finally
+      ini.Free;
+      sl.free;
     end;
-  finally
-    ini.Free;
-    sl.free;
   end;
+
 end;
 
 function GetAlias(aDictionary,aKeyWord: string): string;
@@ -3035,6 +3044,10 @@ begin
     else
     begin
       result:=ini.ReadString(ALIASMAGIC+aDictionary,aKeyWord,'');
+
+      if ((aDictionary='fpcTAG') OR (aDictionary='fpcBRANCH')) AND (result='trunk') then result:=FPCTRUNKBRANCH;
+      if ((aDictionary='lazTAG') OR (aDictionary='lazBRANCH')) AND (result='trunk') then result:=LAZARUSTRUNKBRANCH;
+
       if (result='') then
       begin
         if (Pos('fpcURL',aDictionary)=1) OR (Pos('fpcTAG',aDictionary)=1) OR (Pos('fpcBRANCH',aDictionary)=1) then

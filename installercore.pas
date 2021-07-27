@@ -3594,30 +3594,33 @@ begin
 
         PatchFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME;
 
-        PatchList.LoadFromFile(PatchFilePath);
-
-        // are we able to patch
-        j:=-1;
-        PatchAccepted:=True;
-        for i:=0 to (PatchList.Count-1) do
+        if (FileExists(PatchFilePath)) then
         begin
-          s:=PatchList.Strings[i];
-          if (Pos(DARWINHACKMAGIC,s)>0) then
+          PatchList.LoadFromFile(PatchFilePath);
+
+          // are we able to patch
+          j:=-1;
+          PatchAccepted:=True;
+          for i:=0 to (PatchList.Count-1) do
           begin
-            PatchAccepted:=False;
-            break; // we were here already ... ;-)
+            s:=PatchList.Strings[i];
+            if (Pos(DARWINHACKMAGIC,s)>0) then
+            begin
+              PatchAccepted:=False;
+              break; // we were here already ... ;-)
+            end;
+            if (Pos(DARWINCHECKMAGIC,s)>0) then j:=i; //store position
           end;
-          if (Pos(DARWINCHECKMAGIC,s)>0) then j:=i; //store position
-        end;
 
-        if (PatchAccepted AND (j<>-1)) then
-        begin
-          Inc(j);
-          PatchList.Insert(j+1,'endif');
-          PatchList.Insert(j,'else');
-          PatchList.Insert(j,#9+DARWINHACKMAGIC);
-          PatchList.Insert(j,'ifdef LCL_PLATFORM');
-          PatchList.SaveToFile(PatchFilePath);
+          if (PatchAccepted AND (j<>-1)) then
+          begin
+            Inc(j);
+            PatchList.Insert(j+1,'endif');
+            PatchList.Insert(j,'else');
+            PatchList.Insert(j,#9+DARWINHACKMAGIC);
+            PatchList.Insert(j,'ifdef LCL_PLATFORM');
+            PatchList.SaveToFile(PatchFilePath);
+          end;
         end;
 
       finally
@@ -3758,11 +3761,13 @@ begin
   begin
     RevFileName:='';
 
-    if (ModuleName=_LAZARUS) then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+REVINCFILENAME;
-    if (ModuleName=_FPC) then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+    if (ModuleName=_LAZARUS) then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide';
+    if (ModuleName=_FPC) then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler';
 
     if (Length(RevFileName)>0) then
     begin
+      if (NOT DirectoryExists(RevFileName)) then exit;
+      RevFileName:=RevFileName+PathDelim+REVINCFILENAME;
       DeleteFile(RevFileName);
       RevisionStringList:=TStringList.Create;
       try
