@@ -68,9 +68,15 @@ const
 
   FPCGITLAB             = GITLAB + 'fpc';
   FPCGITLABREPO         = FPCGITLAB + '/testconversion2';
+  FPCGITLABBINARIES     = FPCGITLAB + '/build';
+  FPCTRUNKBRANCH        = 'master';
+  //FPCBINARIES           = FPCGITLABBINARIES + '/-/raw/'+FPCTRUNKBRANCH;
 
   LAZARUSGITLAB         = GITLAB + 'lazarus';
-  LAZARUSGITLABREPO     = LAZARUSGITLAB + '/sandbox/lazarus_test_conversion_2';
+  LAZARUSGITLABREPO     = LAZARUSGITLAB + '/lazarus';
+  LAZARUSGITLABBINARIES = LAZARUSGITLAB + '/binaries';
+  LAZARUSTRUNKBRANCH    = 'main';
+  //LAZARUSBINARIES       = LAZARUSGITLABBINARIES + '/-/raw/'+LAZARUSTRUNKBRANCH;
 
   SVNBASEHTTP           = 'https://svn.';
   SVNBASESVN            = 'svn://svn.';
@@ -86,7 +92,7 @@ const
 
   LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
 
-  BINUTILSURL           = FPCBASESVNURL + '/svn/fpcbuild';
+  FPCBINARIES           = FPCBASESVNURL + '/svn/fpcbuild';
 
   PACKAGESLOCATION      = 'packages.fppkg';
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';
@@ -96,8 +102,8 @@ const
 
   {$IFDEF WINDOWS}
   //FPC prebuilt binaries of the GNU Binutils
-  PREBUILTBINUTILSURL      = BINUTILSURL + '/binaries/i386-win32';
-  PREBUILTBINUTILSURLWINCE = BINUTILSURL + '/tags/release_3_0_4/install/crossbinwce';
+  PREBUILTBINUTILSURL      = FPCBINARIES + '/binaries/i386-win32';
+  PREBUILTBINUTILSURLWINCE = FPCBINARIES + '/tags/release_3_0_4/install/crossbinwce';
   {$ENDIF}
 
   LAZARUSBINARIES = FPCBASESVNURL + '/svn/lazarus/binaries';
@@ -123,7 +129,7 @@ const
   //NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win64/nasm-2.13-win64.zip';
   NASMWIN32URL='https://www.nasm.us/pub/nasm/releasebuilds/2.14/win32/nasm-2.14-win32.zip';
   NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.14/win64/nasm-2.14-win64.zip';
-  NASMFPCURL=BINUTILSURL + '/trunk/install/crossbinmsdos/nasm.exe';
+  NASMFPCURL=FPCBINARIES + '/trunk/install/crossbinmsdos/nasm.exe';
 
   GITREPO='https://github.com/LongDirtyAnimAlf';
   FPCUPGITREPO=GITREPO+'/fpcupdeluxe';
@@ -984,7 +990,7 @@ begin
 
     (*
     // check if we have make ... otherwise get it from standard URL
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+
+    GetFile(FPCBINARIES+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+
             '/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make),Make);
     *)
 
@@ -1082,7 +1088,7 @@ begin
     {$endif}
 
     // Get patch binary from default binutils URL
-    aURL:=BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
+    aURL:=FPCBINARIES+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
 
     OperationSucceeded:=false;
     aLocalClientBinary:=FPatchCmd;
@@ -1495,7 +1501,7 @@ begin
     // check if we have make ... otherwise get it from standard URL
     if (NOT FileExists(Make)) then
     begin
-      s1:=BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
+      s1:=FPCBINARIES+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
       Infoln(s2+'Make binary not found. Getting it from: '+s1+'.',etInfo);
       GetFile(s1,Make);
       OperationSucceeded:=FileExists(Make);
@@ -1590,9 +1596,9 @@ begin
      then aTag:='trunk'
      else aTag:='tags/release_'+StringReplace(aVersion,'.','_',[rfReplaceAll]);
 
-  aSourceURL:=BINUTILSURL+'/'+aTag+'/install/binw32/';
+  aSourceURL:=FPCBINARIES+'/'+aTag+'/install/binw32/';
   {$ifdef win64}
-  aSourceURL64:=BINUTILSURL+'/'+aTag+'/install/binw64/';
+  aSourceURL64:=FPCBINARIES+'/'+aTag+'/install/binw64/';
   {$endif}
 
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)
