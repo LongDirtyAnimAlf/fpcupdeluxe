@@ -1416,7 +1416,6 @@ var
 begin
   result:='0.0.0';
 
-  //if Pos('https://gitlab.com/freepascal.org/',URL)=1 then result:='0.0.0' else
   if Pos('trunk',URL)>0 then result:='trunk' else
   if Pos('newpascal',URL)>0 then result:='trunk' else
   if Pos('freepascal.git',URL)>0 then result:='trunk' else
@@ -1854,6 +1853,9 @@ begin
   {$endif}
 
   if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+
+  if (NOT aDownLoader.checkURL(URL)) then exit;
+
   result:=aDownLoader.getStream(URL,aDataStream);
 end;
 
@@ -2157,8 +2159,7 @@ begin
        then aDownLoader:=TWGetDownLoader.Create
        else aDownLoader:=TNativeDownLoader.Create;
     try
-      if aDownLoader.checkURL(URL) then
-        result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+      result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
     finally
       aDownLoader.Destroy;
     end;

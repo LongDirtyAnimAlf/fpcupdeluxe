@@ -4490,7 +4490,10 @@ begin
   end;
   {$ENDIF}
 
-  aCleanupCompiler:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+GetCompilerName(GetTargetCPU);
+  aCleanupCompiler:='';
+  if (FSourceDirectory<>FInstallDirectory) then
+    aCleanupCompiler:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+GetCompilerName(GetTargetCPU);
+
   if (NOT FileExists(aCleanupCompiler)) then
   begin
     if FileExists(FCompiler)

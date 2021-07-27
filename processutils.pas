@@ -497,7 +497,7 @@ begin
       end;
       if Verbose OR FFPCMagic
       //OR (NOT IsMultiThread)
-      {$ifndef LCL} OR True{$endif}
+      //{$ifndef LCL} OR True{$endif}
       {$ifdef DEBUG} OR True{$endif}
       then
       begin
