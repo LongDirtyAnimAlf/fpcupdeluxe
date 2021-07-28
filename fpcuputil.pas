@@ -519,6 +519,15 @@ begin
   end else result:='';
 end;
 
+function CleanURL(URL:string):string;
+const
+  URLMAGIC='/download';
+begin
+  result:=URL;
+  if AnsiEndsText(URLMAGIC,URL) then SetLength(result,Length(URL)-Length(URLMAGIC));
+end;
+
+
 (*
 
 function ResNameProc({%H-}ModuleHandle : TFPResourceHMODULE; {%H-}ResourceType, ResourceName : PChar; {%H-}lParam : PtrInt) : LongBool; stdcall;
@@ -1231,14 +1240,11 @@ begin
 end;
 
 function FileNameFromURL(URL:string):string;
-const
-  URLMAGIC='/download';
 var
   URI:URIPARSER.TURI;
   aURL:string;
 begin
-  aURL:=URL;
-  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  aURL:=CleanURL(URL);
   URI:=ParseURI(aURL);
   result:=URI.Document;
 end;
@@ -1899,8 +1905,6 @@ end;
 
 {$ifdef MSWindows}
 function DownloadByWinINet(URL: string; aDataStream: TSTream): boolean;
-const
-  URLMAGIC='/download';
 var
   URI    : URIPARSER.TURI;
   aURL,P : String;
@@ -1913,13 +1917,12 @@ var
 begin
   result:=false;
 
-  aURL:=URL;
-  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  aURL:=CleanURL(URL);
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
 
   //do not use WinINet for FTP
-  if CompareText(P,'ftp')=0 then exit;
+  if AnsiStartsText('ftp',P) then exit;
 
   //do not use WinINet for sourceforge : redirect is not working !
   //if CompareText(URI.Host,'downloads.sourceforge.net')=0 then exit;
@@ -2040,15 +2043,12 @@ begin
 end;
 
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
-const
-  URLMAGIC='/download';
 var
   Output : String;
   URI    : URIPARSER.TURI;
   aURL,P : String;
 begin
-  aURL:=URL;
-  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  aURL:=CleanURL(URL);
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
   //result:=(ExecuteCommandCompat('powershell -command "[Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; (new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
@@ -2070,15 +2070,12 @@ begin
 end;
 
 function DownloadByBitsAdmin(URL, TargetFile: string): boolean;
-const
-  URLMAGIC='/download';
 var
   Output : String;
   URI    : URIPARSER.TURI;
   aURL,P : String;
 begin
-  aURL:=URL;
-  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  aURL:=CleanURL(URL);
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
 
@@ -4982,7 +4979,7 @@ begin
   result:=false;
   URI:=ParseURI(URL);
   P:=URI.Protocol;
-  if CompareText(P,'ftp')=0 then
+  if AnsiStartsText('ftp',P) then
   begin
     with TFTPSend.Create do
     try
@@ -5154,42 +5151,56 @@ end;
 
 function TUseNativeDownLoader.checkURL(const URL:string):boolean;
 const
-  HTTPHEADER='Connection';
-  HTTPHEADERVALUE='Close';
+  HTTPHEADER      = 'Connection';
+  HTTPHEADERVALUE = 'Close';
 var
-  response: Integer;
+  aURL,P   : String;
+  response : Integer;
+  URI      : URIPARSER.TURI;
 begin
   result:=false;
-  with aFPHTTPClient do
+
+  aURL:=CleanURL(URL);
+  URI:=ParseURI(aURL);
+  P:=URI.Protocol;
+
+  // Only check http[s]
+  if AnsiStartsText('http',P) then
   begin
-    AddHeader(HTTPHEADER,HTTPHEADERVALUE);
-    try
-      HTTPMethod('HEAD', URL, Nil, []);
-      response:=ResponseStatusCode;
-      // 404 Not Found
-      // The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.
-      result:=(response<>404);
-    except
-    end;
-    // remove additional header
-    if GetHeader(HTTPHEADER)=HTTPHEADERVALUE then
+    with aFPHTTPClient do
     begin
-      response:=IndexOfHeader(HTTPHEADER);
-      if (response<>-1) then RequestHeaders.Delete(response);
+      AddHeader(HTTPHEADER,HTTPHEADERVALUE);
+      try
+        HTTPMethod('HEAD', URL, Nil, []);
+        response:=ResponseStatusCode;
+        // 404 Not Found
+        // The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.
+        result:=(response<>404);
+      except
+      end;
+      // remove additional header
+      if GetHeader(HTTPHEADER)=HTTPHEADERVALUE then
+      begin
+        response:=IndexOfHeader(HTTPHEADER);
+        if (response<>-1) then RequestHeaders.Delete(response);
+      end;
     end;
+  end
+  else
+  begin
+    result:=true;
   end;
+
 end;
 
 function TUseNativeDownLoader.Download(const URL: String; aDataStream:TStream):boolean;
-const
-  URLMAGIC='/download';
 Var
   URI    : URIPARSER.TURI;
   aURL,P : String;
 begin
   result:=false;
-  aURL:=URL;
-  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+
+  aURL:=CleanURL(URL);
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
 
@@ -5199,12 +5210,8 @@ begin
     StoredTickCount:=0;
   end;
 
-  If CompareText(P,'ftp')=0 then
-    result:=FTPDownload(URL,aDataStream)
-  else if CompareText(P,'http')=0 then
-    result:=HTTPDownload(URL,aDataStream)
-  else if CompareText(P,'https')=0 then
-    result:=HTTPDownload(URL,aDataStream);
+  if AnsiStartsText('ftp',P) then result:=FTPDownload(URL,aDataStream);
+  if AnsiStartsText('http',P) then result:=HTTPDownload(URL,aDataStream);
 end;
 {$endif}
 
@@ -5311,7 +5318,7 @@ begin
 
   URI:=ParseURI(URL);
   P:=URI.Protocol;
-  if CompareText(P,'ftp')=0 then
+  if AnsiStartsText('ftp',P) then
   begin
     aURL:=URL;
     if aURL[Length(aURL)]<>'/' then aURL:=aURL+'/';
@@ -5468,7 +5475,7 @@ begin
 
   URI:=ParseURI(URL);
   s:=URI.Protocol;
-  if CompareText(s,'ftp')=0 then
+  if AnsiStartsText('ftp',s) then
   begin
     if LoadCurlLibrary then
     begin
@@ -5673,12 +5680,8 @@ begin
     StoredTickCount:=0;
   end;
 
-  If CompareText(P,'ftp')=0 then
-    result:=FTPDownload(URL,aDataStream)
-  else if CompareText(P,'http')=0 then
-    result:=HTTPDownload(URL,aDataStream)
-  else if CompareText(P,'https')=0 then
-    result:=HTTPDownload(URL,aDataStream);
+  if AnsiStartsText('ftp',P) then result:=FTPDownload(URL,aDataStream);
+  if AnsiStartsText('http',P) then result:=HTTPDownload(URL,aDataStream);
 end;
 
 function TUseWGetDownloader.getFile(const URL,aFilename:string):boolean;

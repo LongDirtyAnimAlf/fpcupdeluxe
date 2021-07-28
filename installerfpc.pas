@@ -4826,10 +4826,10 @@ begin
         UpdateWarnings.Add('');
       end;
       UpdateWarnings.Add(FPCDATEMAGIC+DateTimeToStr(now));
-      if aRepoClient<>nil then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
+      if Assigned(aRepoClient) then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
       UpdateWarnings.Add(ModuleName+' previous revision: '+PreviousRevision);
       UpdateWarnings.Add(FPCREVMAGIC+ActualRevision);
-      if (aRepoClient.ClassType=FGitClient.ClassType) then
+      if (Assigned(aRepoClient) AND (aRepoClient.ClassType=FGitClient.ClassType)) then
         UpdateWarnings.Add(FPCHASHMAGIC+aRepoClient.LocalRevision);
       UpdateWarnings.Add('');
       UpdateWarnings.SaveToFile(s);

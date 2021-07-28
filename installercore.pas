@@ -2148,6 +2148,8 @@ begin
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFromURL: '+ModuleName+'): ';
 
+  if (Length(FURL)=0) then exit;
+
   if (NOT DirectoryIsEmpty(ExcludeTrailingPathDelimiter(FSourceDirectory))) then
   begin
     Infoln(localinfotext+ModuleName+' sources are already there.',etWarning);
@@ -2157,6 +2159,8 @@ begin
   end;
 
   Infoln(localinfotext+'Getting '+ModuleName+' sources.',etInfo);
+
+  if (FURL[Length(FURL)]='/') then SetLength(FURL,Pred(Length(FURL)));
 
   FPCArchive := GetTempFileNameExt('FPCUPTMP','zip');
   result:=GetFile(FURL,FPCArchive);
