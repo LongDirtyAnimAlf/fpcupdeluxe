@@ -5642,27 +5642,40 @@ end;
 function TUseWGetDownloader.checkURL(const URL:string):boolean;
 var
   Output:string;
+  URI:URIPARSER.TURI;
+  aURL,P:string;
 begin
   result:=false;
 
   if (NOT FWGETOk) then
-  begin
     exit;
+
+  aURL:=CleanURL(URL);
+  URI:=ParseURI(aURL);
+  P:=URI.Protocol;
+
+  // Only check http[s]
+  if AnsiStartsText('http',P) then
+  begin
+    Output:='';
+    result:=RunCommand(WGETBinary,['--no-check-certificate','--user-agent="'+FUserAgent+'"','--tries='+InttoStr(MaxRetries),'--spider',aURL],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+
+    if result then
+    begin
+      result:=(Pos('Remote file exists',Output)>0);
+    end;
+    if NOT result then
+    begin
+      // on github/gitlab?, we get a 403 forbidden for an existing file !!
+      result:=((Pos('github',Output)>0) {OR (Pos('gitlab',Output)>0)}) AND (Pos('403 Forbidden',Output)>0);
+      if (NOT result) then result:=(Pos('https://',Output)>0) AND (Pos('401 Unauthorized',Output)>0)
+    end;
+  end
+  else
+  begin
+    result:=true;
   end;
 
-  Output:='';
-  result:=RunCommand(WGETBinary,['--no-check-certificate','--user-agent="'+FUserAgent+'"','--tries='+InttoStr(MaxRetries),'--spider',URL],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-
-  if result then
-  begin
-    result:=(Pos('Remote file exists',Output)>0);
-  end;
-  if NOT result then
-  begin
-    // on github, we get a 403 forbidden for an existing file !!
-    result:=(Pos('github',Output)>0) AND (Pos('403 Forbidden',Output)>0);
-    if (NOT result) then result:=(Pos('https://',Output)>0) AND (Pos('401 Unauthorized',Output)>0)
-  end;
 end;
 
 function TUseWGetDownloader.Download(const URL: String; aDataStream: TStream):boolean;
