@@ -2361,10 +2361,10 @@ begin
         UpdateWarnings.Add('');
       end;
       UpdateWarnings.Add(LAZDATEMAGIC+DateTimeToStr(now));
-      if aRepoClient<>nil then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
+      if Assigned(aRepoClient) then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
       UpdateWarnings.Add(ModuleName+' previous revision: '+PreviousRevision);
       UpdateWarnings.Add(LAZREVMAGIC+ActualRevision);
-      if (aRepoClient.ClassType=FGitClient.ClassType) then
+      if (Assigned(aRepoClient) AND (aRepoClient.ClassType=FGitClient.ClassType)) then
         UpdateWarnings.Add(LAZHASHMAGIC+aRepoClient.LocalRevision);
       UpdateWarnings.Add('');
       UpdateWarnings.SaveToFile(s);
