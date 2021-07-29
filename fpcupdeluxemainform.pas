@@ -363,6 +363,7 @@ var
   IniFilesOk:boolean;
   aSystemTarget:string;
   aFPCTarget,aLazarusTarget:string;
+  bGitlab:boolean;
 begin
   MessageTrigger:=false;
 
@@ -470,13 +471,16 @@ begin
 
   aFPCTarget:='';
   aLazarusTarget:='';
+  bGitlab:=true;
 
   // get last used install directory, proxy and visual settings
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
 
-    // Read default FPC target from settings
+    // Read default FPC and Lazarus target from settings in app directory
+    // Will be overwritten by settings in install directory if needed.
+    bGitlab:=ReadBool('General','Gitlab',true);
     aFPCTarget:=ReadString('General','fpcVersion','');
     if (Length(aFPCTarget)=0) then
     begin
@@ -488,8 +492,6 @@ begin
       aFPCTarget:='stable.git';
       {$endif}
     end;
-
-    // Read default Lazarus target from settings
     aLazarusTarget:=ReadString('General','lazVersion','');
     if (Length(aLazarusTarget)=0) then
     begin
@@ -540,11 +542,7 @@ begin
     {$endif}
     if InstallDirEdit.OnKeyUp=nil then InstallDirEdit.OnChange:=@Edit1Change;
 
-    if (NOT FileExists(IncludeTrailingPathDelimiter(sInstallDir)+installerUniversal.DELUXEFILENAME)) then
-    begin
-      chkGitlab.Checked:=true;
-    end;
-
+    chkGitlab.Checked:=bGitlab;
     if (Length(aFPCTarget)>0) then FPCTarget:=aFPCTarget;
     if (Length(aLazarusTarget)>0) then LazarusTarget:=aLazarusTarget;
     FillSourceListboxes;
@@ -3879,6 +3877,8 @@ begin
     try
       WriteString('General','InstallDirectory',sInstallDir);
 
+      // Termorary store of target in app directory
+      WriteBool('General','Gitlab',chkGitlab.Checked);
       WriteString('General','fpcVersion',FPCTarget);
       WriteString('General','lazVersion',LazarusTarget);
 
