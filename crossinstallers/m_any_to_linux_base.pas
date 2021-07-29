@@ -322,7 +322,7 @@ begin
     result:=SearchBinUtil(BasePath,AsFile);
     if (not result) then
       result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
-    {$IFDEF LINUX}
+    {$IFDEF UNIX}
     if (not result) then
     begin
       for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
@@ -331,7 +331,49 @@ begin
         if result then break;
       end;
     end;
-    {$ENDIF LINUX}
+    {$ENDIF UNIX}
+    if (not result) then
+    begin
+      if (TargetCPU=TCPU.i386) then
+      begin
+        BinPrefixTry:='i586-linux-gnu-';
+        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        result:=SearchBinUtil(BasePath,AsFile);
+        if (not result) then
+          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+        {$IFDEF UNIX}
+        if (not result) then
+        begin
+          for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+          begin
+            result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+            if result then break;
+          end;
+        end;
+        {$ENDIF UNIX}
+      end;
+    end;
+    if (not result) then
+    begin
+      if (TargetCPU=TCPU.i386) then
+      begin
+        BinPrefixTry:='i686-linux-gnu-';
+        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        result:=SearchBinUtil(BasePath,AsFile);
+        if (not result) then
+          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+        {$IFDEF UNIX}
+        if (not result) then
+        begin
+          for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+          begin
+            result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+            if result then break;
+          end;
+        end;
+        {$ENDIF UNIX}
+      end;
+    end;
   end;
 
   {$IFDEF LINUX}
@@ -356,6 +398,25 @@ begin
       if (TargetCPU=TCPU.i386) then
       begin
         BinPrefixTry:='i586-suse-linux-';
+        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        result:=SearchBinUtil(BasePath,AsFile);
+        if (not result) then
+          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+        if (not result) then
+        begin
+          for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+          begin
+            result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+            if result then break;
+          end;
+        end;
+      end;
+    end;
+    if (not result) then
+    begin
+      if (TargetCPU=TCPU.i386) then
+      begin
+        BinPrefixTry:='i686-suse-linux-';
         AsFile:=BinPrefixTry+'as'+GetExeExt;
         result:=SearchBinUtil(BasePath,AsFile);
         if (not result) then
