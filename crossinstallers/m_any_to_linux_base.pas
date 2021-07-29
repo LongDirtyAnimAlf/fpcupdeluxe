@@ -262,7 +262,8 @@ var
   AsFile: string;
   BinPrefixTry: string;
   aDirName: string;
-  s:string;
+  s: string;
+  i: integer;
 begin
   result:=inherited;
 
@@ -273,43 +274,177 @@ begin
   else
     aDirName:=DirName;
 
-  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  BinPrefixTry:=FBinUtilsPrefix;
+
+  AsFile:=BinPrefixTry+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
-
-  {$IFDEF MULTILIB}
-  if CheckMultilib then
-  begin
-    s:=Which('objdump');
-    s:=ExtractFileDir(s);
-    AsFile:='as'+GetExeExt;
-    result:=SearchBinUtil(s,AsFile);
-    if result then FBinUtilsPrefix:='';
-  end;
-  {$ENDIF}
-
   if not result then
     result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+
+  {$IFDEF UNIX}
+  // User may also have placed them into their regular search path:
+  if (not result) then
+  begin
+    for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+    begin
+      result:=SearchBinUtil(IncludeTrailingPathDelimiter(UnixBinDirs[i])+aDirName, AsFile);
+      if (not result) then
+        result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+      if result then break;
+    end;
+  end;
+  {$ENDIF UNIX}
+
+  {$IFDEF UNIX}
+  {$IFDEF MULTILIB}
+  if (not result) then
+  begin
+    if CheckMultilib then
+    begin
+      BinPrefixTry:='';
+      s:=Which('objdump');
+      s:=ExtractFileDir(s);
+      AsFile:='as'+GetExeExt;
+      result:=SearchBinUtil(s,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+    end;
+  end;
+  {$ENDIF}
+  {$ENDIF UNIX}
 
   // Now also allow for cpu-linux-gnu- binutilsprefix (e.g. codesourcery)
   if not result then
   begin
-    BinPrefixTry:=Self.TargetCPUName+'-linux-gnu-';
+    BinPrefixTry:=TargetCPUName+'-linux-gnu-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
+    if (not result) then
+      result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+    {$IFDEF UNIX}
+    if (not result) then
+    begin
+      for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+      begin
+        result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+        if result then break;
+      end;
+    end;
+    {$ENDIF UNIX}
+    if (not result) then
+    begin
+      if (TargetCPU=TCPU.i386) then
+      begin
+        BinPrefixTry:='i586-linux-gnu-';
+        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        result:=SearchBinUtil(BasePath,AsFile);
+        if (not result) then
+          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+        {$IFDEF UNIX}
+        if (not result) then
+        begin
+          for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+          begin
+            result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+            if result then break;
+          end;
+        end;
+        {$ENDIF UNIX}
+      end;
+    end;
+    if (not result) then
+    begin
+      if (TargetCPU=TCPU.i386) then
+      begin
+        BinPrefixTry:='i686-linux-gnu-';
+        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        result:=SearchBinUtil(BasePath,AsFile);
+        if (not result) then
+          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+        {$IFDEF UNIX}
+        if (not result) then
+        begin
+          for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+          begin
+            result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+            if result then break;
+          end;
+        end;
+        {$ENDIF UNIX}
+      end;
+    end;
   end;
 
+  {$IFDEF LINUX}
+  // Also allow for correctly named suse (cross)binutils in /usr/bin
+  if (not result) then
+  begin
+    BinPrefixTry:=TargetCPUName+'-suse-linux-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if (not result) then
+      result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+    if (not result) then
+    begin
+      for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+      begin
+        result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+        if result then break;
+      end;
+    end;
+    if (not result) then
+    begin
+      if (TargetCPU=TCPU.i386) then
+      begin
+        BinPrefixTry:='i586-suse-linux-';
+        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        result:=SearchBinUtil(BasePath,AsFile);
+        if (not result) then
+          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+        if (not result) then
+        begin
+          for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+          begin
+            result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+            if result then break;
+          end;
+        end;
+      end;
+    end;
+    if (not result) then
+    begin
+      if (TargetCPU=TCPU.i386) then
+      begin
+        BinPrefixTry:='i686-suse-linux-';
+        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        result:=SearchBinUtil(BasePath,AsFile);
+        if (not result) then
+          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+        if (not result) then
+        begin
+          for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+          begin
+            result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+            if result then break;
+          end;
+        end;
+      end;
+    end;
+  end;
+  {$ENDIF LINUX}
+
   // Also allow for (cross)binutils without prefix in the right directory
-  if not result then
+  if (not result) then
   begin
     BinPrefixTry:='';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
+    if (not result) then
+      result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
   end;
+
+  if result then FBinUtilsPrefix:=BinPrefixTry;
 
   SearchBinUtilsInfo(result);
 

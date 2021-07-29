@@ -1,4 +1,4 @@
 const
-  {%H-}DELUXEVERSION='1.8.2z.003';
-  {%H-}RevisionStr='348';
-  {%H-}versiondate='20210728';
+  {%H-}DELUXEVERSION='1.8.2z.004';
+  {%H-}RevisionStr='350';
+  {%H-}versiondate='20210729';
