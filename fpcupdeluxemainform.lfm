@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 326
+  Left = 31
   Height = 701
-  Top = 48
+  Top = 68
   Width = 1337
   Anchors = []
   Caption = 'Form1'
@@ -5086,7 +5086,7 @@ object Form1: TForm1
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = HistorySheet
         AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = TagSheet
+        AnchorSideBottom.Control = HistorySheet
         AnchorSideBottom.Side = asrBottom
         Left = 8
         Height = 129

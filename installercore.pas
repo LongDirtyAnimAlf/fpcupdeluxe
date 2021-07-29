@@ -67,7 +67,7 @@ const
   GITLAB                = 'https://gitlab.com/freepascal.org/';
 
   FPCGITLAB             = GITLAB + 'fpc';
-  FPCGITLABREPO         = FPCGITLAB + '/testconversion2';
+  FPCGITLABREPO         = FPCGITLAB + '/fpc';
   FPCGITLABBINARIES     = FPCGITLAB + '/build';
   FPCTRUNKBRANCH        = 'master';
   FPCBINARIES           = FPCGITLABBINARIES + '/-/raw/'+FPCTRUNKBRANCH;

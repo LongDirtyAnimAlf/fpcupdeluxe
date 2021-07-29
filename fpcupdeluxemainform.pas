@@ -220,6 +220,7 @@ type
     {$endif}
     procedure HandleInfo(var Msg: TLMessage); message WM_THREADINFO;
     procedure InitFpcupdeluxe({%H-}Data: PtrInt=0);
+    procedure ScrollToSelected({%H-}Data: PtrInt=0);
     {$ifdef RemoteLog}
     procedure InitConsent({%H-}Data: PtrInt=0);
     {$endif}
@@ -360,7 +361,8 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 var
   IniFilesOk:boolean;
-  aTarget:string;
+  aSystemTarget:string;
+  aFPCTarget,aLazarusTarget:string;
 begin
   MessageTrigger:=false;
 
@@ -417,13 +419,13 @@ begin
   *)
 
   {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-  aTarget:=GetLCLWidgetTypeName;
+  aSystemTarget:=GetLCLWidgetTypeName;
   {$ELSE}
   aTarget:='';
   {$ENDIF}
 
   {$ifdef RemoteLog}
-  aDataClient.UpInfo.UpWidget:=aTarget;
+  aDataClient.UpInfo.UpWidget:=aSystemTarget;
   {$endif}
 
   Self.Caption:=
@@ -436,7 +438,7 @@ begin
     ' for ' +
     GetTargetCPUOS+
     '-'+
-    aTarget;
+    aSystemTarget;
 
   sStatus:='Sitting and waiting';
 
@@ -466,15 +468,45 @@ begin
     AddMessage('Current base directory : '+GetCurrentDir);
   {$endif}
 
-  if NOT FileExists(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME) then
-  begin
-    chkGitlab.Checked:=true;
-  end;
+  aFPCTarget:='';
+  aLazarusTarget:='';
 
   // get last used install directory, proxy and visual settings
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
+
+    // Read default FPC target from settings
+    aFPCTarget:=ReadString('General','fpcVersion','');
+    if (Length(aFPCTarget)=0) then
+    begin
+      aFPCTarget:='stable';
+      {$ifdef LCLCOCOA}
+      aFPCTarget:='stable.git';
+      {$endif}
+      {$ifdef Haiku}
+      aFPCTarget:='stable.git';
+      {$endif}
+    end;
+
+    // Read default Lazarus target from settings
+    aLazarusTarget:=ReadString('General','lazVersion','');
+    if (Length(aLazarusTarget)=0) then
+    begin
+      aLazarusTarget:=aFPCTarget;
+      {$ifdef LCLCOCOA}
+      aLazarusTarget:='stable.git';
+      {$endif}
+      {$ifdef Haiku}
+      {$ifdef CPUX86}
+      aLazarusTarget:='stable.git';
+      {$endif}
+      {$ifdef CPUX86_64}
+      aLazarusTarget:='trunk.git';
+      {$endif}
+      {$endif}
+    end;
+
     {$ifdef EnableLanguages}
     sLanguage:=ReadString('General','Language',sLanguage);
     {$endif}
@@ -491,41 +523,12 @@ begin
     AND
     (SetConfigFile(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME));
 
-  aTarget:='';
+  aSystemTarget:='';
   if IniFilesOk then
   begin
-    aTarget:='stable';
-
-    //Default FPC target
-    {$ifdef LCLCOCOA}
-    aTarget:='stable.git';
-    {$endif}
-    {$ifdef Haiku}
-    aTarget:='stable.git';
-    {$endif}
-    FPCTarget:=aTarget;
-
-    //Default Lazarus target
-
-    {$ifdef LCLCOCOA}
-    aTarget:='stable.git';
-    {$endif}
-    {$ifdef Haiku}
-    {$ifdef CPUX86}
-    aTarget:='stable.git';
-    {$endif}
-    {$ifdef CPUX86_64}
-    aTarget:='trunk.git';
-    {$endif}
-    {$endif}
-    LazarusTarget:=aTarget;
-
-    FillSourceListboxes;
-
     sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
 
     InstallDirEdit.Text:=sInstallDir;
-
     // set InstallDirEdit (installdir) onchange here, to prevent early firing
     InstallDirEdit.OnChange:=nil;
     InstallDirEdit.OnKeyUp:=nil;
@@ -537,12 +540,22 @@ begin
     {$endif}
     if InstallDirEdit.OnKeyUp=nil then InstallDirEdit.OnChange:=@Edit1Change;
 
+    if (NOT FileExists(IncludeTrailingPathDelimiter(sInstallDir)+installerUniversal.DELUXEFILENAME)) then
+    begin
+      chkGitlab.Checked:=true;
+    end;
+
+    if (Length(aFPCTarget)>0) then FPCTarget:=aFPCTarget;
+    if (Length(aLazarusTarget)>0) then LazarusTarget:=aLazarusTarget;
+    FillSourceListboxes;
+
     // create settings form
     // must be done here, to enable local storage/access of some setttings !!
     Form2:=TForm2.Create(Form1);
     Form3:=TForm3.Create(Form1);
     SubarchForm:=TSubarchForm.Create(Form1);
     InitFpcupdeluxe;
+    Application.QueueAsyncCall(@ScrollToSelected,0);
     {$ifdef RemoteLog}
     Application.QueueAsyncCall(@InitConsent,0);
     {$endif}
@@ -3865,6 +3878,10 @@ begin
     with TMemIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
     try
       WriteString('General','InstallDirectory',sInstallDir);
+
+      WriteString('General','fpcVersion',FPCTarget);
+      WriteString('General','lazVersion',LazarusTarget);
+
       {$ifdef RemoteLog}
       WriteBool('General','ConsentWarning',false);
       {$endif}
@@ -4603,7 +4620,7 @@ begin
       aEdit:=RealLazURL;
   end;
 
-  if (aListBox.ItemIndex<>-1) AND (Length(aLocalTarget)=0) then aLocalTarget:=aListBox.GetSelectedText;
+  if (aListBox.HandleAllocated) AND (aListBox.ItemIndex<>-1) AND (Length(aLocalTarget)=0) then aLocalTarget:=aListBox.GetSelectedText;
 
   if (aEdit=nil) OR (aListBox=nil) OR (Length(aLocalTarget)=0)then
   begin
@@ -4642,7 +4659,7 @@ begin
     if change then FLazarusTarget:=aLocalTarget;
   end;
 
-  //if change then
+  //if (change AND (aListBox.HandleAllocated)) then
   begin
     if (NOT (aControl is TListBox)) then
     begin
@@ -4650,10 +4667,9 @@ begin
       begin
         i:=aListBox.Items.IndexOf(aLocalTarget);
         if (i<>-1) then
-        begin
-          aListBox.Selected[i]:=true;
-          aListBox.MakeCurrentVisible;
-        end else aListBox.ClearSelection;
+          aListBox.Selected[i]:=true
+        else
+          aListBox.ClearSelection;
       end;
     end;
     aEdit.Text:=aLocalAlias;
@@ -4699,6 +4715,8 @@ begin
   UltiboBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
 
   FillSourceListboxes;
+
+  ScrollToSelected;
 end;
 
 procedure TForm1.HandleInfo(var Msg: TLMessage);
@@ -4819,6 +4837,12 @@ begin
 
 end;
 {$endif}
+
+procedure TForm1.ScrollToSelected(Data: PtrInt);
+begin
+  if (ListBoxFPCTarget.HandleAllocated) AND (ListBoxFPCTarget.ItemIndex>8) then ListBoxFPCTarget.MakeCurrentVisible;
+  if (ListBoxLazarusTarget.HandleAllocated) AND (ListBoxLazarusTarget.ItemIndex>8) then ListBoxLazarusTarget.MakeCurrentVisible;
+end;
 
 procedure TForm1.ParseRevisions(IniDirectory:string);
 type
