@@ -5117,7 +5117,7 @@ object Form1: TForm1
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = HistorySheet
         AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = TagSheet
+        AnchorSideBottom.Control = HistorySheet
         AnchorSideBottom.Side = asrBottom
         Left = 8
         Height = 129

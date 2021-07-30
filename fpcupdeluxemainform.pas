@@ -220,6 +220,7 @@ type
     {$endif}
     procedure HandleInfo(var Msg: TLMessage); message WM_THREADINFO;
     procedure InitFpcupdeluxe({%H-}Data: PtrInt=0);
+    procedure ScrollToSelected({%H-}Data: PtrInt=0);
     {$ifdef RemoteLog}
     procedure InitConsent({%H-}Data: PtrInt=0);
     {$endif}
@@ -543,6 +544,7 @@ begin
     Form3:=TForm3.Create(Form1);
     SubarchForm:=TSubarchForm.Create(Form1);
     InitFpcupdeluxe;
+    Application.QueueAsyncCall(@ScrollToSelected,0);
     {$ifdef RemoteLog}
     Application.QueueAsyncCall(@InitConsent,0);
     {$endif}
@@ -4650,10 +4652,9 @@ begin
       begin
         i:=aListBox.Items.IndexOf(aLocalTarget);
         if (i<>-1) then
-        begin
-          aListBox.Selected[i]:=true;
-          aListBox.MakeCurrentVisible;
-        end else aListBox.ClearSelection;
+          aListBox.Selected[i]:=true
+        else
+          aListBox.ClearSelection;
       end;
     end;
     aEdit.Text:=aLocalAlias;
@@ -4699,6 +4700,8 @@ begin
   UltiboBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
 
   FillSourceListboxes;
+
+  ScrollToSelected;
 end;
 
 procedure TForm1.HandleInfo(var Msg: TLMessage);
@@ -4819,6 +4822,12 @@ begin
 
 end;
 {$endif}
+
+procedure TForm1.ScrollToSelected(Data: PtrInt);
+begin
+  if (ListBoxFPCTarget.HandleAllocated) AND (ListBoxFPCTarget.ItemIndex>8) then ListBoxFPCTarget.MakeCurrentVisible;
+  if (ListBoxLazarusTarget.HandleAllocated) AND (ListBoxLazarusTarget.ItemIndex>8) then ListBoxLazarusTarget.MakeCurrentVisible;
+end;
 
 procedure TForm1.ParseRevisions(IniDirectory:string);
 type
