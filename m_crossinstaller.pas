@@ -93,6 +93,9 @@ const
   ABI_XTENSA         = [TABI.default,TABI.windowed,TABI.call0];
   ABI_RISCV64        = [TABI.default,TABI.riscvhf];
 
+  CPUADDRSIZE_64     = [TCPU.aarch64,TCPU.powerpc64,TCPU.riscv64,TCPU.sparc64,TCPU.x86_64{,TCPU.ia64]}];
+  CPUADDRSIZE_32     = [TCPU.i386,TCPU.arm,TCPU.powerpc,TCPU.mips,TCPU.mipsel,TCPU.sparc,TCPU.riscv32,TCPU.m68k,TCPU.xtensa,TCPU.wasm32];
+
 type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
 
