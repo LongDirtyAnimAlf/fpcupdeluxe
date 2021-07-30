@@ -471,7 +471,7 @@ begin
 
   aFPCTarget:='';
   aLazarusTarget:='';
-  bGitlab:=true;
+  bGitlab:=false;
 
   // get last used install directory, proxy and visual settings
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
@@ -480,11 +480,14 @@ begin
 
     // Read default FPC and Lazarus target from settings in app directory
     // Will be overwritten by settings in install directory if needed.
-    bGitlab:=ReadBool('General','Gitlab',true);
+    bGitlab:=ReadBool('General','Gitlab',bGitlab);
     aFPCTarget:=ReadString('General','fpcVersion','');
     if (Length(aFPCTarget)=0) then
     begin
-      aFPCTarget:='stable';
+      if bGitlab then
+        aFPCTarget:='stable'
+      else
+        aFPCTarget:='stable.git';
       {$ifdef LCLCOCOA}
       aFPCTarget:='stable.git';
       {$endif}
