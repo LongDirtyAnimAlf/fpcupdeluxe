@@ -14,6 +14,11 @@ sudo zypper --non-interactive install -y gdk-pixbuf-devel-32bit
 sudo zypper --non-interactive install -y cairo-devel-32bit  
 sudo zypper --non-interactive install -y pango-devel-32bit
 sudo zypper --non-interactive install -y libX11-devel-32bit
-sudo zypper --non-interactive install -y libgobject-2_0-0-32bit
+
+sudo ( cd /usr/lib ; ln -s libgobject-2.0.so.0 libgobject-2.0.so )
+sudo ( cd /usr/lib ; ln -s libglib-2.0.so.0 libglib-2.0.so )
+sudo ( cd /usr/lib ; ln -s libgthread-2.0.so.0 libgthread-2.0.so )
+sudo ( cd /usr/lib ; ln -s libgmodule-2.0.so.0 libgmodule-2.0.so )
+sudo ( cd /usr/lib ; ln -s libatk-1.0.so.0 libatk-1.0.so )
 
 
