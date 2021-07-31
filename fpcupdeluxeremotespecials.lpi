@@ -41,7 +41,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
             <Libraries Value="libs\win32"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS=&apos;darwin&apos; then
@@ -77,7 +77,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-musl"/>
           </SearchPaths>
           <CodeGeneration>
@@ -108,7 +108,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)11"/>
           </SearchPaths>
           <CodeGeneration>
@@ -139,7 +139,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-oi"/>
           </SearchPaths>
           <CodeGeneration>
@@ -173,7 +173,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-carbon"/>
           </SearchPaths>
           <CodeGeneration>
@@ -207,7 +207,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-cocoa"/>
           </SearchPaths>
           <CodeGeneration>
@@ -241,7 +241,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-cocoa"/>
           </SearchPaths>
           <CodeGeneration>
@@ -274,7 +274,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-cocoa"/>
           </SearchPaths>
           <CodeGeneration>
@@ -307,7 +307,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -358,7 +358,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -390,7 +390,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -425,7 +425,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -467,7 +467,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -509,7 +509,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-carbon"/>
           </SearchPaths>
           <CodeGeneration>
@@ -543,7 +543,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-cocoa"/>
           </SearchPaths>
           <CodeGeneration>
@@ -577,7 +577,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-cocoa"/>
           </SearchPaths>
           <CodeGeneration>
@@ -679,7 +679,7 @@ if TargetOS=&apos;openbsd&apos; then
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
       <Libraries Value="libs\win32"/>
-      <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3"/>
+      <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Conditionals Value="if TargetOS=&apos;darwin&apos; then

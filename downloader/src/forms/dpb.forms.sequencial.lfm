@@ -1,0 +1,80 @@
+object frmSequencial: TfrmSequencial
+  Left = 330
+  Height = 162
+  Top = 250
+  Width = 400
+  Anchors = []
+  AutoSize = True
+  BorderIcons = []
+  BorderStyle = bsSingle
+  BorderWidth = 16
+  Caption = 'Gus downloader !'
+  ClientHeight = 162
+  ClientWidth = 400
+  Constraints.MinWidth = 400
+  OnActivate = FormActivate
+  OnCreate = FormCreate
+  Position = poOwnerFormCenter
+  LCLVersion = '2.3.0.0'
+  object lblDownloads: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = lblTop
+    AnchorSideTop.Side = asrBottom
+    Left = 16
+    Height = 15
+    Top = 39
+    Width = 29
+    BorderSpacing.Top = 8
+    Caption = '0 of 0'
+  end
+  object pbDownloads: TProgressBar
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = lblDownloads
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 16
+    Height = 20
+    Top = 62
+    Width = 368
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
+    Smooth = True
+    TabOrder = 0
+  end
+  object lblBytes: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = pbDownloads
+    AnchorSideTop.Side = asrBottom
+    Left = 16
+    Height = 15
+    Top = 98
+    Width = 43
+    BorderSpacing.Top = 16
+    Caption = '0B of 0B'
+  end
+  object pbBytes: TProgressBar
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = lblBytes
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 16
+    Height = 20
+    Top = 121
+    Width = 368
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
+    Smooth = True
+    TabOrder = 1
+  end
+  object lblTop: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 16
+    Height = 15
+    Top = 16
+    Width = 21
+    Caption = 'File:'
+  end
+end

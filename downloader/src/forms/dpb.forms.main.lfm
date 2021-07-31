@@ -1,0 +1,60 @@
+object frmMain: TfrmMain
+  Left = 338
+  Height = 357
+  Top = 250
+  Width = 562
+  Caption = 'Download Progess Bar v1.2'
+  ClientHeight = 357
+  ClientWidth = 562
+  Position = poDesktopCenter
+  object panMain: TPanel
+    Left = 0
+    Height = 48
+    Top = 0
+    Width = 562
+    Align = alTop
+    ClientHeight = 48
+    ClientWidth = 562
+    TabOrder = 0
+    object btnSequencial: TButton
+      Left = 8
+      Height = 24
+      Top = 16
+      Width = 158
+      Action = actDownloadSequencial
+      TabOrder = 0
+    end
+    object btnThreadSequential: TButton
+      Left = 176
+      Height = 25
+      Top = 16
+      Width = 207
+      Action = actDownloadThreadSequential
+      TabOrder = 1
+    end
+  end
+  object memLog: TMemo
+    Left = 0
+    Height = 309
+    Top = 48
+    Width = 562
+    Align = alClient
+    ReadOnly = True
+    ScrollBars = ssAutoVertical
+    TabOrder = 1
+  end
+  object alMain: TActionList
+    Left = 416
+    Top = 256
+    object actDownloadSequencial: TAction
+      Category = 'Download'
+      Caption = 'Download Sequencial'
+      OnExecute = actDownloadSequencialExecute
+    end
+    object actDownloadThreadSequential: TAction
+      Category = 'Download'
+      Caption = 'Download Thread Sequential'
+      OnExecute = actDownloadThreadSequentialExecute
+    end
+  end
+end

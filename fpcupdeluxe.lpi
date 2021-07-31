@@ -106,7 +106,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-      <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot;..\mORMot\SQLite3;..\mORMot\CrossPlatform"/>
+      <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common;..\mORMot\CrossPlatform"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>

@@ -1,0 +1,58 @@
+object frmThreadSequential: TfrmThreadSequential
+  Left = 330
+  Height = 162
+  Top = 250
+  Width = 485
+  BorderIcons = []
+  BorderStyle = bsDialog
+  Caption = 'frmThreadSequential'
+  ClientHeight = 162
+  ClientWidth = 485
+  OnActivate = FormActivate
+  OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  Position = poDesktopCenter
+  object lblTop: TLabel
+    Left = 8
+    Height = 17
+    Top = 8
+    Width = 28
+    Caption = 'File:'
+    ParentColor = False
+  end
+  object lblDownloads: TLabel
+    Left = 8
+    Height = 17
+    Top = 32
+    Width = 37
+    Caption = '0 of 0'
+    ParentColor = False
+  end
+  object pbDownloads: TProgressBar
+    Left = 8
+    Height = 20
+    Top = 56
+    Width = 457
+    Anchors = [akTop, akLeft, akRight]
+    Smooth = True
+    TabOrder = 0
+  end
+  object lblBytes: TLabel
+    Left = 8
+    Height = 17
+    Top = 96
+    Width = 55
+    Caption = '0B of 0B'
+    ParentColor = False
+  end
+  object pbBytes: TProgressBar
+    Left = 8
+    Height = 20
+    Top = 120
+    Width = 457
+    Anchors = [akTop, akLeft, akRight]
+    Smooth = True
+    TabOrder = 1
+  end
+end

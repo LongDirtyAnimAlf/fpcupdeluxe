@@ -297,6 +297,7 @@ uses
   extrasettings,
   subarch,
   modulesettings,
+  DPB.Forms.Sequencial,
   //checkoptions,
   installerCore,
   installerUniversal,
@@ -2294,6 +2295,7 @@ var
   aList: TStringList;
   BaseBinsURL:string;
   BinsURL,LibsURL:string;
+  frmSeq: TfrmSequencial;
 begin
   result:=false;
 
@@ -3320,7 +3322,20 @@ begin
                   AddMessage('Going to download the cross-bins. Can (will) take some time !',True);
                   TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
                   SysUtils.DeleteFile(TargetFile);
-                  success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                  success:=false;
+                  frmSeq:= TfrmSequencial.Create(Self);
+                  try
+                    frmSeq.AddDownload(DownloadURL,TargetFile);
+                    frmSeq.ShowModal;
+                    success:=frmSeq.Success;
+                  finally
+                    frmSeq.Free;
+                  end;
+                  if (NOT success) then
+                  begin
+                    SysUtils.DeleteFile(TargetFile);
+                    success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                  end;
                   if success then AddMessage('Download successfull !');
                 end;
 
@@ -3513,7 +3528,20 @@ begin
                   AddMessage('Going to download the cross-libraries. Can (will) take some time !',True);
                   TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
                   SysUtils.DeleteFile(TargetFile);
-                  success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                  success:=false;
+                  frmSeq:= TfrmSequencial.Create(Self);
+                  try
+                    frmSeq.AddDownload(DownloadURL,TargetFile);
+                    frmSeq.ShowModal;
+                    success:=frmSeq.Success;
+                  finally
+                    frmSeq.Free;
+                  end;
+                  if (NOT success) then
+                  begin
+                    SysUtils.DeleteFile(TargetFile);
+                    success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                  end;
                   if success then AddMessage('Download successfull !');
                 end;
 
@@ -3800,7 +3828,7 @@ begin
   Form2.SetCrossTarget(FPCupManager,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
 
   Form2.ShowModal;
-  if Form2.ModalResult=mrOk then
+  if (Form2.ModalResult=mrOk) then
   begin
     FPCupManager.ExportOnly:=(NOT Form2.Repo);
     FPCupManager.HTTPProxyHost:=Form2.HTTPProxyHost;

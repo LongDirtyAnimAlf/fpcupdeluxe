@@ -665,7 +665,6 @@ begin
       aIndex:=rgrpSubarch.Items.IndexOf(GetSubarch(LocalSUBARCH));
       rgrpSubarch.ItemIndex:=aIndex;
     end;
-
   end;
 
 end;

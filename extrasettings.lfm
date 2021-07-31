@@ -9,7 +9,7 @@ object Form2: TForm2
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '2.1.0.0'
+  LCLVersion = '2.3.0.0'
   object GroupBox1: TGroupBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
@@ -40,7 +40,6 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       Caption = 'HTTP proxy URL:'
-      ParentColor = False
       ParentFont = False
     end
     object EditHTTPProxyHost: TEdit
@@ -74,7 +73,6 @@ object Form2: TForm2
       BorderSpacing.Left = 10
       BorderSpacing.Right = 4
       Caption = 'HTTP proxy port:'
-      ParentColor = False
       ParentFont = False
     end
     object EditHTTPProxyPort: TEdit
@@ -103,7 +101,6 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 8
       Caption = 'HTTP proxy username:'
-      ParentColor = False
       ParentFont = False
     end
     object EditHTTPProxyUser: TEdit
@@ -132,7 +129,6 @@ object Form2: TForm2
       Anchors = [akTop, akRight]
       BorderSpacing.Right = 4
       Caption = 'HTTP proxy password:'
-      ParentColor = False
       ParentFont = False
     end
     object EditHTTPProxyPassword: TEdit
@@ -326,7 +322,6 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 12
       Caption = 'Cross Build Options Override (i.e. -CfSoft)'
-      ParentColor = False
       ParentFont = False
     end
     object EditCompilerOverride: TEdit
@@ -383,7 +378,6 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
       Caption = 'Compiler Override'
-      ParentColor = False
       ParentFont = False
     end
     object RadioGroupARMArch: TRadioGroup
@@ -445,7 +439,6 @@ object Form2: TForm2
           BorderSpacing.Left = 4
           BorderSpacing.Top = 12
           Caption = 'Select CPU'
-          ParentColor = False
           ParentFont = False
         end
         object LabelOS: TLabel
@@ -456,7 +449,6 @@ object Form2: TForm2
           Top = 12
           Width = 49
           Caption = 'Select OS'
-          ParentColor = False
           ParentFont = False
         end
         object ComboBoxCPU: TComboBox
@@ -632,7 +624,6 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       Caption = 'FPC branch'
-      ParentColor = False
       ParentFont = False
     end
     object EditFPCRevision: TEdit
@@ -659,7 +650,6 @@ object Form2: TForm2
       Top = 4
       Width = 65
       Caption = 'FPC revision'
-      ParentColor = False
       ParentFont = False
     end
     object LabelLazarusbranch: TLabel
@@ -672,7 +662,6 @@ object Form2: TForm2
       Width = 60
       BorderSpacing.Top = 8
       Caption = 'Laz. branch'
-      ParentColor = False
       ParentFont = False
     end
     object EditLazarusBranch: TEdit
@@ -699,7 +688,6 @@ object Form2: TForm2
       Top = 54
       Width = 64
       Caption = 'Laz. revision'
-      ParentColor = False
       ParentFont = False
     end
     object EditLazarusRevision: TEdit
@@ -749,7 +737,6 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       Caption = 'FPC options'
-      ParentColor = False
       ParentFont = False
     end
     object EditFPCOptions: TEdit
@@ -776,7 +763,6 @@ object Form2: TForm2
       Width = 63
       BorderSpacing.Top = 8
       Caption = 'Laz. options'
-      ParentColor = False
       ParentFont = False
     end
     object EditLazarusOptions: TEdit
