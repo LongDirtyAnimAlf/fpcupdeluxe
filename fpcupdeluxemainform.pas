@@ -3323,6 +3323,7 @@ begin
                   TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
                   SysUtils.DeleteFile(TargetFile);
                   success:=false;
+                  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
                   frmSeq:= TfrmSequencial.Create(Self);
                   try
                     frmSeq.AddDownload(DownloadURL,TargetFile);
@@ -3331,6 +3332,7 @@ begin
                   finally
                     frmSeq.Free;
                   end;
+                  {$ENDIF}
                   if (NOT success) then
                   begin
                     SysUtils.DeleteFile(TargetFile);
@@ -3529,6 +3531,7 @@ begin
                   TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
                   SysUtils.DeleteFile(TargetFile);
                   success:=false;
+                  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
                   frmSeq:= TfrmSequencial.Create(Self);
                   try
                     frmSeq.AddDownload(DownloadURL,TargetFile);
@@ -3537,6 +3540,7 @@ begin
                   finally
                     frmSeq.Free;
                   end;
+                  {$ENDIF}
                   if (NOT success) then
                   begin
                     SysUtils.DeleteFile(TargetFile);
