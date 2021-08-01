@@ -485,6 +485,8 @@ const
 {$endif}
 
 type
+  TMyFTPSend = class(TFTPSend);
+
   TOnWriteStream = procedure(Sender: TObject; APos: Int64) of object;
 
   TDownloadStream = class(TFileStream)
@@ -5034,6 +5036,7 @@ var
   URI : URIPARSER.TURI;
   aPort:integer;
   aFTPClient:TFTPSend;
+  aFTPResult:integer;
 begin
   result:=false;
 
@@ -5076,13 +5079,14 @@ begin
     aDataStream.Size:=0;
     if aFTPClient.Login then
     begin
-      Result := aFTPClient.RetrieveFile(URI.Path+URI.Document, false);
-      aFTPClient.Logout;
-      if Result then
+      if TMyFTPSend(aFTPClient).DataSocket then
       begin
-        aFTPClient.DataStream.Position:=0;
-        aDataStream.CopyFrom(aFTPClient.DataStream,aFTPClient.DataStream.Size);
+        aFTPClient.FTPCommand('TYPE I');
+        aFTPResult:=aFTPClient.FTPCommand('RETR ' + URI.Path+URI.Document);
+        if ((aFTPResult div 100)=1) then
+          result := aFTPClient.DataRead(aDataStream);
       end;
+      aFTPClient.Logout;
     end;
   finally
     aFTPClient.Destroy;
