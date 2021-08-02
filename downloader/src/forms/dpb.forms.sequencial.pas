@@ -26,7 +26,9 @@ unit DPB.Forms.Sequencial;
 
 {$mode objfpc}{$H+}
 
+{$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
 {.$DEFINE USEMORMOT}
+{$ENDIF}
 
 interface
 
@@ -34,6 +36,9 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ComCtrls
 {$IFDEF USEMORMOT}
   , mormot.core.buffers
+{$IFDEF UNIX}
+  , mormot.lib.openssl11
+{$ENDIF UNIX}
 {$ELSE}
   {$IF FPC_FULLVERSION < 30200}
   , ssockets
