@@ -27,7 +27,7 @@ unit DPB.Forms.Sequencial;
 {$mode objfpc}{$H+}
 
 {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
-{.$DEFINE USEMORMOT}
+{$DEFINE USEMORMOT}
 {$ENDIF}
 
 interface
@@ -202,7 +202,6 @@ begin
       http.OnDataReceived:= @DataReceived;
       http.Get(FDownloads[AIndex].URL,FDownloads[AIndex].Filename);
       {$ENDIF}
-
     except
       on E: Exception do
       begin
@@ -249,7 +248,6 @@ begin
   Application.ProcessMessages;
 end;
 {$ENDIF}
-
 
 
 end.
