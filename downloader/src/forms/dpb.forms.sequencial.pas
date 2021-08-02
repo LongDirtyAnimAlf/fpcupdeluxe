@@ -26,13 +26,19 @@ unit DPB.Forms.Sequencial;
 
 {$mode objfpc}{$H+}
 
+{.$DEFINE USEMORMOT}
+
 interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ComCtrls
-{$IF FPC_FULLVERSION < 30200}
-, ssockets
-, sslsockets
+{$IFDEF USEMORMOT}
+  , mormot.core.buffers
+{$ELSE}
+  {$IF FPC_FULLVERSION < 30200}
+  , ssockets
+  , sslsockets
+  {$ENDIF}
 {$ENDIF}
 ;
 
@@ -56,11 +62,15 @@ type
     FDownloads: Array of TDownload;
     FSize: Int64;
     FSuccess: boolean;
+{$IFDEF USEMORMOT}
+    procedure DataReceived(Sender: TStreamRedirect);
+{$ELSE}
 {$IF FPC_FULLVERSION < 30200}
     procedure GetSocketHandler(Sender: TObject; const UseSSL: Boolean;
       out AHandler: TSocketHandler);
 {$ENDIF}
     procedure DataReceived(Sender : TObject; const {%H-}ContentLength, CurrentPos : Int64);
+{$ENDIF}
     procedure DoDownload(const AIndex: Integer);
   public
     procedure AddDownload(const AURL, AFilename: String);
@@ -73,12 +83,16 @@ var
 implementation
 
 uses
+{$IFDEF USEMORMOT}
+  mormot.net.client
+{$ELSE}
   fphttpclient
 {$IF FPC_FULLVERSION >= 30200}
-, opensslsockets
+  , opensslsockets
 {$ELSE}
-, fpopenssl
-, openssl
+  , fpopenssl
+  , openssl
+{$ENDIF}
 {$ENDIF}
 , DPB.Common.Utils
 ;
@@ -126,6 +140,7 @@ begin
   Close;
 end;
 
+{$IFNDEF USEMORMOT}
 {$IF FPC_FULLVERSION < 30200}
 procedure TfrmSequencial.GetSocketHandler(Sender: TObject;
   const UseSSL: Boolean; out AHandler: TSocketHandler);
@@ -134,12 +149,18 @@ begin
   TSSLSocketHandler(AHandler).SSLType := stTLSv1_2;
 end;
 {$ENDIF}
+{$ENDIF}
 
 procedure TfrmSequencial.DoDownload(const AIndex: Integer);
 var
+{$IFDEF USEMORMOT}
+  params: THttpClientSocketWGet;
+{$ELSE}
   http: TFPHTTPClient;
   index: Integer;
+{$ENDIF}
 begin
+{$IFNDEF USEMORMOT}
 {$IF FPC_FULLVERSION < 30200}
   InitSSLInterface;
 {$ENDIF}
@@ -148,9 +169,19 @@ begin
   http.OnGetSocketHandler:=@GetSocketHandler;
 {$ENDIF}
   http.AllowRedirect:= True;
+{$ENDIF}
   pbBytes.Position:= 0;
   try
     try
+      {$IFDEF USEMORMOT}
+      params.Clear;
+      params.Resume := true;
+      params.OnProgress := @DataReceived;
+      if params.WGet(FDownloads[AIndex].URL, FDownloads[AIndex].Filename,
+           '', nil, 5000, 5) <> FDownloads[AIndex].Filename then
+      begin
+      end;
+      {$ELSE}
       lblBytes.Caption:= 'Determining size...';
       Application.ProcessMessages;
       http.HTTPMethod('HEAD', FDownloads[AIndex].URL, nil, []);
@@ -165,6 +196,8 @@ begin
       end;
       http.OnDataReceived:= @DataReceived;
       http.Get(FDownloads[AIndex].URL,FDownloads[AIndex].Filename);
+      {$ENDIF}
+
     except
       on E: Exception do
       begin
@@ -172,7 +205,9 @@ begin
       end;
     end;
   finally
+    {$IFNDEF USEMORMOT}
     http.Free;
+    {$ENDIF}
   end;
 end;
 
@@ -187,6 +222,17 @@ begin
   FDownloads[len].Filename:= AFilename;
 end;
 
+{$IFDEF USEMORMOT}
+procedure TfrmSequencial.DataReceived(Sender: TStreamRedirect);
+var
+  aStream:TStreamRedirect;
+begin
+  aStream:=TStreamRedirect(Sender);
+  pbBytes.Position:= aStream.Percent;
+  lblBytes.Caption:= Format('%s of %s', [FormatBytes(aStream.ProcessedSize), FormatBytes(aStream.ExpectedSize)]);
+  Application.ProcessMessages;
+end;
+{$ELSE}
 procedure TfrmSequencial.DataReceived(Sender: TObject; const ContentLength,
   CurrentPos: Int64);
 var
@@ -197,6 +243,9 @@ begin
   lblBytes.Caption:= Format('%s of %s', [FormatBytes(CurrentPos), FormatBytes(FSize)]);
   Application.ProcessMessages;
 end;
+{$ENDIF}
+
+
 
 end.
 

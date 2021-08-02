@@ -75,6 +75,12 @@ begin
     Log('  Creating form.');
     frmSeq:= TfrmSequencial.Create(nil);
 
+    frmSeq.AddDownload(
+      //'https://ams.edge.kernel.org/opensuse/distribution/leap/15.3/iso/openSUSE-Leap-15.3-NET-x86_64-Current.iso',
+      'https://download.opensuse.org/distribution/leap/15.3/iso/openSUSE-Leap-15.3-NET-x86_64-Current.iso',
+      'suse.iso');
+
+    {
     Log('  Adding: time_series_covid19_confirmed_global.csv');
     frmSeq.AddDownload(
       'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv',
@@ -99,6 +105,7 @@ begin
     frmSeq.AddDownload(
       'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv',
       'time_series_covid19_deaths_US.csv');
+    }
 
     Log('  Calling Show Modal.');
     frmSeq.ShowModal;
