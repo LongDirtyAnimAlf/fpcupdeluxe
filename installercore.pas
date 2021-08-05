@@ -3036,13 +3036,21 @@ function TInstaller.GetSuitableRepoClient:TRepoClient;
 begin
   result:=nil;
 
-  // Do we NOT need a repo client
-  if result=nil then if ( ( (AnsiContainsText('github.com',FURL)) OR (AnsiContainsText('gitlab.com',FURL)) ) AND (AnsiContainsText('/archive/',FURL)) ) then exit;
+  // Do we need a GIT client or nothing when we need a zip archive from a GIT repo
+  if result=nil then
+  begin
+    if ( AnsiContainsText(FURL,'github.com') OR AnsiContainsText(FURL,'gitlab.com') ) then
+    begin
+      if AnsiContainsText(FURL,'/archive/') then
+        exit //// We do NOT need any repo client !!
+      else
+        result:=GitClient; //We need GIT
+    end;
+  end;
 
-  // Do we need GIT
+  // Do we need GIT more
   if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') then result:=GitClient;
   if result=nil then if ( (AnsiEndsText('.git',FURL)) OR (AnsiEndsText('.git/',FURL)) ) then result:=GitClient;
-  if result=nil then if ( ( (AnsiContainsText('github.com',FURL)) OR (AnsiContainsText('gitlab.com',FURL)) ) AND (NOT AnsiContainsText('/archive/',FURL)) ) then result:=GitClient;
 
   // Do we need SVN
   if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.svn') then result:=SVNClient;

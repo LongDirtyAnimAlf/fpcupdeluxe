@@ -400,11 +400,18 @@ begin
 
   if (NOT bSwitch) then
   begin
-    // Get updates (equivalent to git fetch and git merge)
-    // --all: fetch all remotes
-    Command := ' pull --all --recurse-submodules=yes';
+    Command := ' init';
     FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-    FReturnOutput := Output;
+    Command := ' remote add origin '+Repository;
+    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+    Command := ' pull';
+    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+    Command := ' fetch --tags';
+    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+
+    //Command := ' pull --all --recurse-submodules=yes';
+    //FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+    //FReturnOutput := Output;
 
     //if (FReturnCode = 0) then
     begin
