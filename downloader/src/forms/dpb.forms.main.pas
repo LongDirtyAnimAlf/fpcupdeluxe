@@ -75,11 +75,16 @@ begin
     Log('  Creating form.');
     frmSeq:= TfrmSequencial.Create(nil);
 
+
+    frmSeq.AddDownload(
+      'https://www.visualsvn.com/files/Apache-Subversion-1.12.2.zip',
+      'svn.zip');
+
+    {
     frmSeq.AddDownload(
       'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/wincrossbins_v1.2/WinCrossBinsAppleAll.zip',
       'WinCrossBinsAppleAll.zip');
 
-    {
     frmSeq.AddDownload(
       //'https://ams.edge.kernel.org/opensuse/distribution/leap/15.3/iso/openSUSE-Leap-15.3-NET-x86_64-Current.iso',
       'https://download.opensuse.org/distribution/leap/15.3/iso/openSUSE-Leap-15.3-NET-x86_64-Current.iso',

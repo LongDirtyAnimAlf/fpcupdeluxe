@@ -465,6 +465,8 @@ uses
   ,DCPdes
   ,DCPsha256
   ,NumCPULib  in './numcpulib/NumCPULib.pas'
+  ,mormot.net.client
+  ,mormot.core.buffers
   ;
 
 const
@@ -496,6 +498,7 @@ type
   public
     destructor Destroy; override;
     function Write(const Buffer; Count: LongInt): LongInt; override;
+    class function StreamCreate(const aFileName: string; aMode: cardinal):TStream;
   published
     property OnWriteStream: TOnWriteStream read FOnWriteStream write SetOnWriteStream;
   end;
@@ -528,7 +531,6 @@ begin
   result:=URL;
   if AnsiEndsText(URLMAGIC,URL) then SetLength(result,Length(URL)-Length(URLMAGIC));
 end;
-
 
 (*
 
@@ -2091,6 +2093,54 @@ begin
 end;
 {$endif MSWindows}
 
+function DownloadBymORMot(URL, TargetFile: string): boolean;
+var
+  params   : THttpClientSocketWGet;
+  URI      : URIPARSER.TURI;
+  aURL,P,H : String;
+  s        : THttpClientSocket;
+  u        : System.UTF8String;
+begin
+  result:=false;
+
+  aURL:=CleanURL(URL);
+  URI:=ParseURI(aURL);
+  P:=URI.Protocol;
+  H:=URI.Host;
+
+  if AnsiStartsText('downloads.sourceforge.net',H) then exit;
+
+  if AnsiStartsText('http',P) then
+  begin
+    params.Clear;
+    params.Resume := false;
+
+    params.OnStreamCreate:=@TDownloadStream.StreamCreate;
+    try
+      s := THttpClientSocket.OpenUri(URL, u, '', 10000, nil);
+      try
+        s.RedirectMax := 10;
+        s.UserAgent:=FPCUPUSERAGENT;
+        s.ContentType:='application/zip';
+        if (s.WGet(u, TargetFile, params) = TargetFile) then
+        begin
+          result:=true;
+        end;
+      finally
+        s.Free;
+      end;
+
+      //if (params.WGet(aURL,TargetFile,'', nil, 10000, 10) = TargetFile) then
+      //begin
+      //  result:=true;
+      //end;
+    except
+      // Swallow exceptions
+    end;
+  end;
+
+end;
+
 function Download(UseWget:boolean; URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 var
   aDownLoader:TBasicDownLoader;
@@ -2152,6 +2202,11 @@ var
   aDownLoader:TBasicDownLoader;
 begin
   result:=false;
+
+  if (NOT result) AND (NOT UseWget) then
+  begin
+    result:=DownloadBymORMot(URL,TargetFile);
+  end;
 
   if (NOT result) then
   begin
@@ -5756,6 +5811,11 @@ begin
   Result:= inherited Write(Buffer, Count);
   if Assigned(FOnWriteStream) then
     FOnWriteStream(Self, Self.Position);
+end;
+
+class function TDownloadStream.StreamCreate(const aFileName: string; aMode: cardinal):TStream;
+begin
+  result:=Create(aFileName,aMode);
 end;
 
 procedure FinaGitHubStore;

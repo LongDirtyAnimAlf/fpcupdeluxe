@@ -597,6 +597,7 @@ type
 implementation
 
 uses
+  StrUtils,
   {$ifdef LCL}
   //For messaging to MainForm: no writeln
   Forms,
@@ -1572,10 +1573,11 @@ begin
      then aTag:=FPCTRUNKBRANCH
      else aTag:='release_'+StringReplace(aVersion,'.','_',[rfReplaceAll]);
 
-  aSourceURL:=FPCGITLABBINARIES+'/-/raw/'+aTag+'/install/binw32/';
-
+  //aSourceURL:=FPCGITLABBINARIES+'/-/raw/'+aTag+'/install/binw32/';
+  aSourceURL:=FPCUPGITREPO+'/releases/download/win32build_v1.0/';
   {$ifdef win64}
-  aSourceURL64:=FPCGITLABBINARIES+'/-/raw/'+aTag+'/install/binw64/';
+  //aSourceURL64:=FPCGITLABBINARIES+'/-/raw/'+aTag+'/install/binw64/';
+  aSourceURL64:=FPCUPGITREPO+'/releases/download/win64build_v1.0/';
   {$endif}
 
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)
@@ -3034,16 +3036,20 @@ function TInstaller.GetSuitableRepoClient:TRepoClient;
 begin
   result:=nil;
 
+  // Do we NOT need a repo client
+  if result=nil then if ( ( (AnsiContainsText('github.com',FURL)) OR (AnsiContainsText('gitlab.com',FURL)) ) AND (AnsiContainsText('/archive/',FURL)) ) then exit;
+
+  // Do we need GIT
+  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') then result:=GitClient;
+  if result=nil then if ( (AnsiEndsText('.git',FURL)) OR (AnsiEndsText('.git/',FURL)) ) then result:=GitClient;
+  if result=nil then if ( ( (AnsiContainsText('github.com',FURL)) OR (AnsiContainsText('gitlab.com',FURL)) ) AND (NOT AnsiContainsText('/archive/',FURL)) ) then result:=GitClient;
+
   // Do we need SVN
   if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.svn') then result:=SVNClient;
   if result=nil then if (Pos(SVNBASEHTTP,LowerCase(FURL))>0) then result:=SVNClient;
   if result=nil then if (Pos('http://svn.',LowerCase(FURL))=1) then result:=SVNClient;
   if result=nil then if (Pos(SVNBASESVN,LowerCase(FURL))>0) then result:=SVNClient;
 
-  // Do we need GIT
-  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') then result:=GitClient;
-  if result=nil then if ( {(Pos('github',LowerCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then result:=GitClient;
-  if result=nil then if (Pos('gitlab.com/freepascal.org',LowerCase(FURL))>0) then result:=GitClient;
 
   // Do we need HG
   if result=nil then if ( (Pos('hg.code.sf.net',LowerCase(FURL))>0) ) then result:=HGClient;
