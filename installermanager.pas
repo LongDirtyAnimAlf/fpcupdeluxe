@@ -513,7 +513,8 @@ end;
 procedure TFPCupManager.SetFPCTAG(AValue: string);
 begin
   if FFPCTAG=AValue then Exit;
-  if (Pos('_',AValue)=0) then
+  if AnsiEndsText('.gitlab',AValue) then
+  //if (Pos('_',AValue)=0) then
     FFPCTAG:=installerUniversal.GetAlias('fpcTAG',AValue)
   else
     FFPCTAG:=aValue;
@@ -582,8 +583,9 @@ end;
 
 procedure TFPCupManager.SetLazarusTAG(AValue: string);
 begin
-  if FLazarusTAG=AValue then Exit;
-  if (Pos('_',AValue)=0) then
+  if FLazarusTAG=AValue then exit;
+  if AnsiEndsText('.gitlab',AValue) then
+  //if (Pos('_',AValue)=0) then
     FLazarusTAG:=installerUniversal.GetAlias('lazTAG',AValue)
   else
     FLazarusTAG:=aValue;

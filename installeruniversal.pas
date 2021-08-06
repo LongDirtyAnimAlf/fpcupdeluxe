@@ -2997,8 +2997,8 @@ begin
   ini.CaseSensitive:=false;
   {$ENDIF}
 
-  if ((aDictionary='fpcTAG') OR (aDictionary='fpcBRANCH')) AND (aAlias=FPCTRUNKBRANCH) then result:='trunk';
-  if ((aDictionary='lazTAG') OR (aDictionary='lazBRANCH')) AND (aAlias=LAZARUSTRUNKBRANCH) then result:='trunk';
+  if ((aDictionary='fpcTAG') OR (aDictionary='fpcBRANCH')) AND AnsiStartsText(FPCTRUNKBRANCH,aAlias) then result:='trunk';
+  if ((aDictionary='lazTAG') OR (aDictionary='lazBRANCH')) AND AnsiStartsText(LAZARUSTRUNKBRANCH,aAlias) then result:='trunk';
 
   if (Length(result)=0) then
   begin

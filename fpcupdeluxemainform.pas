@@ -156,6 +156,8 @@ type
     procedure chkGitlabChange(Sender: TObject);
     procedure IniPropStorageAppRestoringProperties({%H-}Sender: TObject);
     procedure IniPropStorageAppSavingProperties({%H-}Sender: TObject);
+    procedure ListBoxTargetDrawItem(Control: TWinControl; Index: Integer;
+      ARect: TRect; State: TOwnerDrawState);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick(Sender: TObject);
@@ -1838,6 +1840,45 @@ begin
     SessionProperties := 'WindowState;CmdFontSize;'
   else
     SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;';
+end;
+
+procedure TForm1.ListBoxTargetDrawItem(Control: TWinControl; Index: Integer;
+  ARect: TRect; State: TOwnerDrawState);
+var
+  i:integer;
+  s:string;
+begin
+  with Control as TListBox do
+  begin
+    if Assigned(Font) then
+    begin
+      Canvas.Font := Font;
+      Canvas.Font.PixelsPerInch := Font.PixelsPerInch;
+    end;
+    if Assigned(Brush) then
+      Canvas.Brush := Brush;
+    if ((Index<>-1) AND (odSelected in State)) then
+    begin
+      Canvas.Brush.Color := clHighlight;
+      Canvas.Font.Color := clHighlightText
+    end
+    else
+    begin
+      Canvas.Brush.Color := GetColorResolvingParent;
+      Canvas.Font.Color := clWindowText;
+    end;
+    if (odFocused in State) and (lboDrawFocusRect in Options) then
+      Canvas.DrawFocusRect(ARect);
+    if (NOT (odBackgroundPainted in State)) then
+      Canvas.FillRect(ARect);
+    if (Index<>-1) then
+    begin
+      s:=Items[Index];
+      i:=Pos('.gitlab',s);
+      if (i>0) then Delete(s,i,MaxInt);
+      Canvas.TextOut(ARect.Left + 2, ARect.Top, s);
+    end;
+  end;
 end;
 
 procedure TForm1.radgrpTargetChanged(Sender: TObject);
@@ -4142,26 +4183,28 @@ begin
   FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib -Fl/usr/pkg/lib -Fl/usr/X11R7/lib';
   {$endif}
 
-  if chkGitlab.Checked then
+
+  if AnsiEndsText('.gitlab',FPCTarget) then
   begin
     FPCupManager.FPCTag:=FPCTarget;
-    FPCupManager.LazarusTag:=LazarusTarget;
   end
   else
   begin
     FPCupManager.FPCURL:=FPCTarget;
-    FPCupManager.LazarusURL:=LazarusTarget;
-
-    // for https://github.com/graemeg (FPC/Lazarus mirrors of GitHub) ... always get the right branch
     if (Pos('github.com/graemeg',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='master';
-    if (Pos('github.com/graemeg',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='upstream';
-
-    // for https://github.com/newpascal (FPC/Lazarus NP mirrors of GitHub) ... always get the right branch
     if (Pos('github.com/newpascal',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='release';
-    if (Pos('github.com/newpascal',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='release';
-    //if (Pos('github.com/newpascal',FPCupManager.FPCURL>0) then FPCupManager.FPCBranch:='freepascal';
-    //if (Pos('github.com/newpascal',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='lazarus';
     if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='master';
+  end;
+
+  if AnsiEndsText('.gitlab',LazarusTarget) then
+  begin
+    FPCupManager.LazarusTag:=LazarusTarget;
+  end
+  else
+  begin
+    FPCupManager.LazarusURL:=LazarusTarget;
+    if (Pos('github.com/graemeg',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='upstream';
+    if (Pos('github.com/newpascal',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='release';
     if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='upstream';
     if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='master';
   end;
@@ -4665,7 +4708,8 @@ begin
 
   if (aListBox=ListBoxFPCTarget) then
   begin
-    if (chkGitlab.Checked) then
+    if AnsiEndsText('.gitlab',aLocalTarget) then
+    //if (chkGitlab.Checked) then
       aLocalAlias:=FPCGITLABREPO{+'/-/tree/'+installerUniversal.GetAlias('fpcTAG',aLocalTarget)}
       //aLocalAlias:=installerUniversal.GetAlias('fpcTAG',aLocalTarget)
     else
@@ -4673,7 +4717,8 @@ begin
   end;
   if (aListBox=ListBoxLazarusTarget) then
   begin
-    if (chkGitlab.Checked) then
+    if AnsiEndsText('.gitlab',aLocalTarget) then
+    //if (chkGitlab.Checked) then
       aLocalAlias:=LAZARUSGITLABREPO{+'/-/tree/'+installerUniversal.GetAlias('lazTAG',aLocalTarget)}
       //aLocalAlias:=installerUniversal.GetAlias('lazTAG',aLocalTarget)
     else

@@ -126,6 +126,8 @@ const
   GITREPO='https://github.com/LongDirtyAnimAlf';
   FPCUPGITREPO=GITREPO+'/fpcupdeluxe';
 
+  FPCGITMIRRORREPO='https://github.com/fpc';
+
   BOOTSTRAPPERVERSION='bootstrappers_v1.0';
   FPCUPGITREPOBOOTSTRAPPER=FPCUPGITREPO+'/releases/download/'+BOOTSTRAPPERVERSION;
   FPCUPGITREPOAPI='https://api.github.com/repos/LongDirtyAnimAlf/fpcupdeluxe/releases';
@@ -1527,12 +1529,10 @@ end;
 procedure TInstaller.CreateBinutilsList(aVersion:string);
 {$ifdef MSWINDOWS}
 const
-  SourceURL_gdb_default = LAZARUSBINARIES+'/i386-win32/gdb/bin/';
-  SourceURL64_gdb_default = LAZARUSBINARIES+'/x86_64-win64/gdb/bin/';
-  SourceURL_QT = LAZARUSBINARIES+'/i386-win32/qt/';
-  SourceURL_QT5 = LAZARUSBINARIES+'/i386-win32/qt5/';
-  //SourceURL_gdb = FPCUPGITREPO+'/releases/download/gdb/';
-  //SourceURL64_gdb = FPCUPGITREPO+'/releases/download/gdb/';
+  SourceURL_gdb_default = FPCGITMIRRORREPO+'/LazBinaries/raw/main/i386-win32/gdb/bin/';
+  SourceURL64_gdb_default = FPCGITMIRRORREPO+'/LazBinaries/raw/main/x86_64-win64/gdb/bin/';
+  SourceURL_QT = FPCGITMIRRORREPO+'/LazBinaries/raw/main/i386-win32/qt/';
+  SourceURL_QT5 = FPCGITMIRRORREPO+'/LazBinaries/raw/main/i386-win32/qt5/';
 {$endif}
   procedure AddNewUtil(FileName, RootURL, OS: string; Category: TUtilCategory);
   var
@@ -1551,33 +1551,15 @@ var
   {$ifdef win64}
   aSourceURL64:string;
   {$endif}
-  aTag:string;
 {$endif}
 begin
   SetLength(FUtilFiles,0); //clean out any cruft
 
   {$ifdef MSWINDOWS}
 
-  // default
-  if aVersion='' then aVersion:=DEFAULTFPCVERSION;
-
-  // if Win Vista or higher: use modern (2.4.0 and higher) binutils
-  if CheckWin32Version(6,0) then
-  begin
-    if (CalculateNumericalVersion(aVersion)<CalculateFullVersion(2,4,0)) then
-       aVersion:='2.4.0';
-  end;
-
-  //trunk is special
-  if aVersion=FPCTRUNKVERSION
-     then aTag:=FPCTRUNKBRANCH
-     else aTag:='release_'+StringReplace(aVersion,'.','_',[rfReplaceAll]);
-
-  //aSourceURL:=FPCGITLABBINARIES+'/-/raw/'+aTag+'/install/binw32/';
-  aSourceURL:=FPCUPGITREPO+'/releases/download/win32build_v1.0/';
+  aSourceURL:=FPCGITMIRRORREPO+'/FPCBuild/raw/master/install/binw32/';
   {$ifdef win64}
-  //aSourceURL64:=FPCGITLABBINARIES+'/-/raw/'+aTag+'/install/binw64/';
-  aSourceURL64:=FPCUPGITREPO+'/releases/download/win64build_v1.0/';
+  aSourceURL:=FPCGITMIRRORREPO+'/FPCBuild/raw/master/install/binw64/';
   {$endif}
 
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)
@@ -1597,7 +1579,7 @@ begin
   // add win32/64 gdb from lazarus
   AddNewUtil('gdb' + GetExeExt,SourceURL_gdb_default,'',ucDebugger32);
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucDebugger64);
-  AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucDebugger64);
+  //AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucDebugger64);
 
   // add win32/64 gdb from fpcup
   //AddNewUtil('i386-win32-gdb.zip',SourceURL_gdb,'',ucDebugger32);
@@ -1646,7 +1628,7 @@ begin
   AddNewUtil('gdate' + GetExeExt,aSourceURL64,'',ucBinutil);
   // just add default 64 bit debugger for all usercases as a binutil !
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucBinutil);
-  AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucBinutil);
+  //AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall.exe.manifest',aSourceURL64,'',ucBinutil);

@@ -2646,9 +2646,11 @@ object Form1: TForm1
         BorderSpacing.Top = 8
         BorderSpacing.Bottom = 8
         ItemHeight = 0
+        OnDrawItem = ListBoxTargetDrawItem
         OnSelectionChange = TargetSelectionChange
         ParentFont = False
         ScrollWidth = 133
+        Style = lbOwnerDrawFixed
         TabOrder = 3
       end
       object LazarusVersionLabel: TLabel
@@ -2685,9 +2687,11 @@ object Form1: TForm1
         BorderSpacing.Right = 8
         BorderSpacing.Bottom = 8
         ItemHeight = 0
+        OnDrawItem = ListBoxTargetDrawItem
         OnSelectionChange = TargetSelectionChange
         ParentFont = False
         ScrollWidth = 133
+        Style = lbOwnerDrawFixed
         TabOrder = 4
       end
       object BitBtnFPCOnly: TBitBtn
