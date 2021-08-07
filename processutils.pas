@@ -2,9 +2,7 @@ unit processutils;
 
 {$mode objfpc}{$H+}
 
-{$ifdef LCL}
-{$define THREADEDEXECUTE}
-{$endif}
+{$i fpcupdefines.inc}
 
 interface
 

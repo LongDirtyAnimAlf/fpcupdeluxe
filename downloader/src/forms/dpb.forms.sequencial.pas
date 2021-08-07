@@ -26,9 +26,7 @@ unit DPB.Forms.Sequencial;
 
 {$mode objfpc}{$H+}
 
-{$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
-{$DEFINE USEMORMOT}
-{$ENDIF}
+{$i fpcupdefines.inc}
 
 interface
 

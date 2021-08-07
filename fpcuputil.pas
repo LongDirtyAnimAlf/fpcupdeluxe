@@ -30,43 +30,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 unit fpcuputil;
 { Utility functions that might be needed by fpcup core and plugin units }
 
-//{$mode DELPHI}{$H+}
 {$mode objfpc}{$H+}
 
-{$define ENABLEWGET}
-{$define ENABLECURL}
-{$define ENABLENATIVE}
-
-{.$define ENABLEEMAIL}
-
-{$ifdef Haiku}
-// synaser does not compile under Haiku
-{$undef ENABLENATIVE}
-{$endif}
-{$ifdef OpenBSD}
-// synaser does not work under OpenBSD
-{$undef ENABLENATIVE}
-{$endif}
-{$IF DEFINED(MORPHOS) OR DEFINED(AROS)}
-// libcurl does not work under AROS and Morphos
-{$undef ENABLECURL}
-// synaser does not work under AROS and Morphos
-{$undef ENABLENATIVE}
-{$ENDIF}
-
-{$ifdef Darwin}
-// Do not use wget and family under Darwin
-{$undef ENABLEWGET}
-{$endif}
-{$ifdef Windows}
-// Do not use wget and family under Windows
-{.$undef ENABLEWGET}
-{$endif}
-
-{$ifdef libcurlstatic}
-{$undef ENABLENATIVE}
-{$define USEONLYCURL}
-{$endif}
+{$i fpcupdefines.inc}
 
 {$if not defined(ENABLEWGET) and not defined(ENABLENATIVE)}
 {$error No downloader defined !!! }
@@ -156,7 +122,6 @@ type
     FHTTPProxyHost: string;
     FHTTPProxyUser: string;
     FHTTPProxyPassword: string;
-    StoredTickCount:QWord;
     FFilenameOnly:string;
     procedure parseFTPHTMLListing(F:TStream;filelist:TStringList);
     procedure DoOnWriteStream(Sender: TObject; APos: Int64);
@@ -465,8 +430,10 @@ uses
   ,DCPdes
   ,DCPsha256
   ,NumCPULib  in './numcpulib/NumCPULib.pas'
+  {$IFDEF USEMORMOT}
   ,mormot.net.client
   ,mormot.core.buffers
+  {$ENDIF USEMORMOT}
   ;
 
 const
@@ -493,6 +460,7 @@ type
 
   TDownloadStream = class(TFileStream)
   private
+    FStoredTickCount:QWord;
     FOnWriteStream: TOnWriteStream;
     procedure SetOnWriteStream(aValue:TOnWriteStream);
   public
@@ -2093,6 +2061,7 @@ begin
 end;
 {$endif MSWindows}
 
+{$IFDEF USEMORMOT}
 function DownloadBymORMot(URL, TargetFile: string): boolean;
 var
   params   : THttpClientSocketWGet;
@@ -2140,6 +2109,7 @@ begin
   end;
 
 end;
+{$ENDIF USEMORMOT}
 
 function Download(UseWget:boolean; URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 var
@@ -2203,10 +2173,12 @@ var
 begin
   result:=false;
 
+  {$IFDEF USEMORMOT}
   if (NOT result) AND (NOT UseWget) then
   begin
     result:=DownloadBymORMot(URL,TargetFile);
   end;
+  {$ENDIF USEMORMOT}
 
   if (NOT result) then
   begin
@@ -4793,13 +4765,17 @@ begin
   end
   else
   //Show progress only every 5 seconds
-  if GetUpTickCount>StoredTickCount+5000 then
+  {if (Sender is TDownloadStream) then}
+  with (Sender as TDownloadStream) do
   begin
-    if StoredTickCount=0 then
-      ThreadLog('Download progress '+FileNameOnly+': Starting download.')
-    else
-      ThreadLog('Download progress '+FileNameOnly+': '+KB(APos));
-    StoredTickCount:=GetUpTickCount;
+    if (GetUpTickCount>(FStoredTickCount+5000)) then
+    begin
+      if FStoredTickCount=0 then
+        ThreadLog('Download progress '+FileNameOnly+': Starting download.')
+      else
+        ThreadLog('Download progress '+FileNameOnly+': '+KB(APos));
+      FStoredTickCount:=GetUpTickCount;
+    end;
   end;
   {$ifdef LCL}
   Application.ProcessMessages;
@@ -5265,8 +5241,7 @@ begin
 
   if (aDataStream is TDownloadStream) then
   begin
-    (aDataStream as TDownloadStream).FOnWriteStream:=@DoOnWriteStream;
-    StoredTickCount:=0;
+    (aDataStream as TDownloadStream).OnWriteStream:=@DoOnWriteStream;
   end;
 
   if AnsiStartsText('ftp',P) then result:=FTPDownload(URL,aDataStream);
@@ -5748,8 +5723,7 @@ begin
 
   if (aDataStream is TDownloadStream) then
   begin
-    (aDataStream as TDownloadStream).FOnWriteStream:=@DoOnWriteStream;
-    StoredTickCount:=0;
+    (aDataStream as TDownloadStream).OnWriteStream:=@DoOnWriteStream;
   end;
 
   if AnsiStartsText('ftp',P) then result:=FTPDownload(URL,aDataStream);
@@ -5802,6 +5776,7 @@ end;
 procedure TDownloadStream.SetOnWriteStream(aValue:TOnWriteStream);
 begin
   FOnWriteStream:=aValue;
+  FStoredTickCount:=0;
   if Assigned(FOnWriteStream) then
     FOnWriteStream(Self, 0);
 end;
