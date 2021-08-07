@@ -370,7 +370,7 @@ var
 begin
   MessageTrigger:=false;
 
-  IniPropStorageApp.IniFileName:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+installerUniversal.DELUXEFILENAME;
+  IniPropStorageApp.IniFileName:=SafeGetApplicationPath+installerUniversal.DELUXEFILENAME;
 
   {$ifdef EnableLanguages}
   sLanguage:='en';
@@ -461,7 +461,7 @@ begin
 
   //Prevent overwriting an existing install when starting with a new fpcupdeluxe install
   If DirectoryExists(sInstallDir) then
-    sInstallDir:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+'fpcupdeluxe';
+    sInstallDir:=SafeGetApplicationPath+'fpcupdeluxe';
 
   {$ifdef DARWIN}
   // we could have started from with an .app , so goto the basedir ... not sure if realy needed, but to be sure.
@@ -4555,6 +4555,8 @@ begin
   try
     with TMemIniFile.Create(aDir+DirectorySeparator+installerUniversal.DELUXEFILENAME) do
     try
+      WriteString('General','InstallDirectory',sInstallDir);
+
       WriteBool('General','Gitlab',chkGitlab.Checked);
 
       // mmm, is this correct ?  See extrasettings !!
