@@ -96,17 +96,15 @@ type
   { TLogger }
   TLogger = class(TObject)
   private
-    FLog: TEventLog; //Logging/debug output to file
+    FLog: TEventLog;
     function GetLogFile: string;
     procedure SetLogFile(AValue: string);
   public
-    // Write to log and optionally console with seriousness etInfo
-    procedure WriteLog(Message: string);overload;
-    // Write to log and optionally console with specified seriousness
-    procedure WriteLog(EventType: TEventType;Message: string);overload;
-    property LogFile: string read GetLogFile write SetLogFile ;
     constructor Create;
     destructor Destroy; override;
+    procedure WriteLog(Message: string);overload;
+    procedure WriteLog(EventType: TEventType;Message: string);overload;
+    property LogFile: string read GetLogFile write SetLogFile;
   end;
 
   TBasicDownLoader = Class(TObject)
@@ -454,7 +452,9 @@ const
 {$endif}
 
 type
+  {$ifdef ENABLENATIVE}
   TMyFTPSend = class(TFTPSend);
+  {$endif ENABLENATIVE}
 
   TOnWriteStream = procedure(Sender: TObject; APos: Int64) of object;
 

@@ -487,12 +487,12 @@ begin
     aFPCTarget:=ReadString('General','fpcVersion','');
     if (Length(aFPCTarget)=0) then
     begin
-      aFPCTarget:='stable.gitlab'
+      aFPCTarget:='stable.gitlab';
     end;
     aLazarusTarget:=ReadString('General','lazVersion','');
     if (Length(aLazarusTarget)=0) then
     begin
-      aFPCTarget:='stable.gitlab'
+      aFPCTarget:='stable.gitlab';
       {$ifdef Haiku}
       {$ifdef CPUX86_64}
       aLazarusTarget:='trunk.gitlab';
