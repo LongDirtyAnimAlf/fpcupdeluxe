@@ -160,7 +160,7 @@ type
       ARect: TRect; State: TOwnerDrawState);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
-    procedure OnlyTagClick(Sender: TObject);
+    procedure OnlyTagClick({%H-}Sender: TObject);
     procedure InstallClick(Sender: TObject);
     procedure BitBtnHaltClick({%H-}Sender: TObject);
     procedure btnGetOpenSSLClick({%H-}Sender: TObject);
@@ -234,7 +234,7 @@ type
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable({%H-}Sender: TObject;value:boolean);
     procedure Edit1Change({%H-}Sender: TObject);
-    procedure PrepareRun;
+    function  PrepareRun(Sender: TObject):boolean;
     function  RealRun:boolean;
     function  GetFPCUPSettings(IniDirectory:string):boolean;
     function  SetFPCUPSettings(IniDirectory:string):boolean;
@@ -487,30 +487,15 @@ begin
     aFPCTarget:=ReadString('General','fpcVersion','');
     if (Length(aFPCTarget)=0) then
     begin
-      if bGitlab then
-        aFPCTarget:='stable'
-      else
-        aFPCTarget:='stable.git';
-      {$ifdef LCLCOCOA}
-      aFPCTarget:='stable.git';
-      {$endif}
-      {$ifdef Haiku}
-      aFPCTarget:='stable.git';
-      {$endif}
+      aFPCTarget:='stable.gitlab'
     end;
     aLazarusTarget:=ReadString('General','lazVersion','');
     if (Length(aLazarusTarget)=0) then
     begin
-      aLazarusTarget:=aFPCTarget;
-      {$ifdef LCLCOCOA}
-      aLazarusTarget:='stable.git';
-      {$endif}
+      aFPCTarget:='stable.gitlab'
       {$ifdef Haiku}
-      {$ifdef CPUX86}
-      aLazarusTarget:='stable.git';
-      {$endif}
       {$ifdef CPUX86_64}
-      aLazarusTarget:='trunk.git';
+      aLazarusTarget:='trunk.gitlab';
       {$endif}
       {$endif}
     end;
@@ -1412,7 +1397,7 @@ end;
 
 procedure TForm1.btnCreateLazarusConfigClick(Sender: TObject);
 begin
-  PrepareRun;
+  if (NOT PrepareRun(Sender)) then exit;
   FPCupManager.OnlyModules:=_CONFIG+_LAZARUS;
   sStatus:='Going to create basic Lazarus config only.';
   RealRun;
@@ -1426,7 +1411,7 @@ begin
 
     if (Sender=ChkMakefileLaz) OR (Sender=ChkMakefileFPC) then
     begin
-      PrepareRun;
+      if (NOT PrepareRun(Sender)) then exit;
       if Sender=ChkMakefileLaz then FPCupManager.OnlyModules:=_MAKEFILECHECKLAZARUS;
       if Sender=ChkMakefileFPC then FPCupManager.OnlyModules:=_MAKEFILECHECKFPC;
       sStatus:='Going to check Makefile.';
@@ -1438,7 +1423,7 @@ begin
 
     if Sender=CreateStartup then
     begin
-      PrepareRun;
+      if (NOT PrepareRun(Sender)) then exit;
       FPCupManager.OnlyModules:=_CREATESCRIPT;
       sStatus:='Going to create startup scripts.';
       {$ifdef RemoteLog}
@@ -1790,12 +1775,13 @@ begin
 end;
 
 procedure TForm1.OnlyTagClick(Sender: TObject);
-var
-  aNewURL:string;
+//var
+//  aNewURL:string;
 begin
+  {
   if Sender=BitBtnFPCOnlyTag then
   begin
-    //aNewURL:=FPCBASESVNURL+'/svn/fpc/tags/'+ListBoxFPCTargetTag.GetSelectedText;
+    aNewURL:=FPCBASESVNURL+'/svn/fpc/tags/'+ListBoxFPCTargetTag.GetSelectedText;
     if SetAlias('fpcURL',ListBoxFPCTargetTag.GetSelectedText,aNewURL) then
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
@@ -1806,7 +1792,7 @@ begin
   end;
   if Sender=BitBtnLazarusOnlyTag then
   begin
-    //aNewURL:=FPCBASESVNURL+'/svn/lazarus/tags/'+ListBoxLazarusTargetTag.GetSelectedText;
+    aNewURL:=FPCBASESVNURL+'/svn/lazarus/tags/'+ListBoxLazarusTargetTag.GetSelectedText;
     if SetAlias('lazURL',ListBoxLazarusTargetTag.GetSelectedText,aNewURL) then
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
@@ -1815,6 +1801,7 @@ begin
       //ListBoxLazarusTarget.ItemIndex:=ListBoxLazarusTarget.Count-1;
     end;
   end;
+  }
 end;
 
 procedure TForm1.TagSelectionChange(Sender: TObject;User: boolean);
@@ -1874,7 +1861,11 @@ begin
     if (Index<>-1) then
     begin
       s:=Items[Index];
-      i:=Pos('.gitlab',s);
+      i:=Pos('.svn',s);
+      if (i=0) then
+        i:=Pos('.gitlab',s)
+      else
+        Canvas.Font.Color := clRed;
       if (i>0) then Delete(s,i,MaxInt);
       Canvas.TextOut(ARect.Left + 2, ARect.Top, s);
     end;
@@ -1945,39 +1936,30 @@ begin
   if Sender=TrunkBtn then
   begin
     s:='Going to install both FPC trunk and Lazarus trunk.';
-    aFPCTarget:='trunk';
-    aLazarusTarget:='trunk';
+    aFPCTarget:='trunk.gitlab';
+    aLazarusTarget:='trunk.gitlab';
   end;
 
   if Sender=FixesBtn then
   begin
     s:='Going to install FPC fixes and Lazarus fixes.';
-    aFPCTarget:='fixes';
-    aLazarusTarget:='fixes';
+    aFPCTarget:='fixes.gitlab';
+    aLazarusTarget:='fixes.gitlab';
   end;
 
   if Sender=StableBtn then
   begin
     s:='Going to install FPC stable and Lazarus stable.';
-    aFPCTarget:='stable';
-    aLazarusTarget:='stable';
+    aFPCTarget:='stable.gitlab';
+    aLazarusTarget:='stable.gitlab';
   end;
 
   if Sender=Win95Btn then
   begin
     s:='Going to install FPC and Lazarus for Win95.';
-    aFPCTarget:='2.6.2';
-    aLazarusTarget:='1.2';
+    aFPCTarget:='2.6.2.gitlab';
+    aLazarusTarget:='1.2.gitlab';
   end;
-
-  {$ifdef Darwin}
-  if (Sender=TrunkBtn) OR (Sender=StableBtn) then
-  begin
-    // No SVN anymore on darwin: use GIT repos
-    aFPCTarget:=aFPCTarget+'.git';
-    aLazarusTarget:=aLazarusTarget+'.git';
-  end;
-  {$endif}
 
   {
   if Sender=OldBtn then
@@ -1994,8 +1976,8 @@ begin
   if Sender=AndroidBtn then
   begin
     s:='Going to install FPC and Lazarus stable, armv7/arm64 cross-android compilers and LAMW.';
-    aFPCTarget:='stable';
-    aLazarusTarget:='stable';
+    aFPCTarget:='stable.gitlab';
+    aLazarusTarget:='stable.gitlab';
     aModule:='lamw';
   end;
 
@@ -2041,8 +2023,8 @@ begin
       s:='Going to install FPC and Lazarus for Wio Terminal.';
       aModule:='develtools4fpc,mbf-freertos-wio';
     end;
-    aFPCTarget:='embedded';
-    aLazarusTarget:='trunk';
+    aFPCTarget:='embedded.git';
+    aLazarusTarget:='trunk.gitlab';
   end;
 
   if Sender=mORMotBtn then
@@ -2055,8 +2037,8 @@ begin
   if Sender=UltiboBtn then
   begin
     s:='Going to install the Ultibo.';
-    aFPCTarget:='ultibo';
-    aLazarusTarget:='ultibo';
+    aFPCTarget:='ultibo.zip';
+    aLazarusTarget:='ultibo.zip';
   end;
 
   if Sender=OPMBtn then
@@ -2081,7 +2063,7 @@ begin
     if (Length(aLazarusTarget)>0) then
       LazarusTarget:=aLazarusTarget;
 
-    PrepareRun;
+    if (NOT PrepareRun(Sender)) then exit;
 
     if (Length(aModule)>0)then
     begin
@@ -2291,7 +2273,7 @@ begin
 
     DisEnable(Sender,False);
     try
-      PrepareRun;
+      if (NOT PrepareRun(Sender)) then exit;
 
       FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
       FPCupManager.OnlyModules:=modules;
@@ -2531,7 +2513,7 @@ begin
   // OS=amiga) AND (CPU<>m68k))
   // OS=morphos) AND (CPU<>powerpc))
 
-  PrepareRun;
+  if (NOT PrepareRun(Sender)) then exit;
 
   if radgrpCPU.ItemIndex<>-1 then
   begin
@@ -3732,7 +3714,8 @@ begin
 
   DisEnable(Sender,False);
   try
-    PrepareRun;
+
+    if (NOT PrepareRun(Sender)) then exit;
 
     s:='';
 
@@ -4008,8 +3991,32 @@ begin
   end;
 end;
 
-procedure TForm1.PrepareRun;
+function TForm1.PrepareRun(Sender: TObject):boolean;
+var
+  s:string;
 begin
+  result:=false;
+
+  s:='';
+  if (Sender<>BitBtnLazarusOnly) AND AnsiEndsText('.svn',FPCTarget) then
+  begin
+    s:='You have selected a FPC source from SVN';
+  end;
+  if (Sender<>BitBtnFPCOnly) AND AnsiEndsText('.svn',LazarusTarget) then
+  begin
+    if (Length(s)>0) then
+      s:=s+' and y'
+    else
+      s:='Y';
+    s:=s+'ou have selected a Lazarus source from SVN';
+  end;
+  if (Length(s)>0) then
+  begin
+    s:=s+'.'+LineEnding+'Please select another source: SVN is no longer available.';
+    Application.MessageBox(PChar(s), PChar('SVN source error'), MB_ICONSTOP);
+    exit;
+  end;
+
   FPCVersionLabel.Font.Color:=clDefault;
   LazarusVersionLabel.Font.Color:=clDefault;
 
@@ -4150,13 +4157,12 @@ begin
   StatusMessage.Text:=sStatus;
 
   if CheckAutoClear.Checked then memoSummary.Lines.Clear;
+
+  result:=true;
 end;
 
 function TForm1.RealRun:boolean;
 var
-  {$ifdef RemoteLog}
-  aVersion:string;
-  {$endif}
   s:string;
   aLazarusVersion:word;
   aRecordNumber:PtrUInt;
@@ -4368,7 +4374,7 @@ end;
 
 function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
-  aTarget,aStoredTarget:string;
+  aStoredTarget:string;
   Cores,MemAvailable,SwapAvailable:DWord;
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);

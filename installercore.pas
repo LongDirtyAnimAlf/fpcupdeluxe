@@ -67,7 +67,7 @@ const
   GITLAB                = 'https://gitlab.com/freepascal.org/';
 
   FPCGITLAB             = GITLAB + 'fpc';
-  FPCGITLABREPO         = FPCGITLAB + '/fpc';
+  FPCGITLABREPO         = FPCGITLAB + '/source';
   FPCGITLABBINARIES     = FPCGITLAB + '/build';
   FPCTRUNKBRANCH        = 'master';
   FPCBINARIES           = FPCGITLABBINARIES + '/-/raw/'+FPCTRUNKBRANCH;
@@ -83,6 +83,7 @@ const
   FTPBASEHTTP           = 'https://ftp.';
   FTPBASEFTP            = 'ftp://ftp.';
 
+  FPCBASESVNURL         = SVNBASEHTTP+'freepascal.org';
   FTPBASEURL            = FTPBASEFTP+'freepascal.org';
   FPCFTPURL             = FTPBASEURL+'/pub/fpc/';
   LAZARUSFTPURL         = FTPBASEURL+'/pub/lazarus/';
