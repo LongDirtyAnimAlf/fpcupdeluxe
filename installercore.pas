@@ -1560,7 +1560,7 @@ begin
 
   aSourceURL:=FPCGITMIRRORREPO+'/FPCBuild/raw/master/install/binw32/';
   {$ifdef win64}
-  aSourceURL:=FPCGITMIRRORREPO+'/FPCBuild/raw/master/install/binw64/';
+  aSourceURL64:=FPCGITMIRRORREPO+'/FPCBuild/raw/master/install/binw64/';
   {$endif}
 
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)
