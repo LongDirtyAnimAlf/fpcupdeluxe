@@ -85,8 +85,6 @@ begin
           LeftOverOptions.Add('lazsplit');
           LeftOverOptions.Add('verbose');
           LeftOverOptions.Add('version');
-          LeftOverOptions.Add('usegitlab');
-
           try
             for i:=Options.Params.Count-1 downto 0 do
             begin
@@ -366,31 +364,58 @@ begin
     FManager.LoadFPCUPConfig;
     //load URLs after LoadFPCUPConfig so we're sure we have loaded/parsed the URL aliases
 
-
     try
-      if Options.GetOptionNoParam('','usegitlab')
-      then
+      s:=Options.GetOption('','fpcVersion','');
+      if (Length(s)>0) then
       begin
-        FManager.FPCTAG:=Options.GetOption('','fpcVersion','stable');
-        {$ifndef FPCONLY}
-        FManager.LazarusTAG:=Options.GetOption('','lazVersion','stable');
-      {$endif}
+        if AnsiEndsText('.gitlab',s) then
+          FManager.FPCTag:=s
+        else
+          FManager.FPCURL:=s;
       end
       else
       begin
-        s:=Options.GetOption('','fpcVersion','');
+        s:=Options.GetOption('','fpcURL','');
         if (Length(s)>0) then
           FManager.FPCURL:=s
         else
-          FManager.FPCURL:=Options.GetOption('','fpcURL',installerUniversal.GetAlias('fpcURL','stable'));
-        {$ifndef FPCONLY}
-        s:=Options.GetOption('','lazVersion','');
+        begin
+          s:='stable.gitlab';
+          FManager.FPCTag:=s;
+          Options.PersistentOptions:=trim(Options.PersistentOptions+' --fpcVersion="'+s+'"')
+        end;
+      end;
+      if (Pos('github.com/graemeg',FManager.FPCURL)>0) then FManager.FPCBranch:='master';
+      if (Pos('github.com/newpascal',FManager.FPCURL)>0) then FManager.FPCBranch:='release';
+      if (Pos('github.com/LongDirtyAnimAlf',FManager.FPCURL)>0) then FManager.FPCBranch:='master';
+
+      {$ifndef FPCONLY}
+      s:=Options.GetOption('','lazVersion','');
+      if (Length(s)>0) then
+      begin
+        if AnsiEndsText('.gitlab',s) then
+          FManager.LazarusTag:=s
+        else
+          FManager.LazarusURL:=s;
+      end
+      else
+      begin
+        s:=Options.GetOption('','lazURL','');
         if (Length(s)>0) then
           FManager.LazarusURL:=s
         else
-          FManager.LazarusURL:=Options.GetOption('','lazURL',installerUniversal.GetAlias('lazURL','stable'));
-        {$endif}
+        begin
+          s:='stable.gitlab';
+          FManager.LazarusTag:=s;
+          Options.PersistentOptions:=trim(Options.PersistentOptions+' --lazVersion="'+s+'"')
+        end;
       end;
+      if (Pos('github.com/graemeg',FManager.LazarusURL)>0) then FManager.LazarusBranch:='upstream';
+      if (Pos('github.com/newpascal',FManager.LazarusURL)>0) then FManager.LazarusBranch:='release';
+      if (Pos('github.com/LongDirtyAnimAlf',FManager.LazarusURL)>0) then FManager.LazarusBranch:='upstream';
+      if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FManager.LazarusURL)>0) then FManager.LazarusBranch:='master';
+      {$endif}
+
     except
       on E:Exception do
       begin

@@ -77,7 +77,7 @@ type
     // Raw parameters. Note that FParams will be deleted when calling GetOption
     property Params: TStringList read FParams;
     // Lists all options retrieved with AppendToPersistentOptions=true in command line arg format.
-    property PersistentOptions:string read FPersistentOptions;
+    property PersistentOptions:string read FPersistentOptions write FPersistentOptions;
     // Arguments left after getting all command line parameters
     property RestArguments:TStringList read FParams;
     function GetOption(shortname,name,defaultVal:string;AppendToPersistentOptions:boolean=true):string;
