@@ -533,7 +533,7 @@ begin
     {$endif}
     if InstallDirEdit.OnKeyUp=nil then InstallDirEdit.OnChange:=@Edit1Change;
 
-    chkGitlab.Checked:=bGitlab;
+    if (chkGitlab.Checked<>bGitlab) then chkGitlab.Checked:=bGitlab;
     if (Length(aFPCTarget)>0) then FPCTarget:=aFPCTarget;
     if (Length(aLazarusTarget)>0) then LazarusTarget:=aLazarusTarget;
     FillSourceListboxes;
@@ -1854,6 +1854,7 @@ begin
       Canvas.Brush.Color := GetColorResolvingParent;
       Canvas.Font.Color := clWindowText;
     end;
+
     if (odFocused in State) and (lboDrawFocusRect in Options) then
       Canvas.DrawFocusRect(ARect);
     if (NOT (odBackgroundPainted in State)) then
@@ -1867,6 +1868,8 @@ begin
       else
         Canvas.Font.Color := clRed;
       if (i>0) then Delete(s,i,MaxInt);
+      {if ((odDisabled in State) OR (odGrayed in State)) then}
+      Canvas.Brush.Style:=bsClear;
       Canvas.TextOut(ARect.Left + 2, ARect.Top, s);
     end;
   end;
@@ -2051,6 +2054,9 @@ begin
   s:=s+sLineBreak;
   s:=s+'Install directory: '+Self.sInstallDir;
   if (MessageDlg(s+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+
+  if ( AnsiEndsText('.gitlab',aFPCTarget) AND AnsiEndsText('.gitlab',aLazarusTarget) AND (NOT chkGitlab.Checked) ) then
+    chkGitlab.Checked:=true;
 
   AddMessage(s+'.');
   //sStatus:=s;

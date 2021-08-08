@@ -69,7 +69,7 @@ const
   FPCGITLAB             = GITLAB + 'fpc';
   FPCGITLABREPO         = FPCGITLAB + '/source';
   FPCGITLABBINARIES     = FPCGITLAB + '/build';
-  FPCTRUNKBRANCH        = 'master';
+  FPCTRUNKBRANCH        = 'main';
   FPCBINARIES           = FPCGITLABBINARIES + '/-/raw/'+FPCTRUNKBRANCH;
 
   LAZARUSGITLAB         = GITLAB + 'lazarus';
@@ -1632,10 +1632,9 @@ begin
   //AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('ginstall.exe.manifest',aSourceURL64,'',ucBinutil);
+  AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL64,'',ucBinutil);
   AddNewUtil('gmkdir' + GetExeExt,aSourceURL64,'',ucBinutil);
   //AddNewUtil('GoRC' + GetExeExt,aSourceURL64,'',ucBinutil);
-
   AddNewUtil('ld' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('make' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('mv' + GetExeExt,aSourceURL64,'',ucBinutil);
