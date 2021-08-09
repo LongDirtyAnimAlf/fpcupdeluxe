@@ -4794,8 +4794,8 @@ begin
       s:=GetRevisionFromVersion(ModuleName,SourceVersion);
       if (Length(s)>0) then
       begin
-        FActualRevision:=s;
-        FPreviousRevision:=s;
+        //FActualRevision:=s;
+        //FPreviousRevision:=s;
       end;
     end
     else
