@@ -178,8 +178,6 @@ begin
          else FManager.LazarusSourceDirectory:=FManager.LazarusInstallDirectory;
       {$endif}
 
-      FManager.SVNExecutable := ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','svnexe','')));
-
       FManager.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crossbindir','')));
       FManager.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crosslibdir','')));
 
@@ -230,7 +228,7 @@ begin
         FManager.FPCOPT:=FManager.FPCOPT+' -Fl/usr/local/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
-      FManager.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
+      FManager.FPCBranch:=Options.GetOption('','fpcBranch','');
 
       //FManager.PatchCmd:=Options.GetOption('','patchcmd','patch',false);
 
@@ -292,7 +290,7 @@ begin
         FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/X11R6/lib -Fl/usr/X11R7/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
-      FManager.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
+      FManager.LazarusBranch:=Options.GetOption('','lazBranch','');
       FManager.LCL_Platform:=Options.GetOption('','lclplatform','');
       {$endif}
       FManager.IncludeModules:=Options.GetOption('','include','',false);
@@ -694,11 +692,11 @@ begin
       end;
 
       // User could have specified relative paths so we're normalizing them.
-      if (FManager.FPCDesiredRevision<>'') then
-        writeln('WARNING: Reverting FPC to revision '+FManager.FPCDesiredRevision);
+      if (FManager.FPCBranch<>'') then
+        writeln('WARNING: Getting FPC version '+FManager.FPCBranch);
       {$ifndef FPCONLY}
-      if (FManager.LazarusDesiredRevision<>'') then
-        writeln('WARNING: Reverting Lazarus to revision '+FManager.LazarusDesiredRevision);
+      if (FManager.LazarusBranch<>'') then
+        writeln('WARNING: Getting Lazarus version '+FManager.LazarusBranch);
       {$endif}
       if FManager.SkipModules<>'' then
         writeln('WARNING: Skipping installation/update of '+FManager.SkipModules);

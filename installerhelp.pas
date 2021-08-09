@@ -208,7 +208,9 @@ end;
 function THelpInstaller.InitModule: boolean;
 var
   PlainBinDir: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
-  SVNPath:string;
+  {$IFDEF MSWINDOWS}
+  s:string;
+  {$ENDIF MSWINDOWS}
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
 
@@ -226,16 +228,15 @@ begin
     // at least one ; to be present in the path. If you only have one entry, you
     // can add PathSeparator without problems.
     // https://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
-
-    SVNPath:='';
-    if Length(FSVNDirectory)>0
-       then SVNPath:=ExcludeTrailingPathDelimiter(FSVNDirectory)+PathSeparator;
+    s:='';
+    if Assigned(SVNClient) then if SVNClient.ValidClient then s:=s+ExtractFileDir(SVNClient.RepoExecutable)+PathSeparator;
+    if Assigned(GITClient) then if GITClient.ValidClient then s:=s+ExtractFileDir(GITClient.RepoExecutable)+PathSeparator;
 
     SetPath(
       ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
       PlainBinDir+PathSeparator+
       FMakeDir+PathSeparator+
-      SVNPath+
+      s+
       ExcludeTrailingPathDelimiter(FInstallDirectory),
       false,false);
     {$ENDIF MSWINDOWS}

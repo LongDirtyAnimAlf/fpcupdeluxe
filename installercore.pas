@@ -381,7 +381,6 @@ type
     FGitClient: TGitClient;
     FHGClient: THGClient;
     FSVNClient: TSVNClient;
-    FSVNDirectory: string;
     FRepositoryUpdated: boolean;
     FSourcePatches: string;
     FMajorVersion: integer; //major part of the version number, e.g. 1 for 1.0.8, or -1 if unknown
@@ -425,7 +424,6 @@ type
     // Checkout/update using SVN; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromSVN(aModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
-    function SimpleExportFromSVN(ModuleName: string; aFileURL,aLocalPath:string): boolean;
     function DownloadFromURL(ModuleName: string): boolean;
     // Clone/update using Git; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
@@ -1037,7 +1035,6 @@ begin
       end;
       {$IFDEF MSWINDOWS}
       // try to find fpcupdeluxe SVN
-      FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir)+'svn';
       if (NOT OperationSucceeded) then
         OperationSucceeded:=FindSVNSubDirs;
       if (NOT OperationSucceeded) then
@@ -1048,11 +1045,12 @@ begin
         OperationSucceeded:=DownloadSVN;
       end;
       {$ENDIF MSWINDOWS}
-      if OperationSucceeded then
+      if (OperationSucceeded AND (RepoExecutable<>EmptyStr)) then
       begin
-        if (RepoExecutable<>EmptyStr) then OperationSucceeded := CheckExecutable(RepoExecutable, ['--version'], '');
-        if OperationSucceeded then FSVNDirectory:=ExtractFileDir(RepoExecutable);
+        OperationSucceeded:=CheckExecutable(RepoExecutable, ['--version'], '');
       end;
+      // do not fail: SVN is not essential anymore !
+      OperationSucceeded:=True;
     end;
 
     // Regardless of platform, SVN should now be either set up correctly or we should give up.
@@ -1151,7 +1149,7 @@ begin
 
     if (NOT Ultibo) then
     begin
-      //Unrar HG and GIT not needed for Ultibo
+      //Unrar, HG and GIT not needed for Ultibo
 
       FUnrar := IncludeTrailingPathDelimiter(FMakeDir) + 'unrar\bin\unrar.exe';
       if Not FileExists(FUnrar) then
@@ -1283,13 +1281,11 @@ begin
             if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+GetExeExt;
           end;
         end;
-        if RepoExecutable <> EmptyStr then
+        if (OperationSucceeded AND (RepoExecutable<>EmptyStr)) then
         begin
-          // check exe, but do not fail: GIT is not 100% essential !
-          CheckExecutable(RepoExecutable, ['--version'], '');
+          // check exe
+          OperationSucceeded:=CheckExecutable(RepoExecutable, ['--version'], '');
         end;
-        // do not fail: GIT is not 100% essential !
-        OperationSucceeded:=True;
       end;
 
       with HGClient do
@@ -2069,44 +2065,6 @@ begin
   end;
 end;
 
-function TInstaller.SimpleExportFromSVN(ModuleName: string; aFileURL,aLocalPath:string): boolean;
-begin
-  result:=false;
-
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (SimpleExportFromSVN: '+ModuleName+'): ';
-
-  // check if we do have a client !!
-  if NOT SVNClient.ValidClient then
-  begin
-    Infoln(localinfotext+SVNClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etWarning);
-    exit;
-  end;
-
-  SVNClient.ModuleName       := ModuleName;
-  SVNClient.LocalRepository  := aLocalPath;
-  SVNClient.Repository       := aFileURL;
-  SVNClient.ExportOnly       := true;
-  SVNClient.DesiredRevision  := '';
-  FSVNClient.DesiredBranch    := '';
-
-  if (Length(SVNClient.LocalRepository)>0) then
-  begin
-    if not(DirectoryExists(SVNClient.LocalRepository)) then
-    begin
-      WritelnLog(localinfotext+'Creating directory '+SVNClient.LocalRepository+' for SVN checkout/export.');
-      ForceDirectoriesSafe(SVNClient.LocalRepository);
-    end;
-    SVNClient.CheckOutOrUpdate;
-    result:=(SVNClient.ReturnCode=0);
-  end
-  else
-  begin
-    //only report validity of remote URL
-    result:=SVNClient.CheckURL;
-  end;
-
-end;
-
 function TInstaller.DownloadFromURL(ModuleName: string): boolean;
 var
   i:integer;
@@ -2336,7 +2294,7 @@ const
     );
 var
   OperationSucceeded: boolean;
-  SVNZip,aSourceURL: string;
+  SVNZip,SVNDir,aSourceURL: string;
   i:integer;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadSVN): ';
@@ -2345,49 +2303,52 @@ begin
 
   SVNZip := GetTempFileNameExt('FPCUPTMP','zip');
 
-  ForceDirectoriesSafe(FSVNDirectory);
+  SVNDir := IncludeTrailingPathDelimiter(FMakeDir)+'svn';
 
-  for i:=0 to (Length(NewSourceURL)-1) do
-  try
-    aSourceURL:=NewSourceURL[i];
-    //always get this file with the native downloader !!
-    OperationSucceeded:=GetFile(aSourceURL,SVNZip,true,true);
-    if (NOT OperationSucceeded) then
-    begin
-      // try one more time
-      SysUtils.DeleteFile(SVNZip);
-      OperationSucceeded:=GetFile(aSourceURL,SVNZip,true,true);
-    end;
-    if (NOT OperationSucceeded) then
-      SysUtils.DeleteFile(SVNZip)
-    else
-      break;
-
-  except
-    on E: Exception do
-    begin
-      OperationSucceeded := false;
-      WritelnLog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client', true);
-    end;
-  end;
-
-  if OperationSucceeded then
+  if ForceDirectoriesSafe(SVNDir) then
   begin
-    // Extract, overwrite
-    with TNormalUnzipper.Create do
+    for i:=0 to (Length(NewSourceURL)-1) do
+    try
+      aSourceURL:=NewSourceURL[i];
+      //always get this file with the native downloader !!
+      OperationSucceeded:=GetFile(aSourceURL,SVNZip,true,true);
+      if (NOT OperationSucceeded) then
+      begin
+        // try one more time
+        SysUtils.DeleteFile(SVNZip);
+        OperationSucceeded:=GetFile(aSourceURL,SVNZip,true,true);
+      end;
+      if (NOT OperationSucceeded) then
+        SysUtils.DeleteFile(SVNZip)
+      else
+        break;
+
+    except
+      on E: Exception do
+      begin
+        OperationSucceeded := false;
+        WritelnLog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client', true);
+      end;
+    end;
+
+    if OperationSucceeded then
     begin
-      try
-        DeleteDirectoryEx(FSVNDirectory);
-        OperationSucceeded:=DoUnZip(SVNZip,FSVNDirectory,[]);
-      finally
-        Free;
+      // Extract, overwrite
+      with TNormalUnzipper.Create do
+      begin
+        try
+          DeleteDirectoryEx(SVNDir);
+          OperationSucceeded:=DoUnZip(SVNZip,SVNDir,[]);
+        finally
+          Free;
+        end;
       end;
     end;
   end;
 
   if OperationSucceeded then
   begin
-    WritelnLog(localinfotext + 'SVN download and unpacking ok. Not going to search SVN client itself in ' + FSVNDirectory, true);
+    WritelnLog(localinfotext + 'SVN download and unpacking ok. Not going to search SVN client itself in ' + SVNDir, true);
     OperationSucceeded := FindSVNSubDirs;
     if OperationSucceeded then
       SysUtils.Deletefile(SVNZip); //Get rid of temp zip if success.
@@ -2830,11 +2791,13 @@ end;
 {$IFDEF MSWINDOWS}
 function TInstaller.FindSVNSubDirs: boolean;
 var
+  SVNDir:string;
   SVNFiles: TStringList;
   OperationSucceeded: boolean;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (FindSVNSubDirs): ';
-  SVNFiles := FindAllFiles(FSVNDirectory, SVNClient.RepoExecutableName + GetExeExt, true);
+  SVNDir := IncludeTrailingPathDelimiter(FMakeDir)+'svn';
+  SVNFiles := FindAllFiles(SVNDir, SVNClient.RepoExecutableName + GetExeExt, true);
   try
     if SVNFiles.Count > 0 then
     begin
@@ -2844,7 +2807,7 @@ begin
     end
     else
     begin
-      Infoln(localinfotext+'Could not find svn executable in or under ' + FSVNDirectory,etInfo);
+      Infoln(localinfotext+'Could not find svn executable in or under ' + SVNDir,etInfo);
       OperationSucceeded := false;
     end;
   finally
@@ -2852,45 +2815,6 @@ begin
   end;
   Result := OperationSucceeded;
 end;
-{
-// experiments
-function TInstaller.FindSVNSubDirs: boolean;
-procedure FileSearch(const dirName:string);
-var
-  searchResult: TSearchRec;
-begin
-  result:='';
-  WritelnLog('Going to search for SVN client in ' + IncludeTrailingPathDelimiter(dirName)+'*');
-  if SysUtils.FindFirst(IncludeTrailingPathDelimiter(dirName)+'*', faAnyFile, searchResult)=0 then
-  begin
-    try
-      repeat
-        if (searchResult.Attr and faDirectory)=0 then
-        begin
-          if SameText(searchResult.Name, SVNClient.RepoExecutableName + GetExeExt) then
-          begin
-            SVNClient.RepoExecutable:=IncludeTrailingPathDelimiter(dirName)+searchResult.Name;
-          end;
-        end else if (searchResult.Name<>'.') and (searchResult.Name<>'..') then
-        begin
-          FileSearch(IncludeTrailingPathDelimiter(dirName)+searchResult.Name);
-        end;
-      until ( (SysUtils.FindNext(searchResult)<>0) OR (Length(SVNClient.RepoExecutable)<>0) );
-    finally
-      SysUtils.FindClose(searchResult);
-    end;
-  end;
-end;
-begin
-  SVNClient.RepoExecutable := '';
-  SVNClient.RepoExecutable := FileSearch(FSVNDirectory);
-  WritelnLog('SVN search finished. Found: ' + SVNClient.RepoExecutable);
-  result:=Length(SVNClient.RepoExecutable)>0;
-  if result
-     then WritelnLog('SVN search finished. Found: ' + SVNClient.RepoExecutable)
-     else WritelnLog('SVN search failed');
-end;
-}
 {$ENDIF}
 
 function TInstaller.GetFPCTarget(Native: boolean): string;
@@ -4269,7 +4193,6 @@ begin
   FHGClient  := THGClient.Create(Self);
 
   FShell        := '';
-  FSVNDirectory := '';
   FMakeDir      := '';
 
   FNeededExecutablesChecked:=false;

@@ -2998,7 +2998,10 @@ begin
   {$ENDIF}
 
   if ((aDictionary='fpcTAG') OR (aDictionary='fpcBRANCH')) AND AnsiStartsText(FPCTRUNKBRANCH,aAlias) then result:='trunk';
+  if (aDictionary='fpcURL') AND AnsiStartsText(FPCGITLABREPO,aAlias) then result:='gitlab';
+
   if ((aDictionary='lazTAG') OR (aDictionary='lazBRANCH')) AND AnsiStartsText(LAZARUSTRUNKBRANCH,aAlias) then result:='trunk';
+  if (aDictionary='lazURL') AND AnsiStartsText(LAZARUSGITLABREPO,aAlias) then result:='gitlab';
 
   if (Length(result)=0) then
   begin
@@ -3040,10 +3043,16 @@ begin
   try
     ini.ReadSection(ALIASMAGIC+aDictionary,sl);
     if Uppercase(aKeyWord)='LIST' then
-      result:=sl.CommaText
+    begin
+      result:=sl.CommaText;
+      if (aDictionary='fpcURL') OR ((aDictionary='lazURL')) then result:=result+',gitlab';
+    end
     else
     begin
       result:=ini.ReadString(ALIASMAGIC+aDictionary,aKeyWord,'');
+
+      if (aDictionary='fpcURL') AND (aKeyWord='gitlab') then result:=FPCGITLABREPO;
+      if (aDictionary='lazURL') AND (aKeyWord='gitlab') then result:=LAZARUSGITLABREPO;
 
       if (result='') then
       begin

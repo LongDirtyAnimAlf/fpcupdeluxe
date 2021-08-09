@@ -272,8 +272,6 @@ type
     property Context: boolean read FContext write FContext; //Name of the shortcut that points to the fpcup-installed Lazarus
     {$endif}
     property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup; //Name of the shortcut that points to fpcup
-    // Full path+filename of SVN executable. Use empty to search for default locations.
-    property SVNExecutable: string read FSVNExecutable write FSVNExecutable;
     // Options that are to be saved in shortcuts/batch file/shell scripts.
     // Excludes temporary options like --verbose
     property PersistentOptions: string read FPersistentOptions write FPersistentOptions;
@@ -514,11 +512,12 @@ procedure TFPCupManager.SetFPCTAG(AValue: string);
 begin
   if FFPCTAG=AValue then Exit;
   if AnsiEndsText('.gitlab',AValue) then
-  //if (Pos('_',AValue)=0) then
-    FFPCTAG:=installerUniversal.GetAlias('fpcTAG',AValue)
+  begin
+    FFPCTAG:=installerUniversal.GetAlias('fpcTAG',AValue);
+    FFPCURL:=FPCGITLABREPO;
+  end
   else
     FFPCTAG:=aValue;
-  FFPCURL:=FPCGITLABREPO{+'.git/'};
 end;
 
 {
@@ -585,11 +584,12 @@ procedure TFPCupManager.SetLazarusTAG(AValue: string);
 begin
   if FLazarusTAG=AValue then exit;
   if AnsiEndsText('.gitlab',AValue) then
-  //if (Pos('_',AValue)=0) then
-    FLazarusTAG:=installerUniversal.GetAlias('lazTAG',AValue)
+  begin
+    FLazarusTAG:=installerUniversal.GetAlias('lazTAG',AValue);
+    FLazarusURL:=LAZARUSGITLABREPO;
+  end
   else
     FLazarusTAG:=aValue;
-  FLazarusURL:=LAZARUSGITLABREPO{+'.git/'};
 end;
 
 {$endif}
@@ -1625,7 +1625,6 @@ begin
     FInstaller.FPCSourceDir:=LocalFPCSourceDir;
     FInstaller.FPCInstallDir:=FParent.FPCInstallDirectory;
     FInstaller.TempDirectory:=FParent.TempDirectory;
-    if (Length(FParent.SVNExecutable)>0) then FInstaller.SVNClient.RepoExecutable:=FParent.SVNExecutable;
     {$IFDEF MSWINDOWS}
     FInstaller.SVNClient.ForceLocal:=FParent.ForceLocalRepoClient;
     FInstaller.GitClient.ForceLocal:=FParent.ForceLocalRepoClient;

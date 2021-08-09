@@ -276,7 +276,6 @@ function ReleaseCandidateFromUrl(aURL:string): integer;
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
 function Download(UseWget:boolean; URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; bWGet:boolean=false; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
-function GetSVNFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 {$IFDEF MSWINDOWS}
 function CheckFileSignature(aFilePath: string): boolean;
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
@@ -2381,48 +2380,6 @@ begin
 
   end;
 
-end;
-
-function GetSVNFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
-var
-  Ms: TMemoryStream;
-begin
-  result:=false;
-  if (aURL='') then exit;
-  if (NOT result) then
-  begin
-    Ms := TMemoryStream.Create;
-    try
-      result:=Download(
-            False,
-            aURL,
-            Ms,
-            HTTPProxyHost,
-            HTTPProxyPort,
-            HTTPProxyUser,
-            HTTPProxyPassword);
-
-      if (NOT result) then
-      begin
-        //retry
-        Ms.Clear;
-        result:=Download(
-              true,
-              aURL,
-              Ms,
-              HTTPProxyHost,
-              HTTPProxyPort,
-              HTTPProxyUser,
-              HTTPProxyPassword);
-      end;
-      if result then
-      begin
-        FTPHTMLListingParser(Ms,fileurllist);
-      end;
-    finally
-      Ms.Free;
-    end;
-  end;
 end;
 
 // returns file size in bytes or 0 if not found.

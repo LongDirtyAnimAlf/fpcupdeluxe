@@ -3337,8 +3337,8 @@ begin
 
     {$IFDEF MSWINDOWS}
     s:='';
-    if Length(FSVNDirectory)>0
-       then s:=PathSeparator+ExcludeTrailingPathDelimiter(FSVNDirectory);
+    if Assigned(SVNClient) then if SVNClient.ValidClient then s:=s+PathSeparator+ExtractFileDir(SVNClient.RepoExecutable);
+    if Assigned(GITClient) then if GITClient.ValidClient then s:=s+PathSeparator+ExtractFileDir(GITClient.RepoExecutable);
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // add install/fpc/utils to solve data2inc not found by fpcmkcfg
     // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
