@@ -3045,7 +3045,6 @@ begin
     if Uppercase(aKeyWord)='LIST' then
     begin
       result:=sl.CommaText;
-      if (aDictionary='fpcURL') OR ((aDictionary='lazURL')) then result:=result+',gitlab';
     end
     else
     begin
