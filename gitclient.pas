@@ -332,7 +332,6 @@ var
   Command: string;
   Output: string = '';
   Tags: string = '';
-  bSwitch: boolean;
   aCurrentTag,aCurrentBranch:string;
   aNewTag,aNewBranch:string;
   i:integer;
@@ -343,7 +342,6 @@ begin
 
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
-  bSwitch:=false;
 
   {
   //FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['tag'], LocalRepository, Tags, '', Verbose);
@@ -365,40 +363,43 @@ begin
   end;
   }
 
-  if ((NOT bSwitch) AND (Length(DesiredTag)>0)) then
+  Command:='';
+
+  if ((Length(Command)=0) AND (Length(DesiredTag)>0)) then
   begin
     Command := ' describe --tags --abbrev=0';
     FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+    Command:='';
     if FReturnCode = 0 then
     begin
       if (DesiredTag<>Trim(Output)) then
-      begin
-        Command := ' checkout --force '+DesiredTag;
-        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-        FReturnOutput := Output;
-        bSwitch:=true;
-      end;
+        Command := ' checkout --force '+DesiredTag
+      else
+        Command := ' pull';
     end;
   end;
 
-  if ((NOT bSwitch) AND (Length(DesiredBranch)>0)) then
+  if ((Length(Command)=0) AND (Length(DesiredBranch)>0)) then
   begin
     Command := ' rev-parse --abbrev-ref HEAD';
     //Command := ' symbolic-ref --short HEAD';
     FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+    Command:='';
     if FReturnCode = 0 then
     begin
       if (DesiredBranch<>Trim(Output)) then
-      begin
-        Command := ' checkout --force '+DesiredBranch;
-        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-        FReturnOutput := Output;
-        bSwitch:=true;
-      end;
+        Command := ' checkout --force '+DesiredBranch
+      else
+        Command := ' pull';
     end;
   end;
 
-  if (NOT bSwitch) then
+  if (Length(Command)>0) then
+  begin
+    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+    FReturnOutput := Output;
+  end
+  else
   begin
     Command := ' init';
     FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
@@ -431,7 +432,6 @@ begin
       FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Verbose);
     end;
     }
-
   end;
 
 end;
@@ -659,6 +659,9 @@ begin
   if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
+
+  //Output:='';
+  //i:=TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' rev-parse --show-toplevel',LocalRepository, Output, Verbose);
 
   Output:='';
   i:=TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' log -n 1 --grep=^git-svn-id:',LocalRepository, Output, Verbose);

@@ -4728,6 +4728,7 @@ var
   aRepoClient    : TRepoClient;
   s              : string;
   SourceVersion  : string;
+  SourceInfo     : TRevision;
 begin
   result:=inherited;
   result:=InitModule;
@@ -4803,6 +4804,12 @@ begin
       Infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;
 
+    if Assigned(aRepoClient) then
+    begin
+      if (aRepoClient.ClassType=FSVNClient.ClassType) then SourceInfo.SVNRevision:=aRepoClient.LocalRevision;
+      if (aRepoClient.ClassType=FGitClient.ClassType) then SourceInfo.GITHash:=aRepoClient.LocalRevision;
+    end;
+
     if FRepositoryUpdated then
     begin
       Infoln(infotext+ModuleName + ' was at revision: '+PreviousRevision,etInfo);
@@ -4827,10 +4834,15 @@ begin
       end;
       UpdateWarnings.Add(FPCDATEMAGIC+DateTimeToStr(now));
       if Assigned(aRepoClient) then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
-      UpdateWarnings.Add(ModuleName+' previous revision: '+PreviousRevision);
-      UpdateWarnings.Add(FPCREVMAGIC+ActualRevision);
-      if (Assigned(aRepoClient) AND (aRepoClient.ClassType=FGitClient.ClassType)) then
-        UpdateWarnings.Add(FPCHASHMAGIC+aRepoClient.LocalRevision);
+      UpdateWarnings.Add(ModuleName+' previous rev/hash: '+PreviousRevision);
+      if Length(SourceInfo.SVNRevision)>0 then
+        UpdateWarnings.Add(FPCREVMAGIC+SourceInfo.SVNRevision)
+      else
+      if Length(SourceInfo.GITHash)>0 then
+        UpdateWarnings.Add(FPCHASHMAGIC+SourceInfo.GITHash)
+      else
+      if Length(ActualRevision)>0 then
+        UpdateWarnings.Add(FPCREVMAGIC+ActualRevision);
       UpdateWarnings.Add('');
       UpdateWarnings.SaveToFile(s);
     finally

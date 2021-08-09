@@ -3064,16 +3064,16 @@ begin
         if (Pos('fpcURL',aDictionary)=1) OR (Pos('fpcTAG',aDictionary)=1) OR (Pos('fpcBRANCH',aDictionary)=1) then
         begin
           //if (aDictionary<>'fpcURL')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcURL',   aKeyWord,'');
-          if (aDictionary='fpcTAG')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcBRANCH',   aKeyWord,'');
-          if (aDictionary='fpcBRANCH') AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcTAG',aKeyWord,'');
+          //if (aDictionary='fpcTAG')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcBRANCH',   aKeyWord,'');
+          //if (aDictionary='fpcBRANCH') AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcTAG',aKeyWord,'');
         end
         {$ifndef FPCONLY}
         else
         if (Pos('lazURL',aDictionary)=1) OR (Pos('lazTAG',aDictionary)=1) OR (Pos('lazBRANCH',aDictionary)=1) then
         begin
           //if (aDictionary<>'lazURL')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazURL',   aKeyWord,'');
-          if (aDictionary='lazTAG')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazBRANCH',   aKeyWord,'');
-          if (aDictionary='lazBRANCH') AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazTAG',aKeyWord,'');
+          //if (aDictionary='lazTAG')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazBRANCH',   aKeyWord,'');
+          //if (aDictionary='lazBRANCH') AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazTAG',aKeyWord,'');
         end
         {$endif}
         else
@@ -3084,8 +3084,8 @@ begin
         end;
       end;
 
-      if ((aDictionary='fpcTAG') OR (aDictionary='fpcBRANCH')) AND (result='trunk') then result:=FPCTRUNKBRANCH;
-      if ((aDictionary='lazTAG') OR (aDictionary='lazBRANCH')) AND (result='trunk') then result:=LAZARUSTRUNKBRANCH;
+      if ({(aDictionary='fpcTAG') OR }(aDictionary='fpcBRANCH')) AND (result='trunk') then result:=FPCTRUNKBRANCH;
+      if ({(aDictionary='lazTAG') OR }(aDictionary='lazBRANCH')) AND (result='trunk') then result:=LAZARUSTRUNKBRANCH;
 
     end;
   finally

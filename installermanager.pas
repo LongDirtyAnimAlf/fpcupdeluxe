@@ -509,11 +509,24 @@ begin
 end;
 
 procedure TFPCupManager.SetFPCTAG(AValue: string);
+var
+  s:string;
 begin
-  if FFPCTAG=AValue then Exit;
+  //if FFPCTAG=AValue then Exit;
   if AnsiEndsText('.gitlab',AValue) then
   begin
-    FFPCTAG:=installerUniversal.GetAlias('fpcTAG',AValue);
+    s:=installerUniversal.GetAlias('fpcTAG',AValue);
+    if (Length(s)>0) then
+    begin
+      FFPCTAG:=s;
+      FFPCBranch:='';
+    end;
+    s:=installerUniversal.GetAlias('fpcBRANCH',AValue);
+    if (Length(s)>0) then
+    begin
+      FFPCTAG:='';
+      FFPCBranch:=s;
+    end;
     FFPCURL:=FPCGITLABREPO;
   end
   else
@@ -581,11 +594,24 @@ begin
 end;
 
 procedure TFPCupManager.SetLazarusTAG(AValue: string);
+var
+  s:string;
 begin
-  if FLazarusTAG=AValue then exit;
+  //if FLazarusTAG=AValue then exit;
   if AnsiEndsText('.gitlab',AValue) then
   begin
-    FLazarusTAG:=installerUniversal.GetAlias('lazTAG',AValue);
+    s:=installerUniversal.GetAlias('lazTAG',AValue);
+    if (Length(s)>0) then
+    begin
+      FLazarusTAG:=s;
+      FLazarusBranch:='';
+    end;
+    s:=installerUniversal.GetAlias('lazBRANCH',AValue);
+    if (Length(s)>0) then
+    begin
+      FLazarusTAG:='';
+      FLazarusBranch:=s;
+    end;
     FLazarusURL:=LAZARUSGITLABREPO;
   end
   else
@@ -600,17 +626,17 @@ begin
   if (AValue<>'') and (FLog.LogFile=AValue) then Exit;
   // Defaults if empty value specified
   if AValue='' then
-    begin
+  begin
     {$IFDEF MSWINDOWS}
     FLog.LogFile:=SafeGetApplicationPath+'fpcup.log'; //exe directory
     {$ELSE}
     FLog.LogFile:=SafeExpandFileName('~')+DirectorySeparator+'fpcup.log'; //home directory
     {$ENDIF MSWINDOWS}
-    end
+  end
   else
-    begin
+  begin
     FLog.LogFile:=AValue;
-    end;
+  end;
 end;
 
 procedure TFPCupManager.SetMakeDirectory(AValue: string);

@@ -2226,12 +2226,13 @@ end;
 {$endif}
 {$endif}
 var
-  UpdateWarnings: TStringList;
-  aRepoClient:TRepoClient;
-  s:string;
-  SourceVersion:string;
-  FilePath:string;
-  aIndex:integer;
+  UpdateWarnings : TStringList;
+  aRepoClient    : TRepoClient;
+  s              : string;
+  SourceVersion  : string;
+  SourceInfo     : TRevision;
+  FilePath       : string;
+  aIndex         : integer;
 begin
   result:=inherited;
   result:=InitModule;
@@ -2337,6 +2338,12 @@ begin
       Infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;
 
+    if Assigned(aRepoClient) then
+    begin
+      if (aRepoClient.ClassType=FSVNClient.ClassType) then SourceInfo.SVNRevision:=aRepoClient.LocalRevision;
+      if (aRepoClient.ClassType=FGitClient.ClassType) then SourceInfo.GITHash:=aRepoClient.LocalRevision;
+    end;
+
     if FRepositoryUpdated then
     begin
       Infoln(infotext+ModuleName + ' was at revision: '+PreviousRevision,etInfo);
@@ -2361,10 +2368,15 @@ begin
       end;
       UpdateWarnings.Add(LAZDATEMAGIC+DateTimeToStr(now));
       if Assigned(aRepoClient) then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
-      UpdateWarnings.Add(ModuleName+' previous revision: '+PreviousRevision);
-      UpdateWarnings.Add(LAZREVMAGIC+ActualRevision);
-      if (Assigned(aRepoClient) AND (aRepoClient.ClassType=FGitClient.ClassType)) then
-        UpdateWarnings.Add(LAZHASHMAGIC+aRepoClient.LocalRevision);
+      UpdateWarnings.Add(ModuleName+' previous rev/hash: '+PreviousRevision);
+      if Length(SourceInfo.SVNRevision)>0 then
+        UpdateWarnings.Add(LAZREVMAGIC+SourceInfo.SVNRevision)
+      else
+      if Length(SourceInfo.GITHash)>0 then
+        UpdateWarnings.Add(LAZHASHMAGIC+SourceInfo.GITHash)
+      else
+      if Length(ActualRevision)>0 then
+        UpdateWarnings.Add(LAZREVMAGIC+ActualRevision);
       UpdateWarnings.Add('');
       UpdateWarnings.SaveToFile(s);
     finally
