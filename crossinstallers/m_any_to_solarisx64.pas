@@ -38,10 +38,7 @@ uses
 implementation
 
 uses
-  {$IFDEF UNIX}
-  baseunix,
-  {$ENDIF}
-  FileUtil, m_crossinstaller, fpcuputil;
+  m_crossinstaller, fpcuputil;
 
 type
 

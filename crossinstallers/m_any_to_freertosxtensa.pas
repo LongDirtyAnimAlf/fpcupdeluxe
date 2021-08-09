@@ -38,10 +38,10 @@ uses
 implementation
 
 uses
-  {$ifdef Unix}
+  {$IFDEF LINUX}
   BaseUnix,
-  {$endif}
-  FileUtil, m_crossinstaller, fpcuputil;
+  {$ENDIF LINUX}
+  m_crossinstaller, fpcuputil;
 
 type
 
@@ -165,9 +165,8 @@ end;
 
 function TAny_FreeRTOSXtensa.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile,aOption: string;
+  AsFile: string;
   S,PresetBinPath:string;
-  i:integer;
 begin
   result:=inherited;
   if result then exit;

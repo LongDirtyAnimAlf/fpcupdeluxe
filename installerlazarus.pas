@@ -303,8 +303,8 @@ var
   LazBuildApp: string;
   {$ifdef MSWindows}
   OldPath:string;
-  {$endif}
   s:string;
+  {$endif}
 begin
   Result:=inherited;
 

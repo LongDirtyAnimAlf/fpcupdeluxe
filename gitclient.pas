@@ -365,7 +365,7 @@ begin
   end;
   }
 
-  if (Length(DesiredTag)>0) then
+  if ((NOT bSwitch) AND (Length(DesiredTag)>0)) then
   begin
     Command := ' describe --tags --abbrev=0';
     FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
@@ -381,7 +381,7 @@ begin
     end;
   end;
 
-  if (Length(DesiredBranch)>0) then
+  if ((NOT bSwitch) AND (Length(DesiredBranch)>0)) then
   begin
     Command := ' rev-parse --abbrev-ref HEAD';
     //Command := ' symbolic-ref --short HEAD';
