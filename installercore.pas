@@ -3084,7 +3084,6 @@ function TInstaller.CheckModule(ModuleName: string): boolean;
 var
   aRepoClient:TRepoClient;
   aEvent:TEventType;
-  RepoExists: boolean;
 begin
   result:=true;
 
@@ -3126,14 +3125,14 @@ begin
   aRepoClient.LocalRepository  := FSourceDirectory;
   aRepoClient.Repository       := FURL;
 
-  RepoExists:=aRepoClient.LocalRepositoryExists;
 
-  if (NOT RepoExists) then
+  if (NOT DirectoryExists(aRepoClient.LocalRepository)) OR (DirectoryIsEmpty(aRepoClient.LocalRepository)) then
   begin
     result:=true;
     exit;
   end;
 
+  aRepoClient.LocalRepositoryExists;
   result:=(aRepoClient.ReturnCode<>FRET_LOCAL_REMOTE_URL_NOMATCH);
 
   if result then
