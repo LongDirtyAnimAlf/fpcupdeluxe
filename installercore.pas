@@ -193,6 +193,8 @@ const
 
   GITLABEXTENSION              = '.gitlab';
 
+  DIFFMAGIC                    = 'revhash_';
+
   //Sequence contants for statemachine
 
   _SEP                     = ';';
@@ -1746,7 +1748,7 @@ begin
         UpdateWarnings.Insert(0, {BeginSnippet+' '+}aModuleName + ': WARNING: found modified files.');
         if FKeepLocalChanges=false then
         begin
-          DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + aBeforeRevision + '.diff';
+          DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + DIFFMAGIC + aBeforeRevision + '.diff';
           CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,aClient);
           UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': reverting to original before updating.');
           aClient.Revert; //Remove local changes
@@ -1966,7 +1968,7 @@ begin
       UpdateWarnings.Insert(0, {BeginSnippet+' '+}aModuleName + ': WARNING: found modified files.');
       if FKeepLocalChanges=false then
       begin
-        DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + aBeforeRevision + '.diff';
+        DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + DIFFMAGIC + aBeforeRevision + '.diff';
         CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,FSVNClient);
         UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': WARNING: reverting before updating.');
         SVNClient.Revert; //Remove local changes
