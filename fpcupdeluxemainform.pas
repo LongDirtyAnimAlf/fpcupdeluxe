@@ -1782,9 +1782,9 @@ begin
   if Sender=BitBtnFPCOnlyTag then
   begin
     aNewURL:=FPCBASESVNURL+'/svn/fpc/tags/'+ListBoxFPCTargetTag.GetSelectedText;
-    if SetAlias('fpcURL',ListBoxFPCTargetTag.GetSelectedText,aNewURL) then
+    if SetAlias(FPCURLLOOKUPMAGIC,ListBoxFPCTargetTag.GetSelectedText,aNewURL) then
     begin
-      ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
+      ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
       MemoAddTag.Lines.Add('The tag with name ['+ListBoxFPCTargetTag.GetSelectedText+'] and URL ['+aNewURL+'] was added to the bottom of the FPC list.');
       //ListBoxFPCTarget.ItemIndex:=ListBoxFPCTarget.Count-1;
@@ -1793,9 +1793,9 @@ begin
   if Sender=BitBtnLazarusOnlyTag then
   begin
     aNewURL:=FPCBASESVNURL+'/svn/lazarus/tags/'+ListBoxLazarusTargetTag.GetSelectedText;
-    if SetAlias('lazURL',ListBoxLazarusTargetTag.GetSelectedText,aNewURL) then
+    if SetAlias(LAZARUSURLLOOKUPMAGIC,ListBoxLazarusTargetTag.GetSelectedText,aNewURL) then
     begin
-      ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
+      ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
       MemoAddTag.Lines.Add('The tag with name ['+ListBoxLazarusTargetTag.GetSelectedText+'] and URL ['+aNewURL+'] was added to the bottom of the Lazarus list.');
       //ListBoxLazarusTarget.ItemIndex:=ListBoxLazarusTarget.Count-1;
@@ -1864,7 +1864,7 @@ begin
       s:=Items[Index];
       i:=Pos('.svn',s);
       if (i=0) then
-        i:=Pos('.gitlab',s)
+        i:=Pos(GITLABEXTENSION,s)
       else
         Canvas.Font.Color := clRed;
       if (i>0) then Delete(s,i,MaxInt);
@@ -2055,7 +2055,7 @@ begin
   s:=s+'Install directory: '+Self.sInstallDir;
   if (MessageDlg(s+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
 
-  if ( AnsiEndsText('.gitlab',aFPCTarget) AND AnsiEndsText('.gitlab',aLazarusTarget) AND (NOT chkGitlab.Checked) ) then
+  if ( AnsiEndsText(GITLABEXTENSION,aFPCTarget) AND AnsiEndsText(GITLABEXTENSION,aLazarusTarget) AND (NOT chkGitlab.Checked) ) then
     chkGitlab.Checked:=true;
 
   AddMessage(s+'.');
@@ -4196,7 +4196,7 @@ begin
   {$endif}
 
 
-  if AnsiEndsText('.gitlab',FPCTarget) then
+  if AnsiEndsText(GITLABEXTENSION,FPCTarget) then
   begin
     FPCupManager.FPCTag:=FPCTarget;
   end
@@ -4208,7 +4208,7 @@ begin
     if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='master';
   end;
 
-  if AnsiEndsText('.gitlab',LazarusTarget) then
+  if AnsiEndsText(GITLABEXTENSION,LazarusTarget) then
   begin
     FPCupManager.LazarusTag:=LazarusTarget;
   end
@@ -4463,7 +4463,7 @@ begin
         //Fallback to previous settings
         aStoredTarget:=ReadString('URL','fpcURL','');
         if (Length(aStoredTarget)>0) then
-          aStoredTarget:=installerUniversal.GetKeyword('fpcURL',aStoredTarget);
+          aStoredTarget:=installerUniversal.GetKeyword(FPCURLLOOKUPMAGIC,aStoredTarget);
       end;
       if (Length(aStoredTarget)<>0) then
         FPCTarget:=aStoredTarget;
@@ -4475,7 +4475,7 @@ begin
         //Fallback to previous settings
         aStoredTarget:=ReadString('URL','lazURL','');
         if (Length(aStoredTarget)>0) then
-          aStoredTarget:=installerUniversal.GetKeyword('lazURL',aStoredTarget);
+          aStoredTarget:=installerUniversal.GetKeyword(LAZARUSURLLOOKUPMAGIC,aStoredTarget);
       end;
       if (Length(aStoredTarget)<>0) then
         LazarusTarget:=aStoredTarget;
@@ -4722,21 +4722,21 @@ begin
 
   if (aListBox=ListBoxFPCTarget) then
   begin
-    if AnsiEndsText('.gitlab',aLocalTarget) then
+    if AnsiEndsText(GITLABEXTENSION,aLocalTarget) then
     //if (chkGitlab.Checked) then
-      aLocalAlias:=FPCGITLABREPO{+'/-/tree/'+installerUniversal.GetAlias('fpcTAG',aLocalTarget)}
-      //aLocalAlias:=installerUniversal.GetAlias('fpcTAG',aLocalTarget)
+      aLocalAlias:=FPCGITLABREPO{+'/-/tree/'+installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,aLocalTarget)}
+      //aLocalAlias:=installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,aLocalTarget)
     else
-      aLocalAlias:=installerUniversal.GetAlias('fpcURL',aLocalTarget);
+      aLocalAlias:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,aLocalTarget);
   end;
   if (aListBox=ListBoxLazarusTarget) then
   begin
-    if AnsiEndsText('.gitlab',aLocalTarget) then
+    if AnsiEndsText(GITLABEXTENSION,aLocalTarget) then
     //if (chkGitlab.Checked) then
-      aLocalAlias:=LAZARUSGITLABREPO{+'/-/tree/'+installerUniversal.GetAlias('lazTAG',aLocalTarget)}
-      //aLocalAlias:=installerUniversal.GetAlias('lazTAG',aLocalTarget)
+      aLocalAlias:=LAZARUSGITLABREPO{+'/-/tree/'+installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,aLocalTarget)}
+      //aLocalAlias:=installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,aLocalTarget)
     else
-      aLocalAlias:=installerUniversal.GetAlias('lazURL',aLocalTarget);
+      aLocalAlias:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,aLocalTarget);
   end;
   //i:=Pos('.git',aLocalAlias);
   //if (i>0) then
@@ -5086,10 +5086,10 @@ begin
     begin
       if chkGitlab.Checked then
       begin
-        aList.CommaText:=installerUniversal.GetAlias('fpcTAG','list')+','+installerUniversal.GetAlias('fpcBRANCH','list');
+        aList.CommaText:=installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,'list')+','+installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,'list');
       end
       else
-        aList.CommaText:=installerUniversal.GetAlias('fpcURL','list');
+        aList.CommaText:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,'list');
       if chkGitlab.Checked then aList.CustomSort(@NaturalCompare);
       ListBoxFPCTarget.Items.AddStrings(aList);
     end;
@@ -5103,10 +5103,10 @@ begin
     begin
       if chkGitlab.Checked then
       begin
-        aList.CommaText:=installerUniversal.GetAlias('lazTAG','list')+','+installerUniversal.GetAlias('lazBRANCH','list');
+        aList.CommaText:=installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,'list')+','+installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,'list');
       end
       else
-        aList.CommaText:=installerUniversal.GetAlias('lazURL','list');
+        aList.CommaText:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,'list');
       if chkGitlab.Checked then aList.CustomSort(@NaturalCompare);
       ListBoxLazarusTarget.Items.AddStrings(aList);
     end;

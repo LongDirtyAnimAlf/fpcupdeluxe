@@ -4729,6 +4729,8 @@ var
   s              : string;
   SourceVersion  : string;
   SourceInfo     : TRevision;
+  FilePath       : string;
+  aIndex         : integer;
 begin
   result:=inherited;
   result:=InitModule;
@@ -4852,6 +4854,29 @@ begin
     CreateRevision(ModuleName,ActualRevision);
 
     if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
+
+    if (NOT Ultibo) AND ( (SourceVersion<>'0.0.0') AND (CompareVersionStrings(SourceVersion,'3.3.1')>=0) ) then
+    begin
+      FilePath:=ConcatPaths([FSourceDirectory,'compiler'])+PathDelim+'version.pas';
+      if (FileExists(FilePath)) then
+      begin
+        UpdateWarnings:=TStringList.Create;
+        try
+          UpdateWarnings.LoadFromFile(FilePath);
+          aIndex:=StringListContains(UpdateWarnings,'+''-r''+{$i revision.inc}');
+          if (aIndex<>-1) then
+          begin
+            s:=UpdateWarnings.Strings[aIndex];
+            s:=StringReplace(s,'-r','-',[]);
+            UpdateWarnings.Strings[aIndex]:=s;
+            UpdateWarnings.SaveToFile(FilePath);
+          end;
+        finally
+          UpdateWarnings.Free;
+        end;
+      end;
+    end;
+
   end
   else
   begin

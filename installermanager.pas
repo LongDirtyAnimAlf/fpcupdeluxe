@@ -240,6 +240,7 @@ type
     procedure SetLazarusInstallDirectory(AValue: string);
     procedure SetLazarusURL(AValue: string);
     procedure SetLazarusTAG(AValue: string);
+    procedure SetLazarusBranch(AValue: string);
     {$endif}
     function GetLogFileName: string;
     procedure SetBaseDirectory(AValue: string);
@@ -248,6 +249,7 @@ type
     procedure SetFPCInstallDirectory(AValue: string);
     procedure SetFPCURL(AValue: string);
     procedure SetFPCTAG(AValue: string);
+    procedure SetFPCBranch(AValue: string);
     procedure SetCrossToolsDirectory(AValue: string);
     procedure SetCrossLibraryDirectory(AValue: string);
     procedure SetLogFileName(AValue: string);
@@ -301,7 +303,7 @@ type
     property FPCSourceDirectory: string read FFPCSourceDirectory write SetFPCSourceDirectory;
     property FPCInstallDirectory: string read FFPCInstallDirectory write SetFPCInstallDirectory;
     property FPCURL: string read FFPCURL write SetFPCURL;
-    property FPCBranch: string read FFPCBranch write FFPCBranch;
+    property FPCBranch: string read FFPCBranch write SetFPCBranch;
     property FPCTAG: string read FFPCTAG write SetFPCTAG;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision: string read FFPCDesiredRevision write FFPCDesiredRevision;
@@ -316,7 +318,7 @@ type
     property LazarusInstallDirectory: string read FLazarusInstallDirectory write SetLazarusInstallDirectory;
     property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
     property LazarusURL: string read FLazarusURL write SetLazarusURL;
-    property LazarusBranch:string read FLazarusBranch write FLazarusBranch;
+    property LazarusBranch:string read FLazarusBranch write SetLazarusBranch;
     property LazarusTAG: string read FLazarusTAG write SetLazarusTAG;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
@@ -505,62 +507,64 @@ begin
   if Pos('://',AValue)>0 then
     FFPCURL:=AValue
   else
-    FFPCURL:=installerUniversal.GetAlias('fpcURL',AValue);
+    FFPCURL:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,AValue);
 end;
 
 procedure TFPCupManager.SetFPCTAG(AValue: string);
 var
   s:string;
 begin
-  //if FFPCTAG=AValue then Exit;
-  if AnsiEndsText('.gitlab',AValue) then
+  if AnsiEndsText(GITLABEXTENSION,AValue) then
   begin
-    s:=installerUniversal.GetAlias('fpcTAG',AValue);
+    s:=installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,AValue);
     if (Length(s)>0) then
     begin
       FFPCTAG:=s;
       FFPCBranch:='';
     end;
-    s:=installerUniversal.GetAlias('fpcBRANCH',AValue);
+    s:=installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,AValue);
     if (Length(s)>0) then
     begin
       FFPCTAG:='';
       FFPCBranch:=s;
     end;
     FFPCURL:=FPCGITLABREPO;
+    if (Length(s)=0) then
+    begin
+      WritelnLog(etError,'Gitlab alias lookup of FPC tag/branch failed. Expect errors.');
+    end;
   end
   else
+  begin
     FFPCTAG:=aValue;
+    FFPCBranch:='';
+  end;
 end;
 
-{
-procedure TFPCupManager.SetFPCTAG(AValue: string);
+procedure TFPCupManager.SetFPCBranch(AValue: string);
 var
-  aBranch:string;
+  s:string;
 begin
-  if FFPCTAG=AValue then Exit;
-  if (Pos('_',AValue)=0) then
+  if AnsiEndsText(GITLABEXTENSION,AValue) then
   begin
-    aBranch:=installerUniversal.GetAlias('fpcBRANCH',AValue);
-    if aBranch='' then
+    s:=installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,AValue);
+    if (Length(s)>0) then
     begin
-      //aBranch:='main';
-      FFPCTAG:=installerUniversal.GetAlias('fpcTAG',AValue);
+      FFPCTAG:='';
+      FFPCBranch:=s;
+      FFPCURL:=FPCGITLABREPO;
     end
     else
     begin
-      FFPCTAG:='';
+      WritelnLog(etError,'Gitlab alias lookup of FPC branch failed. Expect errors.');
     end;
-    if aBranch='main' then aBranch:='HEAD';
-    if aBranch='master' then aBranch:='HEAD';
-    if aBranch='trunk' then aBranch:='HEAD';
-    FFPCBranch:=aBranch;
   end
   else
-    FFPCTAG:=aValue;
-  FFPCURL:=FPCGITLABREPO{+'.git/'};
+  begin
+    FFPCBranch:=aValue;
+    FFPCTAG:='';
+  end;
 end;
-}
 
 procedure TFPCupManager.SetCrossToolsDirectory(AValue: string);
 begin
@@ -590,7 +594,7 @@ begin
   if Pos('://',AValue)>0 then
     FLazarusURL:=AValue
   else
-    FLazarusURL:=installerUniversal.GetAlias('lazURL',AValue);
+    FLazarusURL:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,AValue);
 end;
 
 procedure TFPCupManager.SetLazarusTAG(AValue: string);
@@ -598,24 +602,56 @@ var
   s:string;
 begin
   //if FLazarusTAG=AValue then exit;
-  if AnsiEndsText('.gitlab',AValue) then
+  if AnsiEndsText(GITLABEXTENSION,AValue) then
   begin
-    s:=installerUniversal.GetAlias('lazTAG',AValue);
+    s:=installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,AValue);
     if (Length(s)>0) then
     begin
       FLazarusTAG:=s;
       FLazarusBranch:='';
     end;
-    s:=installerUniversal.GetAlias('lazBRANCH',AValue);
+    s:=installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,AValue);
     if (Length(s)>0) then
     begin
       FLazarusTAG:='';
       FLazarusBranch:=s;
     end;
     FLazarusURL:=LAZARUSGITLABREPO;
+    if (Length(s)=0) then
+    begin
+      WritelnLog(etError,'Gitlab alias lookup of Lazarus tag/branch failed. Expect errors.');
+    end;
   end
   else
+  begin
     FLazarusTAG:=aValue;
+    FLazarusBranch:='';
+  end;
+end;
+
+procedure TFPCupManager.SetLazarusBranch(AValue: string);
+var
+  s:string;
+begin
+  if AnsiEndsText(GITLABEXTENSION,AValue) then
+  begin
+    s:=installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,AValue);
+    if (Length(s)>0) then
+    begin
+      FLazarusTAG:='';
+      FLazarusBranch:=s;
+      FLazarusURL:=LAZARUSGITLABREPO;
+    end
+    else
+    begin
+      WritelnLog(etError,'Gitlab alias lookup of Lazarus branch failed. Expect errors.');
+    end;
+  end
+  else
+  begin
+    FLazarusBranch:=aValue;
+    FLazarusTAG:='';
+  end;
 end;
 
 {$endif}

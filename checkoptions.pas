@@ -366,7 +366,7 @@ begin
       s:=Options.GetOption('','fpcVersion','');
       if (Length(s)>0) then
       begin
-        if AnsiEndsText('.gitlab',s) then
+        if AnsiEndsText(GITLABEXTENSION,s) then
           FManager.FPCTag:=s
         else
           FManager.FPCURL:=s;
@@ -391,7 +391,7 @@ begin
       s:=Options.GetOption('','lazVersion','');
       if (Length(s)>0) then
       begin
-        if AnsiEndsText('.gitlab',s) then
+        if AnsiEndsText(GITLABEXTENSION,s) then
           FManager.LazarusTag:=s
         else
           FManager.LazarusURL:=s;

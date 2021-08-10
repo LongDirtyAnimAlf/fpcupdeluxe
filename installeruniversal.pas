@@ -3003,11 +3003,11 @@ begin
   ini.CaseSensitive:=false;
   {$ENDIF}
 
-  if ((aDictionary='fpcTAG') OR (aDictionary='fpcBRANCH')) AND AnsiStartsText(FPCTRUNKBRANCH,aAlias) then result:='trunk';
-  if (aDictionary='fpcURL') AND AnsiStartsText(FPCGITLABREPO,aAlias) then result:='gitlab';
+  if ((aDictionary=FPCTAGLOOKUPMAGIC) OR (aDictionary=FPCBRANCHLOOKUPMAGIC)) AND AnsiStartsText(FPCTRUNKBRANCH,aAlias) then result:='trunk';
+  if (aDictionary=FPCURLLOOKUPMAGIC) AND AnsiStartsText(FPCGITLABREPO,aAlias) then result:='gitlab';
 
-  if ((aDictionary='lazTAG') OR (aDictionary='lazBRANCH')) AND AnsiStartsText(LAZARUSTRUNKBRANCH,aAlias) then result:='trunk';
-  if (aDictionary='lazURL') AND AnsiStartsText(LAZARUSGITLABREPO,aAlias) then result:='gitlab';
+  if ((aDictionary=LAZARUSTAGLOOKUPMAGIC) OR (aDictionary=LAZARUSBRANCHLOOKUPMAGIC)) AND AnsiStartsText(LAZARUSTRUNKBRANCH,aAlias) then result:='trunk';
+  if (aDictionary=LAZARUSURLLOOKUPMAGIC) AND AnsiStartsText(LAZARUSGITLABREPO,aAlias) then result:='gitlab';
 
   if (Length(result)=0) then
   begin
@@ -3056,24 +3056,24 @@ begin
     begin
       result:=ini.ReadString(ALIASMAGIC+aDictionary,aKeyWord,'');
 
-      if (aDictionary='fpcURL') AND (aKeyWord='gitlab') then result:=FPCGITLABREPO;
-      if (aDictionary='lazURL') AND (aKeyWord='gitlab') then result:=LAZARUSGITLABREPO;
+      if (aDictionary=FPCURLLOOKUPMAGIC) AND (aKeyWord='gitlab') then result:=FPCGITLABREPO;
+      if (aDictionary=LAZARUSURLLOOKUPMAGIC) AND (aKeyWord='gitlab') then result:=LAZARUSGITLABREPO;
 
       if (result='') then
       begin
-        if (Pos('fpcURL',aDictionary)=1) OR (Pos('fpcTAG',aDictionary)=1) OR (Pos('fpcBRANCH',aDictionary)=1) then
+        if (Pos(FPCURLLOOKUPMAGIC,aDictionary)=1) OR (Pos(FPCTAGLOOKUPMAGIC,aDictionary)=1) OR (Pos(FPCBRANCHLOOKUPMAGIC,aDictionary)=1) then
         begin
-          //if (aDictionary<>'fpcURL')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcURL',   aKeyWord,'');
-          //if (aDictionary='fpcTAG')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcBRANCH',   aKeyWord,'');
-          //if (aDictionary='fpcBRANCH') AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcTAG',aKeyWord,'');
+          //if (aDictionary<>FPCURLLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcURL',   aKeyWord,'');
+          //if (aDictionary=FPCTAGLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+FPCBRANCHLOOKUPMAGIC,   aKeyWord,'');
+          //if (aDictionary=FPCBRANCHLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+FPCTAGLOOKUPMAGIC,aKeyWord,'');
         end
         {$ifndef FPCONLY}
         else
-        if (Pos('lazURL',aDictionary)=1) OR (Pos('lazTAG',aDictionary)=1) OR (Pos('lazBRANCH',aDictionary)=1) then
+        if (Pos(LAZARUSURLLOOKUPMAGIC,aDictionary)=1) OR (Pos(LAZARUSTAGLOOKUPMAGIC,aDictionary)=1) OR (Pos(LAZARUSBRANCHLOOKUPMAGIC,aDictionary)=1) then
         begin
-          //if (aDictionary<>'lazURL')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazURL',   aKeyWord,'');
-          //if (aDictionary='lazTAG')    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazBRANCH',   aKeyWord,'');
-          //if (aDictionary='lazBRANCH') AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazTAG',aKeyWord,'');
+          //if (aDictionary<>LAZARUSURLLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazURL',   aKeyWord,'');
+          //if (aDictionary=LAZARUSTAGLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+LAZARUSBRANCHLOOKUPMAGIC,   aKeyWord,'');
+          //if (aDictionary=LAZARUSBRANCHLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+LAZARUSTAGLOOKUPMAGIC,aKeyWord,'');
         end
         {$endif}
         else
@@ -3084,8 +3084,8 @@ begin
         end;
       end;
 
-      if ({(aDictionary='fpcTAG') OR }(aDictionary='fpcBRANCH')) AND (result='trunk') then result:=FPCTRUNKBRANCH;
-      if ({(aDictionary='lazTAG') OR }(aDictionary='lazBRANCH')) AND (result='trunk') then result:=LAZARUSTRUNKBRANCH;
+      if ({(aDictionary=FPCTAGLOOKUPMAGIC) OR }(aDictionary=FPCBRANCHLOOKUPMAGIC)) AND (result='trunk') then result:=FPCTRUNKBRANCH;
+      if ({(aDictionary=LAZARUSTAGLOOKUPMAGIC) OR }(aDictionary=LAZARUSBRANCHLOOKUPMAGIC)) AND (result='trunk') then result:=LAZARUSTRUNKBRANCH;
 
     end;
   finally

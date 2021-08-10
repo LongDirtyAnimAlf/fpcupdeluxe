@@ -183,6 +183,16 @@ const
   FPCHASHMAGIC   = 'FPC new GIT hash: ';
   LAZHASHMAGIC   = 'Lazarus new GIT hash: ';
 
+  FPCURLLOOKUPMAGIC            = 'fpcURL';
+  FPCTAGLOOKUPMAGIC            = 'fpcTAG';
+  FPCBRANCHLOOKUPMAGIC         = 'fpcBRANCH';
+
+  LAZARUSURLLOOKUPMAGIC        = 'lazURL';
+  LAZARUSTAGLOOKUPMAGIC        = 'lazTAG';
+  LAZARUSBRANCHLOOKUPMAGIC     = 'lazBRANCH';
+
+  GITLABEXTENSION              = '.gitlab';
+
   //Sequence contants for statemachine
 
   _SEP                     = ';';
@@ -1680,6 +1690,9 @@ end;
 
 function TInstaller.DownloadFromBase(aClient:TRepoClient; aModuleName: string; var aBeforeRevision,
   aAfterRevision: string; UpdateWarnings: TStringList): boolean;
+const
+  MAXFPCREVISION     = '49634';
+  MAXLAZARUSREVISION = '65500';
 var
   ReturnCode: integer;
   DiffFile,DiffFileCorrectedPath: String;
@@ -1711,8 +1724,8 @@ begin
   if ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
   begin
     Output:=(aClient as TGitClient).GetSVNRevision;
-    if (aModuleName=_FPC) AND (Output='49634') then Output:='';
-    if (aModuleName=_LAZARUS) AND (Output='65500') then Output:='';
+    if (aModuleName=_FPC) AND (Output=MAXFPCREVISION) then Output:='';
+    if (aModuleName=_LAZARUS) AND (Output=MAXLAZARUSREVISION) then Output:='';
     if (Length(Output)>0) then
       aBeforeRevision := Output
     else
@@ -1799,8 +1812,8 @@ begin
         if ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
         begin
           Output:=(aClient as TGitClient).GetSVNRevision;
-          if (aModuleName=_FPC) AND (Output='49634') then Output:='';
-          if (aModuleName=_LAZARUS) AND (Output='65500') then Output:='';
+          if (aModuleName=_FPC) AND (Output=MAXFPCREVISION) then Output:='';
+          if (aModuleName=_LAZARUS) AND (Output=MAXLAZARUSREVISION) then Output:='';
           if (Length(Output)>0) then
           begin
             if (Length(FDesiredRevision)>0) AND (Length(FDesiredRevision)<7) AND (Output<>FDesiredRevision) then
