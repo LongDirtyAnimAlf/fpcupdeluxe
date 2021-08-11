@@ -511,6 +511,12 @@ begin
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
+
+  if (FReturnCode = 0) then
+  begin
+    Command := ' fetch --tags';
+    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+  end;
 end;
 
 
