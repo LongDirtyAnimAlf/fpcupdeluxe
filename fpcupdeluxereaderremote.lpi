@@ -24,7 +24,7 @@
         <Resource_3 FileName="languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
         <Resource_4 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
         <Resource_5 FileName="icons\gitlablabel.png" Type="RCDATA" ResourceName="GITLABLABEL"/>
-        <Resource_6 FileName="icons\svnlabel.png" Type="RCDATA" ResourceName="SVNLABEL"/>
+        <Resource_6 FileName="icons\github.png" Type="RCDATA" ResourceName="SVNLABEL"/>
       </Resources>
     </General>
     <i18n>

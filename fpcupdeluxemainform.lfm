@@ -1,12 +1,12 @@
 object Form1: TForm1
-  Left = 31
+  Left = 89
   Height = 701
-  Top = 68
-  Width = 1337
+  Top = 94
+  Width = 1286
   Anchors = []
   Caption = 'Form1'
   ClientHeight = 681
-  ClientWidth = 1337
+  ClientWidth = 1286
   Constraints.MinHeight = 400
   Menu = MainMenu1
   OnClose = FormClose
@@ -44,7 +44,7 @@ object Form1: TForm1
     Left = 336
     Height = 23
     Top = 33
-    Width = 731
+    Width = 680
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
@@ -59,7 +59,7 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = btnSendLog
-    Left = 1079
+    Left = 1028
     Height = 19
     Top = 35
     Width = 74
@@ -75,7 +75,7 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 1252
+    Left = 1201
     Height = 25
     Top = 33
     Width = 73
@@ -97,7 +97,7 @@ object Form1: TForm1
     Left = 336
     Height = 427
     Top = 62
-    Width = 989
+    Width = 938
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 8
@@ -647,7 +647,7 @@ object Form1: TForm1
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
-    Width = 548
+    Width = 497
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 4
@@ -667,7 +667,7 @@ object Form1: TForm1
     Left = 6
     Height = 56
     Top = 621
-    Width = 1319
+    Width = 1268
     Align = alBottom
     AutoSize = True
     BorderSpacing.Left = 6
@@ -677,7 +677,7 @@ object Form1: TForm1
     BorderSpacing.CellAlignVertical = ccaCenter
     BevelInner = bvLowered
     ClientHeight = 56
-    ClientWidth = 1319
+    ClientWidth = 1268
     Constraints.MinHeight = 50
     ParentFont = False
     TabOrder = 3
@@ -2419,7 +2419,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
-      Left = 1222
+      Left = 1171
       Height = 42
       Hint = 'Try to stop current install process'
       Top = 8
@@ -2578,7 +2578,7 @@ object Form1: TForm1
     Height = 120
     Hint = 'Will show error'
     Top = 497
-    Width = 989
+    Width = 938
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 4
@@ -5272,7 +5272,7 @@ object Form1: TForm1
   object btnSendLog: TButton
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = btnClearLog
-    Left = 1165
+    Left = 1114
     Height = 25
     Hint = 'Send email to fpcup maintainer containing Commandscreen output.'
     Top = 33
