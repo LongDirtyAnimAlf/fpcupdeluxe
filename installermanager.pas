@@ -163,7 +163,6 @@ type
 
   TFPCupManager=class(TObject)
   private
-    FSVNExecutable: string;
     FHTTPProxyHost: string;
     FHTTPProxyPassword: string;
     FHTTPProxyPort: integer;
@@ -521,18 +520,20 @@ begin
     begin
       FFPCTAG:=s;
       FFPCBranch:='';
+    end
+    else
+    begin
+      s:=installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,AValue);
+      if (Length(s)>0) then
+      begin
+        FFPCTAG:='';
+        FFPCBranch:=s;
+      end;
     end;
-    s:=installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,AValue);
     if (Length(s)>0) then
-    begin
-      FFPCTAG:='';
-      FFPCBranch:=s;
-    end;
-    FFPCURL:=FPCGITLABREPO;
-    if (Length(s)=0) then
-    begin
+      FFPCURL:=FPCGITLABREPO
+    else
       WritelnLog(etError,'Gitlab alias lookup of FPC tag/branch failed. Expect errors.');
-    end;
   end
   else
   begin
@@ -609,18 +610,20 @@ begin
     begin
       FLazarusTAG:=s;
       FLazarusBranch:='';
+    end
+    else
+    begin
+      s:=installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,AValue);
+      if (Length(s)>0) then
+      begin
+        FLazarusTAG:='';
+        FLazarusBranch:=s;
+      end;
     end;
-    s:=installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,AValue);
     if (Length(s)>0) then
-    begin
-      FLazarusTAG:='';
-      FLazarusBranch:=s;
-    end;
-    FLazarusURL:=LAZARUSGITLABREPO;
-    if (Length(s)=0) then
-    begin
+      FLazarusURL:=LAZARUSGITLABREPO
+    else
       WritelnLog(etError,'Gitlab alias lookup of Lazarus tag/branch failed. Expect errors.');
-    end;
   end
   else
   begin

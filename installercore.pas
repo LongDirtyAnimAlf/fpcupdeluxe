@@ -1772,8 +1772,19 @@ begin
       if (Length(FDesiredRevision)<7) then
       begin
         s:=(aClient as TGitClient).GetGitHash;
-        if (Length(s)>0) then Output:=Output+' with GIT hash '+s;
-        aClient.DesiredRevision := s;
+        if (Length(s)>0) then
+        begin
+          Output:=Output+' with GIT hash '+s;
+          aClient.DesiredTag := s;
+          aClient.DesiredBranch := '';
+          aClient.DesiredRevision:='';
+        end;
+      end
+      else
+      begin
+        aClient.DesiredTag := FDesiredRevision;
+        aClient.DesiredBranch := '';
+        aClient.DesiredRevision:='';
       end;
 
     end;

@@ -419,12 +419,10 @@ begin
       Command:='';
       if (Length(DesiredTag)>0) then Command := DesiredTag;
       if (Length(DesiredBranch)>0) then Command := DesiredBranch;
-      if (Length(Command)>0) then
-      begin
-        Command:=' checkout --force '+Command;
-        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-        FReturnOutput := Output;
-      end
+      if (Length(Command)=0) then Command := '$(git log --branches -1 --pretty=format:"%H")';
+      Command:=' checkout --force '+Command;
+      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+      FReturnOutput := Output;
     end;
 
     {
