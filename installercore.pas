@@ -1112,7 +1112,7 @@ begin
       // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
       Output:='7za920.zip';
       SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-      aURL:='https://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/';
+      aURL:=FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/';
       OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       if OperationSucceeded then
       begin
@@ -1123,12 +1123,11 @@ begin
           OperationSucceeded:=false;
         end;
       end;
-      //OperationSucceeded:=GetFile('https://freefr.dl.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       if NOT OperationSucceeded then
       begin
         // try another URL
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-        aURL:='https://osdn.net/frs/redir.php?m=acc&f=sevenzip%2F64455%2F';
+        aURL:='https://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/';
         OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       end;
       if NOT OperationSucceeded then
@@ -1171,7 +1170,7 @@ begin
         // this version of unrar does not need installation ... so we can silently get it !!
         Output:='unrar-3.4.3-bin.zip';
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
-        aURL:='https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/';
+        aURL:=FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/';
         OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
         // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
         if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
@@ -1261,7 +1260,6 @@ begin
             //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-64-bit.zip';
             //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-64-bit.zip';
             {$endif}
-            //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
             Infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
             OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
             if NOT OperationSucceeded then
@@ -1320,10 +1318,11 @@ begin
           //original source from : https://www.mercurial-scm.org/
           {$ifdef win32}
           Output:='hg32.zip';
+          aURL:=FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/'+Output;
           {$else}
           Output:='hg64.zip';
+          aURL:=FPCUPGITREPO+'/releases/download/windowsx64bins_v1.0/'+Output;
           {$endif}
-          aURL:=FPCUPGITREPO+'/releases/download/HG-4.7/'+Output;
           ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
           Infoln(localinfotext+'HG (mercurial) client not found. Downloading it (may take time) from '+aURL,etInfo);
           OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
@@ -2500,16 +2499,16 @@ end;
 function TInstaller.DownloadWget: boolean;
 const
   {$ifdef win64}
-  NewSourceURL : array [0..0] of string = (
-    //'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/wget-64.zip',
+  NewSourceURL : array [0..1] of string = (
+    FPCUPGITREPO+'/releases/download/windowsx64bins_v1.0/wget.exe',
     //'https://eternallybored.org/misc/wget/1.19.4/64/wget.exe'
     //'https://eternallybored.org/misc/wget/1.20/64/wget.exe'
     'https://eternallybored.org/misc/wget/1.20.3/64/wget.exe'
     );
   {$endif}
   {$ifdef win32}
-  NewSourceURL : array [0..0] of string = (
-    //'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/wget-32.zip',
+  NewSourceURL : array [0..1] of string = (
+    FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/wget.exe',
     //'https://eternallybored.org/misc/wget/1.19.4/32/wget.exe'
     //'https://eternallybored.org/misc/wget/1.20/32/wget.exe'
     'https://eternallybored.org/misc/wget/1.20.3/32/wget.exe'
@@ -2568,13 +2567,13 @@ function TInstaller.DownloadFreetype: boolean;
 const
   {$ifdef win64}
   NewSourceURL : array [0..1] of string = (
-      'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/freetypewin64.zip',
+      'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/windowsx64bins_v1.0/freetypewin64.zip',
       'https://sourceforge.net/projects/gnuwin32/files/freetype/2.3.5-1/freetype-2.3.5-1-bin.zip/download'
     );
   {$endif}
   {$ifdef win32}
   NewSourceURL : array [0..1] of string = (
-      'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/freetypewin32.zip',
+      'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/windowsi386bins_v1.0/freetypewin32.zip',
       'https://sourceforge.net/projects/gnuwin32/files/freetype/2.3.5-1/freetype-2.3.5-1-bin.zip/download'
     );
   {$endif}
@@ -2658,7 +2657,8 @@ end;
 function TInstaller.DownloadZlib: boolean;
 const
   TARGETNAME='zlib1.dll';
-  SOURCEURL : array [0..0] of string = (
+  SOURCEURL : array [0..1] of string = (
+    FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/zlib-1.2.3-bin.zip',
     'https://sourceforge.net/projects/gnuwin32/files/zlib/1.2.3/zlib-1.2.3-bin.zip/download'
     );
 var
