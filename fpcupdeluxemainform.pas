@@ -4942,16 +4942,15 @@ procedure TForm1.ParseRevisions(IniDirectory:string);
 type
   TTarget             = (FPC,LAZARUS);
 const
-  TargetRevMagic      : array[TTarget] of string = (FPCREVMAGIC,LAZREVMAGIC);
   TargetDateMagic     : array[TTarget] of string = (FPCDATEMAGIC,LAZDATEMAGIC);
-  //TargetHashMagic     : array[TTarget] of string = (FPCHASHMAGIC,LAZHASHMAGIC);
+  TargetHashMagic     : array[TTarget] of string = (FPCHASHMAGIC,LAZHASHMAGIC);
 var
   aTarget             : TTarget;
   RevList             : TStringList;
   RevFile             : string;
   index               : integer;
-  date,revision       : string;
-  //hash                : string;
+  date                : string;
+  hash                : string;
   AItem               : TListItem;
   TargetViewArray     : array[TTarget] of TListView;
 begin
@@ -4981,39 +4980,29 @@ begin
             else
               begin
                 date:=RevList[index];
-                revision:='';
-                //hash:='';
+                hash:='';
                 Delete(date,1,Length(TargetDateMagic[aTarget]));
                 Inc(index);
                 while (index<RevList.Count) do
                 begin
                   if (Length(RevList[index])=0) then break;
-                  if (Pos(TargetRevMagic[aTarget],RevList[index])=1) then
-                  begin
-                    revision:=RevList[index];
-                    Delete(revision,1,Length(TargetRevMagic[aTarget]))
-                  end;
-                  {
-                  else
-                  if (Pos(TargetHashMagic[aTarget],RevList[index])=1) then
+                  if AnsiStartsText(TargetHashMagic[aTarget],RevList[index]) then
                   begin
                     hash:=RevList[index];
                     Delete(hash,1,Length(TargetHashMagic[aTarget]))
                   end;
-                  }
                   Inc(index);
                 end;
 
-                if ( (Length(revision)>0) AND (revision<>'failure') AND (revision<>'unknown') ) then
+                if ( (Length(hash)>0) AND (hash<>'failure') AND (hash<>'unknown') ) then
                 begin
-                  AItem:=TargetViewArray[aTarget].FindCaption(0,revision,false,true,false);
+                  AItem:=TargetViewArray[aTarget].FindCaption(0,hash,false,true,false);
                   if (aItem=nil) then
                   begin
                     with TargetViewArray[aTarget].Items.Add do
                     begin
-                      Caption:=revision;
+                      Caption:=hash;
                       SubItems.Add(date);
-                      //SubItems.Add(hash);
                     end;
                   end;
                 end;

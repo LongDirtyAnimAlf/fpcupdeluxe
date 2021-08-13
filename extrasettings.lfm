@@ -648,8 +648,8 @@ object Form2: TForm2
       Left = 100
       Height = 15
       Top = 4
-      Width = 65
-      Caption = 'FPC revision'
+      Width = 70
+      Caption = 'FPC hash/rev'
       ParentFont = False
     end
     object LabelLazarusbranch: TLabel
@@ -686,8 +686,8 @@ object Form2: TForm2
       Left = 100
       Height = 15
       Top = 54
-      Width = 64
-      Caption = 'Laz. revision'
+      Width = 69
+      Caption = 'Laz. hash/rev'
       ParentFont = False
     end
     object EditLazarusRevision: TEdit
