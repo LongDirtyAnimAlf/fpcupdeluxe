@@ -4734,9 +4734,8 @@ object Form1: TForm1
         AnchorSideRight.Side = asrCenter
         Left = 8
         Height = 18
-        Top = 9
+        Top = 8
         Width = 140
-        Anchors = [akLeft]
         BorderSpacing.Left = 8
         BorderSpacing.Top = 8
         Caption = 'FPC revision history'
@@ -4752,11 +4751,11 @@ object Form1: TForm1
         AnchorSideLeft.Control = HistorySheet
         AnchorSideTop.Control = BitBtnFPCSetRevision
         AnchorSideTop.Side = asrBottom
-        AnchorSideRight.Control = BasicSheet
+        AnchorSideRight.Control = HistorySheet
         AnchorSideRight.Side = asrBottom
         Left = 8
         Height = 18
-        Top = 222
+        Top = 221
         Width = 162
         BorderSpacing.Left = 8
         BorderSpacing.Top = 16
@@ -4779,7 +4778,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Set FPC revision'
-        Top = 145
+        Top = 144
         Width = 286
         Anchors = [akTop, akLeft, akRight]
         AutoSize = True
@@ -4937,7 +4936,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Set Lazarus revision'
-        Top = 358
+        Top = 357
         Width = 286
         Anchors = [akTop, akLeft, akRight]
         AutoSize = True
@@ -5094,8 +5093,8 @@ object Form1: TForm1
         AnchorSideBottom.Control = HistorySheet
         AnchorSideBottom.Side = asrBottom
         Left = 8
-        Height = 60
-        Top = 443
+        Height = 61
+        Top = 442
         Width = 286
         Anchors = [akTop, akLeft, akRight, akBottom]
         BorderSpacing.Left = 8
@@ -5114,7 +5113,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         Left = 8
         Height = 102
-        Top = 35
+        Top = 34
         Width = 286
         Anchors = [akTop, akLeft, akRight]
         AutoWidthLastColumn = True
@@ -5129,7 +5128,7 @@ object Form1: TForm1
           end        
           item
             Caption = 'Date'
-            Width = 202
+            Width = 240
           end>
         ColumnClick = False
         HideSelection = False
@@ -5146,7 +5145,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         Left = 8
         Height = 102
-        Top = 248
+        Top = 247
         Width = 286
         Anchors = [akTop, akLeft, akRight]
         AutoWidthLastColumn = True
@@ -5161,7 +5160,7 @@ object Form1: TForm1
           end        
           item
             Caption = 'Date'
-            Width = 223
+            Width = 240
           end>
         ColumnClick = False
         HideSelection = False
