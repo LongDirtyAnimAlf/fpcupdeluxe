@@ -475,60 +475,60 @@ begin
         EnvironmentConfig:
           begin
             Version:='';
-            if FLazarusMajorVer<>-1 then
+            if (FLazarusMajorVer<>-1) then
             begin
               Version:=Version+IntToStr(FLazarusMajorVer);
-              if FLazarusMinor<>-1 then
+              if (FLazarusMinor<>-1) then
               begin
                 Version:=Version+'.'+IntToStr(FLazarusMinor);
-                if FLazarusRelease<>-1 then
-                Version:=Version+'.'+IntToStr(FLazarusRelease);
+                if (FLazarusRelease<>-1) then
+                  Version:=Version+'.'+IntToStr(FLazarusRelease);
               end;
-            end;
-            if FLazarusPatch>0 then
+              if (FLazarusPatch>0) then
+                Version:=Version+'RC'+IntToStr(FLazarusPatch);
+            end
+            else
             begin
-              Version:=Version+'RC'+IntToStr(FLazarusPatch);
-            end;
-
-            // If we don't add these, we trigger an upgrade process on first start on Lazarus 1.1+.
-            NewConfig.SetValue('EnvironmentOptions/Version/Lazarus',Version);
-            if FLazarusMajorVer=-1 then
-            begin // default to newest. Update this when new version appears
               NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
               NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', TrunkLazarusNewEnvironmentConfig);
-            end
-            else if FLazarusMajorVer=0 then
+            end;
+
+            if (Length(Version)>0) then NewConfig.SetValue('EnvironmentOptions/Version/Lazarus',Version);
+
+            Version:='';
+            if (FLazarusMajorVer=0) then
             begin
               if FLazarusMinor<=0 then
                 NewConfig.SetValue('EnvironmentOptions/Version/Lazarus','0.9.31');
-              NewConfig.SetValue('EnvironmentOptions/Version/Value', '106')
+              Version:='106';
             end
-            else if FLazarusMajorVer=1 then
-              case FLazarusMinor of
-                0 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '107'); //for version 1.0
-                1 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '107'); //for version 1.0,1.1
-                2 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.2
-                3 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.3
-                4 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.4
-                5 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '109'); //for version 1.5
-                6 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '109'); //for version 1.6
-                7 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.7
-                8 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.8 (fixes)
-                9 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.9 (old trunk)
-              end
-            else if FLazarusMajorVer=2 then
-              case FLazarusMinor of
-                0 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 2.0
-                else
-                  begin
-                    NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
-                    NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', TrunkLazarusNewEnvironmentConfig);
-                  end;
-              end
-            else { 3 or higher? keep latest known, we can leave lazarus version though }
+            else
+            if (FLazarusMajorVer=1) then
             begin
-              NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
+              case FLazarusMinor of
+                0 : Version := '107'; //for version 1.0
+                1 : Version := '107'; //for version 1.0,1.1
+                2 : Version := '108'; //for version 1.2
+                3 : Version := '108'; //for version 1.3
+                4 : Version := '108'; //for version 1.4
+                5 : Version := '109'; //for version 1.5
+                6 : Version := '109'; //for version 1.6
+              else
+                Version:='110';
+              end
+            end
+            else
+            if (FLazarusMajorVer=2) then
+            begin
+              Version:='110';
+            end
+            else
+            if (FLazarusMajorVer>=3) then
+            begin
+              Version:=TrunkVersionNewEnvironmentConfig;
             end;
+
+            if (Length(Version)>0) then NewConfig.SetValue('EnvironmentOptions/Version/Value', Version);
 
             {$ifdef CPUAARCH64}
             // IDE does not size correctly when set to auto

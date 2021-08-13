@@ -1364,9 +1364,9 @@ begin
     if Length(s)>0 then
     begin
       x:=Pos('RC',s);
-      if x>0 then
+      if (x>0) then
       begin
-        s:=Copy(s,x,MaxInt);
+        s:=Copy(s,(x+2),MaxInt);
         result:=StrToIntDef(s,-1);
       end;
     end;
