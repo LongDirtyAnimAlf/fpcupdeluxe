@@ -913,15 +913,12 @@ begin
       try
         {$ifdef MSWINDOWS}
         // Add FPC tools path to path if necessary
-        SetPath(FMakeDir,false,true);
+        SetPath(FMakeDir,true,false);
         {$endif MSWINDOWS}
 
         // Add binutils path to path if necessary
         if CrossInstaller.BinUtilsPathInPath then
            SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
-
-        //SetPath(ConcatPaths([FSourceDirectory,'rtl',CrossInstaller.TargetOSName]),true,false);
-        //SetPath(ConcatPaths([FSourceDirectory,'rtl',CrossInstaller.TargetOSName,CrossInstaller.TargetCPUName]),true,false);
 
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
         begin

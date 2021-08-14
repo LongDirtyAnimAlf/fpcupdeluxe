@@ -481,8 +481,8 @@ begin
         try
           {$ifdef MSWINDOWS}
           OldPath:=GetPath;
+          SetPath(FMakeDir,true,false);
           SetPath(FFPCCompilerBinPath,false,true);
-          SetPath(FMakeDir,false,true);
           {$endif MSWINDOWS}
           ProcessorResult:=Processor.ExecuteAndWait;
           Result := (ProcessorResult = 0);
