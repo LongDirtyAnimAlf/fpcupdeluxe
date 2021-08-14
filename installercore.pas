@@ -1692,8 +1692,9 @@ end;
 function TInstaller.DownloadFromBase(aClient:TRepoClient; aModuleName: string; var aBeforeRevision,
   aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 const
-  MAXFPCREVISION     = '49634';
-  MAXLAZARUSREVISION = '65500';
+  MAXFPCREVISION      = '49634';
+  MAXFPCFIXESREVISION = '45835';
+  MAXLAZARUSREVISION  = '65500';
 var
   ReturnCode: integer;
   DiffFile,DiffFileCorrectedPath: String;
@@ -1725,7 +1726,7 @@ begin
   if ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
   begin
     Output:=(aClient as TGitClient).GetSVNRevision;
-    if (aModuleName=_FPC) AND (Output=MAXFPCREVISION) then Output:='';
+    if (aModuleName=_FPC) AND ( (Output=MAXFPCREVISION) OR (Output=MAXFPCFIXESREVISION) ) then Output:='';
     if (aModuleName=_LAZARUS) AND (Output=MAXLAZARUSREVISION) then Output:='';
     if (Length(Output)>0) then
       aBeforeRevision := Output
@@ -1824,7 +1825,7 @@ begin
         if ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
         begin
           Output:=(aClient as TGitClient).GetSVNRevision;
-          if (aModuleName=_FPC) AND (Output=MAXFPCREVISION) then Output:='';
+          if (aModuleName=_FPC) AND ( (Output=MAXFPCREVISION) OR (Output=MAXFPCFIXESREVISION) ) then Output:='';
           if (aModuleName=_LAZARUS) AND (Output=MAXLAZARUSREVISION) then Output:='';
           if (Length(Output)>0) then
           begin

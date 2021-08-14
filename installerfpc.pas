@@ -918,22 +918,6 @@ begin
         //SetPath(ConcatPaths([FSourceDirectory,'rtl',CrossInstaller.TargetOSName]),true,false);
         //SetPath(ConcatPaths([FSourceDirectory,'rtl',CrossInstaller.TargetOSName,CrossInstaller.TargetCPUName]),true,false);
 
-        // Use own tools first
-        {$ifdef MSWINDOWS}
-        s2:=Which('echo.exe');
-        if (Length(s2)=0) then s2:=Which('sh.exe');
-        if (Length(s2)>0) then
-        begin
-          // We may have a stray shell (msys among others ... remove from path
-          s1:=GetPath;
-          s2:=ExtractFileDir(s2);
-          s1:=StringReplace(s1,s2+';','',[]);
-          s1:=StringReplace(s1,s2+DirectorySeparator+';','',[]);
-          s1:=StringReplace(s1,s2,'',[]);
-          SetPath(s1,false,false);
-        end;
-        {$endif MSWINDOWS}
-
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
         begin
 
@@ -1158,7 +1142,13 @@ begin
           Processor.Process.Parameters.Add('FPCDIR=' + s1);
 
           {$IFDEF MSWINDOWS}
-          //Processor.Process.Parameters.Add('ECHO='+ExtractFilePath(Make)+'gecho.exe');
+          s1:=Which('echo.exe');
+          if (Length(s1)>0) then
+          begin
+            s1:=ExtractFilePath(Make)+'gecho.exe';
+            if FileExists(s1) then
+              Processor.Process.Parameters.Add('ECHOREDIR='+s1);
+          end;
           Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           {$ELSE}
@@ -1922,10 +1912,7 @@ begin
   //Todo: to be investigated
   //Processor.Process.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
 
-  {$IFDEF UNIX}
-  Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
-  {$ELSE}
-
+  {$IFDEF MSWINDOWS}
   if (ModuleName<>_FPC) then
   begin
     s1:=FFPCCompilerBinPath+FPCCONFIGFILENAME;
@@ -1934,9 +1921,17 @@ begin
       //Processor.Process.Parameters.Add('CFGFILE=' + s1);
     end;
   end;
-
+  s1:=Which('echo.exe');
+  if (Length(s1)>0) then
+  begin
+    s1:=ExtractFilePath(Make)+'gecho.exe';
+    if FileExists(s1) then
+      Processor.Process.Parameters.Add('ECHOREDIR='+s1);
+  end;
   Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  {$ELSE}
+  Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
   {$ENDIF}
   Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
   Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
@@ -4524,14 +4519,13 @@ begin
     Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-    {$IFDEF UNIX}
-    Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
-    {$ENDIF}
     {$IFDEF MSWINDOWS}
     Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
     //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
     Processor.Process.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
     Processor.Process.Parameters.Add('OS_SOURCE='+GetTargetOS);
+    {$ELSE}
+    Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
     {$ENDIF}
     if Self is TFPCCrossInstaller then
     begin  // clean out the correct compiler
@@ -4568,7 +4562,6 @@ begin
     finally
       aCleanupCommandList.Free;
     end;
-
 
     for RunTwice in boolean do
     begin
@@ -4814,12 +4807,12 @@ begin
 
     if FRepositoryUpdated then
     begin
-      Infoln(infotext+ModuleName + ' was at revision: '+PreviousRevision,etInfo);
-      Infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo);
+      Infoln(infotext+ModuleName + ' was at revision/hash: '+PreviousRevision,etInfo);
+      Infoln(infotext+ModuleName + ' is now at revision/hash: '+ActualRevision,etInfo);
     end
     else
     begin
-      Infoln(infotext+ModuleName + ' is at revision: '+ActualRevision,etInfo);
+      Infoln(infotext+ModuleName + ' is at revision/hash: '+ActualRevision,etInfo);
       Infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
     end;
     UpdateWarnings:=TStringList.Create;

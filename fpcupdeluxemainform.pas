@@ -901,7 +901,7 @@ begin
 
   if ExistWordInString(PChar(s),BeginSnippet,[soWholeWord,soDown]) then
   begin
-    if ExistWordInString(PChar(s),'revision:',[soWholeWord,soDown]) then
+    if ExistWordInString(PChar(s),'revision/hash:',[soWholeWord,soDown]) then
     begin
       // repeat fpcupdeluxe warning
       memoSummary.Lines.Append(s);

@@ -637,20 +637,50 @@ begin
   if NOT DirectoryExists(LocalRepository) then exit;
 
   // Only update if we have invalid revision info, in order to minimize git info calls
-  if FLocalRevision = FRET_UNKNOWN_REVISION then
+  if (FLocalRevision = FRET_UNKNOWN_REVISION) then
   begin
-    //todo: find out: without max-count, I can get multiple entries. No idea what these mean!??
-    // alternative command: rev-parse --verify "HEAD^0" but that doesn't look as low-level ;)
     try
-      //FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' rev-list --max-count=1 HEAD ', LocalRepository, Output, Verbose);
-      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' describe --tags --all --long --always ', LocalRepository, Output, Verbose);
-      if FReturnCode = 0 then
+
+      if (FLocalRevision = FRET_UNKNOWN_REVISION) then
       begin
-        i:=RPos('/',Output);
-        if (i>0) then Delete(Output,1,i);
-        FLocalRevision := trim(Output)
-      end
-        else FLocalRevision := FRET_UNKNOWN_REVISION; //for compatibility with the svnclient code
+        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['log','-g','-1','--pretty=oneline'],LocalRepository, Output, '', Verbose);
+        if (FReturnCode = 0) then
+        begin
+          i:=RPos(' to ',Output);
+          if (i>0) then
+          begin
+            Delete(Output,1,(i+3));
+            // Do we have this format : branchname-xxxx-gxxxx
+            if (OccurrencesOfChar(Output,'-')=2) then
+              FLocalRevision := trim(Output);
+          end;
+        end
+      end;
+
+      if (FLocalRevision = FRET_UNKNOWN_REVISION) then
+      begin
+        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--all','--long','--always'],LocalRepository, Output, '', Verbose);
+        if (FReturnCode = 0) then
+        begin
+          i:=RPos('/',Output);
+          if (i>0) then Delete(Output,1,i);
+          // Do we have this format : branchname-xxxx-gxxxx
+          if (OccurrencesOfChar(Output,'-')=2) then
+            FLocalRevision := trim(Output);
+        end;
+      end;
+
+      if (FLocalRevision = FRET_UNKNOWN_REVISION) then
+      begin
+        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--long','--always'],LocalRepository, Output, '', Verbose);
+        if (FReturnCode = 0) then
+        begin
+          // Do we have this format : branchname-xxxx-gxxxx
+          if (OccurrencesOfChar(Output,'-')=2) then
+            FLocalRevision := trim(Output);
+        end
+      end;
+
     except
       FLocalRevision := FRET_UNKNOWN_REVISION; //for compatibility with the svnclient code
     end;

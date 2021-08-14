@@ -390,6 +390,13 @@ begin
         Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
 
         {$ifdef Windows}
+        s:=Which('echo.exe');
+        if (Length(s)>0) then
+        begin
+          s:=ExtractFilePath(Make)+'gecho.exe';
+          if FileExists(s) then
+            Processor.Process.Parameters.Add('ECHOREDIR='+s);
+        end;
         Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
         {$else}
         //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
@@ -683,6 +690,13 @@ begin
     Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
 
     {$ifdef Windows}
+    s:=Which('echo.exe');
+    if (Length(s)>0) then
+    begin
+      s:=ExtractFilePath(Make)+'gecho.exe';
+      if FileExists(s) then
+        Processor.Process.Parameters.Add('ECHOREDIR='+s);
+    end;
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
     {$else}
     //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
@@ -2346,12 +2360,12 @@ begin
 
     if FRepositoryUpdated then
     begin
-      Infoln(infotext+ModuleName + ' was at revision: '+PreviousRevision,etInfo);
-      Infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo);
+      Infoln(infotext+ModuleName + ' was at revision/hash: '+PreviousRevision,etInfo);
+      Infoln(infotext+ModuleName + ' is now at revision/hash: '+ActualRevision,etInfo);
     end
     else
     begin
-      Infoln(infotext+ModuleName + ' is at revision: '+ActualRevision,etInfo);
+      Infoln(infotext+ModuleName + ' is at revision/hash: '+ActualRevision,etInfo);
       Infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
     end;
     UpdateWarnings:=TStringList.Create;

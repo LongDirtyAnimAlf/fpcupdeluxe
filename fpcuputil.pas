@@ -297,6 +297,7 @@ function FixPath(const s:string):string;
 function FileIsReadOnly(const s:string):boolean;
 function MaybeQuoted(const s:string):string;
 function MaybeQuotedSpacesOnly(const s:string):string;
+function OccurrencesOfChar(const ContentString: string; const CharToCount: char): integer;
 // Like ExpandFilename but does not expand an empty string to current directory
 function SafeExpandFileName (Const FileName : String): String;
 // Get application name
@@ -2719,6 +2720,16 @@ begin
   end;
   if Found then
     result:=i;
+end;
+
+function OccurrencesOfChar(const ContentString: string; const CharToCount: char): integer;
+var
+  C: Char;
+begin
+  result := 0;
+  for C in ContentString do
+    if C = CharToCount then
+      Inc(result);
 end;
 
 function GetTotalPhysicalMemory: DWord;

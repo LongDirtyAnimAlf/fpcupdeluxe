@@ -611,6 +611,7 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       BorderSpacing.Right = 8
+      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 0
     end
@@ -639,6 +640,7 @@ object Form2: TForm2
       Anchors = [akTop, akRight]
       BorderSpacing.Top = 4
       BorderSpacing.Right = 4
+      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 1
     end
@@ -677,6 +679,7 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       BorderSpacing.Right = 8
+      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 2
     end
@@ -703,6 +706,7 @@ object Form2: TForm2
       Anchors = [akTop, akRight]
       BorderSpacing.Top = 4
       BorderSpacing.Right = 4
+      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 3
     end
