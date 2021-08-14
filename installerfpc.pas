@@ -909,9 +909,14 @@ begin
 
       FPCCfg := FFPCCompilerBinPath + FPCCONFIGFILENAME;
 
-      // Add binutils path to path if necessary
       OldPath:=GetPath;
       try
+        {$ifdef MSWINDOWS}
+        // Add FPC tools path to path if necessary
+        SetPath(FMakeDir,false,true);
+        {$endif MSWINDOWS}
+
+        // Add binutils path to path if necessary
         if CrossInstaller.BinUtilsPathInPath then
            SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
 
@@ -1142,13 +1147,6 @@ begin
           Processor.Process.Parameters.Add('FPCDIR=' + s1);
 
           {$IFDEF MSWINDOWS}
-          s1:=Which('echo.exe');
-          if (Length(s1)>0) then
-          begin
-            s1:=ExtractFilePath(Make)+'gecho.exe';
-            if FileExists(s1) then
-              Processor.Process.Parameters.Add('ECHOREDIR='+s1);
-          end;
           Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           {$ELSE}
@@ -1920,13 +1918,6 @@ begin
     begin
       //Processor.Process.Parameters.Add('CFGFILE=' + s1);
     end;
-  end;
-  s1:=Which('echo.exe');
-  if (Length(s1)>0) then
-  begin
-    s1:=ExtractFilePath(Make)+'gecho.exe';
-    if FileExists(s1) then
-      Processor.Process.Parameters.Add('ECHOREDIR='+s1);
   end;
   Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -4847,7 +4838,7 @@ begin
     CreateRevision(ModuleName,ActualRevision);
 
     if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
-
+    {
     if (NOT Ultibo) AND ( (SourceVersion<>'0.0.0') AND (CompareVersionStrings(SourceVersion,'3.3.1')>=0) ) then
     begin
       FilePath:=ConcatPaths([FSourceDirectory,'compiler'])+PathDelim+'version.pas';
@@ -4869,7 +4860,7 @@ begin
         end;
       end;
     end;
-
+    }
   end
   else
   begin

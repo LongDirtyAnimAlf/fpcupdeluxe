@@ -390,13 +390,6 @@ begin
         Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
 
         {$ifdef Windows}
-        s:=Which('echo.exe');
-        if (Length(s)>0) then
-        begin
-          s:=ExtractFilePath(Make)+'gecho.exe';
-          if FileExists(s) then
-            Processor.Process.Parameters.Add('ECHOREDIR='+s);
-        end;
         Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
         {$else}
         //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
@@ -485,26 +478,22 @@ begin
         Infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + '/' + FLCL_Platform + ' using ' + ExtractFileName(Processor.Executable), etInfo);
 
       try
-        {$ifdef MSWindows}
-        //Prepend FPC binary directory to PATH to prevent pickup of strange tools
-        OldPath:=Processor.Environment.GetVar(PATHVARNAME);
-        s:=ExcludeTrailingPathDelimiter(FFPCCompilerBinPath);
-        if OldPath<>'' then
-           Processor.Environment.SetVar(PATHVARNAME, s+PathSeparator+OldPath)
-        else
-          Processor.Environment.SetVar(PATHVARNAME, s);
-        {$endif}
-
-        ProcessorResult:=Processor.ExecuteAndWait;
-        Result := (ProcessorResult = 0);
-        if (not Result) then
-          WritelnLog(etError,infotext+'Error compiling LCL for ' + GetFPCTarget(false) + ' ' + FLCL_Platform + LineEnding +
-            'Details: ' + FErrorLog.Text, true);
-
-        {$ifdef MSWindows}
-        Processor.Environment.SetVar(PATHVARNAME, OldPath);
-        {$endif}
-
+        try
+          {$ifdef MSWINDOWS}
+          OldPath:=GetPath;
+          SetPath(FFPCCompilerBinPath,false,true);
+          SetPath(FMakeDir,false,true);
+          {$endif MSWINDOWS}
+          ProcessorResult:=Processor.ExecuteAndWait;
+          Result := (ProcessorResult = 0);
+          if (not Result) then
+            WritelnLog(etError,infotext+'Error compiling LCL for ' + GetFPCTarget(false) + ' ' + FLCL_Platform + LineEnding +
+              'Details: ' + FErrorLog.Text, true);
+        finally
+          {$ifdef MSWINDOWS}
+          SetPath(OldPath,false,false);
+          {$endif MSWINDOWS}
+        end;
       except
         on E: Exception do
         begin
@@ -690,13 +679,6 @@ begin
     Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
 
     {$ifdef Windows}
-    s:=Which('echo.exe');
-    if (Length(s)>0) then
-    begin
-      s:=ExtractFilePath(Make)+'gecho.exe';
-      if FileExists(s) then
-        Processor.Process.Parameters.Add('ECHOREDIR='+s);
-    end;
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
     {$else}
     //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
