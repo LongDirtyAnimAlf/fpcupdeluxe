@@ -506,7 +506,16 @@ begin
   if Pos('://',AValue)>0 then
     FFPCURL:=AValue
   else
+  begin
     FFPCURL:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,AValue);
+    if (Length(FFPCURL)=0) then
+    begin
+      if (NOT AnsiEndsText(GITLABEXTENSION,AValue)) then
+        SetFPCTAG(AValue+GITLABEXTENSION)
+      else
+        SetFPCTAG(AValue);
+    end;
+  end;
 end;
 
 procedure TFPCupManager.SetFPCTAG(AValue: string);
@@ -595,7 +604,16 @@ begin
   if Pos('://',AValue)>0 then
     FLazarusURL:=AValue
   else
+  begin
     FLazarusURL:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,AValue);
+    if (Length(FLazarusURL)=0) then
+    begin
+      if (NOT AnsiEndsText(GITLABEXTENSION,AValue)) then
+        SetLazarusTAG(AValue+GITLABEXTENSION)
+      else
+        SetLazarusTAG(AValue);
+    end;
+  end;
 end;
 
 procedure TFPCupManager.SetLazarusTAG(AValue: string);

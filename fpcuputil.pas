@@ -1394,6 +1394,8 @@ var
 begin
   result:='0.0.0';
 
+  //if (Length(URL)=0) then exit;
+
   if Pos('trunk',URL)>0 then result:='trunk' else
   if Pos('newpascal',URL)>0 then result:='trunk' else
   if Pos('freepascal.git',URL)>0 then result:='trunk' else

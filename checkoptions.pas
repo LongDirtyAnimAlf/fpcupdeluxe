@@ -693,10 +693,10 @@ begin
 
       // User could have specified relative paths so we're normalizing them.
       if (FManager.FPCBranch<>'') then
-        writeln('WARNING: Getting FPC version '+FManager.FPCBranch);
+        writeln('Getting FPC branch: '+FManager.FPCBranch);
       {$ifndef FPCONLY}
       if (FManager.LazarusBranch<>'') then
-        writeln('WARNING: Getting Lazarus version '+FManager.LazarusBranch);
+        writeln('Getting Lazarus branch: '+FManager.LazarusBranch);
       {$endif}
       if FManager.SkipModules<>'' then
         writeln('WARNING: Skipping installation/update of '+FManager.SkipModules);
