@@ -3579,12 +3579,11 @@ var
   aDir:RawByteString;
 begin
   result:=true;
+  if (Length(Dir)=0) then exit;
   aDir:=ExcludeTrailingPathDelimiter(Dir);
-  if Length(aDir)=0 then exit;
+  if (Length(aDir)=0) then exit;
   if (NOT DirectoryExists(aDir)) then
-  begin
     result:=ForceDirectories(aDir);
-  end;
 end;
 
 //Adapted from SysUtils; Unix/Linux only

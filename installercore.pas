@@ -1480,6 +1480,11 @@ begin
             AllThere:=false;
             break;
           end;
+          if (FileSize(InstallPath+FUtilFiles[i].FileName)=0) then
+          begin
+            AllThere:=false;
+            break;
+          end;
         end;
       end;
     end;
@@ -1693,7 +1698,7 @@ function TInstaller.DownloadFromBase(aClient:TRepoClient; aModuleName: string; v
   aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 const
   MAXFPCREVISION      = '49634';
-  MAXFPCFIXESREVISION = '45835';
+  MAXFPCFIXESREVISION = '46749';
   MAXLAZARUSREVISION  = '65500';
 var
   ReturnCode: integer;
@@ -2167,7 +2172,7 @@ begin
         aFile:=FilesList[i];
         aFile:=StringReplace(aFile,aName,aName+DirectorySeparator+'..',[]);
         aFile:=SafeExpandFileName(aFile);
-        if NOT DirectoryExists(ExtractFileDir(aFile)) then ForceDirectoriesSafe(ExtractFileDir(aFile));
+        ForceDirectoriesSafe(ExtractFileDir(aFile));
         SysUtils.RenameFile(FilesList[i],aFile);
         {$ifdef UNIX}
         //Correct line endings
@@ -3066,7 +3071,7 @@ begin
   infotext:=Copy(Self.ClassName,2,MaxInt)+' (CleanModule: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
 
-  if not DirectoryExists(FSourceDirectory) then
+  if (not DirectoryExists(FSourceDirectory)) then
   begin
     Infoln(infotext+'No '+ModuleName+' source directory ('+FSourceDirectory+') found [yet] ... nothing to be done',etInfo);
     exit(true);
@@ -3090,6 +3095,8 @@ begin
   result:=false;
   infotext:=Copy(Self.ClassName,2,MaxInt)+' (GetModule: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
+
+  ForceDirectoriesSafe(FSourceDirectory);
 end;
 
 function TInstaller.CheckModule(ModuleName: string): boolean;

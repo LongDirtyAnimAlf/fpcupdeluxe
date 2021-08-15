@@ -3903,6 +3903,7 @@ end;
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
   sInstallDir:=SetDirSeparators(InstallDirEdit.Text);
+  Form2.ResetAll;
   if DirectoryExists(sInstallDir) then GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
 

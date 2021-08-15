@@ -218,6 +218,8 @@ type
     function  GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
     procedure SetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH;aValue:boolean);
 
+    procedure ResetAll;
+
     property Repo:boolean read GetRepo write SetRepo;
     property PackageRepo:boolean read GetPackageRepo write SetPackageRepo;
 
@@ -1521,6 +1523,21 @@ end;
 procedure TForm2.SetLazPatches(value:string);
 begin
   SetPatches(value,true);
+end;
+
+procedure TForm2.ResetAll;
+begin
+  FPCOptions:='';
+  LazarusOptions:='';
+
+  FPCRevision:='';
+  LazarusRevision:='';
+
+  FPCBranch:='';
+  LazarusBranch:='';
+
+  FPCPatches:='';
+  LazPatches:='';
 end;
 
 end.

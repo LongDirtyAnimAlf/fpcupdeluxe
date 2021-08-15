@@ -662,11 +662,14 @@ begin
         FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--all','--long','--always'],LocalRepository, Output, '', Verbose);
         if (FReturnCode = 0) then
         begin
-          i:=RPos('/',Output);
-          if (i>0) then Delete(Output,1,i);
-          // Do we have this format : branchname-xxxx-gxxxx
-          if (OccurrencesOfChar(Output,'-')=2) then
-            FLocalRevision := trim(Output);
+          if (NOT AnsiStartsText('remotes/',Output)) then
+          begin
+            i:=RPos('/',Output);
+            if (i>0) then Delete(Output,1,i);
+            // Do we have this format : branchname-xxxx-gxxxx
+            if (OccurrencesOfChar(Output,'-')=2) then
+              FLocalRevision := trim(Output);
+          end;
         end;
       end;
 

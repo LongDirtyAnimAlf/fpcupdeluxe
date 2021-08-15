@@ -387,6 +387,8 @@ begin
       if (Pos('github.com/newpascal',FManager.FPCURL)>0) then FManager.FPCBranch:='release';
       if (Pos('github.com/LongDirtyAnimAlf',FManager.FPCURL)>0) then FManager.FPCBranch:='master';
 
+      FManager.FPCDesiredRevision:=Options.GetOption('','fpcRevision','',false);
+
       {$ifndef FPCONLY}
       s:=Options.GetOption('','lazVersion','');
       if (Length(s)>0) then
@@ -412,6 +414,8 @@ begin
       if (Pos('github.com/newpascal',FManager.LazarusURL)>0) then FManager.LazarusBranch:='release';
       if (Pos('github.com/LongDirtyAnimAlf',FManager.LazarusURL)>0) then FManager.LazarusBranch:='upstream';
       if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FManager.LazarusURL)>0) then FManager.LazarusBranch:='master';
+
+      FManager.LazarusDesiredRevision:=Options.GetOption('','lazRevision','',false);
       {$endif}
 
     except

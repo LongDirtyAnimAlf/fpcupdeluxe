@@ -508,7 +508,7 @@ begin
   else
   begin
     FFPCURL:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,AValue);
-    if (Length(FFPCURL)=0) then
+    if ( (Length(FFPCURL)=0) AND (Length(AValue)>0) ) then
     begin
       if (NOT AnsiEndsText(GITLABEXTENSION,AValue)) then
         SetFPCTAG(AValue+GITLABEXTENSION)
@@ -606,7 +606,7 @@ begin
   else
   begin
     FLazarusURL:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,AValue);
-    if (Length(FLazarusURL)=0) then
+    if ( (Length(FLazarusURL)=0) AND (Length(AValue)>0) ) then
     begin
       if (NOT AnsiEndsText(GITLABEXTENSION,AValue)) then
         SetLazarusTAG(AValue+GITLABEXTENSION)
