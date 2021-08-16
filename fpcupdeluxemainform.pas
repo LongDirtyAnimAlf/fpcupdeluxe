@@ -4204,8 +4204,6 @@ begin
   else
   begin
     FPCupManager.FPCURL:=FPCTarget;
-    if (Pos('github.com/graemeg',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='master';
-    if (Pos('github.com/newpascal',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='release';
     if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='master';
   end;
 
@@ -4216,8 +4214,6 @@ begin
   else
   begin
     FPCupManager.LazarusURL:=LazarusTarget;
-    if (Pos('github.com/graemeg',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='upstream';
-    if (Pos('github.com/newpascal',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='release';
     if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='upstream';
     if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='master';
   end;
