@@ -907,6 +907,9 @@ begin
   if AnsiStartsText('runtime_loader:',line) then exit;
   {$endif}
 
+  // Harmless GIT warning
+  if AnsiStartsText('warning: redirecting to https',line) then exit;
+
   result:=(NOT aVerbosity);
 
   if (NOT result) then
@@ -1039,9 +1042,6 @@ begin
         {$ifdef MSWINDOWS}
         if AnsiContainsText(line,'unable to determine the libgcc path') then exit;
         {$endif}
-
-        // Harmless GIT warning
-        if AnsiContainsText(line,'redirecting to https') then exit;
       end;
       // suppress "trivial"* build commands
 

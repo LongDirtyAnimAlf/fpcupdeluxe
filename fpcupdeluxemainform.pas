@@ -487,15 +487,15 @@ begin
     aFPCTarget:=ReadString('General','fpcVersion','');
     if (Length(aFPCTarget)=0) then
     begin
-      aFPCTarget:='stable.gitlab';
+      aFPCTarget:='stable'+GITLABEXTENSION;
     end;
     aLazarusTarget:=ReadString('General','lazVersion','');
     if (Length(aLazarusTarget)=0) then
     begin
-      aFPCTarget:='stable.gitlab';
+      aFPCTarget:='stable'+GITLABEXTENSION;
       {$ifdef Haiku}
       {$ifdef CPUX86_64}
-      aLazarusTarget:='trunk.gitlab';
+      aLazarusTarget:='trunk'+GITLABEXTENSION;
       {$endif}
       {$endif}
     end;
@@ -1939,29 +1939,29 @@ begin
   if Sender=TrunkBtn then
   begin
     s:='Going to install both FPC trunk and Lazarus trunk.';
-    aFPCTarget:='trunk.gitlab';
-    aLazarusTarget:='trunk.gitlab';
+    aFPCTarget:='trunk'+GITLABEXTENSION;
+    aLazarusTarget:='trunk'+GITLABEXTENSION;
   end;
 
   if Sender=FixesBtn then
   begin
     s:='Going to install FPC fixes and Lazarus fixes.';
-    aFPCTarget:='fixes.gitlab';
-    aLazarusTarget:='fixes.gitlab';
+    aFPCTarget:='fixes'+GITLABEXTENSION;
+    aLazarusTarget:='fixes'+GITLABEXTENSION;
   end;
 
   if Sender=StableBtn then
   begin
     s:='Going to install FPC stable and Lazarus stable.';
-    aFPCTarget:='stable.gitlab';
-    aLazarusTarget:='stable.gitlab';
+    aFPCTarget:='stable'+GITLABEXTENSION;
+    aLazarusTarget:='stable'+GITLABEXTENSION;
   end;
 
   if Sender=Win95Btn then
   begin
     s:='Going to install FPC and Lazarus for Win95.';
-    aFPCTarget:='2.6.2.gitlab';
-    aLazarusTarget:='1.2.gitlab';
+    aFPCTarget:='2.6.2'+GITLABEXTENSION;
+    aLazarusTarget:='1.2'+GITLABEXTENSION;
   end;
 
   {
@@ -1979,8 +1979,8 @@ begin
   if Sender=AndroidBtn then
   begin
     s:='Going to install FPC and Lazarus stable, armv7/arm64 cross-android compilers and LAMW.';
-    aFPCTarget:='stable.gitlab';
-    aLazarusTarget:='stable.gitlab';
+    aFPCTarget:='stable'+GITLABEXTENSION;
+    aLazarusTarget:='stable'+GITLABEXTENSION;
     aModule:='lamw';
   end;
 
@@ -2026,8 +2026,8 @@ begin
       s:='Going to install FPC and Lazarus for Wio Terminal.';
       aModule:='develtools4fpc,mbf-freertos-wio';
     end;
-    aFPCTarget:='embedded.git';
-    aLazarusTarget:='trunk.gitlab';
+    aFPCTarget:='embedded'+GITLABEXTENSION;
+    aLazarusTarget:='trunk'+GITLABEXTENSION;
   end;
 
   if Sender=mORMotBtn then
@@ -4720,18 +4720,22 @@ begin
   if (aListBox=ListBoxFPCTarget) then
   begin
     if AnsiEndsText(GITLABEXTENSION,aLocalTarget) then
-    //if (chkGitlab.Checked) then
-      aLocalAlias:=FPCGITLABREPO{+'/-/tree/'+installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,aLocalTarget)}
-      //aLocalAlias:=installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,aLocalTarget)
+    begin
+      aLocalAlias:=installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,aLocalTarget);
+      if (Length(aLocalAlias)=0) then aLocalAlias:=installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,aLocalTarget);
+      if (Pos('://',aLocalAlias)=0) then aLocalAlias:=FPCGITLABREPO;
+    end
     else
       aLocalAlias:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,aLocalTarget);
   end;
   if (aListBox=ListBoxLazarusTarget) then
   begin
     if AnsiEndsText(GITLABEXTENSION,aLocalTarget) then
-    //if (chkGitlab.Checked) then
-      aLocalAlias:=LAZARUSGITLABREPO{+'/-/tree/'+installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,aLocalTarget)}
-      //aLocalAlias:=installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,aLocalTarget)
+    begin
+      aLocalAlias:=installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,aLocalTarget);
+      if (Length(aLocalAlias)=0) then aLocalAlias:=installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,aLocalTarget);
+      if (Pos('://',aLocalAlias)=0) then aLocalAlias:=LAZARUSGITLABREPO;
+    end
     else
       aLocalAlias:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,aLocalTarget);
   end;

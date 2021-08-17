@@ -232,6 +232,9 @@ type
     FSolarisOI:boolean;
     FMUSL:boolean;
     FRunInfo:string;
+    procedure SetURL(ATarget,AValue: string);
+    procedure SetTAG(ATarget,AValue: string);
+    procedure SetBranch(ATarget,AValue: string);
     function GetCrossCombo_Target:string;
     {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
@@ -500,80 +503,223 @@ begin
   FFPCInstallDirectory:=SafeExpandFileName(AValue);
 end;
 
-procedure TFPCupManager.SetFPCURL(AValue: string);
+procedure TFPCupManager.SetURL(ATarget,AValue: string);
+var
+  LocalURL:string;
+  URLLookupMagic:string;
 begin
-  if FFPCURL=AValue then Exit;
-  if Pos('://',AValue)>0 then
-    FFPCURL:=AValue
-  else
+  if ((ATarget<>_FPC) {$ifndef FPCONLY}AND (ATarget<>_LAZARUS){$endif}) then
   begin
-    FFPCURL:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,AValue);
-    if ( (Length(FFPCURL)=0) AND (Length(AValue)>0) ) then
-    begin
-      if (NOT AnsiEndsText(GITLABEXTENSION,AValue)) then
-        SetFPCTAG(AValue+GITLABEXTENSION)
-      else
-        SetFPCTAG(AValue);
-    end;
+    WritelnLog(etError,'Gitlab alias lookup of '+ATarget+' tag/branch/url error.');
+    exit;
+  end;
+
+  if (ATarget=_FPC) then
+  begin
+    LocalURL:=FFPCURL;
+    URLLookupMagic:=FPCURLLOOKUPMAGIC;
+  end;
+
+  {$ifndef FPCONLY}
+  if (ATarget=_LAZARUS) then
+  begin
+    LocalURL:=FLazarusURL;
+    URLLookupMagic:=LAZARUSURLLOOKUPMAGIC;
+  end;
+  {$endif}
+
+  if LocalURL=AValue then exit;
+
+  if (Pos('://',AValue)>0) then
+    LocalURL:=AValue
+  else
+    LocalURL:=installerUniversal.GetAlias(URLLookupMagic,AValue);
+
+  if (ATarget=_FPC) then FFPCURL:=LocalURL;
+  {$ifndef FPCONLY}
+  if (ATarget=_LAZARUS) then FLazarusURL:=LocalURL;
+  {$endif}
+
+  if ( (Length(LocalURL)=0) AND (Length(AValue)>0) ) then
+  begin
+    if (NOT AnsiEndsText(GITLABEXTENSION,AValue)) then
+      SetTAG(ATarget,AValue+GITLABEXTENSION)
+    else
+      SetTAG(ATarget,AValue);
   end;
 end;
 
-procedure TFPCupManager.SetFPCTAG(AValue: string);
+procedure TFPCupManager.SetTAG(ATarget,AValue: string);
 var
   s:string;
+  LocalURL,LocalTag,LocalBranch:string;
+  RemoteURL,BranchLookupMagic,TagLookupMagic:string;
 begin
+  if ((ATarget<>_FPC) {$ifndef FPCONLY}AND (ATarget<>_LAZARUS){$endif}) then
+  begin
+    WritelnLog(etError,'Gitlab alias lookup of '+ATarget+' tag/branch/url error.');
+    exit;
+  end;
+
+  if (ATarget=_FPC) then
+  begin
+    LocalTag:=FFPCTAG;
+    LocalBranch:=FFPCBranch;
+    LocalURL:=FFPCURL;
+    RemoteURL:=FPCGITLABREPO;
+    BranchLookupMagic:=FPCBRANCHLOOKUPMAGIC;
+    TagLookupMagic:=FPCTAGLOOKUPMAGIC;
+  end;
+
+  {$ifndef FPCONLY}
+  if (ATarget=_LAZARUS) then
+  begin
+    LocalTag:=FLazarusTAG;
+    LocalBranch:=FLazarusBranch;
+    LocalURL:=FLazarusURL;
+    RemoteURL:=LAZARUSGITLABREPO;
+    BranchLookupMagic:=LAZARUSBRANCHLOOKUPMAGIC;
+    TagLookupMagic:=LAZARUSTAGLOOKUPMAGIC;
+  end;
+  {$endif}
+
   if AnsiEndsText(GITLABEXTENSION,AValue) then
   begin
-    s:=installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,AValue);
+    LocalURL:='';
+    s:=installerUniversal.GetAlias(TagLookupMagic,AValue);
     if (Length(s)>0) then
     begin
-      FFPCTAG:=s;
-      FFPCBranch:='';
+      LocalTag:=s;
+      LocalBranch:='';
     end
     else
     begin
-      s:=installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,AValue);
+      s:=installerUniversal.GetAlias(BranchLookupMagic,AValue);
       if (Length(s)>0) then
       begin
-        FFPCTAG:='';
-        FFPCBranch:=s;
+        LocalTag:='';
+        if AnsiContainsText(s,'gitlab.com/') then
+        begin
+          LocalURL:=s;
+          LocalBranch:='';
+        end
+        else
+          LocalBranch:=s;
       end;
     end;
     if (Length(s)>0) then
-      FFPCURL:=FPCGITLABREPO
+    begin
+      if (Length(LocalURL)=0) then
+        LocalURL:=RemoteURL;
+    end
     else
-      WritelnLog(etError,'Gitlab alias lookup of FPC tag/branch failed. Expect errors.');
+      WritelnLog(etError,'Gitlab alias lookup of '+ATarget+' tag/branch/url failed. Expect errors.');
   end
   else
   begin
-    FFPCTAG:=aValue;
-    FFPCBranch:='';
+    LocalTag:=aValue;
+    LocalBranch:='';
   end;
+
+  if (ATarget=_FPC) then
+  begin
+    FFPCTAG:=LocalTag;
+    FFPCBranch:=LocalBranch;
+    FFPCURL:=LocalURL;
+  end;
+
+  {$ifndef FPCONLY}
+  if (ATarget=_LAZARUS) then
+  begin
+    FLazarusTAG:=LocalTag;
+    FLazarusBranch:=LocalBranch;
+    FLazarusURL:=LocalURL;
+  end;
+  {$endif}
 end;
 
-procedure TFPCupManager.SetFPCBranch(AValue: string);
+procedure TFPCupManager.SetBranch(ATarget,AValue: string);
 var
   s:string;
+  LocalURL,LocalTag,LocalBranch:string;
+  RemoteURL,BranchLookupMagic:string;
 begin
+  if ((ATarget<>_FPC) {$ifndef FPCONLY}AND (ATarget<>_LAZARUS){$endif}) then
+  begin
+    WritelnLog(etError,'Gitlab alias lookup of '+ATarget+' tag/branch/url error.');
+    exit;
+  end;
+
+  if (ATarget=_FPC) then
+  begin
+    LocalTag:=FFPCTAG;
+    LocalBranch:=FFPCBranch;
+    LocalURL:=FFPCURL;
+    RemoteURL:=FPCGITLABREPO;
+    BranchLookupMagic:=FPCBRANCHLOOKUPMAGIC;
+  end;
+
+  {$ifndef FPCONLY}
+  if (ATarget=_LAZARUS) then
+  begin
+    LocalTag:=FLazarusTAG;
+    LocalBranch:=FLazarusBranch;
+    LocalURL:=FLazarusURL;
+    RemoteURL:=LAZARUSGITLABREPO;
+    BranchLookupMagic:=LAZARUSBRANCHLOOKUPMAGIC;
+  end;
+  {$endif}
+
   if AnsiEndsText(GITLABEXTENSION,AValue) then
   begin
-    s:=installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,AValue);
+    s:=installerUniversal.GetAlias(BranchLookupMagic,AValue);
     if (Length(s)>0) then
     begin
-      FFPCTAG:='';
-      FFPCBranch:=s;
-      FFPCURL:=FPCGITLABREPO;
+      LocalTag:='';
+      LocalBranch:=s;
+      LocalURL:=RemoteURL;
     end
     else
     begin
-      WritelnLog(etError,'Gitlab alias lookup of FPC branch failed. Expect errors.');
+      WritelnLog(etError,'Gitlab alias lookup of '+ATarget+' branch failed. Expect errors.');
     end;
   end
   else
   begin
-    FFPCBranch:=aValue;
-    FFPCTAG:='';
+    LocalBranch:=aValue;
+    LocalTag:='';
   end;
+
+  if (ATarget=_FPC) then
+  begin
+    FFPCTAG:=LocalTag;
+    FFPCBranch:=LocalBranch;
+    FFPCURL:=LocalURL;
+  end;
+
+  {$ifndef FPCONLY}
+  if (ATarget=_LAZARUS) then
+  begin
+    FLazarusTAG:=LocalTag;
+    FLazarusBranch:=LocalBranch;
+    FLazarusURL:=LocalURL;
+  end;
+  {$endif}
+end;
+
+procedure TFPCupManager.SetFPCURL(AValue: string);
+begin
+  SetURL(_FPC,AValue);
+end;
+
+procedure TFPCupManager.SetFPCTAG(AValue: string);
+begin
+  SetTAG(_FPC,AValue);
+end;
+
+procedure TFPCupManager.SetFPCBranch(AValue: string);
+begin
+  SetBranch(_FPC,AValue);
 end;
 
 procedure TFPCupManager.SetCrossToolsDirectory(AValue: string);
@@ -600,81 +746,18 @@ end;
 
 procedure TFPCupManager.SetLazarusURL(AValue: string);
 begin
-  if FLazarusURL=AValue then Exit;
-  if Pos('://',AValue)>0 then
-    FLazarusURL:=AValue
-  else
-  begin
-    FLazarusURL:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,AValue);
-    if ( (Length(FLazarusURL)=0) AND (Length(AValue)>0) ) then
-    begin
-      if (NOT AnsiEndsText(GITLABEXTENSION,AValue)) then
-        SetLazarusTAG(AValue+GITLABEXTENSION)
-      else
-        SetLazarusTAG(AValue);
-    end;
-  end;
+  SetURL(_LAZARUS,AValue);
 end;
 
 procedure TFPCupManager.SetLazarusTAG(AValue: string);
-var
-  s:string;
 begin
-  //if FLazarusTAG=AValue then exit;
-  if AnsiEndsText(GITLABEXTENSION,AValue) then
-  begin
-    s:=installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,AValue);
-    if (Length(s)>0) then
-    begin
-      FLazarusTAG:=s;
-      FLazarusBranch:='';
-    end
-    else
-    begin
-      s:=installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,AValue);
-      if (Length(s)>0) then
-      begin
-        FLazarusTAG:='';
-        FLazarusBranch:=s;
-      end;
-    end;
-    if (Length(s)>0) then
-      FLazarusURL:=LAZARUSGITLABREPO
-    else
-      WritelnLog(etError,'Gitlab alias lookup of Lazarus tag/branch failed. Expect errors.');
-  end
-  else
-  begin
-    FLazarusTAG:=aValue;
-    FLazarusBranch:='';
-  end;
+  SetTAG(_LAZARUS,AValue);
 end;
 
 procedure TFPCupManager.SetLazarusBranch(AValue: string);
-var
-  s:string;
 begin
-  if AnsiEndsText(GITLABEXTENSION,AValue) then
-  begin
-    s:=installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,AValue);
-    if (Length(s)>0) then
-    begin
-      FLazarusTAG:='';
-      FLazarusBranch:=s;
-      FLazarusURL:=LAZARUSGITLABREPO;
-    end
-    else
-    begin
-      WritelnLog(etError,'Gitlab alias lookup of Lazarus branch failed. Expect errors.');
-    end;
-  end
-  else
-  begin
-    FLazarusBranch:=aValue;
-    FLazarusTAG:='';
-  end;
+  SetBranch(_LAZARUS,AValue);
 end;
-
 {$endif}
 
 procedure TFPCupManager.SetLogFileName(AValue: string);
