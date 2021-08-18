@@ -3421,17 +3421,18 @@ begin
 
   {$ifdef Unix}
   {$ifndef Haiku}
-  if NOT result then
+  if (NOT result) then
   begin
     for i:=Low(UNIXSEARCHDIRS) to High(UNIXSEARCHDIRS) do
     begin
       OutputString:='';
       sd:=UNIXSEARCHDIRS[i];
-      RunCommand('find',[sd,'-type','f','-name',aLibrary],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+      // Search file
+      RunCommand('find',[sd,'-type','f','-name',aLibrary,'-print','2>/dev/null'],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
       result:=(Pos(aLibrary,OutputString)>0);
       if result then
       begin
-        ThreadLog('Library searcher found '+aLibrary+' inside '+sd+'.',etDebug);
+        ThreadLog('Library searcher found '+aLibrary+' file inside '+sd+'.',etInfo);
         break;
       end;
     end;
@@ -3439,12 +3440,34 @@ begin
 
   if (NOT result) then
   begin
-    OutputString:='';
-    RunCommand('sh',['-c','"ldconfig -p | grep '+aLibrary+'"'],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-    result:=(Pos(aLibrary,OutputString)>0);
-    if result then
+    for i:=Low(UNIXSEARCHDIRS) to High(UNIXSEARCHDIRS) do
     begin
-      ThreadLog('Library '+aLibrary+' found by ldconfig.',etDebug);
+      OutputString:='';
+      sd:=UNIXSEARCHDIRS[i];
+      // Search symlink
+      RunCommand('find',[sd,'-type','l','-name',aLibrary,'-print','2>/dev/null'],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+      result:=(Pos(aLibrary,OutputString)>0);
+      if result then
+      begin
+        ThreadLog('Library searcher found '+aLibrary+' symlink inside '+sd+'.',etInfo);
+        break;
+      end;
+    end;
+  end;
+
+  if (NOT result) then
+  begin
+    sd:=Which('ldconfig');
+    if (Length(sd)=0) then sd:='/sbin/ldconfig';
+    if FileExists(sd) then
+    begin
+      OutputString:='';
+      RunCommand('sh',['-c','"'+sd+' -p | grep '+aLibrary+'"'],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+      result:=( (Pos(aLibrary,OutputString)>0) AND (Pos('not found',OutputString)=0));
+      if result then
+      begin
+        ThreadLog('Library '+aLibrary+' found by ldconfig.',etInfo);
+      end;
     end;
   end;
   {$endif}

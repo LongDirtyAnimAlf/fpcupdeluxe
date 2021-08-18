@@ -4805,8 +4805,8 @@ begin
   imgSVN.Visible:=(NOT TCheckBox(Sender).Checked);
   imgGitlab.Visible:=(TCheckBox(Sender).Checked);
 
-  WioBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
-  PicoBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
+  //WioBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
+  //PicoBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
   UltiboBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
 
   FillSourceListboxes;
