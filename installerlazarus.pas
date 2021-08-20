@@ -303,7 +303,6 @@ var
   LazBuildApp: string;
   {$ifdef MSWindows}
   OldPath:string;
-  s:string;
   {$endif}
 begin
   Result:=inherited;
@@ -2113,7 +2112,7 @@ begin
   // finally ... if something is still still still floating around ... delete it !!
   if (NOT CrossCompiling) then
   begin
-    s:=ConcatPaths([FSourceDirectory,'ide'])+DirectorySeparator+'revision.inc';
+    s:=ConcatPaths([FSourceDirectory,'ide'])+DirectorySeparator+REVINCFILENAME;
     SysUtils.DeleteFile(s);
 
     s:=ConcatPaths([FInstallDirectory,'lazbuild']);
@@ -2379,9 +2378,7 @@ begin
       UpdateWarnings.Free;
     end;
 
-    {$ifdef FORCEREVISION}
     CreateRevision(ModuleName,ActualRevision);
-    {$endif FORCEREVISION}
 
     if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
 

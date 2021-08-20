@@ -99,9 +99,7 @@ const
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';
   //PACKAGESCONFIGDIR     = PACKAGESLOCATION+DirectorySeparator+'fpcpkgconfig';
 
-  {$ifdef FORCEREVISION}
   REVINCFILENAME        = 'revision.inc';
-  {$endif FORCEREVISION}
 
   {$IFDEF WINDOWS}
   PREBUILTBINUTILSURLWINCE = FPCBINARIES+'/install/crossbinwce';
@@ -587,9 +585,7 @@ type
     // Patch sources
     function PatchModule(ModuleName: string): boolean;
     //Source revision
-    {$ifdef FORCEREVISION}
     function CreateRevision(ModuleName,aRevision:string): boolean;
-    {$endif FORCEREVISION}
     function GetRevision(ModuleName:string): string;
     function GetRevisionFromVersion(aModuleName,aVersion:string): string;
 
@@ -3669,7 +3665,6 @@ begin
   end;
 end;
 
-{$ifdef FORCEREVISION}
 function TInstaller.CreateRevision(ModuleName,aRevision:string): boolean;
 const
   // needs to be exactly the same as used by Lazarus !!!
@@ -3723,7 +3718,6 @@ begin
     end;
   end;
 end;
-{$endif FORCEREVISION}
 
 function TInstaller.GetRevision(ModuleName:string): string;
 var
@@ -3733,8 +3727,6 @@ var
   NumbersExtr: TRegExpr;
 begin
   result:='';
-
-  {$ifdef FORCEREVISION}
 
   RevString:='';
   RevFileName:='';
@@ -3798,7 +3790,6 @@ begin
     end;
   end
   else
-  {$endif FORCEREVISION}
   begin
     if ModuleName=_FPC then
     begin
