@@ -49,6 +49,9 @@ Const
     _EXECUTE+_CREATEFPCUPSCRIPT+_SEP+
     _CHECKMODULE+_FPC+_SEP+
     _GETMODULE+_FPC+_SEP+
+    {$ifndef FORCEREVISION}
+    _BUILDMODULE+_REVISIONFPC+_SEP+
+    {$endif}
     _BUILDMODULE+_FPC+_SEP+
     _END+
 
@@ -1146,6 +1149,13 @@ begin
           {$IFDEF MSWINDOWS}
           Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+          // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
+          s1:=GitClient.RepoExecutable;
+          if (Length(s1)>0) then
+          begin
+            if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
+            Processor.Process.Parameters.Add('GIT='+s1);
+          end;
           {$ELSE}
           Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
           {$ENDIF}
@@ -1342,6 +1352,7 @@ begin
             end;
           end;
 
+          {$ifdef FORCEREVISION}
           if ((SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0))) then
           begin
             s2:=GetRevision(ModuleName);
@@ -1352,6 +1363,7 @@ begin
               Processor.Process.Parameters.Add('REVINC=force');
             end;
           end;
+          {$endif FORCEREVISION}
 
           {$ifdef solaris}
           {$IF defined(CPUX64) OR defined(CPUX86)}
@@ -1918,6 +1930,14 @@ begin
   end;
   Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
+  s1:=GitClient.RepoExecutable;
+  s1:=GitClient.RepoExecutable;
+  if (Length(s1)>0) then
+  begin
+    if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
+    Processor.Process.Parameters.Add('GIT='+s1);
+  end;
   {$ELSE}
   Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
   {$ENDIF}
@@ -1977,6 +1997,7 @@ begin
   end;
   {$ENDIF}
 
+  {$ifdef FORCEREVISION}
   if ((SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0))) then
   begin
     s2:=Trim(ActualRevision);
@@ -1987,6 +2008,7 @@ begin
       Processor.Process.Parameters.Add('REVINC=force');
     end;
   end;
+  {$endif FORCEREVISION}
 
   {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
   if FSoftFloat then
@@ -2018,17 +2040,21 @@ begin
 
   Processor.Process.CurrentDirectory:='';
   case ModuleName of
-    _FPC,_MAKEFILECHECKFPC:
+    _REVISIONFPC:
     begin
-      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+      Processor.Process.CurrentDirectory:=ConcatPaths([FSourceDirectory,'compiler']);
     end;
     _PAS2JS:
     begin
-      Processor.Process.CurrentDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'pas2js';
+      Processor.Process.CurrentDirectory:=ConcatPaths([FSourceDirectory,'utils','pas2js']);
       // first run fpcmake to generate correct makefile
       // is this still needed !!?? No !!
       //SysUtils.DeleteFile(IncludeTrailingPathDelimiter(Processor.Process.CurrentDirectory)+'fpmake'+GetExeExt);
       //ExecuteCommandInDir(FFPCCompilerBinPath+'fpcmake'+GetExeExt,Processor.Process.CurrentDirectory,FVerbose);
+    end;
+    else
+    begin
+      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
     end;
   end;
 
@@ -2048,6 +2074,11 @@ begin
     Processor.Process.Parameters.Add('fpc_baseinfo');
   end
   else
+  if ModuleName=_REVISIONFPC then
+  begin
+    Processor.Process.Parameters.Add('revision');
+  end
+  else
   begin
     Processor.Process.Parameters.Add('all');
     //If we have separate source and install, always use the install command
@@ -2057,9 +2088,9 @@ begin
 
   try
     ProcessorResult:=Processor.ExecuteAndWait;
-    //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
-    //Processor.Environment.SetVar('FPCDIR',FPCDirStore);
-    if ProcessorResult <> 0 then
+    // Do not fail on setting the revision
+    if (ModuleName=_REVISIONFPC) then ProcessorResult:=0;
+    if (ProcessorResult<>0) then
     begin
       OperationSucceeded := False;
       WritelnLog(etError, infotext+'Error running '+Processor.Executable+' for '+ModuleName+' failed with exit code '+IntToStr(ProcessorResult)+LineEnding+'. Details: '+FErrorLog.Text,true);
@@ -4595,9 +4626,11 @@ begin
       Infoln(infotext+'Deleting fpc.sh script.', etInfo);
       Sysutils.DeleteFile(FFPCCompilerBinPath+'fpc.sh');
       {$ENDIF UNIX}
-      Infoln(infotext+'Deleting revision.inc.', etInfo);
+      {$ifdef FORCEREVISION}
+      Infoln(infotext+'Deleting '+REVINCFILENAME, etInfo);
       aDir:=ConcatPaths([FSourceDirectory,'compiler']);
-      DeleteFile(aDir+DirectorySeparator+'revision.inc');
+      DeleteFile(aDir+DirectorySeparator+REVINCFILENAME);
+      {$endif FORCEREVISION}
     end;
 
     // Delete units
@@ -4710,8 +4743,6 @@ var
   s              : string;
   SourceVersion  : string;
   SourceInfo     : TRevision;
-  FilePath       : string;
-  aIndex         : integer;
 begin
   result:=inherited;
   result:=InitModule;
@@ -4832,32 +4863,11 @@ begin
       UpdateWarnings.Free;
     end;
 
+    {$ifdef FORCEREVISION}
     CreateRevision(ModuleName,ActualRevision);
+    {$endif FORCEREVISION}
 
     if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
-    {
-    if (NOT Ultibo) AND ( (SourceVersion<>'0.0.0') AND (CompareVersionStrings(SourceVersion,'3.3.1')>=0) ) then
-    begin
-      FilePath:=ConcatPaths([FSourceDirectory,'compiler'])+PathDelim+'version.pas';
-      if (FileExists(FilePath)) then
-      begin
-        UpdateWarnings:=TStringList.Create;
-        try
-          UpdateWarnings.LoadFromFile(FilePath);
-          aIndex:=StringListContains(UpdateWarnings,'+''-r''+{$i revision.inc}');
-          if (aIndex<>-1) then
-          begin
-            s:=UpdateWarnings.Strings[aIndex];
-            s:=StringReplace(s,'-r','-',[]);
-            UpdateWarnings.Strings[aIndex]:=s;
-            UpdateWarnings.SaveToFile(FilePath);
-          end;
-        finally
-          UpdateWarnings.Free;
-        end;
-      end;
-    end;
-    }
   end
   else
   begin

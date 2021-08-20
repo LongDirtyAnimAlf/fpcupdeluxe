@@ -2379,7 +2379,9 @@ begin
       UpdateWarnings.Free;
     end;
 
+    {$ifdef FORCEREVISION}
     CreateRevision(ModuleName,ActualRevision);
+    {$endif FORCEREVISION}
 
     if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
 

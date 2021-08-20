@@ -1621,7 +1621,7 @@ begin
   //check if this is a known module:
 
   // FPC:
-  if (ModuleName=_FPC) OR (ModuleName=_MAKEFILECHECKFPC) then
+  if ((ModuleName=_FPC) OR (ModuleName=_MAKEFILECHECKFPC)  OR (ModuleName=_REVISIONFPC)) then
   begin
     if assigned(FInstaller) then
     begin
