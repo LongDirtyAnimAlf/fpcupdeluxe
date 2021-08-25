@@ -1141,15 +1141,6 @@ begin
       LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
       try
 
-        {$ifdef LCLQT5}
-        //Set default sizes and position
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Left', '10');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Top', '30');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Width', '900');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Height', '60');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/Visible/Value', 'True');
-        {$endif}
-
         {$ifdef Haiku}
         //Set default font
         LazarusConfig.SetVariable(EditorConfig, 'EditorOptions/Display/DoNotWarnForFont', 'Noto Mono');
