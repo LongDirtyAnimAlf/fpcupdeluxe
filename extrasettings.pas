@@ -166,6 +166,9 @@ type
     function GetAddContext:boolean;
     procedure SetAddContext(value:boolean);
 
+    function GetAskConfirmation:boolean;
+    procedure SetAskConfirmation(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -243,6 +246,7 @@ type
     property UseSoftFloat:boolean read GetUseSoftFloat write SetUseSoftFloat;
     property OnlinePatching:boolean read GetAllowOnlinePatching write SetAllowOnlinePatching;
     property AddContext:boolean read GetAddContext write SetAddContext;
+    property AskConfirmation:boolean read GetAskConfirmation write SetAskConfirmation;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -326,6 +330,9 @@ resourcestring
 
   HintCheckAddContext = 'Double clicking on FPC and Lazarus files will open Lazarus.';
   CaptionCheckAddContext = 'Add context for FPC and Lazarus files.';
+
+  HintCheckAskConfirmation = 'Show a confirmation dialog with yes/no before every build.';
+  CaptionCheckAskConfirmation = 'Always ask for confirmation (default=yes).';
 
 var
   Form2: TForm2;
@@ -438,6 +445,7 @@ begin
     Append(CaptionUseSoftFloat80bit);
     Append(CaptionCheckEnableOnlinePatching);
     Append(CaptionCheckAddContext);
+    Append(CaptionCheckAskConfirmation);
   end;
 
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
@@ -487,6 +495,7 @@ begin
 
   SplitFPC:=true;
   MakeJobs:=true;
+  AskConfirmation := true;
 
   Self.LazarusDebug:=true;
 
@@ -1335,6 +1344,14 @@ begin
   SetCheckState(CaptionCheckAddContext,value);
 end;
 
+function TForm2.GetAskConfirmation: boolean;
+begin
+  result := GetCheckState(CaptionCheckAskConfirmation);
+end;
+procedure TForm2.SetAskConfirmation(value: boolean);
+begin
+  SetCheckState(CaptionCheckAskConfirmation, value);
+end;
 
 function TForm2.GetFPCOptions:string;
 begin

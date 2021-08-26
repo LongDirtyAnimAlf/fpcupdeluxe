@@ -3708,15 +3708,17 @@ begin
     exit;
   end;
 
-  s:='';
-  if Sender=BitBtnFPCOnly then s:='Going to install/update FPC.';
-  if Sender=BitBtnLazarusOnly then s:='Going to install/update Lazarus.';
-  if Sender=BitBtnFPCandLazarus then s:='Going to install/update FPC and Lazarus.';
-  s:=s+sLineBreak;
-  s:=s+'Install directory: '+Self.sInstallDir;
-  s:=s+sLineBreak;
-  s:=s+'Do you want to continue ?';
-  if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+  if Form2.AskConfirmation then begin
+    s:='';
+    if Sender=BitBtnFPCOnly then s:='Going to install/update FPC.';
+    if Sender=BitBtnLazarusOnly then s:='Going to install/update Lazarus.';
+    if Sender=BitBtnFPCandLazarus then s:='Going to install/update FPC and Lazarus.';
+    s:=s+sLineBreak;
+    s:=s+'Install directory: '+Self.sInstallDir;
+    s:=s+sLineBreak;
+    s:=s+'Do you want to continue ?';
+    if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+  end;
 
   DisEnable(Sender,False);
   try
@@ -4516,6 +4518,8 @@ begin
 
       Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
 
+      Form2.AskConfirmation:=ReadBool('General','AskConfirmation',Form2.AskConfirmation);
+
     finally
       Free;
     end;
@@ -4613,6 +4617,8 @@ begin
       WriteBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 
       WriteBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
+
+      WriteBool('General','AskConfirmation',Form2.AskConfirmation);
 
       UpdateFile;
     finally
