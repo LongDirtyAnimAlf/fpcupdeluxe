@@ -244,6 +244,8 @@ type
     procedure InitFPCupManager;
     function  GetCmdFontSize:integer;
     procedure SetCmdFontSize(aValue:integer);
+    function GetCmdFontName: String;
+    procedure SetCmdFontName(aValue: String);
     procedure ParseRevisions(IniDirectory:string);
     {$ifndef usealternateui}
     property  FPCTarget:string read FFPCTarget write SetFPCTarget;
@@ -257,7 +259,8 @@ type
     {$endif}
 
   published
-    property CmdFontSize: integer read GetCmdFontSize write SetCmdFontSize;
+    property CmdFontSize: Integer read GetCmdFontSize write SetCmdFontSize;
+    property CmdFontName: String read GetCmdFontName write SetCmdFontName;
   end;
 
 resourcestring
@@ -1816,7 +1819,7 @@ end;
 
 procedure TForm1.IniPropStorageAppRestoringProperties(Sender: TObject);
 begin
-  SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;';
+  SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;CmdFontName;';
   //Width := MulDiv(Width, 96, Screen.PixelsPerInch);
   //Height := MulDiv(Height, 96, Screen.PixelsPerInch);
 end;
@@ -1824,9 +1827,9 @@ end;
 procedure TForm1.IniPropStorageAppSavingProperties(Sender: TObject);
 begin
   if Self.WindowState=wsMaximized then
-    SessionProperties := 'WindowState;CmdFontSize;'
+    SessionProperties := 'WindowState;CmdFontSize;CmdFontName;'
   else
-    SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;';
+    SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;CmdFontName;';
 end;
 
 procedure TForm1.ListBoxTargetDrawItem(Control: TWinControl; Index: Integer;
@@ -5048,6 +5051,16 @@ end;
 procedure TForm1.SetCmdFontSize(aValue:integer);
 begin
   CommandOutputScreen.Font.Size:=aValue;
+end;
+
+function TForm1.GetCmdFontName: String;
+begin
+  Result := CommandOutputScreen.Font.Name;
+end;
+
+procedure TForm1.SetCmdFontName(aValue: String);
+begin
+  CommandOutputScreen.Font.Name:=aValue;
 end;
 
 procedure TForm1.FillSourceListboxes;
