@@ -107,10 +107,10 @@ object Form1: TForm1
     Color = clBlack
     Font.CharSet = ANSI_CHARSET
     Font.Color = clLime
-    Font.Height = -11
-    Font.Name = 'Courier New'
+    Font.Height = -13
+    Font.Name = 'Monospace'
     Font.Pitch = fpFixed
-    Font.Quality = fqDraft
+    Font.Quality = fqCleartype
     ParentColor = False
     ParentFont = False
     TabOrder = 5
