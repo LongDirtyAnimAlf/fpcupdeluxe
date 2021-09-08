@@ -670,7 +670,7 @@ begin
           begin
             Delete(Output,1,(i+3));
             // Do we have this format : branchname-xxxx-gxxxx
-            if (OccurrencesOfChar(Output,'-')=2) then
+            if (OccurrencesOfChar(Output,'-')>=2) then
               FLocalRevision := trim(Output);
           end;
         end
@@ -686,7 +686,7 @@ begin
             i:=RPos('/',Output);
             if (i>0) then Delete(Output,1,i);
             // Do we have this format : branchname-xxxx-gxxxx
-            if (OccurrencesOfChar(Output,'-')=2) then
+            if (OccurrencesOfChar(Output,'-')>=2) then
               FLocalRevision := trim(Output);
           end;
         end;

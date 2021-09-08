@@ -386,6 +386,11 @@ begin
   Self.Position:=poDesigned;
   {$endif}
 
+  {$ifdef Darwin}
+  CmdFontSize:=-11;
+  CmdFontName:='Courier New';
+  {$endif}
+
   {$ifdef RemoteLog}
   aDataClient:=TDataClient.Create;
   {$ifdef usealternateui}
@@ -1612,7 +1617,7 @@ begin
     OR
     (ExistWordInString(PChar(s),'dependency dropped',[soDown]))
     OR
-    ( ExistWordInString(PChar(s),'echo ',[soDown]) AND ExistWordInString(PChar(s),REVINCFILENAME,[soDown]) )
+    ( ( ExistWordInString(PChar(s),'echo ',[soDown]) OR ExistWordInString(PChar(s),'gecho.exe ',[soDown]) OR ExistWordInString(PChar(s),'gecho ',[soDown]) ) AND ExistWordInString(PChar(s),REVINCFILENAME,[soDown]) )
     OR
     ( ExistWordInString(PChar(s),'Start ',[soDown]) AND ExistWordInString(PChar(s),'now ',[soDown]) )
     OR
@@ -4451,7 +4456,7 @@ begin
   begin
     with TIniFile.Create(IniDirectory+installerUniversal.DELUXEFILENAME) do
     try
-      AddMessage('Current install drectory: '+sInstallDir);
+      AddMessage('Current install directory: '+sInstallDir);
       AddMessage('');
       AddMessage('Got settings from install directory');
       AddMessage('');
@@ -4541,7 +4546,7 @@ begin
   end
   else
   begin
-    AddMessage('Current install drectory: '+sInstallDir);
+    AddMessage('Current install directory: '+sInstallDir);
     {$ifdef Solaris}
     // current trunk does not build with the standard -O2, so use -O1 for all
     Form2.FPCOptions:='-g -gl -O1';

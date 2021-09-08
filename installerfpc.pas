@@ -1132,6 +1132,11 @@ begin
           Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
           Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
           Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+          {$ifdef FORCEGECHO}
+          s1:=FFPCCompilerBinPath+'gecho'+GetExeExt;
+          if FileExists(s1) then
+            Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
+          {$endif FORCEGECHO}
 
           (*
           {$IFDEF UNIX}
@@ -1888,9 +1893,12 @@ begin
   {$ENDIF}
   FErrorLog.Clear;
 
+
   if (NOT FNoJobs) then
   begin
+    {$ifndef win64}
     Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+    {$endif win64}
     Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
   end;
 
@@ -1905,6 +1913,12 @@ begin
   Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
   Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+
+  {$ifdef FORCEGECHO}
+  s1:=IncludeTrailingPathDelimiter(FMakeDir)+'gecho'+GetExeExt;
+  if FileExists(s1) then
+    Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
+  {$endif FORCEGECHO}
 
   //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
   //The paths are fixed in the FPC sources. Try to set the default path here [FPCDIR], so yylex.cod and yyparse.cod can be found.
@@ -3688,7 +3702,9 @@ begin
       Processor.Process.Parameters.Add('compiler_cycle');
       if (NOT FNoJobs) then
       begin
+        {$ifndef win64}
         Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+        {$endif win64}
         Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
       end;
       Processor.Process.Parameters.Add('FPC='+FCompiler);
@@ -4551,7 +4567,9 @@ begin
     Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
     if (NOT FNoJobs) then
     begin
+      {$ifndef win64}
       Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+      {$endif win64}
       Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
     end;
     Processor.Process.Parameters.Add('FPC='+aCleanupCompiler);
@@ -4650,9 +4668,9 @@ begin
       Sysutils.DeleteFile(FFPCCompilerBinPath+'fpc.sh');
       {$ENDIF UNIX}
       {$ifdef FORCEREVISION}
-      Infoln(infotext+'Deleting '+REVINCFILENAME, etInfo);
-      aDir:=ConcatPaths([FSourceDirectory,'compiler']);
-      DeleteFile(aDir+DirectorySeparator+REVINCFILENAME);
+      //Infoln(infotext+'Deleting '+REVINCFILENAME, etInfo);
+      //aDir:=ConcatPaths([FSourceDirectory,'compiler']);
+      //DeleteFile(aDir+DirectorySeparator+REVINCFILENAME);
       {$endif FORCEREVISION}
     end;
 
