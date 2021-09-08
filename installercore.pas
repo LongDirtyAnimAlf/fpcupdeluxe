@@ -1709,6 +1709,7 @@ var
   ReturnCode: integer;
   DiffFile,DiffFileCorrectedPath: String;
   LocalPatchCmd : string;
+  NoPatchStrip:boolean;
   s,Output:string;
 
 begin
@@ -1866,34 +1867,51 @@ begin
 
          if Assigned(UpdateWarnings) then UpdateWarnings.Add(aModuleName + ': reapplying local changes.');
 
-         // check for default values
-         if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
-            then LocalPatchCmd:=FPatchCmd + ' -p0 -i '
-            else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
 
-         ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
-
-         if ReturnCode<>0 then
+         for NoPatchStrip in boolean do
          begin
-           // Patching can go wrong when line endings are not compatible
-           // This happens e.g. with bgracontrols that have CRLF in the source files
-           // Try to circumvent this problem by replacing line enddings
-           if Pos('different line endings',Output)>0 then
-           begin
-             //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
-             //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
 
-             DiffFileCorrectedPath:=IncludeTrailingPathDelimiter(GetTempDirName)+ExtractFileName(DiffFile);
-             if FileCorrectLineEndings(DiffFile,DiffFileCorrectedPath) then
+           if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt)) then
+           begin
+             if NoPatchStrip then
+               LocalPatchCmd:=FPatchCmd + ' -t -p0 -i '
+             else
+               LocalPatchCmd:=FPatchCmd + ' -t -p1 -i ';
+           end
+           else
+           begin
+             if NoPatchStrip then continue;
+             LocalPatchCmd:=Trim(FPatchCmd) + ' ';
+           end;
+
+           ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
+
+           if (ReturnCode=0) then
+             continue
+           else
+           begin
+             // Patching can go wrong when line endings are not compatible
+             // This happens e.g. with bgracontrols that have CRLF in the source files
+             // Try to circumvent this problem by replacing line enddings
+             if Pos('different line endings',Output)>0 then
              begin
-               if FileExists(DiffFileCorrectedPath) then
+               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
+               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
+
+               DiffFileCorrectedPath:=IncludeTrailingPathDelimiter(GetTempDirName)+ExtractFileName(DiffFile);
+               if FileCorrectLineEndings(DiffFile,DiffFileCorrectedPath) then
                begin
-                 ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFileCorrectedPath, FSourceDirectory, Output, FVerbose);
-                 DeleteFile(DiffFileCorrectedPath);
+                 if FileExists(DiffFileCorrectedPath) then
+                 begin
+                   ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFileCorrectedPath, FSourceDirectory, Output, FVerbose);
+                   DeleteFile(DiffFileCorrectedPath);
+                 end;
                end;
              end;
            end;
+
          end;
+
 
          // Report error, but continue !
          if ReturnCode<>0 then
@@ -2065,7 +2083,7 @@ begin
         UpdateWarnings.Add(aModuleName + ': reapplying local changes.');
 
         if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
-           then LocalPatchCmd:=FPatchCmd + ' -p0 -i '
+           then LocalPatchCmd:=FPatchCmd + ' -t -p0 -i '
            else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
         CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
 
@@ -2095,7 +2113,7 @@ begin
             if CheckoutOrUpdateReturnCode=0 then
             begin
               if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
-                 then LocalPatchCmd:=FPatchCmd + ' -p0 --binary -i '
+                 then LocalPatchCmd:=FPatchCmd + ' -t -p0 --binary -i '
                  else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
               CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
             end;
@@ -3200,6 +3218,7 @@ var
   Output: string = '';
   ReturnCode,i,j: integer;
   LocalSourcePatches:string;
+  StripLevel:integer;
   PatchFPC,PatchUniversal,PatchAccepted:boolean;
   {$ifndef FPCONLY}
   PatchLaz:boolean;
@@ -3593,14 +3612,12 @@ begin
              {$endif}
                 else PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpcup'+DirectorySeparator+PatchList[i]);
         end;
+
         if FileExists(PatchFilePath) then
         begin
-
+          StripLevel:=1;
           j:=Pos(STRIPMAGIC,PatchFilePath);
-          if j>0 then
-          begin
-            j:=StrToIntDef(PatchFilePath[j+Length(STRIPMAGIC)],0);
-          end else j:=0;
+          if (j>0) then StripLevel:=StrToIntDef(PatchFilePath[j+Length(STRIPMAGIC)],StripLevel);
 
           {$IFDEF MSWINDOWS}
           Processor.Executable := IncludeTrailingPathDelimiter(FMakeDir) + FPatchCmd;
@@ -3613,8 +3630,8 @@ begin
           // check for default values
           if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt)) then
           begin
-            Processor.Process.Parameters.Add('-p');
-            Processor.Process.Parameters.Add(InttoStr(j));
+            Processor.Process.Parameters.Add('-t');
+            Processor.Process.Parameters.Add('-p'+InttoStr(StripLevel));
             Processor.Process.Parameters.Add('-N');
             {$IF not defined(BSD) or defined(DARWIN)}
             Processor.Process.Parameters.Add('--no-backup-if-mismatch');
@@ -3633,9 +3650,21 @@ begin
             //Execute patch command
             ReturnCode:=Processor.ExecuteAndWait;
 
+            if ( (ReturnCode<>0) AND (StripLevel=1) ) then
+            begin
+              //try again with different [0] strip option
+              j:=Processor.Process.Parameters.IndexOf('-p1');
+              if (j<>-1) then
+              begin
+                Processor.Process.Parameters.Strings[j]:='-p0';
+                ReturnCode:=Processor.ExecuteAndWait;
+              end;
+            end;
+
             // remove the temporary file
             if (PatchFileCorrectedPath<>PatchFilePath) then DeleteFile(PatchFileCorrectedPath);
-            if ReturnCode=0  then
+
+            if (ReturnCode=0)  then
             begin
               result:=true;
               WritelnLog(etInfo, infotext+ModuleName+ ' has been patched successfully with '+PatchList[i] + '.', true);
