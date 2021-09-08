@@ -1056,12 +1056,8 @@ begin
     XdgDesktopContent.Add('Encoding=UTF-8');
     XdgDesktopContent.Add('Type=Application');
     XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus.ico');
-    {$ifdef LCLQT5}
     XdgDesktopContent.Add('Path='+ExtractFilePath(Target));
-    XdgDesktopContent.Add('Exec=./'+ExtractFileName(Target)+' '+TargetArguments+' %f');
-    {$else}
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments+' %f');
-    {$endif}
     XdgDesktopContent.Add('Name='+ShortcutName);
     XdgDesktopContent.Add('GenericName=Lazarus IDE with Free Pascal Compiler');
     XdgDesktopContent.Add('Category=Application;IDE;Development;GUIDesigner;Programming;');
