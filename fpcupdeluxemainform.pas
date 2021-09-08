@@ -1081,10 +1081,9 @@ begin
   begin
     s:='Going to update all crosscompilers !' + sLineBreak +
        'Do you want to continue ?';
-    if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
-    begin
-      exit;
-    end;
+    if Form2.AskConfirmation then
+      if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+        exit;
   end;
 
   if (Sender<>nil) then
@@ -2056,7 +2055,9 @@ begin
 
   s:=s+sLineBreak;
   s:=s+'Install directory: '+Self.sInstallDir;
-  if (MessageDlg(s+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+  if Form2.AskConfirmation then
+    if (MessageDlg(s+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+      exit;
 
   if ( AnsiEndsText(GITLABEXTENSION,aFPCTarget) AND AnsiEndsText(GITLABEXTENSION,aLazarusTarget) AND (NOT chkGitlab.Checked) ) then
     chkGitlab.Checked:=true;
@@ -2265,7 +2266,9 @@ begin
     s:=s+'Install directory: '+Self.sInstallDir;
     s:=s+sLineBreak;
     s:=s+'Do you want to continue ?';
-    if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+    if Form2.AskConfirmation then
+      if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+        exit;
 
     if Sender=btnInstallModule then
     begin
@@ -2810,10 +2813,9 @@ begin
       if (length(s)=0) then
         s:='Do you want to continue ?';
       s:='Going to install the cross-compiler for' + sLineBreak + '['+FPCupManager.CrossCombo_Target+']' + sLineBreak + s;
-      if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
-      begin
-        exit;
-      end;
+      if Form2.AskConfirmation then
+        if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+          exit;
     end;
 
     DisEnable(Sender,False);
@@ -3715,15 +3717,17 @@ begin
     exit;
   end;
 
-  s:='';
-  if Sender=BitBtnFPCOnly then s:='Going to install/update FPC.';
-  if Sender=BitBtnLazarusOnly then s:='Going to install/update Lazarus.';
-  if Sender=BitBtnFPCandLazarus then s:='Going to install/update FPC and Lazarus.';
-  s:=s+sLineBreak;
-  s:=s+'Install directory: '+Self.sInstallDir;
-  s:=s+sLineBreak;
-  s:=s+'Do you want to continue ?';
-  if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+  if Form2.AskConfirmation then begin
+    s:='';
+    if Sender=BitBtnFPCOnly then s:='Going to install/update FPC.';
+    if Sender=BitBtnLazarusOnly then s:='Going to install/update Lazarus.';
+    if Sender=BitBtnFPCandLazarus then s:='Going to install/update FPC and Lazarus.';
+    s:=s+sLineBreak;
+    s:=s+'Install directory: '+Self.sInstallDir;
+    s:=s+sLineBreak;
+    s:=s+'Do you want to continue ?';
+    if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+  end;
 
   DisEnable(Sender,False);
   try
@@ -4523,6 +4527,8 @@ begin
 
       Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
 
+      Form2.AskConfirmation:=ReadBool('General','AskConfirmation',Form2.AskConfirmation);
+
     finally
       Free;
     end;
@@ -4620,6 +4626,8 @@ begin
       WriteBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 
       WriteBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
+
+      WriteBool('General','AskConfirmation',Form2.AskConfirmation);
 
       UpdateFile;
     finally
