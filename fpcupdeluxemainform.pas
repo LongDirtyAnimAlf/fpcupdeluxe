@@ -2178,10 +2178,7 @@ begin
         aCPU:=TCPU.aarch64;
         aOS:=TOS.android;
         aSUBARCH:=TSUBARCH.saNone;
-      end;
 
-      if (Sender=AndroidBtn) then
-      begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
         Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);

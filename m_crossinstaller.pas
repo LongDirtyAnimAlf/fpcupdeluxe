@@ -958,11 +958,13 @@ begin
             // - armeabi-v7a-hard ABI is not adviced anymore by Google,
             //   see "ARM Hard Float ABI Removal" on
             //   https://android.googlesource.com/platform/ndk/+/353e653824b79c43b948429870d0abeedebde386/docs/HardFloatAbi.md
+            //   and
+            //   https://developer.android.com/ndk/guides/abis#v7a
             // - it prevents calling functions from libraries not using
             //   armeabi-v7a-hard ABI (but only using armeabi-v7a) like
             //   http://repo.or.cz/openal-soft/android.git or
             //   https://github.com/michaliskambi/tremolo-android .
-            aCrossOptionSetting:='-CfVFPV3 -CaEABI ';
+            aCrossOptionSetting:='-CfVFPV3 -OoFASTMATH -CaEABI ';
           end;
         end;
 
