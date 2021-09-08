@@ -1142,11 +1142,11 @@ begin
 
         {$ifdef LCLQT5}
         //Set default sizes and position
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Left', '10');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Top', '30');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Width', '900');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Height', '60');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/Visible/Value', 'True');
+        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Left', '10');
+        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Top', '30');
+        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Width', '900');
+        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Height', '60');
+        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/Visible/Value', 'True');
         {$endif}
 
         {$ifdef Haiku}
@@ -1180,7 +1180,7 @@ begin
         {$endif}
 
         j:=LazarusConfig.GetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Count',0);
-        if j=0 then
+        if (j=0) then
         begin
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Count', 2);
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Width/Value', 260);
