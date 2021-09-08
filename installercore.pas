@@ -1703,7 +1703,7 @@ function TInstaller.DownloadFromBase(aClient:TRepoClient; aModuleName: string; v
   aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 const
   MAXFPCREVISION      = '49634';
-  MAXFPCFIXESREVISION = '46749';
+  MAXFPCFIXESREVISION = '49140';
   MAXLAZARUSREVISION  = '65500';
 var
   ReturnCode: integer;

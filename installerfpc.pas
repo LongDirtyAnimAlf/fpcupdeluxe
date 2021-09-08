@@ -1350,14 +1350,24 @@ begin
           end;
 
           {$ifdef FORCEREVISION}
-          if ( (SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0)) AND (SourceVersionNum<CalculateFullVersion(3,2,3)) ) then
+          if (SourceVersionNum<>0) then
           begin
-            s2:=GetRevision(ModuleName);
-            s2:=AnsiDequotedStr(s2,'''');
-            if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
+            if (SourceVersionNum>=CalculateFullVersion(2,6,0))  then
             begin
-              Processor.Process.Parameters.Add('REVSTR='+s2);
-              Processor.Process.Parameters.Add('REVINC=force');
+              if (SourceVersionNum<CalculateFullVersion(3,2,3)) then
+              begin
+                s2:=GetRevision(ModuleName);
+                s2:=AnsiDequotedStr(s2,'''');
+                if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
+                begin
+                  Processor.Process.Parameters.Add('REVSTR='+s2);
+                  Processor.Process.Parameters.Add('REVINC=force');
+                end;
+              end
+              else
+              begin
+                Options:=Options+' -dREVINC';
+              end;
             end;
           end;
           {$endif FORCEREVISION}
@@ -1995,14 +2005,24 @@ begin
   {$ENDIF}
 
   {$ifdef FORCEREVISION}
-  if ( (SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0)) AND (SourceVersionNum<CalculateFullVersion(3,2,3)) ) then
+  if (SourceVersionNum<>0) then
   begin
-    s2:=Trim(ActualRevision);
-    s2:=AnsiDequotedStr(s2,'''');
-    if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
+    if (SourceVersionNum>=CalculateFullVersion(2,6,0))  then
     begin
-      Processor.Process.Parameters.Add('REVSTR='+s2);
-      Processor.Process.Parameters.Add('REVINC=force');
+      if (SourceVersionNum<CalculateFullVersion(3,2,3)) then
+      begin
+        s2:=Trim(ActualRevision);
+        s2:=AnsiDequotedStr(s2,'''');
+        if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
+        begin
+          Processor.Process.Parameters.Add('REVSTR='+s2);
+          Processor.Process.Parameters.Add('REVINC=force');
+        end;
+      end
+      else
+      begin
+        s1:=s1+' -dREVINC';
+      end;
     end;
   end;
   {$endif FORCEREVISION}
