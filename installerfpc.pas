@@ -1135,7 +1135,13 @@ begin
           {$ifdef FORCEGECHO}
           s1:=FFPCCompilerBinPath+'gecho'+GetExeExt;
           if FileExists(s1) then
-            Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
+          begin
+            {$IFDEF MSWINDOWS}
+            if (Length(Which('sh.exe'))>0) then
+              s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
+            {$ENDIF MSWINDOWS}
+            Processor.Process.Parameters.Add('ECHOREDIR='+s1);
+          end;
           {$endif FORCEGECHO}
 
           (*
@@ -1156,6 +1162,11 @@ begin
           if (Length(s1)>0) then
           begin
             if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
+            {$IFDEF MSWINDOWS}
+            // do we have a stray sh.exe in the path ...
+            if (Length(Which('sh.exe'))>0) then
+              s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
+            {$ENDIF MSWINDOWS}
             Processor.Process.Parameters.Add('GIT='+s1);
           end;
           {$ELSE}
@@ -1917,7 +1928,13 @@ begin
   {$ifdef FORCEGECHO}
   s1:=IncludeTrailingPathDelimiter(FMakeDir)+'gecho'+GetExeExt;
   if FileExists(s1) then
-    Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
+  begin
+    {$IFDEF MSWINDOWS}
+    if (Length(Which('sh.exe'))>0) then
+      s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
+    {$ENDIF MSWINDOWS}
+    Processor.Process.Parameters.Add('ECHOREDIR='+s1);
+  end;
   {$endif FORCEGECHO}
 
   //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
@@ -1957,6 +1974,10 @@ begin
   if (Length(s1)>0) then
   begin
     if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
+    {$IFDEF MSWINDOWS}
+    if (Length(Which('sh.exe'))>0) then
+      s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
+    {$ENDIF MSWINDOWS}
     Processor.Process.Parameters.Add('GIT='+s1);
   end;
   {$ELSE}

@@ -50,25 +50,25 @@ begin
   if ABytes < (1024*1024) then
   begin
     dSize := ABytes / 1024;
-    Result := FormatFloat('0.##', dSize) + ' KB';
+    Result := FormatFloat('0.00', dSize) + ' KB';
     exit;
   end;
   if ABytes < (1024*1024*1024) then
   begin
     dSize := ABytes / 1024 / 1024;
-    Result := FormatFloat('0.##', dSize) + ' MB';
+    Result := FormatFloat('0.00', dSize) + ' MB';
     exit;
   end;
   if ABytes < (1024*1024*1024*1024) then
   begin
     dSize := ABytes / 1024 / 1024 / 1024;
-    Result := FormatFloat('0.##', dSize) + 'GB';
+    Result := FormatFloat('0.00', dSize) + 'GB';
     exit;
   end;
   if ABytes < (1024*1024*1024*1024*1024) then
   begin
     dSize := ABytes / 1024 / 1024 / 1024 / 1024;
-    Result := FormatFloat('0.##', dSize) + ' TB';
+    Result := FormatFloat('0.00', dSize) + ' TB';
   end;
 end;
 
