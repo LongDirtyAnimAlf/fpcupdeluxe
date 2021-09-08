@@ -1702,7 +1702,8 @@ end;
 function TInstaller.DownloadFromBase(aClient:TRepoClient; aModuleName: string; var aBeforeRevision,
   aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 const
-  MAXFPCREVISION      = '49634';
+  //MAXFPCREVISION      = '49634';
+  MAXFPCREVISION      = '49513';
   MAXFPCFIXESREVISION = '49140';
   MAXLAZARUSREVISION  = '65500';
 var
