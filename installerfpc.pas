@@ -1350,7 +1350,7 @@ begin
           end;
 
           {$ifdef FORCEREVISION}
-          if ((SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0))) then
+          if ( (SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0)) AND (SourceVersionNum<CalculateFullVersion(3,2,3)) ) then
           begin
             s2:=GetRevision(ModuleName);
             s2:=AnsiDequotedStr(s2,'''');
@@ -1995,7 +1995,7 @@ begin
   {$ENDIF}
 
   {$ifdef FORCEREVISION}
-  if ((SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0))) then
+  if ( (SourceVersionNum<>0) AND (SourceVersionNum>=CalculateFullVersion(2,6,0)) AND (SourceVersionNum<CalculateFullVersion(3,2,3)) ) then
   begin
     s2:=Trim(ActualRevision);
     s2:=AnsiDequotedStr(s2,'''');

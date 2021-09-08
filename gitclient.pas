@@ -644,6 +644,7 @@ begin
   if (FLocalRevision = FRET_UNKNOWN_REVISION) then
   begin
     try
+
       if (FLocalRevision = FRET_UNKNOWN_REVISION) then
       begin
         FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--long','--always'],LocalRepository, Output, '', Verbose);
@@ -656,6 +657,38 @@ begin
           // both of these are guaranteed to be commit-ish names, usable in other git commands.
           FLocalRevision := trim(Output);
         end
+      end;
+
+      if (FLocalRevision = FRET_UNKNOWN_REVISION) then
+      begin
+        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['log','-g','-1','--pretty=oneline'],LocalRepository, Output, '', Verbose);
+        if (FReturnCode = 0) then
+        begin
+          i:=RPos(' to ',Output);
+          if (i>0) then
+          begin
+            Delete(Output,1,(i+3));
+            // Do we have this format : branchname-xxxx-gxxxx
+            if (OccurrencesOfChar(Output,'-')=2) then
+              FLocalRevision := trim(Output);
+          end;
+        end
+      end;
+
+      if (FLocalRevision = FRET_UNKNOWN_REVISION) then
+      begin
+        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--all','--long','--always'],LocalRepository, Output, '', Verbose);
+        if (FReturnCode = 0) then
+        begin
+          if (NOT AnsiStartsText('remotes/',Output)) then
+          begin
+            i:=RPos('/',Output);
+            if (i>0) then Delete(Output,1,i);
+            // Do we have this format : branchname-xxxx-gxxxx
+            if (OccurrencesOfChar(Output,'-')=2) then
+              FLocalRevision := trim(Output);
+          end;
+        end;
       end;
 
     except

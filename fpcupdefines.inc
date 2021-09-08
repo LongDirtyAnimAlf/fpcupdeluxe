@@ -1,4 +1,4 @@
-{.$define FORCEREVISION}
+{$define FORCEREVISION}
 {.$define FORCELAZBUILD}
 {.$define DISABLELAZBUILDJOBS}
 

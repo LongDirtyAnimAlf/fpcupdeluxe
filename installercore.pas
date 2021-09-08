@@ -3673,7 +3673,7 @@ const
   ConstName = 'RevisionStr';
 var
   //RevisionIncText: Text;
-  RevFileName,ConstStart: string;
+  RevFilePath,ConstStart: string;
   RevisionStringList:TStringList;
   NumRevision:Longint;
 begin
@@ -3686,16 +3686,16 @@ begin
 
   //if TryStrToInt(aRevision,NumRevision) then
   begin
-    RevFileName:='';
+    RevFilePath:='';
 
-    if (ModuleName=_LAZARUS) then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide';
-    if (ModuleName=_FPC) then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler';
+    if (ModuleName=_LAZARUS) then RevFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide';
+    if (ModuleName=_FPC) then RevFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler';
 
-    if (Length(RevFileName)>0) then
+    if (Length(RevFilePath)>0) then
     begin
-      if (NOT DirectoryExists(RevFileName)) then exit;
-      RevFileName:=RevFileName+PathDelim+REVINCFILENAME;
-      DeleteFile(RevFileName);
+      if (NOT DirectoryExists(RevFilePath)) then exit;
+      RevFilePath:=RevFilePath+PathDelim+REVINCFILENAME;
+      DeleteFile(RevFilePath);
       RevisionStringList:=TStringList.Create;
       try
         if (ModuleName=_LAZARUS) then
@@ -3710,7 +3710,7 @@ begin
           //RevisionStringList.Add(''''+InttoStr(NumRevision)+'''');
           RevisionStringList.Add(''''+aRevision+'''');
         end;
-        RevisionStringList.SaveToFile(RevFileName);
+        RevisionStringList.SaveToFile(RevFilePath);
         result:=true;
       finally
         RevisionStringList.Free;
