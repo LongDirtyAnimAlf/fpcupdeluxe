@@ -448,17 +448,28 @@ begin
     Append(CaptionCheckAskConfirmation);
   end;
 
+  AskConfirmation := True;
+  Repo            := True;
+  PackageRepo     := False;
+  IncludeHelp     := False;
+  IncludeLCL      := False;
+  {$ifdef RemoteLog}
+  SendInfo        := False;
+  {$endif}
+
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
-    Repo:=ReadBool('General','GetRepo',True);
-    PackageRepo:=ReadBool('General','GetPackageRepo',False);
+    Repo:=ReadBool('General','GetRepo',Repo);
+    PackageRepo:=ReadBool('General','GetPackageRepo',PackageRepo);
 
-    IncludeHelp:=ReadBool('General','IncludeHelp',False);
-    IncludeLCL:=ReadBool('Cross','IncludeLCL',False);
+    IncludeHelp:=ReadBool('General','IncludeHelp',IncludeHelp);
+    IncludeLCL:=ReadBool('Cross','IncludeLCL',IncludeLCL);
 
     {$ifdef RemoteLog}
-    SendInfo:=ReadBool('General','SendInfo',False);
+    SendInfo:=ReadBool('General','SendInfo',SendInfo);
     {$endif}
+
+    AskConfirmation:=ReadBool('General','AskConfirmation',AskConfirmation);
 
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
     EditHTTPProxyPort.Text:=InttoStr(ReadInteger('ProxySettings','HTTPProxyPort',8080));
@@ -495,10 +506,7 @@ begin
 
   SplitFPC:=true;
   MakeJobs:=true;
-  AskConfirmation := true;
-
-  Self.LazarusDebug:=true;
-
+  LazarusDebug:=true;
   {$ifdef win64}
   MakeJobs:=False;
   {$endif}
@@ -889,6 +897,8 @@ begin
     {$ifdef RemoteLog}
     WriteBool('General','SendInfo',SendInfo);
     {$endif}
+
+    WriteBool('General','AskConfirmation',AskConfirmation);
 
     WriteString('ProxySettings','HTTPProxyURL',EditHTTPProxyHost.Text);
     if TryStrToInt(EditHTTPProxyPort.Text,i) then WriteInteger('ProxySettings','HTTPProxyPort',i);

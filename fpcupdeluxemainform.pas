@@ -2337,8 +2337,9 @@ begin
   {$ifdef win64}
   if (Sender<>nil) then
   begin
-    if (MessageDlg('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
-      exit;
+    if Form2.AskConfirmation then
+      if (MessageDlg('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+        exit;
   end;
   {$endif}
 
@@ -2668,10 +2669,9 @@ begin
   begin
     s:='Going to remove the cross-compiler for ['+GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target)+'].' + sLineBreak +
        'Do you want to continue ?';
-    if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
-    begin
-      exit;
-    end;
+    if Form2.AskConfirmation then
+      if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+        exit;
 
     DisEnable(Sender,False);
     try
@@ -3717,7 +3717,8 @@ begin
     exit;
   end;
 
-  if Form2.AskConfirmation then begin
+  if Form2.AskConfirmation then
+  begin
     s:='';
     if Sender=BitBtnFPCOnly then s:='Going to install/update FPC.';
     if Sender=BitBtnLazarusOnly then s:='Going to install/update Lazarus.';
@@ -4189,7 +4190,8 @@ begin
 
   if Pos(' ',FPCupManager.BaseDirectory)>0 then
   begin
-    if (MessageDlg('Having a space in your install path is ill-advised !'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+    if (MessageDlg('Having a space in your install path is ill-advised !'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+      exit;
   end;
 
   StatusMessage.Text:=sStatus;
@@ -4526,9 +4528,6 @@ begin
       Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
 
       Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
-
-      Form2.AskConfirmation:=ReadBool('General','AskConfirmation',Form2.AskConfirmation);
-
     finally
       Free;
     end;
@@ -4626,8 +4625,6 @@ begin
       WriteBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 
       WriteBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
-
-      WriteBool('General','AskConfirmation',Form2.AskConfirmation);
 
       UpdateFile;
     finally
