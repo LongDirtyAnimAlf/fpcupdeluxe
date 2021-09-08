@@ -49,9 +49,6 @@ Const
     _EXECUTE+_CREATEFPCUPSCRIPT+_SEP+
     _CHECKMODULE+_FPC+_SEP+
     _GETMODULE+_FPC+_SEP+
-    {$ifndef FORCEREVISION}
-    _BUILDMODULE+_REVISIONFPC+_SEP+
-    {$endif}
     _BUILDMODULE+_FPC+_SEP+
     _END+
 
@@ -2088,8 +2085,6 @@ begin
 
   try
     ProcessorResult:=Processor.ExecuteAndWait;
-    // Do not fail on setting the revision
-    if (ModuleName=_REVISIONFPC) then ProcessorResult:=0;
     if (ProcessorResult<>0) then
     begin
       OperationSucceeded := False;
@@ -3762,6 +3757,14 @@ begin
     if (GetTargetOS=GetOS(TOS.freebsd)) then FUseLibc:=True;
     if (GetTargetOS=GetOS(TOS.openbsd)) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end;
+
+  {$ifndef FORCEREVISION}
+  if (NOT (Self is TFPCCrossInstaller)) then
+  begin
+    // Generate revision.inc through Makefile
+    BuildModuleCustom(_REVISIONFPC);
+  end;
+  {$endif}
 
   // Now: the real build of FPC !!!
   OperationSucceeded:=BuildModuleCustom(ModuleName);

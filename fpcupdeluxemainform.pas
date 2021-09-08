@@ -2329,12 +2329,16 @@ begin
   result:=false;
 
   {$ifdef win64}
-  if (MessageDlg('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+  if (Sender<>nil) then
+  begin
+    if (MessageDlg('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+      exit;
+  end;
   {$endif}
 
   if (radgrpCPU.ItemIndex=-1) and (radgrpOS.ItemIndex=-1) then
   begin
-    if Sender<>nil then ShowMessage('Please select a CPU and OS target first');
+    if (Sender<>nil) then ShowMessage('Please select a CPU and OS target first');
     exit;
   end;
 
