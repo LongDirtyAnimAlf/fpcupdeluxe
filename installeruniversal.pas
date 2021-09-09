@@ -647,6 +647,9 @@ begin
 
   // Need to remember because we don't always use ProcessEx
   FPath:=ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
+  {$IFDEF MSWINDOWS}
+  FMakeDir+PathSeparator+
+  {$ENDIF MSWINDOWS}
   {$IFDEF DARWIN}
   // pwd is located in /bin ... the makefile needs it !!
   // tools are located in /usr/bin ... the makefile needs it !!

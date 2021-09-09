@@ -231,6 +231,7 @@ begin
     s:='';
     if Assigned(SVNClient) then if SVNClient.ValidClient then s:=s+ExtractFileDir(SVNClient.RepoExecutable)+PathSeparator;
     if Assigned(GITClient) then if GITClient.ValidClient then s:=s+ExtractFileDir(GITClient.RepoExecutable)+PathSeparator;
+    if Assigned(HGClient) then if HGClient.ValidClient then s:=s+ExtractFileDir(HGClient.RepoExecutable)+PathSeparator;
 
     SetPath(
       ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+

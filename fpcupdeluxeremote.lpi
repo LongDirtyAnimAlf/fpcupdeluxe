@@ -34,7 +34,7 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="24">
+    <BuildModes Count="23">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="DefaultQT">
         <MacroValues Count="1">
@@ -223,48 +223,7 @@
           </Other>
         </CompilerOptions>
       </Item6>
-      <Item7 Name="win64debug">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>
-            <OtherUnitFiles Value="crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <IncludeAssertionCode Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-            <VerifyObjMethodCallValidity Value="True"/>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="win64"/>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <UseHeaptrc Value="True"/>
-              <UseExternalDbgSyms Value="True"/>
-            </Debugging>
-            <Options>
-              <Win32>
-                <GraphicApplication Value="True"/>
-              </Win32>
-            </Options>
-          </Linking>
-        </CompilerOptions>
-      </Item7>
-      <Item8 Name="linuxi386">
+      <Item7 Name="linuxi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -294,8 +253,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item8>
-      <Item9 Name="linux64">
+      </Item7>
+      <Item8 Name="linux64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -325,8 +284,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item9>
-      <Item10 Name="linuxaarch64">
+      </Item8>
+      <Item9 Name="linuxaarch64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -355,8 +314,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item10>
-      <Item11 Name="linuxarm">
+      </Item9>
+      <Item10 Name="linuxarm">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -386,8 +345,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item11>
-      <Item12 Name="linuxarmv6">
+      </Item10>
+      <Item11 Name="linuxarmv6">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -419,8 +378,8 @@
 -CpARMV6"/>
           </Other>
         </CompilerOptions>
-      </Item12>
-      <Item13 Name="linuxi386QT5">
+      </Item11>
+      <Item12 Name="linuxi386QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -453,8 +412,8 @@
 -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item13>
-      <Item14 Name="linuxx64QT5">
+      </Item12>
+      <Item13 Name="linuxx64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -488,8 +447,8 @@
 -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item14>
-      <Item15 Name="linuxx64QT5zip">
+      </Item13>
+      <Item14 Name="linuxx64QT5zip">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -520,8 +479,8 @@
 -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item15>
-      <Item16 Name="linuxppc64">
+      </Item14>
+      <Item15 Name="linuxppc64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -551,8 +510,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item16>
-      <Item17 Name="freebsdi386">
+      </Item15>
+      <Item16 Name="freebsdi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -582,8 +541,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item17>
-      <Item18 Name="freebsdx64">
+      </Item16>
+      <Item17 Name="freebsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -613,8 +572,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item18>
-      <Item19 Name="netbsdx64">
+      </Item17>
+      <Item18 Name="netbsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -644,8 +603,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item19>
-      <Item20 Name="solarisx64">
+      </Item18>
+      <Item19 Name="solarisx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -675,8 +634,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item20>
-      <Item21 Name="dragonflyx64">
+      </Item19>
+      <Item20 Name="dragonflyx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -706,8 +665,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item21>
-      <Item22 Name="linux64gtk3">
+      </Item20>
+      <Item21 Name="linux64gtk3">
         <MacroValues Count="1">
           <Macro4 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
@@ -740,8 +699,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item22>
-      <Item23 Name="linuxaarch64QT5">
+      </Item21>
+      <Item22 Name="linuxaarch64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -774,8 +733,8 @@
 -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item23>
-      <Item24 Name="solarisxi386">
+      </Item22>
+      <Item23 Name="solarisxi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -805,7 +764,7 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item24>
+      </Item23>
       <SharedMatrixOptions Count="4">
         <Item1 ID="784204643275" Modes="DefaultQT,linuxx64QT5,linuxi386QT5,linuxaarch64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item2 ID="322994045052" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>

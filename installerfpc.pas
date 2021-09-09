@@ -820,7 +820,6 @@ var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
   CrossOptions:String;
   i,j:integer;
-  OldPath:String;
   Options:String;
   s1,s2:string;
   UnitSearchPath:string;
@@ -909,13 +908,7 @@ begin
 
       FPCCfg := FFPCCompilerBinPath + FPCCONFIGFILENAME;
 
-      OldPath:=GetPath;
-      try
-        {$ifdef MSWINDOWS}
-        // Add FPC tools path to path if necessary
-        SetPath(FMakeDir,true,false);
-        {$endif MSWINDOWS}
-
+      begin
         // Add binutils path to path if necessary
         if CrossInstaller.BinUtilsPathInPath then
            SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
@@ -1696,8 +1689,6 @@ begin
             end;
           end;
         end;
-      finally
-        SetPath(OldPath,false,false);
       end;
     end;
 

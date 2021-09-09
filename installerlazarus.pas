@@ -301,9 +301,6 @@ function TLazarusCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   Options: string;
   LazBuildApp: string;
-  {$ifdef MSWindows}
-  OldPath:string;
-  {$endif}
 begin
   Result:=inherited;
 
@@ -476,23 +473,17 @@ begin
       else
         Infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + '/' + FLCL_Platform + ' using ' + ExtractFileName(Processor.Executable), etInfo);
 
+
+      // Add binutils path to path if necessary
+      if CrossInstaller.BinUtilsPathInPath then
+         SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
+
       try
-        try
-          {$ifdef MSWINDOWS}
-          OldPath:=GetPath;
-          SetPath(FMakeDir,true,false);
-          SetPath(FFPCCompilerBinPath,false,true);
-          {$endif MSWINDOWS}
-          ProcessorResult:=Processor.ExecuteAndWait;
-          Result := (ProcessorResult = 0);
-          if (not Result) then
-            WritelnLog(etError,infotext+'Error compiling LCL for ' + GetFPCTarget(false) + ' ' + FLCL_Platform + LineEnding +
-              'Details: ' + FErrorLog.Text, true);
-        finally
-          {$ifdef MSWINDOWS}
-          SetPath(OldPath,false,false);
-          {$endif MSWINDOWS}
-        end;
+        ProcessorResult:=Processor.ExecuteAndWait;
+        Result := (ProcessorResult = 0);
+        if (not Result) then
+          WritelnLog(etError,infotext+'Error compiling LCL for ' + GetFPCTarget(false) + ' ' + FLCL_Platform + LineEnding +
+            'Details: ' + FErrorLog.Text, true);
       except
         on E: Exception do
         begin
@@ -1527,7 +1518,10 @@ begin
       CrossInstaller.SolarisOI:=FSolarisOI;
       CrossInstaller.MUSL:=FMUSL;
     end;
+  end;
 
+  if result then
+  begin
     {$IFDEF MSWINDOWS}
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
@@ -1537,6 +1531,7 @@ begin
     s:='';
     if Assigned(SVNClient) then if SVNClient.ValidClient then s:=s+ExtractFileDir(SVNClient.RepoExecutable)+PathSeparator;
     if Assigned(GITClient) then if GITClient.ValidClient then s:=s+ExtractFileDir(GITClient.RepoExecutable)+PathSeparator;
+    if Assigned(HGClient) then if HGClient.ValidClient then s:=s+ExtractFileDir(HGClient.RepoExecutable)+PathSeparator;
 
     SetPath(
       ExcludeTrailingPathDelimiter(FFPCCompilerBinPath) + PathSeparator +
@@ -1557,6 +1552,7 @@ begin
     PlainBinDir, true, false);
     {$ENDIF UNIX}
   end;
+
   GetVersion;
   InitDone := Result;
 end;
