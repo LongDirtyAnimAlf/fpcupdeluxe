@@ -5,7 +5,6 @@
 {.$define crosssimple}
 
 {$ifdef WINDOWS}
-{$define FORCEGECHO}
 {.$define buildnative}
 {$endif WINDOWS}
 

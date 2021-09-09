@@ -921,6 +921,9 @@ begin
 
     //Harmless linker warning
     if AnsiContainsText(line,'did you forget -T') then exit;
+
+    //Harmless fpmkpkg warning
+    if AnsiStartsText('Could not find libgcc ',line) then exit;
   end;
 
   if (NOT result) then

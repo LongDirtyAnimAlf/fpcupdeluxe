@@ -482,7 +482,7 @@ begin
 
   aFPCTarget:='';
   aLazarusTarget:='';
-  bGitlab:=false;
+  bGitlab:=true;
 
   // get last used install directory, proxy and visual settings
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
@@ -1617,7 +1617,7 @@ begin
     OR
     (ExistWordInString(PChar(s),'dependency dropped',[soDown]))
     OR
-    ( ( ExistWordInString(PChar(s),'echo ',[soDown]) OR ExistWordInString(PChar(s),'gecho.exe ',[soDown]) OR ExistWordInString(PChar(s),'gecho ',[soDown]) ) AND ExistWordInString(PChar(s),REVINCFILENAME,[soDown]) )
+    ( ( ExistWordInString(PChar(s),'echo.exe ',[soDown]) OR ExistWordInString(PChar(s),'echo ',[soDown]) OR ExistWordInString(PChar(s),'gecho.exe ',[soDown]) OR ExistWordInString(PChar(s),'gecho ',[soDown]) ) AND ExistWordInString(PChar(s),REVINCFILENAME,[soDown]) )
     OR
     ( ExistWordInString(PChar(s),'Start ',[soDown]) AND ExistWordInString(PChar(s),'now ',[soDown]) )
     OR
@@ -2340,7 +2340,7 @@ begin
   if (Sender<>nil) then
   begin
     if Form2.AskConfirmation then
-      if (MessageDlg('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+      if (MessageDlg('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'(Win64 OS disabled extended support for 64-bit applications)'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
         exit;
   end;
   {$endif}

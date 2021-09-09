@@ -3629,38 +3629,43 @@ var
   Output: string;
 begin
   Result:=false;
-  try
-    Output:='';
-    ExeName := ExtractFileName(Executable);
-    RunCommandIndir('',Executable,Parameters, Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-    if (aResultCode>=0) then //Not all non-0 result codes are errors. There's no way to tell, really
-    begin
-      if (ExpectOutput <> '') then
+
+  if FileExists(Executable) then
+  begin
+    try
+      Output:='';
+      ExeName := ExtractFileName(Executable);
+      RunCommandIndir('',Executable,Parameters, Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+      if (aResultCode>=0) then //Not all non-0 result codes are errors. There's no way to tell, really
       begin
-        Result := AnsiContainsText(Output, ExpectOutput);
-        if (NOT Result) then
+        if (ExpectOutput <> '') then
         begin
-          // This is not a warning/error message as sometimes we can use multiple different versions of executables
-          if ((Level<>etCustom) AND (NOT beSilent)) then
+          Result := AnsiContainsText(Output, ExpectOutput);
+          if (NOT Result) then
           begin
-            if (NOT FileExists(Executable)) then
-              ThreadLog(Executable + ' not found.',Level)
-            else
-              ThreadLog(Executable + ' is not a valid ' + ExeName + ' application. ' +
-              ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
+            // This is not a warning/error message as sometimes we can use multiple different versions of executables
+            if ((Level<>etCustom) AND (NOT beSilent)) then
+            begin
+              if (NOT FileExists(Executable)) then
+                ThreadLog(Executable + ' not found.',Level)
+              else
+                ThreadLog(Executable + ' is not a valid ' + ExeName + ' application. ' +
+                ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
+            end;
           end;
-        end;
-      end
-      else
-        Result := true; //not all non-0 result codes are errors. There's no way to tell, really
-    end;
-  except
-    on E: Exception do
-    begin
-      // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      if ((Level<>etCustom) AND (NOT beSilent)) then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
+        end
+        else
+          Result := true; //not all non-0 result codes are errors. There's no way to tell, really
+      end;
+    except
+      on E: Exception do
+      begin
+        // This is not a warning/error message as sometimes we can use multiple different versions of executables
+        if ((Level<>etCustom) AND (NOT beSilent)) then ThreadLog(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
+      end;
     end;
   end;
+
   if ((Result) AND (NOT beSilent)) then
     ThreadLog('Found valid ' + ExeName + ' application.',etDebug);
 end;

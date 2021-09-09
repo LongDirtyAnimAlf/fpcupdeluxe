@@ -1132,17 +1132,6 @@ begin
           Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
           Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
           Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-          {$ifdef FORCEGECHO}
-          s1:=FFPCCompilerBinPath+'gecho'+GetExeExt;
-          if FileExists(s1) then
-          begin
-            {$IFDEF MSWINDOWS}
-            if (Length(Which('sh.exe'))>0) then
-              s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
-            {$ENDIF MSWINDOWS}
-            Processor.Process.Parameters.Add('ECHOREDIR='+s1);
-          end;
-          {$endif FORCEGECHO}
 
           (*
           {$IFDEF UNIX}
@@ -1162,11 +1151,9 @@ begin
           if (Length(s1)>0) then
           begin
             if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
-            {$IFDEF MSWINDOWS}
             // do we have a stray sh.exe in the path ...
             if (Length(Which('sh.exe'))>0) then
               s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
-            {$ENDIF MSWINDOWS}
             Processor.Process.Parameters.Add('GIT='+s1);
           end;
           {$ELSE}
@@ -1925,18 +1912,6 @@ begin
   Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
 
-  {$ifdef FORCEGECHO}
-  s1:=IncludeTrailingPathDelimiter(FMakeDir)+'gecho'+GetExeExt;
-  if FileExists(s1) then
-  begin
-    {$IFDEF MSWINDOWS}
-    if (Length(Which('sh.exe'))>0) then
-      s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
-    {$ENDIF MSWINDOWS}
-    Processor.Process.Parameters.Add('ECHOREDIR='+s1);
-  end;
-  {$endif FORCEGECHO}
-
   //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
   //The paths are fixed in the FPC sources. Try to set the default path here [FPCDIR], so yylex.cod and yyparse.cod can be found.
   (*
@@ -1968,16 +1943,15 @@ begin
   end;
   Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+
   // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
   s1:=GitClient.RepoExecutable;
   s1:=GitClient.RepoExecutable;
   if (Length(s1)>0) then
   begin
     if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
-    {$IFDEF MSWINDOWS}
     if (Length(Which('sh.exe'))>0) then
       s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
-    {$ENDIF MSWINDOWS}
     Processor.Process.Parameters.Add('GIT='+s1);
   end;
   {$ELSE}
@@ -3392,17 +3366,20 @@ begin
 
   if result then
   begin
-
     if assigned(CrossInstaller) then
     begin
       CrossInstaller.SolarisOI:=FSolarisOI;
       CrossInstaller.MUSL:=FMUSL;
     end;
+  end;
 
+  if result then
+  begin
     {$IFDEF MSWINDOWS}
     s:='';
     if Assigned(SVNClient) then if SVNClient.ValidClient then s:=s+PathSeparator+ExtractFileDir(SVNClient.RepoExecutable);
     if Assigned(GITClient) then if GITClient.ValidClient then s:=s+PathSeparator+ExtractFileDir(GITClient.RepoExecutable);
+    if Assigned(HGClient) then if HGClient.ValidClient then s:=s+PathSeparator+ExtractFileDir(HGClient.RepoExecutable);
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // add install/fpc/utils to solve data2inc not found by fpcmkcfg
     // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
@@ -3452,6 +3429,7 @@ begin
       true,false);
     {$ENDIF UNIX}
   end;
+
   GetVersion;
   InitDone:=result;
 end;
