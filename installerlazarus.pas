@@ -603,7 +603,6 @@ var
   {$endif}
   OperationSucceeded: boolean;
   LazarusConfig: TUpdateLazConfig;
-  IDEConfig:TStringList;
 begin
   Result:=inherited;
 
@@ -746,26 +745,6 @@ begin
         Processor.Process.Parameters.Add('useride');
 
         s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
-
-        {
-        IDEConfig:=TStringList.Create;
-        try
-          if FileExists(s) then IDEConfig.LoadFromFile(s);
-          i:=StringListStartsWith(IDEConfig,'-T');
-          if (i=-1) then
-            IDEConfig.Append('-T'+GetTargetOS)
-          else
-            IDEConfig.Strings[i]:='-T'+GetTargetOS;
-          i:=StringListStartsWith(IDEConfig,'-P');
-          if (i=-1) then
-            IDEConfig.Append('-P'+GetTargetCPU)
-          else
-            IDEConfig.Strings[i]:='-P'+GetTargetCPU;
-          IDEConfig.SaveToFile(s);
-        finally
-          IDEConfig.Free;
-        end;
-        }
 
         //if FileExists(s) then
           Processor.Process.Parameters.Add('CFGFILE=' + s);
@@ -1029,8 +1008,7 @@ begin
         end;
       end;
 
-      {
-
+      (*
       // ... build startlazarus if it doesn't exist
       // (even an old version left over by make distclean is probably ok)
       if OperationSucceeded then
@@ -1085,7 +1063,8 @@ begin
           end;
         end;
       end;
-      }
+      *)
+
     end;
   end;
 
@@ -1493,7 +1472,7 @@ function TLazarusInstaller.InitModule: boolean;
 var
   PlainBinDir: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
   {$IFDEF MSWINDOWS}
-  s:string;
+  aPath,s:string;
   {$ENDIF}
 begin
   Result := true;
@@ -1528,17 +1507,31 @@ begin
     // at least one ; to be present in the path. If you only have one entry, you
     // can add PathSeparator without problems.
     // https://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
-    s:='';
-    if Assigned(SVNClient) then if SVNClient.ValidClient then s:=s+ExtractFileDir(SVNClient.RepoExecutable)+PathSeparator;
-    if Assigned(GITClient) then if GITClient.ValidClient then s:=s+ExtractFileDir(GITClient.RepoExecutable)+PathSeparator;
-    if Assigned(HGClient) then if HGClient.ValidClient then s:=s+ExtractFileDir(HGClient.RepoExecutable)+PathSeparator;
-
+    aPath:='';
+    if Assigned(SVNClient) AND SVNClient.ValidClient then
+    begin
+      s:=SVNClient.RepoExecutable;
+      if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
+      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+    end;
+    if Assigned(GITClient) AND GITClient.ValidClient then
+    begin
+      s:=GITClient.RepoExecutable;
+      if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
+      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+    end;
+    if Assigned(HGClient) AND HGClient.ValidClient then
+    begin
+      s:=HGClient.RepoExecutable;
+      if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
+      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+    end;
     SetPath(
       ExcludeTrailingPathDelimiter(FFPCCompilerBinPath) + PathSeparator +
       PlainBinDir + PathSeparator +
       FMakeDir + PathSeparator +
-      s +
-      ExcludeTrailingPathDelimiter(FInstallDirectory),
+      ExcludeTrailingPathDelimiter(FInstallDirectory)+
+      aPath,
       false, false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}

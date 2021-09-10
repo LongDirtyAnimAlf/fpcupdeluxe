@@ -1702,16 +1702,15 @@ end;
 function TInstaller.DownloadFromBase(aClient:TRepoClient; aModuleName: string; var aBeforeRevision,
   aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 const
-  //MAXFPCREVISION      = '49634';
-  MAXFPCREVISION      = '49513';
-  MAXFPCFIXESREVISION = '49140';
-  MAXLAZARUSREVISION  = '65500';
+  MAXFPCREVISION      = 49000;
+  MAXLAZARUSREVISION  = 65000;
 var
   ReturnCode: integer;
   DiffFile,DiffFileCorrectedPath: String;
   LocalPatchCmd : string;
   NoPatchStrip:boolean;
   s,Output:string;
+  SVNRevision:integer;
 
 begin
   Result := false;
@@ -1738,8 +1737,10 @@ begin
   if ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
   begin
     Output:=(aClient as TGitClient).GetSVNRevision;
-    if (aModuleName=_FPC) AND ( (Output=MAXFPCREVISION) OR (Output=MAXFPCFIXESREVISION) ) then Output:='';
-    if (aModuleName=_LAZARUS) AND (Output=MAXLAZARUSREVISION) then Output:='';
+    SVNRevision:=StrToIntDef(Output,0);
+    if (SVNRevision=0) then Output:='';
+    if (aModuleName=_FPC) AND (SVNRevision>MAXFPCREVISION) then Output:='';
+    if (aModuleName=_LAZARUS) AND (SVNRevision>MAXLAZARUSREVISION) then Output:='';
     if (Length(Output)>0) then
       aBeforeRevision := Output
     else
@@ -1837,8 +1838,10 @@ begin
         if ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
         begin
           Output:=(aClient as TGitClient).GetSVNRevision;
-          if (aModuleName=_FPC) AND ( (Output=MAXFPCREVISION) OR (Output=MAXFPCFIXESREVISION) ) then Output:='';
-          if (aModuleName=_LAZARUS) AND (Output=MAXLAZARUSREVISION) then Output:='';
+          SVNRevision:=StrToIntDef(Output,0);
+          if (SVNRevision=0) then Output:='';
+          if (aModuleName=_FPC) AND (SVNRevision>MAXFPCREVISION) then Output:='';
+          if (aModuleName=_LAZARUS) AND (SVNRevision=MAXLAZARUSREVISION) then Output:='';
           if (Length(Output)>0) then
           begin
             if (Length(FDesiredRevision)>0) AND (Length(FDesiredRevision)<7) AND (Output<>FDesiredRevision) then
@@ -3726,24 +3729,27 @@ begin
       if (NOT DirectoryExists(RevFilePath)) then exit;
       RevFilePath:=RevFilePath+PathDelim+REVINCFILENAME;
       DeleteFile(RevFilePath);
-      RevisionStringList:=TStringList.Create;
-      try
-        if (ModuleName=_LAZARUS) then
-        begin
-          RevisionStringList.Add(RevisionIncComment);
-          ConstStart := Format('const %s = ''', [ConstName]);
-          //RevisionStringList.Add(ConstStart+InttoStr(NumRevision)+''';');
-          RevisionStringList.Add(ConstStart+aRevision+''';');
+      if (Length(aRevision)>0) then
+      begin
+        RevisionStringList:=TStringList.Create;
+        try
+          if (ModuleName=_LAZARUS) then
+          begin
+            RevisionStringList.Add(RevisionIncComment);
+            ConstStart := Format('const %s = ''', [ConstName]);
+            //RevisionStringList.Add(ConstStart+InttoStr(NumRevision)+''';');
+            RevisionStringList.Add(ConstStart+aRevision+''';');
+          end;
+          if (ModuleName=_FPC) then
+          begin
+            //RevisionStringList.Add(''''+InttoStr(NumRevision)+'''');
+            RevisionStringList.Add(''''+aRevision+'''');
+          end;
+          RevisionStringList.SaveToFile(RevFilePath);
+          result:=true;
+        finally
+          RevisionStringList.Free;
         end;
-        if (ModuleName=_FPC) then
-        begin
-          //RevisionStringList.Add(''''+InttoStr(NumRevision)+'''');
-          RevisionStringList.Add(''''+aRevision+'''');
-        end;
-        RevisionStringList.SaveToFile(RevFilePath);
-        result:=true;
-      finally
-        RevisionStringList.Free;
       end;
     end;
   end;

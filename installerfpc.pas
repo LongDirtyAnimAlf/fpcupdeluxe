@@ -115,6 +115,7 @@ type
   private
     FSoftFloat  : boolean;
     FUseLibc    : boolean;
+    FUseRevInc  : boolean;
     FTargetCompilerName: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
@@ -1346,23 +1347,20 @@ begin
           end;
 
           {$ifdef FORCEREVISION}
-          if (SourceVersionNum<>0) then
+          if (ModuleName<>_REVISIONFPC) then
           begin
-            if (SourceVersionNum>=CalculateFullVersion(2,6,0))  then
+            if FUseRevInc then
             begin
-              if (SourceVersionNum<CalculateFullVersion(3,2,3)) then
+              Options:=Options+' -dREVINC';
+            end
+            else
+            begin
+              s2:=GetRevision(ModuleName);
+              s2:=AnsiDequotedStr(s2,'''');
+              if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
               begin
-                s2:=GetRevision(ModuleName);
-                s2:=AnsiDequotedStr(s2,'''');
-                if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
-                begin
-                  Processor.Process.Parameters.Add('REVSTR='+s2);
-                  Processor.Process.Parameters.Add('REVINC=force');
-                end;
-              end
-              else
-              begin
-                Options:=Options+' -dREVINC';
+                Processor.Process.Parameters.Add('REVSTR='+s2);
+                Processor.Process.Parameters.Add('REVINC=force');
               end;
             end;
           end;
@@ -1821,9 +1819,13 @@ begin
   OperationSucceeded:=true;
 
   s1:=CompilerVersion(FCompiler);
-  if (s1<>'0.0.0')
-    then Infoln('FPC native builder: Using FPC bootstrap compiler with version: '+s1, etInfo)
-    else Infoln(infotext+'FPC bootstrap version error: '+s1+' ! Should never happen: expect many errors !!', etError);
+
+  if (ModuleName=_FPC) then
+  begin
+    if (s1<>'0.0.0')
+      then Infoln('FPC native builder: Using FPC bootstrap compiler with version: '+s1, etInfo)
+      else Infoln(infotext+'FPC bootstrap version error: '+s1+' ! Should never happen: expect many errors !!', etError);
+  end;
 
   //if clean failed (due to missing compiler), try again !
   if (NOT FCleanModuleSuccess) then
@@ -2005,23 +2007,20 @@ begin
   {$ENDIF}
 
   {$ifdef FORCEREVISION}
-  if (SourceVersionNum<>0) then
+  if (ModuleName<>_REVISIONFPC) then
   begin
-    if (SourceVersionNum>=CalculateFullVersion(2,6,0))  then
+    if FUseRevInc then
     begin
-      if (SourceVersionNum<CalculateFullVersion(3,2,3)) then
+      s1:=s1+' -dREVINC';
+    end
+    else
+    begin
+      s2:=Trim(ActualRevision);
+      s2:=AnsiDequotedStr(s2,'''');
+      if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
       begin
-        s2:=Trim(ActualRevision);
-        s2:=AnsiDequotedStr(s2,'''');
-        if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
-        begin
-          Processor.Process.Parameters.Add('REVSTR='+s2);
-          Processor.Process.Parameters.Add('REVINC=force');
-        end;
-      end
-      else
-      begin
-        s1:=s1+' -dREVINC';
+        Processor.Process.Parameters.Add('REVSTR='+s2);
+        Processor.Process.Parameters.Add('REVINC=force');
       end;
     end;
   end;
@@ -2882,6 +2881,7 @@ var
   FreeBSDVersion:integer;
   {$ENDIF}
   s:string;
+  aPath:string;
   {$ifdef Darwin}
   s1:string;
   {$endif}
@@ -3367,10 +3367,25 @@ begin
   if result then
   begin
     {$IFDEF MSWINDOWS}
-    s:='';
-    if Assigned(SVNClient) then if SVNClient.ValidClient then s:=s+PathSeparator+ExtractFileDir(SVNClient.RepoExecutable);
-    if Assigned(GITClient) then if GITClient.ValidClient then s:=s+PathSeparator+ExtractFileDir(GITClient.RepoExecutable);
-    if Assigned(HGClient) then if HGClient.ValidClient then s:=s+PathSeparator+ExtractFileDir(HGClient.RepoExecutable);
+    aPath:='';
+    if Assigned(SVNClient) AND SVNClient.ValidClient then
+    begin
+      s:=SVNClient.RepoExecutable;
+      if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
+      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+    end;
+    if Assigned(GITClient) AND GITClient.ValidClient then
+    begin
+      s:=GITClient.RepoExecutable;
+      if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
+      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+    end;
+    if Assigned(HGClient) AND HGClient.ValidClient then
+    begin
+      s:=HGClient.RepoExecutable;
+      if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
+      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+    end;
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // add install/fpc/utils to solve data2inc not found by fpcmkcfg
     // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
@@ -3384,7 +3399,7 @@ begin
       ExcludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
       IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
       IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+
-      s,
+      aPath,
       false,false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
@@ -3784,13 +3799,43 @@ begin
     if (GetTargetOS=GetOS(TOS.openbsd)) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end;
 
-  {$ifndef FORCEREVISION}
-  if (NOT (Self is TFPCCrossInstaller)) then
+  {$ifdef FORCEREVISION}
+  FUseRevInc:=true;
+  if (SourceVersionNum<>0) then if (SourceVersionNum<CalculateFullVersion(3,2,3)) then FUseRevInc:=false;
+  if FUseRevInc then
   begin
-    // Generate revision.inc through Makefile
-    BuildModuleCustom(_REVISIONFPC);
+    Infoln('FPC builder: Checking auto-generated (Makefile) revision.inc for compiler revision', etInfo);
+    FUseRevInc:=false;
+    // Generate revision.inc through Makefile to check its contents
+    s:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+    DeleteFile(s);
+    if BuildModuleCustom(_REVISIONFPC) then
+    begin
+      // Check revision.inc for errors
+      if FileExists(s) then
+      begin
+        ConfigText:=TStringList.Create;
+        try
+          ConfigText.LoadFromFile(s);
+          if (ConfigText.Count>0) then
+          begin
+            VersionSnippet:=ConfigText.Strings[0];
+            VersionSnippet:=AnsiDequotedStr(VersionSnippet,'''');
+            VersionSnippet:=AnsiDequotedStr(VersionSnippet,'"');
+            if (Length(VersionSnippet)>0) AND (Pos(' ',VersionSnippet)=0) AND (ContainsDigit(VersionSnippet)) then FUseRevInc:=true;
+          end;
+        finally
+          ConfigText.Free;
+        end;
+        if (NOT FUseRevInc) then
+        begin
+          Infoln('FPC builder: Contents of auto-generated (Makefile) revision.inc incorrect. Deleting and preventing use !', etWarning);
+          DeleteFile(s);
+        end;
+      end;
+    end;
   end;
-  {$endif}
+  {$endif FORCEREVISION}
 
   // Now: the real build of FPC !!!
   OperationSucceeded:=BuildModuleCustom(ModuleName);
@@ -4947,10 +4992,11 @@ begin
 
   FTargetCompilerName:=GetCompilerName(GetTargetCPU);
 
-  FCompiler := '';
-  FUseLibc  := false;
+  FCompiler  := '';
+  FUseLibc   := false;
+  FUseRevInc := false;
 
-  InitDone:=false;
+  InitDone   := false;
 end;
 
 destructor TFPCInstaller.Destroy;

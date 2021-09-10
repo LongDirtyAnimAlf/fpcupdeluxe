@@ -341,6 +341,7 @@ function CompareVersionStrings(s1,s2: string): longint;
 function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
 function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 function GetEnumValueSimple(aTypeInfo:PTypeInfo;const aEnum:string):integer;
+function ContainsDigit(const s: string): Boolean;
 //Find a library, if any
 function LibWhich(aLibrary: string): boolean;
 // Emulates/runs which to find executable in path. If not found, returns empty string
@@ -1261,6 +1262,7 @@ begin
   if Length(Output)>0 then
   begin
     i:=Pos('-r',Output);
+    if (i>0) then i:=Pos('-release',Output); // prevent -release from being detected as -r ... tricky
     if (i=0) then i:=Pos('-',Output);
     if (i>0) then
     begin
@@ -3369,6 +3371,19 @@ begin
       result := -1 else
       result:=GetEnumValue(aTypeInfo,aEnum);
   end;
+end;
+
+function ContainsDigit(const s: string): Boolean;
+const
+  Digits: set of Char = ['0'..'9'];
+var
+  i: Integer;
+begin
+  if (Length(s)=0) then exit(false);
+  result := true;
+  for i := 1 to Length(s) do
+    if s[i] in Digits then exit;
+  result := false;
 end;
 
 function LibWhich(aLibrary: string): boolean;
