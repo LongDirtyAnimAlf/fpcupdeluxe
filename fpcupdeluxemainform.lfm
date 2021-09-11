@@ -2574,7 +2574,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       Left = 781
       Height = 42
-      Hint = 'Get FPC for armv6m RPi Pico'
+      Hint = 'Get FPC for ESP32 [lx6] boards'
       Top = 8
       Width = 109
       AutoSize = True
