@@ -2701,9 +2701,6 @@ begin
   aBinFile:='xtensa-binutils-'+GetTargetCPUOS+'.zip';
   aLibFile:='xtensa-libs-'+GetTargetCPUOS+'.zip';
 
-  aBinFile:='xtensa-binutils-aarch64-darwin.zip';
-  aLibFile:='xtensa-libs-aarch64-darwin.zip';
-
   idx:=UniModuleList.IndexOf(ModuleName);
   if (idx>=0) then
   begin

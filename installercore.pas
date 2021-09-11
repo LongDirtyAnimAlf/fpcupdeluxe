@@ -1840,7 +1840,7 @@ begin
           SVNRevision:=StrToIntDef(Output,0);
           if (SVNRevision=0) then Output:='';
           if (aModuleName=_FPC) AND (SVNRevision>MAXFPCREVISION) then Output:='';
-          if (aModuleName=_LAZARUS) AND (SVNRevision=MAXLAZARUSREVISION) then Output:='';
+          if (aModuleName=_LAZARUS) AND (SVNRevision>MAXLAZARUSREVISION) then Output:='';
           if (Length(Output)>0) then
           begin
             if (Length(FDesiredRevision)>0) AND (Length(FDesiredRevision)<7) AND (Output<>FDesiredRevision) then
