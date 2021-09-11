@@ -622,8 +622,7 @@ uses
   //LMessages,
   LCLIntf,
   {$endif}
-  process,
-  RegExpr
+  process
   {$IFDEF UNIX}
   ,LazFileUtils
   {$ENDIF UNIX}
@@ -3760,78 +3759,53 @@ var
   RevFileName,RevString: string;
   RevisionStringList:TStringList;
   idx:integer;
-  NumbersExtr: TRegExpr;
 begin
   result:='';
 
   RevString:='';
   RevFileName:='';
 
-  if (ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) then RevFileName:=ConcatPaths([FSourceDirectory,'ide',REVINCFILENAME]);
-  if ModuleName=_FPC then RevFileName:=ConcatPaths([FSourceDirectory,'compiler',REVINCFILENAME]);
-  //if ModuleName=_LAZARUS then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+REVINCFILENAME;
-  //if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+  // First, use try to get revision from compiler.
+  if ModuleName=_FPC then RevString:=CompilerRevision(GetFPCInBinDir);
 
-  if FileExists(RevFileName) then
+  // Second, try to get revision from rev file.
+  if (Length(RevString)=0) then
   begin
-    RevisionStringList:=TStringList.Create;
-    try
-      RevisionStringList.LoadFromFile(RevFileName);
-      if (RevisionStringList.Count>0) then
-      begin
+    if (ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) then RevFileName:=ConcatPaths([FSourceDirectory,'ide',REVINCFILENAME]);
+    if ModuleName=_FPC then RevFileName:=ConcatPaths([FSourceDirectory,'compiler',REVINCFILENAME]);
+    //if ModuleName=_LAZARUS then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+REVINCFILENAME;
+    //if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
 
-        if ModuleName=_FPC then
-        begin
-          RevString:=Trim(RevisionStringList.Strings[0]);
-        end;
-
-        if (ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) then
-        begin
-          idx:=StringListStartsWith(RevisionStringList,'const RevisionStr');
-          if (idx<>-1) then
-          begin
-            RevString:=Trim(RevisionStringList.Strings[idx]);
-          end;
-        end;
-
-        result:=RevString;
-
-        {
-        if (Length(RevString)>0) then
-        begin
-          NumbersExtr := TRegExpr.Create;
-          try
-            NumbersExtr.Expression := 'r\d+';
-            if NumbersExtr.Exec(RevString) then
-            begin
-              result := NumbersExtr.Match[0];
-            end
-            else
-            begin
-              NumbersExtr.Expression := '\d+';
-              if NumbersExtr.Exec(RevString) then
-                result := NumbersExtr.Match[0];
-            end;
-            result:=Trim(result);
-            result:=AnsiDequotedStr(result,'''');
-          finally
-            NumbersExtr.Free;
-          end;
-        end;
-        }
-
-      end;
-    finally
-      RevisionStringList.Free;
-    end;
-  end
-  else
-  begin
-    if ModuleName=_FPC then
+    if FileExists(RevFileName) then
     begin
-      result:=CompilerRevision(GetFPCInBinDir);
+      RevisionStringList:=TStringList.Create;
+      try
+        RevisionStringList.LoadFromFile(RevFileName);
+        if (RevisionStringList.Count>0) then
+        begin
+
+          if ModuleName=_FPC then
+          begin
+            RevString:=Trim(RevisionStringList.Strings[0]);
+          end;
+
+          if (ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) then
+          begin
+            idx:=StringListStartsWith(RevisionStringList,'const RevisionStr');
+            if (idx<>-1) then
+            begin
+              RevString:=Trim(RevisionStringList.Strings[idx]);
+            end;
+          end;
+
+        end;
+      finally
+        RevisionStringList.Free;
+      end;
     end;
   end;
+
+  result:=RevString;
 end;
 
 function TInstaller.GetRevisionFromVersion(aModuleName,aVersion:string): string;

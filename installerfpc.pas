@@ -1347,22 +1347,12 @@ begin
           end;
 
           {$ifdef FORCEREVISION}
-          if (ModuleName<>_REVISIONFPC) then
+          s2:=GetRevision(ModuleName);
+          s2:=AnsiDequotedStr(s2,'''');
+          if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
           begin
-            if FUseRevInc then
-            begin
-              Options:=Options+' -dREVINC';
-            end
-            else
-            begin
-              s2:=GetRevision(ModuleName);
-              s2:=AnsiDequotedStr(s2,'''');
-              if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
-              begin
-                Processor.Process.Parameters.Add('REVSTR='+s2);
-                Processor.Process.Parameters.Add('REVINC=force');
-              end;
-            end;
+            Processor.Process.Parameters.Add('REVSTR='+s2);
+            Processor.Process.Parameters.Add('REVINC=force');
           end;
           {$endif FORCEREVISION}
 
@@ -3800,37 +3790,40 @@ begin
   end;
 
   {$ifdef FORCEREVISION}
-  FUseRevInc:=true;
-  if (SourceVersionNum<>0) then if (SourceVersionNum<CalculateFullVersion(3,2,3)) then FUseRevInc:=false;
-  if FUseRevInc then
+  if (NOT(Self is TFPCCrossInstaller)) then
   begin
-    Infoln('FPC builder: Checking auto-generated (Makefile) revision.inc for compiler revision', etInfo);
-    FUseRevInc:=false;
-    // Generate revision.inc through Makefile to check its contents
-    s:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
-    DeleteFile(s);
-    if BuildModuleCustom(_REVISIONFPC) then
+    FUseRevInc:=true;
+    if (SourceVersionNum<>0) then if (SourceVersionNum<CalculateFullVersion(3,2,3)) then FUseRevInc:=false;
+    if FUseRevInc then
     begin
-      // Check revision.inc for errors
-      if FileExists(s) then
+      Infoln('FPC builder: Checking auto-generated (Makefile) revision.inc for compiler revision', etInfo);
+      FUseRevInc:=false;
+      // Generate revision.inc through Makefile to check its contents
+      s:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+      DeleteFile(s);
+      if BuildModuleCustom(_REVISIONFPC) then
       begin
-        ConfigText:=TStringList.Create;
-        try
-          ConfigText.LoadFromFile(s);
-          if (ConfigText.Count>0) then
-          begin
-            VersionSnippet:=ConfigText.Strings[0];
-            VersionSnippet:=AnsiDequotedStr(VersionSnippet,'''');
-            VersionSnippet:=AnsiDequotedStr(VersionSnippet,'"');
-            if (Length(VersionSnippet)>0) AND (Pos(' ',VersionSnippet)=0) AND (ContainsDigit(VersionSnippet)) then FUseRevInc:=true;
-          end;
-        finally
-          ConfigText.Free;
-        end;
-        if (NOT FUseRevInc) then
+        // Check revision.inc for errors
+        if FileExists(s) then
         begin
-          Infoln('FPC builder: Contents of auto-generated (Makefile) revision.inc incorrect. Deleting and preventing use !', etWarning);
-          DeleteFile(s);
+          ConfigText:=TStringList.Create;
+          try
+            ConfigText.LoadFromFile(s);
+            if (ConfigText.Count>0) then
+            begin
+              VersionSnippet:=ConfigText.Strings[0];
+              VersionSnippet:=AnsiDequotedStr(VersionSnippet,'''');
+              VersionSnippet:=AnsiDequotedStr(VersionSnippet,'"');
+              if (Length(VersionSnippet)>0) AND (Pos(' ',VersionSnippet)=0) AND (ContainsDigit(VersionSnippet)) then FUseRevInc:=true;
+            end;
+          finally
+            ConfigText.Free;
+          end;
+          if (NOT FUseRevInc) then
+          begin
+            Infoln('FPC builder: Contents of auto-generated (Makefile) revision.inc incorrect. Deleting and preventing use !', etWarning);
+            DeleteFile(s);
+          end;
         end;
       end;
     end;

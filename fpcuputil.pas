@@ -1262,11 +1262,15 @@ begin
   if Length(Output)>0 then
   begin
     i:=Pos('-r',Output);
-    if (i>0) then i:=Pos('-release',Output); // prevent -release from being detected as -r ... tricky
+    if (i>0) then
+    begin
+      i:=Pos('-release',Output); // prevent -release from being detected as -r ... tricky
+      if (i>0) then Inc(i);
+    end;
     if (i=0) then i:=Pos('-',Output);
     if (i>0) then
     begin
-      Delete(Output,1,i+1);
+      Delete(Output,1,i);
       Result:=Trim(Output);
     end;
   end;
