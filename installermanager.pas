@@ -1766,6 +1766,7 @@ begin
         'mORMotPXL'        : FInstaller:=TmORMotPXLInstaller.Create;
         'internettools'    : FInstaller:=TInternetToolsInstaller.Create;
         'develtools4fpc'   : FInstaller:=TDeveltools4FPCInstaller.Create;
+        'xtensatools4fpc'  : FInstaller:=TXTensaTools4FPCInstaller.Create;
         'mbf-freertos-wio' : FInstaller:=TMBFFreeRTOSWioInstaller.Create;
         'mORMot2'          : FInstaller:=TmORMot2Installer.Create;
         'wst'              : FInstaller:=TWSTInstaller.Create;

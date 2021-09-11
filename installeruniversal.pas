@@ -166,6 +166,11 @@ type
     function GetModule(ModuleName: string): boolean; override;
   end;
 
+  TXTensaTools4FPCInstaller = class(TUniversalInstaller)
+  public
+    function GetModule(ModuleName: string): boolean; override;
+  end;
+
   { TMBFFreeRTOSWioInstaller }
   TMBFFreeRTOSWioInstaller = class(TUniversalInstaller)
   public
@@ -2673,6 +2678,186 @@ begin
   // Do not fail
   result:=true;
 end;
+
+function TXTensaTools4FPCInstaller.GetModule(ModuleName: string): boolean;
+var
+  idx,iassets                         : integer;
+  PackageSettings                     : TStringList;
+  Ss                                  : TStringStream;
+  aName,aRemoteURL,aContent,aVersion  : string;
+  aBinFile,aBinURL                    : string;
+  aLibFile,aLibURL                    : string;
+  ResultCode                          : longint;
+  Json                                : TJSONData;
+  Release,Asset                       : TJSONObject;
+  Assets                              : TJSONArray;
+begin
+  result:=InitModule;
+  if not result then exit;
+
+  aBinURL:='';
+  aLibURL:='';
+
+  aBinFile:='xtensa-binutils-'+GetTargetCPUOS+'.zip';
+  aLibFile:='xtensa-libs-'+GetTargetCPUOS+'.zip';
+
+  aBinFile:='xtensa-binutils-aarch64-darwin.zip';
+  aLibFile:='xtensa-libs-aarch64-darwin.zip';
+
+  idx:=UniModuleList.IndexOf(ModuleName);
+  if (idx>=0) then
+  begin
+    WritelnLog(infotext+'Getting module '+ModuleName,True);
+
+    PackageSettings:=TStringList(UniModuleList.Objects[idx]);
+
+    begin
+      aRemoteURL:=GetValueFromKey('GITURL',PackageSettings);
+      if (aRemoteURL<>'') then
+      begin
+
+        // Get latest release through api
+        aRemoteURL:=StringReplace(aRemoteURL,'//github.com','//api.github.com/repos',[]);
+        aRemoteURL:=aRemoteURL+'/releases';
+        Ss := TStringStream.Create('');
+        try
+          result:=Download(False,aRemoteURL,Ss);
+          if (NOT result) then
+          begin
+            {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
+            Ss.Clear;
+            {$ENDIF}
+            Ss.Position:=0;
+            result:=Download(True,aRemoteURL,Ss);
+          end;
+          if result then aContent:=Ss.DataString;
+        finally
+          Ss.Free;
+        end;
+        aRemoteURL:=GetValueFromKey('GITURL',PackageSettings);
+
+        if result then
+        begin
+          result:=false;
+          if (Length(aContent)>0) then
+          begin
+            try
+              Json:=GetJSON(aContent);
+            except
+              Json:=nil;
+            end;
+            if JSON.IsNull then exit;
+
+            try
+              for idx:=0 to Pred(Json.Count) do
+              begin
+                Release := TJSONObject(Json.Items[idx]);
+                aVersion:=Release.Get('tag_name');
+
+                Assets:=Release.Get('assets',TJSONArray(nil));
+                for iassets:=0 to Pred(Assets.Count) do
+                begin
+                  Asset := TJSONObject(Assets[iassets]);
+                  aName:=Asset.Get('name');
+                  if (Pos(aBinFile,aName)=1) then
+                    aBinURL:=Asset.Get('browser_download_url');
+                  if (Pos(aLibFile,aName)=1) then
+                    aLibURL:=Asset.Get('browser_download_url');
+                  result:=( (Length(aBinURL)>0) AND (Length(aLibURL)>0) );
+                  if result then break;
+                end;
+                if result then break;
+              end;
+            finally
+              Json.Free;
+            end;
+          end;
+        end;
+
+        if result then
+        begin
+
+          Infoln(infotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aBinFile+'] from '+aRemoteURL,etInfo);
+          try
+            aName:=ConcatPaths([FBaseDirectory,'tmp',aBinFile]);
+            result:=Download(FUseWget, aBinURL, aName);
+            if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
+          except
+            on E: Exception do
+            begin
+             result:=false;
+            end;
+          end;
+          if result then
+          begin
+            ResultCode:=-1;
+            WritelnLog(infotext+'Download ok',True);
+            FSourceDirectory:=FBaseDirectory+DirectorySeparator+CROSSBINPATH+DirectorySeparator+'xtensa-freertos';
+            ForceDirectoriesSafe(FSourceDirectory);
+            with TNormalUnzipper.Create do
+            begin
+              try
+                ResultCode:=Ord(NOT DoUnZip(aName,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+              finally
+                Free;
+              end;
+            end;
+            if (ResultCode<>0) then
+            begin
+              result := False;
+              Infoln(infotext+'Unpack of '+aBinFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+            end;
+          end;
+          SysUtils.Deletefile(aName); //Get rid of temp file.
+
+          Infoln(infotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aLibFile+'] from '+aRemoteURL,etInfo);
+          try
+            aName:=ConcatPaths([FBaseDirectory,'tmp',aLibFile]);
+            result:=Download(FUseWget, aLibURL, aName);
+            if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
+          except
+            on E: Exception do
+            begin
+             result:=false;
+            end;
+          end;
+          if result then
+          begin
+            ResultCode:=-1;
+            WritelnLog(infotext+'Download ok',True);
+            FSourceDirectory:=FBaseDirectory+DirectorySeparator+CROSSLIBPATH+DirectorySeparator+'xtensa-freertos';
+            ForceDirectoriesSafe(FSourceDirectory);
+            with TNormalUnzipper.Create do
+            begin
+              try
+                ResultCode:=Ord(NOT DoUnZip(aName,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+              finally
+                Free;
+              end;
+            end;
+            if (ResultCode<>0) then
+            begin
+              result := False;
+              Infoln(infotext+'Unpack of '+aLibFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+            end;
+          end;
+          SysUtils.Deletefile(aName); //Get rid of temp file.
+
+        end;
+
+        if (NOT result) then
+        begin
+          Infoln(infotext+'Getting xtensatools4fpc failure. Will continue anyhow.',etInfo);
+        end;
+
+      end;
+    end;
+  end;
+
+  // Do not fail
+  result:=true;
+end;
+
 
 function TMBFFreeRTOSWioInstaller.GetModule(ModuleName: string): boolean;
 var

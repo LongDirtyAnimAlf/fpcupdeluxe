@@ -215,8 +215,8 @@ begin
   end
   else
   begin
-    //On Haiku, arm and aarch64, always get a shallow copy of the repo
-    {$if defined(CPUAARCH64) OR defined(CPUARM) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2)) OR defined(Haiku) OR defined(AROS) OR defined(Morphos)}
+    //On Haiku and alikes, always get a shallow copy of the repo
+    {$if defined(Haiku) OR defined(AROS) OR defined(Morphos) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2))}
     Command := ' clone --recurse-submodules --depth 1';
     {$else}
     Command := ' clone --recurse-submodules';

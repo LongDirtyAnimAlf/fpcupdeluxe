@@ -81,6 +81,7 @@ type
     MIssuesGitHub: TMenuItem;
     MIssuesForum: TMenuItem;
     PageControl1: TPageControl;
+    ESPBtn: TBitBtn;
     radgrpCPU: TRadioGroup;
     radgrpOS: TRadioGroup;
     StatusMessage: TEdit;
@@ -2021,7 +2022,7 @@ begin
   end;
   }
 
-  if (Sender=WioBtn) OR (Sender=PicoBtn) then
+  if (Sender=WioBtn) OR (Sender=PicoBtn) OR (Sender=ESPBtn) then
   begin
     if Sender=PicoBtn then
     begin
@@ -2032,6 +2033,11 @@ begin
     begin
       s:='Going to install FPC and Lazarus for Wio Terminal.';
       aModule:='develtools4fpc,mbf-freertos-wio';
+    end;
+    if Sender=ESPBtn then
+    begin
+      s:='Going to install FPC and Lazarus for ESP32.';
+      aModule:='xtensatools4fpc';
     end;
     aFPCTarget:='embedded'+GITLABEXTENSION;
     aLazarusTarget:='trunk'+GITLABEXTENSION;
@@ -2115,8 +2121,8 @@ begin
     begin
     end;
 
-    success:=RealRun;
-    //success:=true;
+    //success:=RealRun;
+    success:=true;
 
     if success then
     begin
@@ -2137,6 +2143,15 @@ begin
         aSUBARCH:=TSUBARCH.armv7em;
       end;
 
+      if Sender=ESPBtn then
+      begin
+        s:='Going to install FPC cross-compiler for ESP32.';
+        aCPU:=TCPU.xtensa;
+        aOS:=TOS.freertos;
+        aSUBARCH:=TSUBARCH.lx6;
+      end;
+
+
       if Sender=UltiboBtn then
       begin
         s:='Going to install FPC cross-compiler for Ultibo.';
@@ -2153,7 +2168,7 @@ begin
         aSUBARCH:=TSUBARCH.saNone;
       end;
 
-      if (Sender=PicoBtn) OR (Sender=WioBtn) OR (Sender=UltiboBtn) OR (Sender=AndroidBtn) then
+      if (Sender=PicoBtn) OR (Sender=WioBtn) OR (Sender=ESPBtn) OR (Sender=UltiboBtn) OR (Sender=AndroidBtn) then
       begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
