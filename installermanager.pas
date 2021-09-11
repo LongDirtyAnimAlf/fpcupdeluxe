@@ -1522,7 +1522,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     if (NOT result) AND (Length(Output)>0) then
     begin
       FParent.WritelnLog(etWarning,'You need to install at least '+Output+' to build Lazarus !!', true);
-      FParent.WritelnLog(etWarning,'Make, binutils, subversion/svn [and gdb] are also required !!', true);
+      FParent.WritelnLog(etWarning,'Make, binutils, git and gdb (optional) are also required !!', true);
     end;
 
     // do not error out ... user could only install FPC

@@ -1022,7 +1022,7 @@ end;
 
 procedure TForm1.MFPCBugsClick(Sender: TObject);
 begin
-  OpenURL('https://bugs.freepascal.org/my_view_page.php');
+  OpenURL('https://gitlab.com/groups/freepascal.org/fpc/-/issues');
 end;
 
 procedure TForm1.MIssuesForumClick(Sender: TObject);
@@ -1037,7 +1037,7 @@ end;
 
 procedure TForm1.MLazarusBugsClick(Sender: TObject);
 begin
-  OpenURL('https://bugs.freepascal.org/view_all_bug_page.php?project_id=1');
+  OpenURL('https://gitlab.com/freepascal.org/lazarus/lazarus/-/issues');
 end;
 
 procedure TForm1.ButtonAutoUpdateCrossCompiler(Sender: TObject);
