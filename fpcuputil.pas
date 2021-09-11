@@ -1265,7 +1265,7 @@ begin
     if (i>0) then
     begin
       i:=Pos('-release',Output); // prevent -release from being detected as -r ... tricky
-      if (i>0) then Inc(i);
+      if (i=0) then Inc(i);
     end;
     if (i=0) then i:=Pos('-',Output);
     if (i>0) then
