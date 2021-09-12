@@ -2776,7 +2776,7 @@ begin
 
           Infoln(infotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aBinFile+'] from '+aRemoteURL,etInfo);
           try
-            aName:=ConcatPaths([FBaseDirectory,'tmp',aBinFile]);
+            aName:=ConcatPaths([FTempDirectory,aBinFile]);
             result:=Download(FUseWget, aBinURL, aName);
             if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
           except
@@ -2809,7 +2809,7 @@ begin
 
           Infoln(infotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aLibFile+'] from '+aRemoteURL,etInfo);
           try
-            aName:=ConcatPaths([FBaseDirectory,'tmp',aLibFile]);
+            aName:=ConcatPaths([FTempDirectory,aLibFile]);
             result:=Download(FUseWget, aLibURL, aName);
             if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
           except

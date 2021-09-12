@@ -286,6 +286,7 @@ implementation
 {$endif}
 
 uses
+  fpjson,
   InterfaceBase, // for WidgetSet
   LCLType, // for MessageBox
   LCLIntf, // for OpenURL
@@ -2345,9 +2346,16 @@ var
   i:integer;
   MajorVersion,MinorVersion:integer;
   aList: TStringList;
-  BaseBinsURL:string;
+  BaseBinsURL,BaseLibsURL:string;
   BinsURL,LibsURL:string;
   frmSeq: TfrmSequencial;
+
+  Ss : TStringStream;
+  Json : TJSONData;
+  Assets : TJSONArray;
+  Item,Asset : TJSONObject;
+  TagName, FileName, FileURL : string;
+  iassets : integer;
 begin
   result:=false;
 
@@ -3269,44 +3277,78 @@ begin
             // many files to unpack for Darwin : do not show progress of unpacking files when unpacking for Darwin.
             verbose:=(FPCupManager.CrossOS_Target<>TOS.darwin);
 
-            if MissingCrossBins then
-            begin
-              AddMessage('Going to look for the right cross-bins. Can (will) take some time !',True);
+            BaseBinsURL:='';
 
-              BaseBinsURL:='';
-
-              if GetTargetOS=GetOS(TOS.win32) then BaseBinsURL:='wincrossbins'
-              else
-                 if GetTargetOS=GetOS(TOS.win64) then BaseBinsURL:='wincrossbins'
-                 else
-                    if GetTargetOS=GetOS(TOS.linux) then
+            if GetTargetOS=GetOS(TOS.win32) then BaseBinsURL:='wincrossbins'
+            else
+               if GetTargetOS=GetOS(TOS.win64) then BaseBinsURL:='wincrossbins'
+               else
+                  if GetTargetOS=GetOS(TOS.linux) then
+                  begin
+                    if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386crossbins';
+                    if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64crossbins';
+                    if GetTargetCPU=GetCPU(TCPU.arm) then BaseBinsURL:='linuxarmcrossbins';
+                  end
+                  else
+                    if GetTargetOS=GetOS(TOS.freebsd) then
                     begin
-                      if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386crossbins';
-                      if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64crossbins';
-                      if GetTargetCPU=GetCPU(TCPU.arm) then BaseBinsURL:='linuxarmcrossbins';
+                      if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='freebsdx64crossbins';
                     end
                     else
-                      if GetTargetOS=GetOS(TOS.freebsd) then
+                      if GetTargetOS=GetOS(TOS.solaris) then
                       begin
-                        if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='freebsdx64crossbins';
+                        {if FPCupManager.SolarisOI then}
+                        begin
+                          if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='solarisoix64crossbins';
+                        end;
                       end
                       else
-                        if GetTargetOS=GetOS(TOS.solaris) then
+                        if GetTargetOS=GetOS(TOS.darwin) then
                         begin
-                          {if FPCupManager.SolarisOI then}
-                          begin
-                            if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='solarisoix64crossbins';
-                          end;
-                        end
-                        else
-                          if GetTargetOS=GetOS(TOS.darwin) then
-                          begin
-                            if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='darwini386crossbins';
-                            if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='darwinx64crossbins';
-                            if GetTargetCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='darwinarm64crossbins';
-                          end;
+                          if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='darwini386crossbins';
+                          if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='darwinx64crossbins';
+                          if GetTargetCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='darwinarm64crossbins';
+                        end;
 
+            BaseLibsURL:='crosslibs';
 
+            Ss := TStringStream.Create('');
+            try
+              success:=Download(False,FPCUPGITREPOAPIRELEASES+'?per_page=100',Ss);
+              if (NOT success) then
+              begin
+                {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
+                Ss.Clear;
+                {$ENDIF}
+                Ss.Position:=0;
+                success:=Download(True,FPCUPGITREPOAPIRELEASES+'?per_page=100',Ss);
+              end;
+              if success then s:=Ss.DataString;
+            finally
+              Ss.Free;
+            end;
+
+            if success then
+            begin
+              if (Length(s)>0) then
+              begin
+                try
+                  Json:=GetJSON(s);
+                except
+                  Json:=nil;
+                end;
+                if JSON.IsNull then success:=false;
+              end;
+            end;
+
+            if (NOT success) then
+            begin
+              ShowMessage('Failure getting list of tools. Fatal. Aborting.');
+              exit;
+            end;
+
+            if MissingCrossBins then
+            begin
               // no cross-bins available
               if (Length(BaseBinsURL)=0) then
               begin
@@ -3314,65 +3356,156 @@ begin
                 exit;
               end;
 
+              AddMessage('Going to look for the right cross-bins. Can (will) take some time !',True);
               AddMessage('Looking for: '+BinsFileName, True);
+
+              (*
+
+              Ss := TStringStream.Create('');
+              try
+                success:=Download(False,FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL,Ss);
+                if (NOT success) then
+                begin
+                  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
+                  Ss.Clear;
+                  {$ENDIF}
+                  Ss.Position:=0;
+                  success:=Download(True,FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL,Ss);
+                end;
+                if success then s:=Ss.DataString;
+              finally
+                Ss.Free;
+              end;
+
+              if success then
+              begin
+                if (Length(s)>0) then
+                begin
+                  try
+                    Json:=GetJSON(s);
+                  except
+                    Json:=nil;
+                  end;
+                  if JSON.IsNull then success:=false;
+                end;
+              end;
+
+              if success then
+              begin
+                for i:=Pred(Json.Count) downto 0 do
+                begin
+                  Item := TJSONObject(Json.Items[i]);
+                  TagName:=Item.Get('ref');
+                  Delete(TagName,1,Length('refs/tags/'));
+                end;
+
+              end;
+              //FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL;
+              //FPCUPGITREPOAPIRELEASES+'/tags/wincrossbins_v1.0';
+              *)
+
+              success:=false;
+              FileURL:='';
+              for i:=0 to Pred(Json.Count) do
+              begin
+                Item := TJSONObject(Json.Items[i]);
+                TagName:=Item.Get('tag_name');
+                if (Pos(BaseBinsURL,TagName)<>1) then continue;
+                Assets:=Item.Get('assets',TJSONArray(nil));
+                // Search zip
+                for iassets:=0 to Pred(Assets.Count) do
+                begin
+                  Asset := TJSONObject(Assets[iassets]);
+                  FileName:=Asset.Get('name');
+                  if (Pos(BinsFileName+'.zip',FileName)=1) then
+                    FileURL:=Asset.Get('browser_download_url');
+                  success:=(Length(FileURL)>0);
+                  if success then break;
+                end;
+                if (NOT success) then
+                begin
+                  // Search any
+                  for iassets:=0 to Pred(Assets.Count) do
+                  begin
+                    Asset := TJSONObject(Assets[iassets]);
+                    FileName:=Asset.Get('name');
+                    if (Pos(BinsFileName,FileName)=1) then
+                      FileURL:=Asset.Get('browser_download_url');
+                    success:=(Length(FileURL)>0);
+                    if success then break;
+                  end;
+                end;
+                if success then
+                begin
+                  DownloadURL:=FileURL;
+                  TargetFile:=FileName;
+                  break;
+                end;
+              end;
 
               MajorVersion:=1;
               for MinorVersion:=2 downto 0 do
               begin
 
-                //Add version
-                BinsURL:=BaseBinsURL+'_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
+                if NOT success then
+                begin
+                  TargetFile:=BinsFileName;
 
-                success:=false;
 
-                TargetFile:=BinsFileName;
+                  //Add version
+                  BinsURL:=BaseBinsURL+'_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
 
-                DownloadURL:=FPCUPGITREPOAPI+'/tags/'+BinsURL;
+                  DownloadURL:=FPCUPGITREPOAPIRELEASES+'/tags/'+BinsURL;
 
-                AddMessage('Looking for bins in: '+DownloadURL, True);
+                  AddMessage('Looking for bins in: '+DownloadURL, True);
 
-                aList:=TStringList.Create;
-                try
-                  aList.Clear;
+                  aList:=TStringList.Create;
                   try
-                    GetGitHubFileList(DownloadURL,aList,FPCupManager.UseWget,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-                  except
-                    on E : Exception do
-                    begin
-                      //AddMessage('Could not get binutils file list from '+DownloadURL+'.');
-                      //continue;
+                    aList.Clear;
+                    try
+                      GetGitHubFileList(DownloadURL,aList,FPCupManager.UseWget,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                    except
+                      on E : Exception do
+                      begin
+                        //AddMessage('Could not get binutils file list from '+DownloadURL+'.');
+                        //continue;
+                      end;
                     end;
-                  end;
-                  //Prefer a zip-file
-                  for i:=0 to Pred(aList.Count) do
-                  begin
-                    if AnsiContainsText(aList[i],TargetFile+'.zip') then
-                    begin
-                      TargetFile := TargetFile+'.zip';
-                      success:=true;
-                      break;
-                    end;
-                  end;
-                  if NOT success then
-                  begin
+                    //Prefer a zip-file
                     for i:=0 to Pred(aList.Count) do
                     begin
-                      if AnsiContainsText(aList[i],TargetFile) then
+                      if AnsiContainsText(aList[i],TargetFile+'.zip') then
                       begin
-                        TargetFile := FileNameFromURL(aList[i]);
+                        TargetFile := TargetFile+'.zip';
                         success:=true;
                         break;
                       end;
                     end;
+                    if NOT success then
+                    begin
+                      for i:=0 to Pred(aList.Count) do
+                      begin
+                        if AnsiContainsText(aList[i],TargetFile) then
+                        begin
+                          TargetFile := FileNameFromURL(aList[i]);
+                          success:=true;
+                          break;
+                        end;
+                      end;
+                    end;
+
+                  finally
+                    aList.Free;
                   end;
 
-                finally
-                  aList.Free;
+                  if success then
+                  begin
+                    DownloadURL:=FPCUPGITREPO+'/releases/download/'+BinsURL+'/'+TargetFile;
+                  end;
                 end;
 
                 if success then
                 begin
-                  DownloadURL:=FPCUPGITREPO+'/releases/download/'+BinsURL+'/'+TargetFile;
                   AddMessage('Found correct online binutils at: '+DownloadURL);
                   AddMessage('Going to download the cross-bins. Can (will) take some time !',True);
                   TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
@@ -3522,65 +3655,110 @@ begin
             if MissingCrossLibs then
             begin
               AddMessage('Going to look for the right cross-libraries. Can (will) take some time !',True);
-
-
               AddMessage('Looking for: '+LibsFileName,True);
+
+              success:=false;
+              FileURL:='';
+              for i:=0 to Pred(Json.Count) do
+              begin
+                Item := TJSONObject(Json.Items[i]);
+                TagName:=Item.Get('tag_name');
+                if (Pos(BaseLibsURL,TagName)<>1) then continue;
+                Assets:=Item.Get('assets',TJSONArray(nil));
+                // Search zip
+                for iassets:=0 to Pred(Assets.Count) do
+                begin
+                  Asset := TJSONObject(Assets[iassets]);
+                  FileName:=Asset.Get('name');
+                  if (Pos(LibsFileName+'.zip',FileName)=1) then
+                    FileURL:=Asset.Get('browser_download_url');
+                  success:=(Length(FileURL)>0);
+                  if success then break;
+                end;
+                if (NOT success) then
+                begin
+                  // Search any
+                  for iassets:=0 to Pred(Assets.Count) do
+                  begin
+                    Asset := TJSONObject(Assets[iassets]);
+                    FileName:=Asset.Get('name');
+                    if (Pos(LibsFileName,FileName)=1) then
+                      FileURL:=Asset.Get('browser_download_url');
+                    success:=(Length(FileURL)>0);
+                    if success then break;
+                  end;
+                end;
+                if success then
+                begin
+                  DownloadURL:=FileURL;
+                  TargetFile:=FileName;
+                  break;
+                end;
+              end;
 
               MajorVersion:=1;
               for MinorVersion:=3 downto 0 do
               begin
-                LibsURL:='crosslibs_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
 
-                TargetFile:=LibsFileName;
+                if (NOT success) then
+                begin
+                  LibsURL:=BaseLibsURL+'_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
 
-                DownloadURL:=FPCUPGITREPOAPI+'/tags/'+LibsURL;
+                  TargetFile:=LibsFileName;
 
-                AddMessage('Looking for libs in: '+DownloadURL, True);
+                  DownloadURL:=FPCUPGITREPOAPIRELEASES+'/tags/'+LibsURL;
 
-                success:=false;
-                aList:=TStringList.Create;
-                try
-                  aList.Clear;
+                  AddMessage('Looking for libs in: '+DownloadURL, True);
+
+                  success:=false;
+                  aList:=TStringList.Create;
                   try
-                    GetGitHubFileList(DownloadURL,aList,FPCupManager.UseWget,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-                  except
-                    on E : Exception do
-                    begin
-                      //AddMessage('Could not get libraries file list from '+DownloadURL+'.');
-                      //continue;
+                    aList.Clear;
+                    try
+                      GetGitHubFileList(DownloadURL,aList,FPCupManager.UseWget,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                    except
+                      on E : Exception do
+                      begin
+                        //AddMessage('Could not get libraries file list from '+DownloadURL+'.');
+                        //continue;
+                      end;
                     end;
-                  end;
 
-                  //Prefer a zip-file
-                  for i:=0 to Pred(aList.Count) do
-                  begin
-                    if Pos(TargetFile+'.zip',aList[i])>0 then
-                    begin
-                      TargetFile := TargetFile+'.zip';
-                      success:=true;
-                      break;
-                    end;
-                  end;
-                  if NOT success then
-                  begin
+                    //Prefer a zip-file
                     for i:=0 to Pred(aList.Count) do
                     begin
-                      s:=aList[i];
-                      if Pos(TargetFile,s)>0 then
+                      if Pos(TargetFile+'.zip',aList[i])>0 then
                       begin
-                        TargetFile := FileNameFromURL(s);
+                        TargetFile := TargetFile+'.zip';
                         success:=true;
                         break;
                       end;
                     end;
+                    if NOT success then
+                    begin
+                      for i:=0 to Pred(aList.Count) do
+                      begin
+                        s:=aList[i];
+                        if Pos(TargetFile,s)>0 then
+                        begin
+                          TargetFile := FileNameFromURL(s);
+                          success:=true;
+                          break;
+                        end;
+                      end;
+                    end;
+                  finally
+                    aList.Free;
                   end;
-                finally
-                  aList.Free;
+
+                  if success then
+                  begin
+                    DownloadURL:=FPCUPGITREPO+'/releases/download/'+LibsURL+'/'+TargetFile;
+                  end;
                 end;
 
                 if success then
                 begin
-                  DownloadURL:=FPCUPGITREPO+'/releases/download/'+LibsURL+'/'+TargetFile;
                   AddMessage('Found correct online libraries at: '+DownloadURL);
                   AddMessage('Going to download the cross-libraries. Can (will) take some time !',True);
                   TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
@@ -3707,6 +3885,7 @@ begin
         Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,true);
 
     finally
+      if Assigned(Json) then Json.Free;
       DisEnable(Sender,True);
     end;
   end;
@@ -5059,7 +5238,7 @@ var
   s:string;
 begin
   AddMessage(upCheckUpdate);
-  s:=checkGithubRelease(FPCUPGITREPOAPI+'/latest');
+  s:=checkGithubRelease(FPCUPGITREPOAPIRELEASES+'/latest');
   if Length(s)>0 then
   begin
     AddMessage(upUpdateFound);

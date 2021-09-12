@@ -482,6 +482,9 @@ begin
   // Safeguards
   if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.embedded) then result:=false;
 
+  // Safeguards
+  if (CrossInstaller.TargetCPU=TCPU.xtensa) AND (CrossInstaller.TargetOS=TOS.freertos) then result:=false;
+
   if (CrossInstaller.TargetCPU=TCPU.wasm32) then result:=false;
 end;
 
