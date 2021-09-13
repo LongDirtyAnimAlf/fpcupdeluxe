@@ -275,7 +275,7 @@ function ReleaseCandidateFromUrl(aURL:string): integer;
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
 function Download(UseWget:boolean; URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
-function GetURLDataFromCache(aURL:string):string;
+function GetURLDataFromCache(aURL:string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):string;
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; bWGet:boolean=false; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 {$IFDEF MSWINDOWS}
 function CheckFileSignature(aFilePath: string): boolean;
@@ -2283,7 +2283,7 @@ begin
   end;
 end;
 
-function GetURLDataFromCache(aURL:string):string;
+function GetURLDataFromCache(aURL:string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):string;
 var
   aStore:TURLDataCache;
   s:string;
@@ -2309,10 +2309,12 @@ begin
     end;
   end;
 
-  if (Length(s)=0) then
+  //if (Length(s)=0) then
+  if ((Length(s)=0) OR ( (Pos('api.github.com',aURL)<>0) AND (Pos('"message": "Not Found"',s)<>0)) ) then
   begin
     // Indicate that we cannot reuse index
     if (NOT success) then i:=-1;
+    success:=false;
   end;
 
   if (NOT success) then
@@ -2320,14 +2322,14 @@ begin
     s:='';
     Ss := TStringStream.Create('');
     try
-      success:=Download(False,aURL,Ss);
+      success:=Download(False,aURL,Ss,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
       if (NOT success) then
       begin
         {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
         Ss.Clear;
         {$ENDIF}
         Ss.Position:=0;
-        success:=Download(True,aURL,Ss);
+        success:=Download(True,aURL,Ss,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
       end;
       if success then s:=Ss.DataString;
     finally
@@ -2361,9 +2363,10 @@ var
   JsonArray: TJSONArray;
   i:integer;
   aStore:TGitHubStore;
-  localwget:boolean;
 begin
   result:=false;
+
+  json:=nil;
 
   Content:='';
 
@@ -2394,47 +2397,23 @@ begin
 
   if (NOT result) then
   begin
-    localwget:=bWGet;
-    repeat
-      Ss := TStringStream.Create('');
+    Content:=GetURLDataFromCache(aURL,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+    result:=((Length(Content)>0) AND (Pos('"message": "Not Found"',Content)=0));
+
+    Json:=nil;
+    if result then
+    begin
       try
-        {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
-        Ss.Clear;
-        {$ENDIF}
-        Ss.Position:=0;
-        Ss.Size:=0;
-        result:=
-          Download(
-            localwget,
-            aURL,
-            Ss,
-            HTTPProxyHost,
-            HTTPProxyPort,
-            HTTPProxyUser,
-            HTTPProxyPassword
-          );
-        Content:='';
-        if result then Content:=Ss.DataString;
-      finally
-        Ss.Free;
+        Json:=GetJSON(Content);
+      except
+        Json:=nil;
       end;
+    end;
 
-      result:=((Length(Content)>0) AND (Pos('Not Found',Content)=0));
+    result:=(Json<>nil);
 
-      Json:=nil;
-      if result then
-      begin
-        try
-          Json:=GetJSON(Content);
-        except
-          Json:=nil;
-        end;
-      end;
-
-      result:=Assigned(Json);
-
-      if result then
-      begin
+    if result then
+    begin
         try
           JsonArray:=Json.FindPath('assets') as TJSONArray;
           i:=JsonArray.Count;
@@ -2454,10 +2433,7 @@ begin
         finally
           Json.Free;
         end;
-      end;
-
-      localwget:=(NOT localwget);
-    until ((NOT localwget) OR (result));
+    end;
 
   end;
 
@@ -4182,6 +4158,7 @@ var
   Content      : string;
   Success      : boolean;
 begin
+  json:=nil;
   Success:=false;
   NewVersion:=false;
   result:='';
@@ -4212,7 +4189,7 @@ begin
         except
           Json:=nil;
         end;
-        if JSON=nil then exit;
+        if (JSON=nil) then exit;
         try
           JsonObject := TJSONObject(Json);
           // Example ---

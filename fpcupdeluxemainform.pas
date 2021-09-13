@@ -2344,12 +2344,9 @@ var
   warning,success,verbose:boolean;
   IncludeLCL,ZipFile:boolean;
   i:integer;
-  MajorVersion,MinorVersion:integer;
   aList: TStringList;
   BaseBinsURL,BaseLibsURL:string;
-  BinsURL,LibsURL:string;
   frmSeq: TfrmSequencial;
-
   Json : TJSONData;
   Assets : TJSONArray;
   Item,Asset : TJSONObject;
@@ -2844,6 +2841,7 @@ begin
 
     DisEnable(Sender,False);
 
+    Json:=nil;
     try
       //embedded predefined settings
       if (FPCupManager.CrossOS_Target=TOS.embedded) then
@@ -3426,172 +3424,109 @@ begin
                 end;
               end;
 
-              MajorVersion:=1;
-              for MinorVersion:=2 downto 0 do
+              if success then
               begin
-
-                if NOT success then
-                begin
-                  TargetFile:=BinsFileName;
-
-
-                  //Add version
-                  BinsURL:=BaseBinsURL+'_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
-
-                  DownloadURL:=FPCUPGITREPOAPIRELEASES+'/tags/'+BinsURL;
-
-                  AddMessage('Looking for bins in: '+DownloadURL, True);
-
-                  aList:=TStringList.Create;
-                  try
-                    aList.Clear;
-                    try
-                      GetGitHubFileList(DownloadURL,aList,FPCupManager.UseWget,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-                    except
-                      on E : Exception do
-                      begin
-                        //AddMessage('Could not get binutils file list from '+DownloadURL+'.');
-                        //continue;
-                      end;
-                    end;
-                    //Prefer a zip-file
-                    for i:=0 to Pred(aList.Count) do
-                    begin
-                      if AnsiContainsText(aList[i],TargetFile+'.zip') then
-                      begin
-                        TargetFile := TargetFile+'.zip';
-                        success:=true;
-                        break;
-                      end;
-                    end;
-                    if NOT success then
-                    begin
-                      for i:=0 to Pred(aList.Count) do
-                      begin
-                        if AnsiContainsText(aList[i],TargetFile) then
-                        begin
-                          TargetFile := FileNameFromURL(aList[i]);
-                          success:=true;
-                          break;
-                        end;
-                      end;
-                    end;
-
-                  finally
-                    aList.Free;
-                  end;
-
-                  if success then
-                  begin
-                    DownloadURL:=FPCUPGITREPO+'/releases/download/'+BinsURL+'/'+TargetFile;
-                  end;
+                AddMessage('Found correct online binutils at: '+DownloadURL);
+                AddMessage('Going to download the cross-bins. Can (will) take some time !',True);
+                TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
+                SysUtils.DeleteFile(TargetFile);
+                success:=false;
+                {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
+                frmSeq:= TfrmSequencial.Create(Self);
+                try
+                  frmSeq.AddDownload(DownloadURL,TargetFile);
+                  frmSeq.ShowModal;
+                  success:=frmSeq.Success;
+                finally
+                  frmSeq.Free;
                 end;
-
-                if success then
+                {$ENDIF}
+                if (NOT success) then
                 begin
-                  AddMessage('Found correct online binutils at: '+DownloadURL);
-                  AddMessage('Going to download the cross-bins. Can (will) take some time !',True);
-                  TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
                   SysUtils.DeleteFile(TargetFile);
-                  success:=false;
-                  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
-                  frmSeq:= TfrmSequencial.Create(Self);
-                  try
-                    frmSeq.AddDownload(DownloadURL,TargetFile);
-                    frmSeq.ShowModal;
-                    success:=frmSeq.Success;
-                  finally
-                    frmSeq.Free;
-                  end;
-                  {$ENDIF}
-                  if (NOT success) then
-                  begin
-                    SysUtils.DeleteFile(TargetFile);
-                    success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-                  end;
-                  if success then AddMessage('Download successfull !');
+                  success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                 end;
+                if success then AddMessage('Download successfull !');
+              end;
 
-                if success then
+              if success then
+              begin
+                ZipFile:=(ExtractFileExt(TargetFile)='.zip');
+                TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+                {$ifndef MSWINDOWS}
+                TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator;
+                {$endif}
+                ForceDirectoriesSafe(TargetPath);
+
+                AddMessage('Going to extract archive into '+TargetPath);
+
+                if ZipFile then
                 begin
-                  ZipFile:=(ExtractFileExt(TargetFile)='.zip');
-                  TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
-                  {$ifndef MSWINDOWS}
-                  TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator;
-                  {$endif}
-                  ForceDirectoriesSafe(TargetPath);
-
-                  AddMessage('Going to extract archive into '+TargetPath);
-
-                  if ZipFile then
+                  with TNormalUnzipper.Create do
                   begin
-                    with TNormalUnzipper.Create do
-                    begin
-                      try
-                        success:=DoUnZip(TargetFile,TargetPath,[]);
-                      finally
-                        Free;
-                      end;
+                    try
+                      success:=DoUnZip(TargetFile,TargetPath,[]);
+                    finally
+                      Free;
                     end;
-                  end
-                  else
+                  end;
+                end
+                else
+                begin
+                  {$ifdef MSWINDOWS}
+                  if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
+                  success:={%H-}RunCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',s);
+                  if (NOT success) then
+                  {$endif}
                   begin
                     {$ifdef MSWINDOWS}
-                    if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
-                    success:={%H-}RunCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',s);
-                    if (NOT success) then
+                    UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                    {$else}
+                    UnZipper := 'unrar';
                     {$endif}
+                    success:=CheckExecutable(UnZipper, ['-v'], '');
+                    if success then
                     begin
-                      {$ifdef MSWINDOWS}
-                      UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-                      {$else}
-                      UnZipper := 'unrar';
-                      {$endif}
-                      success:=CheckExecutable(UnZipper, ['-v'], '');
-                      if success then
-                      begin
-                        if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
-                        success:={%H-}RunCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',s);
-                      end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
-                    end;
+                      if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
+                      success:={%H-}RunCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',s);
+                    end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
                   end;
                 end;
+              end;
 
-                SysUtils.DeleteFile(TargetFile);
+              SysUtils.DeleteFile(TargetFile);
 
-                if success then
-                begin
-                  aList:=TStringList.Create;
-                  try
-                    aList.Add('These binary utilities were happily provided to you by fpcupdeluxe.');
-                    aList.Add('You can find them at:');
-                    aList.Add(DownloadURL);
-                    s:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
-                    If DirectoryExists(ExtractFileDir(s)) then
-                    begin
-                      SysUtils.DeleteFile(s);
-                      aList.SaveToFile(s);
-                    end;
-                  finally
-                    aList.Free;
+              if success then
+              begin
+                aList:=TStringList.Create;
+                try
+                  aList.Add('These binary utilities were happily provided to you by fpcupdeluxe.');
+                  aList.Add('You can find them at:');
+                  aList.Add(DownloadURL);
+                  s:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
+                  If DirectoryExists(ExtractFileDir(s)) then
+                  begin
+                    SysUtils.DeleteFile(s);
+                    aList.SaveToFile(s);
                   end;
-                  {$IFDEF UNIX}
-                  aList:=FindAllFiles(TargetPath);
-                  try
-                    if (aList.Count > 0) then
-                    begin
-                      for i:=0 to Pred(aList.Count) do
-                      begin
-                        fpChmod(aList.Strings[i],&755);
-                      end;
-                    end;
-                  finally
-                    aList.Free;
-                  end;
-                  {$ENDIF}
-                  MissingCrossBins:=False;
-                  break;
+                finally
+                  aList.Free;
                 end;
+                {$IFDEF UNIX}
+                aList:=FindAllFiles(TargetPath);
+                try
+                  if (aList.Count > 0) then
+                  begin
+                    for i:=0 to Pred(aList.Count) do
+                    begin
+                      fpChmod(aList.Strings[i],&755);
+                    end;
+                  end;
+                finally
+                  aList.Free;
+                end;
+                {$ENDIF}
+                MissingCrossBins:=False;
               end;
             end;
 
@@ -3679,155 +3614,92 @@ begin
                 end;
               end;
 
-              MajorVersion:=1;
-              for MinorVersion:=3 downto 0 do
+              if success then
               begin
-
+                AddMessage('Found correct online libraries at: '+DownloadURL);
+                AddMessage('Going to download the cross-libraries. Can (will) take some time !',True);
+                TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
+                SysUtils.DeleteFile(TargetFile);
+                success:=false;
+                {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
+                frmSeq:= TfrmSequencial.Create(Self);
+                try
+                  frmSeq.AddDownload(DownloadURL,TargetFile);
+                  frmSeq.ShowModal;
+                  success:=frmSeq.Success;
+                finally
+                  frmSeq.Free;
+                end;
+                {$ENDIF}
                 if (NOT success) then
                 begin
-                  LibsURL:=BaseLibsURL+'_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
-
-                  TargetFile:=LibsFileName;
-
-                  DownloadURL:=FPCUPGITREPOAPIRELEASES+'/tags/'+LibsURL;
-
-                  AddMessage('Looking for libs in: '+DownloadURL, True);
-
-                  success:=false;
-                  aList:=TStringList.Create;
-                  try
-                    aList.Clear;
-                    try
-                      GetGitHubFileList(DownloadURL,aList,FPCupManager.UseWget,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-                    except
-                      on E : Exception do
-                      begin
-                        //AddMessage('Could not get libraries file list from '+DownloadURL+'.');
-                        //continue;
-                      end;
-                    end;
-
-                    //Prefer a zip-file
-                    for i:=0 to Pred(aList.Count) do
-                    begin
-                      if Pos(TargetFile+'.zip',aList[i])>0 then
-                      begin
-                        TargetFile := TargetFile+'.zip';
-                        success:=true;
-                        break;
-                      end;
-                    end;
-                    if NOT success then
-                    begin
-                      for i:=0 to Pred(aList.Count) do
-                      begin
-                        s:=aList[i];
-                        if Pos(TargetFile,s)>0 then
-                        begin
-                          TargetFile := FileNameFromURL(s);
-                          success:=true;
-                          break;
-                        end;
-                      end;
-                    end;
-                  finally
-                    aList.Free;
-                  end;
-
-                  if success then
-                  begin
-                    DownloadURL:=FPCUPGITREPO+'/releases/download/'+LibsURL+'/'+TargetFile;
-                  end;
-                end;
-
-                if success then
-                begin
-                  AddMessage('Found correct online libraries at: '+DownloadURL);
-                  AddMessage('Going to download the cross-libraries. Can (will) take some time !',True);
-                  TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
                   SysUtils.DeleteFile(TargetFile);
-                  success:=false;
-                  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
-                  frmSeq:= TfrmSequencial.Create(Self);
-                  try
-                    frmSeq.AddDownload(DownloadURL,TargetFile);
-                    frmSeq.ShowModal;
-                    success:=frmSeq.Success;
-                  finally
-                    frmSeq.Free;
-                  end;
-                  {$ENDIF}
-                  if (NOT success) then
-                  begin
-                    SysUtils.DeleteFile(TargetFile);
-                    success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-                  end;
-                  if success then AddMessage('Download successfull !');
+                  success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                 end;
+                if success then AddMessage('Download successfull !');
+              end;
 
-                if success then
+              if success then
+              begin
+                ZipFile:=(ExtractFileExt(TargetFile)='.zip');
+                TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+                //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator;
+                //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+LibPath);
+
+                AddMessage('Going to extract archive into '+TargetPath);
+
+                if ZipFile then
                 begin
-                  ZipFile:=(ExtractFileExt(TargetFile)='.zip');
-                  TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
-                  //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator;
-                  //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+LibPath);
-
-                  AddMessage('Going to extract archive into '+TargetPath);
-
-                  if ZipFile then
+                  with TNormalUnzipper.Create do
                   begin
-                    with TNormalUnzipper.Create do
-                    begin
-                      try
-                        success:=DoUnZip(TargetFile,TargetPath,[]);
-                      finally
-                        Free;
-                      end;
+                    try
+                      success:=DoUnZip(TargetFile,TargetPath,[]);
+                    finally
+                      Free;
                     end;
-                  end
-                  else
+                  end;
+                end
+                else
+                begin
+                  {$ifdef MSWINDOWS}
+                  if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
+                  success:={%H-}RunCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',s);
+                  if (NOT success) then
+                  {$endif}
                   begin
                     {$ifdef MSWINDOWS}
-                    if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
-                    success:={%H-}RunCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',s);
-                    if (NOT success) then
+                    UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                    {$else}
+                    UnZipper := 'unrar';
                     {$endif}
+                    success:=CheckExecutable(UnZipper, ['-v'], '');
+                    if success then
                     begin
-                      {$ifdef MSWINDOWS}
-                      UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-                      {$else}
-                      UnZipper := 'unrar';
-                      {$endif}
-                      success:=CheckExecutable(UnZipper, ['-v'], '');
-                      if success then
-                      begin
-                        if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
-                        success:={%H-}RunCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',s);
-                      end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
-                    end;
+                      if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
+                      success:={%H-}RunCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',s);
+                    end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
                   end;
                 end;
-                SysUtils.DeleteFile(TargetFile);
+              end;
+              SysUtils.DeleteFile(TargetFile);
 
-                if success then
-                begin
-                  aList:=TStringList.Create;
-                  try
-                    aList.Add('These libraries were happily provided to you by fpcupdeluxe.');
-                    aList.Add('You can find them at:');
-                    aList.Add(DownloadURL);
-                    s:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
-                    if DirectoryExists(ExtractFileDir(s)) then
-                    begin
-                      SysUtils.DeleteFile(s);
-                      aList.SaveToFile(s);
-                    end;
-                  finally
-                    aList.Free;
+              if success then
+              begin
+                aList:=TStringList.Create;
+                try
+                  aList.Add('These libraries were happily provided to you by fpcupdeluxe.');
+                  aList.Add('You can find them at:');
+                  aList.Add(DownloadURL);
+                  s:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
+                  if DirectoryExists(ExtractFileDir(s)) then
+                  begin
+                    SysUtils.DeleteFile(s);
+                    aList.SaveToFile(s);
                   end;
-                  MissingCrossLibs:=False;
-                  break;
+                finally
+                  aList.Free;
                 end;
+                MissingCrossLibs:=False;
               end;
 
               // as libraries are not always needed for embedded, end with success even if the above has failed
@@ -3868,7 +3740,7 @@ begin
         Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,true);
 
     finally
-      if Assigned(Json) then Json.Free;
+      if (Json<>nil) AND (NOT Json.IsNull) then Json.Free;
       DisEnable(Sender,True);
     end;
   end;
