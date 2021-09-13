@@ -2350,7 +2350,6 @@ var
   BinsURL,LibsURL:string;
   frmSeq: TfrmSequencial;
 
-  Ss : TStringStream;
   Json : TJSONData;
   Assets : TJSONArray;
   Item,Asset : TJSONObject;
@@ -3312,33 +3311,17 @@ begin
 
             BaseLibsURL:='crosslibs';
 
-            Ss := TStringStream.Create('');
-            try
-              success:=Download(False,FPCUPGITREPOAPIRELEASES+'?per_page=100',Ss);
-              if (NOT success) then
-              begin
-                {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
-                Ss.Clear;
-                {$ENDIF}
-                Ss.Position:=0;
-                success:=Download(True,FPCUPGITREPOAPIRELEASES+'?per_page=100',Ss);
-              end;
-              if success then s:=Ss.DataString;
-            finally
-              Ss.Free;
-            end;
+            s:=GetURLDataFromCache(FPCUPGITREPOAPIRELEASES+'?per_page=100');
+            success:=(Length(s)>0);
 
             if success then
             begin
-              if (Length(s)>0) then
-              begin
-                try
-                  Json:=GetJSON(s);
-                except
-                  Json:=nil;
-                end;
-                if JSON.IsNull then success:=false;
+              try
+                Json:=GetJSON(s);
+              except
+                Json:=nil;
               end;
+              if JSON.IsNull then success:=false;
             end;
 
             if (NOT success) then

@@ -275,6 +275,7 @@ function ReleaseCandidateFromUrl(aURL:string): integer;
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
 function Download(UseWget:boolean; URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
+function GetURLDataFromCache(aURL:string):string;
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; bWGet:boolean=false; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 {$IFDEF MSWINDOWS}
 function CheckFileSignature(aFilePath: string): boolean;
@@ -478,8 +479,14 @@ type
     FileList:TStringList;
   end;
 
+  TURLDataCache = record
+    URL:string;
+    Data:string;
+  end;
+
 var
   GitHubFileListCache:array of TGitHubStore;
+  URLDataCache:array of TURLDataCache;
 
 
 function GetStringFromBuffer(const field:PChar):string;
@@ -2274,6 +2281,75 @@ begin
       end;
     end;
   end;
+end;
+
+function GetURLDataFromCache(aURL:string):string;
+var
+  aStore:TURLDataCache;
+  s:string;
+  Ss: TStringStream;
+  success:boolean;
+  i:integer;
+begin
+  s:='';
+
+  i:=0;
+  success:=false;
+  if Length(URLDataCache)>0 then
+  begin
+    for aStore in URLDataCache do
+    begin
+      if (aStore.URL=aURL) then
+      begin
+        s:=aStore.Data;
+        success:=true;
+        break;
+      end;
+      Inc(i);
+    end;
+  end;
+
+  if (Length(s)=0) then
+  begin
+    // Indicate that we cannot reuse index
+    if (NOT success) then i:=-1;
+  end;
+
+  if (NOT success) then
+  begin
+    s:='';
+    Ss := TStringStream.Create('');
+    try
+      success:=Download(False,aURL,Ss);
+      if (NOT success) then
+      begin
+        {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
+        Ss.Clear;
+        {$ENDIF}
+        Ss.Position:=0;
+        success:=Download(True,aURL,Ss);
+      end;
+      if success then s:=Ss.DataString;
+    finally
+      Ss.Free;
+    end;
+
+    if (success AND (Length(s)>0)) then
+    begin
+      if (i=-1) then
+      begin
+        SetLength(URLDataCache,Length(URLDataCache)+1);
+        i:=High(URLDataCache);
+      end;
+      with URLDataCache[i] do
+      begin
+        URL:=aURL;
+        Data:=s;
+      end;
+    end;
+  end;
+
+  result:=s;
 end;
 
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; bWGet:boolean=false; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
@@ -5823,6 +5899,8 @@ begin
     end;
   end;
   Finalize(GitHubFileListCache);
+
+  Finalize(URLDataCache);
 end;
 
 finalization
