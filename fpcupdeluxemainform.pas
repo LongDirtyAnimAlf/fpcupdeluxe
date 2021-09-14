@@ -3040,8 +3040,6 @@ begin
               ( (GetTOS(GetTargetOS)=TOS.darwin) AND ((GetTCPU(GetTargetCPU)=TCPU.x86_64) OR (GetTCPU(GetTargetCPU)=TCPU.aarch64)) )
               OR
               ( (GetTOS(GetTargetOS)=TOS.linux) AND (GetTCPU(GetTargetCPU)=TCPU.x86_64) )
-              OR
-              ( (GetTOS(GetTargetOS)=TOS.win32) AND (GetTCPU(GetTargetCPU)=TCPU.i386) )
             then
             begin
               if (FPCupManager.CrossCPU_Target=TCPU.xtensa) AND (FPCupManager.CrossOS_Target=TOS.freertos) then
