@@ -936,6 +936,10 @@ begin
     if AnsiStartsText('svnversion: error:',line) then exit;
     {$endif Darwin}
 
+    // GIT quirks.
+    if AnsiStartsText('fatal: No annotated tags ',line) then exit;
+    if AnsiStartsText('fatal: HEAD does not ',line) then exit;
+    if AnsiStartsText('However, ',line) then exit;
 
     // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
     // will be a bit redundant , but just to be sure !
