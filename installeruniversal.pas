@@ -2701,6 +2701,9 @@ begin
   aBinFile:='xtensa-binutils-'+GetTargetCPUOS+'.zip';
   aLibFile:='xtensa-libs-'+GetTargetCPUOS+'.zip';
 
+  //aBinFile:='xtensa-binutils-'+'aarch64-darwin'+'.zip';
+  //aLibFile:='xtensa-libs-'+'aarch64-darwin'+'.zip';
+
   idx:=UniModuleList.IndexOf(ModuleName);
   if (idx>=0) then
   begin
@@ -2774,72 +2777,78 @@ begin
         if result then
         begin
 
-          Infoln(infotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aBinFile+'] from '+aRemoteURL,etInfo);
-          try
-            aName:=ConcatPaths([FTempDirectory,aBinFile]);
-            result:=Download(FUseWget, aBinURL, aName);
-            if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
-          except
-            on E: Exception do
-            begin
-             result:=false;
-            end;
-          end;
-          if result then
+          FSourceDirectory:=FBaseDirectory+DirectorySeparator+CROSSBINPATH+DirectorySeparator+'xtensa-freertos';
+          if ( (NOT DirectoryExists(FSourceDirectory)) OR (DirectoryIsEmpty(FSourceDirectory)) ) then
           begin
-            ResultCode:=-1;
-            WritelnLog(infotext+'Download ok',True);
-            FSourceDirectory:=FBaseDirectory+DirectorySeparator+CROSSBINPATH+DirectorySeparator+'xtensa-freertos';
-            ForceDirectoriesSafe(FSourceDirectory);
-            with TNormalUnzipper.Create do
-            begin
-              try
-                ResultCode:=Ord(NOT DoUnZip(aName,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
-              finally
-                Free;
+            Infoln(infotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aBinFile+'] from '+aRemoteURL,etInfo);
+            try
+              aName:=ConcatPaths([FTempDirectory,aBinFile]);
+              result:=Download(FUseWget, aBinURL, aName);
+              if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
+            except
+              on E: Exception do
+              begin
+               result:=false;
               end;
             end;
-            if (ResultCode<>0) then
+            if result then
             begin
-              result := False;
-              Infoln(infotext+'Unpack of '+aBinFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
-            end;
-          end;
-          SysUtils.Deletefile(aName); //Get rid of temp file.
-
-          Infoln(infotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aLibFile+'] from '+aRemoteURL,etInfo);
-          try
-            aName:=ConcatPaths([FTempDirectory,aLibFile]);
-            result:=Download(FUseWget, aLibURL, aName);
-            if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
-          except
-            on E: Exception do
-            begin
-             result:=false;
-            end;
-          end;
-          if result then
-          begin
-            ResultCode:=-1;
-            WritelnLog(infotext+'Download ok',True);
-            FSourceDirectory:=FBaseDirectory+DirectorySeparator+CROSSLIBPATH+DirectorySeparator+'xtensa-freertos';
-            ForceDirectoriesSafe(FSourceDirectory);
-            with TNormalUnzipper.Create do
-            begin
-              try
-                ResultCode:=Ord(NOT DoUnZip(aName,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
-              finally
-                Free;
+              ResultCode:=-1;
+              WritelnLog(infotext+'Download ok',True);
+              ForceDirectoriesSafe(FSourceDirectory);
+              with TNormalUnzipper.Create do
+              begin
+                try
+                  ResultCode:=Ord(NOT DoUnZip(aName,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+                finally
+                  Free;
+                end;
+              end;
+              if (ResultCode<>0) then
+              begin
+                result := False;
+                Infoln(infotext+'Unpack of '+aBinFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
               end;
             end;
-            if (ResultCode<>0) then
-            begin
-              result := False;
-              Infoln(infotext+'Unpack of '+aLibFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
-            end;
+            SysUtils.Deletefile(aName); //Get rid of temp file.
           end;
-          SysUtils.Deletefile(aName); //Get rid of temp file.
 
+          FSourceDirectory:=FBaseDirectory+DirectorySeparator+CROSSLIBPATH+DirectorySeparator+'xtensa-freertos';
+          if ( (NOT DirectoryExists(FSourceDirectory)) OR (DirectoryIsEmpty(FSourceDirectory)) ) then
+          begin
+            Infoln(infotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aLibFile+'] from '+aRemoteURL,etInfo);
+            try
+              aName:=ConcatPaths([FTempDirectory,aLibFile]);
+              result:=Download(FUseWget, aLibURL, aName);
+              if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
+            except
+              on E: Exception do
+              begin
+               result:=false;
+              end;
+            end;
+            if result then
+            begin
+              ResultCode:=-1;
+              WritelnLog(infotext+'Download ok',True);
+              FSourceDirectory:=FBaseDirectory+DirectorySeparator+CROSSLIBPATH+DirectorySeparator+'xtensa-freertos';
+              ForceDirectoriesSafe(FSourceDirectory);
+              with TNormalUnzipper.Create do
+              begin
+                try
+                  ResultCode:=Ord(NOT DoUnZip(aName,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+                finally
+                  Free;
+                end;
+              end;
+              if (ResultCode<>0) then
+              begin
+                result := False;
+                Infoln(infotext+'Unpack of '+aLibFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+              end;
+            end;
+            SysUtils.Deletefile(aName); //Get rid of temp file.
+          end;
         end;
 
         if (NOT result) then
