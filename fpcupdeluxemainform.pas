@@ -3033,26 +3033,27 @@ begin
 
           // Get special tools when needed !
 
-          // Only for Darwin and Linux x86_64 : use special xtensa tools !!
           if (NOT success) then
           begin
-            if
-              ( (GetTOS(GetTargetOS)=TOS.darwin) AND ((GetTCPU(GetTargetCPU)=TCPU.x86_64) OR (GetTCPU(GetTargetCPU)=TCPU.aarch64)) )
-              OR
-              ( (GetTOS(GetTargetOS)=TOS.linux) AND (GetTCPU(GetTargetCPU)=TCPU.x86_64) )
-            then
+            if (FPCupManager.CrossCPU_Target=TCPU.xtensa) AND (FPCupManager.CrossOS_Target=TOS.freertos) then
             begin
-              if (FPCupManager.CrossCPU_Target=TCPU.xtensa) AND (FPCupManager.CrossOS_Target=TOS.freertos) then
+              try
+                s:=FPCupManager.OnlyModules;
+                if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
+                FPCupManager.OnlyModules:='xtensatools4fpc';
+                AddMessage('Getting (if any) xtensa tools from https://github.com/michael-ring/espsdk4fpc.');
+                success:=RealRun;
+              finally
+                FPCupManager.OnlyModules:=s;
+              end;
+              if success then
               begin
-                try
-                  s:=FPCupManager.OnlyModules;
-                  if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
-                  FPCupManager.OnlyModules:='xtensatools4fpc';
-                  AddMessage('Getting xtensa tools from https://github.com/michael-ring/espsdk4fpc.');
-                  success:=RealRun;
-                finally
-                  FPCupManager.OnlyModules:=s;
-                end;
+                // Check if we have received some files.
+                s:=ConcatPaths([FPCupManager.BaseDirectory,CROSSBINPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
+                if DirectoryExists(s) then MissingCrossBins:=false;
+                s:=ConcatPaths([FPCupManager.BaseDirectory,CROSSLIBPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
+                if DirectoryExists(s) then MissingCrossLibs:=false;
+                if MissingCrossBins OR MissingCrossLibs then success:=false;
               end;
             end;
           end;
@@ -3281,15 +3282,15 @@ begin
 
             // bit tricky ... if bins and/or libs are already there exit this retry ... ;-)
 
-            if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+BinPath)) then MissingCrossBins:=false;
+            if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath)) then MissingCrossBins:=false;
 
             if (FPCupManager.CrossOS_SubArch=TSUBARCH.saNone) then
             begin
-              if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+LibPath)) then MissingCrossLibs:=false;
+              if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath)) then MissingCrossLibs:=false;
             end
             else
             begin
-              s:=ConcatPaths([sInstallDir,LibPath,GetSubarch(FPCupManager.CrossOS_SubArch)]);
+              s:=ConcatPaths([FPCupManager.BaseDirectory,LibPath,GetSubarch(FPCupManager.CrossOS_SubArch)]);
               if (NOT DirectoryIsEmpty(s)) then
                 MissingCrossLibs:=false
               else
@@ -3427,8 +3428,11 @@ begin
                   begin
                     Asset := TJSONObject(Assets[iassets]);
                     FileName:=Asset.Get('name');
-                    if (Pos(BinsFileName+'.zip',FileName)=1) then
+                    if AnsiStartsText(BinsFileName+'.zip',FileName) then
+                    begin
+                      BinsFileName:=FileName;
                       FileURL:=Asset.Get('browser_download_url');
+                    end;
                     success:=(Length(FileURL)>0);
                     if success then break;
                   end;
@@ -3439,8 +3443,11 @@ begin
                     begin
                       Asset := TJSONObject(Assets[iassets]);
                       FileName:=Asset.Get('name');
-                      if (Pos(BinsFileName,FileName)=1) then
+                      if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(BinsFileName,FileName)) then
+                      begin
+                        BinsFileName:=FileName;
                         FileURL:=Asset.Get('browser_download_url');
+                      end;
                       success:=(Length(FileURL)>0);
                       if success then break;
                     end;
@@ -3452,7 +3459,6 @@ begin
                     break;
                   end;
                 end;
-
                 if success then
                 begin
                   AddMessage('Found correct online binutils at: '+DownloadURL);
@@ -3481,9 +3487,9 @@ begin
                 if success then
                 begin
                   ZipFile:=(ExtractFileExt(TargetFile)='.zip');
-                  TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+                  TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
                   {$ifndef MSWINDOWS}
-                  TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator;
+                  TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath+DirectorySeparator;
                   {$endif}
                   ForceDirectoriesSafe(TargetPath);
 
@@ -3532,7 +3538,7 @@ begin
                     aList.Add('These binary utilities were happily provided to you by fpcupdeluxe.');
                     aList.Add('You can find them at:');
                     aList.Add(DownloadURL);
-                    s:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
+                    s:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
                     If DirectoryExists(ExtractFileDir(s)) then
                     begin
                       SysUtils.DeleteFile(s);
@@ -3560,7 +3566,7 @@ begin
               end;
 
               // force the download of embedded libs if not there ... if this fails, don't worry, building will go on
-              if (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+LibPath)) AND (FPCupManager.CrossOS_Target=TOS.embedded)
+              if (DirectoryIsEmpty(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath)) AND (FPCupManager.CrossOS_Target=TOS.embedded)
                 then MissingCrossLibs:=true;
 
               if MissingCrossLibs then
@@ -3579,8 +3585,8 @@ begin
                   if success then
                   begin
                     AddMessage('Download successfull !');
-                    TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator;
-                    ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+LibPath);
+                    TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath+DirectorySeparator;
+                    ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath);
                     with TNormalUnzipper.Create do
                     begin
                       try
@@ -3617,8 +3623,11 @@ begin
                   begin
                     Asset := TJSONObject(Assets[iassets]);
                     FileName:=Asset.Get('name');
-                    if (Pos(LibsFileName+'.zip',FileName)=1) then
+                    if AnsiStartsText(LibsFileName+'.zip',FileName) then
+                    begin
+                      LibsFileName:=FileName;
                       FileURL:=Asset.Get('browser_download_url');
+                    end;
                     success:=(Length(FileURL)>0);
                     if success then break;
                   end;
@@ -3629,8 +3638,11 @@ begin
                     begin
                       Asset := TJSONObject(Assets[iassets]);
                       FileName:=Asset.Get('name');
-                      if (Pos(LibsFileName,FileName)=1) then
+                      if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(LibsFileName,FileName)) then
+                      begin
+                        LibsFileName:=FileName;
                         FileURL:=Asset.Get('browser_download_url');
+                      end;
                       success:=(Length(FileURL)>0);
                       if success then break;
                     end;
@@ -3671,9 +3683,9 @@ begin
                 if success then
                 begin
                   ZipFile:=(ExtractFileExt(TargetFile)='.zip');
-                  TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
-                  //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator;
-                  //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+LibPath);
+                  TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
+                  //TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath+DirectorySeparator;
+                  //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath);
 
                   AddMessage('Going to extract archive into '+TargetPath);
 
@@ -3719,7 +3731,7 @@ begin
                     aList.Add('These libraries were happily provided to you by fpcupdeluxe.');
                     aList.Add('You can find them at:');
                     aList.Add(DownloadURL);
-                    s:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
+                    s:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
                     if DirectoryExists(ExtractFileDir(s)) then
                     begin
                       SysUtils.DeleteFile(s);
@@ -4052,10 +4064,13 @@ begin
       WriteString('General','Language',sLanguage);
       {$endif}
 
-      WriteString('ProxySettings','HTTPProxyURL',FPCupManager.HTTPProxyHost);
-      WriteInteger('ProxySettings','HTTPProxyPort',FPCupManager.HTTPProxyPort);
-      WriteString('ProxySettings','HTTPProxyUser',FPCupManager.HTTPProxyUser);
-      WriteString('ProxySettings','HTTPProxyPass',FPCupManager.HTTPProxyPassword);
+      if Assigned(FPCupManager) then
+      begin
+        WriteString('ProxySettings','HTTPProxyURL',FPCupManager.HTTPProxyHost);
+        WriteInteger('ProxySettings','HTTPProxyPort',FPCupManager.HTTPProxyPort);
+        WriteString('ProxySettings','HTTPProxyUser',FPCupManager.HTTPProxyUser);
+        WriteString('ProxySettings','HTTPProxyPass',FPCupManager.HTTPProxyPassword);
+      end;
 
       UpdateFile;
     finally

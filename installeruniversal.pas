@@ -2726,6 +2726,7 @@ begin
         if result then
         begin
           result:=false;
+
           try
             Json:=GetJSON(aContent);
           except
@@ -2760,8 +2761,7 @@ begin
 
         if result then
         begin
-
-          FSourceDirectory:=FBaseDirectory+DirectorySeparator+CROSSBINPATH+DirectorySeparator+'xtensa-freertos';
+          FSourceDirectory:=ConcatPaths([FBaseDirectory,CROSSBINPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
           if ( (NOT DirectoryExists(FSourceDirectory)) OR (DirectoryIsEmpty(FSourceDirectory)) ) then
           begin
             Infoln(localinfotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aBinFile+'] from '+aRemoteURL,etInfo);
@@ -2797,7 +2797,7 @@ begin
             SysUtils.Deletefile(aName); //Get rid of temp file.
           end;
 
-          FSourceDirectory:=FBaseDirectory+DirectorySeparator+CROSSLIBPATH+DirectorySeparator+'xtensa-freertos';
+          FSourceDirectory:=ConcatPaths([FBaseDirectory,CROSSLIBPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
           if ( (NOT DirectoryExists(FSourceDirectory)) OR (DirectoryIsEmpty(FSourceDirectory)) ) then
           begin
             Infoln(localinfotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aLibFile+'] from '+aRemoteURL,etInfo);
