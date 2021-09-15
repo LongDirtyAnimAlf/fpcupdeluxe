@@ -2525,7 +2525,6 @@ function TDeveltools4FPCInstaller.GetModule(ModuleName: string): boolean;
 var
   idx,iassets                         : integer;
   PackageSettings                     : TStringList;
-  Ss                                  : TStringStream;
   RemoteURL                           : string;
   aName,aFile,aURL,aContent,aVersion  : string;
   ResultCode                          : longint;
@@ -2557,61 +2556,46 @@ begin
         // Get latest release through api
         aURL:=StringReplace(RemoteURL,'//github.com','//api.github.com/repos',[]);
         aURL:=aURL+'/releases';
-        Ss := TStringStream.Create('');
-        try
-          result:=Download(False,aURL,Ss);
-          if (NOT result) then
-          begin
-            {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
-            Ss.Clear;
-            {$ENDIF}
-            Ss.Position:=0;
-            result:=Download(True,aURL,Ss);
-          end;
-          if result then aContent:=Ss.DataString;
-        finally
-          Ss.Free;
-        end;
+
+        aContent:=GetURLDataFromCache(aURL);
+        result:=(Length(aContent)>0);
 
         if result then
         begin
           result:=false;
-          if (Length(aContent)>0) then
-          begin
-            try
-              Json:=GetJSON(aContent);
-            except
-              Json:=nil;
-            end;
-            if JSON.IsNull then exit;
+          try
+            Json:=GetJSON(aContent);
+          except
+            Json:=nil;
+          end;
+          if JSON.IsNull then exit;
 
-            try
-              for idx:=0 to Pred(Json.Count) do
+          try
+            for idx:=0 to Pred(Json.Count) do
+            begin
+              Release := TJSONObject(Json.Items[idx]);
+              aVersion:=Release.Get('tag_name');
+              {$ifdef Windows}
+              aFile:='develtools4fpc-x86_64-win64';
+              {$else}
+              aFile:='develtools4fpc-'+GetTargetCPUOS;
+              {$endif}
+              Assets:=Release.Get('assets',TJSONArray(nil));
+              for iassets:=0 to Pred(Assets.Count) do
               begin
-                Release := TJSONObject(Json.Items[idx]);
-                aVersion:=Release.Get('tag_name');
-                {$ifdef Windows}
-                aFile:='develtools4fpc-x86_64-win64';
-                {$else}
-                aFile:='develtools4fpc-'+GetTargetCPUOS;
-                {$endif}
-                Assets:=Release.Get('assets',TJSONArray(nil));
-                for iassets:=0 to Pred(Assets.Count) do
+                Asset := TJSONObject(Assets[iassets]);
+                aName:=Asset.Get('name');
+                if (Pos(aFile,aName)=1) then
                 begin
-                  Asset := TJSONObject(Assets[iassets]);
-                  aName:=Asset.Get('name');
-                  if (Pos(aFile,aName)=1) then
-                  begin
-                    aURL:=Asset.Get('browser_download_url');
-                    result:=true;
-                  end;
-                  if result then break;
+                  aURL:=Asset.Get('browser_download_url');
+                  result:=true;
                 end;
                 if result then break;
               end;
-            finally
-              Json.Free;
+              if result then break;
             end;
+          finally
+            Json.Free;
           end;
         end;
 
@@ -2914,7 +2898,6 @@ function TmORMot2Installer.GetModule(ModuleName: string): boolean;
 var
   idx,iassets                                    : integer;
   PackageSettings                                : TStringList;
-  Ss                                             : TStringStream;
   RemoteURL                                      : string;
   aName,aFile,aURL,aContent,aVersion,aDirectory  : string;
   ResultCode                                     : longint;
@@ -2947,57 +2930,42 @@ begin
         // Get latest release through api
         aURL:=StringReplace(RemoteURL,'//github.com','//api.github.com/repos',[]);
         aURL:=aURL+'/releases';
-        Ss := TStringStream.Create('');
-        try
-          result:=Download(False,aURL,Ss);
-          if (NOT result) then
-          begin
-            {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
-            Ss.Clear;
-            {$ENDIF}
-            Ss.Position:=0;
-            result:=Download(True,aURL,Ss);
-          end;
-          if result then aContent:=Ss.DataString;
-        finally
-          Ss.Free;
-        end;
+
+        aContent:=GetURLDataFromCache(aURL);
+        result:=(Length(aContent)>0);
 
         if result then
         begin
           result:=false;
-          if (Length(aContent)>0) then
-          begin
-            try
-              Json:=GetJSON(aContent);
-            except
-              Json:=nil;
-            end;
-            if JSON.IsNull then exit;
+          try
+            Json:=GetJSON(aContent);
+          except
+            Json:=nil;
+          end;
+          if JSON.IsNull then exit;
 
-            try
-              for idx:=0 to Pred(Json.Count) do
+          try
+            for idx:=0 to Pred(Json.Count) do
+            begin
+              Release := TJSONObject(Json.Items[idx]);
+              aVersion:=Release.Get('tag_name');
+              aFile:='mormot2static.7z';
+              Assets:=Release.Get('assets',TJSONArray(nil));
+              for iassets:=0 to Pred(Assets.Count) do
               begin
-                Release := TJSONObject(Json.Items[idx]);
-                aVersion:=Release.Get('tag_name');
-                aFile:='mormot2static.7z';
-                Assets:=Release.Get('assets',TJSONArray(nil));
-                for iassets:=0 to Pred(Assets.Count) do
+                Asset := TJSONObject(Assets[iassets]);
+                aName:=Asset.Get('name');
+                if (Pos(aFile,aName)=1) then
                 begin
-                  Asset := TJSONObject(Assets[iassets]);
-                  aName:=Asset.Get('name');
-                  if (Pos(aFile,aName)=1) then
-                  begin
-                    aURL:=Asset.Get('browser_download_url');
-                    result:=true;
-                  end;
-                  if result then break;
+                  aURL:=Asset.Get('browser_download_url');
+                  result:=true;
                 end;
                 if result then break;
               end;
-            finally
-              Json.Free;
+              if result then break;
             end;
+          finally
+            Json.Free;
           end;
         end;
 
@@ -3498,17 +3466,6 @@ var
     if setting
        then result:=(V1 AND V2)
        else result:=(V1 OR V2);
-  end;
-
-  function OccurrencesOfChar(const ContentString: string;
-    const CharToCount: char): integer;
-  var
-    C: Char;
-  begin
-    result := 0;
-    for C in ContentString do
-      if C = CharToCount then
-        Inc(result);
   end;
 
 begin

@@ -3368,7 +3368,7 @@ begin
                 end;
 
                 AddMessage('Going to look for the right cross-bins. Can (will) take some time !',True);
-                AddMessage('Looking for: '+BinsFileName, True);
+                AddMessage('Looking for: '+BinsFileName+'.*', True);
 
                 (*
 
@@ -3608,7 +3608,7 @@ begin
               if MissingCrossLibs then
               begin
                 AddMessage('Going to look for the right cross-libraries. Can (will) take some time !',True);
-                AddMessage('Looking for: '+LibsFileName,True);
+                AddMessage('Looking for: '+LibsFileName+'.*',True);
 
                 success:=false;
                 FileURL:='';

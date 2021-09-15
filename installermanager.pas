@@ -365,9 +365,8 @@ type
     property RunInfo:string read GetRunInfo write SetRunInfo;
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
-    function CheckValidCPUOS: boolean;
+    function CheckValidCPUOS(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone): boolean;
     function ParseSubArchsFromSource: TStringList;
-
     // Stop talking. Do it! Returns success status
     function Run: boolean;
 
@@ -834,15 +833,24 @@ begin
   result:=installerUniversal.GetModuleEnabledList(FModuleEnabledList);
 end;
 
-function TFPCupManager.CheckValidCPUOS: boolean;
+function TFPCupManager.CheckValidCPUOS(aCPU:TCPU;aOS:TOS): boolean;
 var
   TxtFile:Text;
   s,sourceline:string;
   x:integer;
   sl:TStringList;
   cpuindex,osindex:integer;
+  aLocalCPU:TCPU;
+  aLocalOS:TOS;
 begin
   result:=false;
+
+  aLocalCPU:=aCPU;
+  if aLocalCPU=TCPU.cpuNone then aLocalCPU:=CrossCPU_Target;
+  aLocalOS:=aOS;
+  if aLocalOS=TOS.osNone then aLocalOS:=CrossOS_Target;
+
+  if ((aLocalCPU=TCPU.cpuNone) OR (aLocalOS=TOS.osNone)) then exit;
 
   //parsing systems.inc for valid CPU / OS system
   s:=ConcatPaths([FPCSourceDirectory,'compiler'])+DirectorySeparator+'systems.inc';
@@ -851,7 +859,7 @@ begin
     sl:=TStringList.Create;
     try
       sl.LoadFromFile(s);
-      s:='system_'+GetCPU(CrossCPU_Target)+'_'+GetOS(CrossOS_Target);
+      s:='system_'+GetCPU(aLocalCPU)+'_'+GetOS(aLocalOS);
       x:=StringListContains(sl,s);
       if (x<>-1) then result:=true;
     finally
@@ -913,7 +921,7 @@ begin
             sl.Delimiter:=',';
             sl.StrictDelimiter:=true;
             sl.DelimitedText:=sourceline;
-            cpuindex:=sl.IndexOf(GetCPU(CrossCPU_Target));
+            cpuindex:=sl.IndexOf(GetCPU(aLocalCPU));
           finally
             sl.Free;
           end;
@@ -954,7 +962,7 @@ begin
             sl.Delimiter:=',';
             sl.StrictDelimiter:=true;
             sl.DelimitedText:=sourceline;
-            osindex:=sl.IndexOf(GetOS(CrossOS_Target));
+            osindex:=sl.IndexOf(GetOS(aLocalOS));
           finally
             sl.Free;
           end;
@@ -1009,15 +1017,11 @@ begin
         end;
 
       end;
-
       CloseFile(TxtFile);
-
     end;
 
   end;
-
 end;
-
 
 function TFPCupManager.ParseSubArchsFromSource: TStringList;
 const
