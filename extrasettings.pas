@@ -163,6 +163,9 @@ type
     function GetAllowOnlinePatching:boolean;
     procedure SetAllowOnlinePatching(value:boolean);
 
+    function GetApplyLocalChanges:boolean;
+    procedure SetApplyLocalChanges(value:boolean);
+
     function GetAddContext:boolean;
     procedure SetAddContext(value:boolean);
 
@@ -245,6 +248,7 @@ type
     property GetUpdates:boolean read GetCheckUpdates write SetCheckUpdates;
     property UseSoftFloat:boolean read GetUseSoftFloat write SetUseSoftFloat;
     property OnlinePatching:boolean read GetAllowOnlinePatching write SetAllowOnlinePatching;
+    property ApplyLocalChanges:boolean read GetApplyLocalChanges write SetApplyLocalChanges;
     property AddContext:boolean read GetAddContext write SetAddContext;
     property AskConfirmation:boolean read GetAskConfirmation write SetAskConfirmation;
 
@@ -327,6 +331,9 @@ resourcestring
 
   HintCheckEnableOnlinePatching = 'Fpcupdeluxe can patch the sources automagically by using online patches.';
   CaptionCheckEnableOnlinePatching = 'Allow patching of sources by online patches.';
+
+  HintCheckApplyLocalChanges = 'Fpcupdeluxe can re-apply the local changes automagically by using local auto-patch.';
+  CaptionCheckApplyLocalChanges = 'Re-apply local changes when updating.';
 
   HintCheckAddContext = 'Double clicking on FPC and Lazarus files will open Lazarus.';
   CaptionCheckAddContext = 'Add context for FPC and Lazarus files.';
@@ -444,6 +451,7 @@ begin
     Append(CaptionCheckGetUpdates);
     Append(CaptionUseSoftFloat80bit);
     Append(CaptionCheckEnableOnlinePatching);
+    Append(CaptionCheckApplyLocalChanges);
     Append(CaptionCheckAddContext);
     Append(CaptionCheckAskConfirmation);
   end;
@@ -1343,6 +1351,15 @@ end;
 procedure TForm2.SetAllowOnlinePatching(value:boolean);
 begin
   SetCheckState(CaptionCheckEnableOnlinePatching,value);
+end;
+
+function TForm2.GetApplyLocalChanges:boolean;
+begin
+  result:=GetCheckState(CaptionCheckApplyLocalChanges);
+end;
+procedure TForm2.SetApplyLocalChanges(value:boolean);
+begin
+  SetCheckState(CaptionCheckApplyLocalChanges,value);
 end;
 
 function TForm2.GetAddContext:boolean;

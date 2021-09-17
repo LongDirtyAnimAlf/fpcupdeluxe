@@ -523,6 +523,8 @@ type
     property HTTPProxyPassword: string read FHTTPProxyPassword write SetHTTPProxyPassword;
     // Whether or not to let locally modified files remain or back them up to .diff and svn revert before compiling
     property KeepLocalChanges: boolean write FKeepLocalChanges;
+    // Whether or not to back up locale changes to .diff and reapply them before compiling
+    property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
     // auto switchover SVN URL
     property SwitchURL: boolean write FSwitchURL;
     // do we have OpenIndiana instead of plain Solaris
@@ -536,8 +538,6 @@ type
     property MakeDirectory: string write FMakeDir;
     // Patch utility to use. Defaults to 'patch'
     property PatchCmd:string write FPatchCmd;
-    // Whether or not to back up locale changes to .diff and reapply them before compiling
-    property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
     // URL for download. HTTP, ftp or svn or git or hg
     property URL: string read FURL write SetURL;
     property TAG: string read FURL write FTAG;
@@ -1044,13 +1044,10 @@ begin
     begin
       OperationSucceeded:=False;
       // try to find systemwide SVN
-      {$IFDEF MSWINDOWS}
       if (NOT ForceLocal) then
-      {$ENDIF MSWINDOWS}
       begin
         OperationSucceeded:=ValidClient;
       end;
-      {$IFDEF MSWINDOWS}
       // try to find fpcupdeluxe SVN
       if (NOT OperationSucceeded) then
         OperationSucceeded:=FindSVNSubDirs;
@@ -1061,7 +1058,6 @@ begin
         // and set FSVNClient.SVNExecutable if succesful
         OperationSucceeded:=DownloadSVN;
       end;
-      {$ENDIF MSWINDOWS}
       if (OperationSucceeded AND (RepoExecutable<>EmptyStr)) then
       begin
         OperationSucceeded:=CheckExecutable(RepoExecutable, ['--version'], '');
@@ -1097,13 +1093,15 @@ begin
 
     OperationSucceeded:=false;
     aLocalClientBinary:=FPatchCmd;
-    if Not FileExists(aLocalClientBinary) then
+    if (Not FileExists(aLocalClientBinary)) then
       aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir) + FPatchCmd;
-    if Not FileExists(aLocalClientBinary) then
+    if (Not FileExists(aLocalClientBinary)) then
     begin
-      GetFile(aURL+'patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
-      GetFile(aURL+'patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
+      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe';
+      GetFile(aURL+'patch.exe',aLocalClientBinary);
+      GetFile(aURL+'patch.exe.manifest',aLocalClientBinary + '.manifest');
     end;
+    if FileExists(aLocalClientBinary) then FPatchCmd:=aLocalClientBinary;
 
     // do not fail
     OperationSucceeded:=True;
@@ -1871,11 +1869,11 @@ begin
 
          if Assigned(UpdateWarnings) then UpdateWarnings.Add(aModuleName + ': reapplying local changes.');
 
-
          for NoPatchStrip in boolean do
          begin
 
-           if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt)) then
+           s:=ExtractFileName(FPatchCmd);
+           if ((s='patch'+GetExeExt) OR (s='gpatch'+GetExeExt)) then
            begin
              if NoPatchStrip then
                LocalPatchCmd:=FPatchCmd + ' -t -p0 -i '
@@ -1890,32 +1888,27 @@ begin
 
            ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
 
-           if (ReturnCode=0) then
-             continue
-           else
-           begin
-             // Patching can go wrong when line endings are not compatible
-             // This happens e.g. with bgracontrols that have CRLF in the source files
-             // Try to circumvent this problem by replacing line enddings
-             if Pos('different line endings',Output)>0 then
-             begin
-               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
-               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
+           if (ReturnCode=0) then break;
 
-               DiffFileCorrectedPath:=IncludeTrailingPathDelimiter(GetTempDirName)+ExtractFileName(DiffFile);
-               if FileCorrectLineEndings(DiffFile,DiffFileCorrectedPath) then
+           // Patching can go wrong when line endings are not compatible
+           // This happens e.g. with bgracontrols that have CRLF in the source files
+           // Try to circumvent this problem by replacing line enddings
+           if Pos('different line endings',Output)>0 then
+           begin
+             //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
+             //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
+             DiffFileCorrectedPath:=IncludeTrailingPathDelimiter(GetTempDirName)+ExtractFileName(DiffFile);
+             if FileCorrectLineEndings(DiffFile,DiffFileCorrectedPath) then
+             begin
+               if FileExists(DiffFileCorrectedPath) then
                begin
-                 if FileExists(DiffFileCorrectedPath) then
-                 begin
-                   ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFileCorrectedPath, FSourceDirectory, Output, FVerbose);
-                   DeleteFile(DiffFileCorrectedPath);
-                 end;
+                 ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFileCorrectedPath, FSourceDirectory, Output, FVerbose);
+                 DeleteFile(DiffFileCorrectedPath);
                end;
              end;
            end;
 
          end;
-
 
          // Report error, but continue !
          if ReturnCode<>0 then
@@ -1947,7 +1940,7 @@ var
   DiffFile: String;
   RepoExists: boolean;
   LocalPatchCmd : string;
-  Output: string = '';
+  s,Output: string;
   {$IFNDEF MSWINDOWS}
   DiffFileSL:TStringList;
   {$ENDIF}
@@ -2084,9 +2077,10 @@ begin
       begin
         Output:='';
 
-        UpdateWarnings.Add(aModuleName + ': reapplying local changes.');
+        if Assigned(UpdateWarnings) then UpdateWarnings.Add(aModuleName + ': reapplying local changes.');
 
-        if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
+        s:=ExtractFileName(FPatchCmd);
+        if ((s='patch'+GetExeExt) OR (s='gpatch'+GetExeExt))
            then LocalPatchCmd:=FPatchCmd + ' -t -p0 -i '
            else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
         CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
@@ -2116,7 +2110,8 @@ begin
             end;
             if CheckoutOrUpdateReturnCode=0 then
             begin
-              if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt))
+              s:=ExtractFileName(FPatchCmd);
+              if ((s='patch'+GetExeExt) OR (s='gpatch'+GetExeExt))
                  then LocalPatchCmd:=FPatchCmd + ' -t -p0 --binary -i '
                  else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
               CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
@@ -3623,16 +3618,13 @@ begin
           j:=Pos(STRIPMAGIC,PatchFilePath);
           if (j>0) then StripLevel:=StrToIntDef(PatchFilePath[j+Length(STRIPMAGIC)],StripLevel);
 
-          {$IFDEF MSWINDOWS}
-          Processor.Executable := IncludeTrailingPathDelimiter(FMakeDir) + FPatchCmd;
-          {$ELSE}
           Processor.Executable := FPatchCmd;
-          {$ENDIF}
           Processor.Process.Parameters.Clear;
           Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
 
           // check for default values
-          if ((FPatchCmd='patch'+GetExeExt) OR (FPatchCmd='gpatch'+GetExeExt)) then
+          s:=ExtractFileName(FPatchCmd);
+          if ((s='patch'+GetExeExt) OR (s='gpatch'+GetExeExt)) then
           begin
             Processor.Process.Parameters.Add('-t');
             Processor.Process.Parameters.Add('-p'+InttoStr(StripLevel));
