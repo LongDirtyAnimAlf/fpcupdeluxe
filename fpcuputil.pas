@@ -1268,11 +1268,17 @@ begin
   Output:=CompilerCommand(CompilerPath,'-iW');
   if Length(Output)>0 then
   begin
-    i:=Pos('-r',Output);
-    if (i>0) then
+    i:=0;
+    if (i=0) then i:=Pos('-release',Output); // prevent -release from being detected as -r ... tricky
+    if (i=0) then
     begin
-      i:=Pos('-release',Output); // prevent -release from being detected as -r ... tricky
-      if (i=0) then Inc(i);
+      i:=Pos('-rrelease',Output); // prevent -rrelease from being detected as -r ... tricky
+      if (i>0) then Inc(i);
+    end;
+    if (i=0) then
+    begin
+      i:=Pos('-r',Output);
+      if (i>0) then Inc(i);
     end;
     if (i=0) then i:=Pos('-',Output);
     if (i>0) then
