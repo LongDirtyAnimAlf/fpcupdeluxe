@@ -243,6 +243,15 @@ begin
       end;
 
       try
+        FManager.NativeFPCBootstrapCompiler:=(NOT Options.GetOption('','onlyupbootstrappers',true));
+      except
+        on E: ECommandLineError do begin
+        // option did not have an argument
+        FManager.NativeFPCBootstrapCompiler:=(NOT Options.GetOptionNoParam('','onlyupbootstrappers'));
+        end;
+      end;
+
+      try
         FManager.KeepLocalChanges:=Options.GetOption('','keeplocalchanges',false);
       except
         on E: ECommandLineError do begin

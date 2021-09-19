@@ -318,7 +318,7 @@ resourcestring
   CaptionCheckSendInfo = 'Send location and install info (default=no)';
 
   HintCheckFpcupBootstrappersOnly = '';
-  CaptionCheckFpcupBootstrappersOnly = 'Only use fpcup bootstrappers (default=no)';
+  CaptionCheckFpcupBootstrappersOnly = 'Only use fpcup bootstrappers (default=yes)';
 
   HintCheckForceLocalRepoClient = 'Use the repo-client by fpcupdeluxe.';
   CaptionCheckForceLocalRepoClient = 'Use local repo-client (default=no)';
@@ -456,11 +456,12 @@ begin
     Append(CaptionCheckAskConfirmation);
   end;
 
-  AskConfirmation := True;
-  Repo            := True;
-  PackageRepo     := False;
-  IncludeHelp     := False;
-  IncludeLCL      := False;
+  AskConfirmation        := True;
+  FpcupBootstrappersOnly := True;
+  Repo                   := True;
+  PackageRepo            := False;
+  IncludeHelp            := False;
+  IncludeLCL             := False;
   {$ifdef RemoteLog}
   SendInfo        := False;
   {$endif}
