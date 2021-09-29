@@ -3063,6 +3063,7 @@ begin
           begin
             Infoln(localinfotext+'Got a V'+aLocalBootstrapVersion+' bootstrap compiler from official FPC bootstrap sources.',etInfo);
             FBootstrapCompilerURL := FPCFTPURL+'dist/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
+            Infoln(localinfotext+'Location [URL]: '+FBootstrapCompilerURL,etInfo);
           end;
         end;
 

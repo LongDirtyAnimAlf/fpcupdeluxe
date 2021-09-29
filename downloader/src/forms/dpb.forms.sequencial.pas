@@ -114,6 +114,7 @@ procedure TfrmSequencial.FormActivate(Sender: TObject);
 var
   index: Integer;
 begin
+  OnActivate:=nil;
   lblDownloads.Visible:=(Length(FDownloads)>1);
   pbDownloads.Visible:=lblDownloads.Visible;
   Application.ProcessMessages;
