@@ -401,6 +401,8 @@ type
     FSVNClient: TSVNClient;
     FRepositoryUpdated: boolean;
     FSourcePatches: string;
+    FPreInstallScriptPath: string;
+    FPostInstallScriptPath: string;
     FMajorVersion: integer; //major part of the version number, e.g. 1 for 1.0.8, or -1 if unknown
     FMinorVersion: integer; //minor part of the version number, e.g. 0 for 1.0.8, or -1 if unknown
     FReleaseVersion: integer; //release part of the version number, e.g. 8 for 1.0.8, or -1 if unknown
@@ -543,6 +545,8 @@ type
     property TAG: string read FURL write FTAG;
     // patches
     property SourcePatches: string write FSourcePatches;
+    property PreInstallScriptPath: string write FPreInstallScriptPath;
+    property PostInstallScriptPath: string write FPostInstallScriptPath;
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
     property NoJobs: boolean write FNoJobs;

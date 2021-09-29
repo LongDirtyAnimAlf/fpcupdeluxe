@@ -33,8 +33,17 @@ type
     chkLazarusDebug: TCheckBox;
     ComboBoxCPU: TComboBox;
     ComboBoxOS: TComboBox;
+    EditFPCPreInstall: TEdit;
+    EditFPCPostInstall: TEdit;
+    EditLazarusPreInstall: TEdit;
+    EditLazarusPostInstall: TEdit;
+    GroupBoxFPCLazScripts: TGroupBox;
     IniPropStorageSettings: TIniPropStorage;
     LabelCPU: TLabel;
+    LabelFPCPreInstall: TLabel;
+    LabelFPCPostInstall: TLabel;
+    LabelLazarusPreInstall: TLabel;
+    LabelLazarusPostInstall: TLabel;
     LabelOS: TLabel;
     MiscellaneousCheckListBox: TCheckListBox;
     EditCrossBuildOptions: TEdit;
@@ -86,6 +95,7 @@ type
     procedure ComboBoxCPUOSChange({%H-}Sender: TObject);
     procedure EditCrossBuildOptionsEditingDone(Sender: TObject);
     procedure EditDblClickDelete(Sender: TObject);
+    procedure EditScriptClick(Sender: TObject);
     procedure FormClose({%H-}Sender: TObject; var {%H-}CloseAction: TCloseAction);
     procedure FormCreate({%H-}Sender: TObject);
     procedure FormDestroy({%H-}Sender: TObject);
@@ -197,6 +207,16 @@ type
     function GetLazarusBranch:string;
     procedure SetLazarusBranch(value:string);
 
+    function GetFPCPreScript:string;
+    procedure SetFPCPreScript(value:string);
+    function GetFPCPostScript:string;
+    procedure SetFPCPostScript(value:string);
+
+    function GetLazarusPreScript:string;
+    procedure SetLazarusPreScript(value:string);
+    function GetLazarusPostScript:string;
+    procedure SetLazarusPostScript(value:string);
+
     function GetFPCPatches:string;
     procedure SetFPCPatches(value:string);
     function GetLazPatches:string;
@@ -271,6 +291,12 @@ type
 
     property FPCBranch:string read GetFPCBranch write SetFPCBranch;
     property LazarusBranch:string read GetLazarusBranch write SetLazarusBranch;
+
+    property FPCPreScript:string read GetFPCPreScript write SetFPCPreScript;
+    property FPCPostScript:string read GetFPCPostScript write SetFPCPostScript;
+
+    property LazarusPreScript:string read GetLazarusPreScript write SetLazarusPreScript;
+    property LazarusPostScript:string read GetLazarusPostScript write SetLazarusPostScript;
 
     property FPCPatches:string read GetFPCPatches write SetFPCPatches;
     property LazPatches:string read GetLazPatches write SetLazPatches;
@@ -729,6 +755,26 @@ begin
   end;
 end;
 
+procedure TForm2.EditScriptClick(Sender: TObject);
+var
+  aEdit:TEdit;
+begin
+  aEdit:=TEdit(Sender);
+  {$ifdef MSWindows}
+  OpenDialog1.Filter:='Script|*.bat|All|*.*';
+  {$else}
+  OpenDialog1.Filter:='Script|*.sh|All|*.*';
+  {$endif MSWindows}
+  OpenDialog1.FilterIndex:=1;
+  if OpenDialog1.Execute then
+  begin
+    aEdit.Text:=ExtractFileName(OpenDialog1.FileName);
+    if Sender=EditFPCPreInstall then
+    begin
+    end;
+  end;
+end;
+
 procedure TForm2.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   SetSelectedSubArch(LocalCPU,LocalOS,LocalSUBARCH);
@@ -745,6 +791,7 @@ var
   FullPatchPath: string;
   aListBox:TListBox;
 begin
+  OpenDialog1.Filter:='Patch|*.patch|Diff|*.diff|All|*.*';
   OpenDialog1.FilterIndex:=1;
   if OpenDialog1.Execute then
   begin
@@ -1464,6 +1511,40 @@ begin
   EditLazarusBranch.Text:=value;
 end;
 
+function TForm2.GetFPCPreScript:string;
+begin
+  result:=EditFPCPreInstall.Text;
+end;
+procedure TForm2.SetFPCPreScript(value:string);
+begin
+  EditFPCPreInstall.Text:=value;
+end;
+function TForm2.GetFPCPostScript:string;
+begin
+  result:=EditFPCPostInstall.Text;
+end;
+procedure TForm2.SetFPCPostScript(value:string);
+begin
+  EditFPCPostInstall.Text:=value;
+end;
+
+function TForm2.GetLazarusPreScript:string;
+begin
+  result:=EditLazarusPreInstall.Text;
+end;
+procedure TForm2.SetLazarusPreScript(value:string);
+begin
+  EditLazarusPreInstall.Text:=value;
+end;
+function TForm2.GetLazarusPostScript:string;
+begin
+  result:=EditLazarusPostInstall.Text;
+end;
+procedure TForm2.SetLazarusPostScript(value:string);
+begin
+  EditLazarusPostInstall.Text:=value;
+end;
+
 function TForm2.GetHTTPProxyHost:string;
 begin
   result:=EditHTTPProxyHost.Text;
@@ -1580,6 +1661,12 @@ begin
 
   FPCBranch:='';
   LazarusBranch:='';
+
+  FPCPreScript:='';
+  FPCPostScript:='';
+
+  LazarusPreScript:='';
+  LazarusPostScript:='';
 
   FPCPatches:='';
   LazPatches:='';

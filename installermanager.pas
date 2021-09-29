@@ -214,8 +214,12 @@ type
     FShortCutNameFpcup: string;
     FSkipModules: string;
     FFPCPatches:string;
+    FFPCPreInstallScriptPath:string;
+    FFPCPostInstallScriptPath:string;
     {$ifndef FPCONLY}
     FLazarusPatches:string;
+    FLazarusPreInstallScriptPath:string;
+    FLazarusPostInstallScriptPath:string;
     {$endif}
     FUninstall:boolean;
     FVerbose: boolean;
@@ -343,8 +347,12 @@ type
     // List of modules that must not be processed
     property SkipModules:string read FSkipModules write FSkipModules;
     property FPCPatches:string read FFPCPatches write FFPCPatches;
+    property FPCPreInstallScriptPath:string read FFPCPreInstallScriptPath write FFPCPreInstallScriptPath;
+    property FPCPostInstallScriptPath:string read FFPCPostInstallScriptPath write FFPCPostInstallScriptPath;
     {$ifndef FPCONLY}
     property LazarusPatches:string read FLazarusPatches write FLazarusPatches;
+    property LazarusPreInstallScriptPath:string read FLazarusPreInstallScriptPath write FLazarusPreInstallScriptPath;
+    property LazarusPostInstallScriptPath:string read FLazarusPostInstallScriptPath write FLazarusPostInstallScriptPath;
     {$endif}
     // Exhaustive/exclusive list of modules that must be processed; no other
     // modules may be processed.
@@ -1650,6 +1658,9 @@ begin
 
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
     (FInstaller as TFPCInstaller).SourcePatches:=FParent.FPCPatches;
+    (FInstaller as TFPCInstaller).PreInstallScriptPath:=FParent.FPCPreInstallScriptPath;
+    (FInstaller as TFPCInstaller).PostInstallScriptPath:=FParent.FPCPostInstallScriptPath;
+
     (FInstaller as TFPCInstaller).SoftFloat:=FParent.SoftFloat;
     if FParent.MUSL then
       (FInstaller as TFPCInstaller).NativeFPCBootstrapCompiler:=false
@@ -1706,7 +1717,10 @@ begin
     // will take care of that.
     (FInstaller as TLazarusInstaller).LCL_Platform:=FParent.LCL_Platform;
     (FInstaller as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
-    (FInstaller as TLazarusInstaller).SourcePatches:=FParent.FLazarusPatches;
+    (FInstaller as TLazarusInstaller).SourcePatches:=FParent.LazarusPatches;
+    (FInstaller as TLazarusInstaller).PreInstallScriptPath:=FParent.LazarusPreInstallScriptPath;
+    (FInstaller as TLazarusInstaller).PostInstallScriptPath:=FParent.LazarusPostInstallScriptPath;
+
     FInstaller.URL:=FParent.LazarusURL;
     FInstaller.Branch:=FParent.LazarusBranch;
     FInstaller.TAG:=FParent.LazarusTag;

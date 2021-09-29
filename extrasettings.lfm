@@ -1,11 +1,11 @@
 object Form2: TForm2
-  Left = 180
-  Height = 660
-  Top = 139
-  Width = 782
+  Left = 356
+  Height = 762
+  Top = 141
+  Width = 842
   Caption = 'Advanced settings'
-  ClientHeight = 660
-  ClientWidth = 782
+  ClientHeight = 762
+  ClientWidth = 842
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -17,7 +17,7 @@ object Form2: TForm2
     Left = 8
     Height = 124
     Top = 8
-    Width = 387
+    Width = 447
     Anchors = [akTop, akLeft, akRight]
     AutoSize = True
     BorderSpacing.Left = 8
@@ -27,7 +27,7 @@ object Form2: TForm2
     BorderSpacing.InnerBorder = 4
     Caption = 'Proxy settings'
     ClientHeight = 104
-    ClientWidth = 383
+    ClientWidth = 443
     ParentFont = False
     TabOrder = 0
     object Label1: TLabel
@@ -51,7 +51,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 23
-      Width = 274
+      Width = 334
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -65,7 +65,7 @@ object Form2: TForm2
       AnchorSideTop.Control = Label1
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 290
+      Left = 350
       Height = 15
       Top = 4
       Width = 89
@@ -80,7 +80,7 @@ object Form2: TForm2
       AnchorSideTop.Control = EditHTTPProxyHost
       AnchorSideRight.Control = Label2
       AnchorSideRight.Side = asrBottom
-      Left = 290
+      Left = 350
       Height = 23
       Top = 23
       Width = 89
@@ -122,7 +122,7 @@ object Form2: TForm2
       AnchorSideTop.Control = Label3
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 262
+      Left = 322
       Height = 15
       Top = 54
       Width = 117
@@ -136,7 +136,7 @@ object Form2: TForm2
       AnchorSideTop.Control = EditHTTPProxyUser
       AnchorSideRight.Control = Label4
       AnchorSideRight.Side = asrBottom
-      Left = 262
+      Left = 322
       Height = 23
       Top = 73
       Width = 117
@@ -155,24 +155,24 @@ object Form2: TForm2
     AnchorSideRight.Control = ScrollBox1
     AnchorSideBottom.Control = btnAddFPCPatch
     Left = 8
-    Height = 430
+    Height = 474
     Top = 140
-    Width = 392
+    Width = 452
     Anchors = [akTop, akLeft, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 8
     BorderSpacing.Right = 8
-    BorderSpacing.Bottom = 12
+    BorderSpacing.Bottom = 24
     Caption = 'Miscellaneous settings'
-    ClientHeight = 410
-    ClientWidth = 388
+    ClientHeight = 454
+    ClientWidth = 448
     ParentFont = False
     TabOrder = 3
     object MiscellaneousCheckListBox: TCheckListBox
       Left = 4
-      Height = 402
+      Height = 446
       Top = 4
-      Width = 380
+      Width = 440
       Align = alClient
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -190,9 +190,10 @@ object Form2: TForm2
     AnchorSideTop.Control = GroupBox2
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = ButtonPanel
-    Left = 408
-    Height = 419
+    AnchorSideBottom.Control = GroupBox2
+    AnchorSideBottom.Side = asrBottom
+    Left = 468
+    Height = 474
     Top = 140
     Width = 366
     HorzScrollBar.Page = 223
@@ -200,8 +201,7 @@ object Form2: TForm2
     Anchors = [akTop, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Right = 8
-    BorderSpacing.Bottom = 4
-    ClientHeight = 415
+    ClientHeight = 470
     ClientWidth = 362
     ParentFont = False
     TabOrder = 4
@@ -582,7 +582,7 @@ object Form2: TForm2
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 574
+    Left = 634
     Height = 124
     Top = 8
     Width = 200
@@ -716,7 +716,7 @@ object Form2: TForm2
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = GroupBoxFPCLazBranchRevision
-    Left = 403
+    Left = 463
     Height = 124
     Top = 8
     Width = 163
@@ -818,17 +818,17 @@ object Form2: TForm2
     end
   end
   object ListBoxFPCPatch: TListBox
-    AnchorSideLeft.Control = btnRemFPCPatch
-    AnchorSideLeft.Side = asrBottom
+    AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = btnAddFPCPatch
-    AnchorSideBottom.Control = btnRemFPCPatch
+    AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 134
-    Height = 70
-    Top = 582
+    Left = 8
+    Height = 50
+    Top = 704
     Width = 170
-    Anchors = [akTop, akLeft, akBottom]
+    Anchors = [akLeft, akBottom]
     BorderSpacing.Left = 8
+    BorderSpacing.Bottom = 8
     ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
@@ -836,15 +836,15 @@ object Form2: TForm2
     TabOrder = 5
   end
   object btnAddFPCPatch: TButton
-    AnchorSideLeft.Control = btnRemFPCPatch
+    AnchorSideLeft.Control = ListBoxFPCPatch
     AnchorSideBottom.Control = btnRemFPCPatch
-    Left = 6
+    Left = 8
     Height = 25
-    Top = 582
+    Top = 638
     Width = 120
     Anchors = [akLeft, akBottom]
     AutoSize = True
-    BorderSpacing.Bottom = 20
+    BorderSpacing.Bottom = 8
     Caption = 'Add FPC patch'
     Constraints.MinHeight = 24
     Constraints.MinWidth = 120
@@ -853,16 +853,14 @@ object Form2: TForm2
     TabOrder = 6
   end
   object btnRemFPCPatch: TButton
-    AnchorSideLeft.Control = Owner
-    AnchorSideBottom.Control = Owner
-    AnchorSideBottom.Side = asrBottom
-    Left = 6
+    AnchorSideLeft.Control = ListBoxFPCPatch
+    AnchorSideBottom.Control = ListBoxFPCPatch
+    Left = 8
     Height = 25
-    Top = 627
+    Top = 671
     Width = 120
     Anchors = [akLeft, akBottom]
     AutoSize = True
-    BorderSpacing.Left = 6
     BorderSpacing.Bottom = 8
     Caption = 'Rem. FPC patch'
     Constraints.MinHeight = 24
@@ -872,17 +870,17 @@ object Form2: TForm2
     TabOrder = 7
   end
   object ListBoxLazPatch: TListBox
-    AnchorSideLeft.Control = btnRemLazPatch
+    AnchorSideLeft.Control = ListBoxFPCPatch
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = btnAddFPCPatch
-    AnchorSideBottom.Control = btnRemFPCPatch
+    AnchorSideTop.Control = ListBoxFPCPatch
+    AnchorSideBottom.Control = ListBoxFPCPatch
     AnchorSideBottom.Side = asrBottom
-    Left = 450
-    Height = 70
-    Top = 582
+    Left = 202
+    Height = 50
+    Top = 704
     Width = 170
     Anchors = [akTop, akLeft, akBottom]
-    BorderSpacing.Left = 6
+    BorderSpacing.Left = 24
     ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
@@ -890,14 +888,16 @@ object Form2: TForm2
     TabOrder = 8
   end
   object btnAddLazPatch: TButton
-    AnchorSideLeft.Control = btnRemLazPatch
+    AnchorSideLeft.Control = ListBoxLazPatch
     AnchorSideTop.Control = btnAddFPCPatch
     AnchorSideBottom.Control = btnRemLazPatch
-    Left = 324
+    Left = 202
     Height = 25
-    Top = 582
+    Top = 638
     Width = 120
+    Anchors = [akLeft, akBottom]
     AutoSize = True
+    BorderSpacing.Bottom = 8
     Caption = 'Add Laz. patch'
     Constraints.MinHeight = 24
     Constraints.MinWidth = 120
@@ -906,17 +906,15 @@ object Form2: TForm2
     TabOrder = 9
   end
   object btnRemLazPatch: TButton
-    AnchorSideLeft.Control = ListBoxFPCPatch
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideBottom.Control = btnRemFPCPatch
-    AnchorSideBottom.Side = asrBottom
-    Left = 324
+    AnchorSideLeft.Control = ListBoxLazPatch
+    AnchorSideBottom.Control = ListBoxLazPatch
+    Left = 202
     Height = 25
-    Top = 627
+    Top = 671
     Width = 120
     Anchors = [akLeft, akBottom]
     AutoSize = True
-    BorderSpacing.Left = 20
+    BorderSpacing.Bottom = 8
     Caption = 'Rem. Laz. patch'
     Constraints.MinHeight = 24
     Constraints.MinWidth = 120
@@ -924,14 +922,155 @@ object Form2: TForm2
     ParentFont = False
     TabOrder = 10
   end
+  object GroupBoxFPCLazScripts: TGroupBox
+    AnchorSideLeft.Control = ListBoxLazPatch
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 396
+    Height = 124
+    Top = 630
+    Width = 276
+    Anchors = [akLeft, akBottom]
+    AutoSize = True
+    BorderSpacing.Left = 24
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 8
+    BorderSpacing.Bottom = 8
+    BorderSpacing.InnerBorder = 4
+    Caption = 'Pre and post install scripts'
+    ClientHeight = 104
+    ClientWidth = 272
+    ParentFont = False
+    TabOrder = 12
+    object EditFPCPreInstall: TEdit
+      AnchorSideLeft.Control = GroupBoxFPCLazScripts
+      AnchorSideTop.Control = LabelFPCPreInstall
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = EditFPCPostInstall
+      Left = 4
+      Height = 23
+      Top = 23
+      Width = 132
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      Constraints.MinWidth = 124
+      OnClick = EditScriptClick
+      ParentFont = False
+      TabOrder = 0
+    end
+    object LabelFPCPreInstall: TLabel
+      AnchorSideLeft.Control = EditFPCPreInstall
+      AnchorSideTop.Control = GroupBoxFPCLazScripts
+      Left = 8
+      Height = 15
+      Top = 4
+      Width = 41
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 4
+      Caption = 'FPC pre'
+      ParentFont = False
+    end
+    object EditFPCPostInstall: TEdit
+      AnchorSideLeft.Control = LabelFPCPostInstall
+      AnchorSideTop.Control = LabelFPCPostInstall
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBoxFPCLazScripts
+      AnchorSideRight.Side = asrBottom
+      Left = 144
+      Height = 23
+      Top = 23
+      Width = 124
+      Anchors = [akTop, akRight]
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 4
+      Constraints.MinWidth = 124
+      OnClick = EditScriptClick
+      ParentFont = False
+      TabOrder = 1
+    end
+    object LabelFPCPostInstall: TLabel
+      AnchorSideLeft.Control = EditFPCPostInstall
+      AnchorSideTop.Control = LabelFPCPreInstall
+      Left = 144
+      Height = 15
+      Top = 4
+      Width = 47
+      Caption = 'FPC post'
+      ParentFont = False
+    end
+    object LabelLazarusPreInstall: TLabel
+      AnchorSideLeft.Control = EditLazarusPreInstall
+      AnchorSideTop.Control = EditFPCPreInstall
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 15
+      Top = 54
+      Width = 59
+      BorderSpacing.Top = 8
+      Caption = 'Lazarus pre'
+      ParentFont = False
+    end
+    object EditLazarusPreInstall: TEdit
+      AnchorSideLeft.Control = GroupBoxFPCLazScripts
+      AnchorSideTop.Control = LabelLazarusPreInstall
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = EditLazarusPostInstall
+      Left = 4
+      Height = 23
+      Top = 73
+      Width = 132
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      Constraints.MinWidth = 124
+      OnClick = EditScriptClick
+      ParentFont = False
+      TabOrder = 2
+    end
+    object LabelLazarusPostInstall: TLabel
+      AnchorSideLeft.Control = EditLazarusPostInstall
+      AnchorSideTop.Control = LabelLazarusPreInstall
+      Left = 144
+      Height = 15
+      Top = 54
+      Width = 65
+      Caption = 'Lazarus post'
+      ParentFont = False
+    end
+    object EditLazarusPostInstall: TEdit
+      AnchorSideLeft.Control = LabelLazarusPostInstall
+      AnchorSideTop.Control = LabelLazarusPostInstall
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBoxFPCLazScripts
+      AnchorSideRight.Side = asrBottom
+      Left = 144
+      Height = 23
+      Top = 73
+      Width = 124
+      Anchors = [akTop, akRight]
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 4
+      Constraints.MinWidth = 124
+      OnClick = EditScriptClick
+      ParentFont = False
+      TabOrder = 3
+    end
+  end
   object ButtonPanel: TPanel
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 676
+    Left = 736
     Height = 89
-    Top = 563
+    Top = 665
     Width = 98
     Anchors = [akRight, akBottom]
     BorderSpacing.Right = 8
