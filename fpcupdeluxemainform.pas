@@ -2023,7 +2023,7 @@ begin
   end;
   }
 
-  if (Sender=WioBtn) OR (Sender=PicoBtn) OR (Sender=ESPBtn) then
+  if (Sender=WioBtn) OR (Sender=PicoBtn) then
   begin
     if Sender=PicoBtn then
     begin
@@ -2035,12 +2035,15 @@ begin
       s:='Going to install FPC and Lazarus for Wio Terminal.';
       aModule:='develtools4fpc,mbf-freertos-wio';
     end;
-    if Sender=ESPBtn then
-    begin
-      s:='Going to install FPC and Lazarus for ESP32.';
-      aModule:='xtensatools4fpc';
-    end;
     aFPCTarget:='embedded'+GITLABEXTENSION;
+    aLazarusTarget:='trunk'+GITLABEXTENSION;
+  end;
+
+  if Sender=ESPBtn then
+  begin
+    s:='Going to install FPC and Lazarus for ESP32.';
+    aModule:='xtensatools4fpc';
+    aFPCTarget:='trunk'+GITLABEXTENSION;
     aLazarusTarget:='trunk'+GITLABEXTENSION;
   end;
 
@@ -3420,18 +3423,18 @@ begin
                 for i:=0 to Pred(Json.Count) do
                 begin
                   Item := TJSONObject(Json.Items[i]);
-                  TagName:=Item.Get('tag_name');
+                  TagName:=Item{%H-}.Get('tag_name');
                   if (Pos(BaseBinsURL,TagName)<>1) then continue;
                   Assets:=Item.Get('assets',TJSONArray(nil));
                   // Search zip
                   for iassets:=0 to Pred(Assets.Count) do
                   begin
                     Asset := TJSONObject(Assets[iassets]);
-                    FileName:=Asset.Get('name');
+                    FileName:=Asset{%H-}.Get('name');
                     if AnsiStartsText(BinsFileName+'.zip',FileName) then
                     begin
                       BinsFileName:=FileName;
-                      FileURL:=Asset.Get('browser_download_url');
+                      FileURL:=Asset{%H-}.Get('browser_download_url');
                     end;
                     success:=(Length(FileURL)>0);
                     if success then break;
@@ -3442,11 +3445,11 @@ begin
                     for iassets:=0 to Pred(Assets.Count) do
                     begin
                       Asset := TJSONObject(Assets[iassets]);
-                      FileName:=Asset.Get('name');
+                      FileName:=Asset{%H-}.Get('name');
                       if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(BinsFileName,FileName)) then
                       begin
                         BinsFileName:=FileName;
-                        FileURL:=Asset.Get('browser_download_url');
+                        FileURL:=Asset{%H-}.Get('browser_download_url');
                       end;
                       success:=(Length(FileURL)>0);
                       if success then break;
@@ -3615,18 +3618,18 @@ begin
                 for i:=0 to Pred(Json.Count) do
                 begin
                   Item := TJSONObject(Json.Items[i]);
-                  TagName:=Item.Get('tag_name');
+                  TagName:=Item{%H-}.Get('tag_name');
                   if (Pos(BaseLibsURL,TagName)<>1) then continue;
                   Assets:=Item.Get('assets',TJSONArray(nil));
                   // Search zip
                   for iassets:=0 to Pred(Assets.Count) do
                   begin
                     Asset := TJSONObject(Assets[iassets]);
-                    FileName:=Asset.Get('name');
+                    FileName:=Asset{%H-}.Get('name');
                     if AnsiStartsText(LibsFileName+'.zip',FileName) then
                     begin
                       LibsFileName:=FileName;
-                      FileURL:=Asset.Get('browser_download_url');
+                      FileURL:=Asset{%H-}.Get('browser_download_url');
                     end;
                     success:=(Length(FileURL)>0);
                     if success then break;
@@ -3637,11 +3640,11 @@ begin
                     for iassets:=0 to Pred(Assets.Count) do
                     begin
                       Asset := TJSONObject(Assets[iassets]);
-                      FileName:=Asset.Get('name');
+                      FileName:=Asset{%H-}.Get('name');
                       if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(LibsFileName,FileName)) then
                       begin
                         LibsFileName:=FileName;
-                        FileURL:=Asset.Get('browser_download_url');
+                        FileURL:=Asset{%H-}.Get('browser_download_url');
                       end;
                       success:=(Length(FileURL)>0);
                       if success then break;

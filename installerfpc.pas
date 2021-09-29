@@ -2874,7 +2874,9 @@ var
   FreeBSDVersion:integer;
   {$ENDIF}
   s:string;
+  {$ifdef MSWindows}
   aPath:string;
+  {$endif}
   {$ifdef Darwin}
   s1:string;
   {$endif}
