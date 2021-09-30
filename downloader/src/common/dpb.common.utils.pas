@@ -37,38 +37,63 @@ function FormatBytes(ABytes: Int64): String;
 implementation
 
 function FormatBytes(ABytes: Int64): String;
+
+  function FormatReal(ASize: Double): String;
+  begin
+    Result:= EmptyStr;
+    if ASize < 10 then
+    begin
+      Result:= FormatFloat('0.00', ASize);
+      exit;
+    end;
+    if ASize < 100 then
+    begin
+      Result:= FormatFloat('00.0', ASize);
+      exit;
+    end;
+    if ASize < 1000 then
+    begin
+      Result:= FormatFloat('#000', ASize);
+      exit;
+    end;
+    if ASize < 1024 then
+    begin
+      Result:= FormatFloat('0000', ASize);
+      exit;
+    end;
+  end;
+
 var
-  dSize: Double;
+  dSize: Double = 0.0;
 begin
   Result := '';
-  dSize := 0.0;
   if ABytes < 1024 then
   begin
-    Result := IntToStr(ABytes) + ' B';
+    Result:= ' B';
     exit;
   end;
   if ABytes < (1024*1024) then
   begin
-    dSize := ABytes / 1024;
-    Result := FormatFloat('0.00', dSize) + ' KB';
+    dSize:= ABytes / 1024;
+    Result:= FormatReal(dSize) + ' KB';
     exit;
   end;
   if ABytes < (1024*1024*1024) then
   begin
-    dSize := ABytes / 1024 / 1024;
-    Result := FormatFloat('0.00', dSize) + ' MB';
+    dSize:= ABytes / 1024 / 1024;
+    Result:= FormatReal(dSize) + ' MB';
     exit;
   end;
   if ABytes < (1024*1024*1024*1024) then
   begin
-    dSize := ABytes / 1024 / 1024 / 1024;
-    Result := FormatFloat('0.00', dSize) + 'GB';
+    dSize:= ABytes / 1024 / 1024 / 1024;
+    Result:= FormatReal(dSize) + 'GB';
     exit;
   end;
   if ABytes < (1024*1024*1024*1024*1024) then
   begin
-    dSize := ABytes / 1024 / 1024 / 1024 / 1024;
-    Result := FormatFloat('0.00', dSize) + ' TB';
+    dSize:= ABytes / 1024 / 1024 / 1024 / 1024;
+    Result:= FormatReal(dSize) + ' TB';
   end;
 end;
 

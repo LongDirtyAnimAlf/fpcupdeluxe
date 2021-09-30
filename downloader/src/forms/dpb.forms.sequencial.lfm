@@ -2,7 +2,7 @@ object frmSequencial: TfrmSequencial
   Left = 367
   Height = 162
   Top = 254
-  Width = 700
+  Width = 400
   Anchors = []
   AutoSize = True
   BorderIcons = []
@@ -10,9 +10,9 @@ object frmSequencial: TfrmSequencial
   BorderWidth = 16
   Caption = 'Gus downloader !'
   ClientHeight = 162
-  ClientWidth = 700
+  ClientWidth = 400
   Constraints.MaxWidth = 1024
-  Constraints.MinWidth = 700
+  Constraints.MinWidth = 400
   OnActivate = FormActivate
   OnCreate = FormCreate
   Position = poOwnerFormCenter
@@ -37,7 +37,7 @@ object frmSequencial: TfrmSequencial
     Left = 16
     Height = 20
     Top = 62
-    Width = 668
+    Width = 368
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 8
     Smooth = True
@@ -63,7 +63,7 @@ object frmSequencial: TfrmSequencial
     Left = 16
     Height = 20
     Top = 121
-    Width = 668
+    Width = 368
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 8
     Smooth = True

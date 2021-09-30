@@ -86,6 +86,7 @@ var
 implementation
 
 uses
+  FileCtrl,
 {$IFDEF USEMORMOT}
   mormot.net.client
 {$ELSE}
@@ -121,7 +122,8 @@ begin
   if pbDownloads.Visible then pbDownloads.Max:= Length(FDownloads);
   index:=0;
   repeat
-    lblTop.Caption:= Format('File: %s',[FDownloads[index].Filename]);
+    lblTop.Caption:= Format('File: %s',[MiniMizeName(FDownloads[index].Filename, lblTop.Canvas, lblTop.Parent.Width-(lblTop.Left*2))]);
+    //lblTop.Caption:= Format('File: %s',[FDownloads[index].Filename]);
     if lblDownloads.Visible then lblDownloads.Caption:= Format('%d of %d', [index + 1, Length(FDownloads)]);
     Application.ProcessMessages;
     try
