@@ -944,6 +944,7 @@ object Form2: TForm2
     Caption = 'Pre and post install scripts'
     ClientHeight = 104
     ClientWidth = 272
+    Enabled = False
     ParentFont = False
     TabOrder = 12
     object EditFPCPreInstall: TEdit

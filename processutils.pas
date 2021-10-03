@@ -1049,6 +1049,8 @@ begin
         {$ifdef MSWINDOWS}
         if AnsiContainsText(line,'unable to determine the libgcc path') then exit;
         {$endif}
+
+        if AnsiContainsText(line,'constant cast with potential data loss') then exit;
       end;
       // suppress "trivial"* build commands
 

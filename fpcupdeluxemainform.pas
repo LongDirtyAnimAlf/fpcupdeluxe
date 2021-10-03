@@ -3068,7 +3068,7 @@ begin
 
             if ((Sender<>nil) AND (CheckAutoClear.Checked)) then memoSummary.Clear;
 
-            memoSummary.Lines.Append('New try building a cross-compiler for '+GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target)+'.');
+            memoSummary.Lines.Append('Trying to build the cross-compiler for '+GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target)+'.');
 
             AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
 
@@ -3764,7 +3764,7 @@ begin
             FPCVersionLabel.Font.Color:=clDefault;
             LazarusVersionLabel.Font.Color:=clDefault;
             AddMessage('Got all tools now. Building a cross-compiler for '+GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target),True);
-            memoSummary.Lines.Append('Got all tools now. Start building cross-compiler.');
+            memoSummary.Lines.Append('Got all tools. Started to build cross-compiler.');
             if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
 
             AddMessage(sStatus);
