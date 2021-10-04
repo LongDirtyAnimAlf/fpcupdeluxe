@@ -2470,6 +2470,8 @@ begin
   result:=InstallPackage(FilePath,WorkingDir,False);
   if not result then exit;
 
+  RebuildLazarus;
+
   {$endif}
 end;
 
