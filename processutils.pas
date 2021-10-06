@@ -1051,6 +1051,8 @@ begin
         {$endif}
 
         if AnsiContainsText(line,'constant cast with potential data loss') then exit;
+
+        if AnsiContainsText(line,'Removed non empty directory') then exit;
       end;
       // suppress "trivial"* build commands
 

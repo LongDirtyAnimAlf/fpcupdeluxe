@@ -504,6 +504,8 @@ begin
     SendInfo:=ReadBool('General','SendInfo',SendInfo);
     {$endif}
 
+    GetUpdates:=ReadBool('General','GetUpdates',GetUpdates);
+
     AskConfirmation:=ReadBool('General','AskConfirmation',AskConfirmation);
 
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
@@ -953,6 +955,8 @@ begin
     {$ifdef RemoteLog}
     WriteBool('General','SendInfo',SendInfo);
     {$endif}
+
+    WriteBool('General','GetUpdates',GetUpdates);
 
     WriteBool('General','AskConfirmation',AskConfirmation);
 

@@ -2409,8 +2409,6 @@ begin
   result:=inherited;
   if not result then exit;
 
-  {$ifndef FPCONLY}
-
   //Perform some extra magic for this module
 
   Workingdir:='';
@@ -2424,20 +2422,52 @@ begin
     Workingdir:=FixPath(Workingdir);
   end;
 
+  if (NOT DirectoryExists(Workingdir)) then exit;
+
+  FilePath:=ConcatPaths([WorkingDir,'units',GetFPCTarget(true)]);
+  if DirectoryExists(FilePath) then DeleteDirectoryEx(FilePath);
+
+  FilePath:=ConcatPaths([WorkingDir,'bin',GetFPCTarget(true)]);
+  if DirectoryExists(FilePath) then DeleteDirectoryEx(FilePath);
+
+  FilePath:=ConcatPaths([WorkingDir,'fpmake'+GetExeExt]);
+  if FileExists(FilePath) then SysUtils.DeleteFile(FilePath);
+
+  FilePath:=ConcatPaths([WorkingDir,'fpmake.o']);
+  if FileExists(FilePath) then SysUtils.DeleteFile(FilePath);
+
   Processor.Process.Parameters.Clear;
   Processor.Executable:=Make;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
   Processor.Process.Parameters.Add('PP='+FCompiler);
-  //Processor.Process.Parameters.Add('FPC='+FCompiler);
+  //Processor.Process.Parameters.Add('FPCDIR=' + IncludeTrailingPathDelimiter(Workingdir)+'compiler');
 
   Processor.Process.Parameters.Add('clean');
   Processor.Process.Parameters.Add('all');
 
   Infoln(infotext+Processor.GetExeInfo,etDebug);
-  ProcessorResult:=Processor.ExecuteAndWait;
-  result := (ProcessorResult=0);
+
+  try
+    ProcessorResult:=Processor.ExecuteAndWait;
+    result := (ProcessorResult=0);
+
+    if (NOT result) then
+    begin
+      WritelnLog(etError, infotext+ExtractFileName(Processor.Executable)+' returned error code ' + IntToStr(ProcessorResult) + LineEnding +
+        'Details: ' + FErrorLog.Text, true);
+    end;
+  except
+    on E: Exception do
+    begin
+      result := false;
+      WritelnLog(etError, infotext+'Exception running '+ExtractFileName(Processor.Executable)+' to build the pas2js compiler !' + LineEnding +
+        'Details: ' + E.Message, true);
+    end;
+  end;
 
   if not result then exit;
+
+  {$ifndef FPCONLY}
 
   LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
   try
