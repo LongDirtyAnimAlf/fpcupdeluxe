@@ -21,13 +21,13 @@ type
   TForm2 = class(TForm)
     BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
+    btnAddFPCPatch: TButton;
+    btnAddLazPatch: TButton;
     btnListCustomOptions: TButton;
+    btnRemFPCPatch: TButton;
+    btnRemLazPatch: TButton;
     btnSelectLibDir: TButton;
     btnSelectBinDir: TButton;
-    btnAddFPCPatch: TButton;
-    btnRemFPCPatch: TButton;
-    btnAddLazPatch: TButton;
-    btnRemLazPatch: TButton;
     btnSelectCompiler: TButton;
     chkFPCDebug: TCheckBox;
     chkLazarusDebug: TCheckBox;
@@ -37,6 +37,7 @@ type
     EditFPCPostInstall: TEdit;
     EditLazarusPreInstall: TEdit;
     EditLazarusPostInstall: TEdit;
+    grpPatching: TGroupBox;
     GroupBoxFPCLazScripts: TGroupBox;
     IniPropStorageSettings: TIniPropStorage;
     LabelCPU: TLabel;
@@ -45,6 +46,8 @@ type
     LabelLazarusPreInstall: TLabel;
     LabelLazarusPostInstall: TLabel;
     LabelOS: TLabel;
+    ListBoxFPCPatch: TListBox;
+    ListBoxLazPatch: TListBox;
     MiscellaneousCheckListBox: TCheckListBox;
     EditCrossBuildOptions: TEdit;
     EditFPCBranch: TEdit;
@@ -77,8 +80,6 @@ type
     LabelLazarusbranch: TLabel;
     LabelLazarusOptions: TLabel;
     LabelLazarusRevision: TLabel;
-    ListBoxFPCPatch: TListBox;
-    ListBoxLazPatch: TListBox;
     OpenDialog1: TOpenDialog;
     ButtonPanel: TPanel;
     PageControl1: TPageControl;

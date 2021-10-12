@@ -153,9 +153,9 @@ object Form2: TForm2
     AnchorSideTop.Control = GroupBox1
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = ScrollBox1
-    AnchorSideBottom.Control = btnAddFPCPatch
+    AnchorSideBottom.Control = grpPatching
     Left = 8
-    Height = 474
+    Height = 438
     Top = 140
     Width = 452
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -164,13 +164,13 @@ object Form2: TForm2
     BorderSpacing.Right = 8
     BorderSpacing.Bottom = 24
     Caption = 'Miscellaneous settings'
-    ClientHeight = 454
+    ClientHeight = 418
     ClientWidth = 448
     ParentFont = False
     TabOrder = 3
     object MiscellaneousCheckListBox: TCheckListBox
       Left = 4
-      Height = 446
+      Height = 410
       Top = 4
       Width = 440
       Align = alClient
@@ -193,7 +193,7 @@ object Form2: TForm2
     AnchorSideBottom.Control = GroupBox2
     AnchorSideBottom.Side = asrBottom
     Left = 468
-    Height = 474
+    Height = 438
     Top = 140
     Width = 366
     HorzScrollBar.Page = 223
@@ -201,7 +201,7 @@ object Form2: TForm2
     Anchors = [akTop, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Right = 8
-    ClientHeight = 470
+    ClientHeight = 434
     ClientWidth = 362
     ParentFont = False
     TabOrder = 4
@@ -817,120 +817,15 @@ object Form2: TForm2
       TabOrder = 3
     end
   end
-  object ListBoxFPCPatch: TListBox
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = btnAddFPCPatch
-    AnchorSideBottom.Control = Owner
-    AnchorSideBottom.Side = asrBottom
-    Left = 8
-    Height = 50
-    Top = 704
-    Width = 170
-    Anchors = [akLeft, akBottom]
-    BorderSpacing.Left = 8
-    BorderSpacing.Bottom = 8
-    ClickOnSelChange = False
-    ExtendedSelect = False
-    ItemHeight = 0
-    ParentFont = False
-    TabOrder = 5
-  end
-  object btnAddFPCPatch: TButton
-    AnchorSideLeft.Control = ListBoxFPCPatch
-    AnchorSideBottom.Control = btnRemFPCPatch
-    Left = 8
-    Height = 25
-    Top = 638
-    Width = 120
-    Anchors = [akLeft, akBottom]
-    AutoSize = True
-    BorderSpacing.Bottom = 8
-    Caption = 'Add FPC patch'
-    Constraints.MinHeight = 24
-    Constraints.MinWidth = 120
-    OnClick = btnAddPatchClick
-    ParentFont = False
-    TabOrder = 6
-  end
-  object btnRemFPCPatch: TButton
-    AnchorSideLeft.Control = ListBoxFPCPatch
-    AnchorSideBottom.Control = ListBoxFPCPatch
-    Left = 8
-    Height = 25
-    Top = 671
-    Width = 120
-    Anchors = [akLeft, akBottom]
-    AutoSize = True
-    BorderSpacing.Bottom = 8
-    Caption = 'Rem. FPC patch'
-    Constraints.MinHeight = 24
-    Constraints.MinWidth = 120
-    OnClick = btnRemPatchClick
-    ParentFont = False
-    TabOrder = 7
-  end
-  object ListBoxLazPatch: TListBox
-    AnchorSideLeft.Control = ListBoxFPCPatch
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = ListBoxFPCPatch
-    AnchorSideBottom.Control = ListBoxFPCPatch
-    AnchorSideBottom.Side = asrBottom
-    Left = 202
-    Height = 50
-    Top = 704
-    Width = 170
-    Anchors = [akTop, akLeft, akBottom]
-    BorderSpacing.Left = 24
-    ClickOnSelChange = False
-    ExtendedSelect = False
-    ItemHeight = 0
-    ParentFont = False
-    TabOrder = 8
-  end
-  object btnAddLazPatch: TButton
-    AnchorSideLeft.Control = ListBoxLazPatch
-    AnchorSideTop.Control = btnAddFPCPatch
-    AnchorSideBottom.Control = btnRemLazPatch
-    Left = 202
-    Height = 25
-    Top = 638
-    Width = 120
-    Anchors = [akLeft, akBottom]
-    AutoSize = True
-    BorderSpacing.Bottom = 8
-    Caption = 'Add Laz. patch'
-    Constraints.MinHeight = 24
-    Constraints.MinWidth = 120
-    OnClick = btnAddPatchClick
-    ParentFont = False
-    TabOrder = 9
-  end
-  object btnRemLazPatch: TButton
-    AnchorSideLeft.Control = ListBoxLazPatch
-    AnchorSideBottom.Control = ListBoxLazPatch
-    Left = 202
-    Height = 25
-    Top = 671
-    Width = 120
-    Anchors = [akLeft, akBottom]
-    AutoSize = True
-    BorderSpacing.Bottom = 8
-    Caption = 'Rem. Laz. patch'
-    Constraints.MinHeight = 24
-    Constraints.MinWidth = 120
-    OnClick = btnRemPatchClick
-    ParentFont = False
-    TabOrder = 10
-  end
   object GroupBoxFPCLazScripts: TGroupBox
-    AnchorSideLeft.Control = ListBoxLazPatch
+    AnchorSideLeft.Control = grpPatching
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 396
+    Left = 416
     Height = 124
     Top = 630
     Width = 276
@@ -946,7 +841,7 @@ object Form2: TForm2
     ClientWidth = 272
     Enabled = False
     ParentFont = False
-    TabOrder = 12
+    TabOrder = 6
     object EditFPCPreInstall: TEdit
       AnchorSideLeft.Control = GroupBoxFPCLazScripts
       AnchorSideTop.Control = LabelFPCPreInstall
@@ -1064,6 +959,129 @@ object Form2: TForm2
       TabOrder = 3
     end
   end
+  object grpPatching: TGroupBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 8
+    Height = 152
+    Top = 602
+    Width = 384
+    Anchors = [akLeft, akBottom]
+    AutoSize = True
+    BorderSpacing.Left = 8
+    BorderSpacing.Bottom = 8
+    BorderSpacing.InnerBorder = 4
+    Caption = 'Source pathing'
+    ClientHeight = 132
+    ClientWidth = 380
+    TabOrder = 7
+    object btnAddFPCPatch: TButton
+      AnchorSideLeft.Control = ListBoxFPCPatch
+      AnchorSideBottom.Control = btnRemFPCPatch
+      Left = 8
+      Height = 25
+      Top = 8
+      Width = 120
+      Anchors = [akLeft, akBottom]
+      AutoSize = True
+      BorderSpacing.Bottom = 8
+      Caption = 'Add FPC patch'
+      Constraints.MinHeight = 24
+      Constraints.MinWidth = 120
+      OnClick = btnAddPatchClick
+      ParentFont = False
+      TabOrder = 0
+    end
+    object btnRemFPCPatch: TButton
+      AnchorSideLeft.Control = ListBoxFPCPatch
+      AnchorSideBottom.Control = ListBoxFPCPatch
+      Left = 8
+      Height = 25
+      Top = 41
+      Width = 120
+      Anchors = [akLeft, akBottom]
+      AutoSize = True
+      BorderSpacing.Bottom = 8
+      Caption = 'Rem. FPC patch'
+      Constraints.MinHeight = 24
+      Constraints.MinWidth = 120
+      OnClick = btnRemPatchClick
+      ParentFont = False
+      TabOrder = 1
+    end
+    object ListBoxFPCPatch: TListBox
+      AnchorSideLeft.Control = grpPatching
+      AnchorSideTop.Control = btnAddFPCPatch
+      AnchorSideBottom.Control = grpPatching
+      AnchorSideBottom.Side = asrBottom
+      Left = 8
+      Height = 50
+      Top = 74
+      Width = 170
+      Anchors = [akLeft, akBottom]
+      BorderSpacing.Left = 8
+      BorderSpacing.Bottom = 8
+      ClickOnSelChange = False
+      ExtendedSelect = False
+      ItemHeight = 0
+      ParentFont = False
+      TabOrder = 2
+    end
+    object btnAddLazPatch: TButton
+      AnchorSideLeft.Control = ListBoxLazPatch
+      AnchorSideTop.Control = btnAddFPCPatch
+      AnchorSideBottom.Control = btnRemLazPatch
+      Left = 202
+      Height = 25
+      Top = 8
+      Width = 120
+      Anchors = [akLeft, akBottom]
+      AutoSize = True
+      BorderSpacing.Bottom = 8
+      Caption = 'Add Laz. patch'
+      Constraints.MinHeight = 24
+      Constraints.MinWidth = 120
+      OnClick = btnAddPatchClick
+      ParentFont = False
+      TabOrder = 3
+    end
+    object btnRemLazPatch: TButton
+      AnchorSideLeft.Control = ListBoxLazPatch
+      AnchorSideBottom.Control = ListBoxLazPatch
+      Left = 202
+      Height = 25
+      Top = 41
+      Width = 120
+      Anchors = [akLeft, akBottom]
+      AutoSize = True
+      BorderSpacing.Bottom = 8
+      Caption = 'Rem. Laz. patch'
+      Constraints.MinHeight = 24
+      Constraints.MinWidth = 120
+      OnClick = btnRemPatchClick
+      ParentFont = False
+      TabOrder = 4
+    end
+    object ListBoxLazPatch: TListBox
+      AnchorSideLeft.Control = ListBoxFPCPatch
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = ListBoxFPCPatch
+      AnchorSideBottom.Control = ListBoxFPCPatch
+      AnchorSideBottom.Side = asrBottom
+      Left = 202
+      Height = 50
+      Top = 74
+      Width = 170
+      Anchors = [akTop, akLeft, akBottom]
+      BorderSpacing.Left = 24
+      ClickOnSelChange = False
+      ExtendedSelect = False
+      ItemHeight = 0
+      ParentFont = False
+      TabOrder = 5
+    end
+  end
   object ButtonPanel: TPanel
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
@@ -1079,7 +1097,7 @@ object Form2: TForm2
     ClientHeight = 89
     ClientWidth = 98
     ParentFont = False
-    TabOrder = 11
+    TabOrder = 5
     object BitBtn1: TBitBtn
       AnchorSideLeft.Control = ButtonPanel
       AnchorSideTop.Control = ButtonPanel
