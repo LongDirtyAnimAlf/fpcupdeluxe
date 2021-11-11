@@ -1759,58 +1759,100 @@ end;
 procedure TForm1.PageControl1Change(Sender: TObject);
 var
   aFileList:TStringList;
+  aResultCode: longint;
+  Output:string;
+  GitExe:string;
+  GITTagCombo:string;
+  GITTag:string;
+  i:integer;
 begin
   if TPageControl(Sender).ActivePage=TagSheet then
   begin
     Application.ProcessMessages;
     aFileList:=TStringList.Create;
+    aFileList.Delimiter:=#10;
+    aFileList.StrictDelimiter:=true;
     ListBoxFPCTargetTag.Items.BeginUpdate;
     ListBoxLazarusTargetTag.Items.BeginUpdate;
     try
-      aFileList.Clear;
-      //GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=fpc',aFileList);
-      ListBoxFPCTargetTag.Items.Text:=aFileList.Text;
-      aFileList.Clear;
-      //GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=lazarus',aFileList);
-      ListBoxLazarusTargetTag.Items.Text:=aFileList.Text;
+      GitExe:=Which('git'+GetExeExt);
+      {$ifdef MSWindows}
+      if (NOT FileExists(GitExe)) then
+      begin
+        GitExe:=ConcatPaths([FPCupManager.MakeDirectory,'git','cmd'])+PathSeparator+'git.exe';
+      end;
+      {$endif}
+
+      if FileExists(GitExe) then
+      begin
+
+        ListBoxFPCTargetTag.Items.Clear;
+        ListBoxLazarusTargetTag.Items.Clear;
+
+        aFileList.Clear;
+        RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname',FPCGITLABREPO+'.git','?.?.?'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+        aFileList.DelimitedText:=Output;
+        for GITTagCombo in aFileList do
+        begin
+          i:=Pos(#9,GITTagCombo);
+          GITTag:=Copy(GITTagCombo,i+1,MaxInt);
+          Delete(GITTag,1,Length('refs/tags/'));
+          ListBoxFPCTargetTag.Items.Append(GITTag);
+        end;
+        aFileList.Clear;
+
+        RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname',LAZARUSGITLABREPO+'.git','*_RC?'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+        aFileList.DelimitedText:=Output;
+        for GITTagCombo in aFileList do
+        begin
+          i:=Pos(#9,GITTagCombo);
+          GITTag:=Copy(GITTagCombo,i+1,MaxInt);
+          Delete(GITTag,1,Length('refs/tags/'));
+          ListBoxLazarusTargetTag.Items.Append(GITTag);
+        end;
+        aFileList.Clear;
+
+        //Do this only once !!
+        TPageControl(Sender).OnChange:=nil;
+      end;
+
     finally
       aFileList.Free;
       ListBoxLazarusTargetTag.Items.EndUpdate;
       ListBoxFPCTargetTag.Items.EndUpdate;
     end;
-    //Do this only once !!
-    TPageControl(Sender).OnChange:=nil;
   end;
 end;
 
 procedure TForm1.OnlyTagClick(Sender: TObject);
-//var
-//  aNewURL:string;
+var
+  aTag:string;
 begin
-  {
   if Sender=BitBtnFPCOnlyTag then
   begin
-    aNewURL:=FPCBASESVNURL+'/svn/fpc/tags/'+ListBoxFPCTargetTag.GetSelectedText;
-    if SetAlias(FPCURLLOOKUPMAGIC,ListBoxFPCTargetTag.GetSelectedText,aNewURL) then
+    aTag:=ListBoxFPCTargetTag.GetSelectedText;
+    if SetAlias(FPCTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
-      MemoAddTag.Lines.Add('The tag with name ['+ListBoxFPCTargetTag.GetSelectedText+'] and URL ['+aNewURL+'] was added to the bottom of the FPC list.');
+      MemoAddTag.Lines.Add('The tag with name ['+aTag+'] was added to the bottom of the FPC list.');
       //ListBoxFPCTarget.ItemIndex:=ListBoxFPCTarget.Count-1;
     end;
   end;
   if Sender=BitBtnLazarusOnlyTag then
   begin
-    aNewURL:=FPCBASESVNURL+'/svn/lazarus/tags/'+ListBoxLazarusTargetTag.GetSelectedText;
-    if SetAlias(LAZARUSURLLOOKUPMAGIC,ListBoxLazarusTargetTag.GetSelectedText,aNewURL) then
+    aTag:=ListBoxLazarusTargetTag.GetSelectedText;
+    if SetAlias(LAZARUSTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
-      MemoAddTag.Lines.Add('The tag with name ['+ListBoxLazarusTargetTag.GetSelectedText+'] and URL ['+aNewURL+'] was added to the bottom of the Lazarus list.');
+      MemoAddTag.Lines.Add('The tag with name ['+aTag+'] was added to the bottom of the Lazarus list.');
       //ListBoxLazarusTarget.ItemIndex:=ListBoxLazarusTarget.Count-1;
     end;
   end;
-  }
+
+  FillSourceListboxes;
+  ScrollToSelected;
 end;
 
 procedure TForm1.TagSelectionChange(Sender: TObject;User: boolean);
