@@ -362,6 +362,7 @@ function DirectoryIsEmpty(Directory: string): Boolean;
 function GetTargetCPU:string;
 function GetTargetOS:string;
 function GetTargetCPUOS:string;
+function GetFPCBuildVersion:string;
 function GetDistro(const aID:string=''):string;
 function GetFreeBSDVersion:byte;
 function checkGithubRelease(const aURL:string):string;
@@ -4007,10 +4008,17 @@ begin
   result:=GetTargetCPU+'-'+GetTargetOS;
 end;
 
+function GetFPCBuildVersion:string;
+begin
+  result:=lowercase({$I %FPCVERSION%});// + ' on ' +GetTargetCPUOS;
+end;
 
 function GetDistro(const aID:string):string;
 var
-  Major,Minor,Build,Patch,i,j: Integer;
+  {$if defined(Darwin) OR defined(MSWindows)}
+  Major,Minor,Build,Patch: Integer;
+  {$endif}
+  i,j: Integer;
   AllOutput : TStringList;
   s,t:ansistring;
   success:boolean;

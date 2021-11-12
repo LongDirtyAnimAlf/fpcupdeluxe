@@ -111,8 +111,7 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dDEBUG
--dRemoteLog"/>
+            <CustomOptions Value="-dDEBUG"/>
           </Other>
         </CompilerOptions>
       </Item3>

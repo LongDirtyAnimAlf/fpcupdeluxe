@@ -12,13 +12,12 @@ uses
   {$ifndef READER}
   SynEdit, SynEditMiscClasses, SynEditPopup,
   {$endif}
+  LMessages, ActnList, StdActns, IniPropStorage, LCLVersion,
+  {$ifdef RemoteLog}
+  mormotdatamodelclient,
+  {$endif}
   installerManager
   {$ifdef usealternateui},alternateui{$endif}
-  ,LMessages
-  ,LCLVersion, ActnList, StdActns, IniPropStorage
-  {$ifdef RemoteLog}
-  ,mormotdatamodelclient
-  {$endif}
   ;
 
 {$IF DEFINED(lcl_fullversion) AND (lcl_fullversion >= 2010000)}
@@ -4443,6 +4442,7 @@ begin
 
   AddMessage(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.');
   AddMessage('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro);
+  AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win10 x86_64');
   AddMessage('');
 
   try
@@ -4549,11 +4549,11 @@ begin
   {$else}
   CommandOutputScreen.ClearAll;
   {$endif}
-
   AddMessage('Welcome @ FPCUPdeluxe.');
   AddMessage(Self.Caption);
   {$ifndef NetBSD}
   AddMessage('Running on '+GetDistro);
+  AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win10 x86_64');
   {$ifdef FreeBSD}
   AddMessage('Detected mayor FreeBSD version '+InttoStr(GetFreeBSDVersion));
   {$endif FreeBSD}

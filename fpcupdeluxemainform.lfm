@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 67
+  Left = 43
   Height = 701
-  Top = 35
+  Top = 57
   Width = 1280
   Anchors = []
   Caption = 'Form1'
@@ -685,7 +685,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = AndroidBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 468
+      Left = 422
       Height = 42
       Hint = 'Install FPC and Lazarus for Win95'
       Top = 8
@@ -1328,12 +1328,12 @@ object Form1: TForm1
       Height = 42
       Hint = 'Will install/update FPC and Lazarus stable and LAMW'
       Top = 8
-      Width = 144
+      Width = 98
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 2
       BorderSpacing.Around = 4
-      Caption = 'Android LAMW'
+      Caption = 'LAMW'
       Glyph.Data = {
         36100000424D3610000000000000360000002800000020000000200000000100
         2000000000000010000064000000640000000000000000000000000000000000
@@ -1476,7 +1476,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = Win95Btn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 571
+      Left = 525
       Height = 42
       Hint = 'Get FPC for SAMD51 embedded on Wio Terminal'
       Top = 8
@@ -1668,7 +1668,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = WioBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 672
+      Left = 626
       Height = 42
       Hint = 'Get FPC for armv6m RPi Pico'
       Top = 8
@@ -1860,7 +1860,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = ESPBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 892
+      Left = 846
       Height = 42
       Hint = 'Install baremetal Ultibo for RPi3'
       Top = 8
@@ -2243,7 +2243,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = UltiboBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 1036
+      Left = 990
       Height = 42
       Hint = 'Get the mORMot for FPC'
       Top = 8
@@ -2395,7 +2395,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = PicoBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 775
+      Left = 729
       Height = 42
       Hint = 'Get FPC for ESP32 [lx6] boards'
       Top = 8
@@ -5561,5 +5561,10 @@ object Form1: TForm1
     OnRestoringProperties = IniPropStorageAppRestoringProperties
     Left = 363
     Top = 139
+  end
+  object IniPropStorage1: TIniPropStorage
+    StoredValues = <>
+    Left = 632
+    Top = 208
   end
 end
