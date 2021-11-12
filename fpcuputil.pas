@@ -362,7 +362,7 @@ function DirectoryIsEmpty(Directory: string): Boolean;
 function GetTargetCPU:string;
 function GetTargetOS:string;
 function GetTargetCPUOS:string;
-function GetDistro:string;
+function GetDistro(const aID:string=''):string;
 function GetFreeBSDVersion:byte;
 function checkGithubRelease(const aURL:string):string;
 {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}
@@ -4008,7 +4008,7 @@ begin
 end;
 
 
-function GetDistro:string;
+function GetDistro(const aID:string):string;
 var
   Major,Minor,Build,Patch,i,j: Integer;
   AllOutput : TStringList;
@@ -4028,10 +4028,17 @@ begin
           try
             AllOutput.Text:=s;
             s:='';
-            s:=AllOutput.Values['NAME'];
-            if Length(s)=0 then s := AllOutput.Values['ID_LIKE'];
-            if Length(s)=0 then s := AllOutput.Values['DISTRIB_ID'];
-            if Length(s)=0 then s := AllOutput.Values['ID'];
+            if Length(aID)>0 then
+            begin
+              s:=AllOutput.Values[aID];
+            end
+            else
+            begin
+              s:=AllOutput.Values['NAME'];
+              if Length(s)=0 then s := AllOutput.Values['ID_LIKE'];
+              if Length(s)=0 then s := AllOutput.Values['DISTRIB_ID'];
+              if Length(s)=0 then s := AllOutput.Values['ID'];
+            end;
             success:=(Length(s)>0);
           finally
             AllOutput.Free;
@@ -4137,7 +4144,7 @@ var
   i,j:integer;
 begin
   result:=0;
-  s:=GetDistro;
+  s:=GetDistro('VERSION');
   if Length(s)>0 then
   begin
     i:=1;

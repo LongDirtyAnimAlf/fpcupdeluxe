@@ -1835,7 +1835,7 @@ begin
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
-      MemoAddTag.Lines.Add('The tag with name ['+aTag+'] was added to the bottom of the FPC list.');
+      MemoAddTag.Lines.Add('The tag with name ['+aTag+'] was added to the FPC sources list.');
       //ListBoxFPCTarget.ItemIndex:=ListBoxFPCTarget.Count-1;
     end;
   end;
@@ -1846,7 +1846,7 @@ begin
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
-      MemoAddTag.Lines.Add('The tag with name ['+aTag+'] was added to the bottom of the Lazarus list.');
+      MemoAddTag.Lines.Add('The tag with name ['+aTag+'] was added to the Lazarus sources list.');
       //ListBoxLazarusTarget.ItemIndex:=ListBoxLazarusTarget.Count-1;
     end;
   end;
