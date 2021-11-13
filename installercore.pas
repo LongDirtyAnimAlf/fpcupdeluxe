@@ -2188,7 +2188,14 @@ begin
     FilesList:=FindAllDirectories(FPCArchiveDir,False);
     if FilesList.Count=1 then aName:=FilesList[0];
     FreeAndNil(FilesList);
-    if Pos(LowerCase(ModuleName),LowerCase(ExtractFileName(aName)))>0 then
+    if (
+      (Pos(LowerCase(ModuleName),LowerCase(ExtractFileName(aName)))>0)
+      OR
+      ((ModuleName=_FPC) AND (Pos('source-release',LowerCase(ExtractFileName(aName)))>0))
+      OR
+      ((ModuleName=_LAZARUS) AND (Pos('lazarus-lazarus',LowerCase(ExtractFileName(aName)))>0))
+      )
+    then
     //if LowerCase(ExtractFileName(aName))=LowerCase(ModuleName) then
     begin
       Infoln(infotext+'Moving files due to extra path.',etInfo);
