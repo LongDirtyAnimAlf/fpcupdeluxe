@@ -130,6 +130,8 @@ begin
   {$ifdef UNIX}
   if not FileExists(FRepoExecutable) then
     FRepoExecutable := ('/usr/local/bin/'  + RepoExecutableName);
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := ('/opt/local/bin/'  + RepoExecutableName);
   {$endif UNIX}
 
   if not FileExists(FRepoExecutable) then

@@ -1765,6 +1765,11 @@ var
   GITTag:string;
   i:integer;
 begin
+  if TPageControl(Sender).ActivePage=ModuleSheet then
+  begin
+    if (listModules.HandleAllocated) AND (listModules.ItemIndex>8) then listModules.MakeCurrentVisible;
+  end;
+
   if TPageControl(Sender).ActivePage=TagSheet then
   begin
     Application.ProcessMessages;

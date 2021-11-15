@@ -1996,7 +1996,12 @@ begin
   begin
     s1:='-XR'+s2+' '+s1;
     s1:='-Fl'+s2+'/usr/lib '+s1;
-  end;
+  end
+  else
+  begin
+    // always add the default library location
+    s1:='-Fl'+'/usr/lib '+s1;
+  end;;
   {$ENDIF}
 
   {$ifdef FORCEREVISION}

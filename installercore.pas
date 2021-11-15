@@ -1024,6 +1024,10 @@ begin
       begin
         Infoln(localinfotext+'Found OpenSLL library files.',etDebug);
         Infoln(localinfotext+'Checking for correct signature.',etDebug);
+        if (IsSSLloaded) then
+        begin
+          DestroySSLInterface; // disable ssl and release libs
+        end;
         if (NOT CheckFileSignature(SafeGetApplicationPath+'libeay32.dll')) OR (NOT CheckFileSignature(SafeGetApplicationPath+'ssleay32.dll')) then
         begin
           Infoln(localinfotext+'OpenSLL library files have wrong CPU signature.',etWarning);
@@ -1031,7 +1035,7 @@ begin
           DeleteFile(SafeGetApplicationPath+'ssleay32.dll');
           Infoln(localinfotext+'Getting correct OpenSLL library files.',etInfo);
           DownloadOpenSSL;
-          DestroySSLInterface; // disable ssl and release libs
+          //DestroySSLInterface; // disable ssl and release libs
         end;
       end;
       if (NOT IsSSLloaded) then

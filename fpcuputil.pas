@@ -423,7 +423,6 @@ uses
   {$ifdef ENABLEEMAIL}
   ,mimemess,mimepart,smtpsend
   {$endif}
-  ,ssl_openssl
   {$endif}
   ,process
   ,processutils
@@ -3233,21 +3232,33 @@ begin
   result:=s;
 end;
 function GetDarwinSDKLocation:string;
+const
+  SDKCOMMAND = '--show-sdk-path';
 var
   Output:string;
 begin
+  result:='';
   Output:=ConcatPaths([GetXCodeLocation,'Platforms','MacOSX.platform','Developer','SDKs','MacOSX.sdk']);
   if DirectoryExists(Output) then
     result:=Output
   else
   begin
     Output:='';
-    RunCommand('xcrun',['--show-sdk-path'], Output);
-    Output:=Trim(Output);
-    if (Length(Output)>0) then
-      result:=Output;
+    RunCommand('xcrun',['-h'], Output);
+    if (Pos(SDKCOMMAND,Output)>0) then
+    begin
+      Output:='';
+      RunCommand('xcrun',[SDKCOMMAND], Output);
+      Output:=Trim(Output);
+      if (Length(Output)>0) then
+      begin
+        if DirectoryExists(Output) then
+          result:=Output
+      end;
+    end;
   end;
 end;
+
 function GetDarwinToolsLocation:string;
 const
   BINARY = 'clang';

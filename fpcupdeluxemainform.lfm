@@ -5562,9 +5562,4 @@ object Form1: TForm1
     Left = 363
     Top = 139
   end
-  object IniPropStorage1: TIniPropStorage
-    StoredValues = <>
-    Left = 632
-    Top = 208
-  end
 end

@@ -87,9 +87,11 @@ type
     FLazarusNeedsRebuild:boolean;
     // Directory where configuration for Lazarus is stored:
     FLazarusPrimaryConfigPath:string;
+    FLazarusVersion:string;
     // LCL widget set to be built
     FLCL_Platform: string;
     function RebuildLazarus:boolean;
+    procedure SetLazarusPrimaryConfigPath(value:string);
     {$endif}
   protected
     // Scans for and adds all packages specified in a (module's) stringlist with commands:
@@ -117,10 +119,11 @@ type
     // Compiler options user chose to compile Lazarus with (coming from fpcup).
     property LazarusCompilerOptions: string write FLazarusCompilerOptions;
     // Lazarus primary config path
-    property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
+    property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write SetLazarusPrimaryConfigPath;
     // Lazarus base directories
     property LazarusSourceDir:string read FLazarusSourceDir write FLazarusSourceDir;
     property LazarusInstallDir:string read FLazarusInstallDir write FLazarusInstallDir;
+    property LazarusVersion:string read FLazarusVersion;
     // LCL widget set to be built
     property LCL_Platform: string write FLCL_Platform;
     {$endif}
@@ -486,6 +489,23 @@ begin
     LazarusConfig.Free;
   end;
 end;
+
+procedure TUniversalInstaller.SetLazarusPrimaryConfigPath(value:string);
+var
+  LazarusConfig:TUpdateLazConfig;
+begin
+  if (value<>FLazarusPrimaryConfigPath) then
+  begin
+    FLazarusPrimaryConfigPath:=value;
+    LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
+    try
+      FLazarusVersion:=LazarusConfig.GetVariable(EnvironmentConfig, 'EnvironmentOptions/Version/Lazarus');
+    finally
+      LazarusConfig.Free;
+    end;
+  end;
+end;
+
 {$endif}
 
 function TUniversalInstaller.GetValueFromKey(Key: string; sl: TStringList;
@@ -972,7 +992,7 @@ var
   RealDirective:string;
   RegisterOnly:boolean;
   ReadyCounter:integer;
-
+  LazarusConfig:TUpdateLazConfig;
 begin
   BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
   if BaseWorkingdir='' then BaseWorkingdir:=GetValueFromKey(INSTALLMAGIC,sl);;
@@ -1142,6 +1162,17 @@ begin
       if Workingdir='' then Workingdir:=BaseWorkingdir;
 
       {$ifndef FPCONLY}
+
+      if (LowerCase(ModuleName)='fpdebug') then
+      begin
+        // only install fpdebug on Lazarus 2.2.0 and better.
+        if (CompareVersionStrings(LazarusVersion,'2.2.0')<0) then
+        begin
+          WritelnLog(localinfotext+'Skipping '+ModuleName, True);
+          continue;
+        end;
+      end;
+
       result:=InstallPackage(PackagePath,WorkingDir,RegisterOnly);
       if not result then
       begin
@@ -1152,6 +1183,23 @@ begin
 
       if result then
       begin
+
+        if (LowerCase(ModuleName)='fpdebug') then
+        begin
+          // due to limited features of TUpdateLazConfig, this will delete any previous item
+          // and that might be not wanted, but keep it like this
+          LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
+          try
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigName', 'FpDebug');
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigClass', 'TFpDebugDebugger');
+            {$if defined(MSWindows) or defined(Linux)}
+            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',True);
+            {$endif}
+          finally
+            LazarusConfig.Free;
+          end;
+        end;
+
         if (LowerCase(ModuleName)='lamw') AND (Pos('amw_ide_tools',LowerCase(PackagePath))>0) then
         begin
           //perform some auto magic install stuff
@@ -2930,6 +2978,7 @@ function TmORMot2Installer.GetModule(ModuleName: string): boolean;
 var
   idx,iassets                                    : integer;
   PackageSettings                                : TStringList;
+  Output                                         : string;
   RemoteURL                                      : string;
   aName,aFile,aURL,aContent,aVersion,aDirectory  : string;
   ResultCode                                     : longint;
@@ -3032,12 +3081,13 @@ begin
             if (FileSize(aFile)>5000) then
             begin
               ResultCode:=-1;
-              WritelnLog(localinfotext+'Download ok',True);
+              WritelnLog(localinfotext+'Download ok. Extracting files. Please wait.',True);
 
               aDirectory:=FSourceDirectory+DirectorySeparator+'static';
               if DirectoryExists(aDirectory) then DeleteDirectoryEx(aDirectory);
 
-              ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+              RunCommandIndir(FSourceDirectory,F7zip ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+
               {$ifdef MSWINDOWS}
               // try winrar
               if (ResultCode<>0) then
@@ -3047,11 +3097,11 @@ begin
               {$endif}
               if (ResultCode<>0) then
               begin
-                ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+                RunCommandIndir(FSourceDirectory,'7z' ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
               end;
               if (ResultCode<>0) then
               begin
-                ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+                RunCommandIndir(FSourceDirectory,'7za' ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
               end;
 
               if (ResultCode<>0) then
@@ -3067,7 +3117,7 @@ begin
 
         if (NOT result) then
         begin
-          Infoln(localinfotext+'Getting develtools4fpc failure. Will continue anyhow.',etInfo);
+          Infoln(localinfotext+'Getting mORMot2 (statics) failure. Will continue anyhow.',etInfo);
         end;
 
       end;
@@ -3650,8 +3700,8 @@ initialization
 
 finalization
   ClearUniModuleList;
-  UniModuleList.free;
-  UniModuleEnabledList.free;
+  UniModuleList.Free;
+  UniModuleEnabledList.Free;
   IniGeneralSection.Free;
 
 end.
