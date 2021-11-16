@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 43
+  Left = 50
   Height = 701
-  Top = 57
+  Top = 46
   Width = 1280
   Anchors = []
   Caption = 'Form1'
@@ -41,10 +41,10 @@ object Form1: TForm1
     AnchorSideTop.Control = RealFPCURL
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = CheckAutoClear
-    Left = 336
+    Left = 330
     Height = 23
     Top = 33
-    Width = 674
+    Width = 680
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
@@ -94,10 +94,10 @@ object Form1: TForm1
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = memoSummary
-    Left = 336
+    Left = 330
     Height = 427
     Top = 62
-    Width = 932
+    Width = 938
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 8
@@ -624,12 +624,15 @@ object Form1: TForm1
     TabOrder = 0
   end
   object RealFPCURL: TEdit
+    AnchorSideLeft.Control = btnInstallDirSelect
+    AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
-    Left = 336
+    Left = 330
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
     Width = 433
+    BorderSpacing.Left = 8
     BorderSpacing.Top = 4
     ParentFont = False
     ParentShowHint = False
@@ -643,11 +646,11 @@ object Form1: TForm1
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 777
+    Left = 771
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
-    Width = 491
+    Width = 497
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 4
@@ -2766,11 +2769,11 @@ object Form1: TForm1
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Panel1
-    Left = 336
+    Left = 330
     Height = 120
     Hint = 'Will show error'
     Top = 497
-    Width = 932
+    Width = 938
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 4
@@ -2785,6 +2788,8 @@ object Form1: TForm1
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = InstallDirEdit
     AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = btnInstallDirSelect
+    AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = btnSetupPlus
     Left = 12
     Height = 539
@@ -2795,11 +2800,14 @@ object Form1: TForm1
     BorderSpacing.Left = 12
     BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
+    Constraints.MaxWidth = 310
+    Constraints.MinWidth = 220
     ParentFont = False
     TabIndex = 0
     TabOrder = 2
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet
+      AnchorSideRight.Side = asrBottom
       Caption = 'Basic'
       ClientHeight = 511
       ClientWidth = 302
@@ -2837,6 +2845,8 @@ object Form1: TForm1
         BorderSpacing.Left = 8
         BorderSpacing.Top = 8
         BorderSpacing.Bottom = 8
+        Constraints.MinWidth = 80
+        ExtendedSelect = False
         ItemHeight = 0
         OnDrawItem = ListBoxTargetDrawItem
         OnSelectionChange = TargetSelectionChange
@@ -2878,6 +2888,8 @@ object Form1: TForm1
         BorderSpacing.Top = 8
         BorderSpacing.Right = 8
         BorderSpacing.Bottom = 8
+        Constraints.MinWidth = 80
+        ExtendedSelect = False
         ItemHeight = 0
         OnDrawItem = ListBoxTargetDrawItem
         OnSelectionChange = TargetSelectionChange

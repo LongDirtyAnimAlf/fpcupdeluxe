@@ -3463,7 +3463,9 @@ end;
 function LibWhich(aLibrary: string): boolean;
 {$ifdef Unix}
 const
-  UNIXSEARCHDIRS : array [0..1] of string = (
+  UNIXSEARCHDIRS : array [0..3] of string = (
+  '/lib',
+  '/lib64',
   '/usr/lib',
   '/usr/local/lib'
   );
@@ -3482,19 +3484,33 @@ var
 {$endif}
 begin
   result:=false;
-
-  {$ifdef Haiku}
-  if NOT result then
+  {$ifdef Unix}
+  if (NOT result) then
   begin
-    for i:=Low(HAIKUSEARCHDIRS) to High(HAIKUSEARCHDIRS) do
+    {$ifdef Haiku}
+    for sd in HAIKUSEARCHDIRS do
+    {$else}
+    for sd in UNIXSEARCHDIRS do
+    {$endif}
     begin
       OutputString:='';
-      sd:=HAIKUSEARCHDIRS[i];
+      {$ifdef Haiku}
       {$ifndef CPUX86}
       if (RightStr(sd,4)='/x86') then continue;
       {$endif}
-      RunCommand('find',[sd,'-type','f','-name',aLibrary],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-      result:=(Pos(aLibrary,OutputString)>0);
+      {$endif}
+      if (NOT result) then
+      begin
+        //try to find a file
+        RunCommand('find',[sd,'-type','f','-name',aLibrary],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+        result:=(Pos(aLibrary,OutputString)>0);
+      end;
+      if (NOT result) then
+      begin
+        //try to find a symlink to a file
+        RunCommand('find',[sd,'-type','l','-name',aLibrary],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+        result:=(Pos(aLibrary,OutputString)>0);
+      end;
       if result then
       begin
         ThreadLog('Library searcher found '+aLibrary+' inside '+sd+'.',etDebug);
@@ -3502,44 +3518,8 @@ begin
       end;
     end;
   end;
-  {$endif}
 
-  {$ifdef Unix}
   {$ifndef Haiku}
-  if (NOT result) then
-  begin
-    for i:=Low(UNIXSEARCHDIRS) to High(UNIXSEARCHDIRS) do
-    begin
-      OutputString:='';
-      sd:=UNIXSEARCHDIRS[i];
-      // Search file
-      RunCommand('find',[sd,'-type','f','-name',aLibrary,'-print','2>/dev/null'],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-      result:=(Pos(aLibrary,OutputString)>0);
-      if result then
-      begin
-        ThreadLog('Library searcher found '+aLibrary+' file inside '+sd+'.',etInfo);
-        break;
-      end;
-    end;
-  end;
-
-  if (NOT result) then
-  begin
-    for i:=Low(UNIXSEARCHDIRS) to High(UNIXSEARCHDIRS) do
-    begin
-      OutputString:='';
-      sd:=UNIXSEARCHDIRS[i];
-      // Search symlink
-      RunCommand('find',[sd,'-type','l','-name',aLibrary,'-print','2>/dev/null'],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-      result:=(Pos(aLibrary,OutputString)>0);
-      if result then
-      begin
-        ThreadLog('Library searcher found '+aLibrary+' symlink inside '+sd+'.',etInfo);
-        break;
-      end;
-    end;
-  end;
-
   if (NOT result) then
   begin
     sd:=Which('ldconfig');

@@ -794,7 +794,7 @@ var
   FullPatchPath: string;
   aListBox:TListBox;
 begin
-  OpenDialog1.Filter:='Patch|*.patch|Diff|*.diff|All|*.*';
+  OpenDialog1.Filter:='Diff|*.diff|Patch|*.patch|All|*.*';
   OpenDialog1.FilterIndex:=1;
   if OpenDialog1.Execute then
   begin
@@ -1081,17 +1081,23 @@ end;
 
 procedure TForm2.IniPropStorageSettingsRestoringProperties(Sender: TObject);
 begin
+  {$ifdef Haiku}
+  {$else}
   SessionProperties := 'WindowState;Width;Height;Top;Left;';
+  {$endif}
   //Width := MulDiv(Width, 96, Screen.PixelsPerInch);
   //Height := MulDiv(Height, 96, Screen.PixelsPerInch);
 end;
 
 procedure TForm2.IniPropStorageSettingsSavingProperties(Sender: TObject);
 begin
+  {$ifdef Haiku}
+  {$else}
   if Self.WindowState=wsMaximized then
     SessionProperties := 'WindowState;'
   else
     SessionProperties := 'WindowState;Width;Height;Top;Left;';
+  {$endif}
 end;
 
 procedure TForm2.rgrpSearchOptionsSelectionChanged(Sender: TObject);

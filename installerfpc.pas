@@ -4774,7 +4774,7 @@ begin
 
       // Delete stray compilers, if any !!
       FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler', '*'+GetExeExt, False);
-      // But do not delete the PPC executable ... :-)
+      // But do not delete the PPC executable itself ... :-)
       FileCounter:=DeleteList.IndexOf(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc'+GetExeExt);
       if (FileCounter<>-1) then DeleteList.Delete(FileCounter);
 

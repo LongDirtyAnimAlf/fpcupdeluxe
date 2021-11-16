@@ -871,6 +871,12 @@ begin
   // suppress some GIT errors, always
   if AnsiContainsText(line,'fatal: not a git repository') then exit;
 
+  //Haiku errors we are not interested in
+  {$ifdef Haiku}
+  if AnsiStartsText('fatal: No names found',line) then exit;
+  if AnsiStartsText('runtime_loader:',line) then exit;
+  {$endif}
+
   // suppress some lazbuild errors, always
   if AnsiContainsText(line,'lazbuild') then
   begin
@@ -887,7 +893,6 @@ begin
     if AnsiContainsText(line,':294:') then exit;
   end;
 
-
   //Various harmless OpenBSD errors
   if AnsiContainsText(line,'misused, please use') then exit;
   if AnsiContainsText(line,'may return deterministic values') then exit;
@@ -901,11 +906,6 @@ begin
   //Skip debug message
   //if AnsiStartsText('TExternalToolsConsole.HandleMesages: Calling CheckSynchronize!',line) then exit;
   if AnsiStartsText('TExternalToolsConsole',line) then exit;
-
-  //Haiku error we are not interested in
-  {$ifdef Haiku}
-  if AnsiStartsText('runtime_loader:',line) then exit;
-  {$endif}
 
   // Harmless GIT warning
   if AnsiStartsText('warning: redirecting to https',line) then exit;

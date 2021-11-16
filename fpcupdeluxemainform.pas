@@ -1871,17 +1871,25 @@ end;
 
 procedure TForm1.IniPropStorageAppRestoringProperties(Sender: TObject);
 begin
+  {$ifdef Haiku}
+  SessionProperties := 'CmdFontSize;CmdFontName;';
+  {$else}
   SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;CmdFontName;';
+  {$endif}
   //Width := MulDiv(Width, 96, Screen.PixelsPerInch);
   //Height := MulDiv(Height, 96, Screen.PixelsPerInch);
 end;
 
 procedure TForm1.IniPropStorageAppSavingProperties(Sender: TObject);
 begin
+  {$ifdef Haiku}
+  SessionProperties := 'CmdFontSize;CmdFontName;'
+  {$else}
   if Self.WindowState=wsMaximized then
     SessionProperties := 'WindowState;CmdFontSize;CmdFontName;'
   else
     SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;CmdFontName;';
+  {$endif}
 end;
 
 procedure TForm1.ListBoxTargetDrawItem(Control: TWinControl; Index: Integer;
