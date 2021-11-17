@@ -1,0 +1,31 @@
+--- src/hmi/winccusermanagement.pas	Fri Jan 10 17:54:13 2020
++++ src/hmi/winccusermanagement.pas	Fri Oct  1 13:04:33 2021
+@@ -1,6 +1,8 @@
+ {$I ../common/delphiver.inc}
+ unit WinCCUserManagement;
+ 
++{$mode objfpc}{$H+}
++
+ interface
+ 
+ uses
+@@ -76,7 +78,8 @@
+     function    GetRegisteredAccessCodes:TStringList; override;
+     procedure   ClearAuthorizationCache;
+     function    CanAccessViaWinCCAuthCode(Code:LongInt):Boolean;
+-    function    CheckIfUserIsAllowed(sc: UTF8String; RequireUserLogin: Boolean; var userlogin: UTF8String): Boolean; override;
++    function    CheckIfUserIsAllowed(sc: UTF8String; RequireUserLogin: Boolean; var userlogin: UTF8String; const UserHint:String): Boolean; override;
++
+   published
+     property FailureLogin;
+     property LoginRetries;
+@@ -379,8 +382,7 @@
+   Result := PWRTCheckPermission(code,0);
+ end;
+ 
+-function TWinCCUserManagement.CheckIfUserIsAllowed(sc: UTF8String;
+-  RequireUserLogin: Boolean; var userlogin: UTF8String): Boolean;
++function TWinCCUserManagement.CheckIfUserIsAllowed(sc: UTF8String; RequireUserLogin: Boolean; var userlogin: UTF8String; const UserHint:String): Boolean;
+ begin
+   raise exception.Create(SWCCNotSupportCheckUserAuth);
+ end;

@@ -3934,7 +3934,7 @@ begin
   while (i > 0) and not CharInSet(AFilename[i],EndSep) do
     Dec(i);
   j:=i+1;
-  while (j<Length(AFilename)) and (AFilename[j]<>' ') do
+  while (j<=Length(AFilename)) and (AFilename[j]<>' ') do
     Inc(j);
   result:=Copy(AFilename,1,j-1);
 end;

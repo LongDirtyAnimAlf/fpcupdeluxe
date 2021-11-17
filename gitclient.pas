@@ -129,9 +129,9 @@ begin
 
   {$ifdef UNIX}
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := ('/usr/local/bin/'  + RepoExecutableName);
+    FRepoExecutable := ('/usr/local/git/bin/'  + RepoExecutableName);
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := ('/opt/local/bin/'  + RepoExecutableName);
+    FRepoExecutable := ('/opt/local/git/bin/'  + RepoExecutableName);
   {$endif UNIX}
 
   if not FileExists(FRepoExecutable) then
