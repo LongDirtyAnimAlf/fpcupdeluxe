@@ -992,7 +992,9 @@ var
   RealDirective:string;
   RegisterOnly:boolean;
   ReadyCounter:integer;
+  {$ifndef FPCONLY}
   LazarusConfig:TUpdateLazConfig;
+  {$endif}
 begin
   BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
   if BaseWorkingdir='' then BaseWorkingdir:=GetValueFromKey(INSTALLMAGIC,sl);;
