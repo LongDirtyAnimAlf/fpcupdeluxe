@@ -230,7 +230,7 @@ begin
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FManager.FPCBranch:=Options.GetOption('','fpcBranch','');
 
-      //FManager.PatchCmd:=Options.GetOption('','patchcmd','patch',false);
+      FManager.PatchCmd:=Options.GetOption('','patchcmd','patch',false);
 
       // Deal with options coming from ini (e.g. Help=true)
       try

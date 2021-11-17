@@ -245,6 +245,7 @@ procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 // Delete shortcut on desktop
 procedure DeleteDesktopShortcut(ShortcutName: string);
 {$ENDIF MSWINDOWS}
+function FindFileInDirList(Filename, DirectoryList: String): String;
 function FindFileInDir(Filename, Path: String): String;
 function FindFileInDirWildCard(Filename, Path: String): String;
 // Copy a directory recursive
@@ -353,6 +354,8 @@ function CheckExecutable(Executable:string;Parameters:array of string;ExpectOutp
 function GetJava: string;
 function GetJavac: string;
 function CheckJava: boolean;
+function ExtractFilePathSafe(const AFilename: string): string;
+function ExtractFileNameSafe(const AFilename: string): string;
 function FileNameWithoutExt(const AFilename: string): string;
 function FileNameWithoutAllExt(const AFilename: string): string;
 function FileNameAllExt(const AFilename: string): string;
@@ -1518,6 +1521,32 @@ begin
   SysUtils.DeleteFile(LinkName);
 end;
 {$ENDIF MSWINDOWS}
+
+function FindFileInDirList(Filename, DirectoryList: String): String;
+var
+  DirList: TStringList;
+  ADirectory: String;
+  AFile: string;
+begin
+  Result := '';
+  DirList:=TStringList.Create;
+  try
+    DirList.Delimiter:=PathSeparator;
+    DirList.StrictDelimiter:=True;
+    DirList.DelimitedText:=SetDirSeparators(DirectoryList);
+    for ADirectory in DirList do
+    begin
+      AFile:=IncludeTrailingPathDelimiter(ADirectory)+Filename;
+      if FileExists(AFile) then
+      begin
+        Result := AFile;
+        Break;
+      end;
+    end;
+  finally
+    DirList.Free;
+  end;
+end;
 
 function FindFileInDir(Filename, Path: String): String;
 var
@@ -3485,6 +3514,15 @@ var
 begin
   result:=false;
   {$ifdef Unix}
+
+  if (NOT result) then
+  begin
+    OutputString:=FileSearch(aLibrary,SysUtils.GetEnvironmentVariable('LIBRARY_PATH'));
+    //OutputString:=FindFileInDirList(aLibrary,SysUtils.GetEnvironmentVariable('LIBRARY_PATH'));
+    result:=(Length(OutputString)>0);
+    if result then ThreadLog('Library searcher found '+aLibrary+' in path @ '+OutputString,etDebug);
+  end;
+
   if (NOT result) then
   begin
     {$ifdef Haiku}
@@ -3502,6 +3540,8 @@ begin
       if (NOT result) then
       begin
         //try to find a file
+        //OutputString:=FileSearch(aLibrary,SysUtils.GetEnvironmentVariable('LIBRARY_PATH'));
+        //OutputString:=FindFileInDirList(aLibrary,SysUtils.GetEnvironmentVariable('LIBRARY_PATH'));
         RunCommand('find',[sd,'-type','f','-name',aLibrary],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
         result:=(Pos(aLibrary,OutputString)>0);
       end;
@@ -3882,6 +3922,26 @@ begin
   {$else}
   result:=CheckExecutable('java', ['-version'], '');
   {$endif}
+end;
+
+function ExtractFilePathSafe(const AFilename: string): string;
+var
+  i,j : longint;
+  EndSep : Set of Char;
+begin
+  i:=Length(AFilename);
+  EndSep:=AllowDirectorySeparators+AllowDriveSeparators;
+  while (i > 0) and not CharInSet(AFilename[i],EndSep) do
+    Dec(i);
+  j:=i+1;
+  while (j<Length(AFilename)) and (AFilename[j]<>' ') do
+    Inc(j);
+  result:=Copy(AFilename,1,j-1);
+end;
+
+function ExtractFileNameSafe(const AFilename: string): string;
+begin
+  result:=ExtractFileName(ExtractFilePathSafe(AFilename));
 end;
 
 function FileNameWithoutExt(const AFilename: string): string;

@@ -45,8 +45,6 @@ type
 
 { Tany_darwinpowerpc }
 Tany_darwinpowerpc = class(Tany_apple)
-private
-  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 protected
   function GetOSName:string;override;
   function GetLibName:string;override;

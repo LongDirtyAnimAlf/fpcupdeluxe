@@ -481,7 +481,6 @@ if TargetOS=&apos;openbsd&apos; then
             <Debugging>
               <GenerateDebugInfo Value="False"/>
               <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
           <Other>

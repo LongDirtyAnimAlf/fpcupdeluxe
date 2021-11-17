@@ -4773,10 +4773,16 @@ begin
       DeleteFilesExtensionsSubdirs(FSourceDirectory,DeleteList,CPUOS_Signature);
 
       // Delete stray compilers, if any !!
-      FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler', '*'+GetExeExt, False);
-      // But do not delete the PPC executable itself ... :-)
-      FileCounter:=DeleteList.IndexOf(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc'+GetExeExt);
-      if (FileCounter<>-1) then DeleteList.Delete(FileCounter);
+      aDir:=ConcatPaths([FSourceDirectory,'compiler']);
+
+      if CrossCompiling then
+        DeleteFile(aDir+DirectorySeparator+GetCrossCompilerName(CrossInstaller.TargetCPU))
+      else
+        DeleteFile(aDir+DirectorySeparator+GetCompilerName(GetTargetCPU));
+
+      DeleteFile(aDir+DirectorySeparator+'ppc1'+GetExeExt);
+      DeleteFile(aDir+DirectorySeparator+'ppc2'+GetExeExt);
+      DeleteFile(aDir+DirectorySeparator+'ppc3'+GetExeExt);
 
       // delete stray executables, if any !!
       if (NOT CrossCompiling) then

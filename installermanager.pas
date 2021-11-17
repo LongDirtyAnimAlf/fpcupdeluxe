@@ -263,6 +263,7 @@ type
     function  GetTempDirectory:string;
     function  GetRunInfo:string;
     procedure SetRunInfo(aValue:string);
+    procedure SetNoJobs(aValue:boolean);
   protected
     FShortcutCreated:boolean;
     FLog:TLogger;
@@ -341,7 +342,7 @@ type
     // List of modules that must be processed in addition to the default ones
     property IncludeModules:string read FIncludeModules write FIncludeModules;
     // Patch utility to use. Defaults to '(g)patch'
-    property PatchCmd:string read FPatchCmd;
+    property PatchCmd:string read FPatchCmd write FPatchCmd;
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean read FReApplyLocalChanges write FReApplyLocalChanges;
     // List of modules that must not be processed
@@ -361,7 +362,7 @@ type
     property Verbose:boolean read FVerbose write FVerbose;
     property UseWget:boolean read FUseWget write FUseWget;
     property ExportOnly:boolean read FExportOnly write FExportOnly;
-    property NoJobs:boolean read FNoJobs write FNoJobs;
+    property NoJobs:boolean read FNoJobs write SetNoJobs;
     property SoftFloat:boolean read FSoftFloat write FSoftFloat;
     property OnlinePatching:boolean read FOnlinePatching write FOnlinePatching;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
@@ -1103,6 +1104,20 @@ begin
     FRunInfo:=aValue;
 end;
 
+procedure TFPCupManager.SetNoJobs(aValue:boolean);
+begin
+  {$ifdef Haiku}
+  FNoJobs:=True;
+  RunInfo:='No make jobs on Haiku !';
+  {$else}
+  FNoJobs:=aValue;
+  {$endif}
+  if (GetLogicalCpuCount<=1) AND (NOT FNoJobs) then
+  begin
+    RunInfo:='No make jobs due to CPU count [smaller or] equal to 1 !';
+    FNoJobs:=True;
+  end;
+end;
 
 function TFPCupManager.Run: boolean;
 var
@@ -1191,7 +1206,7 @@ begin
   Verbose:=false;
   UseWget:=false;
   ExportOnly:=false;
-  NoJobs:=false;
+  FNoJobs:=True;
   UseGitClient:=false;
   FNativeFPCBootstrapCompiler:=true;
   ForceLocalRepoClient:=false;
@@ -1202,7 +1217,11 @@ begin
   FSolarisOI:=false;
   FMUSL:=false;
 
+  {$if (defined(BSD) and not defined(DARWIN)) or (defined(Solaris))}
+  FPatchCmd:='gpatch';
+  {$else}
   FPatchCmd:='patch'+GetExeExt;
+  {$endif}
 
   FModuleList:=TStringList.Create;
   FModuleEnabledList:=TStringList.Create;
