@@ -1,0 +1,433 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.0\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: ko\n"
+
+#: extrasettings.captioncheckaddcontext
+msgid "Add context for FPC and Lazarus files."
+msgstr "FPC와 라자루스 파일을 추가합니다."
+
+#: extrasettings.captioncheckautoswitchurl
+msgid "Auto-switch repo URL (default=no)"
+msgstr "레포 URL 자동전환 (기본=아니오)"
+
+#: extrasettings.captioncheckenableonlinepatching
+msgid "Allow patching of sources by online patches."
+msgstr "온라인 소스에서 패치 허용."
+
+#: extrasettings.captioncheckextraverbose
+msgid "Be extra verbose (default=no)"
+msgstr "자세한 내용(기본값=아니오)"
+
+#: extrasettings.captioncheckforcelocalrepoclient
+msgid "Use local repo-client (default=no)"
+msgstr "로컬 repo-client 사용(기본값=아니오)"
+
+#: extrasettings.captioncheckfpcupbootstrappersonly
+msgid "Only use fpcup bootstrappers (default=no)"
+msgstr "Fpcup 부트스트래퍼만 사용(기본값=아니오)"
+
+#: extrasettings.captioncheckgetupdates
+msgid "Check for fpcupdeluxe updates (default=no)"
+msgstr "Fpcupdeluxe 업데이트 확인(기본값=아니오)"
+
+#: extrasettings.captioncheckincludehelp
+msgid "Include Help (default=no)"
+msgstr "도움말 포함(기본=아니오)"
+
+#: extrasettings.captioncheckincludelcl
+msgid "Include LCL with cross-compiler (default=no)"
+msgstr "교차 관측치가 있는 LCL 포함(기본값=아니오)"
+
+#: extrasettings.captioncheckpackagerepo
+msgid "Get package repositories (default=no)"
+msgstr "패키지 저장소 가져오기 (기본=아니오)"
+
+#: extrasettings.captioncheckrepo
+msgid "Get FPC/Laz repositories (default=yes)"
+msgstr "FPC/Laz 리포지토리 가져오기(기본값=예)"
+
+#: extrasettings.captionchecksendinfo
+msgid "Send location and install info (default=no)"
+msgstr "위치 및 설치 정보 전송(기본값=아니오)"
+
+#: extrasettings.captionchecksplitfpc
+msgid "Split FPC source and bins (default=yes)"
+msgstr "FPC 소스와 바이너리 분리 (기본=예)"
+
+#: extrasettings.captionchecksplitlazarus
+msgid "Split Lazarus source and bins (default=no)"
+msgstr "Lazarus 소스 및 바이너리 분할(기본값=아니오)"
+
+#: extrasettings.captionchecksystemfpc
+msgid "Use system FPC for Lazarus (default=no)"
+msgstr "Lazarus에 시스템 FPC 사용(기본값=아니오)"
+
+#: extrasettings.captioncheckupdateonly
+msgid "FPC/Laz rebuild only (default=no)"
+msgstr "FPC/Laz 리빌드 만 (기본=아니오)"
+
+#: extrasettings.captioncheckusemakejobs
+msgid "Use jobs for GNU make (default=yes)"
+msgstr "GNU Make에 작업 사용(기본값=예)"
+
+#: extrasettings.captioncheckusewget
+msgid "Use wget/libcurl as downloader (default=no)"
+msgstr "Wget/libcurl을 다운로드 프로그램으로 사용(기본값=아니오)"
+
+#: extrasettings.captionusesoftfloat80bit
+msgctxt "extrasettings.captionusesoftfloat80bit"
+msgid "Enable software emulation of 80 bit floats."
+msgstr "80비트 플로트의 소프트웨어 에뮬레이션을 활성화합니다."
+
+#: extrasettings.hintcheckaddcontext
+msgid "Double clicking on FPC and Lazarus files will open Lazarus."
+msgstr "FPC와 Lazarus 파일을 더블 클릭하면 Lazarus가 열립니다."
+
+#: extrasettings.hintcheckenableonlinepatching
+msgid "Fpcupdeluxe can patch the sources automagically by using online patches."
+msgstr "Fpcupdeluxe는 온라인 패치를 사용하여 소스를 자동으로 패치할 수 있습니다."
+
+#: extrasettings.hintcheckforcelocalrepoclient
+msgid "Use the repo-client by fpcupdeluxe."
+msgstr "Fpcupdeluxe의 repo-client를 사용합니다."
+
+#: extrasettings.hintcheckgetupdates
+msgid "Check for updates of fpcupdeluxe binaries."
+msgstr "Fpcupdeluxe 파일의 업데이트를 확인합니다."
+
+#: extrasettings.hintcheckrepo
+msgid "Download whole repository, or only latest files"
+msgstr "전체 리포지토리 또는 최신 파일만 다운로드"
+
+#: extrasettings.hintchecksendinfo
+msgid "Location and install info will be send to public central fpcupdeluxe server."
+msgstr "위치 및 설치 정보는 공용 중앙 fpcupdeluxe 서버로 전송됩니다."
+
+#: extrasettings.hintchecksystemfpc
+msgid "Use the system wide install of FPC to build Lazarus."
+msgstr "FPC의 시스템 전체 설치를 사용하여 Lazarus를 구축합니다."
+
+#: extrasettings.hintusesoftfloat80bit
+msgctxt "extrasettings.hintusesoftfloat80bit"
+msgid "Enable software emulation of 80 bit floats."
+msgstr "80비트 플로트의 소프트웨어 에뮬레이션을 활성화합니다."
+
+#: fpcupdeluxemainform.upbuildallcrosscompilers
+msgid "Going to auto-build all installed cross-compilers !"
+msgstr "설치된 모든 교차 컴파일러를 자동 빌드합니다!"
+
+#: fpcupdeluxemainform.upbuildallcrosscompilerscheck
+msgid "Checking FPC configfile [fpc.cfg] for cross-compilers in "
+msgstr "FPC 구성 파일 [fpc.cfg]에서 교차 컴파일러를 확인하는 중 "
+
+#: fpcupdeluxemainform.upbuildallcrosscompilersfound
+msgid "Found crosscompiler for "
+msgstr "교차 컴파일러를 찾았습니다 "
+
+#: fpcupdeluxemainform.upbuildallcrosscompilersupdate
+msgid "Going to update cross-compiler."
+msgstr "교차 컴파일러를 업데이트하려고 합니다."
+
+#: fpcupdeluxemainform.upbuildcrosscompiler
+msgid "Going to install a cross-compiler from available sources."
+msgstr "사용 가능한 원본에서 크로스 컴파일러를 설치합니다."
+
+#: fpcupdeluxemainform.upcheckupdate
+msgid "Please wait. Checking for updates."
+msgstr "업데이트 확인중입니다. 기다리세요."
+
+#: fpcupdeluxemainform.upupdatefound
+msgid "New fpcupdeluxe version available"
+msgstr "새로운 fpcupdeluxe 버전 사용 가능"
+
+#: fpcupdeluxemainform.upupdatenotfound
+msgid "No updates found."
+msgstr "업데이트를 찾을수 없습니다."
+
+#: processutils.lisaborted
+msgid "Aborted"
+msgstr "취소"
+
+#: processutils.liscannotexecute
+#, object-pascal-format
+msgid "cannot execute \"%s\""
+msgstr "실행 실패 \"%s\""
+
+#: processutils.liscannotfindexecutable
+#, object-pascal-format
+msgid "cannot find executable \"%s\""
+msgstr "\"%s\" 실행파일 찾을수 없음"
+
+#: processutils.lisexecutableisadirectory
+#, object-pascal-format
+msgid "executable \"%s\" is a directory"
+msgstr "\"%s\" 는 폴더입니다"
+
+#: processutils.lisexecutablelacksthepermissiontorun
+#, object-pascal-format
+msgid "executable \"%s\" lacks the permission to run"
+msgstr "\"%s\" 실행 권한이 없습니다"
+
+#: processutils.lisexitcode
+#, object-pascal-format
+msgid "Exit code %s"
+msgstr "종료 코드 %s"
+
+#: processutils.lisfreeingbufferlines
+#, object-pascal-format
+msgid "freeing buffer lines: %s"
+msgstr "사용 가능한 버퍼 라인: %s"
+
+#: processutils.lismissingdirectory
+#, object-pascal-format
+msgid "missing directory \"%s\""
+msgstr "\"%s\" 폴더 오류"
+
+#: processutils.lismissingexecutable
+#, object-pascal-format
+msgid "missing executable \"%s\""
+msgstr "실행파일 없음 \"%s\""
+
+#: processutils.lissuccess
+msgid "Success"
+msgstr "성공"
+
+#: processutils.listoolhasnoexecutable
+#, object-pascal-format
+msgid "tool \"%s\" has no executable"
+msgstr "도구 \"%s\" 실행할수 없습니다"
+
+#: processutils.lisunabletoexecute
+#, object-pascal-format
+msgid "unable to execute: %s"
+msgstr "%s 실행할수 없습니다"
+
+#: processutils.lisunabletoreadprocessexitstatus
+msgid "unable to read process ExitStatus"
+msgstr "exitStatus 프로세스를 읽을 수 없습니다"
+
+#: tform1.autocrossupdate.caption
+msgid "Auto-update compilers"
+msgstr "컴파일러 자동 업데이트"
+
+#: tform1.autocrossupdate.hint
+msgid "Auto-update all installed cross-compilers."
+msgstr "설치된 모든 교차 컴파일러를 자동 업데이트합니다."
+
+#: tform1.basicsheet.caption
+msgid "Basic"
+msgstr "기본"
+
+#: tform1.bitbtnfpcandlazarus.caption
+msgid "Install/update FPC+Laz"
+msgstr "설치/업데이트 FPC+Laz"
+
+#: tform1.bitbtnfpcandlazarus.hint
+msgid "Will install/update the selected version of both FPC and Lazarus."
+msgstr "선택한 버전의 FPC와 Lazarus를 모두 설치/업데이트합니다."
+
+#: tform1.bitbtnfpconly.caption
+msgctxt "tform1.bitbtnfpconly.caption"
+msgid "Only"
+msgstr "오직"
+
+#: tform1.bitbtnfpconly.hint
+msgid "Only install/update selected FPC version."
+msgstr "선택한 FPC 버전만 설치/업데이트합니다."
+
+#: tform1.bitbtnhalt.caption
+msgid "Halt"
+msgstr "중지"
+
+#: tform1.bitbtnhalt.hint
+msgid "Try to quit fpcupdeluxe"
+msgstr "Fpcupdeluxe 종료합니다"
+
+#: tform1.bitbtnlazarusonly.caption
+msgctxt "tform1.bitbtnlazarusonly.caption"
+msgid "Only"
+msgstr "오직"
+
+#: tform1.bitbtnlazarusonly.hint
+msgid "Only install/update selected Lazarus version."
+msgstr "선택한 Lazarus 버전만 설치/업데이트합니다."
+
+#: tform1.btnclearlog.caption
+msgid "Clear log"
+msgstr "로그 삭제"
+
+#: tform1.btninstalldirselect.caption
+msgid "Set InstallDir"
+msgstr "설치폴더 설정"
+
+#: tform1.btninstallmodule.caption
+msgid "Install module"
+msgstr "모듈 설치"
+
+#: tform1.btninstallmodule.hint
+msgid "Install the selected module."
+msgstr "선택모듈 설치."
+
+#: tform1.btnsetupplus.caption
+msgid "Setup+"
+msgstr "설치+"
+
+#: tform1.btnsetupplus.hint
+msgid "Open the extended settings form."
+msgstr "확장설정창 열기."
+
+#: tform1.btnuninstallmodule.caption
+msgid "Uninstall module"
+msgstr "모듈 삭제"
+
+#: tform1.btnuninstallmodule.hint
+msgid "Uninstall the selected module."
+msgstr "선택 모듈 삭제."
+
+#: tform1.buttoninstallcrosscompiler.caption
+msgid "Install cross-compiler"
+msgstr "크로스 컴파일러 설치"
+
+#: tform1.buttoninstallcrosscompiler.hint
+msgid "Install the selected CPU-OS cross-compiler."
+msgstr "선택한 CPU-OS 크로스 컴파일러를 설치합니다."
+
+#: tform1.checkautoclear.caption
+msgid "AutoClear"
+msgstr "자동정리"
+
+#: tform1.crosssheet.caption
+msgid "Cross"
+msgstr "교차"
+
+#: tform1.dinobtn.caption
+msgid "2.0.2+0.9.16"
+msgstr "2.0.2+0.9.16"
+
+#: tform1.dinobtn.hint
+msgid "Will install/update prehistoric FPC and Lazarus"
+msgstr "오래된 FPC 및 Lazarus 설치/업데이트"
+
+#: tform1.embeddedbtn.caption
+msgid "Embedded"
+msgstr "임베디드"
+
+#: tform1.embeddedbtn.hint
+msgid "Get FPC for SAM embedded"
+msgstr "SAM 내장 FPC 가져오기"
+
+#: tform1.fixesbtn.caption
+msgid "Fixes"
+msgstr "고정"
+
+#: tform1.fixesbtn.hint
+msgid "Will install/update current fixes versions of both FPC and Lazarus"
+msgstr "FPC 및 Lazarus의 현재 수정 버전을 설치/업데이트합니다"
+
+#: tform1.fpcversionlabel.caption
+msgid "FPC version"
+msgstr "FPC 버전"
+
+#: tform1.installdiredit.hint
+msgid "Directory to install FPC and Lazarus"
+msgstr "라자루스 와 FPC 설치할 디렉토리"
+
+#: tform1.lazarusversionlabel.caption
+msgid "Lazarus version"
+msgstr "라자루스 버전"
+
+#: tform1.mchineeslanguage.caption
+msgid "Chinees"
+msgstr "중국어"
+
+#: tform1.memosummary.hint
+msgid "Will show error"
+msgstr "오류 보기"
+
+#: tform1.menglishlanguage.caption
+msgid "English"
+msgstr "영어"
+
+#: tform1.menuitem1.caption
+msgid "About"
+msgstr "관하여"
+
+#: tform1.menuitem2.caption
+msgid "Languages"
+msgstr "언어"
+
+#: tform1.modulesheet.caption
+msgid "Modules"
+msgstr "모듈"
+
+#: tform1.mormotbtn.caption
+msgid "mORMot"
+msgstr "mORMot"
+
+#: tform1.mormotbtn.hint
+msgid "Get the mORMot for FPC"
+msgstr "FPC용 mORMot 획득"
+
+#: tform1.npbtn.caption
+msgid "NewPascal"
+msgstr "새로운파스칼"
+
+#: tform1.npbtn.hint
+msgid "Will install/update NewPascal."
+msgstr "새로운 파스칼 설치/업그레이드."
+
+#: tform1.oldbtn.caption
+msgid "2.6.4 + 1.4"
+msgstr "2.6.4 + 1.4"
+
+#: tform1.oldbtn.hint
+msgid "Will install/update FPC 2.6.4 and Lazarus 1.4"
+msgstr "FPC 2.6.4 및 Lazarus 1.4 설치/업데이트"
+
+#: tform1.radgrpcpu.caption
+msgid "CPU"
+msgstr "CPU"
+
+#: tform1.radgrpos.caption
+msgid "OS"
+msgstr "OS"
+
+#: tform1.realfpcurl.hint
+msgctxt "tform1.realfpcurl.hint"
+msgid "Double click to allow editing"
+msgstr "편집을 허용하려면 두 번 누르십시오"
+
+#: tform1.reallazurl.hint
+msgctxt "tform1.reallazurl.hint"
+msgid "Double click to allow editing"
+msgstr "편집을 허용하려면 두 번 누르십시오"
+
+#: tform1.stablebtn.caption
+msgid "Stable"
+msgstr "Stable"
+
+#: tform1.stablebtn.hint
+msgid "Will install/update stable versions of both FPC and Lazarus"
+msgstr "FPC 및 Lazarus의 안정적인 버전 설치/업데이트"
+
+#: tform1.statusmessage.text
+msgid "Sitting and waiting"
+msgstr "기다리세요"
+
+#: tform1.trunkbtn.caption
+msgid "Trunk"
+msgstr "Trunk"
+
+#: tform1.trunkbtn.hint
+msgid "Will install/update trunk version of both FPC and Lazarus."
+msgstr "FPC와 Lazarus의 트렁크 버전을 설치/업데이트합니다."
