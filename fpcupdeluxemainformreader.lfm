@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 62
+  Left = 96
   Height = 701
-  Top = 145
+  Top = 71
   Width = 1286
   Anchors = []
   Caption = 'Form1'
@@ -41,10 +41,10 @@ object Form1: TForm1
     AnchorSideTop.Control = RealFPCURL
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = CheckAutoClear
-    Left = 336
+    Left = 330
     Height = 23
     Top = 33
-    Width = 680
+    Width = 686
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
@@ -125,12 +125,15 @@ object Form1: TForm1
     TabOrder = 0
   end
   object RealFPCURL: TEdit
+    AnchorSideLeft.Control = btnInstallDirSelect
+    AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
-    Left = 336
+    Left = 330
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
     Width = 433
+    BorderSpacing.Left = 8
     BorderSpacing.Top = 4
     ParentFont = False
     ParentShowHint = False
@@ -144,11 +147,11 @@ object Form1: TForm1
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 777
+    Left = 771
     Height = 23
     Hint = 'Double click to allow editing'
     Top = 4
-    Width = 497
+    Width = 503
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 4
@@ -321,11 +324,31 @@ object Form1: TForm1
       ShowHint = True
       TabOrder = 6
     end
-    object UltiboBtn: TButton
+    object ESPBtn: TButton
       AnchorSideLeft.Control = PicoBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
       Left = 828
+      Height = 25
+      Hint = 'Get FPC for ESP32'
+      Top = 8
+      Width = 97
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install for ESP'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 7
+    end
+    object UltiboBtn: TButton
+      AnchorSideLeft.Control = ESPBtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 933
       Height = 25
       Hint = 'Install baremetal Ultibo for RPi3'
       Top = 8
@@ -339,13 +362,13 @@ object Form1: TForm1
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 7
+      TabOrder = 8
     end
     object mORMotBtn: TButton
       AnchorSideLeft.Control = UltiboBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 944
+      Left = 1049
       Height = 25
       Hint = 'Get the mORMot for FPC'
       Top = 8
@@ -359,7 +382,7 @@ object Form1: TForm1
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 8
+      TabOrder = 9
     end
     object BitBtnHalt: TButton
       AnchorSideTop.Control = Panel1
@@ -380,18 +403,19 @@ object Form1: TForm1
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 9
+      TabOrder = 10
     end
   end
   object memoSummary: TMemo
+    AnchorSideLeft.Control = CommandOutputScreen
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Panel1
-    Left = 336
+    Left = 330
     Height = 120
     Hint = 'Will show error'
     Top = 513
-    Width = 938
+    Width = 944
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 4
@@ -1235,7 +1259,6 @@ object Form1: TForm1
       ClientHeight = 527
       ClientWidth = 302
       ParentFont = False
-      TabVisible = False
       object ListBoxFPCTargetTag: TListBox
         AnchorSideLeft.Control = TagSheet
         AnchorSideTop.Control = FPCTagLabel
@@ -1697,10 +1720,10 @@ object Form1: TForm1
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = memoSummary
-    Left = 336
+    Left = 330
     Height = 441
     Top = 64
-    Width = 938
+    Width = 944
     Anchors = [akTop, akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
     BorderSpacing.Right = 12
@@ -1759,6 +1782,10 @@ object Form1: TForm1
       object MChineseCNlanguage: TMenuItem
         Caption = 'Chinese (CN)'
         OnClick = MChineseCNlanguageClick
+      end
+      object MKoreanlanguage: TMenuItem
+        Caption = 'Korean'
+        OnClick = MKoreanlanguageClick
       end
     end
     object MenuItem1: TMenuItem

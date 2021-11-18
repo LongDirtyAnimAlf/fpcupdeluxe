@@ -17,7 +17,7 @@
         <TextDesc Value="Installer for FPC and Lazarus."/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="7">
+      <Resources Count="8">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
@@ -25,6 +25,7 @@
         <Resource_4 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
         <Resource_5 FileName="icons\gitlablabel.png" Type="RCDATA" ResourceName="GITLABLABEL"/>
         <Resource_6 FileName="icons\github.png" Type="RCDATA" ResourceName="SVNLABEL"/>
+        <Resource_7 FileName="languages\fpcupdeluxe.ko.po" Type="RCDATA" ResourceName="FPCUPDELUXE.KO"/>
       </Resources>
     </General>
     <i18n>
@@ -633,7 +634,7 @@
       </Item19>
       <Item20 Name="linux64gtk3">
         <MacroValues Count="1">
-          <Macro4 Name="LCLWidgetType" Value="gtk3"/>
+          <Macro2 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
@@ -730,11 +731,9 @@
           </Other>
         </CompilerOptions>
       </Item22>
-      <SharedMatrixOptions Count="4">
+      <SharedMatrixOptions Count="2">
         <Item1 ID="784204643275" Modes="DefaultQT,linuxx64QT5,linuxi386QT5,linuxaarch64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
-        <Item2 ID="322994045052" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
-        <Item3 ID="015223611220" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
-        <Item4 ID="591091371099" Modes="linux64gtk3" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
+        <Item2 ID="591091371099" Modes="linux64gtk3" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>

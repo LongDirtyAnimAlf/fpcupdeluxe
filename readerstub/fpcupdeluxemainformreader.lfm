@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 45
+  Left = 96
   Height = 701
-  Top = 65
+  Top = 71
   Width = 1286
   Anchors = []
   Caption = 'Form1'
@@ -324,11 +324,31 @@ object Form1: TForm1
       ShowHint = True
       TabOrder = 6
     end
-    object UltiboBtn: TButton
+    object ESPBtn: TButton
       AnchorSideLeft.Control = PicoBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
       Left = 828
+      Height = 25
+      Hint = 'Get FPC for ESP32'
+      Top = 8
+      Width = 97
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 4
+      Caption = 'Install for ESP'
+      OnClick = QuickBtnClick
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 7
+    end
+    object UltiboBtn: TButton
+      AnchorSideLeft.Control = ESPBtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      Left = 933
       Height = 25
       Hint = 'Install baremetal Ultibo for RPi3'
       Top = 8
@@ -342,13 +362,13 @@ object Form1: TForm1
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 7
+      TabOrder = 8
     end
     object mORMotBtn: TButton
       AnchorSideLeft.Control = UltiboBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 944
+      Left = 1049
       Height = 25
       Hint = 'Get the mORMot for FPC'
       Top = 8
@@ -362,7 +382,7 @@ object Form1: TForm1
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 8
+      TabOrder = 9
     end
     object BitBtnHalt: TButton
       AnchorSideTop.Control = Panel1
@@ -383,7 +403,7 @@ object Form1: TForm1
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 9
+      TabOrder = 10
     end
   end
   object memoSummary: TMemo
