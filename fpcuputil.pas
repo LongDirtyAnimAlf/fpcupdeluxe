@@ -3272,9 +3272,9 @@ begin
     result:=Output
   else
   begin
-    Output:='';
-    RunCommand('xcrun',['-h'], Output);
-    if (Pos(SDKCOMMAND,Output)>0) then
+    //Output:='';
+    //RunCommand('xcrun',['-h'], Output);
+    //if (Pos(SDKCOMMAND,Output)>0) then
     begin
       Output:='';
       RunCommand('xcrun',[SDKCOMMAND], Output);

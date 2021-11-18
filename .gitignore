@@ -59,6 +59,7 @@ Temporary Items
 *.local
 
 *.pot
+!./languages/*.po
 
 logger/secrets.inc
 secrets/
@@ -79,7 +80,6 @@ logger/LAMWmORMotProject/gen/
 crosstools/
 bootstrappers/
 deluxebin/
-!deluxebin/languages/*.po
 lib/
 lib*/
 !fpcuptools/*
