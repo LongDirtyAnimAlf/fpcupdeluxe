@@ -23,7 +23,7 @@ uses
   {$endif}
   ;
 
-{$IF DEFINED(lcl_fullversion) AND (lcl_fullversion >= 2010000)}
+{$if lcl_fullversion >= 2010000}
 {$define EnableLanguages}
 {$endif}
 
@@ -78,6 +78,7 @@ type
     MenuFile: TMenuItem;
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
+    MKoreanlanguage: TMenuItem;
     MFPCBugs: TMenuItem;
     MLazarusBugs: TMenuItem;
     MIssuesGitHub: TMenuItem;
@@ -160,6 +161,7 @@ type
     procedure IniPropStorageAppSavingProperties({%H-}Sender: TObject);
     procedure ListBoxTargetDrawItem(Control: TWinControl; Index: Integer;
       ARect: TRect; State: TOwnerDrawState);
+    procedure MKoreanlanguageClick(Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick({%H-}Sender: TObject);
@@ -1010,6 +1012,14 @@ procedure TForm1.MEnglishlanguageClick(Sender: TObject);
 begin
   {$ifdef EnableLanguages}
   sLanguage:='en';
+  TransLate(sLanguage);
+  {$endif}
+end;
+
+procedure TForm1.MKoreanlanguageClick(Sender: TObject);
+begin
+  {$ifdef EnableLanguages}
+  sLanguage:='ko';
   TransLate(sLanguage);
   {$endif}
 end;

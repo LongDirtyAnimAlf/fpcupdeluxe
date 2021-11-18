@@ -1763,6 +1763,10 @@ object Form1: TForm1
         Caption = 'Chinese (CN)'
         OnClick = MChineseCNlanguageClick
       end
+      object MKoreanlanguage: TMenuItem
+        Caption = 'Korean'
+        OnClick = MKoreanlanguageClick
+      end
     end
     object MenuItem1: TMenuItem
       Caption = 'About'
