@@ -161,22 +161,22 @@ msgstr "취소"
 #: processutils.liscannotexecute
 #, object-pascal-format
 msgid "cannot execute \"%s\""
-msgstr "실행 실패 “%s”"
+msgstr "실행 실패 \"%s\""
 
 #: processutils.liscannotfindexecutable
 #, object-pascal-format
 msgid "cannot find executable \"%s\""
-msgstr "“%s” 실행파일 찾을수 없음"
+msgstr "\"%s\" 실행파일 찾을수 없음"
 
 #: processutils.lisexecutableisadirectory
 #, object-pascal-format
 msgid "executable \"%s\" is a directory"
-msgstr "“%s” 는 폴더입니다"
+msgstr "\"%s\" 는 폴더입니다"
 
 #: processutils.lisexecutablelacksthepermissiontorun
 #, object-pascal-format
 msgid "executable \"%s\" lacks the permission to run"
-msgstr "“%s” 실행 권한이 없습니다"
+msgstr "\"%s\" 실행 권한이 없습니다"
 
 #: processutils.lisexitcode
 #, object-pascal-format
@@ -191,12 +191,12 @@ msgstr "사용 가능한 버퍼 라인: %s"
 #: processutils.lismissingdirectory
 #, object-pascal-format
 msgid "missing directory \"%s\""
-msgstr "“%s” 폴더 오류"
+msgstr "\"%s\" 폴더 오류"
 
 #: processutils.lismissingexecutable
 #, object-pascal-format
 msgid "missing executable \"%s\""
-msgstr "실행파일 없음 “%s”"
+msgstr "실행파일 없음 \"%s\""
 
 #: processutils.lissuccess
 msgid "Success"
@@ -205,7 +205,7 @@ msgstr "성공"
 #: processutils.listoolhasnoexecutable
 #, object-pascal-format
 msgid "tool \"%s\" has no executable"
-msgstr "도구 “%s” 실행할수 없습니다"
+msgstr "도구 \"%s\" 실행할수 없습니다"
 
 #: processutils.lisunabletoexecute
 #, object-pascal-format
