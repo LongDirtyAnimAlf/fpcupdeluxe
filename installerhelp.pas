@@ -80,6 +80,7 @@ Const
     _GETMODULE+_HELPLAZARUS+_SEP+
     _BUILDMODULE+_HELPLAZARUS+_SEP+
     _CONFIGMODULE+_HELPLAZARUS+_SEP+
+    _BUILDMODULE+_LHELP+_SEP+
     _END+
 
     //Remove Lazarus help:
@@ -163,8 +164,6 @@ end;
 { THelpLazarusInstaller }
 
 THelpLazarusInstaller = class(THelpInstaller)
-private
-  FLazarusPrimaryConfigPath: string;
 protected
   // Build module descendant customisation
   function BuildModuleCustom(ModuleName:string): boolean; override;
@@ -177,7 +176,7 @@ public
   // Install update sources
   function GetModule(ModuleName:string): boolean; override;
   // Configuration for Lazarus; required for configuration
-  property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
+  property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath;
   // Uninstall module
   function UnInstallModule(ModuleName:string): boolean; override;
   constructor Create;
@@ -251,7 +250,7 @@ begin
       ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
       PlainBinDir+PathSeparator+
       FMakeDir+PathSeparator+PathSeparator+
-      ExcludeTrailingPathDelimiter(FInstallDirectory)+
+      ExcludeTrailingPathDelimiter(InstallDirectory)+
       aPath,
       false,false);
     {$ENDIF MSWINDOWS}
@@ -503,7 +502,7 @@ begin
   if inherited InitModule then
   begin
     //todo: check with FreeVision FPCIDE to see if this is a sensible location.
-    FTargetDirectory:=IncludeTrailingPathDelimiter(FInstallDirectory)+
+    FTargetDirectory:=IncludeTrailingPathDelimiter(InstallDirectory)+
       'doc'+DirectorySeparator+
       'ide'+DirectorySeparator; ;
     Infoln(infotext+'Documentation directory: '+FTargetDirectory,etInfo);
@@ -635,7 +634,7 @@ begin
           // Check for valid lazbuild.
           // Note: we don't check if we have a valid primary config path, but that will come out
           // in the next steps.
-          LazbuildApp:=IncludeTrailingPathDelimiter(FInstallDirectory)+LAZBUILDNAME+GetExeExt;
+          LazbuildApp:=IncludeTrailingPathDelimiter(InstallDirectory)+LAZBUILDNAME+GetExeExt;
           if CheckExecutable(LazbuildApp, ['--help'],LAZBUILDNAME)=false then
           begin
             WritelnLog(ModuleName+': No valid lazbuild executable found. Aborting.', true);
@@ -790,11 +789,11 @@ begin
   begin
     // This must be the directory of the build_lcl_docs project, otherwise
     // build_lcl_docs will fail; at least it won't pick up the FPC help files for cross references
-    FTargetDirectory:=IncludeTrailingPathDelimiter(FInstallDirectory)+
+    FTargetDirectory:=IncludeTrailingPathDelimiter(InstallDirectory)+
       'docs'+DirectorySeparator+
       'chm'+DirectorySeparator;
     Infoln('helplazarus: documentation directory: '+FTargetDirectory,etInfo);
-    FBuildLCLDocsExeDirectory:=IncludeTrailingPathDelimiter(FInstallDirectory)+
+    FBuildLCLDocsExeDirectory:=IncludeTrailingPathDelimiter(InstallDirectory)+
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator;
     Infoln(localinfotext+'FBuildLCLDocsExeDirectory: '+FTargetDirectory,etDebug);

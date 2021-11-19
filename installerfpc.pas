@@ -389,7 +389,7 @@ begin
   if NOT Assigned(CrossInstaller) then exit;
 
   // Standard directory
-  aDir:=ConcatPaths([FInstallDirectory,'units']);
+  aDir:=ConcatPaths([InstallDirectory,'units']);
   {$ifdef UNIX}
   if FileIsSymlink(aDir) then
   begin
@@ -400,7 +400,7 @@ begin
   end;
   {$endif UNIX}
   result:=ConcatPaths([aDir,CrossInstaller.RegisterName]);
-  //result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName]);
+  //result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName]);
 
   // Specials
   if (SubarchTarget) then
@@ -418,13 +418,13 @@ begin
     end;
 
     if (CrossInstaller.TargetOS=TOS.ultibo) then
-      result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.TargetOSName+'-'+SUBARCHMagic])
+      result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.TargetOSName+'-'+SUBARCHMagic])
     else
     begin
       if CrossInstaller.TargetCPU=TCPU.arm then
-        result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic,ABIMagic])
+        result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic,ABIMagic])
       else
-        result:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic]);
+        result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic]);
     end;
   end;
 end;
@@ -875,7 +875,7 @@ begin
     end;
     if CrossInstaller.SearchModeUsed=TSearchSetting.ssCustom
        then BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
-       else BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
+       else BinsAvailable:=CrossInstaller.GetBinUtils(BaseDirectory);
     if (not BinsAvailable) then Infoln('Failed to get crossbinutils', etError);
 
     // second, get/set cross libraries !!
@@ -890,7 +890,7 @@ begin
     end;
     if CrossInstaller.SearchModeUsed=TSearchSetting.ssCustom
       then LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory)
-      else LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory);
+      else LibsAvailable:=CrossInstaller.GetLibs(BaseDirectory);
     if (not LibsAvailable) then Infoln('Failed to get crosslibrary', etError);
 
     result:=(BinsAvailable AND LibsAvailable);
@@ -971,7 +971,7 @@ begin
               if (i<>-1) then
               begin
                 // Get the correct name of the cross-compiler in source-directory
-                s1:=ConcatPaths([FSourceDirectory,'compiler','ppcross'+ppcSuffix[CrossInstaller.TargetCPU]]);
+                s1:=ConcatPaths([SourceDirectory,'compiler','ppcross'+ppcSuffix[CrossInstaller.TargetCPU]]);
                 // Get the correct name of the cross-compiler in install-directory
                 if (NOT FileExists(s1)) then
                   s1:=FFPCCompilerBinPath+CrossCompilerName;
@@ -1008,7 +1008,7 @@ begin
               if (i<>-1) then
               begin
                 // Get the correct name of the cross-compiler in source-directory
-                s1:=ConcatPaths([FSourceDirectory,'compiler','ppcross'+ppcSuffix[CrossInstaller.TargetCPU]]);
+                s1:=ConcatPaths([SourceDirectory,'compiler','ppcross'+ppcSuffix[CrossInstaller.TargetCPU]]);
                 // Get the correct name of the cross-compiler in install-directory
                 if (NOT FileExists(s1)) then
                   s1:=FFPCCompilerBinPath+CrossCompilerName;
@@ -1066,8 +1066,8 @@ begin
                 s1:=s1+CrossInstaller.FPCCFGSnippet+LineEnding;
 
               if (CrossInstaller.TargetOS=TOS.java) then
-                //s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units','$FPCTARGET','rtl','org','freepascal','rtl'])+LineEnding;
-                s1:=s1+'-Fu'+ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl'])+LineEnding;
+                //s1:=s1+'-Fu'+ConcatPaths([InstallDirectory,'units','$FPCTARGET','rtl','org','freepascal','rtl'])+LineEnding;
+                s1:=s1+'-Fu'+ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl'])+LineEnding;
 
               if (SubarchTarget) then
               begin
@@ -1082,7 +1082,7 @@ begin
                   // Tricky ... :-| ... !!!
                   //{$ifdef MSWINDOWS}
                   if (CrossInstaller.TargetOS in [TOS.embedded,TOS.freertos]) then
-                    FileCreate(ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'system.ppu']));
+                    FileCreate(ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,'system.ppu']));
                   //{$endif MSWINDOWS}
                 end;
               end;
@@ -1097,7 +1097,7 @@ begin
             //Correct for some case errors on Unixes
             if (CrossInstaller.TargetOS=TOS.java) then
             begin
-              s1:=ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl']);
+              s1:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl']);
               s2:=IncludeTrailingPathDelimiter(s1)+'System.class';
               s1:=IncludeTrailingPathDelimiter(s1)+'system.class';
               if (NOT FileExists(s1)) then FileUtil.CopyFile(s2,s1);
@@ -1111,7 +1111,7 @@ begin
           {$IFDEF MSWINDOWS}
           if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
           {$ENDIF}
-          Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+          Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
           //Still not clear if jobs can be enabled for crosscompiler builds ... :-|
           //However, on Windows, erroros occur frequently due to more jobs.
@@ -1124,20 +1124,20 @@ begin
           end;
           }
 
-          Processor.Process.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
+          Processor.Process.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(SourceDirectory));
           Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
           Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
-          Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-          Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+          Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
+          Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
 
           (*
           {$IFDEF UNIX}
-          s1:=ConcatPaths([FInstallDirectory,'lib','fpc',GetFPCVersion]);
+          s1:=ConcatPaths([InstallDirectory,'lib','fpc',GetFPCVersion]);
           {$ELSE}
-          s1:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+          s1:=ExcludeTrailingPathDelimiter(SourceDirectory);
           {$ENDIF UNIX}
           *)
-          s1:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+          s1:=ExcludeTrailingPathDelimiter(SourceDirectory);
           Processor.Process.Parameters.Add('FPCDIR=' + s1);
 
           {$IFDEF MSWINDOWS}
@@ -1193,8 +1193,8 @@ begin
               if FMUSL then
               begin
                 // copy over the [cross-]compiler
-                s1:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+GetCompilerName(CrossInstaller.TargetCPU);
-                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+CrossCompilerName;
+                s1:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+GetCompilerName(CrossInstaller.TargetCPU);
+                s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+CrossCompilerName;
                 if FileExists(s1) then
                 begin
                   Infoln(infotext+'Copy [cross-]compiler ('+ExtractFileName(s1)+') into: '+ExtractFilePath(s2),etInfo);
@@ -1212,7 +1212,7 @@ begin
               s1:=CrossCompilerName;
               s2:=FFPCCompilerBinPath+s1;
               if (NOT FileExists(s2)) then
-                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
+                s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1;
               Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('rtl_all');
             end;
@@ -1221,7 +1221,7 @@ begin
               s1:=CrossCompilerName;
               s2:=FFPCCompilerBinPath+s1;
               if (NOT FileExists(s2)) then
-                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
+                s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1;
               Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('rtl_install');
             end;
@@ -1230,7 +1230,7 @@ begin
               s1:=CrossCompilerName;
               s2:=FFPCCompilerBinPath+s1;
               if (NOT FileExists(s2)) then
-                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
+                s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1;
               Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('packages_all');
             end;
@@ -1239,7 +1239,7 @@ begin
               s1:=CrossCompilerName;
               s2:=FFPCCompilerBinPath+s1;
               if (NOT FileExists(s2)) then
-                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1;
+                s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1;
               Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('packages_install');
             end;
@@ -1258,7 +1258,7 @@ begin
                 Infoln(infotext+'Building native compiler for '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+'.',etInfo);
                 Processor.Process.Parameters.Add('FPC='+FCompiler);
                 //s1:=CrossCompilerName;
-                //Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+                //Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1);
                 Processor.Process.Parameters.Add('-C');
                 Processor.Process.Parameters.Add('compiler');
                 Processor.Process.Parameters.Add('compiler');
@@ -1494,7 +1494,7 @@ begin
             begin
               // Get the correct name of the cross-compiler in source-directory
               s1:='ppcross'+ppcSuffix[CrossInstaller.TargetCPU];
-              s2:=ConcatPaths([FSourceDirectory,'compiler',s1]);
+              s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
               if FileExists(s2) then
               begin
                 {$ifdef Darwin}
@@ -1571,7 +1571,7 @@ begin
 
           // Get the correct name of the cross-compiler in source-directory
           s1:='ppcross'+ppcSuffix[CrossInstaller.TargetCPU];
-          s2:=ConcatPaths([FSourceDirectory,'compiler',s1]);
+          s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
           {$ifdef crosssimple}
           {$IFDEF UNIX}
           if FileExists(s2) then
@@ -1701,18 +1701,18 @@ begin
 
   FErrorLog.Clear;
 
-  if (NOT DirectoryExists(FInstallDirectory)) then exit;
-  if CheckDirectory(FInstallDirectory) then exit;
+  if (NOT DirectoryExists(InstallDirectory)) then exit;
+  if CheckDirectory(InstallDirectory) then exit;
 
 
-  if assigned(CrossInstaller) AND (Length(FBaseDirectory)>0) AND (NOT CheckDirectory(FBaseDirectory)) then
+  if assigned(CrossInstaller) AND (Length(BaseDirectory)>0) AND (NOT CheckDirectory(BaseDirectory)) then
   begin
     if ((CrossInstaller.TargetCPU=TCPU.cpuNone) OR (CrossInstaller.TargetOS=TOS.osNone)) then exit;
 
     CrossInstaller.Reset;
     CrossInstaller.SetFPCVersion(SourceVersionStr);
 
-    DirectoryAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
+    DirectoryAvailable:=CrossInstaller.GetBinUtils(BaseDirectory);
     if DirectoryAvailable then
     begin
       aDir:=CrossInstaller.BinUtilsPath;
@@ -1721,7 +1721,7 @@ begin
         if FileExists(IncludeTrailingPathDelimiter(aDir)+FPCUP_ACKNOWLEDGE) then
         begin
           // Only allow cross directories inside our own install te be deleted
-          if (Pos(FBaseDirectory,aDir)=1) AND  (Pos(CROSSBINPATH,aDir)>0) then
+          if (Pos(BaseDirectory,aDir)=1) AND  (Pos(CROSSBINPATH,aDir)>0) then
           begin
             Infoln(infotext+'Deleting '+ModuleName+' bin tools directory '+aDir);
             if DeleteDirectoryEx(aDir)=false then
@@ -1733,7 +1733,7 @@ begin
       end;
     end;
 
-    DirectoryAvailable:=CrossInstaller.GetLibs(FBaseDirectory);
+    DirectoryAvailable:=CrossInstaller.GetLibs(BaseDirectory);
     if DirectoryAvailable then
     begin
       aDir:=CrossInstaller.LibsPath;
@@ -1742,7 +1742,7 @@ begin
         if FileExists(IncludeTrailingPathDelimiter(aDir)+FPCUP_ACKNOWLEDGE) then
         begin
           // Only allow cross directories inside our own install te be deleted
-          if (Pos(FBaseDirectory,aDir)=1) AND  (Pos(CROSSLIBPATH,aDir)>0) then
+          if (Pos(BaseDirectory,aDir)=1) AND  (Pos(CROSSLIBPATH,aDir)>0) then
           begin
             Infoln(infotext+'Deleting '+ModuleName+' libs directory '+aDir);
             if DeleteDirectoryEx(aDir)=false then
@@ -1757,11 +1757,11 @@ begin
     FPCCfg := FFPCCompilerBinPath + FPCCONFIGFILENAME;
     InsertFPCCFGSnippet(FPCCfg,'');
 
-    aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(false);
+    aDir:=IncludeTrailingPathDelimiter(InstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(false);
     if DirectoryExists(aDir) then
     begin
       // Only allow binary directories inside our own install te be deleted
-      if (Pos(FBaseDirectory,aDir)=1) then
+      if (Pos(BaseDirectory,aDir)=1) then
       begin
         Infoln(infotext+'Deleting '+ModuleName+' binary directory '+aDir);
         if DeleteDirectoryEx(aDir)=false then
@@ -1775,7 +1775,7 @@ begin
     if DirectoryExists(aDir) then
     begin
       // Only allow unit directories inside our own install te be deleted
-      if (Pos(FBaseDirectory,aDir)=1) then
+      if (Pos(BaseDirectory,aDir)=1) then
       begin
         Infoln(infotext+'Deleting '+ModuleName+' unit directory '+aDir);
         if DeleteDirectoryEx(aDir)=false then
@@ -1787,7 +1787,7 @@ begin
 
     // Delete dummy system.ppu
     //if (CrossInstaller.TargetOS in [TOS.embedded,TOS.freertos]) then
-    //  SysUtils.DeleteFile(ConcatPaths([FInstallDirectory,'units',CrossInstaller.RegisterName,'system.ppu']));
+    //  SysUtils.DeleteFile(ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,'system.ppu']));
 
   end;
 end;
@@ -1837,22 +1837,22 @@ begin
     //Copy them now, just to be sure
 
     ForceDirectoriesSafe(FFPCCompilerBinPath);
-    s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'tply';
+    s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'utils'+DirectorySeparator+'tply';
     s1:=FFPCCompilerBinPath+YYLEX;
     if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYLEX,s1);
     s1:=FFPCCompilerBinPath+YYPARSE;
     if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYPARSE,s1);
 
     {$IFDEF UNIX}
-    s1:=ConcatPaths([FInstallDirectory,'lib','fpc',SourceVersionStr]);
+    s1:=ConcatPaths([InstallDirectory,'lib','fpc',SourceVersionStr]);
     ForceDirectoriesSafe(s1);
     s1:=s1+'/lexyacc';
     DeleteFile(s1);
-    s2:=IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc/lexyacc';
+    s2:=IncludeTrailingPathDelimiter(InstallDirectory)+'lib/fpc/lexyacc';
     ForceDirectoriesSafe(s2);
     fpSymlink(pchar(s2),pchar(s1));
 
-    s1:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'tply';
+    s1:=IncludeTrailingPathDelimiter(SourceDirectory)+'utils'+DirectorySeparator+'tply';
     s3:=s2+DirectorySeparator+YYLEX;
     if (NOT FileExists(s3)) then FileUtil.CopyFile(s1+DirectorySeparator+YYLEX,s3);
     s3:=s2+DirectorySeparator+YYPARSE;
@@ -1895,24 +1895,24 @@ begin
   {$ENDIF}
   Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
   Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
-  Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-  Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+  Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
+  Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
 
   //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
   //The paths are fixed in the FPC sources. Try to set the default path here [FPCDIR], so yylex.cod and yyparse.cod can be found.
   (*
   {$IFDEF UNIX}
-  s1:=ConcatPaths([FInstallDirectory,'lib','fpc',GetFPCVersion]);
+  s1:=ConcatPaths([InstallDirectory,'lib','fpc',GetFPCVersion]);
   {$ELSE}
-  s1:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+  s1:=ExcludeTrailingPathDelimiter(SourceDirectory);
   {$ENDIF UNIX}
   *)
-  s1:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+  s1:=ExcludeTrailingPathDelimiter(SourceDirectory);
   Processor.Process.Parameters.Add('FPCDIR=' + s1);
 
   //Makefile could pickup FPCDIR setting, so try to set it for fpcupdeluxe
   //FPCDirStore:=Processor.Environment.GetVar('FPCDIR');
-  //Processor.Environment.SetVar('FPCDIR',IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc');
+  //Processor.Environment.SetVar('FPCDIR',IncludeTrailingPathDelimiter(InstallDirectory)+'lib/fpc');
 
   //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
   //Todo: to be investigated
@@ -2056,11 +2056,11 @@ begin
   case ModuleName of
     _REVISIONFPC:
     begin
-      Processor.Process.CurrentDirectory:=ConcatPaths([FSourceDirectory,'compiler']);
+      Processor.Process.CurrentDirectory:=ConcatPaths([SourceDirectory,'compiler']);
     end;
     _PAS2JS:
     begin
-      Processor.Process.CurrentDirectory:=ConcatPaths([FSourceDirectory,'utils','pas2js']);
+      Processor.Process.CurrentDirectory:=ConcatPaths([SourceDirectory,'utils','pas2js']);
       // first run fpcmake to generate correct makefile
       // is this still needed !!?? No !!
       //SysUtils.DeleteFile(IncludeTrailingPathDelimiter(Processor.Process.CurrentDirectory)+'fpmake'+GetExeExt);
@@ -2068,7 +2068,7 @@ begin
     end;
     else
     begin
-      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
     end;
   end;
 
@@ -2096,7 +2096,7 @@ begin
   begin
     Processor.Process.Parameters.Add('all');
     //If we have separate source and install, always use the install command
-    //if (FInstallDirectory<>FSourceDirectory) then
+    //if (InstallDirectory<>SourceDirectory) then
     Processor.Process.Parameters.Add('install');
   end;
 
@@ -2855,10 +2855,10 @@ var
 begin
   result:='unknown';
 
-  testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc1'+GetExeExt;
+  testcompiler:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+'ppc1'+GetExeExt;
 
   if not FileExists(testcompiler) then
-    testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc'+GetExeExt;
+    testcompiler:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+'ppc'+GetExeExt;
 
   if not FileExists(testcompiler) then
     testcompiler:=GetFPCInBinDir;
@@ -2898,7 +2898,7 @@ begin
   result:=CheckAndGetTools;
 
   WritelnLog(localinfotext+'Init:', false);
-  WritelnLog(localinfotext+'FPC directory:      ' + FSourceDirectory, false);
+  WritelnLog(localinfotext+'FPC directory:      ' + SourceDirectory, false);
   WritelnLog(localinfotext+'FPC URL:            ' + URL, false);
   WritelnLog(localinfotext+'FPC options:        ' + FCompilerOptions, false);
 
@@ -3350,8 +3350,8 @@ begin
   WritelnLog(localinfotext+'Bootstrap compiler dir: '+ExtractFilePath(FCompiler),false);
   WritelnLog(localinfotext+'FPC URL:                '+URL,false);
   WritelnLog(localinfotext+'FPC options:            '+FCompilerOptions,false);
-  WritelnLog(localinfotext+'FPC source directory:   '+FSourceDirectory,false);
-  WritelnLog(localinfotext+'FPC install directory:  '+FInstallDirectory,false);
+  WritelnLog(localinfotext+'FPC source directory:   '+SourceDirectory,false);
+  WritelnLog(localinfotext+'FPC install directory:  '+InstallDirectory,false);
   {$IFDEF MSWINDOWS}
   WritelnLog(localinfotext+'Make/binutils path:     '+FMakeDir,false);
   {$ENDIF MSWINDOWS}
@@ -3394,12 +3394,12 @@ begin
       ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+ {compiler for current architecture}
       FMakeDir+PathSeparator+
       FBootstrapCompilerDirectory+PathSeparator+
-      ExcludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
-      IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
-      IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
-      ExcludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
-      IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
-      IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+
+      ExcludeTrailingPathDelimiter(InstallDirectory)+PathSeparator+
+      IncludeTrailingPathDelimiter(InstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
+      IncludeTrailingPathDelimiter(InstallDirectory)+'utils'+PathSeparator+
+      ExcludeTrailingPathDelimiter(SourceDirectory)+PathSeparator+
+      IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+PathSeparator+
+      IncludeTrailingPathDelimiter(SourceDirectory)+'utils'+
       aPath,
       false,false);
     {$ENDIF MSWINDOWS}
@@ -3422,12 +3422,12 @@ begin
     SetPath(
       ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
       FBootstrapCompilerDirectory+PathSeparator+
-      ExcludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
-      IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
-      IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
-      ExcludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
-      IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
-      IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+PathSeparator+
+      ExcludeTrailingPathDelimiter(InstallDirectory)+PathSeparator+
+      IncludeTrailingPathDelimiter(InstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
+      IncludeTrailingPathDelimiter(InstallDirectory)+'utils'+PathSeparator+
+      ExcludeTrailingPathDelimiter(SourceDirectory)+PathSeparator+
+      IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+PathSeparator+
+      IncludeTrailingPathDelimiter(SourceDirectory)+'utils'+PathSeparator+
       s+
       // pwd is located in /bin ... the makefile needs it !!
       // tools are located in /usr/bin ... the makefile needs it !!
@@ -3489,7 +3489,7 @@ var
   begin
     result:=false;
     Processor.Process.Parameters.Add('-d');
-    Processor.Process.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+    Processor.Process.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(InstallDirectory));
     Processor.Process.Parameters.Add('-o');
     Processor.Process.Parameters.Add('' + aFile + '');
     Infoln(infotext+'Creating '+ExtractFileName(aFile));
@@ -3514,7 +3514,7 @@ begin
 
   Infoln(infotext+'Building module '+ModuleName+'...',etInfo);
 
-  s:=IncludeTrailingPathDelimiter(FSourceDirectory) + MAKEFILENAME;
+  s:=IncludeTrailingPathDelimiter(SourceDirectory) + MAKEFILENAME;
   if (NOT FileExists(s)) then
   begin
     Infoln(infotext+s+' not found. Severe error. Should not happen. Aborting.',etError);
@@ -3547,8 +3547,8 @@ begin
   begin
     RequiredBootstrapVersion:='0.0.0';
 
-    RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromSource(FSourceDirectory,True);
-    RequiredBootstrapVersionHigh:=GetBootstrapCompilerVersionFromSource(FSourceDirectory,False);
+    RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromSource(SourceDirectory,True);
+    RequiredBootstrapVersionHigh:=GetBootstrapCompilerVersionFromSource(SourceDirectory,False);
 
     // There is no Makefile or no info inside the Makefile to determine bootstrap version
     // So, try something else !
@@ -3665,7 +3665,7 @@ begin
     else
     begin
       s:=VersionSnippet;
-      x:=GetReleaseCandidateFromSource(FSourceDirectory);
+      x:=GetReleaseCandidateFromSource(SourceDirectory);
       if (x<>0) then
         s:=s+'.rc'+InttoStr(x);
       CreateBinutilsList(s);
@@ -3684,8 +3684,8 @@ begin
       end
       else
       begin
-        ForceDirectoriesSafe(FInstallDirectory);
-        s:=IncludeTrailingPathDelimiter(FInstallDirectory)+'gstrip';
+        ForceDirectoriesSafe(InstallDirectory);
+        s:=IncludeTrailingPathDelimiter(InstallDirectory)+'gstrip';
         if (NOT FileExists(s)) then FileUtil.CopyFile('/usr/bin/strip',s);
       end;
     end;
@@ -3704,7 +3704,7 @@ begin
       {$IFDEF MSWINDOWS}
       if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
       {$ENDIF}
-      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
       Processor.Process.Parameters.Add('compiler_cycle');
       if (NOT FNoJobs) then
       begin
@@ -3714,7 +3714,7 @@ begin
         Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
       end;
       Processor.Process.Parameters.Add('FPC='+FCompiler);
-      Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+      Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(SourceDirectory));
       Processor.Process.Parameters.Add('OS_SOURCE=win32');
       Processor.Process.Parameters.Add('CPU_SOURCE=i386');
       Processor.Process.Parameters.Add('OS_TARGET=win64');
@@ -3733,7 +3733,7 @@ begin
       end;
       // Now we can change the compiler from the i386 to the x64 compiler:
       Compiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
-      FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler\ppcx64.exe',FCompiler,[cffOverwriteFile]);
+      FileUtil.CopyFile(IncludeTrailingPathDelimiter(SourceDirectory)+'compiler\ppcx64.exe',FCompiler,[cffOverwriteFile]);
       FBootstrapCompilerOverrideVersionCheck:=True;
     end;
     {$endif win64}
@@ -3742,7 +3742,7 @@ begin
     begin
       Infoln(infotext+'We have ppcuniversal. We need '+TargetCompilerName+'. So make it !',etInfo);
       Processor.Executable := Make;
-      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
       Processor.Process.Parameters.Clear;
       Processor.Process.Parameters.Add('compiler_cycle');
       if (NOT FNoJobs) then
@@ -3751,7 +3751,7 @@ begin
         Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
       end;
       Processor.Process.Parameters.Add('FPC='+FCompiler);
-      Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+      Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(SourceDirectory));
       Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
       Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
       Processor.Process.Parameters.Add('OS_TARGET=' + GetTargetOS);
@@ -3770,12 +3770,12 @@ begin
       end;
 
       // copy over the fresh bootstrapper, if any
-      if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName) then
+      if FileExists(IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+TargetCompilerName) then
       begin
         // Now we can change the compiler from the ppcuniversal to the target compiler:
         Compiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+TargetCompilerName;
         Infoln(infotext+'Copy fresh compiler ('+TargetCompilerName+') into: '+ExtractFilePath(FCompiler),etDebug);
-        FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName,
+        FileUtil.CopyFile(IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+TargetCompilerName,
           FCompiler);
         fpChmod(FCompiler,&755);
         FBootstrapCompilerOverrideVersionCheck:=True;
@@ -3810,7 +3810,7 @@ begin
       Infoln('FPC builder: Checking auto-generated (Makefile) revision.inc for compiler revision', etInfo);
       FUseRevInc:=false;
       // Generate revision.inc through Makefile to check its contents
-      s:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+      s:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
       DeleteFile(s);
       if BuildModuleCustom(_REVISIONFPC) then
       begin
@@ -3849,10 +3849,10 @@ begin
   begin
     // copy the freshly created compiler to the bin/$fpctarget directory so that
     // fpc can find it
-    if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName) then
+    if FileExists(IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+TargetCompilerName) then
     begin
       Infoln(infotext+'Copy compiler ('+TargetCompilerName+') into: '+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath),etDebug);
-      s:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName;
+      s:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+TargetCompilerName;
       s2:=FFPCCompilerBinPath+TargetCompilerName;
       //FileUtil.CopyFile(s,s2);
       SysUtils.DeleteFile(s2);
@@ -3860,11 +3860,11 @@ begin
       fpChmod(s2,&755);
     end;
 
-    // create link 'units' below FInstallDirectory to
+    // create link 'units' below InstallDirectory to
     // <somewhere>/lib/fpc/$fpcversion/units
-    s:=IncludeTrailingPathDelimiter(FInstallDirectory)+'units';
+    s:=IncludeTrailingPathDelimiter(InstallDirectory)+'units';
     DeleteFile(s);
-    fpSymlink(pchar(IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc/'+SourceVersionStr+'/units'),
+    fpSymlink(pchar(IncludeTrailingPathDelimiter(InstallDirectory)+'lib/fpc/'+SourceVersionStr+'/units'),
       pchar(s));
   end;
   {$ENDIF UNIX}
@@ -3880,7 +3880,7 @@ begin
       if (NOT OperationSucceeded) then
       begin
         Infoln(infotext+'Did not find '+FPCMAKECONFIG+GetExeExt+' in '+ExtractFileDir(FPCMkCfg),etDebug);
-        FPCMkCfg:=ConcatPaths([FInstallDirectory,'bin',FPCMAKECONFIG+GetExeExt]);
+        FPCMkCfg:=ConcatPaths([InstallDirectory,'bin',FPCMAKECONFIG+GetExeExt]);
         OperationSucceeded:=CheckExecutable(FPCMkCfg,['-h'],FPCMAKECONFIG);
         if (NOT OperationSucceeded) then
         begin
@@ -3903,7 +3903,7 @@ begin
     if (OperationSucceeded) then
     begin
       Processor.Executable:=FPCMkCfg;
-      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FInstallDirectory);
+      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(InstallDirectory);
 
       s2:= ExtractFilePath(FPCMkCfg)+FPFILENAME+GetExeExt;
       if FileExists(s2) then
@@ -3958,10 +3958,10 @@ begin
       if FileExists(s2) then
       begin
 
-        s2:=ConcatPaths([FBaseDirectory,PACKAGESLOCATION]);
+        s2:=ConcatPaths([BaseDirectory,PACKAGESLOCATION]);
         ForceDirectoriesSafe(s2);
 
-        s2 := ConcatPaths([FBaseDirectory,PACKAGESCONFIGDIR]);
+        s2 := ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR]);
         ForceDirectoriesSafe(s2);
 
         s  := IncludeTrailingPathDelimiter(s2)+FPCPKGCONFIGFILENAME;
@@ -3975,20 +3975,20 @@ begin
             Processor.Process.Parameters.Add('-3');
 
             Processor.Process.Parameters.Add('-d');
-            Processor.Process.Parameters.Add('LocalRepository='+ConcatPaths([FBaseDirectory,PACKAGESLOCATION])+PathDelim);
+            Processor.Process.Parameters.Add('LocalRepository='+ConcatPaths([BaseDirectory,PACKAGESLOCATION])+PathDelim);
 
             Processor.Process.Parameters.Add('-d');
             Processor.Process.Parameters.Add('CompilerConfigDir='+IncludeTrailingPathDelimiter(s2));
 
             Processor.Process.Parameters.Add('-d');
             {$ifdef MSWINDOWS}
-            Processor.Process.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(FInstallDirectory));
+            Processor.Process.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(InstallDirectory));
             {$ELSE}
-            Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([FInstallDirectory,'lib','fpc'])+PathDelim+'{CompilerVersion}'+PathDelim);
+            Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([InstallDirectory,'lib','fpc'])+PathDelim+'{CompilerVersion}'+PathDelim);
             {$ENDIF}
 
             Processor.Process.Parameters.Add('-d');
-            Processor.Process.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+            Processor.Process.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(InstallDirectory));
 
             Processor.Process.Parameters.Add('-d');
             Processor.Process.Parameters.Add('UserPathSuffix=users');
@@ -4012,7 +4012,7 @@ begin
             Processor.Process.Parameters.Add('-4');
 
             Processor.Process.Parameters.Add('-d');
-            Processor.Process.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+            Processor.Process.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(InstallDirectory));
 
             Processor.Process.Parameters.Add('-d');
             Processor.Process.Parameters.Add('fpcbin='+FCompiler);
@@ -4064,7 +4064,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
+            s2:=ConcatPaths([InstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -4094,7 +4094,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI2');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
+            s2:=ConcatPaths([InstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -4124,7 +4124,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI3');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
+            s2:=ConcatPaths([InstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -4154,7 +4154,7 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dQEMUVPB');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([FInstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
+            s2:=ConcatPaths([InstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
@@ -4197,12 +4197,12 @@ begin
         writeln(TxtFile,'-Sgic');
         writeln(TxtFile,'');
         writeln(TxtFile,'# searchpath for units and other system dependent things');
-        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units/$FPCTARGET/');
-        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units/$FPCTARGET/*');
-        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units/$FPCTARGET/rtl');
+        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(InstallDirectory)+'units/$FPCTARGET/');
+        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(InstallDirectory)+'units/$FPCTARGET/*');
+        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(InstallDirectory)+'units/$FPCTARGET/rtl');
         writeln(TxtFile,'');
         writeln(TxtFile,'# searchpath for tools');
-        writeln(TxtFile,'-FD'+IncludeTrailingPathDelimiter(FInstallDirectory)+'bin/$FPCTARGET');
+        writeln(TxtFile,'-FD'+IncludeTrailingPathDelimiter(InstallDirectory)+'bin/$FPCTARGET');
         writeln(TxtFile,'');
         writeln(TxtFile,'# binutils prefix for cross compiling');
         writeln(TxtFile,'#IFDEF FPC_CROSSCOMPILING');
@@ -4439,14 +4439,14 @@ begin
         ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
         ConfigText.Append('# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)');
         {$ifdef Darwin}
-        ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
-        ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
+        ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
 
         ConfigText.Append('-k-rpath');
         ConfigText.Append('-k@executable_path/../Frameworks');
 
         ConfigText.Append('-k-rpath');
-        ConfigText.Append('-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        ConfigText.Append('-k'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
 
         (*
         ConfigText.Append('-k-framework');
@@ -4505,7 +4505,7 @@ begin
         x:=ConfigText.IndexOf('# searchpath for fppkg user-specific packages');
         if x>-1 then
         begin
-          ConfigText.Strings[x+1]:='-Fu'+ConcatPaths([FBaseDirectory,PACKAGESLOCATION,'units','$FPCTARGET'])+'/*';
+          ConfigText.Strings[x+1]:='-Fu'+ConcatPaths([BaseDirectory,PACKAGESLOCATION,'units','$FPCTARGET'])+'/*';
         end;
 
         ConfigText.SaveToFile(FPCCfg);
@@ -4524,7 +4524,7 @@ begin
   if OperationSucceeded then
   begin
     Infoln(infotext+'Start search and removal of stale build files and directories. May take a while.');
-    RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPU,GetTargetOS);
+    RemoveStaleBuildDirectories(SourceDirectory,GetTargetCPU,GetTargetOS);
     Infoln(infotext+'Search and removal of stale build files and directories ready.');
     WritelnLog(infotext+'Update/build/config succeeded.',false);
   end;
@@ -4560,8 +4560,8 @@ begin
   begin
     CPUOS_Signature:=GetFPCTarget(false);
     // Delete any existing buildstamp file
-    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'build-stamp.'+CPUOS_Signature);
-    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'base.build-stamp.'+CPUOS_Signature);
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(SourceDirectory)+'build-stamp.'+CPUOS_Signature);
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(SourceDirectory)+'base.build-stamp.'+CPUOS_Signature);
 
     CrossInstaller.SetCrossOpt(CrossOPT);
     CrossInstaller.SetSubArch(CrossOS_SubArch);
@@ -4570,20 +4570,20 @@ begin
 
   {$IFDEF MSWINDOWS}
   // Remove all fpmakes
-  Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'fpmake'+GetExeExt);
-  Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'packages'+DirectorySeparator+'fpmake'+GetExeExt);
-  Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+DirectorySeparator+'fpmake'+GetExeExt);
+  Sysutils.DeleteFile(IncludeTrailingPathDelimiter(SourceDirectory)+'utils'+DirectorySeparator+'fpmake'+GetExeExt);
+  Sysutils.DeleteFile(IncludeTrailingPathDelimiter(SourceDirectory)+'packages'+DirectorySeparator+'fpmake'+GetExeExt);
+  Sysutils.DeleteFile(IncludeTrailingPathDelimiter(SourceDirectory)+'ide'+DirectorySeparator+'fpmake'+GetExeExt);
   DeleteList:=TStringList.Create;
   try
     DeleteList.Add('fpmake'+GetExeExt);
-    DeleteFilesSubDirs(IncludeTrailingPathDelimiter(FSourceDirectory),DeleteList,CPUOS_Signature);
+    DeleteFilesSubDirs(IncludeTrailingPathDelimiter(SourceDirectory),DeleteList,CPUOS_Signature);
   finally
     DeleteList.Free;
   end;
   {$ENDIF}
 
   aCleanupCompiler:='';
-  if (FSourceDirectory<>FInstallDirectory) then
+  if (SourceDirectory<>InstallDirectory) then
     aCleanupCompiler:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+GetCompilerName(GetTargetCPU);
 
   if (NOT FileExists(aCleanupCompiler)) then
@@ -4603,7 +4603,7 @@ begin
     {$IFDEF MSWINDOWS}
     if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
     {$ENDIF}
-    Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+    Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
     if (NOT FNoJobs) then
     begin
       {$ifndef win64}
@@ -4612,12 +4612,12 @@ begin
       Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
     end;
     Processor.Process.Parameters.Add('FPC='+aCleanupCompiler);
-    Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+    Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(SourceDirectory));
     Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
     Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
-    Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
-    Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-    Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+    Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(SourceDirectory));
+    Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
+    Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
     {$IFDEF MSWINDOWS}
     Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
     //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -4699,8 +4699,8 @@ begin
     if (NOT CrossCompiling) then
     begin
       Infoln(infotext+'Deleting some FPC package config files.', etInfo);
-      //DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGFILENAME);
-      DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
+      //DeleteFile(IncludeTrailingPathDelimiter(BaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGFILENAME);
+      DeleteFile(IncludeTrailingPathDelimiter(BaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
       {$IFDEF UNIX}
       // Delete any fpc.sh shell scripts
       Infoln(infotext+'Deleting fpc.sh script.', etInfo);
@@ -4708,7 +4708,7 @@ begin
       {$ENDIF UNIX}
       {$ifdef FORCEREVISION}
       //Infoln(infotext+'Deleting '+REVINCFILENAME, etInfo);
-      //aDir:=ConcatPaths([FSourceDirectory,'compiler']);
+      //aDir:=ConcatPaths([SourceDirectory,'compiler']);
       //DeleteFile(aDir+DirectorySeparator+REVINCFILENAME);
       {$endif FORCEREVISION}
     end;
@@ -4722,7 +4722,7 @@ begin
     end
     else
     begin
-      aDir:=ConcatPaths([FInstallDirectory,'units']);
+      aDir:=ConcatPaths([InstallDirectory,'units']);
       {$IFDEF UNIX}
       if FileIsSymlink(aDir) then
       begin
@@ -4738,7 +4738,7 @@ begin
     if DirectoryExists(aDir) then
     begin
       // Only allow unit directories inside our own install te be deleted
-      if (Pos(FBaseDirectory,aDir)=1) then
+      if (Pos(BaseDirectory,aDir)=1) then
         DeleteDirectoryEx(aDir);
     end;
 
@@ -4746,9 +4746,9 @@ begin
     // delete the units directory !!
     // this is needed due to the fact that make distclean will not cleanout this units directory
     // make distclean will only remove the results of a make, not a make install
-    aDir:=ConcatPaths([FSourceDirectory,'units',CPUOS_Signature]);
+    aDir:=ConcatPaths([SourceDirectory,'units',CPUOS_Signature]);
     // Only allow unit directories inside our own install te be deleted
-    if (Pos(FBaseDirectory,aDir)=1) then
+    if (Pos(BaseDirectory,aDir)=1) then
       DeleteDirectoryEx(aDir);
     {$ENDIF}
 
@@ -4756,7 +4756,7 @@ begin
     DeleteList := TStringList.Create;
     try
       (*
-      FindAllFiles(DeleteList,FSourceDirectory, '*.ppu; *.a; *.o', True);
+      FindAllFiles(DeleteList,SourceDirectory, '*.ppu; *.a; *.o', True);
       if DeleteList.Count > 0 then
       begin
         for FileCounter := 0 to (DeleteList.Count-1) do
@@ -4770,10 +4770,10 @@ begin
       DeleteList.Add('.ppu');
       DeleteList.Add('.a');
       DeleteList.Add('.o');
-      DeleteFilesExtensionsSubdirs(FSourceDirectory,DeleteList,CPUOS_Signature);
+      DeleteFilesExtensionsSubdirs(SourceDirectory,DeleteList,CPUOS_Signature);
 
       // Delete stray compilers, if any !!
-      aDir:=ConcatPaths([FSourceDirectory,'compiler']);
+      aDir:=ConcatPaths([SourceDirectory,'compiler']);
 
       if CrossCompiling then
         DeleteFile(aDir+DirectorySeparator+GetCrossCompilerName(CrossInstaller.TargetCPU))
@@ -4787,9 +4787,9 @@ begin
       // delete stray executables, if any !!
       if (NOT CrossCompiling) then
       begin
-        aDir:=ConcatPaths([FSourceDirectory,'compiler','utils']);
+        aDir:=ConcatPaths([SourceDirectory,'compiler','utils']);
         FindAllFiles(DeleteList,aDir, '*'+GetExeExt, False);
-        aDir:=ConcatPaths([FSourceDirectory,'utils']);
+        aDir:=ConcatPaths([SourceDirectory,'utils']);
         FindAllFiles(DeleteList,aDir, '*'+GetExeExt, True);
       end;
       if DeleteList.Count > 0 then
@@ -4840,7 +4840,7 @@ begin
   SourceVersion:='0.0.0';
 
   if Ultibo then
-    FSourceDirectory:=StringReplace(FSourceDirectory,DirectorySeparator+'source','',[]);
+    SourceDirectory:=StringReplace(SourceDirectory,DirectorySeparator+'source','',[]);
 
   aRepoClient:=GetSuitableRepoClient;
 
@@ -4885,7 +4885,7 @@ begin
   end;
 
   if Ultibo then
-    FSourceDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'source';
+    SourceDirectory:=IncludeTrailingPathDelimiter(SourceDirectory)+'source';
 
   if result then
   begin
@@ -4922,14 +4922,14 @@ begin
     end;
     UpdateWarnings:=TStringList.Create;
     try
-      s:=SafeExpandFileName(IncludeTrailingPathDelimiter(FBaseDirectory)+REVISIONSLOG);
+      s:=SafeExpandFileName(IncludeTrailingPathDelimiter(BaseDirectory)+REVISIONSLOG);
       if FileExists(s) then
         UpdateWarnings.LoadFromFile(s)
       else
       begin
         UpdateWarnings.Add('New install.');
         UpdateWarnings.Add('Date: '+DateTimeToStr(now));
-        UpdateWarnings.Add('Location: '+FBaseDirectory);
+        UpdateWarnings.Add('Location: '+BaseDirectory);
         UpdateWarnings.Add('');
       end;
       UpdateWarnings.Add(FPCDATEMAGIC+DateTimeToStr(now));
@@ -4976,14 +4976,14 @@ begin
   if not result then exit;
 
   //sanity check
-  if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME) and
-    DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler') and
-    DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl') and
-    ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then
+  if FileExists(IncludeTrailingPathDelimiter(SourceDirectory)+MAKEFILENAME) and
+    DirectoryExists(IncludeTrailingPathDelimiter(SourceDirectory)+'compiler') and
+    DirectoryExists(IncludeTrailingPathDelimiter(SourceDirectory)+'rtl') and
+    ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(SourceDirectory)) then
     begin
-    if DeleteDirectoryEx(FSourceDirectory)=false then
+    if DeleteDirectoryEx(SourceDirectory)=false then
     begin
-      WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+FSourceDirectory);
+      WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+SourceDirectory);
       result:=false;
     end
     else
@@ -4991,7 +4991,7 @@ begin
     end
   else
   begin
-    WritelnLog(infotext+'Invalid '+ModuleName+' directory :'+FSourceDirectory);
+    WritelnLog(infotext+'Invalid '+ModuleName+' directory :'+SourceDirectory);
     result:=false;
   end;
 end;

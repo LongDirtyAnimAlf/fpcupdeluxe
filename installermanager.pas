@@ -1726,16 +1726,12 @@ begin
     else
       FInstaller:=TLazarusNativeInstaller.Create;
 
-    FInstaller.SourceDirectory:=FParent.LazarusSourceDirectory;
-    FInstaller.InstallDirectory:=FParent.LazarusInstallDirectory;
-
     FInstaller.CompilerOptions:=FParent.LazarusOPT;
 
     FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
     // LCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
     (FInstaller as TLazarusInstaller).LCL_Platform:=FParent.LCL_Platform;
-    (FInstaller as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     (FInstaller as TLazarusInstaller).SourcePatches:=FParent.LazarusPatches;
     (FInstaller as TLazarusInstaller).PreInstallScriptPath:=FParent.LazarusPreInstallScriptPath;
     (FInstaller as TLazarusInstaller).PostInstallScriptPath:=FParent.LazarusPostInstallScriptPath;
@@ -1778,10 +1774,6 @@ begin
         FInstaller.free; // get rid of old FInstaller
     end;
     FInstaller:=THelpLazarusInstaller.Create;
-
-    FInstaller.SourceDirectory:=FParent.LazarusSourceDirectory;
-    FInstaller.InstallDirectory:=FParent.LazarusInstallDirectory;
-    (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
   end
   {$endif}
   else       // this is a universal module
@@ -1815,10 +1807,7 @@ begin
       // Use compileroptions for chosen FPC compile options...
       FInstaller.CompilerOptions:=FParent.FPCOPT;
       {$ifndef FPCONLY}
-      (FInstaller as TUniversalInstaller).LazarusSourceDir:=FParent.FLazarusSourceDirectory;
-      (FInstaller as TUniversalInstaller).LazarusInstallDir:=FParent.FLazarusInstallDirectory;
       (FInstaller as TUniversalInstaller).LazarusCompilerOptions:=FParent.FLazarusOPT;
-      (FInstaller as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       (FInstaller as TUniversalInstaller).LCL_Platform:=FParent.LCL_Platform;
       {$endif}
   end;
@@ -1828,6 +1817,10 @@ begin
     FInstaller.BaseDirectory:=FParent.BaseDirectory;
     FInstaller.FPCSourceDir:=LocalFPCSourceDir;
     FInstaller.FPCInstallDir:=FParent.FPCInstallDirectory;
+    FInstaller.LazarusSourceDir:=FParent.LazarusSourceDirectory;
+    FInstaller.LazarusInstallDir:=FParent.LazarusInstallDirectory;
+    FInstaller.LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+
     FInstaller.TempDirectory:=FParent.TempDirectory;
     {$IFDEF MSWINDOWS}
     FInstaller.SVNClient.ForceLocal:=FParent.ForceLocalRepoClient;

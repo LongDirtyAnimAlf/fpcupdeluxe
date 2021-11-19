@@ -79,19 +79,12 @@ type
     // Compiler options chosen by user to build Lazarus. There is a CompilerOptions property,
     // but let's leave that for use with FPC.
     FLazarusCompilerOptions:string;
-    // Lazarus base directories
-    FLazarusSourceDir:string;
-    FLazarusInstallDir:string;
     // Keep track of whether Lazarus needs to be rebuilt after package installation
     // or running lazbuild with an .lpk
     FLazarusNeedsRebuild:boolean;
-    // Directory where configuration for Lazarus is stored:
-    FLazarusPrimaryConfigPath:string;
-    FLazarusVersion:string;
     // LCL widget set to be built
     FLCL_Platform: string;
     function RebuildLazarus:boolean;
-    procedure SetLazarusPrimaryConfigPath(value:string);
     {$endif}
   protected
     // Scans for and adds all packages specified in a (module's) stringlist with commands:
@@ -113,17 +106,18 @@ type
     function RunCommands(Directive:string;sl:TStringList):boolean;
   public
     // FPC base directories
-    property FPCSourceDir:string read FFPCSourceDir write FFPCSourceDir;
-    property FPCInstallDir:string read FFPCInstallDir write FFPCInstallDir;
+    property TempDirectory:string read FTempDirectory;
+    // FPC base directories
+    property FPCSourceDir:string read FFPCSourceDir;
+    property FPCInstallDir:string read FFPCInstallDir;
     {$ifndef FPCONLY}
+    // Lazarus base directories
+    property LazarusSourceDir:string read FLazarusSourceDir;
+    property LazarusInstallDir:string read FLazarusInstallDir;
     // Compiler options user chose to compile Lazarus with (coming from fpcup).
     property LazarusCompilerOptions: string write FLazarusCompilerOptions;
     // Lazarus primary config path
-    property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write SetLazarusPrimaryConfigPath;
-    // Lazarus base directories
-    property LazarusSourceDir:string read FLazarusSourceDir write FLazarusSourceDir;
-    property LazarusInstallDir:string read FLazarusInstallDir write FLazarusInstallDir;
-    property LazarusVersion:string read FLazarusVersion;
+    property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath;
     // LCL widget set to be built
     property LCL_Platform: string write FLCL_Platform;
     {$endif}
@@ -490,22 +484,6 @@ begin
   end;
 end;
 
-procedure TUniversalInstaller.SetLazarusPrimaryConfigPath(value:string);
-var
-  LazarusConfig:TUpdateLazConfig;
-begin
-  if (value<>FLazarusPrimaryConfigPath) then
-  begin
-    FLazarusPrimaryConfigPath:=value;
-    LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
-    try
-      FLazarusVersion:=LazarusConfig.GetVariable(EnvironmentConfig, 'EnvironmentOptions/Version/Lazarus');
-    finally
-      LazarusConfig.Free;
-    end;
-  end;
-end;
-
 {$endif}
 
 function TUniversalInstaller.GetValueFromKey(Key: string; sl: TStringList;
@@ -559,7 +537,7 @@ begin
         // For the directory macros, the user expects to add path separators himself in fpcup.ini,
         // so strip them out if they are there.
         if macro='BASEDIR' then
-          macro:=ExcludeTrailingPathDelimiter(FBaseDirectory)
+          macro:=ExcludeTrailingPathDelimiter(BaseDirectory)
         else if macro='FPCDIR' then
           macro:=ExcludeTrailingPathDelimiter(FPCInstallDir)
         else if macro='FPCBINDIR' then
@@ -748,7 +726,7 @@ begin
   // find a fpcupdeluxe ccr component, if any
   // all other packages will be ignored
   {
-  Path:=IncludeTrailingPathDelimiter(FBaseDirectory)+'ccr';
+  Path:=IncludeTrailingPathDelimiter(BaseDirectory)+'ccr';
   if ( (NOT FileExists(PackageAbsolutePath)) AND DirectoryExists(Path) ) then
   begin
     PackageFiles:=FindAllFiles(Path, PackageName+'.lpk' , true);
@@ -1168,7 +1146,8 @@ begin
       if (LowerCase(ModuleName)='fpdebug') then
       begin
         // only install fpdebug on Lazarus 2.2.0 and better.
-        if (CompareVersionStrings(LazarusVersion,'2.2.0')<0) then
+        // ALF
+        //if (CompareVersionStrings(FLazarusVersion,'2.2.0')<0) then
         begin
           WritelnLog(localinfotext+'Skipping '+ModuleName, True);
           continue;
@@ -1221,7 +1200,7 @@ begin
             if Length(s2)>0 then WriteString('NewProject',s,s2);
 
             s:='PathToWorkspace';
-            s2:=ReadString('NewProject',s,ConcatPaths([FBaseDirectory,'projects','LAMWProjects']));
+            s2:=ReadString('NewProject',s,ConcatPaths([BaseDirectory,'projects','LAMWProjects']));
             ForceDirectoriesSafe(s2);
             WriteString('NewProject',s,s2);
 
@@ -1578,9 +1557,9 @@ begin
   if idx>=0 then
   begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
-    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
-    FSourceDirectory:=FixPath(FSourceDirectory);
-    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+    SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    SourceDirectory:=FixPath(SourceDirectory);
+    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
   end;
   result:=inherited;
   result:=InitModule;
@@ -1829,11 +1808,11 @@ begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
 
     WritelnLog(infotext+'Getting module '+ModuleName,True);
-    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
-    FSourceDirectory:=FixPath(FSourceDirectory);
-    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+    SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    SourceDirectory:=FixPath(SourceDirectory);
+    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
-    if (FSourceDirectory<>'') then
+    if (SourceDirectory<>'') then
     begin
       // Common keywords for all repo methods
       FDesiredRevision:=GetValueFromKey('Revision',PackageSettings);
@@ -1852,7 +1831,7 @@ begin
           GitClient.ModuleName:=ModuleName;
           GitClient.ExportOnly:=FExportOnly;
           result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-          SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') OR FExportOnly);
+          SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(SourceDirectory)+'.git') OR FExportOnly);
           if UpdateWarnings.Count>0 then
           begin
             WritelnLog(UpdateWarnings.Text);
@@ -1877,7 +1856,7 @@ begin
           SVNClient.UserName   := GetValueFromKey('UserName',PackageSettings);
           SVNClient.Password   := GetValueFromKey('Password',PackageSettings);
           result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-          SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.svn') OR FExportOnly);
+          SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(SourceDirectory)+'.svn') OR FExportOnly);
           if UpdateWarnings.Count>0 then
           begin
             WritelnLog(UpdateWarnings.Text);
@@ -1885,7 +1864,7 @@ begin
           // hack for pascalscada (if needed)
           if ModuleName='pascalscada' then
           begin
-            aFile:=IncludeTrailingPathDelimiter(FSourceDirectory)+'pascalscada.lrs';
+            aFile:=IncludeTrailingPathDelimiter(SourceDirectory)+'pascalscada.lrs';
             if (NOT FileExists(aFile)) then
             begin
               try
@@ -1932,11 +1911,11 @@ begin
       RemoteURL:=GetValueFromKey('ArchiveURL',PackageSettings);
       if (RemoteURL<>'') AND (NOT SourceOK) then
       begin
-        if (NOT DirectoryIsEmpty(ExcludeTrailingPathDelimiter(FSourceDirectory))) then
+        if (NOT DirectoryIsEmpty(ExcludeTrailingPathDelimiter(SourceDirectory))) then
         begin
           Infoln(localinfotext+ModuleName+' sources are already there. Using these. Skipping download.',etWarning);
           Infoln(localinfotext+ModuleName+' sources are already there.',etInfo);
-          Infoln(localinfotext+'Sources: '+FSourceDirectory,etInfo);
+          Infoln(localinfotext+'Sources: '+SourceDirectory,etInfo);
           Infoln(localinfotext+'Build-process will continue with existing sources.',etInfo);
           Infoln(localinfotext+'Delete directory yourself if new sources are desired.',etInfo);
           SourceOK:=True;
@@ -1989,9 +1968,9 @@ begin
           end;
 
           //Delete existing files from install directory
-          if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
+          if DirectoryExists(SourceDirectory) then DeleteDirectoryEx(SourceDirectory);
           //Sometimes, we need to do this twice ... :-(
-          if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
+          if DirectoryExists(SourceDirectory) then DeleteDirectoryEx(SourceDirectory);
 
           // Extract, overwrite
           case UpperCase(SysUtils.ExtractFileExt(aFile)) of
@@ -2000,7 +1979,7 @@ begin
                   with TNormalUnzipper.Create do
                   begin
                     try
-                      ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+                      ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(SourceDirectory),[]));
                     finally
                       Free;
                     end;
@@ -2008,37 +1987,37 @@ begin
                 end;
              '.7Z':
                 begin
-                  ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+                  ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(SourceDirectory)+'" '+aFile,FVerbose);
                   {$ifdef MSWINDOWS}
                   // try winrar
                   if ResultCode <> 0 then
                   begin
-                    ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(FSourceDirectory)+'"',FVerbose);
+                    ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(SourceDirectory)+'"',FVerbose);
                   end;
                   {$endif}
                   if ResultCode <> 0 then
                   begin
-                    ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+                    ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(SourceDirectory)+'" '+aFile,FVerbose);
                   end;
                   if ResultCode <> 0 then
                   begin
-                    ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+                    ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(SourceDirectory)+'" '+aFile,FVerbose);
                   end;
                 end;
              '.rar':
                 begin
-                  ResultCode:=ExecuteCommand(FUnrar+' x "'+aFile+'" "'+IncludeTrailingPathDelimiter(FSourceDirectory)+'"',FVerbose);
+                  ResultCode:=ExecuteCommand(FUnrar+' x "'+aFile+'" "'+IncludeTrailingPathDelimiter(SourceDirectory)+'"',FVerbose);
                   {$ifdef MSWINDOWS}
                   // try winrar
                   if ResultCode <> 0 then
                   begin
-                    ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(FSourceDirectory)+'"',FVerbose);
+                    ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(SourceDirectory)+'"',FVerbose);
                   end;
                   {$endif}
                 end;
 
              else {.tar and all others}
-                ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(FSourceDirectory),FVerbose);
+                ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(SourceDirectory),FVerbose);
              end;
           if ResultCode <> 0 then
           begin
@@ -2058,7 +2037,7 @@ begin
           begin
             //There should be a single directory !
             aName:='';
-            FilesList:=FindAllDirectories(FSourceDirectory,False);
+            FilesList:=FindAllDirectories(SourceDirectory,False);
             if FilesList.Count=1 then aName:=FilesList[0];
             FreeAndNil(FilesList);
             if (Length(aName)>0) AND (DirectoryExists(aName)) then
@@ -2091,7 +2070,7 @@ begin
              with TNormalUnzipper.Create do
              begin
                try
-                 ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+                 ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(SourceDirectory),[]));
                finally
                  Free;
                end;
@@ -2099,25 +2078,25 @@ begin
            end;
            '.7Z':
            begin
-             ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+             ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(SourceDirectory)+'" '+aFile,FVerbose);
              {$ifdef MSWINDOWS}
              // try winrar
              if ResultCode <> 0 then
              begin
-               ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(FSourceDirectory)+'"',FVerbose);
+               ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(SourceDirectory)+'"',FVerbose);
              end;
              {$endif}
              if ResultCode <> 0 then
              begin
-               ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+               ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(SourceDirectory)+'" '+aFile,FVerbose);
              end;
              if ResultCode <> 0 then
              begin
-               ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+               ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(SourceDirectory)+'" '+aFile,FVerbose);
              end;
            end;
            else {.tar and all others}
-              ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(FSourceDirectory),FVerbose);
+              ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(SourceDirectory),FVerbose);
         end;
 
         if ResultCode <> 0 then
@@ -2156,9 +2135,9 @@ begin
   result:=inherited;
 
   {
-  if not DirectoryExists(FSourceDirectory) then
+  if not DirectoryExists(SourceDirectory) then
   begin
-    Infoln(infotext+'No '+ModuleName+' source directory ('+FSourceDirectory+') found [yet] ... nothing to be done',etInfo);
+    Infoln(infotext+'No '+ModuleName+' source directory ('+SourceDirectory+') found [yet] ... nothing to be done',etInfo);
     exit(true);
   end;
   }
@@ -2623,14 +2602,14 @@ begin
     WritelnLog(infotext+'Getting module '+ModuleName,True);
 
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
-    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
-    FSourceDirectory:=FixPath(FSourceDirectory);
-    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+    SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    SourceDirectory:=FixPath(SourceDirectory);
+    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
-    if (FSourceDirectory<>'') then
+    if (SourceDirectory<>'') then
     begin
 
-      ForceDirectoriesSafe(FSourceDirectory);
+      ForceDirectoriesSafe(SourceDirectory);
 
       RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
       if (RemoteURL<>'') then
@@ -2713,11 +2692,11 @@ begin
             begin
               ResultCode:=-1;
               WritelnLog(infotext+'Download ok',True);
-              if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
+              if DirectoryExists(SourceDirectory) then DeleteDirectoryEx(SourceDirectory);
               with TNormalUnzipper.Create do
               begin
                 try
-                  ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+                  ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(SourceDirectory),[]));
                 finally
                   Free;
                 end;
@@ -2827,12 +2806,12 @@ begin
 
         if result then
         begin
-          FSourceDirectory:=ConcatPaths([FBaseDirectory,CROSSBINPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
-          if ( (NOT DirectoryExists(FSourceDirectory)) OR (DirectoryIsEmpty(FSourceDirectory)) ) then
+          SourceDirectory:=ConcatPaths([BaseDirectory,CROSSBINPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
+          if ( (NOT DirectoryExists(SourceDirectory)) OR (DirectoryIsEmpty(SourceDirectory)) ) then
           begin
             Infoln(localinfotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aBinFile+'] from '+aRemoteURL,etInfo);
             try
-              aName:=ConcatPaths([FTempDirectory,aBinFile]);
+              aName:=ConcatPaths([TempDirectory,aBinFile]);
               result:=Download(FUseWget, aBinURL, aName);
               if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
             except
@@ -2845,11 +2824,11 @@ begin
             begin
               ResultCode:=-1;
               WritelnLog(localinfotext+'Download ok',True);
-              ForceDirectoriesSafe(FSourceDirectory);
+              ForceDirectoriesSafe(SourceDirectory);
               with TNormalUnzipper.Create do
               begin
                 try
-                  ResultCode:=Ord(NOT DoUnZip(aName,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+                  ResultCode:=Ord(NOT DoUnZip(aName,IncludeTrailingPathDelimiter(SourceDirectory),[]));
                 finally
                   Free;
                 end;
@@ -2863,12 +2842,12 @@ begin
             SysUtils.Deletefile(aName); //Get rid of temp file.
           end;
 
-          FSourceDirectory:=ConcatPaths([FBaseDirectory,CROSSLIBPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
-          if ( (NOT DirectoryExists(FSourceDirectory)) OR (DirectoryIsEmpty(FSourceDirectory)) ) then
+          SourceDirectory:=ConcatPaths([BaseDirectory,CROSSLIBPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
+          if ( (NOT DirectoryExists(SourceDirectory)) OR (DirectoryIsEmpty(SourceDirectory)) ) then
           begin
             Infoln(localinfotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aLibFile+'] from '+aRemoteURL,etInfo);
             try
-              aName:=ConcatPaths([FTempDirectory,aLibFile]);
+              aName:=ConcatPaths([TempDirectory,aLibFile]);
               result:=Download(FUseWget, aLibURL, aName);
               if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
             except
@@ -2881,12 +2860,12 @@ begin
             begin
               ResultCode:=-1;
               WritelnLog(localinfotext+'Download ok',True);
-              FSourceDirectory:=FBaseDirectory+DirectorySeparator+CROSSLIBPATH+DirectorySeparator+'xtensa-freertos';
-              ForceDirectoriesSafe(FSourceDirectory);
+              SourceDirectory:=BaseDirectory+DirectorySeparator+CROSSLIBPATH+DirectorySeparator+'xtensa-freertos';
+              ForceDirectoriesSafe(SourceDirectory);
               with TNormalUnzipper.Create do
               begin
                 try
-                  ResultCode:=Ord(NOT DoUnZip(aName,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+                  ResultCode:=Ord(NOT DoUnZip(aName,IncludeTrailingPathDelimiter(SourceDirectory),[]));
                 finally
                   Free;
                 end;
@@ -2937,17 +2916,17 @@ begin
     WritelnLog(localinfotext+'Getting module '+ModuleName,True);
 
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
-    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
-    FSourceDirectory:=FixPath(FSourceDirectory);
-    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+    SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    SourceDirectory:=FixPath(SourceDirectory);
+    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
-    if (FSourceDirectory<>'') then
+    if (SourceDirectory<>'') then
     begin
       aList:=TStringList.Create;
       try
         aLine:='set CROSS=';
-        //aDir:=ConcatPaths([FSourceDirectory,'SamplesBoardSpecific','WioTerminal','Examples']);
-        aDir:=ConcatPaths([FSourceDirectory,'SamplesBoardSpecific','WioTerminal']);
+        //aDir:=ConcatPaths([SourceDirectory,'SamplesBoardSpecific','WioTerminal','Examples']);
+        aDir:=ConcatPaths([SourceDirectory,'SamplesBoardSpecific','WioTerminal']);
         aFileList := TStringList.Create;
         try
           FindAllFiles(aFileList, aDir,'*.bat', true);
@@ -2958,7 +2937,7 @@ begin
             if (idx<>-1) then
             begin
               Infoln(localinfotext+'Setting correct path in '+ExtractFileName(aFile)+'.',etInfo);
-              aList.Strings[idx]:='set CROSS='+ConcatPaths([FBaseDirectory,'cross']);
+              aList.Strings[idx]:='set CROSS='+ConcatPaths([BaseDirectory,'cross']);
               aList.SaveToFile(aFile);
             end;
             aList.Clear;
@@ -2999,13 +2978,13 @@ begin
     WritelnLog(localinfotext+'Getting module '+ModuleName,True);
 
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
-    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
-    FSourceDirectory:=FixPath(FSourceDirectory);
-    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+    SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    SourceDirectory:=FixPath(SourceDirectory);
+    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
-    if (FSourceDirectory<>'') then
+    if (SourceDirectory<>'') then
     begin
-      ForceDirectoriesSafe(FSourceDirectory);
+      ForceDirectoriesSafe(SourceDirectory);
 
       RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
       if (RemoteURL<>'') then
@@ -3085,25 +3064,25 @@ begin
               ResultCode:=-1;
               WritelnLog(localinfotext+'Download ok. Extracting files. Please wait.',True);
 
-              aDirectory:=FSourceDirectory+DirectorySeparator+'static';
+              aDirectory:=SourceDirectory+DirectorySeparator+'static';
               if DirectoryExists(aDirectory) then DeleteDirectoryEx(aDirectory);
 
-              RunCommandIndir(FSourceDirectory,F7zip ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+              RunCommandIndir(SourceDirectory,F7zip ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
 
               {$ifdef MSWINDOWS}
               // try winrar
               if (ResultCode<>0) then
               begin
-                ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(FSourceDirectory)+'"',FVerbose);
+                ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(SourceDirectory)+'"',FVerbose);
               end;
               {$endif}
               if (ResultCode<>0) then
               begin
-                RunCommandIndir(FSourceDirectory,'7z' ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+                RunCommandIndir(SourceDirectory,'7z' ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
               end;
               if (ResultCode<>0) then
               begin
-                RunCommandIndir(FSourceDirectory,'7za' ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+                RunCommandIndir(SourceDirectory,'7za' ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
               end;
 
               if (ResultCode<>0) then
@@ -3152,14 +3131,14 @@ begin
     WritelnLog(infotext+'Getting module '+ModuleName,True);
 
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
-    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
-    FSourceDirectory:=FixPath(FSourceDirectory);
-    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+    SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    SourceDirectory:=FixPath(SourceDirectory);
+    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
-    if (FSourceDirectory<>'') then
+    if (SourceDirectory<>'') then
     begin
-      FSourceDirectory:=ConcatPaths([FSourceDirectory,'ide','lazarus']);
-      LazarusConfig:=TUpdateLazConfig.Create(FSourceDirectory);
+      SourceDirectory:=ConcatPaths([SourceDirectory,'ide','lazarus']);
+      LazarusConfig:=TUpdateLazConfig.Create(SourceDirectory);
       try
         try
           xmlfile:='wst_design.lpk';

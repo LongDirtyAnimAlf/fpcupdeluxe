@@ -330,24 +330,29 @@ type
 
   TInstaller = class(TObject)
   private
-    FURL                   : string;
-    FTAG                   : string;
-    FUltibo                : boolean;
-    FKeepLocalChanges      : boolean;
-    FReApplyLocalChanges   : boolean;
-    FCrossInstaller        : TCrossInstaller;
-    FCrossCPU_Target       : TCPU; //When cross-compiling: CPU, e.g. x86_64
-    FCrossOS_Target        : TOS; //When cross-compiling: OS, e.g. win64
-    FCrossOS_SubArch       : TSUBARCH; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
-    FCrossOS_ABI           : TABI; //When cross-compiling for arm: hardfloat or softfloat calling convention
-    FCrossToolsDirectory   : string;
-    FCrossLibraryDirectory : string;
+    FURL                       : string;
+    FTAG                       : string;
+    FUltibo                    : boolean;
+    FKeepLocalChanges          : boolean;
+    FReApplyLocalChanges       : boolean;
+    FCrossInstaller            : TCrossInstaller;
+    FCrossCPU_Target           : TCPU; //When cross-compiling: CPU, e.g. x86_64
+    FCrossOS_Target            : TOS; //When cross-compiling: OS, e.g. win64
+    FCrossOS_SubArch           : TSUBARCH; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
+    FCrossOS_ABI               : TABI; //When cross-compiling for arm: hardfloat or softfloat calling convention
+    FCrossToolsDirectory       : string;
+    FCrossLibraryDirectory     : string;
+    FBaseDirectory             : string; //Base directory for fpc(laz)up(deluxe) install itself
+    FSourceDirectory           : string; //Top source directory for a product (FPC, Lazarus)
+    FInstallDirectory          : string; //Top install directory for a product (FPC, Lazarus)
     procedure SetURL(value:string);
     procedure SetSourceDirectory(value:string);
     procedure SetBaseDirectory(value:string);
     procedure SetInstallDirectory(value:string);
     procedure SetFPCInstallDirectory(value:string);
     procedure SetFPCSourceDirectory(value:string);
+    procedure SetLazarusInstallDirectory(value:string);
+    procedure SetLazarusSourceDirectory(value:string);
     function GetShell: string;
     function GetMake: string;
     procedure SetVerbosity(aValue:boolean);
@@ -365,17 +370,18 @@ type
     function GetInstallerClass(aClassToFind:TClass):boolean;
     function IsFPCInstaller:boolean;
     function IsLazarusInstaller:boolean;
+    function IshelpInstaller:boolean;
     function IsUniversalInstaller:boolean;
   protected
+    FFPCInstallDir             : string;
+    FFPCSourceDir              : string;
+    FLazarusInstallDir         : string;
+    FLazarusSourceDir          : string;
+    FLazarusPrimaryConfigPath  : string;
+    FTempDirectory             : string; //For storing temp files and logs
     FCleanModuleSuccess: boolean;
     FNeededExecutablesChecked: boolean;
     FFPCCompilerBinPath: string; //path where compiler lives
-    FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) install itself
-    FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
-    FInstallDirectory: string; //Top install directory for a product (FPC, Lazarus)
-    FFPCInstallDir: string;
-    FFPCSourceDir: string;
-    FTempDirectory: string; //For storing temp files and logs
     FCompiler: string; // Compiler executable
     FCompilerOptions: string; //options passed when compiling (FPC or Lazarus currently)
     FCPUCount: integer; //logical cpu count (i.e. hyperthreading=2cpus)
@@ -487,16 +493,22 @@ type
     property Processor: TExternalTool read FExternalTool;
     property ProcessorResult: integer read FExternalToolResult write FExternalToolResult;
     // Source directory for installation (fpcdir, lazdir,... option)
-    property SourceDirectory: string write SetSourceDirectory;
+    property SourceDirectory: string read FSourceDirectory write SetSourceDirectory;
     //Base directory for fpc(laz)up(deluxe) itself
-    property BaseDirectory: string write SetBaseDirectory;
+    property BaseDirectory: string  read FBaseDirectory write SetBaseDirectory;
     // Final install directory
-    property InstallDirectory: string write SetInstallDirectory;
+    property InstallDirectory: string read FInstallDirectory write SetInstallDirectory;
     //Base directory for fpc(laz)up(deluxe) itself
     // FPC install directory
     property FPCInstallDir: string write SetFPCInstallDirectory;
     // FPC source directory
     property FPCSourceDir: string write SetFPCSourceDirectory;
+    // Lazarus install directory
+    property LazarusInstallDir: string write SetLazarusInstallDirectory;
+    // Lazarus source directory
+    property LazarusSourceDir: string write SetLazarusSourceDirectory;
+    // Lazarus primary config path
+    property LazarusPrimaryConfigPath:string write FLazarusPrimaryConfigPath;
     property TempDirectory: string write FTempDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
     property Compiler: string {read GetCompiler} write FCompiler;
@@ -848,6 +860,19 @@ begin
     SetSourceDirectory(value);
 end;
 
+procedure TInstaller.SetLazarusInstallDirectory(value:string);
+begin
+  FLazarusInstallDir:=value;
+  if ((IsLazarusInstaller) OR (IsHelpInstaller)) then
+    SetInstallDirectory(value);
+end;
+
+procedure TInstaller.SetLazarusSourceDirectory(value:string);
+begin
+  FLazarusSourceDir:=value;
+  if ((IsLazarusInstaller) OR (IsHelpInstaller)) then
+    SetSourceDirectory(value);
+end;
 
 function TInstaller.GetMake: string;
 const
@@ -3632,6 +3657,22 @@ begin
   begin
     PatchList := FindAllFiles(PatchDirectory, '*.patch;*.diff', false);
     try
+
+      if (PatchList.Count>0) then
+      begin
+        if PatchUniversal then
+        begin
+          // patches must have the same name as the module to be installed
+          for i:=Pred(PatchList.Count) downto 0 do
+          begin
+            PatchFilePath:=SafeExpandFileName(PatchList[i]);
+            PatchFilePath:=FileNameWithoutExt(PatchFilePath);
+            PatchAccepted:=(LowerCase(ModuleName)=LowerCase(PatchFilePath));
+            if (NOT PatchAccepted) then PatchList.Delete(i);
+          end;
+        end;
+      end;
+
       if (PatchList.Count>0) then
       begin
         //add standard patches by fpcup(deluxe)
@@ -3639,6 +3680,7 @@ begin
            then LocalSourcePatches:=LocalSourcePatches+','+PatchList.CommaText
            else LocalSourcePatches:=PatchList.CommaText;
       end;
+
     finally
       PatchList.Free;
     end;
@@ -4027,6 +4069,11 @@ end;
 function TInstaller.IsLazarusInstaller:boolean;
 begin
   result:=GetInstallerClass(TBaseLazarusInstaller);
+end;
+
+function TInstaller.IsHelpInstaller:boolean;
+begin
+  result:=GetInstallerClass(TBaseHelpInstaller);
 end;
 
 function TInstaller.IsUniversalInstaller:boolean;

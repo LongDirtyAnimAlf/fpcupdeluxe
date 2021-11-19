@@ -3968,7 +3968,7 @@ begin
 
     end;
 
-    if NOT Form2.IncludeHelp then
+    if (NOT Form2.IncludeHelp) then
     begin
       if ((Sender=BitBtnFPCOnly) OR (Sender=BitBtnFPCandLazarus)) then FPCupManager.SkipModules:=FPCupManager.SkipModules+','+_HELPFPC;
       if ((Sender=BitBtnLazarusOnly) OR (Sender=BitBtnFPCandLazarus)) then FPCupManager.SkipModules:=FPCupManager.SkipModules+','+_HELPLAZARUS;
