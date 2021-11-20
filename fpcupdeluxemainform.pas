@@ -34,6 +34,7 @@ type
 
   TForm1 = class(TForm)
     ActionList1: TActionList;
+    btnCheckToolsLocations: TButton;
     chkGitlab: TCheckBox;
     imgSVN: TImage;
     imgGitlab: TImage;
@@ -154,6 +155,7 @@ type
     {$endif}
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure BitBtnSetRevisionClick(Sender: TObject);
+    procedure btnCheckToolsLocationsClick(Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
     procedure ButtonSubarchSelectClick({%H-}Sender: TObject);
     procedure chkGitlabChange(Sender: TObject);
@@ -1991,6 +1993,48 @@ begin
   end;
   if valid then
     btnSetupPlusClick(nil);
+end;
+
+procedure TForm1.btnCheckToolsLocationsClick(Sender: TObject);
+var
+  aCPU:TCPU;
+  aOS:TOS;
+  success:boolean;
+  BinsFileName,LibsFileName,BaseBinsURL,BaseLibsURL,BinPath,LibPath:string;
+begin
+  for aOS := Low(TOS) to High(TOS) do
+  begin
+    if aOS=osNone then continue;
+    for aCPU := Low(TCPU) to High(TCPU) do
+    begin
+      if aCPU=cpuNone then continue;
+      FPCupManager.CrossCPU_Target:=aCPU;
+      FPCupManager.CrossOS_Target:=aOS;
+      FPCupManager.GetCrossToolsFileName({%H-}BinsFileName,{%H-}LibsFileName);
+      FPCupManager.GetCrossToolsPath({%H-}BinPath,{%H-}LibPath);
+      success:=FPCupManager.GetCrossBinsURL({%H-}BaseBinsURL,BinsFileName);
+      {
+      if (NOT success) then
+      begin
+        BaseBinsURL:='none';
+        success:=true;
+      end;
+      }
+      if success then
+      begin
+        AddMessage(FPCupManager.CrossCombo_Target+' bins: '+BaseBinsURL);
+        success:=FPCupManager.GetCrossLibsURL({%H-}BaseLibsURL,LibsFileName);
+        if (NOT success) then
+        begin
+          BaseLibsURL:='none';
+          success:=true;
+        end;
+        if success then AddMessage(FPCupManager.CrossCombo_Target+' libs: '+BaseLibsURL);
+      end;
+    end;
+  end;
+  FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
+  FPCupManager.CrossOS_Target:=TOS.osNone;
 end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);
@@ -4482,6 +4526,7 @@ begin
     begin
       aLocalAlias:=installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,aLocalTarget);
       if (Length(aLocalAlias)=0) then aLocalAlias:=installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,aLocalTarget);
+      if (Length(aLocalAlias)=0) then aLocalTarget:='stable'+GITLABEXTENSION; // default to stable in case of lookup failure
       if (Pos('://',aLocalAlias)=0) then aLocalAlias:=FPCGITLABREPO;
     end
     else
@@ -4493,6 +4538,7 @@ begin
     begin
       aLocalAlias:=installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,aLocalTarget);
       if (Length(aLocalAlias)=0) then aLocalAlias:=installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,aLocalTarget);
+      if (Length(aLocalAlias)=0) then aLocalTarget:='stable'+GITLABEXTENSION; // default to stable in case of lookup failure
       if (Pos('://',aLocalAlias)=0) then aLocalAlias:=LAZARUSGITLABREPO;
     end
     else

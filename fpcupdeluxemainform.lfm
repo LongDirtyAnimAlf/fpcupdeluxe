@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 50
+  Left = 51
   Height = 701
-  Top = 46
+  Top = 49
   Width = 1226
   Anchors = []
   Caption = 'Form1'
@@ -5475,6 +5475,22 @@ object Form1: TForm1
         Caption = 'Create Lazarus Configuration'
         OnClick = btnCreateLazarusConfigClick
         TabOrder = 5
+      end
+      object btnCheckToolsLocations: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = btnCreateLazarusConfig
+        AnchorSideTop.Side = asrBottom
+        Left = 82
+        Height = 25
+        Top = 262
+        Width = 139
+        AutoSize = True
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 16
+        Caption = 'Check Tools Location'
+        OnClick = btnCheckToolsLocationsClick
+        TabOrder = 6
       end
     end
   end
