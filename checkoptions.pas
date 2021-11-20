@@ -83,6 +83,7 @@ begin
           LeftOverOptions.Add('includehelp');
           LeftOverOptions.Add('fpcsplit');
           LeftOverOptions.Add('lazsplit');
+          LeftOverOptions.Add('autotools');
           LeftOverOptions.Add('verbose');
           LeftOverOptions.Add('version');
           try
@@ -177,6 +178,8 @@ begin
          then FManager.LazarusSourceDirectory:=FManager.LazarusInstallDirectory+'src'
          else FManager.LazarusSourceDirectory:=FManager.LazarusInstallDirectory;
       {$endif}
+
+      FManager.AutoTools:=Options.GetOptionNoParam('','autotools',false);
 
       FManager.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crossbindir','')));
       FManager.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crosslibdir','')));

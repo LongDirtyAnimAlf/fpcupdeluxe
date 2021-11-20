@@ -670,22 +670,22 @@ begin
   begin
     if (NOT Assigned(FCrossInstaller)) OR ((FCrossInstaller.TargetCPU<>FCrossCPU_Target)  OR (FCrossInstaller.TargetOS<>FCrossOS_Target)) then
     begin
-  target := GetFPCTarget(false);
-    FCrossInstaller:=nil;
-    if assigned(CrossInstallers) then
-      for idx := 0 to Pred(CrossInstallers.Count) do
-        if CrossInstallers[idx] = target then
-        begin
-          FCrossInstaller:=TCrossInstaller(CrossInstallers.Objects[idx]);
-          break;
-        end;
-  end;
-  if (NOT Assigned(FCrossInstaller)) then
-  begin
-    Infoln(localinfotext+'Could not find crosscompiler logic for '+target+' !!',etError);
-    Infoln(localinfotext+'This is a fatal error. Exception will be created.',etError);
-    Infoln(localinfotext+'Please file a bug-report.',etError);
-    raise Exception.CreateFmt('%s fpcup cross-logic not found. Please report this issue.',[target]);
+      target := GetFPCTarget(false);
+      FCrossInstaller:=nil;
+      if assigned(CrossInstallers) then
+        for idx := 0 to Pred(CrossInstallers.Count) do
+          if CrossInstallers[idx] = target then
+          begin
+            FCrossInstaller:=TCrossInstaller(CrossInstallers.Objects[idx]);
+            break;
+          end;
+    end;
+    if (NOT Assigned(FCrossInstaller)) then
+    begin
+      Infoln(localinfotext+'Could not find crosscompiler logic for '+target+' !!',etError);
+      Infoln(localinfotext+'This is a fatal error. Exception will be created.',etError);
+      Infoln(localinfotext+'Please file a bug-report.',etError);
+      raise Exception.CreateFmt('%s fpcup cross-logic not found. Please report this issue.',[target]);
     end
     else
     begin

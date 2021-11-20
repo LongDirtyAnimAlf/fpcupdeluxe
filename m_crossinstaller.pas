@@ -431,6 +431,7 @@ begin
 end;
 {$endif LCL}
 
+
 function GetExeExt: string;
 begin
   {$IFDEF WINDOWS}

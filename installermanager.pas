@@ -235,6 +235,7 @@ type
     FSequencer: TSequencer;
     FSolarisOI:boolean;
     FMUSL:boolean;
+    FAutoTools:boolean;
     FRunInfo:string;
     procedure SetURL(ATarget,AValue: string);
     procedure SetTAG(ATarget,AValue: string);
@@ -371,11 +372,17 @@ type
     property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
     property SolarisOI:boolean read FSolarisOI write FSolarisOI;
     property MUSL:boolean read FMUSL write FMUSL;
+    property AutoTools:boolean read FAutoTools write FAutoTools;
     property RunInfo:string read GetRunInfo write SetRunInfo;
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
     function CheckValidCPUOS(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone): boolean;
     function ParseSubArchsFromSource: TStringList;
+    procedure GetCrossToolsFileName(var BinsFileName,LibsFileName:string);
+    procedure GetCrossToolsPath(var BinPath,LibPath:string);
+    function GetCrossBinsURL(var BaseBinsURL,BinsFileName:string):boolean;
+    function GetCrossLibsURL(var BaseLibsURL,LibsFileName:string):boolean;
+
     // Stop talking. Do it! Returns success status
     function Run: boolean;
 
@@ -459,6 +466,7 @@ uses
   {$ENDIF}
   {$ENDIF}
   StrUtils,
+  fpjson,
   processutils;
 
 { TFPCupManager }
@@ -1089,6 +1097,474 @@ begin
   end;
 end;
 
+procedure TFPCupManager.GetCrossToolsFileName(var BinsFileName,LibsFileName:string);
+var
+  s:string;
+begin
+  // Setting the CPU part of the name[s] for the file to download
+  if CrossCPU_Target=TCPU.arm then s:='ARM' else
+    if CrossCPU_Target=TCPU.i386 then s:='i386' else
+      if CrossCPU_Target=TCPU.x86_64 then s:='x64' else
+        if CrossCPU_Target=TCPU.powerpc then s:='PowerPC' else
+          if CrossCPU_Target=TCPU.powerpc64 then s:='PowerPC64' else
+            if CrossCPU_Target=TCPU.avr then s:='AVR' else
+              s:=UppercaseFirstChar(GetCPU(CrossCPU_Target));
+
+  BinsFileName:=s;
+
+  // Set special CPU names
+  if CrossOS_Target=TOS.darwin then
+  begin
+    // Darwin has some universal binaries and libs
+    if CrossCPU_Target=TCPU.i386 then BinsFileName:='All';
+    if CrossCPU_Target=TCPU.x86_64 then BinsFileName:='All';
+    if CrossCPU_Target=TCPU.aarch64 then BinsFileName:='All';
+    if CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
+    if CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC';
+  end;
+
+  if CrossOS_Target=TOS.ios then
+  begin
+    // iOS has some universal binaries and libs
+    if CrossCPU_Target=TCPU.arm then BinsFileName:='All';
+    if CrossCPU_Target=TCPU.aarch64 then BinsFileName:='All';
+  end;
+
+  if CrossOS_Target=TOS.aix then
+  begin
+    // AIX has some universal binaries
+    if CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
+    if CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC';
+  end;
+
+  // Set OS case
+  if CrossOS_Target=TOS.morphos then s:='MorphOS' else
+    if CrossOS_Target=TOS.freebsd then s:='FreeBSD' else
+      if CrossOS_Target=TOS.dragonfly then s:='DragonFlyBSD' else
+        if CrossOS_Target=TOS.openbsd then s:='OpenBSD' else
+          if CrossOS_Target=TOS.netbsd then s:='NetBSD' else
+            if CrossOS_Target=TOS.aix then s:='AIX' else
+              if CrossOS_Target=TOS.msdos then s:='MSDos' else
+                if CrossOS_Target=TOS.freertos then s:='FreeRTOS' else
+                  if CrossOS_Target=TOS.win32 then s:='Windows' else
+                    if CrossOS_Target=TOS.win64 then s:='Windows' else
+                      if CrossOS_Target=TOS.ios then s:='IOS' else
+                      s:=UppercaseFirstChar(GetOS(CrossOS_Target));
+
+  if SolarisOI then s:=s+'OI';
+  BinsFileName:=s+BinsFileName;
+
+  if MUSL then BinsFileName:='MUSL'+BinsFileName;
+
+  // normally, we have the same names for libs and bins URL
+  LibsFileName:=BinsFileName;
+
+  {$IF (defined(Windows)) OR (defined(Linux))}
+  if (
+    ((CrossOS_Target=TOS.darwin) AND (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
+    OR
+    ((CrossOS_Target=TOS.ios) AND (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]))
+    ) then
+  begin
+    // Set special BinsFile for universal tools for Darwin
+    BinsFileName:='AppleAll';
+  end;
+
+  if CrossOS_Target=TOS.android then
+  begin
+    // Android has universal binaries
+    BinsFileName:='AndroidAll';
+  end;
+  {$endif}
+
+  if CrossCPU_Target=TCPU.wasm32 then
+  begin
+    // wasm has some universal binaries
+    BinsFileName:='AllWasm32';
+  end;
+
+  if CrossOS_Target=TOS.linux then
+  begin
+    // PowerPC64 is special: only little endian libs for now
+    if (CrossCPU_Target=TCPU.powerpc64) then
+    begin
+      LibsFileName:=StringReplace(LibsFileName,'PowerPC64','PowerPC64LE',[rfIgnoreCase]);
+    end;
+
+    // ARM is special: can be hard or softfloat (Windows only binutils yet)
+    {$ifdef MSWINDOWS}
+    if (CrossCPU_Target=TCPU.arm) then
+    begin
+      if (Pos('SOFT',UpperCase(CrossOPT))>0) OR (Pos('FPC_ARMEL',UpperCase(FPCOPT))>0) then
+      begin
+        // use softfloat binutils
+        BinsFileName:=StringReplace(LibsFileName,'BinsLinuxARM','BinsLinuxARMSoft',[rfIgnoreCase]);
+      end;
+    end;
+    {$endif}
+  end;
+
+  //{$IF defined(CPUAARCH64) AND defined(DARWIN)}
+  {$ifndef MSWINDOWS}
+  // For most targets, FreeRTOS is a special version of embedded, so just use the embedded tools !!
+  if CrossOS_Target=TOS.freertos then
+  begin
+    // use embedded tools for freertos:
+    if (CrossCPU_Target in SUBARCH_CPU) then
+    begin
+      BinsFileName:=StringReplace(BinsFileName,'FreeRTOS','Embedded',[]);
+    end;
+  end;
+  {$endif}
+
+  // All ready !!
+
+  LibsFileName:='CrossLibs'+LibsFileName;
+  {$ifdef MSWINDOWS}
+  BinsFileName:='WinCrossBins'+BinsFileName;
+  {$else}
+  BinsFileName:='CrossBins'+BinsFileName;
+  {$endif MSWINDOWS}
+end;
+
+procedure TFPCupManager.GetCrossToolsPath(var BinPath,LibPath:string);
+begin
+  // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
+  // Normally, we have the standard names for libs and bins paths
+  LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(CrossCPU_Target)])+'-';
+  BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'bin',GetCPU(CrossCPU_Target)])+'-';
+
+  if MUSL then
+  begin
+    LibPath:=LibPath+'musl';
+    BinPath:=BinPath+'musl';
+  end;
+  LibPath:=LibPath+GetOS(CrossOS_Target);
+  BinPath:=BinPath+GetOS(CrossOS_Target);
+  if SolarisOI then
+  begin
+    LibPath:=LibPath+'-oi';
+    BinPath:=BinPath+'-oi';
+  end;
+
+  {$IF (defined(Windows)) OR (defined(Linux))}
+  // Set special Bins directory for universal tools for Darwin based on clang
+  if (
+    ((CrossOS_Target=TOS.darwin) AND (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
+    OR
+    ((CrossOS_Target=TOS.ios) AND (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]))
+    ) then
+  begin
+    BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
+    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'apple',[]);
+  end;
+
+  // Set special Bins directory for universal tools for Android based on clang
+  if CrossOS_Target=TOS.android then
+  begin
+    BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
+  end;
+  {$endif}
+
+  // Set special Bins directory for universal tools for wasm32
+  if CrossCPU_Target=TCPU.wasm32 then
+  begin
+    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'all',[]);
+  end;
+
+  if CrossOS_Target=TOS.darwin then
+  begin
+    // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
+    if (CrossCPU_Target=TCPU.i386) OR (CrossCPU_Target=TCPU.x86_64) OR (CrossCPU_Target=TCPU.aarch64) then
+    begin
+      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
+      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),'all',[]);
+    end;
+    if (CrossCPU_Target=TCPU.powerpc) OR (CrossCPU_Target=TCPU.powerpc64) then
+    begin
+      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
+      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
+    end;
+  end;
+
+  if CrossOS_Target=TOS.ios then
+  begin
+    // iOS is special: combined libs for arm and aarch64
+    if (CrossCPU_Target=TCPU.arm) OR (CrossCPU_Target=TCPU.aarch64) then
+    begin
+      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
+      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),'all',[]);
+    end;
+  end;
+
+  if CrossOS_Target=TOS.aix then
+  begin
+    // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
+    if (CrossCPU_Target=TCPU.powerpc) OR (CrossCPU_Target=TCPU.powerpc64) then
+    begin
+      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
+      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
+    end;
+  end;
+
+  //Put all windows stuff (not that much) in a single windows directory
+  if (CrossOS_Target=TOS.win32) OR (CrossOS_Target=TOS.win64) then
+  begin
+    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'windows',[]);
+    LibPath:=StringReplace(LibPath,GetOS(CrossOS_Target),'windows',[]);
+  end;
+end;
+
+function TFPCupManager.GetCrossBinsURL(var BaseBinsURL,BinsFileName:string):boolean;
+var
+  s:string;
+  success:boolean;
+  Json : TJSONData;
+  Assets : TJSONArray;
+  Item,Asset : TJSONObject;
+  TagName, FileName, FileURL : string;
+  i,iassets : integer;
+begin
+  result:=false;
+
+  BaseBinsURL:='';
+
+  if GetTargetOS=GetOS(TOS.win32) then BaseBinsURL:='wincrossbins'
+  else
+     if GetTargetOS=GetOS(TOS.win64) then BaseBinsURL:='wincrossbins'
+     else
+        if GetTargetOS=GetOS(TOS.linux) then
+        begin
+          if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386crossbins';
+          if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64crossbins';
+          if GetTargetCPU=GetCPU(TCPU.arm) then BaseBinsURL:='linuxarmcrossbins';
+        end
+        else
+          if GetTargetOS=GetOS(TOS.freebsd) then
+          begin
+            if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='freebsdx64crossbins';
+          end
+          else
+            if GetTargetOS=GetOS(TOS.solaris) then
+            begin
+              {if FPCupManager.SolarisOI then}
+              begin
+                if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='solarisoix64crossbins';
+              end;
+            end
+            else
+              if GetTargetOS=GetOS(TOS.darwin) then
+              begin
+                if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='darwini386crossbins';
+                if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='darwinx64crossbins';
+                if GetTargetCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='darwinarm64crossbins';
+              end;
+
+  s:=GetURLDataFromCache(FPCUPGITREPOAPIRELEASES+'?per_page=100');
+  success:=(Length(s)>0);
+
+  if success then
+  begin
+    json:=nil;
+    try
+      try
+        Json:=GetJSON(s);
+      except
+        Json:=nil;
+      end;
+      if JSON.IsNull then success:=false;
+
+      if (NOT success) then
+      begin
+        BaseBinsURL:='';
+        exit;
+      end;
+
+      (*
+      Ss := TStringStream.Create('');
+      try
+        success:=Download(False,FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL,Ss);
+        if (NOT success) then
+        begin
+          {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
+          Ss.Clear;
+          {$ENDIF}
+          Ss.Position:=0;
+          success:=Download(True,FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL,Ss);
+        end;
+        if success then s:=Ss.DataString;
+      finally
+        Ss.Free;
+      end;
+
+      if success then
+      begin
+        if (Length(s)>0) then
+        begin
+          try
+            Json:=GetJSON(s);
+          except
+            Json:=nil;
+          end;
+          if JSON.IsNull then success:=false;
+        end;
+      end;
+
+      if success then
+      begin
+        for i:=Pred(Json.Count) downto 0 do
+        begin
+          Item := TJSONObject(Json.Items[i]);
+          TagName:=Item.Get('ref');
+          Delete(TagName,1,Length('refs/tags/'));
+        end;
+
+      end;
+      //FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL;
+      //FPCUPGITREPOAPIRELEASES+'/tags/wincrossbins_v1.0';
+      *)
+
+      success:=false;
+      FileURL:='';
+      for i:=0 to Pred(Json.Count) do
+      begin
+        Item := TJSONObject(Json.Items[i]);
+        TagName:=Item{%H-}.Get('tag_name');
+        if (Pos(BaseBinsURL,TagName)<>1) then continue;
+        Assets:=Item.Get('assets',TJSONArray(nil));
+        // Search zip
+        for iassets:=0 to Pred(Assets.Count) do
+        begin
+          Asset := TJSONObject(Assets[iassets]);
+          FileName:=Asset{%H-}.Get('name');
+          if AnsiStartsText(BinsFileName+'.zip',FileName) then
+          begin
+            BinsFileName:=FileName;
+            FileURL:=Asset{%H-}.Get('browser_download_url');
+          end;
+          success:=(Length(FileURL)>0);
+          if success then break;
+        end;
+        if (NOT success) then
+        begin
+          // Search any
+          for iassets:=0 to Pred(Assets.Count) do
+          begin
+            Asset := TJSONObject(Assets[iassets]);
+            FileName:=Asset{%H-}.Get('name');
+            if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(BinsFileName,FileName)) then
+            begin
+              BinsFileName:=FileName;
+              FileURL:=Asset{%H-}.Get('browser_download_url');
+            end;
+            success:=(Length(FileURL)>0);
+            if success then break;
+          end;
+        end;
+        if success then
+        begin
+          BaseBinsURL:=FileURL;
+          BinsFileName:=FileName;
+          result:=true;
+          break;
+        end;
+      end;
+
+    finally
+      if (Json<>nil) AND (NOT Json.IsNull) then Json.Free;
+    end;
+  end;
+
+end;
+
+function TFPCupManager.GetCrossLibsURL(var BaseLibsURL,LibsFileName:string):boolean;
+var
+  s:string;
+  success:boolean;
+  Json : TJSONData;
+  Assets : TJSONArray;
+  Item,Asset : TJSONObject;
+  TagName, FileName, FileURL : string;
+  i,iassets : integer;
+begin
+  result:=false;
+
+  BaseLibsURL:='crosslibs';
+
+  s:=GetURLDataFromCache(FPCUPGITREPOAPIRELEASES+'?per_page=100');
+  success:=(Length(s)>0);
+
+  if success then
+  begin
+    json:=nil;
+    try
+
+      try
+        Json:=GetJSON(s);
+      except
+        Json:=nil;
+      end;
+      if JSON.IsNull then success:=false;
+
+      if (NOT success) then
+      begin
+        BaseLibsURL:='';
+        exit;
+      end;
+
+      success:=false;
+      FileURL:='';
+      for i:=0 to Pred(Json.Count) do
+      begin
+        Item := TJSONObject(Json.Items[i]);
+        TagName:=Item{%H-}.Get('tag_name');
+        if (Pos(BaseLibsURL,TagName)<>1) then continue;
+        Assets:=Item.Get('assets',TJSONArray(nil));
+        // Search zip
+        for iassets:=0 to Pred(Assets.Count) do
+        begin
+          Asset := TJSONObject(Assets[iassets]);
+          FileName:=Asset{%H-}.Get('name');
+          if AnsiStartsText(LibsFileName+'.zip',FileName) then
+          begin
+            LibsFileName:=FileName;
+            FileURL:=Asset{%H-}.Get('browser_download_url');
+          end;
+          success:=(Length(FileURL)>0);
+          if success then break;
+        end;
+        if (NOT success) then
+        begin
+          // Search any
+          for iassets:=0 to Pred(Assets.Count) do
+          begin
+            Asset := TJSONObject(Assets[iassets]);
+            FileName:=Asset{%H-}.Get('name');
+            if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(LibsFileName,FileName)) then
+            begin
+              LibsFileName:=FileName;
+              FileURL:=Asset{%H-}.Get('browser_download_url');
+            end;
+            success:=(Length(FileURL)>0);
+            if success then break;
+          end;
+        end;
+        if success then
+        begin
+          BaseLibsURL:=FileURL;
+          LibsFileName:=FileName;
+          result:=true;
+          break;
+        end;
+      end;
+
+    finally
+      if (Json<>nil) AND (NOT Json.IsNull) then Json.Free;
+    end;
+  end;
+
+end;
+
 
 function TFPCupManager.GetRunInfo:string;
 begin
@@ -1203,11 +1679,11 @@ end;
 
 constructor TFPCupManager.Create;
 begin
-  Verbose:=false;
-  UseWget:=false;
-  ExportOnly:=false;
+  FVerbose:=false;
+  FUseWget:=false;
+  FExportOnly:=false;
   FNoJobs:=True;
-  UseGitClient:=false;
+  FUseGitClient:=false;
   FNativeFPCBootstrapCompiler:=true;
   ForceLocalRepoClient:=false;
 
@@ -1216,6 +1692,11 @@ begin
   FSwitchURL:=false;
   FSolarisOI:=false;
   FMUSL:=false;
+  FAutoTools:=false;
+
+  FCrossOS_Target:=TOS.osNone;
+  FCrossCPU_Target:=TCPU.cpuNone;
+  FCrossOS_SubArch:=TSUBARCH.saNone;
 
   {$if (defined(BSD) and not defined(DARWIN)) or (defined(Solaris))}
   FPatchCmd:='gpatch';
@@ -1642,7 +2123,7 @@ begin
 
   Ultibo:=((Pos('github.com/ultibohub',FParent.FPCURL)>0){$ifndef FPCONLY} OR (Pos('github.com/ultibohub',FParent.LazarusURL)>0){$endif});
 
-  CrossCompiling:=(FParent.CrossCPU_Target<>TCPU.cpuNone) or (FParent.CrossOS_Target<>TOS.osNone);
+  CrossCompiling:=(FParent.CrossCPU_Target<>TCPU.cpuNone) OR (FParent.CrossOS_Target<>TOS.osNone);
 
   if Ultibo then
     LocalFPCSourceDir:=IncludeTrailingPathDelimiter(FParent.FPCSourceDirectory)+'source'
@@ -1817,10 +2298,11 @@ begin
     FInstaller.BaseDirectory:=FParent.BaseDirectory;
     FInstaller.FPCSourceDir:=LocalFPCSourceDir;
     FInstaller.FPCInstallDir:=FParent.FPCInstallDirectory;
+    {$ifndef FPCONLY}
     FInstaller.LazarusSourceDir:=FParent.LazarusSourceDirectory;
     FInstaller.LazarusInstallDir:=FParent.LazarusInstallDirectory;
     FInstaller.LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
-
+    {$endif}
     FInstaller.TempDirectory:=FParent.TempDirectory;
     {$IFDEF MSWINDOWS}
     FInstaller.SVNClient.ForceLocal:=FParent.ForceLocalRepoClient;

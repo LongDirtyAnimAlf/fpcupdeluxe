@@ -289,7 +289,6 @@ implementation
 {$endif}
 
 uses
-  fpjson,
   InterfaceBase, // for WidgetSet
   LCLType, // for MessageBox
   LCLIntf, // for OpenURL
@@ -2409,18 +2408,13 @@ end;
 
 function TForm1.ButtonProcessCrossCompiler(Sender: TObject):boolean;
 var
-  BinsFileName,LibsFileName,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
+  BinsFileName,LibsFileName,BaseBinsURL,BaseLibsURL,BinPath,LibPath:string;
+  ToolTargetPath,ToolTargetFile,UnZipper,s:string;
   warning,success,verbose:boolean;
   IncludeLCL,ZipFile:boolean;
   i:integer;
   aList: TStringList;
-  BaseBinsURL,BaseLibsURL:string;
   frmSeq: TfrmSequencial;
-  Json : TJSONData;
-  Assets : TJSONArray;
-  Item,Asset : TJSONObject;
-  TagName, FileName, FileURL : string;
-  iassets : integer;
 begin
   result:=false;
 
@@ -2910,7 +2904,6 @@ begin
 
     DisEnable(Sender,False);
 
-    Json:=nil;
     try
       //embedded predefined settings
       if (FPCupManager.CrossOS_Target=TOS.embedded) then
@@ -3130,227 +3123,16 @@ begin
           // Get fpcupdeluxe tools when needed !
           if (NOT success) then
           begin
-            BinsFileName:='';
-
             if ((Sender<>nil) AND (CheckAutoClear.Checked)) then memoSummary.Clear;
 
             memoSummary.Lines.Append('Trying to build the cross-compiler for '+GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target)+'.');
 
             AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
 
-            // Setting the CPU part of the name[s] for the file to download
-            if FPCupManager.CrossCPU_Target=TCPU.arm then s:='ARM' else
-              if FPCupManager.CrossCPU_Target=TCPU.i386 then s:='i386' else
-                if FPCupManager.CrossCPU_Target=TCPU.x86_64 then s:='x64' else
-                  if FPCupManager.CrossCPU_Target=TCPU.powerpc then s:='PowerPC' else
-                    if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then s:='PowerPC64' else
-                      if FPCupManager.CrossCPU_Target=TCPU.avr then s:='AVR' else
-                        s:=UppercaseFirstChar(GetCPU(FPCupManager.CrossCPU_Target));
-
-            BinsFileName:=s;
-
-            // Set special CPU names
-            if FPCupManager.CrossOS_Target=TOS.darwin then
-            begin
-              // Darwin has some universal binaries and libs
-              if FPCupManager.CrossCPU_Target=TCPU.i386 then BinsFileName:='All';
-              if FPCupManager.CrossCPU_Target=TCPU.x86_64 then BinsFileName:='All';
-              if FPCupManager.CrossCPU_Target=TCPU.aarch64 then BinsFileName:='All';
-              if FPCupManager.CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
-              if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC';
-            end;
-
-            if FPCupManager.CrossOS_Target=TOS.ios then
-            begin
-              // iOS has some universal binaries and libs
-              if FPCupManager.CrossCPU_Target=TCPU.arm then BinsFileName:='All';
-              if FPCupManager.CrossCPU_Target=TCPU.aarch64 then BinsFileName:='All';
-            end;
-
-            if FPCupManager.CrossOS_Target=TOS.aix then
-            begin
-              // AIX has some universal binaries
-              if FPCupManager.CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
-              if FPCupManager.CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC';
-            end;
-
-            // Set OS case
-            if FPCupManager.CrossOS_Target=TOS.morphos then s:='MorphOS' else
-              if FPCupManager.CrossOS_Target=TOS.freebsd then s:='FreeBSD' else
-                if FPCupManager.CrossOS_Target=TOS.dragonfly then s:='DragonFlyBSD' else
-                  if FPCupManager.CrossOS_Target=TOS.openbsd then s:='OpenBSD' else
-                    if FPCupManager.CrossOS_Target=TOS.netbsd then s:='NetBSD' else
-                      if FPCupManager.CrossOS_Target=TOS.aix then s:='AIX' else
-                        if FPCupManager.CrossOS_Target=TOS.msdos then s:='MSDos' else
-                          if FPCupManager.CrossOS_Target=TOS.freertos then s:='FreeRTOS' else
-                            if FPCupManager.CrossOS_Target=TOS.win32 then s:='Windows' else
-                              if FPCupManager.CrossOS_Target=TOS.win64 then s:='Windows' else
-                                if FPCupManager.CrossOS_Target=TOS.ios then s:='IOS' else
-                                s:=UppercaseFirstChar(GetOS(FPCupManager.CrossOS_Target));
-
-            if FPCupManager.SolarisOI then s:=s+'OI';
-            BinsFileName:=s+BinsFileName;
-
-            if FPCupManager.MUSL then BinsFileName:='MUSL'+BinsFileName;
-
-            // normally, we have the same names for libs and bins URL
-            LibsFileName:=BinsFileName;
-
-            {$IF (defined(Windows)) OR (defined(Linux))}
-            if (
-              ((FPCupManager.CrossOS_Target=TOS.darwin) AND (FPCupManager.CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
-              OR
-              ((FPCupManager.CrossOS_Target=TOS.ios) AND (FPCupManager.CrossCPU_Target in [TCPU.arm,TCPU.aarch64]))
-              ) then
-            begin
-              // Set special BinsFile for universal tools for Darwin
-              BinsFileName:='AppleAll';
-            end;
-
-            if FPCupManager.CrossOS_Target=TOS.android then
-            begin
-              // Android has universal binaries
-              BinsFileName:='AndroidAll';
-            end;
-            {$endif}
-
-            if FPCupManager.CrossCPU_Target=TCPU.wasm32 then
-            begin
-              // wasm has some universal binaries
-              BinsFileName:='AllWasm32';
-            end;
-
-
-            // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
-            // Normally, we have the standard names for libs and bins paths
-            LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(FPCupManager.CrossCPU_Target)])+'-';
-            BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'bin',GetCPU(FPCupManager.CrossCPU_Target)])+'-';
-
-            if FPCupManager.MUSL then
-            begin
-              LibPath:=LibPath+'musl';
-              BinPath:=BinPath+'musl';
-            end;
-            LibPath:=LibPath+GetOS(FPCupManager.CrossOS_Target);
-            BinPath:=BinPath+GetOS(FPCupManager.CrossOS_Target);
-            if FPCupManager.SolarisOI then
-            begin
-              LibPath:=LibPath+'-oi';
-              BinPath:=BinPath+'-oi';
-            end;
-
-            {$IF (defined(Windows)) OR (defined(Linux))}
-            // Set special Bins directory for universal tools for Darwin based on clang
-            if (
-              ((FPCupManager.CrossOS_Target=TOS.darwin) AND (FPCupManager.CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
-              OR
-              ((FPCupManager.CrossOS_Target=TOS.ios) AND (FPCupManager.CrossCPU_Target in [TCPU.arm,TCPU.aarch64]))
-              ) then
-            begin
-              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
-              BinPath:=StringReplace(BinPath,GetOS(FPCupManager.CrossOS_Target),'apple',[]);
-            end;
-
-            // Set special Bins directory for universal tools for Android based on clang
-            if FPCupManager.CrossOS_Target=TOS.android then
-            begin
-              BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
-            end;
-            {$endif}
-
-            // Set special Bins directory for universal tools for wasm32
-            if FPCupManager.CrossCPU_Target=TCPU.wasm32 then
-            begin
-              BinPath:=StringReplace(BinPath,GetOS(FPCupManager.CrossOS_Target),'all',[]);
-            end;
-
-            if FPCupManager.CrossOS_Target=TOS.darwin then
-            begin
-              // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
-              if (FPCupManager.CrossCPU_Target=TCPU.i386) OR (FPCupManager.CrossCPU_Target=TCPU.x86_64) OR (FPCupManager.CrossCPU_Target=TCPU.aarch64) then
-              begin
-                BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
-                LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
-              end;
-              if (FPCupManager.CrossCPU_Target=TCPU.powerpc) OR (FPCupManager.CrossCPU_Target=TCPU.powerpc64) then
-              begin
-                BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-                LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-              end;
-            end;
-
-            if FPCupManager.CrossOS_Target=TOS.ios then
-            begin
-              // iOS is special: combined libs for arm and aarch64
-              if (FPCupManager.CrossCPU_Target=TCPU.arm) OR (FPCupManager.CrossCPU_Target=TCPU.aarch64) then
-              begin
-                BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
-                LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),'all',[]);
-              end;
-            end;
-
-            if FPCupManager.CrossOS_Target=TOS.aix then
-            begin
-              // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
-              if (FPCupManager.CrossCPU_Target=TCPU.powerpc) OR (FPCupManager.CrossCPU_Target=TCPU.powerpc64) then
-              begin
-                BinPath:=StringReplace(BinPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-                LibPath:=StringReplace(LibPath,GetCPU(FPCupManager.CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-              end;
-            end;
-
-            //Put all windows stuff (not that much) in a single windows directory
-            if (FPCupManager.CrossOS_Target=TOS.win32) OR (FPCupManager.CrossOS_Target=TOS.win64) then
-            begin
-              BinPath:=StringReplace(BinPath,GetOS(FPCupManager.CrossOS_Target),'windows',[]);
-              LibPath:=StringReplace(LibPath,GetOS(FPCupManager.CrossOS_Target),'windows',[]);
-            end;
-
-            if FPCupManager.CrossOS_Target=TOS.linux then
-            begin
-              // PowerPC64 is special: only little endian libs for now
-              if (FPCupManager.CrossCPU_Target=TCPU.powerpc64) then
-              begin
-                LibsFileName:=StringReplace(LibsFileName,'PowerPC64','PowerPC64LE',[rfIgnoreCase]);
-              end;
-
-              // ARM is special: can be hard or softfloat (Windows only binutils yet)
-              {$ifdef MSWINDOWS}
-              if (FPCupManager.CrossCPU_Target=TCPU.arm) then
-              begin
-                if (Pos('SOFT',UpperCase(FPCupManager.CrossOPT))>0) OR (Pos('FPC_ARMEL',UpperCase(FPCupManager.FPCOPT))>0) then
-                begin
-                  // use softfloat binutils
-                  BinsFileName:=StringReplace(LibsFileName,'BinsLinuxARM','BinsLinuxARMSoft',[rfIgnoreCase]);
-                end;
-              end;
-              {$endif}
-            end;
-
-            //{$IF defined(CPUAARCH64) AND defined(DARWIN)}
-            {$ifndef MSWINDOWS}
-            // For most targets, FreeRTOS is a special version of embedded, so just use the embedded tools !!
-            if FPCupManager.CrossOS_Target=TOS.freertos then
-            begin
-              // use embedded tools for freertos:
-              if (FPCupManager.CrossCPU_Target in SUBARCH_CPU) then
-              begin
-                BinsFileName:=StringReplace(BinsFileName,'FreeRTOS','Embedded',[]);
-              end;
-            end;
-            {$endif}
-
-            // All ready !!
-
-            LibsFileName:='CrossLibs'+LibsFileName;
-            {$ifdef MSWINDOWS}
-            BinsFileName:='WinCrossBins'+BinsFileName;
-            {$else}
-            BinsFileName:='CrossBins'+BinsFileName;
-            {$endif MSWINDOWS}
+            FPCupManager.GetCrossToolsFileName({%H-}BinsFileName,{%H-}LibsFileName);
+            FPCupManager.GetCrossToolsPath({%H-}BinPath,{%H-}LibPath);
 
             // bit tricky ... if bins and/or libs are already there exit this retry ... ;-)
-
             if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath)) then MissingCrossBins:=false;
 
             if (FPCupManager.CrossOS_SubArch=TSUBARCH.saNone) then
@@ -3373,172 +3155,31 @@ begin
               // many files to unpack for Darwin : do not show progress of unpacking files when unpacking for Darwin.
               verbose:=(FPCupManager.CrossOS_Target<>TOS.darwin);
 
-              BaseBinsURL:='';
-
-              if GetTargetOS=GetOS(TOS.win32) then BaseBinsURL:='wincrossbins'
-              else
-                 if GetTargetOS=GetOS(TOS.win64) then BaseBinsURL:='wincrossbins'
-                 else
-                    if GetTargetOS=GetOS(TOS.linux) then
-                    begin
-                      if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386crossbins';
-                      if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64crossbins';
-                      if GetTargetCPU=GetCPU(TCPU.arm) then BaseBinsURL:='linuxarmcrossbins';
-                    end
-                    else
-                      if GetTargetOS=GetOS(TOS.freebsd) then
-                      begin
-                        if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='freebsdx64crossbins';
-                      end
-                      else
-                        if GetTargetOS=GetOS(TOS.solaris) then
-                        begin
-                          {if FPCupManager.SolarisOI then}
-                          begin
-                            if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='solarisoix64crossbins';
-                          end;
-                        end
-                        else
-                          if GetTargetOS=GetOS(TOS.darwin) then
-                          begin
-                            if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='darwini386crossbins';
-                            if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='darwinx64crossbins';
-                            if GetTargetCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='darwinarm64crossbins';
-                          end;
-
-              BaseLibsURL:='crosslibs';
-
-              s:=GetURLDataFromCache(FPCUPGITREPOAPIRELEASES+'?per_page=100');
-              success:=(Length(s)>0);
-
-              if success then
-              begin
-                try
-                  Json:=GetJSON(s);
-                except
-                  Json:=nil;
-                end;
-                if JSON.IsNull then success:=false;
-              end;
-
-              if (NOT success) then
-              begin
-                ShowMessage('Failure getting list of tools. Fatal. Aborting.');
-                exit;
-              end;
-
               if MissingCrossBins then
               begin
+                AddMessage('Going to look for the right cross-bins. Can (will) take some time !',True);
+                AddMessage('Looking for: '+BinsFileName, True);
+
+                success:=FPCupManager.GetCrossBinsURL({%H-}BaseBinsURL,BinsFileName);
+
                 // no cross-bins available
-                if (Length(BaseBinsURL)=0) then
+                if (NOT success) then
                 begin
-                  ShowMessage('No tools available online. You could do a feature request ... ;-)');
+                  ShowMessage('No binary tools available online. You could do a feature request ... ;-)');
                   exit;
                 end;
 
-                AddMessage('Going to look for the right cross-bins. Can (will) take some time !',True);
-                AddMessage('Looking for: '+BinsFileName+'.*', True);
-
-                (*
-
-                Ss := TStringStream.Create('');
-                try
-                  success:=Download(False,FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL,Ss);
-                  if (NOT success) then
-                  begin
-                    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
-                    Ss.Clear;
-                    {$ENDIF}
-                    Ss.Position:=0;
-                    success:=Download(True,FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL,Ss);
-                  end;
-                  if success then s:=Ss.DataString;
-                finally
-                  Ss.Free;
-                end;
-
                 if success then
                 begin
-                  if (Length(s)>0) then
-                  begin
-                    try
-                      Json:=GetJSON(s);
-                    except
-                      Json:=nil;
-                    end;
-                    if JSON.IsNull then success:=false;
-                  end;
-                end;
-
-                if success then
-                begin
-                  for i:=Pred(Json.Count) downto 0 do
-                  begin
-                    Item := TJSONObject(Json.Items[i]);
-                    TagName:=Item.Get('ref');
-                    Delete(TagName,1,Length('refs/tags/'));
-                  end;
-
-                end;
-                //FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL;
-                //FPCUPGITREPOAPIRELEASES+'/tags/wincrossbins_v1.0';
-                *)
-
-                success:=false;
-                FileURL:='';
-                for i:=0 to Pred(Json.Count) do
-                begin
-                  Item := TJSONObject(Json.Items[i]);
-                  TagName:=Item{%H-}.Get('tag_name');
-                  if (Pos(BaseBinsURL,TagName)<>1) then continue;
-                  Assets:=Item.Get('assets',TJSONArray(nil));
-                  // Search zip
-                  for iassets:=0 to Pred(Assets.Count) do
-                  begin
-                    Asset := TJSONObject(Assets[iassets]);
-                    FileName:=Asset{%H-}.Get('name');
-                    if AnsiStartsText(BinsFileName+'.zip',FileName) then
-                    begin
-                      BinsFileName:=FileName;
-                      FileURL:=Asset{%H-}.Get('browser_download_url');
-                    end;
-                    success:=(Length(FileURL)>0);
-                    if success then break;
-                  end;
-                  if (NOT success) then
-                  begin
-                    // Search any
-                    for iassets:=0 to Pred(Assets.Count) do
-                    begin
-                      Asset := TJSONObject(Assets[iassets]);
-                      FileName:=Asset{%H-}.Get('name');
-                      if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(BinsFileName,FileName)) then
-                      begin
-                        BinsFileName:=FileName;
-                        FileURL:=Asset{%H-}.Get('browser_download_url');
-                      end;
-                      success:=(Length(FileURL)>0);
-                      if success then break;
-                    end;
-                  end;
-                  if success then
-                  begin
-                    DownloadURL:=FileURL;
-                    TargetFile:=FileName;
-                    break;
-                  end;
-                end;
-                if success then
-                begin
-                  AddMessage('Found correct online binutils at: '+DownloadURL);
+                  AddMessage('Found correct online binutils at: '+BaseBinsURL);
                   AddMessage('Going to download the cross-bins. Can (will) take some time !',True);
-                  TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
-                  SysUtils.DeleteFile(TargetFile);
+                  ToolTargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+BinsFileName;
+                  SysUtils.DeleteFile(ToolTargetFile);
                   success:=false;
                   {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
                   frmSeq:= TfrmSequencial.Create(Self);
                   try
-                    frmSeq.AddDownload(DownloadURL,TargetFile);
+                    frmSeq.AddDownload(BaseBinsURL,ToolTargetFile);
                     frmSeq.ShowModal;
                     success:=frmSeq.Success;
                   finally
@@ -3547,29 +3188,29 @@ begin
                   {$ENDIF}
                   if (NOT success) then
                   begin
-                    SysUtils.DeleteFile(TargetFile);
-                    success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                    SysUtils.DeleteFile(ToolTargetFile);
+                    success:=DownLoad(FPCupManager.UseWget,BaseBinsURL,ToolTargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                   end;
                   if success then AddMessage('Download successfull !');
                 end;
 
                 if success then
                 begin
-                  ZipFile:=(ExtractFileExt(TargetFile)='.zip');
-                  TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
+                  ZipFile:=(ExtractFileExt(ToolTargetFile)='.zip');
+                  ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
                   {$ifndef MSWINDOWS}
-                  TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath+DirectorySeparator;
+                  ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath+DirectorySeparator;
                   {$endif}
-                  ForceDirectoriesSafe(TargetPath);
+                  ForceDirectoriesSafe(ToolTargetPath);
 
-                  AddMessage('Going to extract archive into '+TargetPath);
+                  AddMessage('Going to extract archive into '+ToolTargetPath);
 
                   if ZipFile then
                   begin
                     with TNormalUnzipper.Create do
                     begin
                       try
-                        success:=DoUnZip(TargetFile,TargetPath,[]);
+                        success:=DoUnZip(ToolTargetFile,ToolTargetPath,[]);
                       finally
                         Free;
                       end;
@@ -3579,7 +3220,7 @@ begin
                   begin
                     {$ifdef MSWINDOWS}
                     if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
-                    success:={%H-}RunCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',s);
+                    success:={%H-}RunCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+ToolTargetFile+' "'+ToolTargetPath+'"',s);
                     if (NOT success) then
                     {$endif}
                     begin
@@ -3592,13 +3233,13 @@ begin
                       if success then
                       begin
                         if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
-                        success:={%H-}RunCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',s);
+                        success:={%H-}RunCommand(UnZipper + ' x "' + ToolTargetFile + '" "' + ToolTargetPath + '"',s);
                       end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
                     end;
                   end;
                 end;
 
-                SysUtils.DeleteFile(TargetFile);
+                SysUtils.DeleteFile(ToolTargetFile);
 
                 if success then
                 begin
@@ -3606,7 +3247,7 @@ begin
                   try
                     aList.Add('These binary utilities were happily provided to you by fpcupdeluxe.');
                     aList.Add('You can find them at:');
-                    aList.Add(DownloadURL);
+                    aList.Add(BaseBinsURL);
                     s:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
                     If DirectoryExists(ExtractFileDir(s)) then
                     begin
@@ -3617,7 +3258,7 @@ begin
                     aList.Free;
                   end;
                   {$IFDEF UNIX}
-                  aList:=FindAllFiles(TargetPath);
+                  aList:=FindAllFiles(ToolTargetPath);
                   try
                     if (aList.Count > 0) then
                     begin
@@ -3638,103 +3279,33 @@ begin
               if (DirectoryIsEmpty(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath)) AND (FPCupManager.CrossOS_Target=TOS.embedded)
                 then MissingCrossLibs:=true;
 
-              if MissingCrossLibs then
-              begin
-                (*
-                if ((FPCupManager.CrossCPU_Target=TCPU.arm) AND (FPCupManager.CrossOS_Target=TOS.freertos)) then
-                begin
-                  // Use deticated libs by Michael Ring !
-                  s:='10.4.3';
-                  MinorVersion:=4;
-                  LibsFileName:='FreeRTOS-'+s+'-for-FreePascal.zip';
-                  DownloadURL:='https://github.com/michael-ring/freertos4fpc/releases/download/v'+s+'-'+InttoStr(MinorVersion)+'/'+LibsFileName;
-                  TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+LibsFileName;
-                  SysUtils.DeleteFile(TargetFile);
-                  success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-                  if success then
-                  begin
-                    AddMessage('Download successfull !');
-                    TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath+DirectorySeparator;
-                    ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath);
-                    with TNormalUnzipper.Create do
-                    begin
-                      try
-                        success:=DoUnZip(TargetFile,TargetPath,[]);
-                      finally
-                        Free;
-                      end;
-                    end;
-                    if success then
-                    begin
-                      SysUtils.DeleteFile(TargetFile);
-                      MissingCrossLibs:=False;
-                    end;
-                  end;
-                end;
-                *)
-              end;
 
               if MissingCrossLibs then
               begin
                 AddMessage('Going to look for the right cross-libraries. Can (will) take some time !',True);
-                AddMessage('Looking for: '+LibsFileName+'.*',True);
+                AddMessage('Looking for: '+LibsFileName, True);
 
-                success:=false;
-                FileURL:='';
-                for i:=0 to Pred(Json.Count) do
+                success:=FPCupManager.GetCrossLibsURL({%H-}BaseLibsURL,LibsFileName);
+
+                // no cross-libraries available
+                if (NOT success) then
                 begin
-                  Item := TJSONObject(Json.Items[i]);
-                  TagName:=Item{%H-}.Get('tag_name');
-                  if (Pos(BaseLibsURL,TagName)<>1) then continue;
-                  Assets:=Item.Get('assets',TJSONArray(nil));
-                  // Search zip
-                  for iassets:=0 to Pred(Assets.Count) do
-                  begin
-                    Asset := TJSONObject(Assets[iassets]);
-                    FileName:=Asset{%H-}.Get('name');
-                    if AnsiStartsText(LibsFileName+'.zip',FileName) then
-                    begin
-                      LibsFileName:=FileName;
-                      FileURL:=Asset{%H-}.Get('browser_download_url');
-                    end;
-                    success:=(Length(FileURL)>0);
-                    if success then break;
-                  end;
-                  if (NOT success) then
-                  begin
-                    // Search any
-                    for iassets:=0 to Pred(Assets.Count) do
-                    begin
-                      Asset := TJSONObject(Assets[iassets]);
-                      FileName:=Asset{%H-}.Get('name');
-                      if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(LibsFileName,FileName)) then
-                      begin
-                        LibsFileName:=FileName;
-                        FileURL:=Asset{%H-}.Get('browser_download_url');
-                      end;
-                      success:=(Length(FileURL)>0);
-                      if success then break;
-                    end;
-                  end;
-                  if success then
-                  begin
-                    DownloadURL:=FileURL;
-                    TargetFile:=FileName;
-                    break;
-                  end;
+                  // Do not fail !!
+                  //ShowMessage('No libraries available online. You could do a feature request ... ;-)');
+                  //exit;
                 end;
 
                 if success then
                 begin
-                  AddMessage('Found correct online libraries at: '+DownloadURL);
-                  AddMessage('Going to download the cross-libraries. Can (will) take some time !',True);
-                  TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
-                  SysUtils.DeleteFile(TargetFile);
+                  AddMessage('Found correct online libraries at: '+BaseLibsURL);
+                  AddMessage('Going to download the cross-libs. Can (will) take some time !',True);
+                  ToolTargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+LibsFileName;
+                  SysUtils.DeleteFile(ToolTargetFile);
                   success:=false;
                   {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
                   frmSeq:= TfrmSequencial.Create(Self);
                   try
-                    frmSeq.AddDownload(DownloadURL,TargetFile);
+                    frmSeq.AddDownload(BaseLibsURL,ToolTargetFile);
                     frmSeq.ShowModal;
                     success:=frmSeq.Success;
                   finally
@@ -3743,27 +3314,27 @@ begin
                   {$ENDIF}
                   if (NOT success) then
                   begin
-                    SysUtils.DeleteFile(TargetFile);
-                    success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                    SysUtils.DeleteFile(ToolTargetFile);
+                    success:=DownLoad(FPCupManager.UseWget,BaseLibsURL,ToolTargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                   end;
                   if success then AddMessage('Download successfull !');
                 end;
 
                 if success then
                 begin
-                  ZipFile:=(ExtractFileExt(TargetFile)='.zip');
-                  TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
-                  //TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath+DirectorySeparator;
-                  //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath);
+                  ZipFile:=(ExtractFileExt(ToolTargetFile)='.zip');
+                  ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
+                  //ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath+DirectorySeparator;
+                  ForceDirectoriesSafe(ToolTargetPath);
 
-                  AddMessage('Going to extract archive into '+TargetPath);
+                  AddMessage('Going to extract archive into '+ToolTargetPath);
 
                   if ZipFile then
                   begin
                     with TNormalUnzipper.Create do
                     begin
                       try
-                        success:=DoUnZip(TargetFile,TargetPath,[]);
+                        success:=DoUnZip(ToolTargetFile,ToolTargetPath,[]);
                       finally
                         Free;
                       end;
@@ -3773,7 +3344,7 @@ begin
                   begin
                     {$ifdef MSWINDOWS}
                     if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
-                    success:={%H-}RunCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',s);
+                    success:={%H-}RunCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+ToolTargetFile+' "'+ToolTargetPath+'"',s);
                     if (NOT success) then
                     {$endif}
                     begin
@@ -3786,12 +3357,12 @@ begin
                       if success then
                       begin
                         if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
-                        success:={%H-}RunCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',s);
+                        success:={%H-}RunCommand(UnZipper + ' x "' + ToolTargetFile + '" "' + ToolTargetPath + '"',s);
                       end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
                     end;
                   end;
                 end;
-                SysUtils.DeleteFile(TargetFile);
+                SysUtils.DeleteFile(ToolTargetFile);
 
                 if success then
                 begin
@@ -3799,7 +3370,7 @@ begin
                   try
                     aList.Add('These libraries were happily provided to you by fpcupdeluxe.');
                     aList.Add('You can find them at:');
-                    aList.Add(DownloadURL);
+                    aList.Add(BaseLibsURL);
                     s:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
                     if DirectoryExists(ExtractFileDir(s)) then
                     begin
@@ -3854,7 +3425,6 @@ begin
         Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,true);
 
     finally
-      if (Json<>nil) AND (NOT Json.IsNull) then Json.Free;
       DisEnable(Sender,True);
     end;
   end;
@@ -4227,6 +3797,7 @@ begin
   FPCupManager.OnlyModules:='';
   FPCupManager.IncludeModules:='';
   FPCupManager.SkipModules:='';
+
   FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
   FPCupManager.CrossOS_Target:=TOS.osNone;
   FPCupManager.CrossOS_SubArch:=TSubarch.saNone;
