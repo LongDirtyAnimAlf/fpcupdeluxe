@@ -1991,6 +1991,9 @@ begin
     }
   end;
 
+  s2:=Which('codesign');
+  if (NOT FileExists(s2)) then Processor.Process.Parameters.Add('CODESIGN=/usr/bin/true');
+
   s2:=GetDarwinSDKLocation;
   if Length(s2)>0 then
   begin
@@ -2001,7 +2004,7 @@ begin
   begin
     // always add the default library location
     s1:='-Fl'+'/usr/lib '+s1;
-  end;;
+  end;
   {$ENDIF}
 
   {$ifdef FORCEREVISION}
@@ -4420,6 +4423,7 @@ begin
           ConfigText.Append('');
           if (Length(s)>0) then
             ConfigText.Append('# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory');
+
           s:=GetDarwinSDKLocation;
           if (Length(s)>0) AND (DirectoryExists(s)) then
           begin
@@ -4427,7 +4431,13 @@ begin
             ConfigText.Append('-XR'+s);
             ConfigText.Append('#ENDIF');
             ConfigText.Append('-Fl'+s+'/usr/lib');
+          end
+          else
+          begin
+            // always add the default library location
+            ConfigText.Append('-Fl/usr/lib');
           end;
+
           s:=GetDarwinToolsLocation;
           if (Length(s)>0) AND (DirectoryExists(s)) then
             ConfigText.Append('-FD'+s);

@@ -153,20 +153,22 @@ const
   {$endif}
 
   {$ifdef win64}
-  OpenSSLSourceURL : array [0..3] of string = (
+  OpenSSLSourceURL : array [0..4] of string = (
     //'https://indy.fulgan.com/SSL/openssl-1.0.2u-x64_86-win64.zip',
     'https://github.com/IndySockets/OpenSSL-Binaries/raw/master/openssl-1.0.2u-x64_86-win64.zip',
     'http://wiki.overbyte.eu/arch/openssl-1.0.2u-win64.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip',
+    'https://indy.fulgan.com/SSL/openssl-1.0.2u-x64_86-win64.zip',
     'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-x64_86-win64.zip'
     );
   {$endif}
   {$ifdef win32}
-  OpenSSLSourceURL : array [0..3] of string = (
+  OpenSSLSourceURL : array [0..4] of string = (
     //'https://indy.fulgan.com/SSL/openssl-1.0.2u-i386-win32.zip',
     'https://github.com/IndySockets/OpenSSL-Binaries/raw/master/openssl-1.0.2u-i386-win32.zip',
     'http://wiki.overbyte.eu/arch/openssl-1.0.2u-win32.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip',
+    'https://indy.fulgan.com/SSL/openssl-1.0.2u-i386-win32.zip',
     'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-i386-win32.zip'
     );
   {$endif}
@@ -1041,13 +1043,13 @@ begin
       // always get ssl libs if they are not there: sometimes system wide libs do not work
       if (NOT FileExists(SafeGetApplicationPath+'libeay32.dll')) OR (NOT FileExists(SafeGetApplicationPath+'ssleay32.dll')) then
       begin
-        Infoln(localinfotext+'Getting OpenSLL library files.',etInfo);
+        Infoln(localinfotext+'Getting OpenSSL library files.',etInfo);
         DownloadOpenSSL;
         DestroySSLInterface; // disable ssl and release libs
       end
       else
       begin
-        Infoln(localinfotext+'Found OpenSLL library files.',etDebug);
+        Infoln(localinfotext+'Found OpenSSL library files.',etDebug);
         Infoln(localinfotext+'Checking for correct signature.',etDebug);
         if (IsSSLloaded) then
         begin
@@ -1055,10 +1057,10 @@ begin
         end;
         if (NOT CheckFileSignature(SafeGetApplicationPath+'libeay32.dll')) OR (NOT CheckFileSignature(SafeGetApplicationPath+'ssleay32.dll')) then
         begin
-          Infoln(localinfotext+'OpenSLL library files have wrong CPU signature.',etWarning);
+          Infoln(localinfotext+'OpenSSL library files have wrong CPU signature.',etWarning);
           DeleteFile(SafeGetApplicationPath+'libeay32.dll');
           DeleteFile(SafeGetApplicationPath+'ssleay32.dll');
-          Infoln(localinfotext+'Getting correct OpenSLL library files.',etInfo);
+          Infoln(localinfotext+'Getting correct OpenSSL library files.',etInfo);
           DownloadOpenSSL;
           //DestroySSLInterface; // disable ssl and release libs
         end;
@@ -2480,7 +2482,7 @@ begin
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
 
-  Infoln(localinfotext+'No OpenSLL library files available for SSL. Going to download them.',etWarning);
+  Infoln(localinfotext+'No OpenSSL library files available for SSL. Going to download them.',etWarning);
 
   // Direct download OpenSSL from from Lazarus binaries
   if (NOT OperationSucceeded) then
@@ -2499,7 +2501,7 @@ begin
   begin
     localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
 
-    Infoln(localinfotext+'Got OpenSLL from '+OPENSSL_URL_LATEST+'.',etWarning);
+    Infoln(localinfotext+'Got OpenSSL from '+OPENSSL_URL_LATEST+'.',etWarning);
 
     OpenSSLFileName := GetTempFileNameExt('FPCUPTMP','zip');
 
@@ -2558,7 +2560,7 @@ begin
     end;
 
     if OperationSucceeded
-       then Infoln(localinfotext+'OpenSLL library files download and unpacking from '+aSourceURL+' ok.',etWarning)
+       then Infoln(localinfotext+'OpenSSL library files download and unpacking from '+aSourceURL+' ok.',etWarning)
        else Infoln(localinfotext+'Could not download/install openssl library archive.', etError);
 
     SysUtils.Deletefile(OpenSSLFileName); //Get rid of temp zip if success.
