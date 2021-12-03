@@ -102,12 +102,12 @@ type
     function RemovePackages(sl:TStringList): boolean;
     // Uninstall a single package:
     function UnInstallPackage(PackagePath, WorkingDir: string): boolean;
-    {$endif}
-    // Filters (a module's) sl stringlist and runs all <Directive> commands:
-    function RunCommands(Directive:string;sl:TStringList):boolean;
     function GetVersionFromUrl({%H-}aUrl: string): string;override;
     function GetVersionFromSource: string;override;
     function GetReleaseCandidateFromSource:integer;override;
+    {$endif}
+    // Filters (a module's) sl stringlist and runs all <Directive> commands:
+    function RunCommands(Directive:string;sl:TStringList):boolean;
   public
     // FPC base directories
     property TempDirectory:string read FTempDirectory;
@@ -671,9 +671,8 @@ begin
   // installpackage
   {$ifndef FPCONLY}
   FLazarusNeedsRebuild:=false;
-  {$endif}
-
   FLazarusVersion:=GetVersion;
+  {$endif}
 
   InitDone:=result;
 end;
@@ -1364,6 +1363,7 @@ begin
   end;
 end;
 
+{$ifndef FPCONLY}
 function TUniversalInstaller.GetVersionFromSource:string;
 var
   aFileName:string;
@@ -1404,8 +1404,6 @@ begin
   result:=0;
 end;
 
-
-{$ifndef FPCONLY}
 function TUniversalInstaller.UnInstallPackage(PackagePath, WorkingDir: string): boolean;
 const
   PACKAGE_KEYSTART='UserPkgLinks/';
