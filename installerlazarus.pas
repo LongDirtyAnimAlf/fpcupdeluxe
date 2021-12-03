@@ -225,9 +225,9 @@ type
     InitDone: boolean;
     function LCLCrossActionNeeded:boolean;
   protected
-    function GetVersionFromSource(aSourcePath:string):string;override;
+    function GetVersionFromSource:string;override;
     function GetVersionFromUrl(aUrl:string):string;override;
-    function GetReleaseCandidateFromSource(aSourcePath:string):integer;override;
+    function GetReleaseCandidateFromSource:integer;override;
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName: string): boolean; virtual;
     function GetLazarusVersion: string;
@@ -1126,7 +1126,7 @@ end;
 
 { TLazarusInstaller }
 
-function TLazarusInstaller.GetVersionFromSource(aSourcePath:string):string;
+function TLazarusInstaller.GetVersionFromSource:string;
 const
   VERSIONMAGIC='LazarusVersionStr';
   VERSIONMAGIC2='laz_version';
@@ -1137,7 +1137,7 @@ var
 begin
   result:='0.0.0';
 
-  aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'ide' + DirectorySeparator + 'version.inc';
+  aFileName:=IncludeTrailingPathDelimiter(SourceDirectory) + 'ide' + DirectorySeparator + 'version.inc';
   if FileExists(aFileName) then
   begin
     AssignFile(TxtFile,aFileName);
@@ -1156,7 +1156,7 @@ begin
 
   if result='0.0.0' then
   begin
-    aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'ide' + DirectorySeparator + 'aboutfrm.pas';
+    aFileName:=IncludeTrailingPathDelimiter(SourceDirectory) + 'ide' + DirectorySeparator + 'aboutfrm.pas';
     if FileExists(aFileName) then
     begin
       AssignFile(TxtFile,aFileName);
@@ -1187,7 +1187,7 @@ begin
 
   if result='0.0.0' then
   begin
-    aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'components' + DirectorySeparator + 'lazutils' + DirectorySeparator  + 'lazversion.pas';
+    aFileName:=IncludeTrailingPathDelimiter(SourceDirectory) + 'components' + DirectorySeparator + 'lazutils' + DirectorySeparator  + 'lazversion.pas';
     if FileExists(aFileName) then
     begin
       AssignFile(TxtFile,aFileName);
@@ -1218,7 +1218,7 @@ begin
 
 end;
 
-function TLazarusInstaller.GetReleaseCandidateFromSource(aSourcePath:string):integer;
+function TLazarusInstaller.GetReleaseCandidateFromSource:integer;
 const
   VERSIONMAGIC='LazarusVersionStr';
   //VERSIONMAGIC2='laz_patch';
@@ -1229,7 +1229,7 @@ var
 begin
   result:=-1;
 
-  aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'ide' + DirectorySeparator + 'version.inc';
+  aFileName:=IncludeTrailingPathDelimiter(SourceDirectory) + 'ide' + DirectorySeparator + 'version.inc';
   if FileExists(aFileName) then
   begin
     AssignFile(TxtFile,aFileName);
@@ -1253,7 +1253,7 @@ begin
 
   if result=-1 then
   begin
-    aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'ide' + DirectorySeparator + 'aboutfrm.pas';
+    aFileName:=IncludeTrailingPathDelimiter(SourceDirectory) + 'ide' + DirectorySeparator + 'aboutfrm.pas';
     if FileExists(aFileName) then
     begin
       AssignFile(TxtFile,aFileName);
@@ -1376,7 +1376,7 @@ begin
     end;
   end;
 
-  if result='0.0.0' then result:=GetVersionFromSource(SourceDirectory);
+  if result='0.0.0' then result:=GetVersionFromSource;
   if result='0.0.0' then result:=GetVersionFromUrl(URL);
 end;
 

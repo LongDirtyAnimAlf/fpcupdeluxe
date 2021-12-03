@@ -480,9 +480,9 @@ type
     function GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
     function GetSanityCheck:boolean;
 
-    function GetVersionFromSource({%H-}aSourcePath:string):string;virtual;
+    function GetVersionFromSource:string;virtual;
     function GetVersionFromURL({%H-}aUrl:string):string;virtual;
-    function GetReleaseCandidateFromSource({%H-}aSourcePath:string):integer;virtual;
+    function GetReleaseCandidateFromSource:integer;virtual;
     function GetVersion:string;
 
   public
@@ -4010,7 +4010,7 @@ begin
   end;
 end;
 
-function TInstaller.GetVersionFromSource(aSourcePath:string):string;
+function TInstaller.GetVersionFromSource:string;
 begin
   result:='';
   raise Exception.Create('TInstaller descendants must implement this function themselves.');
@@ -4020,7 +4020,7 @@ begin
   result:='';
   raise Exception.Create('TInstaller descendants must implement this function themselves.');
 end;
-function TInstaller.GetReleaseCandidateFromSource(aSourcePath:string):integer;
+function TInstaller.GetReleaseCandidateFromSource:integer;
 begin
   result:=0;
   raise Exception.Create('TInstaller descendants must implement this function themselves.');
@@ -4030,7 +4030,7 @@ function TInstaller.GetVersion:string;
 var
   s:string;
 begin
-  s:=GetVersionFromSource(FSourceDirectory);
+  s:=GetVersionFromSource;
   if s='0.0.0' then s:=GetVersionFromURL(FURL);
   if (s<>'0.0.0') then
   begin
@@ -4039,7 +4039,7 @@ begin
     FReleaseVersion := -1;
     FPatchVersion := -1;
     VersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
-    FPatchVersion:=GetReleaseCandidateFromSource(FSourceDirectory);
+    FPatchVersion:=GetReleaseCandidateFromSource;
     if FPatchVersion=-1 then FPatchVersion:=ReleaseCandidateFromUrl(FURL);
   end;
   result:=s;
