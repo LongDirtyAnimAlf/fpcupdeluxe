@@ -3015,21 +3015,22 @@ var
   PackageSettings                                : TStringList;
   Output                                         : string;
   RemoteURL                                      : string;
-  aName,aFile,aURL,aContent,aVersion,aDirectory  : string;
+  aName,aFile,aURL,aContent,aVersion             : string;
   ResultCode                                     : longint;
   Json                                           : TJSONData;
   Release,Asset                                  : TJSONObject;
   Assets                                         : TJSONArray;
+  FilesList                                      : TStringList;
 begin
   result:=inherited;
   if not result then exit;
 
-  localinfotext:=Copy(ClassName,2,MaxInt)+' ('+Copy(ClassName,2,MaxInt)+': '+ModuleName+'): ';
+  localinfotext:=Copy(ClassName,2,MaxInt)+' (GetModule: '+ModuleName+'): ';
 
   idx:=UniModuleList.IndexOf(ModuleName);
   if (idx>=0) then
   begin
-    WritelnLog(localinfotext+'Getting module '+ModuleName,True);
+    WritelnLog(localinfotext+'Getting static sqlite3 files.',True);
 
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
     SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
@@ -3040,123 +3041,178 @@ begin
     begin
       ForceDirectoriesSafe(SourceDirectory);
 
-      RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
-      if (RemoteURL<>'') then
+      result:=false;
+
+      {
+      if (NOT result) then
       begin
-        // Get latest release through api
-        aURL:=StringReplace(RemoteURL,'//github.com','//api.github.com/repos',[]);
-        aURL:=aURL+'/releases';
-
-        aContent:=GetURLDataFromCache(aURL);
-        result:=(Length(aContent)>0);
-
-        if result then
-        begin
-          result:=false;
-          try
-            Json:=GetJSON(aContent);
-          except
-            Json:=nil;
+        aURL:='https://synopse.info/files/mormot2static.7z';
+        aFile := GetTempFileNameExt('FPCUPTMP','7z');
+        WritelnLog(infotext+'Going to download '+aURL+' into '+aFile,false);
+        try
+          result:=Download(FUseWget, aURL, aFile);
+          if result then result:=FileExists(aFile);
+          if result then result:=(FileSize(aFile)>5000);
+        except
+          on E: Exception do
+          begin
+           result:=false;
           end;
-          if JSON.IsNull then exit;
+        end;
+      end;
+      }
 
-          try
-            for idx:=0 to Pred(Json.Count) do
-            begin
-              Release := TJSONObject(Json.Items[idx]);
-              aVersion:=Release.Get('tag_name');
-              aFile:='mormot2static.7z';
-              Assets:=Release.Get('assets',TJSONArray(nil));
-              for iassets:=0 to Pred(Assets.Count) do
+      if (NOT result) then
+      begin
+        RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
+        if (RemoteURL<>'') then
+        begin
+          // Get latest release through api
+          aURL:=StringReplace(RemoteURL,'//github.com','//api.github.com/repos',[]);
+          aURL:=aURL+'/releases';
+
+          aContent:=GetURLDataFromCache(aURL);
+          result:=(Length(aContent)>0);
+
+          if result then
+          begin
+            result:=false;
+            try
+              Json:=GetJSON(aContent);
+            except
+              Json:=nil;
+            end;
+            if JSON.IsNull then exit;
+
+            try
+              for idx:=0 to Pred(Json.Count) do
               begin
-                Asset := TJSONObject(Assets[iassets]);
-                aName:=Asset.Get('name');
-                if (Pos(aFile,aName)=1) then
+                Release := TJSONObject(Json.Items[idx]);
+                aVersion:=Release.Get('tag_name');
+                aFile:='mormot2static.7z';
+                Assets:=Release.Get('assets',TJSONArray(nil));
+                for iassets:=0 to Pred(Assets.Count) do
                 begin
-                  aURL:=Asset.Get('browser_download_url');
-                  result:=true;
+                  Asset := TJSONObject(Assets[iassets]);
+                  aName:=Asset.Get('name');
+                  if (Pos(aFile,aName)=1) then
+                  begin
+                    aURL:=Asset.Get('browser_download_url');
+                    result:=true;
+                  end;
+                  if result then break;
                 end;
                 if result then break;
               end;
-              if result then break;
-            end;
-          finally
-            Json.Free;
-          end;
-        end;
-
-        if result then
-        begin
-          aName:=FileNameFromURL(aURL);
-          Infoln(localinfotext+'Going to download '+aVersion+' of mormot sqlite3 static libs ['+aName+'] from '+aURL,etInfo);
-          if Length(aName)>0 then
-          begin
-            aName:=SysUtils.ExtractFileExt(aName);
-            if Length(aName)>0 then
-            begin
-              if aName[1]='.' then Delete(aName,1,1);
-            end;
-          end;
-          //If no extension, assume zip
-          if Length(aName)=0 then aName:='zip';
-          aFile := GetTempFileNameExt('FPCUPTMP',aName);
-          WritelnLog(localinfotext+'Going to download '+aURL+' into '+aFile,false);
-          try
-            result:=Download(FUseWget, aURL, aFile);
-            if result then result:=FileExists(aFile);
-          except
-            on E: Exception do
-            begin
-             result:=false;
+            finally
+              Json.Free;
             end;
           end;
 
           if result then
           begin
-            if (FileSize(aFile)>5000) then
+            aName:=FileNameFromURL(aURL);
+            Infoln(localinfotext+'Going to download '+aVersion+' of mormot sqlite3 static libs ['+aName+'] from '+aURL,etInfo);
+            if Length(aName)>0 then
             begin
-              ResultCode:=-1;
-              WritelnLog(localinfotext+'Download ok. Extracting files. Please wait.',True);
-
-              aDirectory:=SourceDirectory+DirectorySeparator+'static';
-              if DirectoryExists(aDirectory) then DeleteDirectoryEx(aDirectory);
-
-              RunCommandIndir(SourceDirectory,F7zip ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-
-              {$ifdef MSWINDOWS}
-              // try winrar
-              if (ResultCode<>0) then
+              aName:=SysUtils.ExtractFileExt(aName);
+              if Length(aName)>0 then
               begin
-                ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(SourceDirectory)+'"',FVerbose);
+                if aName[1]='.' then Delete(aName,1,1);
               end;
-              {$endif}
-              if (ResultCode<>0) then
+            end;
+            //If no extension, assume zip
+            if Length(aName)=0 then aName:='zip';
+            aFile := GetTempFileNameExt('FPCUPTMP',aName);
+            WritelnLog(localinfotext+'Going to download '+aURL+' into '+aFile,false);
+            try
+              result:=Download(FUseWget, aURL, aFile);
+              if result then result:=FileExists(aFile);
+            except
+              on E: Exception do
               begin
-                RunCommandIndir(SourceDirectory,'7z' ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+               result:=false;
               end;
-              if (ResultCode<>0) then
-              begin
-                RunCommandIndir(SourceDirectory,'7za' ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-              end;
-
-              if (ResultCode<>0) then
-              begin
-                result := False;
-                Infoln(localinfotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
-              end;
-
             end;
           end;
-          SysUtils.Deletefile(aFile); //Get rid of temp file.
         end;
+      end;
 
-        if (NOT result) then
+      if result then
+      begin
+        if (FileSize(aFile)>5000) then
         begin
-          Infoln(localinfotext+'Getting mORMot2 (statics) failure. Will continue anyhow.',etInfo);
-        end;
+          ResultCode:=-1;
+          WritelnLog(localinfotext+'Download ok. Extracting files. Please wait.',True);
 
+          SourceDirectory:=SourceDirectory+DirectorySeparator+'static';
+          if DirectoryExists(SourceDirectory) then DeleteDirectoryEx(SourceDirectory);
+          ForceDirectoriesSafe(SourceDirectory);
+
+          RunCommandIndir(SourceDirectory,F7zip ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+
+          {$ifdef MSWINDOWS}
+          // try winrar
+          if (ResultCode<>0) then
+          begin
+            ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(SourceDirectory)+'"',FVerbose);
+          end;
+          {$endif}
+          if (ResultCode<>0) then
+          begin
+            RunCommandIndir(SourceDirectory,'7z' ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+          end;
+          if (ResultCode<>0) then
+          begin
+            RunCommandIndir(SourceDirectory,'7za' ,['x','-y','-bd',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+          end;
+
+          if (ResultCode<>0) then
+          begin
+            result := False;
+            Infoln(localinfotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+          end;
+
+        end;
+      end;
+      SysUtils.Deletefile(aFile); //Get rid of temp file.
+
+      if result then
+      begin
+        aName:='';
+        FilesList:=FindAllDirectories(SourceDirectory,False);
+        if FilesList.Count=1 then aName:=FilesList[0];
+        FreeAndNil(FilesList);
+        if (LowerCase(ExtractFileName(aName))='static') then
+        begin
+          Infoln(infotext+'Moving files due to extra path.',etInfo);
+          //Infoln(infotext+'Also simultaneously correcting line-endings.',etInfo);
+          Infoln(infotext+'This is time-consuming. Please wait.',etInfo);
+          FilesList:=FindAllFiles(aName, '', True);
+          for idx:=0 to (FilesList.Count-1) do
+          begin
+            aFile:=FilesList[idx];
+            aFile:=StringReplace(aFile,aName,aName+DirectorySeparator+'..',[]);
+            aFile:=SafeExpandFileName(aFile);
+            ForceDirectoriesSafe(ExtractFileDir(aFile));
+            SysUtils.RenameFile(FilesList[idx],aFile);
+            {$ifdef UNIX}
+            //Correct line endings
+            //Diabled for now: sed consumes enormous amount of time
+            //ExecuteCommand('sed -i '+'''s/\r//'''+' '+aFile,False);
+            {$endif}
+          end;
+          DeleteDirectory(aName,False);
+          FreeAndNil(FilesList);
+        end;
       end;
     end;
+
+    if (NOT result) then
+    begin
+      Infoln(localinfotext+'Getting mORMot2 (statics) failure. Will continue anyhow.',etInfo);
+    end;
+
   end;
 
   // Do not fail

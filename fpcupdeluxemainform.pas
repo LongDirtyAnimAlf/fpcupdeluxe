@@ -506,7 +506,7 @@ begin
     aLazarusTarget:=ReadString('General','lazVersion','');
     if (Length(aLazarusTarget)=0) then
     begin
-      aFPCTarget:='stable'+GITLABEXTENSION;
+      aLazarusTarget:='stable'+GITLABEXTENSION;
       {$ifdef Haiku}
       {$ifdef CPUX86_64}
       aLazarusTarget:='trunk'+GITLABEXTENSION;

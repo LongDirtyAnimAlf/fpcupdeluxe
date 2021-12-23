@@ -257,19 +257,24 @@ begin
     if DirectoryExists(aOption) then
       PresetLibPath:=aOption;
 
+    if TargetCPUName='i386' then
+      aOption:='i686-linux-'+OS
+    else
+      aOption:=TargetCPUName+'-linux-'+OS;
+
     FilesFound:=FindAllFiles(PresetLibPath,LIBCNAME);
     FilesFoundFiltered:=TStringList.Create;
     try
       for s in FilesFound do
       begin
-        if (Pos(NDKARCHDIRNAME,s)=0) OR (Pos(SEARCHFOR,s)=0) then continue;
+        if ((Pos(NDKARCHDIRNAME,s)=0) AND (Pos(SEARCHFOR,s)=0) AND (Pos(aOption,s)=0)) then continue;
         FilesFoundFiltered.Append(s);
       end;
       FilesFoundFiltered.CustomSort(@StringListSortCompare);
       for s in FilesFoundFiltered do
       begin
         // Get the first ... we were sorting from highest version to lowest
-        PresetLibPath:=ExtractFilePath(s);
+        PresetLibPath:=ExtractFileDir(s);
         result:=SearchLibrary(PresetLibPath,LIBCNAME);
         break;
       end;
@@ -324,6 +329,13 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
 
+
+  // The newest Android tools are based on clang and llvm.
+  // FPC is not yet prepared to use these.
+  // So skip search for them
+
+  (*
+
   // if libs already found, search for binutils belonging to this lib !!
   if (not result) AND (Length(FLibsPath)>0) AND (Pos('Error:',FLibsPath)=0){ AND (SearchModeUsed=TSearchSetting.ssAuto)} then
   begin
@@ -338,7 +350,8 @@ begin
         begin
           PresetBinPath := ConcatPaths([s,'toolchains',NDKTOOLCHAINVERSIONS[toolchain],'prebuilt',BuildArch,'bin']);
           result:=SearchBinUtil(PresetBinPath,AsFile);
-          if result then break;
+          if result then
+            break;
         end;
       end;
     end;
@@ -358,7 +371,8 @@ begin
         begin
           PresetBinPath := ConcatPaths([s,NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion],'toolchains',NDKTOOLCHAINVERSIONS[toolchain],'prebuilt',BuildArch,'bin']);
           result:=SearchBinUtil(PresetBinPath,AsFile);
-          if result then break;
+          if result then
+            break;
         end;
       end else break;
     end;
@@ -388,7 +402,8 @@ begin
             begin
               s:=ConcatPaths([GetEnvironmentVariable('ProgramFiles'),UppercaseFirstChar(OS),NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion],'toolchains',NDKTOOLCHAINVERSIONS[toolchain],'prebuilt','windows','bin']);
               result:=SearchBinUtil(s,AsFile);
-              if result then break;
+              if result then
+                break;
             end;
           end else break;
         end;
@@ -396,7 +411,7 @@ begin
     end;
   end;
 
-  // check Delphi auto installed android libraries
+  // check Delphi auto installed android tools
   if (not result) AND (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     for delphiversion:=MAXDELPHIVERSION downto MINDELPHIVERSION do
@@ -485,6 +500,8 @@ begin
       result:=SearchBinUtil(PresetBinPath,AsFile);
     end;
   end;
+
+  *)
 
   SearchBinUtilsInfo(result);
 
