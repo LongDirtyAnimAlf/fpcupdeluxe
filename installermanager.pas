@@ -1986,7 +1986,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       AdvicedLibs:=AdvicedLibs+
                    'make binutils build-essential gdb gcc subversion unrar devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
                    'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
-                   'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf unrar';
+                   'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf appmenu-gtk-module unrar';
     end
     else
     if (AnsiContainsText(Output,'rhel') OR AnsiContainsText(Output,'centos') OR AnsiContainsText(Output,'scientific') OR AnsiContainsText(Output,'fedora') OR AnsiContainsText(Output,'redhat'))  then
