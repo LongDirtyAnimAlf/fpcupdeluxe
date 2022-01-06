@@ -129,8 +129,6 @@ const
   GITREPO='https://github.com/LongDirtyAnimAlf';
   FPCUPGITREPO=GITREPO+'/fpcupdeluxe';
 
-  FPCGITMIRRORREPO='https://github.com/fpc';
-
   BOOTSTRAPPERVERSION='bootstrappers_v1.0';
   FPCUPGITREPOBOOTSTRAPPER=FPCUPGITREPO+'/releases/download/'+BOOTSTRAPPERVERSION;
   FPCUPGITREPOAPI='https://api.github.com/repos/LongDirtyAnimAlf/fpcupdeluxe';
@@ -139,8 +137,6 @@ const
 
   SOURCEPATCHES='patches_v1.0';
   FPCUPGITREPOSOURCEPATCHESAPI=FPCUPGITREPOAPIRELEASES+'/tags/'+SOURCEPATCHES;
-
-  FPCUPPRIVATEGITREPO='https://www.consulab.nl/git/Alfred/FPCbootstrappers/raw/master';
 
   FPCUP_ACKNOWLEDGE='acknowledgement_fpcup.txt';
 
@@ -980,7 +976,7 @@ function TInstaller.CheckAndGetTools: boolean;
 var
   OperationSucceeded: boolean;
   {$ifdef MSWINDOWS}
-  aURL,aLocalClientBinary,Output: string;
+  aURL,aFile,Output: string;
   {$endif}
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckAndGetTools): ';
@@ -1124,21 +1120,28 @@ begin
     {$endif}
 
     // Get patch binary from default binutils URL
-    aURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
-
     OperationSucceeded:=false;
-    aLocalClientBinary:=ExtractFilePathSafe(FPatchCmd);
-    if (Not FileExists(aLocalClientBinary)) then
-      aLocalClientBinary:=Which(aLocalClientBinary);
-    if (Not FileExists(aLocalClientBinary)) then
-      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir) + FPatchCmd;
-    if (Not FileExists(aLocalClientBinary)) then
+    aFile:=ExtractFilePathSafe(FPatchCmd);
+    if (Not FileExists(aFile)) then
+      aFile:=Which(aFile);
+    if (Not FileExists(aFile)) then
+      aFile:=IncludeTrailingPathDelimiter(FMakeDir) + FPatchCmd;
+    if (Not FileExists(aFile)) then
     begin
-      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe';
-      GetFile(aURL+'patch.exe',aLocalClientBinary);
-      GetFile(aURL+'patch.exe.manifest',aLocalClientBinary + '.manifest');
+      aFile:=IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe';
+      //aURL:=FPCBINARIES+'/install/binw32/';
+      aURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
+      GetFile(aURL+'patch.exe',aFile);
+      GetFile(aURL+'patch.exe.manifest',aFile + '.manifest');
     end;
-    if FileExists(aLocalClientBinary) then FPatchCmd:=aLocalClientBinary;
+    if FileExists(aFile) then FPatchCmd:=aFile;
+
+
+    // Get pwd binary from default binutils URL. If its not there, the make clean command will fail
+    //aURL:=FPCBINARIES+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
+    aURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
+    aFile:='pwd.exe';
+    GetFile(aURL+aFile,IncludeTrailingPathDelimiter(FMakeDir)+aFile);
 
     // do not fail
     OperationSucceeded:=True;
@@ -1257,7 +1260,7 @@ begin
       with GitClient do
       begin
         OperationSucceeded:=False;
-        aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'git'+DirectorySeparator+'cmd'+DirectorySeparator+RepoExecutableName+GetExeExt;
+        aFile:=IncludeTrailingPathDelimiter(FMakeDir)+'git'+DirectorySeparator+'cmd'+DirectorySeparator+RepoExecutableName+GetExeExt;
         // try to find systemwide GIT
         if (NOT ForceLocal) then
         begin
@@ -1266,8 +1269,8 @@ begin
         // try to find fpcupdeluxe GIT
         if (NOT OperationSucceeded) then
         begin
-          OperationSucceeded:=FileExists(aLocalClientBinary);
-          if OperationSucceeded then RepoExecutable:=aLocalClientBinary;
+          OperationSucceeded:=FileExists(aFile);
+          if OperationSucceeded then RepoExecutable:=aFile;
         end;
         if (NOT OperationSucceeded) then
         begin
@@ -1324,13 +1327,13 @@ begin
               if OperationSucceeded then
               begin
                 SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-                OperationSucceeded:=FileExists(aLocalClientBinary);
+                OperationSucceeded:=FileExists(aFile);
                 //Copy certificate ... might be necessary
                 //aURL:=IncludeTrailingPathDelimiter(FMakeDir)+'git\mingw32\';
                 //if (NOT FileExists(aURL+'bin\curl-ca-bundle.crt')) then FileUtil.CopyFile(aURL+'ssl\certs\ca-bundle.crt',aURL+'bin\curl-ca-bundle.crt');
               end;
             end;
-            if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+GetExeExt;
+            if OperationSucceeded then RepoExecutable:=aFile else RepoExecutable:=RepoExecutableName+GetExeExt;
           end;
         end;
         if (OperationSucceeded AND (RepoExecutable<>EmptyStr)) then
@@ -1343,7 +1346,7 @@ begin
       with HGClient do
       begin
         OperationSucceeded:=False;
-        aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'hg'+DirectorySeparator+RepoExecutableName+GetExeExt;
+        aFile:=IncludeTrailingPathDelimiter(FMakeDir)+'hg'+DirectorySeparator+RepoExecutableName+GetExeExt;
         // try to find systemwide HG
         if (NOT ForceLocal) then
         begin
@@ -1352,8 +1355,8 @@ begin
         // try to find fpcupdeluxe HG
         if (NOT OperationSucceeded) then
         begin
-          OperationSucceeded:=FileExists(aLocalClientBinary);
-          if OperationSucceeded then RepoExecutable:=aLocalClientBinary;
+          OperationSucceeded:=FileExists(aFile);
+          if OperationSucceeded then RepoExecutable:=aFile;
         end;
         if (NOT OperationSucceeded) then
         begin
@@ -1387,11 +1390,11 @@ begin
             end;
             if OperationSucceeded then
             begin
-              OperationSucceeded:=FileExists(aLocalClientBinary);
+              OperationSucceeded:=FileExists(aFile);
             end;
           end;
           SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
-          if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+GetExeExt;
+          if OperationSucceeded then RepoExecutable:=aFile else RepoExecutable:=RepoExecutableName+GetExeExt;
         end;
         if RepoExecutable <> EmptyStr then
         begin
@@ -1464,6 +1467,7 @@ begin
       if (NOT FileExists(Make)) then
       begin
         aURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
+        //aURL:=FPCBINARIES+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
         Infoln(localinfotext+'Make binary not found. Getting it from: '+aURL+'.',etInfo);
         GetFile(aURL,Make);
         OperationSucceeded:=FileExists(Make);
@@ -1584,10 +1588,10 @@ end;
 procedure TInstaller.CreateBinutilsList(aVersion:string);
 {$ifdef MSWINDOWS}
 const
-  SourceURL_gdb_default = FPCGITMIRRORREPO+'/LazBinaries/raw/main/i386-win32/gdb/bin/';
-  SourceURL64_gdb_default = FPCGITMIRRORREPO+'/LazBinaries/raw/main/x86_64-win64/gdb/bin/';
-  SourceURL_QT = FPCGITMIRRORREPO+'/LazBinaries/raw/main/i386-win32/qt/';
-  SourceURL_QT5 = FPCGITMIRRORREPO+'/LazBinaries/raw/main/i386-win32/qt5/';
+  SourceURL_gdb_default = LAZARUSBINARIES+'/i386-win32/gdb/bin/';
+  SourceURL64_gdb_default = LAZARUSBINARIES+'/x86_64-win64/gdb/bin/';
+  SourceURL_QT = LAZARUSBINARIES+'/i386-win32/qt/';
+  SourceURL_QT5 = LAZARUSBINARIES+'/i386-win32/qt5/';
 {$endif}
   procedure AddNewUtil(FileName, RootURL, OS: string; Category: TUtilCategory);
   var
@@ -1611,10 +1615,11 @@ begin
   SetLength(FUtilFiles,0); //clean out any cruft
 
   {$ifdef MSWINDOWS}
-
-  aSourceURL:=FPCGITMIRRORREPO+'/FPCBuild/raw/master/install/binw32/';
+  //aSourceURL:=FPCBINARIES+'/install/binw32/';
+  aSourceURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
   {$ifdef win64}
-  aSourceURL64:=FPCGITMIRRORREPO+'/FPCBuild/raw/master/install/binw64/';
+  //aSourceURL64:=FPCBINARIES+'/install/binw64/';
+  aSourceURL64:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw64/';
   {$endif}
 
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)

@@ -152,12 +152,30 @@ begin
     {$IFDEF UNIX}
     //if FpGeteuid=0 then PresetLibPath:='/usr/local/lib';
     {$ENDIF}
-    PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-esp32-elf']);
-    S:=FindFileInDir(StaticLibName2,PresetLibPath);
-    if (Length(S)>0) then
+    if (FSubArch=TSUBARCH.lx6) then
     begin
-      PresetLibPath:=ExtractFilePath(S);
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(PresetLibPath));
+      PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-esp32-elf']);
+      S:=FindFileInDir(StaticLibName2,PresetLibPath);
+      if (Length(S)>0) then
+      begin
+        S:='-Fl'+ExtractFilePath(S);
+        AddFPCCFGSnippet(S);
+        FCrossOpts.Add(S+' ');
+      end;
+    end;
+    if (FSubArch=TSUBARCH.lx106) then
+    begin
+      PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-lx106-elf']);
+      S:=FindFileInDir(StaticLibName2,PresetLibPath);
+      if (Length(S)>0) then
+      begin
+        S:='-Fl'+ExtractFilePath(S);
+        AddFPCCFGSnippet(S);
+        FCrossOpts.Add(S+' ');
+      end;
+      S:='3.4';
+      AddFPCCFGSnippet('-WP'+S);
+      FCrossOpts.Add('-WP'+S+' ');
     end;
   end;
 
@@ -171,7 +189,16 @@ begin
   result:=inherited;
   if result then exit;
 
-  FBinUtilsPrefix:=GetCPU(TargetCPU)+'-esp32-elf-';
+  if (FSubArch<>TSUBARCH.saNone) then
+  begin
+    S:=GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(FSubArch));
+    ShowInfo('Cross-libs: We have a subarch: '+S);
+    if (FSubArch=TSUBARCH.lx6) then
+      FBinUtilsPrefix:=GetCPU(TargetCPU)+'-esp32-elf-';
+    if (FSubArch=TSUBARCH.lx106) then
+      FBinUtilsPrefix:=GetCPU(TargetCPU)+'-lx106-elf-';
+  end
+  else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // Start with any names user may have given
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
@@ -186,12 +213,31 @@ begin
     {$IFDEF LINUX}
     if FpGetEUid=0 then PresetBinPath:='/usr/local/bin';
     {$ENDIF}
-    PresetBinPath:=ConcatPaths([PresetBinPath,'.espressif','tools','xtensa-esp32-elf']);
-    S:=FindFileInDir(AsFile,PresetBinPath);
-    if (Length(S)>0) then
+    if (not result) then
     begin
-      PresetBinPath:=ExtractFilePath(S);
-      result:=SearchBinUtil(PresetBinPath,AsFile);
+      if (FSubArch=TSUBARCH.lx6) then
+      begin
+        PresetBinPath:=ConcatPaths([PresetBinPath,'.espressif','tools','xtensa-esp32-elf']);
+        S:=FindFileInDir(AsFile,PresetBinPath);
+        if (Length(S)>0) then
+        begin
+          PresetBinPath:=ExtractFilePath(S);
+          result:=SearchBinUtil(PresetBinPath,AsFile);
+        end;
+      end;
+    end;
+    if (not result) then
+    begin
+      if (FSubArch=TSUBARCH.lx106) then
+      begin
+        PresetBinPath:=ConcatPaths([PresetBinPath,'.espressif','tools','xtensa-lx106-elf']);
+        S:=FindFileInDir(AsFile,PresetBinPath);
+        if (Length(S)>0) then
+        begin
+          PresetBinPath:=ExtractFilePath(S);
+          result:=SearchBinUtil(PresetBinPath,AsFile);
+        end;
+      end;
     end;
   end;
 
@@ -219,7 +265,11 @@ begin
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
 
-    AddFPCCFGSnippet('-Wpesp32');
+    if (FSubArch<>TSUBARCH.saNone) then
+    begin
+      if (FSubArch=TSUBARCH.lx6) then AddFPCCFGSnippet('-Wpesp32');
+      if (FSubArch=TSUBARCH.lx106) then AddFPCCFGSnippet('-Wpesp8266');
+    end;
 
     S:=Trim(GetEnvironmentVariable('IDF_PATH'));
     if (Length(S)=0) then
