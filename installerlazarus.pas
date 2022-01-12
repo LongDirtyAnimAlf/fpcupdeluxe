@@ -148,6 +148,7 @@ const
     //standard useride build
     _DECLARE+_USERIDE+_SEP +
     _BUILDMODULE+_LAZBUILD+_SEP +
+    //_BUILDMODULE+'IdeDebugger'+_SEP +
     _BUILDMODULE+_USERIDE+_SEP +
     _END +
 
@@ -616,16 +617,33 @@ begin
   //DownloadZlib;
   {$ENDIF}
 
-  LazBuildApp := IncludeTrailingPathDelimiter(InstallDirectory) + LAZBUILDNAME + GetExeExt;
 
-  if (ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) then
+  if ((ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) OR (ModuleName=_USERIDE)) then
   begin
     if (Length(ActualRevision)=0) OR (ActualRevision='failure') then
     begin
       s2:=GetRevision(ModuleName);
+      if (Length(s2)=0) then
+      begin
+        // In case we only do a rebuild of the available sources, get then revision while it might be missing
+        // And presume that we have git sources, which might be not true in all cases, but anyhow
+        GitClient.LocalRepository:=SourceDirectory;
+        s2:=GitClient.LocalRevision;
+      end;
       if Length(s2)>0 then FActualRevision:=s2;
     end;
-    if (ModuleName=_LAZARUS) then Infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
+    if ((ModuleName=_LAZARUS) OR (ModuleName=_USERIDE)) then
+    begin
+      Infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
+      s:=ConcatPaths([SourceDirectory,'ide'])+DirectorySeparator+REVINCFILENAME;
+      // If not there, store the revision in the appropriate location
+      if (NOT FileExists(s)) then
+      begin
+        s2:=ActualRevision;
+        if (Length(s2)=0) OR (s2='failure') then s2:='unknown';
+        CreateRevision(_LAZARUS,s2);
+      end;
+    end;
   end;
 
   //Note: available in more recent Lazarus : use "make lazbuild useride" to build ide with installed packages
@@ -936,6 +954,8 @@ begin
     // Check for valid lazbuild.
     // Note: we don't check if we have a valid primary config path, but that will come out
     // in the next steps.
+    //LazBuildApp:=IncludeTrailingPathDelimiter(SourceDirectory)+LAZBUILDNAME+GetExeExt;
+    LazBuildApp:=IncludeTrailingPathDelimiter(InstallDirectory)+LAZBUILDNAME+GetExeExt;
     if CheckExecutable(LazBuildApp, ['--help'], LAZBUILDNAME) = false then
     begin
       WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);

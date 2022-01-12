@@ -159,12 +159,15 @@ begin
       if (Length(S)>0) then
       begin
         S:='-Fl'+ExtractFilePath(S);
+        AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
         AddFPCCFGSnippet(S);
+        AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
         FCrossOpts.Add(S+' ');
       end;
     end;
     if (FSubArch=TSUBARCH.lx106) then
     begin
+      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
       PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-lx106-elf']);
       S:=FindFileInDir(StaticLibName2,PresetLibPath);
       if (Length(S)>0) then
@@ -175,6 +178,7 @@ begin
       end;
       S:='3.4';
       AddFPCCFGSnippet('-WP'+S);
+      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
       FCrossOpts.Add('-WP'+S+' ');
     end;
   end;
@@ -267,8 +271,10 @@ begin
 
     if (FSubArch<>TSUBARCH.saNone) then
     begin
+      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
       if (FSubArch=TSUBARCH.lx6) then AddFPCCFGSnippet('-Wpesp32');
       if (FSubArch=TSUBARCH.lx106) then AddFPCCFGSnippet('-Wpesp8266');
+      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
     end;
 
     S:=Trim(GetEnvironmentVariable('IDF_PATH'));
