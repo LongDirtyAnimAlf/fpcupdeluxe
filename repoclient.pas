@@ -82,6 +82,7 @@ type
     procedure SetDesiredBranch(AValue: string); virtual;
     procedure SetDesiredTag(AValue: string); virtual;
     procedure SetLocalRepository(AValue: string); virtual;
+    function  GetRepositoryURL:string; virtual;
     procedure SetRepositoryURL(AValue: string); virtual;
     procedure SetRepoExecutable(AValue: string); virtual;
     procedure SetVerbose(AValue: boolean); virtual;
@@ -136,7 +137,7 @@ type
     // Revision number of local repository: branch revision number if we're in a branch.
     property LocalRevision: string read GetLocalRevision;
     // URL where central (remote) repository is placed
-    property Repository: string read FRepositoryURL write SetRepositoryURL;
+    property Repository: string read GetRepositoryURL write SetRepositoryURL;
     // Exit code returned by last client command; 0 for success. Useful for troubleshooting
     property ReturnCode: integer read FReturnCode;
     // Output returned by last client command. Useful for troubleshooting
@@ -226,6 +227,11 @@ begin
     FLocalRepository := ExcludeTrailingPathDelimiter(AValue);
 end;
 
+function TRepoClient.GetRepositoryURL:string;
+begin
+  result:=FRepositoryURL;
+end;
+
 procedure TRepoClient.SetRepositoryURL(AValue: string);
  // Make sure there's a trailing / in the URL.
  // This normalization helps matching remote and local URLs
@@ -234,6 +240,7 @@ begin
     Exit;
   FRepositoryURL := IncludeTrailingSlash(AValue);
 end;
+
 
 procedure TRepoClient.SetRepoExecutable(AValue: string);
 begin

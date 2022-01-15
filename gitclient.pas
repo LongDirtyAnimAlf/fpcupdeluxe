@@ -59,6 +59,7 @@ type
     function GetRepoExecutable: string; override;
     function GetRepoExecutableName: string; override;
     function FindRepoExecutable: string; override;
+    function GetRepositoryURL:string; override;
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
@@ -175,6 +176,21 @@ begin
     Result := ''
   else
     Result := FRepoExecutable;
+end;
+
+function TGitClient.GetRepositoryURL:string;
+var
+  aURL:string;
+begin
+  result:=inherited;
+  if (Pos('gitlab.com/freepascal.org',result)>0) then
+  begin
+    // To run errorfree on all systems, .git needs to be appended to the desired URL
+    aURL:=ExcludeTrailingSlash(result);
+    if (NOT AnsiEndsText('.git',aURL)) then aURL:=aURL+'.git';
+    if (result[Length(result)]='/') then aURL:=aURL+'/';
+    result:=aURL;
+  end;
 end;
 
 procedure TGitClient.CheckOut(UseForce:boolean=false);
@@ -560,8 +576,9 @@ function TGitClient.LocalRepositoryExists: boolean;
 var
   Output: string = '';
   URL: string;
+  RepoURL,RemoteURL:string;
 begin
-  Result := false;
+  result := false;
   FReturnCode := 0;
   if ExportOnly then exit;
   if NOT ValidClient then exit;
@@ -571,7 +588,7 @@ begin
   // fatal: Not a git repository (or any of the parent directories): .git
   // to std err
   FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --porcelain ', LocalRepository, Output, Verbose);
-  if FReturnCode = 0 then
+  if (FReturnCode = 0) then
   begin
     // There is a git repository here.
 
@@ -590,13 +607,27 @@ begin
     if Repository = '' then
     begin
       Repository := URL;
-      Result := true;
+      result := true;
     end
     else
     begin
-      if StripUrl(Repository) = StripUrl(URL) then
+      RepoURL:=ExcludeTrailingSlash(StripUrl(URL));
+      RemoteURL:=ExcludeTrailingSlash(StripUrl(Repository));
+      if (Pos(RepoURL,RemoteURL)=1) then
       begin
-        Result := true;
+        result := true;
+        // Check if we have an exact match.
+        // If not, set remote URL to correct value.
+        // This might be the case when .git is missing from the URL.
+        // If things are well, this has to be done only once.
+        if (RepoURL<>RemoteURL) then
+        begin
+          FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' remote set-url origin ' + Repository, LocalRepository, Output, Verbose);
+          if (FReturnCode <> 0) then
+          begin
+            result := false;
+          end;
+        end;
       end
       else
       begin

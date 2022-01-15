@@ -1397,6 +1397,8 @@ begin
             Processor.Process.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
           end;
 
+          // ALF
+          // This needs to be investigated, if its necessary or may be transported towards the cross-installers themselves
           if CrossInstaller.LibsPath<>''then
           begin
             {$ifndef Darwin}
@@ -1733,6 +1735,7 @@ begin
       end;
     end;
 
+    {
     DirectoryAvailable:=CrossInstaller.GetLibs(BaseDirectory);
     if DirectoryAvailable then
     begin
@@ -1753,6 +1756,7 @@ begin
         end;
       end;
     end;
+    }
 
     FPCCfg := FFPCCompilerBinPath + FPCCONFIGFILENAME;
     InsertFPCCFGSnippet(FPCCfg,'');

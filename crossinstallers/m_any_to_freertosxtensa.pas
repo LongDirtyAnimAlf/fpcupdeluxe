@@ -41,7 +41,7 @@ uses
   {$IFDEF LINUX}
   BaseUnix,
   {$ENDIF LINUX}
-  m_crossinstaller, fpcuputil;
+  StrUtils, m_crossinstaller, fpcuputil;
 
 type
 
@@ -67,6 +67,7 @@ var
   StaticLibNameESP:string;
   S:string;
   aABI:TABI;
+  ToolVersionNeeded:boolean;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -148,14 +149,24 @@ begin
 
   if (true) then
   begin
-    PresetLibPath:=GetUserDir;
-    {$IFDEF UNIX}
-    //if FpGeteuid=0 then PresetLibPath:='/usr/local/lib';
-    {$ENDIF}
-    if (FSubArch=TSUBARCH.lx6) then
+    if (SubArch<>TSUBARCH.saNone) then
     begin
-      PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-esp32-elf']);
-      S:=FindFileInDir(StaticLibName2,PresetLibPath);
+      // Add SDK libs path, if any
+      PresetLibPath:=GetUserDir;
+      {$IFDEF UNIX}
+      //if FpGeteuid=0 then PresetLibPath:='/usr/local/lib';
+      {$ENDIF}
+      S:='';
+      if (FSubArch=TSUBARCH.lx6) then
+      begin
+        PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-esp32-elf']);
+        S:=FindFileInDir(StaticLibName2,PresetLibPath);
+      end;
+      if (FSubArch=TSUBARCH.lx106) then
+      begin
+        PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-lx106-elf']);
+        S:=FindFileInDir(StaticLibName2,PresetLibPath);
+      end;
       if (Length(S)>0) then
       begin
         S:='-Fl'+ExtractFilePath(S);
@@ -164,25 +175,34 @@ begin
         AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
         FCrossOpts.Add(S+' ');
       end;
-    end;
-    if (FSubArch=TSUBARCH.lx106) then
-    begin
-      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
-      PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-lx106-elf']);
-      S:=FindFileInDir(StaticLibName2,PresetLibPath);
-      if (Length(S)>0) then
+
+      // Check tools deployment version
+      // If not found, add default value
+      ToolVersionNeeded:=true;
+      for S in FCrossOpts do
       begin
-        S:='-Fl'+ExtractFilePath(S);
-        AddFPCCFGSnippet(S);
-        FCrossOpts.Add(S+' ');
+        if AnsiStartsStr('-WP',S) then
+        begin
+          ToolVersionNeeded:=false;
+          break;
+        end;
       end;
-      S:='3.4';
-      AddFPCCFGSnippet('-WP'+S);
-      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
-      FCrossOpts.Add('-WP'+S+' ');
+      if (ToolVersionNeeded) then
+      begin
+        S:='';
+        if (FSubArch=TSUBARCH.lx6) then S:='4.2';
+        if (FSubArch=TSUBARCH.lx106) then S:='3.4';
+        if (Length(S)<>0) then
+        begin
+          S:='-WP'+S;
+          AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
+          AddFPCCFGSnippet(S);
+          AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
+          FCrossOpts.Add(S+' ');
+        end;
+      end;
     end;
   end;
-
 end;
 
 function TAny_FreeRTOSXtensa.GetBinUtils(Basepath:string): boolean;
