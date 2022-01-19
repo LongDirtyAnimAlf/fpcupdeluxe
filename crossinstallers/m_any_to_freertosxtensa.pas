@@ -189,7 +189,7 @@ begin
       if (ActionNeeded) then
       begin
         S:='';
-        if (FSubArch=TSUBARCH.lx6) then S:='4.3';
+        if (FSubArch=TSUBARCH.lx6) then S:='4.3.2';
         if (FSubArch=TSUBARCH.lx106) then S:='3.4';
         if (Length(S)<>0) then
         begin
@@ -209,7 +209,7 @@ end;
 function TAny_FreeRTOSXtensa.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
-  S,FilePath:string;
+  S,FilePath,ToolVersion:string;
   ESPToolFiles: TStringList;
 begin
   result:=inherited;
@@ -296,18 +296,28 @@ begin
     if (FSubArch=TSUBARCH.lx6) then AddFPCCFGSnippet('-Wpesp32');
     if (FSubArch=TSUBARCH.lx106) then AddFPCCFGSnippet('-Wpesp8266');
 
+    ToolVersion:='';
+    for S in FCrossOpts do
+    begin
+      if AnsiStartsStr('-WP',S) then
+      begin
+        ToolVersion:='-'+Copy(Trim(S),4,MaxInt);
+        break;
+      end;
+    end;
+
     S:=Trim(GetEnvironmentVariable('IDF_PATH'));
     if (Length(S)=0) then
     begin
       FilePath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
       ESPToolFiles:=FindAllFiles(FilePath, 'esptool.py', true);
+      FilePath:='';
       try
-        FilePath:='';
         for S in ESPToolFiles do
         begin
           if (FSubArch=TSUBARCH.lx6) then
           begin
-            if (Pos('esp-idf',S)>0) then
+            if (Pos('esp-idf'+ToolVersion,S)>0) then
             begin
               FilePath:=S;
               break;
@@ -315,24 +325,24 @@ begin
           end;
           if (FSubArch=TSUBARCH.lx106) then
           begin
-            if (Pos('esp-rtos',S)>0) then
+            if (Pos('esp-rtos'+ToolVersion,S)>0) then
             begin
               FilePath:=S;
               break;
             end;
           end;
         end;
-        if (Length(FilePath)>0) then
-        begin
-          FilePath:=ExtractFileDir(FilePath);
-          repeat
-            FilePath:=SafeExpandFileName(FilePath+DirectorySeparator+'..');
-            S:=ExtractFileName(FilePath);
-          until ((S='components') OR (Length(S)=0));
-          S:=SafeExpandFileName(FilePath+DirectorySeparator+'..');
-        end;
       finally
         ESPToolFiles.Free;
+      end;
+      if (Length(FilePath)>0) then
+      begin
+        FilePath:=ExtractFileDir(FilePath);
+        repeat
+          FilePath:=SafeExpandFileName(FilePath+DirectorySeparator+'..');
+          S:=ExtractFileName(FilePath);
+        until ((S='components') OR (Length(S)=0));
+        S:=SafeExpandFileName(FilePath+DirectorySeparator+'..');
       end;
     end;
 
