@@ -41,7 +41,7 @@ uses
   {$IFDEF LINUX}
   BaseUnix,
   {$ENDIF LINUX}
-  StrUtils, m_crossinstaller, fpcuputil;
+  FileUtil, StrUtils, m_crossinstaller, fpcuputil;
 
 type
 
@@ -67,7 +67,7 @@ var
   StaticLibNameESP:string;
   S:string;
   aABI:TABI;
-  ToolVersionNeeded:boolean;
+  ActionNeeded:boolean;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -102,7 +102,11 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName1);
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubarchName,StaticLibName1);
+  begin
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubarchName]),StaticLibName1);
+    if (not result) then
+      result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubarchName,'debug']),StaticLibName1);
+  end;
 
   // do the same as above, but look for a static libc_nano lib
   if not result then
@@ -112,7 +116,11 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName2);
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubarchName,StaticLibName2);
+  begin
+    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubarchName]),StaticLibName2);
+    if (not result) then
+      result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubarchName,'debug']),StaticLibName2);
+  end;
 
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
   begin
@@ -130,27 +138,20 @@ begin
 
   SearchLibraryInfo(result);
 
-  if result then
+  if (result) then
   begin
     FLibsFound:=True;
 
-    if PerformLibraryPathMagic then
-    begin
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-    end
-    else
-    begin
-      // If we do not have magic, add subarch to enclose
-      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
-    end;
-  end;
+    ActionNeeded:=(NOT PerformLibraryPathMagic(S));
 
-  if (true) then
-  begin
+    if (NOT ActionNeeded) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(S));
+
     if (SubArch<>TSUBARCH.saNone) then
     begin
+      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
+
+      if ActionNeeded then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(S));
+
       // Add SDK libs path, if any
       PresetLibPath:=GetUserDir;
       {$IFDEF UNIX}
@@ -160,47 +161,47 @@ begin
       if (FSubArch=TSUBARCH.lx6) then
       begin
         PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-esp32-elf']);
-        S:=FindFileInDir(StaticLibName2,PresetLibPath);
+        S:=FindFileInDir(StaticLibName1,PresetLibPath);
       end;
       if (FSubArch=TSUBARCH.lx106) then
       begin
         PresetLibPath:=ConcatPaths([PresetLibPath,'.espressif','tools','xtensa-lx106-elf']);
-        S:=FindFileInDir(StaticLibName2,PresetLibPath);
+        S:=FindFileInDir(StaticLibName1,PresetLibPath);
       end;
       if (Length(S)>0) then
       begin
         S:='-Fl'+ExtractFilePath(S);
-        AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
         AddFPCCFGSnippet(S);
-        AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
         FCrossOpts.Add(S+' ');
       end;
 
       // Check tools deployment version
       // If not found, add default value
-      ToolVersionNeeded:=true;
+      ActionNeeded:=true;
       for S in FCrossOpts do
       begin
         if AnsiStartsStr('-WP',S) then
         begin
-          ToolVersionNeeded:=false;
+          ActionNeeded:=false;
           break;
         end;
       end;
-      if (ToolVersionNeeded) then
+      if (ActionNeeded) then
       begin
         S:='';
-        if (FSubArch=TSUBARCH.lx6) then S:='4.2';
+        if (FSubArch=TSUBARCH.lx6) then S:='4.3';
         if (FSubArch=TSUBARCH.lx106) then S:='3.4';
         if (Length(S)<>0) then
         begin
           S:='-WP'+S;
-          AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
-          AddFPCCFGSnippet(S);
-          AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
           FCrossOpts.Add(S+' ');
+          AddFPCCFGSnippet(S);
+          S:=ConcatPaths([BasePath,CROSSPATH,'lib',TargetCPUName+'-'+TargetOSName]);
+          PresetLibPath:=ConcatPaths([S,SubArchName]);
+          if DirectoryExists(PresetLibPath) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(PresetLibPath));
         end;
       end;
+      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
     end;
   end;
 end;
@@ -208,7 +209,8 @@ end;
 function TAny_FreeRTOSXtensa.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
-  S,PresetBinPath:string;
+  S,FilePath:string;
+  ESPToolFiles: TStringList;
 begin
   result:=inherited;
   if result then exit;
@@ -233,20 +235,20 @@ begin
 
   if (not result) then
   begin
-    PresetBinPath:=GetUserDir;
+    FilePath:=GetUserDir;
     {$IFDEF LINUX}
-    if FpGetEUid=0 then PresetBinPath:='/usr/local/bin';
+    if FpGetEUid=0 then FilePath:='/usr/local/bin';
     {$ENDIF}
     if (not result) then
     begin
       if (FSubArch=TSUBARCH.lx6) then
       begin
-        PresetBinPath:=ConcatPaths([PresetBinPath,'.espressif','tools','xtensa-esp32-elf']);
-        S:=FindFileInDir(AsFile,PresetBinPath);
+        FilePath:=ConcatPaths([FilePath,'.espressif','tools','xtensa-esp32-elf']);
+        S:=FindFileInDir(AsFile,FilePath);
         if (Length(S)>0) then
         begin
-          PresetBinPath:=ExtractFilePath(S);
-          result:=SearchBinUtil(PresetBinPath,AsFile);
+          FilePath:=ExtractFilePath(S);
+          result:=SearchBinUtil(FilePath,AsFile);
         end;
       end;
     end;
@@ -254,12 +256,12 @@ begin
     begin
       if (FSubArch=TSUBARCH.lx106) then
       begin
-        PresetBinPath:=ConcatPaths([PresetBinPath,'.espressif','tools','xtensa-lx106-elf']);
-        S:=FindFileInDir(AsFile,PresetBinPath);
+        FilePath:=ConcatPaths([FilePath,'.espressif','tools','xtensa-lx106-elf']);
+        S:=FindFileInDir(AsFile,FilePath);
         if (Length(S)>0) then
         begin
-          PresetBinPath:=ExtractFilePath(S);
-          result:=SearchBinUtil(PresetBinPath,AsFile);
+          FilePath:=ExtractFilePath(S);
+          result:=SearchBinUtil(FilePath,AsFile);
         end;
       end;
     end;
@@ -267,14 +269,14 @@ begin
 
   if (not result) then
   begin
-    PresetBinPath:=Trim(GetEnvironmentVariable('IDF_TOOLS_PATH'));
-    if (Length(PresetBinPath)>0) then
+    FilePath:=Trim(GetEnvironmentVariable('IDF_TOOLS_PATH'));
+    if (Length(FilePath)>0) then
     begin
-      S:=FindFileInDir(AsFile,PresetBinPath);
+      S:=FindFileInDir(AsFile,FilePath);
       if (Length(S)>0) then
       begin
-        PresetBinPath:=ExtractFilePath(S);
-        result:=SearchBinUtil(PresetBinPath,AsFile);
+        FilePath:=ExtractFilePath(S);
+        result:=SearchBinUtil(FilePath,AsFile);
       end;
     end;
   end;
@@ -285,41 +287,73 @@ begin
   begin
     FBinsFound:=true;
 
+    if (FSubArch<>TSUBARCH.saNone) then AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
+
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
 
-    if (FSubArch<>TSUBARCH.saNone) then
-    begin
-      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
-      if (FSubArch=TSUBARCH.lx6) then AddFPCCFGSnippet('-Wpesp32');
-      if (FSubArch=TSUBARCH.lx106) then AddFPCCFGSnippet('-Wpesp8266');
-      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
-    end;
+    if (FSubArch=TSUBARCH.lx6) then AddFPCCFGSnippet('-Wpesp32');
+    if (FSubArch=TSUBARCH.lx106) then AddFPCCFGSnippet('-Wpesp8266');
 
     S:=Trim(GetEnvironmentVariable('IDF_PATH'));
     if (Length(S)=0) then
     begin
-      //AsFile:=ConcatPaths(['esp-idf','components','esptool_py','esptool','esptool.py']);
-      PresetBinPath:=FBinUtilsPath;
-      S:=FindFileInDir('esptool.py',PresetBinPath);
-      if (Length(S)=0) then
-      begin
-        // go one directory up
-        PresetBinPath:=ExpandFileName(IncludeTrailingPathDelimiter(FBinUtilsPath)+'..');
-        S:=FindFileInDir('esptool.py',PresetBinPath);
-      end;
-      if (Length(S)>0) then
-      begin
-        repeat
-          S:=ExtractFileDir(S);
-          AsFile:=ExtractFileName(S);
-        until ((AsFile='components') OR (Length(AsFile)=0));
-        S:=ExtractFileDir(S);
-        if (Length(S)>0) then
-          AddFPCCFGSnippet('-Ff'+S); {Set the IDF SDK path};
+      FilePath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
+      ESPToolFiles:=FindAllFiles(FilePath, 'esptool.py', true);
+      try
+        FilePath:='';
+        for S in ESPToolFiles do
+        begin
+          if (FSubArch=TSUBARCH.lx6) then
+          begin
+            if (Pos('esp-idf',S)>0) then
+            begin
+              FilePath:=S;
+              break;
+            end;
+          end;
+          if (FSubArch=TSUBARCH.lx106) then
+          begin
+            if (Pos('esp-rtos',S)>0) then
+            begin
+              FilePath:=S;
+              break;
+            end;
+          end;
+        end;
+        if (Length(FilePath)>0) then
+        begin
+          FilePath:=ExtractFileDir(FilePath);
+          repeat
+            FilePath:=SafeExpandFileName(FilePath+DirectorySeparator+'..');
+            S:=ExtractFileName(FilePath);
+          until ((S='components') OR (Length(S)=0));
+          S:=SafeExpandFileName(FilePath+DirectorySeparator+'..');
+        end;
+      finally
+        ESPToolFiles.Free;
       end;
     end;
+
+    if ((Length(S)>0) AND DirectoryExists(S)) then
+    begin
+      AddFPCCFGSnippet('-Ff'+S); {Set the IDF SDK path};
+      if (FSubArch=TSUBARCH.lx6) then
+      begin
+        FilePath:=ConcatPaths([S,'components','esp_rom','esp32','ld']);
+        if DirectoryExists(FilePath) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FilePath));
+        FilePath:=ConcatPaths([S,'components','esp32','ld']);
+        if DirectoryExists(FilePath) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FilePath));
+      end;
+      if (FSubArch=TSUBARCH.lx106) then
+      begin
+        FilePath:=ConcatPaths([S,'components','esp8266','ld']);
+        if DirectoryExists(FilePath) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FilePath));
+      end;
+    end;
+
+    if (FSubArch<>TSUBARCH.saNone) then AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
 
   end;
 end;

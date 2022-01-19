@@ -63,6 +63,7 @@ const
   LibName='libgcc.a';
 var
   aABI:TABI;
+  S:string;
 begin
   // Arm-embedded does not need libs by default, but user can add them.
   result:=FLibsFound;
@@ -100,15 +101,15 @@ begin
   begin
     FLibsFound:=True;
 
-    if PerformLibraryPathMagic then
+    if PerformLibraryPathMagic(S) then
     begin
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(S));
     end
     else
     begin
       // If we do not have magic, add subarch to enclose
       AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(S));
       AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
     end;
   end;

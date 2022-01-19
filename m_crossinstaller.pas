@@ -148,7 +148,7 @@ type
     FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
     FSolarisOI:boolean;
     FMUSL:boolean;
-    function PerformLibraryPathMagic:boolean;
+    function PerformLibraryPathMagic(out LibraryPath:string):boolean;
     function SearchLibrary(Directory, LookFor: string): boolean;
     function SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string): boolean;
     function SearchBinUtil(Directory, LookFor: string): boolean;
@@ -545,13 +545,15 @@ begin
   //if Length(extrainfo)>0 then Infoln(CrossModuleName + ' bins : '+extrainfo, etInfo);
 end;
 
-function TCrossInstaller.PerformLibraryPathMagic:boolean;
+function TCrossInstaller.PerformLibraryPathMagic(out LibraryPath:string):boolean;
 var
   aPath:TStringArray;
   aIndex:integer;
   aABI:TABI;
 begin
   result:=false;
+
+  LibraryPath:=FLibsPath;
 
   // Skip for some combo's until we have structured libs
   if (Self.TargetOS=TOS.embedded) AND (Self.TargetCPU<>TCPU.arm) then exit;
@@ -588,7 +590,7 @@ begin
     end;
   end;
 
-  if result then FLibsPath:=ConcatPaths(aPath);
+  if result then LibraryPath:=ConcatPaths(aPath);
 end;
 
 function TCrossInstaller.SearchLibrary(Directory, LookFor: string): boolean;

@@ -1426,6 +1426,9 @@ end;
 
 procedure TForm1.ChkMakefileFPCClick(Sender: TObject);
 begin
+  ThreadLog('AtenÃ§Ã£o');
+  //AddMessage('AtenÃ§Ã£o');
+  exit;
   DisEnable(Sender,False);
 
   try
