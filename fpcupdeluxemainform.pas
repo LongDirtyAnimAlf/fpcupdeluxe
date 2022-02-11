@@ -4095,6 +4095,7 @@ begin
   AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win10 x86_64');
   AddMessage('');
 
+  BitBtnHalt.Enabled:=true;
   try
     {$ifdef READER}
     try
@@ -4185,6 +4186,7 @@ begin
     StatusMessage.Color:=clRed;
   end;
 
+  BitBtnHalt.Enabled:=false;
 end;
 
 function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;

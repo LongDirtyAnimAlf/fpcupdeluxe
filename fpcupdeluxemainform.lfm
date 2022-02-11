@@ -2625,6 +2625,7 @@ object Form1: TForm1
       BorderSpacing.Right = 1
       BorderSpacing.Around = 4
       Caption = 'STOP'
+      Enabled = False
       Glyph.Data = {
         36100000424D3610000000000000360000002800000020000000200000000100
         2000000000000010000064000000640000000000000000000000000000000000
