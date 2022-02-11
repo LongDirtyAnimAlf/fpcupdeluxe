@@ -1848,9 +1848,10 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   const
     DEBIAN_INSTALL_COMMAND='sudo apt-get install';
 
-    DEBIAN_LIBS : array [0..15] of string = (
+    DEBIAN_LIBS : array [0..16] of string = (
     'unrar',
     'unzip',
+    'p7zip',
     'wget',
     'make',
     'gcc',

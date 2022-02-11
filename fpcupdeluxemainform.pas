@@ -900,6 +900,13 @@ begin
     memoSummary.Lines.Append(BeginSnippet+' Please free some space and re-run fpcupdeluxe.');
   end;
 
+  // GLIBC hardening error
+  if (ExistWordInString(PChar(s),'undefined reference to',[soDown])) AND (ExistWordInString(PChar(s),'libc_csu',[soDown])) then
+  begin
+    memoSummary.Lines.Append(BeginSnippet+' Might be GLIBC>=2.34 hardening error.');
+    memoSummary.Lines.Append(BeginSnippet+' See: https://gitlab.com/freepascal.org/fpc/source/-/issues/39295');
+  end;
+
   // RAM errors
   if (ExistWordInString(PChar(s),'call the assembler',[soDown])) OR (ExistWordInString(PChar(s),'call the resource compiler',[soDown])) then
   begin
@@ -4820,9 +4827,13 @@ begin
 
           end;
 
+          if aTarget=TTarget.FPC then BitBtnFPCSetRevision.Enabled:=(TargetViewArray[aTarget].Items.Count>0);
+          if aTarget=TTarget.LAZARUS then BitBtnLazarusSetRevision.Enabled:=(TargetViewArray[aTarget].Items.Count>0);
+
         finally
           TargetViewArray[aTarget].Items.EndUpdate;
         end;
+
       end;
 
     finally
