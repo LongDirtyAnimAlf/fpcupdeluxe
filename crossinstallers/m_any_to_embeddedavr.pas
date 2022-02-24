@@ -228,7 +228,7 @@ begin
   if not result then
   begin
     {$ifdef mswindows}
-    ShowInfo('Suggestion for cross binutils: the crossfpc binutils (avr-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/.');
+    ShowInfo(CrossWindowsSuggestion);
     {$endif}
     FAlreadyWarned:=true;
   end

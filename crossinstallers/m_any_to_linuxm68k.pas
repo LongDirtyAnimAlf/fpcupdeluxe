@@ -1,5 +1,5 @@
-unit m_any_to_embeddedarm;
-{ Cross compiles from any platform with correct binutils to Embedded ARM
+unit m_any_to_linuxm68k;
+{ Cross compiles from any platform with correct binutils to linux m68k
 Copyright (C) 2017 Alf
 
 This library is free software; you can redistribute it and/or modify it
@@ -42,8 +42,8 @@ uses
 
 type
 
-{ TAny_Embeddedarm }
-TAny_Embeddedarm = class(TCrossInstaller)
+{ TAny_Linuxm68k }
+TAny_Linuxm68k = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -56,67 +56,41 @@ public
   destructor Destroy; override;
 end;
 
-{ TAny_Embeddedarm }
+{ TAny_Linuxm68k }
 
-function TAny_Embeddedarm.GetLibs(Basepath:string): boolean;
+function TAny_Linuxm68k.GetLibs(Basepath:string): boolean;
 const
-  LibName='libgcc.a';
-var
-  aABI:TABI;
-  S:string;
+  LibName='libc.a';
 begin
-  // Arm-embedded does not need libs by default, but user can add them.
   result:=FLibsFound;
-
   if result then exit;
 
-  if (FSubArch<>TSUBARCH.saNone) then
-    ShowInfo('Cross-libs: We have a subarch: '+SubArchName)
-  else
-    ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
-
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LibName);
-  // search local paths based on libraries provided for or adviced by fpc itself
+  result:=SearchLibrary(Basepath,LIBCNAME);
+  // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
-
-  if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-  begin
-    result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubArchName]),LibName);
-    if (not result) then
-    begin
-      for aABI in TABI do
-      begin
-        if aABI=TABI.default then continue;
-        result:=SimpleSearchLibrary(BasePath,ConcatPaths([DirName,SubArchName,GetABI(aABI)]),LibName);
-        if result then break;
-      end;
-    end;
-  end;
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
   SearchLibraryInfo(result);
 
   if result then
   begin
     FLibsFound:=True;
-
-    if PerformLibraryPathMagic(S) then
-    begin
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(S));
-    end
-    else
-    begin
-      // If we do not have magic, add subarch to enclose
-      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(S));
-      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
-    end;
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-Xr/usr/lib');
+  end
+  else
+  begin
+    //no libs yet: go on without them
+    ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
+    FLibsPath:='';
+    FLibsFound:=True;
+    result:=True;
   end;
 end;
 
 {$ifndef FPCONLY}
-function TAny_Embeddedarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TAny_Linuxm68k.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
   ShowInfo('Todo: implement lcl libs path from basepath '+BasePath,etdebug);
@@ -124,13 +98,10 @@ begin
 end;
 {$endif}
 
-function TAny_Embeddedarm.GetBinUtils(Basepath:string): boolean;
+function TAny_Linuxm68k.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile: string;
-  BinPrefixTry: string;
-  {$ifdef unix}
-  i:integer;
-  {$endif unix}
+  AsFile        : string;
+  BinPrefixTry  : string;
 begin
   result:=inherited;
   if result then exit;
@@ -139,52 +110,39 @@ begin
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
-  if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  if not result then
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  {$ifdef unix}
-  // User may also have placed them into their regular search path:
+  // Now also allow for avr- binutilsprefix
   if not result then
   begin
-    for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+    BinPrefixTry:='m68k-elf-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    {$ifdef unix}
+    // User may also have placed them into their regular search path:
+    if not result then
     begin
-      result:=SearchBinUtil(IncludeTrailingPathDelimiter(UnixBinDirs[i])+DirName, AsFile);
-      if not result then result:=SearchBinUtil(UnixBinDirs[i], AsFile);
-      if result then break;
+      for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+      begin
+        result:=SearchBinUtil(IncludeTrailingPathDelimiter(UnixBinDirs[i])+DirName, AsFile);
+        if not result then result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+        if result then break;
+      end;
     end;
-  end;
-  {$endif unix}
-
-  // Now also allow for arm-none-eabi- binutilsprefix (e.g. launchpadlibrarian)
-  if not result then
-  begin
-    BinPrefixTry:='arm-none-eabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    {$endif unix}
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
-  // Now also allow for empty binutilsprefix in the right directory:
-  if not result then
-  begin
-    BinPrefixTry:='';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
 
   SearchBinUtilsInfo(result);
 
   if not result then
   begin
-    ShowInfo('Suggestion for cross binutils:');
     {$ifdef mswindows}
     ShowInfo(CrossWindowsSuggestion);
-    {$else}
-    ShowInfo('Tools from https://launchpad.net/gcc-arm-embedded.');
     {$endif}
-    ShowInfo('Tools from https://github.com/gnu-mcu-eclipse/arm-none-eabi-gcc');
     FAlreadyWarned:=true;
   end
   else
@@ -196,29 +154,29 @@ begin
   end;
 end;
 
-constructor TAny_Embeddedarm.Create;
+constructor TAny_Linuxm68k.Create;
 begin
   inherited Create;
-  FTargetCPU:=TCPU.arm;
-  FTargetOS:=TOS.embedded;
+  FTargetCPU:=TCPU.m68k;
+  FTargetOS:=TOS.linux;
   Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor TAny_Embeddedarm.Destroy;
+destructor TAny_Linuxm68k.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Any_Embeddedarm:TAny_Embeddedarm;
+  Any_Linuxm68k:TAny_Linuxm68k;
 
 initialization
-  Any_Embeddedarm:=TAny_Embeddedarm.Create;
-  RegisterCrossCompiler(Any_Embeddedarm.RegisterName,Any_Embeddedarm);
+  Any_Linuxm68k:=TAny_Linuxm68k.Create;
+  RegisterCrossCompiler(Any_Linuxm68k.RegisterName,Any_Linuxm68k);
 
 finalization
-  Any_Embeddedarm.Destroy;
+  Any_Linuxm68k.Destroy;
 end.
 

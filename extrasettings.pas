@@ -1004,7 +1004,6 @@ begin
         if CPU=cpuNone then continue;
 
         // skip non-combi's to reduce size of ini-file
-        if ((OS=amiga) AND (CPU<>m68k)) then continue;
         if ((OS=morphos) AND (CPU<>powerpc)) then continue;
         if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java) AND (OS<>android)) then continue;
         if (OS=ultibo) AND ((CPU<>arm) AND (CPU<>aarch64)) then continue;
@@ -1020,6 +1019,7 @@ begin
 
 
         if (CPU=xtensa) AND ((OS<>linux) AND (OS<>freertos)) then continue;
+        if (CPU=m68k) AND ((OS<>linux) AND (OS<>amiga)) then continue;
         if (CPU=powerpc) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=powerpc64) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=mips) AND (OS<>linux) then continue;

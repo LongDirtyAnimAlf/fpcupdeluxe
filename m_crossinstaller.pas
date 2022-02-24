@@ -42,6 +42,8 @@ const
   ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
     'todo: specify what exactly is missing';
 
+  CrossWindowsSuggestion = 'Suggestion for cross binutils: the crossfpc binutils at https://gitlab.com/freepascal.org/fpc/binaries/-/tree/main/i386-win32.';
+
   MAXDARWINVERSION=20;
   MINDARWINVERSION=7;
 

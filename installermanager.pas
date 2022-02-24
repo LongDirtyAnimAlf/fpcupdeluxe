@@ -1108,7 +1108,8 @@ begin
         if CrossCPU_Target=TCPU.powerpc then s:='PowerPC' else
           if CrossCPU_Target=TCPU.powerpc64 then s:='PowerPC64' else
             if CrossCPU_Target=TCPU.avr then s:='AVR' else
-              s:=UppercaseFirstChar(GetCPU(CrossCPU_Target));
+              if CrossCPU_Target=TCPU.m68k then s:='m68k' else
+                s:=UppercaseFirstChar(GetCPU(CrossCPU_Target));
 
   BinsFileName:=s;
 
