@@ -47,6 +47,7 @@ Linux
 ------------
 - GNU make
 - the binutils (make etc); e.g. in a package called build-essential
+- GIT client
 - bunzip2 (probably present in most distributions)
 - unzip
 - untar
