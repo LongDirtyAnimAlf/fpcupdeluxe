@@ -102,6 +102,7 @@ function TAny_Linuxm68k.GetBinUtils(Basepath:string): boolean;
 var
   AsFile        : string;
   BinPrefixTry  : string;
+  i             : integer;
 begin
   result:=inherited;
   if result then exit;
