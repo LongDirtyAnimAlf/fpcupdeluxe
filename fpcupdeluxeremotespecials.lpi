@@ -354,7 +354,7 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)70"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\mORMot"/>

@@ -102,7 +102,9 @@ function TAny_Linuxm68k.GetBinUtils(Basepath:string): boolean;
 var
   AsFile        : string;
   BinPrefixTry  : string;
+  {$ifdef UNIX}
   i             : integer;
+  {$endif UNIX}
 begin
   result:=inherited;
   if result then exit;
@@ -121,7 +123,7 @@ begin
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    {$ifdef unix}
+    {$ifdef UNIX}
     // User may also have placed them into their regular search path:
     if not result then
     begin
@@ -132,7 +134,7 @@ begin
         if result then break;
       end;
     end;
-    {$endif unix}
+    {$endif UNIX}
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
@@ -141,9 +143,9 @@ begin
 
   if not result then
   begin
-    {$ifdef mswindows}
+    {$ifdef MSWINDOWS}
     ShowInfo(CrossWindowsSuggestion);
-    {$endif}
+    {$endif MSWINDOWS}
     FAlreadyWarned:=true;
   end
   else

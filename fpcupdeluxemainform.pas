@@ -2020,9 +2020,9 @@ begin
       if aCPU=cpuNone then continue;
       FPCupManager.CrossCPU_Target:=aCPU;
       FPCupManager.CrossOS_Target:=aOS;
-      FPCupManager.GetCrossToolsFileName({%H-}BinsFileName,{%H-}LibsFileName);
-      FPCupManager.GetCrossToolsPath({%H-}BinPath,{%H-}LibPath);
-      success:=FPCupManager.GetCrossBinsURL({%H-}BaseBinsURL,BinsFileName);
+      FPCupManager.GetCrossToolsFileName(BinsFileName,LibsFileName);
+      FPCupManager.GetCrossToolsPath(BinPath,LibPath);
+      success:=FPCupManager.GetCrossBinsURL(BaseBinsURL,BinsFileName);
       {
       if (NOT success) then
       begin
@@ -2033,7 +2033,7 @@ begin
       if success then
       begin
         AddMessage(FPCupManager.CrossCombo_Target+' bins: '+BaseBinsURL);
-        success:=FPCupManager.GetCrossLibsURL({%H-}BaseLibsURL,LibsFileName);
+        success:=FPCupManager.GetCrossLibsURL(BaseLibsURL,LibsFileName);
         if (NOT success) then
         begin
           BaseLibsURL:='none';
@@ -3183,8 +3183,8 @@ begin
 
             AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
 
-            FPCupManager.GetCrossToolsFileName({%H-}BinsFileName,{%H-}LibsFileName);
-            FPCupManager.GetCrossToolsPath({%H-}BinPath,{%H-}LibPath);
+            FPCupManager.GetCrossToolsFileName(BinsFileName,LibsFileName);
+            FPCupManager.GetCrossToolsPath(BinPath,LibPath);
 
             // bit tricky ... if bins and/or libs are already there exit this retry ... ;-)
             if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath)) then MissingCrossBins:=false;
@@ -3214,7 +3214,7 @@ begin
                 AddMessage('Going to look for the right cross-bins. Can (will) take some time !',True);
                 AddMessage('Looking for: '+BinsFileName, True);
 
-                success:=FPCupManager.GetCrossBinsURL({%H-}BaseBinsURL,BinsFileName);
+                success:=FPCupManager.GetCrossBinsURL(BaseBinsURL,BinsFileName);
 
                 // no cross-bins available
                 if (NOT success) then
@@ -3339,7 +3339,7 @@ begin
                 AddMessage('Going to look for the right cross-libraries. Can (will) take some time !',True);
                 AddMessage('Looking for: '+LibsFileName, True);
 
-                success:=FPCupManager.GetCrossLibsURL({%H-}BaseLibsURL,LibsFileName);
+                success:=FPCupManager.GetCrossLibsURL(BaseLibsURL,LibsFileName);
 
                 // no cross-libraries available
                 if (NOT success) then

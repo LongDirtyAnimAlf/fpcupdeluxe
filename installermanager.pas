@@ -378,10 +378,10 @@ type
     function LoadFPCUPConfig:boolean;
     function CheckValidCPUOS(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone): boolean;
     function ParseSubArchsFromSource: TStringList;
-    procedure GetCrossToolsFileName(var BinsFileName,LibsFileName:string);
-    procedure GetCrossToolsPath(var BinPath,LibPath:string);
-    function GetCrossBinsURL(var BaseBinsURL,BinsFileName:string):boolean;
-    function GetCrossLibsURL(var BaseLibsURL,LibsFileName:string):boolean;
+    procedure GetCrossToolsFileName(out BinsFileName,LibsFileName:string);
+    procedure GetCrossToolsPath(out BinPath,LibPath:string);
+    function GetCrossBinsURL(out BaseBinsURL:string; var BinsFileName:string):boolean;
+    function GetCrossLibsURL(out BaseLibsURL:string; var LibsFileName:string):boolean;
 
     // Stop talking. Do it! Returns success status
     function Run: boolean;
@@ -1097,7 +1097,7 @@ begin
   end;
 end;
 
-procedure TFPCupManager.GetCrossToolsFileName(var BinsFileName,LibsFileName:string);
+procedure TFPCupManager.GetCrossToolsFileName(out BinsFileName,LibsFileName:string);
 var
   s:string;
 begin
@@ -1228,7 +1228,7 @@ begin
   {$endif MSWINDOWS}
 end;
 
-procedure TFPCupManager.GetCrossToolsPath(var BinPath,LibPath:string);
+procedure TFPCupManager.GetCrossToolsPath(out BinPath,LibPath:string);
 begin
   // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
   // Normally, we have the standard names for libs and bins paths
@@ -1316,7 +1316,7 @@ begin
   end;
 end;
 
-function TFPCupManager.GetCrossBinsURL(var BaseBinsURL,BinsFileName:string):boolean;
+function TFPCupManager.GetCrossBinsURL(out BaseBinsURL:string; var BinsFileName:string):boolean;
 var
   s:string;
   success:boolean;
@@ -1478,7 +1478,7 @@ begin
 
 end;
 
-function TFPCupManager.GetCrossLibsURL(var BaseLibsURL,LibsFileName:string):boolean;
+function TFPCupManager.GetCrossLibsURL(out BaseLibsURL:string; var LibsFileName:string):boolean;
 var
   s:string;
   success:boolean;
