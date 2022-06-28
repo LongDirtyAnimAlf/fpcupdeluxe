@@ -2016,7 +2016,8 @@ begin
   begin
     if FUseRevInc then
     begin
-      s1:=s1+' -dREVINC';
+      s2:=ConcatPaths([SourceDirectory,'compiler'])+DirectorySeparator+REVINCFILENAME;
+      if FileExists(s2) then s1:=s1+' -dREVINC';
     end
     else
     begin
@@ -3817,8 +3818,7 @@ begin
       Infoln('FPC builder: Checking auto-generated (Makefile) revision.inc for compiler revision', etInfo);
       FUseRevInc:=false;
       // Generate revision.inc through Makefile to check its contents
-      s:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
-      DeleteFile(s);
+      s:=ConcatPaths([SourceDirectory,'compiler'])+DirectorySeparator+REVINCFILENAME;
       if BuildModuleCustom(_REVISIONFPC) then
       begin
         // Check revision.inc for errors
@@ -3830,9 +3830,12 @@ begin
             if (ConfigText.Count>0) then
             begin
               VersionSnippet:=ConfigText.Strings[0];
-              VersionSnippet:=AnsiDequotedStr(VersionSnippet,'''');
-              VersionSnippet:=AnsiDequotedStr(VersionSnippet,'"');
-              if (Length(VersionSnippet)>0) AND (Pos(' ',VersionSnippet)=0) AND (ContainsDigit(VersionSnippet)) then FUseRevInc:=true;
+              if (OccurrencesOfChar(VersionSnippet,'''')=2) then
+              begin
+                VersionSnippet:=AnsiDequotedStr(VersionSnippet,'''');
+                VersionSnippet:=AnsiDequotedStr(VersionSnippet,'"');
+                if (Length(VersionSnippet)>0) AND (Pos(' ',VersionSnippet)=0) AND (ContainsDigit(VersionSnippet)) then FUseRevInc:=true;
+              end;
             end;
           finally
             ConfigText.Free;
@@ -3982,7 +3985,7 @@ begin
             Processor.Process.Parameters.Add('-3');
 
             Processor.Process.Parameters.Add('-d');
-            Processor.Process.Parameters.Add('LocalRepository='+ConcatPaths([BaseDirectory,PACKAGESLOCATION])+PathDelim);
+            Processor.Process.Parameters.Add('LocalRepository='+ConcatPaths([BaseDirectory,PACKAGESLOCATION])+DirectorySeparator);
 
             Processor.Process.Parameters.Add('-d');
             Processor.Process.Parameters.Add('CompilerConfigDir='+IncludeTrailingPathDelimiter(s2));
@@ -3991,7 +3994,7 @@ begin
             {$ifdef MSWINDOWS}
             Processor.Process.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(InstallDirectory));
             {$ELSE}
-            Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([InstallDirectory,'lib','fpc'])+PathDelim+'{CompilerVersion}'+PathDelim);
+            Processor.Process.Parameters.Add('GlobalPath='+ConcatPaths([InstallDirectory,'lib','fpc'])+DirectorySeparator+'{CompilerVersion}'+DirectorySeparator);
             {$ENDIF}
 
             Processor.Process.Parameters.Add('-d');
