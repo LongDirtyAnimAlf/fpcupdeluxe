@@ -370,6 +370,9 @@ type
     function IsLazarusInstaller:boolean;
     function IshelpInstaller:boolean;
     function IsUniversalInstaller:boolean;
+    {$IFDEF MSWINDOWS}
+    function GetStrayShell: boolean;
+    {$ENDIF MSWINDOWS}
   protected
     FFPCInstallDir             : string;
     FFPCSourceDir              : string;
@@ -571,6 +574,9 @@ type
     property SourceVersionStr:string read GetFullVersionString;
     property SourceVersionNum:dword read GetFullVersion;
     property SanityCheck:boolean read GetSanityCheck;
+    {$IFDEF MSWINDOWS}
+    property StrayShell: boolean read GetStrayShell;
+    {$ENDIF MSWINDOWS}
     function GetCompilerName(Cpu_Target:TCPU):string;overload;
     function GetCompilerName(Cpu_Target:string):string;overload;
     function GetCrossCompilerName(Cpu_Target:TCPU):string;
@@ -906,7 +912,7 @@ begin
     // disable for now .... not working 100%
     {
     // do we have a stray sh.exe in the path ...
-    if (Length(Which('sh.exe'))>0) then
+    if StrayShell then
     begin
       FShell := GetEnvironmentVariable('COMSPEC');
       //ExecuteCommand('cmd.exe /C echo %COMSPEC%', output, False);
@@ -924,6 +930,22 @@ begin
   {$ENDIF MSWINDOWS}
   Result := FShell;
 end;
+
+{$IFDEF MSWINDOWS}
+function TInstaller.GetStrayShell: boolean;
+begin
+  result:=false;
+  {$ifdef win32}
+  result:=(NOT CheckExecutable('echo',['''mytestrevision'''],'''mytestrevision''',false));
+  {$endif}
+  {$ifdef win64}
+  result:=(NOT CheckExecutable('echo',['''mytestrevision'''],'''mytestrevision''',false));
+  {$endif}
+  //if result then Infoln(localinfotext+'Found stray echo in path. Using gecho.exe command from custom binaries !',etWarning);
+  //result:=(Length(Which('sh.exe'))>0);
+  //if result then Infoln(localinfotext+'Found stray shell in path. Adjusting path !',etWarning);
+end;
+{$ENDIF MSWINDOWS}
 
 procedure TInstaller.SetVerbosity(aValue:boolean);
 begin

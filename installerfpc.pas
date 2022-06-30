@@ -1140,7 +1140,20 @@ begin
           s1:=ExcludeTrailingPathDelimiter(SourceDirectory);
           Processor.Process.Parameters.Add('FPCDIR=' + s1);
 
+
           {$IFDEF MSWINDOWS}
+          // do we have a stray shell in the path ...
+          if StrayShell then
+          begin
+            s1:=ExtractFilePath(Make)+'gecho.exe';
+            if FileExists(s1) then
+            begin
+              if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
+              s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
+              Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
+            end;
+          end;
+
           Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
@@ -1148,8 +1161,8 @@ begin
           if (Length(s1)>0) then
           begin
             if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
-            // do we have a stray sh.exe in the path ...
-            if (Length(Which('sh.exe'))>0) then
+            // do we have a stray shell in the path ...
+            if StrayShell then
               s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
             Processor.Process.Parameters.Add('GIT='+s1);
           end;
@@ -1934,13 +1947,24 @@ begin
   Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
 
+  // do we have a stray shell in the path ...
+  if StrayShell then
+  begin
+    s1:=ExtractFilePath(Make)+'gecho.exe';
+    if FileExists(s1) then
+    begin
+      if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
+      s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
+      Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
+    end;
+  end;
+
   // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
-  s1:=GitClient.RepoExecutable;
   s1:=GitClient.RepoExecutable;
   if (Length(s1)>0) then
   begin
     if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
-    if (Length(Which('sh.exe'))>0) then
+    if StrayShell then
       s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
     Processor.Process.Parameters.Add('GIT='+s1);
   end;
