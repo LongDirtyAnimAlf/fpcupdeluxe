@@ -3405,19 +3405,28 @@ begin
     begin
       s:=SVNClient.RepoExecutable;
       if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
-      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+      s:=ExtractFileDir(s);
+      // Only add path if there is no stray shell (sh.exe) laying around in this path
+      if (NOT FileExists(s+DirectorySeparator+'sh'+GetExeExt)) then
+        aPath:=aPath+PathSeparator+s;
     end;
     if Assigned(GITClient) AND GITClient.ValidClient then
     begin
       s:=GITClient.RepoExecutable;
       if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
-      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+      s:=ExtractFileDir(s);
+      // Only add path if there is no stray shell (sh.exe) laying around in this path
+      if (NOT FileExists(s+DirectorySeparator+'sh'+GetExeExt)) then
+        aPath:=aPath+PathSeparator+s;
     end;
     if Assigned(HGClient) AND HGClient.ValidClient then
     begin
       s:=HGClient.RepoExecutable;
       if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
-      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+      s:=ExtractFileDir(s);
+      // Only add path if there is no stray shell (sh.exe) laying around in this path
+      if (NOT FileExists(s+DirectorySeparator+'sh'+GetExeExt)) then
+        aPath:=aPath+PathSeparator+s;
     end;
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // add install/fpc/utils to solve data2inc not found by fpcmkcfg
@@ -3904,7 +3913,9 @@ begin
   {$ENDIF UNIX}
 
   // only create fpc.cfg and other configs with fpcmkcfg when NOT crosscompiling !
-  if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) then
+
+  s:=ExcludetrailingPathDelimiter(FFPCCompilerBinPath);
+  if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) AND DirectoryExists(s) then
   begin
     // Find out where fpcmkcfg lives
     if (OperationSucceeded) then

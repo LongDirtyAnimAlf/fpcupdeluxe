@@ -1469,19 +1469,28 @@ begin
     begin
       s:=SVNClient.RepoExecutable;
       if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
-      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+      s:=ExtractFileDir(s);
+      // Only add path if there is no stray shell (sh.exe) laying around in this path
+      if (NOT FileExists(s+DirectorySeparator+'sh'+GetExeExt)) then
+        aPath:=aPath+PathSeparator+s;
     end;
     if Assigned(GITClient) AND GITClient.ValidClient then
     begin
       s:=GITClient.RepoExecutable;
       if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
-      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+      s:=ExtractFileDir(s);
+      // Only add path if there is no stray shell (sh.exe) laying around in this path
+      if (NOT FileExists(s+DirectorySeparator+'sh'+GetExeExt)) then
+        aPath:=aPath+PathSeparator+s;
     end;
     if Assigned(HGClient) AND HGClient.ValidClient then
     begin
       s:=HGClient.RepoExecutable;
       if (Pos(' ',s)>0) then s:=ExtractShortPathName(s);
-      aPath:=aPath+PathSeparator+ExtractFileDir(s);
+      s:=ExtractFileDir(s);
+      // Only add path if there is no stray shell (sh.exe) laying around in this path
+      if (NOT FileExists(s+DirectorySeparator+'sh'+GetExeExt)) then
+        aPath:=aPath+PathSeparator+s;
     end;
     SetPath(
       ExcludeTrailingPathDelimiter(FFPCCompilerBinPath) + PathSeparator +

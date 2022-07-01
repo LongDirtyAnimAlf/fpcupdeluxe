@@ -1433,9 +1433,6 @@ end;
 
 procedure TForm1.ChkMakefileFPCClick(Sender: TObject);
 begin
-  ThreadLog('AtenÃ§Ã£o');
-  //AddMessage('AtenÃ§Ã£o');
-  exit;
   DisEnable(Sender,False);
 
   try
@@ -4634,10 +4631,14 @@ end;
 procedure TForm1.HandleInfo(var Msg: TLMessage);
 var
   MsgStr: PChar;
+  MsgPStr: PString;
   MsgPasStr: string;
 begin
-  MsgStr := {%H-}PChar(Msg.wparam);
+  MsgStr := {%H-}PChar(Msg.lParam);
   MsgPasStr := StrPas(MsgStr);
+
+  //MsgPStr := PString(Msg.lParam);
+  //MsgPasStr := MsgPStr^;
 
   {$ifdef Darwin}
   // suppress all setfocus errors on Darwin, always
@@ -4698,7 +4699,8 @@ begin
     end;
   end;
 
-  StrDispose(MsgStr)
+  StrDispose(MsgStr);
+  //Dispose(MsgPStr);
 end;
 
 procedure TForm1.InitFpcupdeluxe(Data: PtrInt);

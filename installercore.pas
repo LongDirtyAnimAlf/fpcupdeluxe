@@ -939,7 +939,7 @@ begin
   result:=(NOT CheckExecutable('echo',['''mytestrevision'''],'''mytestrevision''',false));
   {$endif}
   {$ifdef win64}
-  result:=(NOT CheckExecutable('echo',['''mytestrevision'''],'''mytestrevision''',false));
+  //result:=(NOT CheckExecutable('echo',['''mytestrevision'''],'''mytestrevision''',false));
   {$endif}
   //if result then Infoln(localinfotext+'Found stray echo in path. Using gecho.exe command from custom binaries !',etWarning);
   //result:=(Length(Which('sh.exe'))>0);

@@ -211,6 +211,7 @@ uses
   Forms,
   Controls, // for crHourGlass
   LCLIntf,
+  LCLType,
   LMessages,
   {$endif}
   StrUtils,
@@ -1387,12 +1388,12 @@ begin
       aMessage:=aMsg;
   end else aMessage:='';
 
-  PInfo := StrAlloc(Length(aMessage)+1);
-  StrCopy(PInfo, PChar(aMessage));
+  PInfo := StrAlloc(Length(aMessage)+16);
+  StrPCopy(PInfo, aMessage);
   if (Assigned(Application) AND Assigned(Application.MainForm)) then
   begin
-    PostMessage(Application.MainForm.Handle, WM_THREADINFO, {%H-}NativeUInt(PInfo), 0);
-    //Application.ProcessMessages;
+    if not PostMessage(Application.MainForm.Handle, WM_THREADINFO, 0, {%H-}LPARAM(PInfo)) then
+      StrDispose(PInfo);
   end;
 end;
 {$else}
