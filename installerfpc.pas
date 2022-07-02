@@ -1142,6 +1142,7 @@ begin
 
 
           {$IFDEF MSWINDOWS}
+          (*
           // do we have a stray shell in the path ...
           if StrayShell then
           begin
@@ -1153,7 +1154,7 @@ begin
               Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
             end;
           end;
-
+          *)
           Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
@@ -1947,6 +1948,7 @@ begin
   Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
 
+  (*
   // do we have a stray shell in the path ...
   if StrayShell then
   begin
@@ -1958,7 +1960,7 @@ begin
       Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
     end;
   end;
-
+  *)
   // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
   s1:=GitClient.RepoExecutable;
   if (Length(s1)>0) then

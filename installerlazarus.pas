@@ -391,7 +391,7 @@ begin
 
         {$ifdef MsWindows}
         Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
-
+        (*
         // do we have a stray shell in the path ...
         if StrayShell then
         begin
@@ -403,6 +403,7 @@ begin
             Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
           end;
         end;
+        *)
         {$else}
         //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
         {$endif}
@@ -702,6 +703,7 @@ begin
 
     {$ifdef MsWindows}
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
+    (*
     // do we have a stray shell in the path ...
     if StrayShell then
     begin
@@ -713,6 +715,7 @@ begin
         Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
       end;
     end;
+    *)
     {$else}
     //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
     {$endif}
