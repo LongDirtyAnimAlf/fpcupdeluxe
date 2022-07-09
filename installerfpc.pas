@@ -1440,15 +1440,18 @@ begin
             Processor.Process.Parameters.Add('CROSSOPT='+CrossOptions);
           end;
 
-          {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
+          {$ifndef FPC_HAS_TYPE_EXTENDED}
           // soft 80 bit float if available
-          if FSoftFloat then
+          if (GetTargetCPU=GetCPU(TCPU.x86_64)) then
           begin
             if ( (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.i8086)  {OR (CrossInstaller.TargetCPU=TCPU.x86_64)} ) then
             begin
-              Infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
-              Infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
-              Options:=Options+' -dFPC_SOFT_FPUX80';
+              if FSoftFloat then
+              begin
+                Infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
+                Infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
+                Options:=Options+' -dFPC_SOFT_FPUX80';
+              end;
             end;
           end;
           {$endif}
@@ -2058,12 +2061,15 @@ begin
   end;
   {$endif FORCEREVISION}
 
-  {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
-  if FSoftFloat then
+  {$ifndef FPC_HAS_TYPE_EXTENDED}
+  if (GetTargetCPU=GetCPU(TCPU.x86_64)) then
   begin
-    // soft 80 bit float if available
-    Infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
-    s1:=s1+' -dFPC_SOFT_FPUX80';
+    if FSoftFloat then
+    begin
+      // soft 80 bit float if available
+      Infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
+      s1:=s1+' -dFPC_SOFT_FPUX80';
+    end;
   end;
   {$endif}
 
