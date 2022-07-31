@@ -122,7 +122,8 @@ begin
   if pbDownloads.Visible then pbDownloads.Max:= Length(FDownloads);
   index:=0;
   repeat
-    lblTop.Caption:= Format('File: %s',[MiniMizeName(FDownloads[index].Filename, lblTop.Canvas, lblTop.Parent.Width-(lblTop.Left*2))]);
+    // Adjust text width and text length to be exactly the same width as the progress bar.
+    lblTop.Caption:= Format('File: %s',[MiniMizeName(FDownloads[index].Filename, lblTop.Canvas, pbBytes.Width)]);
     //lblTop.Caption:= Format('File: %s',[FDownloads[index].Filename]);
     if lblDownloads.Visible then lblDownloads.Caption:= Format('%d of %d', [index + 1, Length(FDownloads)]);
     Application.ProcessMessages;

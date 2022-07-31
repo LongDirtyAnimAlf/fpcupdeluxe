@@ -305,53 +305,53 @@ type
 
 
 resourcestring
-  HintCheckRepo = 'Download whole repository, or only latest files';
-  CaptionCheckRepo = 'Get FPC/Laz repositories (default=yes)';
+  HintCheckRepo = 'Download whole repository, or only latest files.';
+  CaptionCheckRepo = 'Get FPC/Laz repositories.';
 
   HintCheckPackageRepo = '';
-  CaptionCheckPackageRepo = 'Get package repositories (default=no)';
+  CaptionCheckPackageRepo = 'Get package repositories.';
 
   HintCheckIncludeLCL = '';
-  CaptionCheckIncludeLCL = 'Include LCL with cross-compiler (default=no)';
+  CaptionCheckIncludeLCL = 'Include LCL with cross-compiler.';
 
   HintCheckUpdateOnly = '';
-  CaptionCheckUpdateOnly = 'FPC/Laz rebuild only (default=no)';
+  CaptionCheckUpdateOnly = 'FPC/Laz rebuild only.';
 
   HintCheckSystemFPC = 'Use the system wide install of FPC to build Lazarus.';
-  CaptionCheckSystemFPC = 'Use system FPC for Lazarus (default=no)';
+  CaptionCheckSystemFPC = 'Use system FPC for Lazaru.s';
 
   HintCheckIncludeHelp = '';
-  CaptionCheckIncludeHelp = 'Include Help (default=no)';
+  CaptionCheckIncludeHelp = 'Include Help.';
 
   HintCheckSplitFPC = '';
-  CaptionCheckSplitFPC = 'Split FPC source and bins (default=yes)';
+  CaptionCheckSplitFPC = 'Split FPC source and bins.';
 
   HintCheckSplitLazarus = '';
-  CaptionCheckSplitLazarus = 'Split Lazarus source and bins (default=no)';
+  CaptionCheckSplitLazarus = 'Split Lazarus source and bins.';
 
   HintCheckUseWget = '';
-  CaptionCheckUseWget = 'Use wget/libcurl as downloader (default=no)';
+  CaptionCheckUseWget = 'Use wget/libcurl as downloader.';
 
   HintCheckUseMakeJobs = '';
-  CaptionCheckUseMakeJobs = 'Use jobs for GNU make (default=yes)';
+  CaptionCheckUseMakeJobs = 'Use jobs for GNU make.';
 
   HintCheckExtraVerbose = '';
-  CaptionCheckExtraVerbose = 'Be extra verbose (default=no)';
+  CaptionCheckExtraVerbose = 'Be extra verbose.';
 
   HintCheckAutoSwitchURL = '';
-  CaptionCheckAutoSwitchURL = 'Auto-switch repo URL (default=no)';
+  CaptionCheckAutoSwitchURL = 'Auto-switch repo URL.';
 
   HintCheckSendInfo = 'Location and install info will be send to public central fpcupdeluxe server.';
-  CaptionCheckSendInfo = 'Send location and install info (default=no)';
+  CaptionCheckSendInfo = 'Send location and install info.';
 
   HintCheckFpcupBootstrappersOnly = '';
-  CaptionCheckFpcupBootstrappersOnly = 'Only use fpcup bootstrappers (default=yes)';
+  CaptionCheckFpcupBootstrappersOnly = 'Only use fpcup bootstrappers.';
 
   HintCheckForceLocalRepoClient = 'Use the repo-client by fpcupdeluxe.';
-  CaptionCheckForceLocalRepoClient = 'Use local repo-client (default=no)';
+  CaptionCheckForceLocalRepoClient = 'Use local repo-client.';
 
   HintCheckGetUpdates = 'Check for updates of fpcupdeluxe binaries.';
-  CaptionCheckGetUpdates = 'Check for fpcupdeluxe updates (default=no)';
+  CaptionCheckGetUpdates = 'Check for fpcupdeluxe updates.';
 
   HintUseSoftFloat80bit = 'Enable software emulation of 80 bit floats.';
   CaptionUseSoftFloat80bit = 'Enable software emulation of 80 bit floats.';
@@ -366,7 +366,7 @@ resourcestring
   CaptionCheckAddContext = 'Add context for FPC and Lazarus files.';
 
   HintCheckAskConfirmation = 'Show a confirmation dialog with yes/no before every build.';
-  CaptionCheckAskConfirmation = 'Always ask for confirmation (default=yes).';
+  CaptionCheckAskConfirmation = 'Always ask for confirmation.';
 
 var
   Form2: TForm2;
