@@ -2127,10 +2127,10 @@ begin
 
   CrossCompiling:=(FParent.CrossCPU_Target<>TCPU.cpuNone) OR (FParent.CrossOS_Target<>TOS.osNone);
 
-  if Ultibo then
-    LocalFPCSourceDir:=IncludeTrailingPathDelimiter(FParent.FPCSourceDirectory)+'source'
-  else
-    LocalFPCSourceDir:=FParent.FPCSourceDirectory;
+  //if Ultibo then
+  //  LocalFPCSourceDir:=IncludeTrailingPathDelimiter(FParent.FPCSourceDirectory)+'source'
+  //else
+  LocalFPCSourceDir:=FParent.FPCSourceDirectory;
 
   //check if this is a known module:
 

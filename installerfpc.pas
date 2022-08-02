@@ -418,7 +418,7 @@ begin
     end;
 
     if (CrossInstaller.TargetOS=TOS.ultibo) then
-      result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.TargetOSName+'-'+SUBARCHMagic])
+      result:=ConcatPaths([InstallDirectory,'units',SUBARCHMagic+'-'+CrossInstaller.TargetOSName])
     else
     begin
       if CrossInstaller.TargetCPU=TCPU.arm then
@@ -4117,11 +4117,11 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([InstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
+            s2:=ConcatPaths([InstallDirectory,'units',FPC_SUBARCH_MAGIC+'-'+GetOS(TOS.ultibo)]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
+            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
+            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
           finally
             CloseFile(TxtFile);
           end;
@@ -4147,11 +4147,11 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI2');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([InstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
+            s2:=ConcatPaths([InstallDirectory,'units',FPC_SUBARCH_MAGIC+'-'+GetOS(TOS.ultibo)]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
+            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
+            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
           finally
             CloseFile(TxtFile);
           end;
@@ -4177,11 +4177,53 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dRPI3');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([InstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
+            s2:=ConcatPaths([InstallDirectory,'units',FPC_SUBARCH_MAGIC+'-'+GetOS(TOS.ultibo)]);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
+            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
+            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
+          finally
+            CloseFile(TxtFile);
+          end;
+        end
+        else
+        begin
+          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+        end;
+
+        s := FFPCCompilerBinPath + 'RPI4.CFG';
+        if (NOT FileExists(s)) then
+        begin
+          //create RPI4.CFG
+          AssignFile(TxtFile,s);
+          Rewrite(TxtFile);
+          try
+            writeln(TxtFile,'#');
+            writeln(TxtFile,'# Raspberry Pi 4B/400/CM4 specific config file');
+            writeln(TxtFile,'#');
+            writeln(TxtFile,'#IFDEF CPUARM');
+            writeln(TxtFile,'-CfVFPV3');
+            writeln(TxtFile,'-CIARM');
+            writeln(TxtFile,'-CaEABIHF');
+            writeln(TxtFile,'-OoFASTMATH');
+            writeln(TxtFile,'-dRPI4');
+            writeln(TxtFile,'-dBCM2711');
+            s2:=ConcatPaths([InstallDirectory,'units',FPC_SUBARCH_MAGIC+'-'+GetOS(TOS.ultibo)]);
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+            writeln(TxtFile,'#ENDIF');
+            writeln(TxtFile,'#IFDEF CPUAARCH64');
+            writeln(TxtFile,'-CfVFP');
+            writeln(TxtFile,'-OoFASTMATH');
+            writeln(TxtFile,'-dRPI4');
+            writeln(TxtFile,'-dBCM2711');
+            s2:=ConcatPaths([InstallDirectory,'units','armv8'+'-'+GetOS(TOS.ultibo)]);
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+            s2:=ConcatPaths([InstallDirectory,'units',GetCPU(TCPU.aarch64)+'-'+GetOS(TOS.ultibo)]);
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+            writeln(TxtFile,'#ENDIF');
           finally
             CloseFile(TxtFile);
           end;
@@ -4207,10 +4249,10 @@ begin
             writeln(TxtFile,'-OoFASTMATH');
             writeln(TxtFile,'-dQEMUVPB');
             writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([InstallDirectory,'units','ultibo-'+FPC_SUBARCH_MAGIC]);
+            s2:=ConcatPaths([InstallDirectory,'units',FPC_SUBARCH_MAGIC+'-ultibo']);
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
             writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
+            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
           finally
             CloseFile(TxtFile);
           end;
@@ -4885,10 +4927,13 @@ end;
 function TFPCInstaller.GetModule(ModuleName: string): boolean;
 var
   UpdateWarnings : TStringList;
+  FilesList      : TStringList;
   aRepoClient    : TRepoClient;
   s              : string;
   SourceVersion  : string;
+  aSF,aDP,aAD    : string;
   SourceInfo     : TRevision;
+  i              : integer;
 begin
   result:=inherited;
   result:=InitModule;
@@ -4899,8 +4944,8 @@ begin
 
   SourceVersion:='0.0.0';
 
-  if Ultibo then
-    SourceDirectory:=StringReplace(SourceDirectory,DirectorySeparator+'source','',[]);
+  //if Ultibo then
+  //  SourceDirectory:=StringReplace(SourceDirectory,DirectorySeparator+'source','',[]);
 
   aRepoClient:=GetSuitableRepoClient;
 
@@ -4942,10 +4987,83 @@ begin
       UpdateWarnings.Free;
     end;
 
+    if result and Ultibo then
+    begin
+      // Get Ultibo Core also
+      Infoln(infotext+'Downloading Ultibo Core sources.',etInfo);
+      s := GetTempFileNameExt('FPCUPTMP','zip');
+      aAD:=ExtractFileDir(s);
+      result:=GetFile('https://github.com/ultibohub/Core/archive/refs/heads/master.zip',s);
+      if (result AND (NOT FileExists(s))) then result:=false;
+      if result then
+      begin
+        with TNormalUnzipper.Create do
+        begin
+          try
+            result:=DoUnZip(s,aAD,[]);
+          finally
+            Free;
+          end;
+        end;
+      end;
+      if result then SysUtils.Deletefile(s); //Get rid of archive file file.
+      if result then
+      begin
+
+        s:=ConcatPaths([aAD,'Core-master','source']);
+        FilesList:=FindAllFiles(s, '', True);
+        for i:=0 to (FilesList.Count-1) do
+        begin
+          aSF:=FilesList[i];
+          aDP:=ConcatPaths([SourceDirectory,ExtractRelativePath(IncludeTrailingPathDelimiter(s),ExtractFilePath(aSF))]);
+          ForceDirectoriesSafe(aDP);
+          MoveFile(aSF,IncludeTrailingPathDelimiter(aDP)+ExtractFileName(aSF));
+        end;
+        FreeAndNil(FilesList);
+
+        s:=ConcatPaths([aAD,'Core-master','units','armv6-'+GetOS(TOS.ultibo),'lib']);
+        FilesList:=FindAllFiles(s, '', True);
+        for i:=0 to (FilesList.Count-1) do
+        begin
+          aSF:=FilesList[i];
+          aDP:=ConcatPaths([ConcatPaths([BaseDirectory,{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(TCPU.arm)+'-'+GetOS(TOS.ultibo),'armv6']),ExtractRelativePath(IncludeTrailingPathDelimiter(s),ExtractFilePath(aSF))]);
+          ForceDirectoriesSafe(aDP);
+          MoveFile(aSF,IncludeTrailingPathDelimiter(aDP)+ExtractFileName(aSF));
+        end;
+        FreeAndNil(FilesList);
+
+        s:=ConcatPaths([aAD,'Core-master','units','armv7-'+GetOS(TOS.ultibo),'lib']);
+        FilesList:=FindAllFiles(s, '', True);
+        for i:=0 to (FilesList.Count-1) do
+        begin
+          aSF:=FilesList[i];
+          aDP:=ConcatPaths([ConcatPaths([BaseDirectory,{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(TCPU.arm)+'-'+GetOS(TOS.ultibo),'armv7a']),ExtractRelativePath(IncludeTrailingPathDelimiter(s),ExtractFilePath(aSF))]);
+          ForceDirectoriesSafe(aDP);
+          MoveFile(aSF,IncludeTrailingPathDelimiter(aDP)+ExtractFileName(aSF));
+        end;
+        FreeAndNil(FilesList);
+
+        s:=ConcatPaths([aAD,'Core-master','units','armv8-'+GetOS(TOS.ultibo),'lib']);
+        FilesList:=FindAllFiles(s, '', True);
+        for i:=0 to (FilesList.Count-1) do
+        begin
+          aSF:=FilesList[i];
+          aDP:=ConcatPaths([ConcatPaths([BaseDirectory,{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(TCPU.aarch64)+'-'+GetOS(TOS.ultibo),'armv8']),ExtractRelativePath(IncludeTrailingPathDelimiter(s),ExtractFilePath(aSF))]);
+          ForceDirectoriesSafe(aDP);
+          MoveFile(aSF,IncludeTrailingPathDelimiter(aDP)+ExtractFileName(aSF));
+        end;
+        FreeAndNil(FilesList);
+
+      end;
+
+      DeleteDirectory(aAD,False);
+
+    end;
+
   end;
 
-  if Ultibo then
-    SourceDirectory:=IncludeTrailingPathDelimiter(SourceDirectory)+'source';
+  //if Ultibo then
+  //  SourceDirectory:=IncludeTrailingPathDelimiter(SourceDirectory)+'source';
 
   if result then
   begin

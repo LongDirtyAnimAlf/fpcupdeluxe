@@ -425,7 +425,7 @@ begin
   {$ifdef Darwin}
   radgrpOS.Items.Strings[radgrpOS.Items.IndexOf(GetOS(TOS.wince))]:='i-sim';
   {$ifndef CPUX86}
-  UltiboBtn.Enabled:=False;
+  //UltiboBtn.Enabled:=False;
   {$endif}
   {$endif Darwin}
 
@@ -2173,8 +2173,8 @@ begin
   if Sender=UltiboBtn then
   begin
     s:='Going to install the Ultibo.';
-    aFPCTarget:='ultibo.zip';
-    aLazarusTarget:='ultibo.zip';
+    aFPCTarget:='ultibo.git';
+    aLazarusTarget:='ultibo.git';
   end;
 
   if Sender=OPMBtn then
@@ -2312,13 +2312,24 @@ begin
         memoSummary.Lines.Append('');
       end;
 
+      if (Sender=UltiboBtn) then
+      begin
+        s:='Going to install FPC cross-compiler for Ultibo armv8.';
+        aCPU:=TCPU.aarch64;
+        aOS:=TOS.ultibo;
+        aSUBARCH:=TSUBARCH.saNone;
+      end;
+
       if (Sender=AndroidBtn) then
       begin
         s:='Going to install FPC cross-compiler for Android arm64.';
         aCPU:=TCPU.aarch64;
         aOS:=TOS.android;
         aSUBARCH:=TSUBARCH.saNone;
+      end;
 
+      if ((Sender=AndroidBtn) OR (Sender=UltiboBtn)) then
+      begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
         Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
@@ -2340,7 +2351,6 @@ begin
 
         memoSummary.Lines.Append('');
       end;
-
 
     end;
 
@@ -4009,6 +4019,7 @@ begin
   begin
     FPCupManager.FPCURL:=FPCTarget;
     if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='master';
+    if (Pos('github.com/ultibohub/FreePascal',FPCupManager.FPCURL)>0) then FPCupManager.FPCBranch:='ultibo';
   end;
 
   if AnsiEndsText(GITLABEXTENSION,LazarusTarget) then
@@ -4020,6 +4031,7 @@ begin
     FPCupManager.LazarusURL:=LazarusTarget;
     if (Pos('github.com/LongDirtyAnimAlf',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='upstream';
     if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='master';
+    if (Pos('github.com/ultibohub/LazarusIDE',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='ultibo';
   end;
 
   // branch and revision overrides from setup+
@@ -4621,7 +4633,7 @@ begin
 
   //WioBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
   //PicoBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
-  UltiboBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
+  //UltiboBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
 
   FillSourceListboxes;
 

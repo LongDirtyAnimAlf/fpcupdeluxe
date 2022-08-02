@@ -1443,21 +1443,24 @@ begin
     VersionSnippet := Copy(VersionSnippet, i + 1, MaxInt);
 
     // if url contains a version, this version always starts with first _#
-    i:=1;
-    repeat
-      if (CharInSet(VersionSnippet[i],['0'..'9'])) then
-      begin
-        if (i>1) AND (VersionSnippet[i-1]='_') then break;
-      end;
-      Inc(i);
-      if (i>Length(VersionSnippet)) then break;
-    until false;
+    if Length(VersionSnippet)>0 then
+    begin
+      i:=1;
+      repeat
+        if (CharInSet(VersionSnippet[i],['0'..'9'])) then
+        begin
+          if (i>1) AND (VersionSnippet[i-1]='_') then break;
+        end;
+        Inc(i);
+        if (i>Length(VersionSnippet)) then break;
+      until false;
 
-    Delete(VersionSnippet,1,(i-1));
-    // ignore release candidate numbering
-    i := Pos('_RC',VersionSnippet);
-    if i>0 then Delete(VersionSnippet,i,MaxInt);
-    VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
+      Delete(VersionSnippet,1,(i-1));
+      // ignore release candidate numbering
+      i := Pos('_RC',VersionSnippet);
+      if i>0 then Delete(VersionSnippet,i,MaxInt);
+      VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
+    end;
 
     if Length(VersionSnippet)>0 then
     begin

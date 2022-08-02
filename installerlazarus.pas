@@ -1621,6 +1621,13 @@ begin
 
       if (LazarusConfig.IfNewFile(EnvironmentConfig)) then
       begin
+        if Ultibo then
+        begin
+          s:=LazarusConfig.GetVariable(EnvironmentConfig, 'EnvironmentOptions/Version/Lazarus');
+          s:=s+'U';
+          LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Version/Lazarus',s);
+        end;
+
         {$IFDEF MSWINDOWS}
         // On Windows, we provide our own GDB
         GDBPath:=ConcatPaths([FMakeDir,'gdb',GetTargetCPUOS])+DirectorySeparator+'gdb.exe';
