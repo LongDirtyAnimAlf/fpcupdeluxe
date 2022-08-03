@@ -90,6 +90,7 @@ uses
   m_any_to_freertosxtensa,
   m_any_to_freertosarm,
   m_any_to_ultiboarm,
+  m_any_to_ultiboaarch64,
   {$ifdef LINUX}
   //{$ifdef CPUX86}
   m_linux386_to_mips,

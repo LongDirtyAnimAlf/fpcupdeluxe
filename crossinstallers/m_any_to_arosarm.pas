@@ -105,7 +105,7 @@ begin
   result:=inherited;
   if result then exit;
 
-  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
 

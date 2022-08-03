@@ -115,7 +115,7 @@ begin
 
   FBinUtilsPrefix:=GetCPU(TargetCPU)+'-unknown-'+GetOS(TargetOS)+'-';
 
-  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then

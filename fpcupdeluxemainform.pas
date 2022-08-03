@@ -2317,7 +2317,7 @@ begin
         s:='Going to install FPC cross-compiler for Ultibo armv8.';
         aCPU:=TCPU.aarch64;
         aOS:=TOS.ultibo;
-        aSUBARCH:=TSUBARCH.saNone;
+        aSUBARCH:=TSUBARCH.armv8;
       end;
 
       if (Sender=AndroidBtn) then
@@ -3000,6 +3000,13 @@ begin
           if FPCupManager.CrossOS_SubArch=TSUBARCH.saNone then
           begin
             FPCupManager.CrossOS_SubArch:=TSubarch.armv7a;
+          end;
+        end;
+        if (FPCupManager.CrossCPU_Target=TCPU.aarch64) then
+        begin
+          if FPCupManager.CrossOS_SubArch=TSUBARCH.saNone then
+          begin
+            FPCupManager.CrossOS_SubArch:=TSubarch.armv8;
           end;
         end;
       end;

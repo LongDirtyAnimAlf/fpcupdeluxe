@@ -1,6 +1,6 @@
-unit m_any_to_ultiboarm;
+unit m_any_to_ultiboaarch64;
 { Cross compiles from any platform with correct binutils to linux ARM
-Copyright (C) 2013 Reinier Olislagers
+Copyright (C) 2022 Don
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -50,8 +50,8 @@ uses
 
 type
 
-{ Tany_ultiboarm }
-Tany_ultiboarm = class(TCrossInstaller)
+{ Tany_ultiboaarch64 }
+Tany_ultiboaarch64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -60,9 +60,9 @@ public
   constructor Create;
 end;
 
-{ Tany_ultiboarm }
+{ Tany_ultiboaarch64 }
 
-function Tany_ultiboarm.GetLibs(Basepath:string): boolean;
+function Tany_ultiboaarch64.GetLibs(Basepath:string): boolean;
 const
   LibName='libc.a';
 var
@@ -88,10 +88,6 @@ begin
   // also check in the gnueabi directory
   if not result then
      result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabi',LibName);
-  // also check in the gnueabihf directory
-  if not result then
-     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabihf',LibName);
-
   // search local paths based on libraries provided for or adviced by fpc itself
   if not result then
      if (FSubArch<>TSUBARCH.saNone) then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+aSubarchName,LibName);
@@ -108,7 +104,7 @@ begin
   end;
 end;
 
-function Tany_ultiboarm.GetBinUtils(Basepath:string): boolean;
+function Tany_ultiboaarch64.GetBinUtils(Basepath:string): boolean;
 var
   AsFile,aOption: string;
   BinPrefixTry:string;
@@ -121,45 +117,14 @@ begin
 
   BinPrefixTry:=BinUtilsPrefix;
 
-
-  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinPrefixTry+'as'+GetExeExt;
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Also allow for crossfpc naming
   if (not result) then
   begin
-    BinPrefixTry:=TargetCPUName+'-linux-eabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-    // also check in the eabi directory
-    if not result then
-       result:=SimpleSearchBinUtil(BasePath,DirName+'-eabi',AsFile);
-  end;
-
-  // Also allow for baremetal crossfpc naming
-  if (not result) then
-  begin
-    BinPrefixTry:=TargetCPUName+'-none-eabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-    // also check in the eabi directory
-    if not result then
-       result:=SimpleSearchBinUtil(BasePath,DirName+'-eabi',AsFile);
-  end;
-
-  if (not result) then
-  begin
-    BinPrefixTry:=TargetCPUName+'-linux-gnueabi-';
+    BinPrefixTry:=TargetCPUName+'-none-gnu-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
@@ -168,33 +133,31 @@ begin
 
     // also check in the gnueabi directory
     if not result then
-       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabi',AsFile);
+       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnu',AsFile);
   end;
 
   if (not result) then
   begin
-    BinPrefixTry:=TargetCPUName+'-none-gnueabi-';
+    BinPrefixTry:=TargetCPUName+'-unknown-linux-gnu-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
       result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-    // also check in the gnueabi directory
-    if not result then
-       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabi',AsFile);
   end;
 
-  // Also allow for android crossbinutils
-  if not result then
+  if (not result) then
   begin
-    BinPrefixTry:=TargetCPUName+'-linux-androideabi-';//standard eg in Android NDK 9
+    BinPrefixTry:=TargetCPUName+'-unknown-linux-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
 
   // Last resort: also allow for crossbinutils without prefix, but in correct directory
-  if not result then
+  if (not result) then
   begin
     BinPrefixTry:='';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
@@ -221,10 +184,10 @@ begin
   end;
 end;
 
-constructor Tany_ultiboarm.Create;
+constructor Tany_ultiboaarch64.Create;
 begin
   inherited Create;
-  FTargetCPU:=TCPU.arm;
+  FTargetCPU:=TCPU.aarch64;
   FTargetOS:=TOS.ultibo;
   Reset;
   FAlreadyWarned:=false;
@@ -232,13 +195,13 @@ begin
 end;
 
 var
-  any_ultiboarm:Tany_ultiboarm;
+  any_ultiboaarch64:Tany_ultiboaarch64;
 
 initialization
-  any_ultiboarm:=Tany_ultiboarm.Create;
-  RegisterCrossCompiler(any_ultiboarm.RegisterName,any_ultiboarm);
+  any_ultiboaarch64:=Tany_ultiboaarch64.Create;
+  RegisterCrossCompiler(any_ultiboaarch64.RegisterName,any_ultiboaarch64);
 
 finalization
-  any_ultiboarm.Destroy;
+  any_ultiboaarch64.Destroy;
 end.
 

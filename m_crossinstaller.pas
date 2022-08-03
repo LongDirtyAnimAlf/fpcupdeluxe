@@ -73,7 +73,7 @@ const
 type
   TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa,wasm32);
   TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo,wasi);
-  TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,rv32ima,rv32im,rv32i,rv64imac,rv64ima,rv64im,rv64i,lx6,lx106);
+  TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,armv8,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,rv32ima,rv32im,rv32i,rv64imac,rv64ima,rv64im,rv64i,lx6,lx106);
   //TABI      = (default,sysv,aix,darwin,elfv2,eabi,armeb,eabihf,oldwin32gnu,aarch64ios,riscvhf,linux386_sysv,windowed,call0);
   TABI      = (default,eabi,eabihf,aarch64ios,riscvhf,windowed,call0);
   TARMARCH  = (none,armel,armeb,armhf);
@@ -83,7 +83,7 @@ type
 
 const
   SUBARCH_OS         = [TOS.embedded,TOS.freertos,TOS.ultibo];
-  SUBARCH_CPU        = [TCPU.arm,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.riscv64,TCPU.xtensa];
+  SUBARCH_CPU        = [TCPU.arm,TCPU.aarch64,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.riscv64,TCPU.xtensa]; //for Ultibo added TCPU.aarch64
   SUBARCH_ARM        = [TSUBARCH.armv4..TSUBARCH.armv7m];
   SUBARCH_AVR        = [TSUBARCH.avr1..TSUBARCH.avrxmega3];
   SUBARCH_MIPSEL     = [TSUBARCH.pic32mx];
@@ -107,6 +107,7 @@ const
   );
   FPCUP_AUTO_MAGIC  = 'FPCUP_AUTO';
 
+  FPC_TARGET_MAGIC  = '$FPCTARGET';
   FPC_SUBARCH_MAGIC = '$FPCSUBARCH';
   FPC_ABI_MAGIC     = '$FPCABI';
 
@@ -356,7 +357,13 @@ begin
       TCPU.xtensa:   if (aOS<>TOS.ultibo) then result:=SUBARCH_XTENSA;
     end;
     // Limit some special targets
-    if (aOS=TOS.ultibo) then result:=[TSUBARCH.armv6,TSUBARCH.armv7a];
+    if (aOS=TOS.ultibo) then
+    begin
+      case aCPU of
+        TCPU.arm:      result:=[TSUBARCH.armv6,TSUBARCH.armv7a];
+        TCPU.aarch64:  result:=[TSUBARCH.armv8];
+      end;
+    end;
     if ((aOS=TOS.freertos) AND (aCPU=TCPU.arm)) then result:=[TSUBARCH.armv6m,TSUBARCH.armv7em,TSUBARCH.armv7m];
   end;
 end;
@@ -418,6 +425,7 @@ begin
       TCPU.xtensa:   if (aOS<>TOS.ultibo) then result:=ABI_XTENSA;
       TCPU.riscv64:  if (aOS<>TOS.ultibo) then result:=ABI_RISCV64;
     end;
+    //if ((aOS=TOS.ultibo) AND (aCPU=TCPU.arm)) then result:=TABI.eabi;
   end;
 end;
 
@@ -1016,6 +1024,11 @@ begin
               aCrossOptionSetting:='-CfVFPV2 -CIARM -CaEABIHF -OoFASTMATH ';
             if SUBARCH=TSubarch.armv7a then
               aCrossOptionSetting:='-CfVFPV3 -CIARM -CaEABIHF -OoFASTMATH ';
+          end;
+          if (CPU=TCPU.aarch64) then
+          begin
+            if SUBARCH=TSubarch.armv8 then
+              aCrossOptionSetting:='-CfVFP -OoFASTMATH ';
           end;
         end;
 

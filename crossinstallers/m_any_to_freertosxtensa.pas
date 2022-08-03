@@ -227,7 +227,7 @@ begin
   else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // Start with any names user may have given
-  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then

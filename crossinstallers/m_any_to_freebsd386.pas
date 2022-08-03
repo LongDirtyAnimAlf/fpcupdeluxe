@@ -105,7 +105,7 @@ begin
   result:=inherited;
   if result then exit;
 
-  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
@@ -133,7 +133,7 @@ begin
   if not result then
   begin
     // look for binutils in versioned directories
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    AsFile:=BinUtilsPrefix+'as'+GetExeExt;
     i:=MAXFREEBSDVERSION;
     while (i>=MINFREEBSDVERSION) do
     begin

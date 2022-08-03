@@ -419,6 +419,7 @@ begin
 
     if (CrossInstaller.TargetOS=TOS.ultibo) then
       result:=ConcatPaths([InstallDirectory,'units',SUBARCHMagic+'-'+CrossInstaller.TargetOSName])
+      //result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic])
     else
     begin
       if CrossInstaller.TargetCPU=TCPU.arm then
@@ -825,6 +826,7 @@ var
   CrossOptions:String;
   i,j:integer;
   Options:String;
+  TxtFile:Text;
   s1,s2:string;
   UnitSearchPath:string;
   LibsAvailable,BinsAvailable:boolean;
@@ -1066,7 +1068,7 @@ begin
                 s1:=s1+CrossInstaller.FPCCFGSnippet+LineEnding;
 
               if (CrossInstaller.TargetOS=TOS.java) then
-                //s1:=s1+'-Fu'+ConcatPaths([InstallDirectory,'units','$FPCTARGET','rtl','org','freepascal','rtl'])+LineEnding;
+                //s1:=s1+'-Fu'+ConcatPaths([InstallDirectory,'units',FPC_TARGET_MAGIC,'rtl','org','freepascal','rtl'])+LineEnding;
                 s1:=s1+'-Fu'+ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl'])+LineEnding;
 
               if (SubarchTarget) then
@@ -1092,6 +1094,199 @@ begin
 
             //Edit dedicated settings of config snippet
             InsertFPCCFGSnippet(FPCCfg,s1);
+
+            if (CrossInstaller.TargetOS=TOS.ultibo) then
+            begin
+              // Creating Ultibo configuration files
+
+              if (CrossInstaller.TargetCPU=TCPU.arm) then
+              begin
+                s1 := FFPCCompilerBinPath + 'RPI.CFG';
+                if (NOT FileExists(s1)) then
+                begin
+                  //create RPI.CFG
+                  AssignFile(TxtFile,s1);
+                  Rewrite(TxtFile);
+                  try
+                    writeln(TxtFile,'#');
+                    writeln(TxtFile,'# Raspberry Pi (A/B/A+/B+/Zero) specific config file');
+                    writeln(TxtFile,'#');
+                    writeln(TxtFile,'-CfVFPV2');
+                    writeln(TxtFile,'-CIARM');
+                    writeln(TxtFile,'-CaEABIHF');
+                    writeln(TxtFile,'-OoFASTMATH');
+                    writeln(TxtFile,'-dRPI');
+                    writeln(TxtFile,'-dBCM2708');
+                    s2:=GetUnitsInstallDirectory(true);
+                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv6),[]);
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                  finally
+                    CloseFile(TxtFile);
+                  end;
+                end
+                else
+                begin
+                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1)+'. Not touching it !');
+                end;
+
+                s1 := FFPCCompilerBinPath + 'RPI2.CFG';
+                if (NOT FileExists(s1)) then
+                begin
+                  //create RPI2.CFG
+                  AssignFile(TxtFile,s1);
+                  Rewrite(TxtFile);
+                  try
+                    writeln(TxtFile,'#');
+                    writeln(TxtFile,'# Raspberry Pi 2B specific config file');
+                    writeln(TxtFile,'#');
+                    writeln(TxtFile,'-CfVFPV3');
+                    writeln(TxtFile,'-CIARM');
+                    writeln(TxtFile,'-CaEABIHF');
+                    writeln(TxtFile,'-OoFASTMATH');
+                    writeln(TxtFile,'-dRPI2');
+                    writeln(TxtFile,'-dBCM2709');
+                    s2:=GetUnitsInstallDirectory(true);
+                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                  finally
+                    CloseFile(TxtFile);
+                  end;
+                end
+                else
+                begin
+                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1)+'. Not touching it !');
+                end;
+
+                s1 := FFPCCompilerBinPath + 'RPI3.CFG';
+                if (NOT FileExists(s1)) then
+                 begin
+                  //create RPI3.CFG
+                  AssignFile(TxtFile,s1);
+                  Rewrite(TxtFile);
+                  try
+                    writeln(TxtFile,'#');
+                    writeln(TxtFile,'# Raspberry Pi 3B/3B+/3A+/CM3/Zero2W specific config file');
+                    writeln(TxtFile,'#');
+                    writeln(TxtFile,'#IFDEF CPUARM');
+                    writeln(TxtFile,'-CfVFPV3');
+                    writeln(TxtFile,'-CIARM');
+                    writeln(TxtFile,'-CaEABIHF');
+                    writeln(TxtFile,'-OoFASTMATH');
+                    writeln(TxtFile,'-dRPI3');
+                    writeln(TxtFile,'-dBCM2710');
+                    s2:=GetUnitsInstallDirectory(true);
+                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                    writeln(TxtFile,'#ENDIF');
+                    writeln(TxtFile,'#IFDEF CPUAARCH64');
+                    writeln(TxtFile,'-CfVFP');
+                    writeln(TxtFile,'-OoFASTMATH');
+                    writeln(TxtFile,'-dRPI3');
+                    writeln(TxtFile,'-dBCM2710');
+                    s2:=GetUnitsInstallDirectory(true);
+                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                    writeln(TxtFile,'#ENDIF');
+                  finally
+                    CloseFile(TxtFile);
+                  end;
+                end
+                else
+                begin
+                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1)+'. Not touching it !');
+                end;
+
+                s1 := FFPCCompilerBinPath + 'QEMUVPB.CFG';
+                if (NOT FileExists(s1)) then
+                begin
+                  //create QEMUVPB.CFG
+                  AssignFile(TxtFile,s1);
+                  Rewrite(TxtFile);
+                  try
+                    writeln(TxtFile,'#');
+                    writeln(TxtFile,'# QEMU VersatilePB specific config file');
+                    writeln(TxtFile,'#');
+                    writeln(TxtFile,'#IFDEF CPUARM');
+                    writeln(TxtFile,'-CfVFPV3');
+                    writeln(TxtFile,'-CIARM');
+                    writeln(TxtFile,'-CaEABIHF');
+                    writeln(TxtFile,'-OoFASTMATH');
+                    writeln(TxtFile,'-dQEMUVPB');
+                    s2:=GetUnitsInstallDirectory(true);
+                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                    writeln(TxtFile,'#ENDIF');
+                    writeln(TxtFile,'#IFDEF CPUAARCH64');
+                    writeln(TxtFile,'-CfVFP');
+                    writeln(TxtFile,'-OoFASTMATH');
+                    writeln(TxtFile,'-dQEMUVPB');
+                    s2:=GetUnitsInstallDirectory(true);
+                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                    writeln(TxtFile,'#ENDIF');
+                  finally
+                    CloseFile(TxtFile);
+                  end;
+                end
+                else
+                begin
+                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1)+'. Not touching it !');
+                end;
+
+              end;
+
+              if ((CrossInstaller.TargetCPU=TCPU.arm) OR (CrossInstaller.TargetCPU=TCPU.aarch64)) then
+              begin
+                s1 := FFPCCompilerBinPath + 'RPI4.CFG';
+                if (NOT FileExists(s1)) then
+                begin
+                  //create RPI4.CFG
+                  AssignFile(TxtFile,s1);
+                  Rewrite(TxtFile);
+                  try
+                    writeln(TxtFile,'#');
+                    writeln(TxtFile,'# Raspberry Pi 4B/400/CM4 specific config file');
+                    writeln(TxtFile,'#');
+                    writeln(TxtFile,'#IFDEF CPUARM');
+                    writeln(TxtFile,'-CfVFPV3');
+                    writeln(TxtFile,'-CIARM');
+                    writeln(TxtFile,'-CaEABIHF');
+                    writeln(TxtFile,'-OoFASTMATH');
+                    writeln(TxtFile,'-dRPI4');
+                    writeln(TxtFile,'-dBCM2711');
+                    s2:=GetUnitsInstallDirectory(true);
+                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                    writeln(TxtFile,'#ENDIF');
+                    writeln(TxtFile,'#IFDEF CPUAARCH64');
+                    writeln(TxtFile,'-CfVFP');
+                    writeln(TxtFile,'-OoFASTMATH');
+                    writeln(TxtFile,'-dRPI4');
+                    writeln(TxtFile,'-dBCM2711');
+                    s2:=GetUnitsInstallDirectory(true);
+                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                    writeln(TxtFile,'#ENDIF');
+                  finally
+                    CloseFile(TxtFile);
+                  end;
+                end
+                else
+                begin
+                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1)+'. Not touching it !');
+                end;
+
+              end;
+
+            end;
 
             {$ifdef UNIX}
             //Correct for some case errors on Unixes
@@ -4097,173 +4292,6 @@ begin
         Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
       end;
 
-      if Ultibo then
-      begin
-        // Creating Ultibo configuration files
-
-        s := FFPCCompilerBinPath + 'RPI.CFG';
-        if (NOT FileExists(s)) then
-        begin
-          //create RPI.CFG
-          AssignFile(TxtFile,s);
-          Rewrite(TxtFile);
-          try
-            writeln(TxtFile,'#');
-            writeln(TxtFile,'# Raspberry Pi (A/B/A+/B+/Zero) specific config file');
-            writeln(TxtFile,'#');
-            writeln(TxtFile,'-CfVFPV2');
-            writeln(TxtFile,'-CIARM');
-            writeln(TxtFile,'-CaEABIHF');
-            writeln(TxtFile,'-OoFASTMATH');
-            writeln(TxtFile,'-dRPI');
-            writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([InstallDirectory,'units',FPC_SUBARCH_MAGIC+'-'+GetOS(TOS.ultibo)]);
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
-            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
-          finally
-            CloseFile(TxtFile);
-          end;
-        end
-        else
-        begin
-          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
-        end;
-
-        s := FFPCCompilerBinPath + 'RPI2.CFG';
-        if (NOT FileExists(s)) then
-        begin
-          //create RPI2.CFG
-          AssignFile(TxtFile,s);
-          Rewrite(TxtFile);
-          try
-            writeln(TxtFile,'#');
-            writeln(TxtFile,'# Raspberry Pi 2B specific config file');
-            writeln(TxtFile,'#');
-            writeln(TxtFile,'-CfVFPV3');
-            writeln(TxtFile,'-CIARM');
-            writeln(TxtFile,'-CaEABIHF');
-            writeln(TxtFile,'-OoFASTMATH');
-            writeln(TxtFile,'-dRPI2');
-            writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([InstallDirectory,'units',FPC_SUBARCH_MAGIC+'-'+GetOS(TOS.ultibo)]);
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
-            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
-          finally
-            CloseFile(TxtFile);
-          end;
-        end
-        else
-        begin
-          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
-        end;
-
-        s := FFPCCompilerBinPath + 'RPI3.CFG';
-        if (NOT FileExists(s)) then
-        begin
-          //create RPI3.CFG
-          AssignFile(TxtFile,s);
-          Rewrite(TxtFile);
-          try
-            writeln(TxtFile,'#');
-            writeln(TxtFile,'# Raspberry Pi 3B specific config file');
-            writeln(TxtFile,'#');
-            writeln(TxtFile,'-CfVFPV3');
-            writeln(TxtFile,'-CIARM');
-            writeln(TxtFile,'-CaEABIHF');
-            writeln(TxtFile,'-OoFASTMATH');
-            writeln(TxtFile,'-dRPI3');
-            writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([InstallDirectory,'units',FPC_SUBARCH_MAGIC+'-'+GetOS(TOS.ultibo)]);
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
-            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib'+DirectorySeparator+'vc4');
-          finally
-            CloseFile(TxtFile);
-          end;
-        end
-        else
-        begin
-          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
-        end;
-
-        s := FFPCCompilerBinPath + 'RPI4.CFG';
-        if (NOT FileExists(s)) then
-        begin
-          //create RPI4.CFG
-          AssignFile(TxtFile,s);
-          Rewrite(TxtFile);
-          try
-            writeln(TxtFile,'#');
-            writeln(TxtFile,'# Raspberry Pi 4B/400/CM4 specific config file');
-            writeln(TxtFile,'#');
-            writeln(TxtFile,'#IFDEF CPUARM');
-            writeln(TxtFile,'-CfVFPV3');
-            writeln(TxtFile,'-CIARM');
-            writeln(TxtFile,'-CaEABIHF');
-            writeln(TxtFile,'-OoFASTMATH');
-            writeln(TxtFile,'-dRPI4');
-            writeln(TxtFile,'-dBCM2711');
-            s2:=ConcatPaths([InstallDirectory,'units',FPC_SUBARCH_MAGIC+'-'+GetOS(TOS.ultibo)]);
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            writeln(TxtFile,'#ENDIF');
-            writeln(TxtFile,'#IFDEF CPUAARCH64');
-            writeln(TxtFile,'-CfVFP');
-            writeln(TxtFile,'-OoFASTMATH');
-            writeln(TxtFile,'-dRPI4');
-            writeln(TxtFile,'-dBCM2711');
-            s2:=ConcatPaths([InstallDirectory,'units','armv8'+'-'+GetOS(TOS.ultibo)]);
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            s2:=ConcatPaths([InstallDirectory,'units',GetCPU(TCPU.aarch64)+'-'+GetOS(TOS.ultibo)]);
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            writeln(TxtFile,'#ENDIF');
-          finally
-            CloseFile(TxtFile);
-          end;
-        end
-        else
-        begin
-          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
-        end;
-
-        s := FFPCCompilerBinPath + 'QEMUVPB.CFG';
-        if (NOT FileExists(s)) then
-        begin
-          //create QEMUVPB.CFG
-          AssignFile(TxtFile,s);
-          Rewrite(TxtFile);
-          try
-            writeln(TxtFile,'#');
-            writeln(TxtFile,'# QEMU VersatilePB specific config file');
-            writeln(TxtFile,'#');
-            writeln(TxtFile,'-CfVFPV3');
-            writeln(TxtFile,'-CIARM');
-            writeln(TxtFile,'-CaEABIHF');
-            writeln(TxtFile,'-OoFASTMATH');
-            writeln(TxtFile,'-dQEMUVPB');
-            writeln(TxtFile,'-XParm-none-eabi-');
-            s2:=ConcatPaths([InstallDirectory,'units',FPC_SUBARCH_MAGIC+'-ultibo']);
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-            writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-            //writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'lib');
-          finally
-            CloseFile(TxtFile);
-          end;
-        end
-        else
-        begin
-          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
-        end;
-
-      end;
-
     end;
 
     // if, for one reason or another, there is no cfg file, create a minimal one by ourselves
@@ -4292,17 +4320,17 @@ begin
         writeln(TxtFile,'-Sgic');
         writeln(TxtFile,'');
         writeln(TxtFile,'# searchpath for units and other system dependent things');
-        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(InstallDirectory)+'units/$FPCTARGET/');
-        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(InstallDirectory)+'units/$FPCTARGET/*');
-        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(InstallDirectory)+'units/$FPCTARGET/rtl');
+        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(InstallDirectory)+'units/'+FPC_TARGET_MAGIC+'/');
+        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(InstallDirectory)+'units/'+FPC_TARGET_MAGIC+'/*');
+        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(InstallDirectory)+'units/'+FPC_TARGET_MAGIC+'/rtl');
         writeln(TxtFile,'');
         writeln(TxtFile,'# searchpath for tools');
-        writeln(TxtFile,'-FD'+IncludeTrailingPathDelimiter(InstallDirectory)+'bin/$FPCTARGET');
+        writeln(TxtFile,'-FD'+IncludeTrailingPathDelimiter(InstallDirectory)+'bin/'+FPC_TARGET_MAGIC);
         writeln(TxtFile,'');
         writeln(TxtFile,'# binutils prefix for cross compiling');
         writeln(TxtFile,'#IFDEF FPC_CROSSCOMPILING');
         writeln(TxtFile,'#IFDEF NEEDCROSSBINUTILS');
-        writeln(TxtFile,'  -XP$FPCTARGET-');
+        writeln(TxtFile,'  -XP'+FPC_TARGET_MAGIC+'-');
         writeln(TxtFile,'#ENDIF');
         writeln(TxtFile,'#ENDIF');
         writeln(TxtFile,'');
@@ -4410,6 +4438,45 @@ begin
         ConfigText.Append(SnipMagicBegin+FPCUPMAGIC);
 
         // add settings
+        if Ultibo then
+        begin
+          ConfigText.Append('#ifdef ULTIBO');
+          ConfigText.Append('# Search for CPU specific units');
+          s:=ConcatPaths([InstallDirectory,'units',FPC_TARGET_MAGIC,FPC_SUBARCH_MAGIC]);
+          ConfigText.Append('-Fu'+s);
+          ConfigText.Append('-Fu'+s+DirectorySeparator+'*');
+          ConfigText.Append('-Fu'+s+DirectorySeparator+'rtl');
+
+          ConfigText.Append('#ifdef CPUARMV6');
+          ConfigText.Append('# Search for CPU specific units');
+          s:=ConcatPaths([InstallDirectory,'units','armv6-'+GetOS(TOS.ultibo)]);
+          ConfigText.Append('-Fu'+s);
+          ConfigText.Append('-Fu'+s+DirectorySeparator+'*');
+          ConfigText.Append('-Fu'+s+DirectorySeparator+'rtl');
+          ConfigText.Append('#endif');
+
+          ConfigText.Append('#ifdef CPUARMV7A');
+          ConfigText.Append('# Search for CPU specific units');
+          s:=ConcatPaths([InstallDirectory,'units','armv7a-'+GetOS(TOS.ultibo)]);
+          ConfigText.Append('-Fu'+s);
+          ConfigText.Append('-Fu'+s+DirectorySeparator+'*');
+          ConfigText.Append('-Fu'+s+DirectorySeparator+'rtl');
+          ConfigText.Append('#endif');
+
+          ConfigText.Append('#ifdef CPUARMV8');
+          ConfigText.Append('# Search for CPU specific units');
+          s:=ConcatPaths([InstallDirectory,'units','armv8-'+GetOS(TOS.ultibo)]);
+          ConfigText.Append('-Fu'+s);
+          ConfigText.Append('-Fu'+s+DirectorySeparator+'*');
+          ConfigText.Append('-Fu'+s+DirectorySeparator+'rtl');
+          //s:=ConcatPaths([InstallDirectory,'units',GetCPU(TCPU.aarch64)+'-'+GetOS(TOS.ultibo)]);
+          //ConfigText.Append('-Fu'+s);
+          //ConfigText.Append('-Fu'+s+DirectorySeparator+'*');
+          //ConfigText.Append('-Fu'+s+DirectorySeparator+'rtl');
+          ConfigText.Append('#endif');
+          ConfigText.Append('#endif');
+        end;
+
         ConfigText.Append('# Adding binary tools paths to');
         ConfigText.Append('# plain bin dir and architecture bin dir so');
         ConfigText.Append('# fpc 3.1+ fpcres etc can be found.');
@@ -4424,12 +4491,12 @@ begin
         // Need to add appropriate library search path
         // where it is e.g /usr/lib/arm-linux-gnueabihf...
         ConfigText.Append('# library search path');
-        s:='-Fl/usr/lib/$FPCTARGET'+';'+'/usr/lib/$FPCTARGET-gnu'+';'+'/lib/$FPCTARGET'+';'+'/lib/$FPCTARGET-gnu';
+        s:='-Fl/usr/lib/'+FPC_TARGET_MAGIC+';'+'/usr/lib/$FPCTARGET-gnu'+';'+'/lib/$FPCTARGET'+';'+'/lib/$FPCTARGET-gnu';
         {$IFDEF cpuarm}
         {$IFDEF CPUARMHF}
-        s:=s+';'+'/usr/lib/$FPCTARGET-gnueabihf';
+        s:=s+';'+'/usr/lib/'+FPC_TARGET_MAGIC+'-gnueabihf';
         {$ELSE}
-        s:=s+';'+'/usr/lib/$FPCTARGET-gnueabi';
+        s:=s+';'+'/usr/lib/'+FPC_TARGET_MAGIC+'-gnueabi';
         {$ENDIF CPUARMHF}
         {$ENDIF cpuarm}
         ConfigText.Append(s);
@@ -4607,7 +4674,7 @@ begin
         x:=ConfigText.IndexOf('# searchpath for fppkg user-specific packages');
         if x>-1 then
         begin
-          ConfigText.Strings[x+1]:='-Fu'+ConcatPaths([BaseDirectory,PACKAGESLOCATION,'units','$FPCTARGET'])+'/*';
+          ConfigText.Strings[x+1]:='-Fu'+ConcatPaths([BaseDirectory,PACKAGESLOCATION,'units',FPC_TARGET_MAGIC])+'/*';
         end;
 
         ConfigText.SaveToFile(FPCCfg);
