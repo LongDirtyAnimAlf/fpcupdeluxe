@@ -2190,8 +2190,14 @@ begin
     if (MessageDlg(s+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
       exit;
 
-  if ( AnsiEndsText(GITLABEXTENSION,aFPCTarget) AND AnsiEndsText(GITLABEXTENSION,aLazarusTarget) AND (NOT chkGitlab.Checked) ) then
-    chkGitlab.Checked:=true;
+  if ( AnsiEndsText(GITLABEXTENSION,aFPCTarget) AND AnsiEndsText(GITLABEXTENSION,aLazarusTarget)) then
+  begin
+    if (NOT chkGitlab.Checked) then chkGitlab.Checked:=true;
+  end
+  else
+  begin
+    if (chkGitlab.Checked) then chkGitlab.Checked:=false;
+  end;
 
   AddMessage(s+'.');
   //sStatus:=s;
