@@ -106,11 +106,12 @@ end;
 
 function Tany_ultiboaarch64.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile,aOption: string;
+  AsFile: string;
   BinPrefixTry:string;
-  i:integer;
 begin
-  //binaries: https://github.com/messense/homebrew-macos-cross-toolchains
+  // binaries:
+  // https://github.com/messense/homebrew-macos-cross-toolchains
+  // https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/downloads
 
   result:=inherited;
   if result then exit;
@@ -135,6 +136,37 @@ begin
     if not result then
        result:=SimpleSearchBinUtil(BasePath,DirName+'-gnu',AsFile);
   end;
+
+  if (not result) then
+  begin
+    BinPrefixTry:=TargetCPUName+'-none-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
+
+  if (not result) then
+  begin
+    BinPrefixTry:=TargetCPUName+'-none-gnu-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
+
+  if (not result) then
+  begin
+    BinPrefixTry:=TargetCPUName+'-none-elf-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
+
 
   if (not result) then
   begin

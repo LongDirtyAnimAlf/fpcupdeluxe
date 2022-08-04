@@ -110,17 +110,17 @@ end;
 
 function Tany_ultiboarm.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile,aOption: string;
+  AsFile: string;
   BinPrefixTry:string;
-  i:integer;
 begin
-  //binaries: https://github.com/messense/homebrew-macos-cross-toolchains
+  // binaries:
+  // https://github.com/messense/homebrew-macos-cross-toolchains
+  // https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/downloads
 
   result:=inherited;
   if result then exit;
 
   BinPrefixTry:=BinUtilsPrefix;
-
 
   AsFile:=BinUtilsPrefix+'as'+GetExeExt;
   result:=SearchBinUtil(BasePath,AsFile);
@@ -183,6 +183,26 @@ begin
     // also check in the gnueabi directory
     if not result then
        result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabi',AsFile);
+  end;
+
+  if (not result) then
+  begin
+    BinPrefixTry:=TargetCPUName+'-unknown-linux-gnu-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
+
+  if (not result) then
+  begin
+    BinPrefixTry:=TargetCPUName+'-unknown-linux-gnueabi-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
 
   // Also allow for android crossbinutils
