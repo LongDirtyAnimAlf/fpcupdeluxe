@@ -242,8 +242,8 @@ type
     function GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
     function GetCompiler(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
 
-    function  GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
-    procedure SetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH;aValue:boolean);
+    //procedure SetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH;aValue:boolean);
+    //function  GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
 
     procedure ResetAll;
 
@@ -1209,6 +1209,7 @@ begin
   result:=CrossUtils[aCPU,aOS,aSubarch].Compiler;
 end;
 
+{
 procedure TForm2.SetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH; aValue:boolean);
 begin
   CrossUtils[aCPU,aOS,aSubarch].Available:=aValue;
@@ -1218,6 +1219,7 @@ function TForm2.GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
 begin
   result:=CrossUtils[aCPU,aOS,aSubarch].Available;
 end;
+}
 
 function TForm2.GetCheckIndex(aCaption:string):integer;
 begin

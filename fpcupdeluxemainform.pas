@@ -1213,8 +1213,8 @@ begin
 
           for aTSUBARCH in RebuildSubarchs do
           begin
-            if (Sender=nil) then
-              Form2.SetCrossAvailable(aTCPU,aTOS,aTSubArch,true);
+            //if (Sender=nil) then
+            //  Form2.SetCrossAvailable(aTCPU,aTOS,aTSubArch,true);
 
             // Only build for subarch if we do have subarchs
             if (aTOS in SUBARCH_OS) AND (aTCPU in SUBARCH_CPU) AND (aTSUBARCH=saNone) then continue;
@@ -2252,6 +2252,7 @@ begin
 
     if success then
     begin
+      aSUBARCH:=TSUBARCH.saNone;
 
       if Sender=PicoBtn then
       begin
@@ -2277,7 +2278,6 @@ begin
         aSUBARCH:=TSUBARCH.lx6;
       end;
 
-
       if Sender=UltiboBtn then
       begin
         s:='Going to install FPC cross-compiler for Ultibo.';
@@ -2291,15 +2291,18 @@ begin
         s:='Going to install FPC cross-compiler for Android arm.';
         aCPU:=TCPU.arm;
         aOS:=TOS.android;
-        aSUBARCH:=TSUBARCH.saNone;
       end;
 
       if (Sender=PicoBtn) OR (Sender=WioBtn) OR (Sender=ESPBtn) OR (Sender=UltiboBtn) OR (Sender=AndroidBtn) then
       begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
-        Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
+        //Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
         SetSelectedSubArch(aCPU,aOS,aSUBARCH);
+
+        //aSUBARCH:=GetSelectedSubArch(aCPU,aOS);
+        if (aSUBARCH<>TSUBARCH.saNone) then
+          s:=s+'. Subarch: '+GetSubarch(aSUBARCH);
 
         AddMessage(s+'.');
         sStatus:=s;
@@ -2318,6 +2321,8 @@ begin
         memoSummary.Lines.Append('');
       end;
 
+      aSUBARCH:=TSUBARCH.saNone;
+
       if (Sender=UltiboBtn) then
       begin
         s:='Going to install FPC cross-compiler for Ultibo armv8.';
@@ -2331,15 +2336,18 @@ begin
         s:='Going to install FPC cross-compiler for Android arm64.';
         aCPU:=TCPU.aarch64;
         aOS:=TOS.android;
-        aSUBARCH:=TSUBARCH.saNone;
       end;
 
       if ((Sender=AndroidBtn) OR (Sender=UltiboBtn)) then
       begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
-        Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
+        //Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
         SetSelectedSubArch(aCPU,aOS,aSUBARCH);
+
+        //aSUBARCH:=GetSelectedSubArch(aCPU,aOS);
+        if (aSUBARCH<>TSUBARCH.saNone) then
+          s:=s+'. Subarch: '+GetSubarch(aSUBARCH);
 
         AddMessage(s+'.');
         sStatus:=s;
@@ -2842,8 +2850,8 @@ begin
       aDataClient.UpInfo.UpFunction:=ufUninstallCross;
       {$endif}
       success:=RealRun;
-      if success then
-        Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,false);
+      //if success then
+      //  Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,false);
     finally
       DisEnable(Sender,true);
     end;
@@ -2972,6 +2980,8 @@ begin
     DisEnable(Sender,False);
 
     try
+      //FPCupManager.CrossOS_SubArch:=GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+
       //embedded predefined settings
       if (FPCupManager.CrossOS_Target=TOS.embedded) then
       begin
@@ -3495,8 +3505,8 @@ begin
 
       end;
 
-      if success then
-        Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,true);
+      //if success then
+      //  Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,true);
 
     finally
       DisEnable(Sender,True);
@@ -4166,7 +4176,7 @@ begin
     begin
       AddMessage('');
       AddMessage('');
-      AddMessage('SUCCESS: Fpcupdeluxe ended without errors.');
+      AddMessage('SUCCESS: installation by fpcupdeluxe complete !');
       AddMessage('');
 
       if FPCupManager.ShortcutCreated then

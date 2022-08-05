@@ -90,6 +90,7 @@ const
   SUBARCH_RISCV32    = [TSUBARCH.rv32imac..TSUBARCH.rv32i];
   SUBARCH_RISCV64    = [TSUBARCH.rv64imac..TSUBARCH.rv64i];
   SUBARCH_XTENSA     = [TSUBARCH.lx6..TSUBARCH.lx106];
+  SUBARCH_ULTIBO     = [TSUBARCH.armv6,TSUBARCH.armv7a,TSUBARCH.armv8];
 
   ABI_ARM            = [TABI.default,TABI.eabi,TABI.eabihf];
   ABI_XTENSA         = [TABI.default,TABI.windowed,TABI.call0];
@@ -119,7 +120,7 @@ type
     CrossBuildOptions:string;
     CrossARMArch:TARMARCH;
     Compiler:string;
-    Available:boolean;
+    //Available:boolean;
   end;
 
   TCrossUtils = array[TCPU,TOS,TSUBARCH] of TCrossUtil;
