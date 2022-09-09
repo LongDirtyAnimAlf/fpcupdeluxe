@@ -224,6 +224,9 @@ uses
   {$ENDIF}
   ;
 
+const
+  DEFINE_FPC_SOFT_FPUX80 = 'FPC_SOFT_FPUX80';
+
 // remove stale compiled files
 procedure RemoveStaleBuildDirectories(aBaseDir,aCPU,aOS:string);
 var
@@ -1616,10 +1619,6 @@ begin
             {$endif}
           end;
 
-          {$ifdef Darwin}
-          Options:=Options+' -ap';
-          {$endif}
-
           CrossOptions:=Trim(CrossOptions);
 
           if (
@@ -1635,17 +1634,21 @@ begin
             Processor.Process.Parameters.Add('CROSSOPT='+CrossOptions);
           end;
 
+          {$ifdef Darwin}
+          Options:=Options+' -ap';
+          {$endif}
+
           {$ifndef FPC_HAS_TYPE_EXTENDED}
           // soft 80 bit float if available
           if (GetTargetCPU=GetCPU(TCPU.x86_64)) then
           begin
-            if ( (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.i8086)  {OR (CrossInstaller.TargetCPU=TCPU.x86_64)} ) then
+            if ( (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.i8086)  OR (CrossInstaller.TargetCPU=TCPU.x86_64) ) then
             begin
               if FSoftFloat then
               begin
-                Infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
+                Infoln(infotext+'Adding -d'+DEFINE_FPC_SOFT_FPUX80+' to compiler options to enable 80bit (soft)float support.',etInfo);
                 Infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
-                Options:=Options+' -dFPC_SOFT_FPUX80';
+                Options:=Options+' -d'+DEFINE_FPC_SOFT_FPUX80;
               end;
             end;
           end;
@@ -2262,8 +2265,8 @@ begin
     if FSoftFloat then
     begin
       // soft 80 bit float if available
-      Infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
-      s1:=s1+' -dFPC_SOFT_FPUX80';
+      Infoln(infotext+'Adding -d'+DEFINE_FPC_SOFT_FPUX80+' to compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
+      s1:=s1+' -d'+DEFINE_FPC_SOFT_FPUX80;
     end;
   end;
   {$endif}
