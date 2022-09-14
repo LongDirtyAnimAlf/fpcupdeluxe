@@ -484,6 +484,11 @@ begin
     AddMessage('Setting base directory failure !!')
   else
     AddMessage('Current base directory : '+GetCurrentDir);
+
+  {$ifdef CPUAARCH64}
+  AddMessage('It might be necessary (quarantine problem) to do: sudo xattr -r -d com.apple.quarantine fpcupdeluxe-aarch64-darwin-cocoa.app');
+  {$endif}
+
   {$endif}
 
   aFPCTarget:='';
