@@ -148,6 +148,19 @@ const
   FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION=(2*10000+2*100+4);
   {$endif}
 
+  {$ifdef WINDOWS}
+  Crypto_DLL_Name = 'libeay32';
+  SSL_DLL_Name    = 'ssleay32';
+
+  {$ifdef win64}
+    SSL_DLL_Names:    array[1..4] of string = ('libssl-3-x64',    'libssl-1_1-x64',    SSL_DLL_Name, 'libssl32');
+    Crypto_DLL_Names: array[1..4] of string = ('libcrypto-3-x64', 'libcrypto-1_1-x64', Crypto_DLL_Name, Crypto_DLL_Name);
+  {$endif}
+  {$ifdef win32}
+    SSL_DLL_Names:    array[1..4] of string = ('libssl-3',    'libssl-1_1',    SSL_DLL_Name, 'libssl32');
+    Crypto_DLL_Names: array[1..4] of string = ('libcrypto-3', 'libcrypto-1_1', Crypto_DLL_Name, Crypto_DLL_Name);
+  {$endif}
+
   {$ifdef win64}
   OpenSSLSourceURL : array [0..4] of string = (
     //'https://indy.fulgan.com/SSL/openssl-1.0.2u-x64_86-win64.zip',
@@ -168,6 +181,8 @@ const
     'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-i386-win32.zip'
     );
   {$endif}
+  {$endif}
+
 
   REVISIONSLOG = 'fpcuprevisions.log';
 
@@ -996,9 +1011,10 @@ end;
 
 function TInstaller.CheckAndGetTools: boolean;
 var
-  OperationSucceeded: boolean;
+  CryptoSucceeded,OperationSucceeded: boolean;
   {$ifdef MSWINDOWS}
   aURL,aFile,Output: string;
+  i:integer;
   {$endif}
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckAndGetTools): ';
@@ -1058,38 +1074,37 @@ begin
     {$ifndef USEONLYCURL}
     if OperationSucceeded then
     begin
-      // always get ssl libs if they are not there: sometimes system wide libs do not work
-      if (NOT FileExists(SafeGetApplicationPath+'libeay32.dll')) OR (NOT FileExists(SafeGetApplicationPath+'ssleay32.dll')) then
-      begin
-        Infoln(localinfotext+'Getting OpenSSL library files.',etInfo);
-        DownloadOpenSSL;
-        DestroySSLInterface; // disable ssl and release libs
-      end
-      else
-      begin
-        Infoln(localinfotext+'Found OpenSSL library files.',etDebug);
-        Infoln(localinfotext+'Checking for correct signature.',etDebug);
-        if (IsSSLloaded) then
-        begin
-          DestroySSLInterface; // disable ssl and release libs
-        end;
-        if (NOT CheckFileSignature(SafeGetApplicationPath+'libeay32.dll')) OR (NOT CheckFileSignature(SafeGetApplicationPath+'ssleay32.dll')) then
-        begin
-          Infoln(localinfotext+'OpenSSL library files have wrong CPU signature.',etWarning);
-          DeleteFile(SafeGetApplicationPath+'libeay32.dll');
-          DeleteFile(SafeGetApplicationPath+'ssleay32.dll');
-          Infoln(localinfotext+'Getting correct OpenSSL library files.',etInfo);
-          DownloadOpenSSL;
-          //DestroySSLInterface; // disable ssl and release libs
-        end;
-      end;
-      if (NOT IsSSLloaded) then
+
+      CryptoSucceeded:=IsSSLloaded;
+      if (NOT CryptoSucceeded) then
       begin
         InitSSLInterface;
+        CryptoSucceeded:=IsSSLloaded;
+      end;
+
+      if (NOT CryptoSucceeded) then
+      begin
+        i:=Low(SSL_DLL_Names);
+        while ( (not CryptoSucceeded) AND (i<=High(SSL_DLL_Names)) ) do
+        begin
+          CryptoSucceeded:=(FileExists(SafeGetApplicationPath+Crypto_DLL_Names[i]+GetLibExt)) AND (FileExists(SafeGetApplicationPath+SSL_DLL_Names[i]+GetLibExt));
+          Inc(i);
+        end;
+        if (NOT CryptoSucceeded) then
+        begin
+          Infoln(localinfotext+'Getting OpenSSL library files.',etInfo);
+          DownloadOpenSSL;
+          DestroySSLInterface; // disable ssl and release libs
+        end;
+        if (NOT IsSSLloaded) then
+        begin
+          InitSSLInterface;
+          CryptoSucceeded:=IsSSLloaded;
+        end;
       end;
     end;
 
-    if (NOT IsSSLloaded) then
+    if (NOT CryptoSucceeded) then
       Infoln(localinfotext+'Could not init SSL interface.',etWarning);
     {$endif}
 
@@ -1261,7 +1276,6 @@ begin
           with TNormalUnzipper.Create do
           begin
             try
-              //OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\',['bin\unrar.exe','\bin\unrar3.dll']);
               OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\',[]);
             finally
               Free;
@@ -1661,7 +1675,7 @@ begin
   // add win32/64 gdb from lazarus
   AddNewUtil('gdb' + GetExeExt,SourceURL_gdb_default,'',ucDebugger32);
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucDebugger64);
-  //AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucDebugger64);
+  //AddNewUtil('libiconv-2'+GetLibExt,SourceURL64_gdb_default,'',ucDebugger64);
 
   // add win32/64 gdb from fpcup
   //AddNewUtil('i386-win32-gdb.zip',SourceURL_gdb,'',ucDebugger32);
@@ -1676,7 +1690,7 @@ begin
   AddNewUtil('gdate' + GetExeExt,aSourceURL,'',ucBinutil);
   // just add default 32 bit debugger for all usercases as a binutil !
   AddNewUtil('gdb' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('libexpat-1.dll',aSourceURL,'',ucBinutil);
+  AddNewUtil('libexpat-1'+GetLibExt,aSourceURL,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL,'',ucBinutil);
@@ -1685,9 +1699,9 @@ begin
   {
   https://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
   only has libexpat-1, so no need for these:
-  AddNewUtil('libgcc_s_dw2-1.dll',aSourceURL,'',ucBinutil);
-  AddNewUtil('libiconv-2.dll',aSourceURL,'',ucBinutil);
-  AddNewUtil('libintl-8.dll',aSourceURL,'',ucBinutil);
+  AddNewUtil('libgcc_s_dw2-1'+GetLibExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('libiconv-2'+GetLibExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('libintl-8'+GetLibExt,aSourceURL,'',ucBinutil);
   }
   AddNewUtil('ld' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('make' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -1697,8 +1711,8 @@ begin
   AddNewUtil('rm' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('strip' + GetExeExt,aSourceURL,'',ucBinutil);
 
-  AddNewUtil('Qt4Pas5.dll',SourceURL_QT,'',ucQtFile);
-  AddNewUtil('Qt5Pas1.dll',SourceURL_QT5,'',ucQtFile);
+  AddNewUtil('Qt4Pas5'+GetLibExt,SourceURL_QT,'',ucQtFile);
+  AddNewUtil('Qt5Pas1'+GetLibExt,SourceURL_QT5,'',ucQtFile);
   {$endif win32}
 
   {$ifdef win64}
@@ -1710,7 +1724,7 @@ begin
   AddNewUtil('gdate' + GetExeExt,aSourceURL64,'',ucBinutil);
   // just add default 64 bit debugger for all usercases as a binutil !
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucBinutil);
-  //AddNewUtil('libiconv-2.dll',SourceURL64_gdb_default,'',ucBinutil);
+  //AddNewUtil('libiconv-2'+GetLibExt,SourceURL64_gdb_default,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL64,'',ucBinutil);
@@ -2328,7 +2342,7 @@ begin
 
       RemotePath:=FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName;
 
-      //if (FUtilFiles[Counter].FileName='libiconv-2.dll') then continue;
+      //if (FUtilFiles[Counter].FileName='libiconv-2'+GetLibExt) then continue;
 
       DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath+FUtilFiles[Counter].FileName);
 
@@ -2509,17 +2523,22 @@ begin
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
 
-  Infoln(localinfotext+'No OpenSSL library files available for SSL. Going to download them.',etWarning);
+  Infoln(localinfotext+'No OpenSSL library files available for SSL. Going to download them. Might take some time.',etWarning);
 
   // Direct download OpenSSL from from Lazarus binaries
   if (NOT OperationSucceeded) then
   begin
-    OpenSSLFileName:='libeay32.dll';
-    OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
-    if OperationSucceeded then
+    i:=Low(SSL_DLL_Names);
+    while ( (not OperationSucceeded) AND (i<=High(SSL_DLL_Names)) ) do
     begin
-      OpenSSLFileName:='ssleay32.dll';
+      OpenSSLFileName:=Crypto_DLL_Names[i]+GetLibExt;
       OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
+      if OperationSucceeded then
+      begin
+        OpenSSLFileName:=SSL_DLL_Names[i]+GetLibExt;
+        OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
+      end;
+      Inc(i);
     end;
   end;
 
@@ -2527,8 +2546,6 @@ begin
   if (NOT OperationSucceeded) then
   begin
     localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
-
-    Infoln(localinfotext+'Got OpenSSL from '+OPENSSL_URL_LATEST+'.',etWarning);
 
     OpenSSLFileName := GetTempFileNameExt('FPCUPTMP','zip');
 
@@ -2563,14 +2580,16 @@ begin
       begin
         try
           resultcode:=2;
-          SysUtils.Deletefile(SafeGetApplicationPath+'libeay32.dll');
+          //DLLExt;
+          GetExeExt;
+          SysUtils.Deletefile(SafeGetApplicationPath+Crypto_DLL_Name+GetLibExt);
           if GetLastOSError<>5 then // no access denied
           begin
-            SysUtils.Deletefile(SafeGetApplicationPath+'ssleay32.dll');
+            SysUtils.Deletefile(SafeGetApplicationPath+SSL_DLL_Name+GetLibExt);
             if GetLastOSError<>5 then // no access denied
             begin
               resultcode:=1;
-              if DoUnZip(OpenSSLFileName,SafeGetApplicationPath,['libeay32.dll','ssleay32.dll']) then resultcode:=0;
+              if DoUnZip(OpenSSLFileName,SafeGetApplicationPath,[Crypto_DLL_Name+GetLibExt,SSL_DLL_Name+GetLibExt]) then resultcode:=0;
             end;
           end;
         finally
@@ -2691,9 +2710,9 @@ begin
 
   FreetypeDir:=IncludeTrailingPathDelimiter(FInstallDirectory);
 
-  FreetypeBin:='freetype-6.dll';
+  FreetypeBin:='freetype-6'+GetLibExt;
   if NOT FileExists(FreetypeDir+FreetypeBin) then
-    FreetypeBin:='freetype.dll';
+    FreetypeBin:='freetype'+GetLibExt;
 
   if NOT FileExists(FreetypeDir+FreetypeBin) then
   begin
@@ -2757,7 +2776,7 @@ end;
 
 function TInstaller.DownloadZlib: boolean;
 const
-  TARGETNAME='zlib1.dll';
+  TARGETNAME='zlib1'+GetLibExt;
   SOURCEURL : array [0..1] of string = (
     FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/zlib-1.2.3-bin.zip',
     'https://sourceforge.net/projects/gnuwin32/files/zlib/1.2.3/zlib-1.2.3-bin.zip/download'

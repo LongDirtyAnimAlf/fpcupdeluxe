@@ -68,8 +68,10 @@ Const
   MAXCONNECTIONRETRIES=2;
   {$ifdef Windows}
   GetExeExt='.exe';
+  GetLibExt='.dll';
   {$else}
   GetExeExt='';
+  //GetLibExt='.so';
   {$endif}
 
 
@@ -1067,6 +1069,7 @@ begin
     XdgDesktopContent.Add('Encoding=UTF-8');
     XdgDesktopContent.Add('Type=Application');
     XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus.ico');
+    //XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus128x128.png');
     XdgDesktopContent.Add('Path='+ExtractFilePath(Target));
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments+' %f');
     XdgDesktopContent.Add('Name='+ShortcutName);
@@ -5432,7 +5435,7 @@ begin
 
   if (NOT FCURLOk) AND (NOT FWGETOk) then
   begin
-    ThreadLog('Could not initialize either libcurl or wget.',etError);
+    ThreadLog('Could not initialize either libcurl or wget.',etDebug);
   end;
 
   UserAgent:=CURLUSERAGENT;
