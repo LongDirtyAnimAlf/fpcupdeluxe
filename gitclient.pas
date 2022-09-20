@@ -745,6 +745,9 @@ var
 begin
   result:='';
 
+  // As SVN revision info is not updated (anymore), disabled.
+  exit;
+
   if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
