@@ -1395,13 +1395,13 @@ begin
       with TNormalUnzipper.Create do
       begin
         try
-          SysUtils.Deletefile(SafeGetApplicationPath+'libeay32.dll');
+          SysUtils.Deletefile(SafeGetApplicationPath+Crypto_DLL_Name+GetLibExt);
           if GetLastOSError<>5 then // no access denied
           begin
-            SysUtils.Deletefile(SafeGetApplicationPath+'ssleay32.dll');
+            SysUtils.Deletefile(SafeGetApplicationPath+SSL_DLL_Name+GetLibExt);
             if GetLastOSError<>5 then // no access denied
             begin
-              if DoUnZip(OpenSSLZip,SafeGetApplicationPath,['libeay32.dll','ssleay32.dll']) then
+              if DoUnZip(OpenSSLZip,SafeGetApplicationPath,[Crypto_DLL_Name+GetLibExt,SSL_DLL_Name+GetLibExt]) then
               begin
                 AddMessage('Success: got OpenSSL library dll by browser!');
               end;
