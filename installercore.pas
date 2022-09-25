@@ -658,10 +658,7 @@ uses
   //LMessages,
   LCLIntf,
   {$endif}
-  process
-  {$IFDEF UNIX}
-  ,LazFileUtils
-  {$ENDIF UNIX}
+  process,LazFileUtils
   {$IF NOT DEFINED(HAIKU) AND NOT DEFINED(AROS) AND NOT DEFINED(MORPHOS)}
   //,ssl_openssl
   // for runtime init of openssl
@@ -3744,14 +3741,17 @@ begin
       begin
         Infoln(infotext+'Trying to patch ' + ModuleName + ' with '+PatchList[i],etInfo);
         PatchFilePath:=SafeExpandFileName(PatchList[i]);
-        if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+PatchList[i]);
-        if NOT FileExists(PatchFilePath) then
+        if (NOT FilenameIsAbsolute(PatchFilePath)) then
         begin
-          if PatchFPC then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpc'+DirectorySeparator+PatchList[i])
-             {$ifndef FPCONLY}
-             else if PatchLaz then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+PatchList[i])
-             {$endif}
-                else PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpcup'+DirectorySeparator+PatchList[i]);
+          if (NOT FileExists(PatchFilePath)) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+PatchList[i]);
+          if NOT FileExists(PatchFilePath) then
+          begin
+            if PatchFPC then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpc'+DirectorySeparator+PatchList[i])
+               {$ifndef FPCONLY}
+               else if PatchLaz then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+PatchList[i])
+               {$endif}
+                  else PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpcup'+DirectorySeparator+PatchList[i]);
+          end;
         end;
 
         if FileExists(PatchFilePath) then
