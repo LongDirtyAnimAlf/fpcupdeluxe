@@ -3520,16 +3520,17 @@ var
 begin
   result:=false;
 
-  OutputString:='';
   {$ifdef Unix}
   if (NOT result) then
   begin
     sd:=SysUtils.GetEnvironmentVariable('LIBRARY_PATH');
-    if ( (Length(sd)>0) AND (DirectoryExists(sd)) ) then
+    if (Length(sd)=0) then sd:=SysUtils.GetEnvironmentVariable('LD_LIBRARY_PATH');
+    if ((Length(sd)>0) AND (DirectoryExists(sd))) then
+    begin
       OutputString:=FileSearch(aLibrary,sd);
-    //OutputString:=FindFileInDirList(aLibrary,SysUtils.GetEnvironmentVariable('LIBRARY_PATH'));
-    result:=(Length(OutputString)>0);
-    if result then ThreadLog('Library searcher found '+aLibrary+' in path @ '+OutputString,etDebug);
+      result:=(Length(OutputString)>0);
+      if result then ThreadLog('Library searcher found '+aLibrary+' in path @ '+OutputString,etDebug);
+    end;
   end;
 
   if (NOT result) then
