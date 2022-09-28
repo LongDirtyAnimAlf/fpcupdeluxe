@@ -4230,6 +4230,9 @@ function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   aStoredTarget:string;
   Cores,MemAvailable,SwapAvailable:DWord;
+  {$ifdef LCLQT5}
+  QT5LibraryLocation:string;
+  {$endif}
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
@@ -4253,10 +4256,10 @@ begin
   {$ENDIF LINUX}
 
   {$ifdef LCLQT5}
-  if LibWhich(LIBQT5) then
-    AddMessage('Found system wide libQt5Pas.so and that will be used.')
+  if LibWhich(LIBQT5,QT5LibraryLocation) then
+    AddMessage('Found system wide '+LIBQT5+' inside '+QT5LibraryLocation+'. And that will be used.')
   else
-    AddMessage('No system wide libQt5Pas.so found. Some QT5 trickery will be used');
+    AddMessage('No system wide '+LIBQT5+' found. Some QT5 trickery will be used');
   {$endif}
 
   Cores:=GetLogicalCpuCount;

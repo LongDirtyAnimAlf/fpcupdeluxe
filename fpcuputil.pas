@@ -347,6 +347,7 @@ function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 function GetEnumValueSimple(aTypeInfo:PTypeInfo;const aEnum:string):integer;
 function ContainsDigit(const s: string): Boolean;
 //Find a library, if any
+function LibWhich(aLibrary: string; out dir: string): boolean;
 function LibWhich(aLibrary: string): boolean;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(const Executable: string): string;
@@ -3495,7 +3496,7 @@ begin
   result := false;
 end;
 
-function LibWhich(aLibrary: string): boolean;
+function LibWhich(aLibrary: string; out dir: string): boolean;
 {$ifdef Unix}
 const
   UNIXSEARCHDIRS : array [0..3] of string = (
@@ -3514,11 +3515,15 @@ const
   {$endif}
 var
   OutputString: string;
+  aFile:string;
   i:integer;
   sd:string;
+  OutputLines:TStringList;
 {$endif}
 begin
   result:=false;
+
+  //SysUtils.GetCurrentDir;
 
   {$ifdef Unix}
   if (NOT result) then
@@ -3529,7 +3534,11 @@ begin
     begin
       OutputString:=FileSearch(aLibrary,sd);
       result:=(Length(OutputString)>0);
-      if result then ThreadLog('Library searcher found '+aLibrary+' in path @ '+OutputString,etDebug);
+      if result then
+      begin
+        dir:='Found in library path: '+ExtractFileDir(OutputString);
+        ThreadLog('Library searcher found '+aLibrary+' in path @ '+OutputString,etDebug);
+      end;
     end;
   end;
 
@@ -3547,24 +3556,64 @@ begin
       if (RightStr(sd,4)='/x86') then continue;
       {$endif}
       {$endif}
-      if (NOT result) then
+      if DirectoryExists(sd) then
       begin
-        //try to find a file
-        //OutputString:=FileSearch(aLibrary,SysUtils.GetEnvironmentVariable('LIBRARY_PATH'));
-        //OutputString:=FindFileInDirList(aLibrary,SysUtils.GetEnvironmentVariable('LIBRARY_PATH'));
-        RunCommand('find',[sd,'-type','f','-name',aLibrary],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-        result:=(Pos(aLibrary,OutputString)>0);
-      end;
-      if (NOT result) then
-      begin
-        //try to find a symlink to a file
-        RunCommand('find',[sd,'-type','l','-name',aLibrary],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-        result:=(Pos(aLibrary,OutputString)>0);
-      end;
-      if result then
-      begin
-        ThreadLog('Library searcher found '+aLibrary+' inside '+sd+'.',etDebug);
-        break;
+        if (NOT result) then
+        begin
+          //try to find a file
+          //OutputString:=FileSearch(aLibrary,SysUtils.GetEnvironmentVariable('LIBRARY_PATH'));
+          //OutputString:=FindFileInDirList(aLibrary,SysUtils.GetEnvironmentVariable('LIBRARY_PATH'));
+          RunCommand('find',[sd,'-type','f','-name',aLibrary],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+          result:=((Pos(aLibrary,OutputString)>0));
+          if result then
+          begin
+            OutputLines:=TStringList.Create;
+            try
+              OutputLines.Text:=OutputString;
+              i:=StringListContains(OutputLines,aLibrary);
+              if (i<>-1) then
+              begin
+                aFile:=OutputLines[i];
+                if FileExists(aFile) then
+                  dir:='Found in unix dirs: '+ExtractFileDir(aFile)
+                else
+                  result:=false;
+              end;
+            finally
+              OutputLines.Destroy;
+            end;
+          end;
+
+        end;
+        if (NOT result) then
+        begin
+          //try to find a symlink to a file
+          RunCommand('find',[sd,'-type','l','-name',aLibrary],OutputString,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+          result:=((Pos(aLibrary,OutputString)>0));
+          if result then
+          begin
+            OutputLines:=TStringList.Create;
+            try
+              OutputLines.Text:=OutputString;
+              i:=StringListContains(OutputLines,aLibrary);
+              if (i<>-1) then
+              begin
+                aFile:=OutputLines[i];
+                if FileExists(aFile) then
+                  dir:='Found symlink in unix dirs: '+ExtractFileDir(aFile)
+                else
+                  result:=false;
+              end;
+            finally
+              OutputLines.Destroy;
+            end;
+          end;
+        end;
+        if result then
+        begin
+          ThreadLog('Library searcher found '+aLibrary+' inside '+sd+'.',etDebug);
+          break;
+        end;
       end;
     end;
   end;
@@ -3581,12 +3630,42 @@ begin
       result:=( (Pos(aLibrary,OutputString)>0) AND (Pos('not found',OutputString)=0));
       if result then
       begin
+        OutputLines:=TStringList.Create;
+        try
+          OutputLines.Text:=OutputString;
+          i:=StringListContains(OutputLines,aLibrary);
+          if (i<>-1) then
+          begin
+            aFile:=OutputLines[i];
+            i:=Pos(' /',aFile);
+            if (i>0) then
+            begin
+              Delete(aFile,1,i);
+              if FileExists(aFile) then
+                dir:='Found with ldconfig: '+ExtractFileDir(aFile)
+              else
+                result:=false;
+            end;
+          end;
+        finally
+          OutputLines.Destroy;
+        end;
+      end;
+      if result then
+      begin
         ThreadLog('Library '+aLibrary+' found by ldconfig.',etInfo);
       end;
     end;
   end;
   {$endif}
   {$endif}
+end;
+
+function LibWhich(aLibrary: string): boolean;
+var
+  aDir:string;
+begin
+  result:=LibWhich(aLibrary,aDir);
 end;
 
 function Which(const Executable: string): string;
