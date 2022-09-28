@@ -3575,7 +3575,7 @@ begin
               begin
                 aFile:=OutputLines[i];
                 if FileExists(aFile) then
-                  dir:='Found in unix dirs: '+ExtractFileDir(aFile)
+                  dir:='Found in unix dir: '+ExtractFileDir(aFile)
                 else
                   result:=false;
               end;
@@ -3600,7 +3600,7 @@ begin
               begin
                 aFile:=OutputLines[i];
                 if FileExists(aFile) then
-                  dir:='Found symlink in unix dirs: '+ExtractFileDir(aFile)
+                  dir:='Found symlink in unix dir: '+ExtractFileDir(aFile)
                 else
                   result:=false;
               end;
