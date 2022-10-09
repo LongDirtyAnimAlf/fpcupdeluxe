@@ -39,6 +39,9 @@ uses
 
 implementation
 
+uses
+  fpcuputil; // for wildcard libc.so search
+
 type
 
 { TAny_OpenBSDx64 }
@@ -59,18 +62,34 @@ end;
 
 function TAny_OpenBSDx64.GetLibs(Basepath:string): boolean;
 const
-  LibName='libc.so.95.0';
+  LibName1='libc.so.95.0'; // crosslibs v1.2
+  LibName2='libc.so.96.1'; // crosslibs v1.3
+var
+  sd,lc:string;
 begin
-
   result:=FLibsFound;
+
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LibName);
+  if (NOT result) then result:=SearchLibrary(Basepath,LibName1);
+  if (NOT result) then result:=SearchLibrary(Basepath,LibName2);
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+  if (NOT result) then result:=SimpleSearchLibrary(BasePath,DirName,LibName1);
+  if (NOT result) then result:=SimpleSearchLibrary(BasePath,DirName,LibName2);
+
+  if (NOT result) then
+  begin
+    // OpenBSD uses versioned libc, so also use a wildcard search
+    sd:=ConcatPaths([BasePath,CROSSPATH,'lib',DirName]);
+    lc:=FindFileInDirWildCard('libc.so*',sd);
+    if FileExists(lc) then
+    begin
+      lc:=ExtractFileName(lc);
+      result:=SearchLibrary(sd,lc);
+    end;
+  end;
 
   SearchLibraryInfo(result);
   if result then

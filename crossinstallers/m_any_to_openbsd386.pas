@@ -39,6 +39,9 @@ uses
 
 implementation
 
+uses
+  fpcuputil; // for wildcard libc.so search
+
 type
 
 { TAny_OpenBSD386 }
@@ -60,6 +63,8 @@ end;
 function TAny_OpenBSD386.GetLibs(Basepath:string): boolean;
 const
   LibName='libc.so.88.0';
+var
+  sd,lc:string;
 begin
   result:=FLibsFound;
 
@@ -71,6 +76,19 @@ begin
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+
+  if (NOT result) then
+  begin
+    // OpenBSD uses versioned libc, so also use a wildcard search
+    sd:=ConcatPaths([BasePath,CROSSPATH,'lib',DirName]);
+    lc:=FindFileInDirWildCard('libc.so*',sd);
+    if FileExists(lc) then
+    begin
+      lc:=ExtractFileName(lc);
+      result:=SearchLibrary(sd,lc);
+    end;
+  end;
+
 
   SearchLibraryInfo(result);
   if result then
