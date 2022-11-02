@@ -995,12 +995,10 @@ begin
   try
     for OS := Low(TOS) to High(TOS) do
     begin
-
       if OS=osNone then continue;
 
       for CPU := Low(TCPU) to High(TCPU) do
       begin
-
         if CPU=cpuNone then continue;
 
         // skip non-combi's to reduce size of ini-file

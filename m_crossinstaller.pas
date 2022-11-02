@@ -259,7 +259,7 @@ uses
 
 function GetCPU(aCPU:TCPU):string;
 begin
-  if (aCPU<Low(TCPU)) OR (aCPU>High(TCPU)) then
+  if (aCPU<Low(TCPU)) OR (aCPU>High(TCPU)) OR (aCPU=TCPU.cpuNone) then
     raise Exception.Create('Invalid CPU for GetCPU.');
   result:=GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU));
 end;
@@ -288,7 +288,7 @@ end;
 
 function GetOS(aOS:TOS):string;
 begin
-  if (aOS<Low(TOS)) OR (aOS>High(TOS)) then
+  if (aOS<Low(TOS)) OR (aOS>High(TOS)) OR (aOS=TOS.osNone) then
     raise Exception.Create('Invalid OS for GetOS.');
   result:=GetEnumNameSimple(TypeInfo(TOS),Ord(aOS));
 end;
@@ -896,9 +896,11 @@ var
 begin
   for OS := Low(TOS) to High(TOS) do
   begin
+    if OS=TOS.osNone then continue;
 
     for CPU := Low(TCPU) to High(TCPU) do
     begin
+      if CPU=TCPU.cpuNone then continue;
 
       SetSelectedSubArch(CPU,OS,TSUBARCH.saNone);
 

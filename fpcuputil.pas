@@ -259,7 +259,7 @@ function DeleteDirectoryEx(DirectoryName: string): boolean;
 function DeleteFilesSubDirs(const DirectoryName: string; const Names:TStringList; const OnlyIfPathHas: string): boolean;
 // Recursively delete files with specified extension(s),
 // only if path contains specfied directory name somewhere (or no directory name specified):
-function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
+function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TStringList; const OnlyIfPathHas: string): boolean;
 // only if filename contains specfied part somewhere
 function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas: string): boolean;
 function FileNameFromURL(URL:string):string;
@@ -1609,9 +1609,13 @@ begin
 end;
 
 function CheckDirectory(DirectoryName: string):boolean;
+{$ifndef Windows}
+const
+  FORBIDDENFOLDERS:array[0..11] of string = ('/bin','/boot','/dev','/lib','/lib32','/lib64','/proc','/root','/run','/sbin','/sys','/var');
+{$endif}
 var
   s,aDirectory:string;
-
+  i:integer;
 begin
   result:=true;
   aDirectory:=LowerCase(DirectoryName);
@@ -1622,13 +1626,14 @@ begin
   if s=aDirectory then exit;
   s:=IncludeTrailingPathDelimiter(s);
   if s=aDirectory then exit;
-  if (Pos(DirectorySeparator+'lib',aDirectory)=1) then exit;
-  if (Pos(DirectorySeparator+'lib32',aDirectory)=1) then exit;
-  if (Pos(DirectorySeparator+'lib64',aDirectory)=1) then exit;
-  if (Pos(DirectorySeparator+'sbin',aDirectory)=1) then exit;
+  for s in FORBIDDENFOLDERS do
+  begin
+    if (Pos(s,aDirectory)=1) then exit;
+  end;
   {$else}
   if Length(aDirectory)<=3 then exit;
-  if Pos('\windows',aDirectory)>0 then exit;
+  i:=Pos('\windows',aDirectory);
+  if ((i>0) AND (i<4)) then exit;
   {$endif}
   if (NOT ParentDirectoryIsNotRoot(aDirectory)) then exit;
   result:=false;
@@ -1746,13 +1751,13 @@ begin
   end;
 end;
 
-function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
+function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TStringList; const OnlyIfPathHas: string): boolean;
 // Deletes all files ending in one of the extensions, starting from
 // DirectoryName and recursing down.
 // It only deletes files if any directory of the path contains OnlyIfPathHas,
 // unless that is empty
-// Extensions can contain * to cover everything (other extensions will then be
-// ignored), making it delete all files, but leaving the directories.
+// Extensions can contain * to cover everything [other extensions will then be ignored]
+// making it delete all files, but leaving the directories.
 // Will try to remove read-only files.
 //todo: check how this works with case insensitive file system like Windows
 var
@@ -1763,12 +1768,18 @@ var
   {$ENDIF}
   AllFiles: boolean;
   CurSrcDir: String;
+  CurSearchPath: String;
   CurFilename: String;
   i: integer;
+  CurSrcDirValid:boolean;
 begin
   result:=false;
 
-  if CheckDirectory(DirectoryName) then exit;
+  if CheckDirectory(DirectoryName) then
+  begin
+    ThreadLog('Something wrong with directory: ' + DirectoryName + ' .',etError);
+    exit;
+  end;
 
   // Make sure we can compare extensions using ExtractFileExt
   for i:=0 to Extensions.Count-1 do
@@ -1777,7 +1788,9 @@ begin
   end;
   AllFiles:=(Extensions.Count=0) or (Extensions.IndexOf('.*')>=0);
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
-  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
+  CurSrcDirValid:=((OnlyIfPathHas='') OR (Pos(DirectorySeparator+OnlyIfPathHas,CurSrcDir)>0));
+  CurSearchPath:=CurSrcDir+GetAllFilesMask;
+  if SysUtils.FindFirst(CurSearchPath,faAnyFile{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
   begin
     result:=true;
     repeat
@@ -1795,8 +1808,7 @@ begin
         begin
           // If we are in the right path:
           //todo: get utf8 replacement for ExtractFilePath
-          if (OnlyIfPathHas='') or
-            (pos(DirectorySeparator+OnlyIfPathHas+DirectorySeparator,ExtractFilePath(CurFileName))>0) then
+          if CurSrcDirValid then
           begin
             // Only delete if extension is right
             if AllFiles or (Extensions.IndexOf(ExtractFileExt(FileInfo.Name))>=0) then
@@ -1805,12 +1817,22 @@ begin
               if (FileInfo.Attr and faReadOnly)>0 then
                 FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
               if not SysUtils.DeleteFile(CurFilename) then result:=false;
+              if result then CurSrcDirValid:=True;
+              if (NOT result) then
+              begin
+                ThreadLog('Delete error of file: ' + CurFilename + ' .',etError);
+              end;
             end;
           end;
         end;
       end;
     until (SysUtils.FindNext(FileInfo)<>0) OR (NOT result);
     SysUtils.FindClose(FileInfo);
+  end;
+  // Remove root directory; exit with failure on error:
+  if (result AND CurSrcDirValid) then
+  begin
+    if DirectoryIsEmpty(CurSrcDir) then result:=RemoveDir(CurSrcDir);
   end;
 end;
 

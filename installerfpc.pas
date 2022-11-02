@@ -125,6 +125,7 @@ type
     InitDone: boolean;
     function GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
   protected
+    function GetUnitsInstallDirectory(WithMagic:boolean):string;
     function GetVersionFromUrl(aUrl: string): string;override;
     function GetVersionFromSource: string;override;
     function GetReleaseCandidateFromSource:integer;override;
@@ -191,13 +192,12 @@ type
   TFPCCrossInstaller = class(TFPCInstaller)
   private
     FCrossCompilerName: string;
-    function SubarchTarget:boolean;
     function CompilerUpdateNeeded:boolean;
     function PackagesNeeded:boolean;
     function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
     property CrossCompilerName: string read FCrossCompilerName;
   protected
-    function GetUnitsInstallDirectory(WithMagic:boolean):string;
+    function SubarchTarget:boolean;
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; override;
   public
@@ -381,56 +381,6 @@ end;
 destructor TFPCCrossInstaller.Destroy;
 begin
   inherited Destroy;
-end;
-
-function TFPCCrossInstaller.GetUnitsInstallDirectory(WithMagic:boolean):string;
-var
-  aDir:string;
-  ABIMagic:string;
-  SUBARCHMagic:string;
-begin
-  if NOT Assigned(CrossInstaller) then exit;
-
-  // Standard directory
-  aDir:=ConcatPaths([InstallDirectory,'units']);
-  {$ifdef UNIX}
-  if FileIsSymlink(aDir) then
-  begin
-    try
-      aDir:=GetPhysicalFilename(aDir,pfeException);
-    except
-    end;
-  end;
-  {$endif UNIX}
-  result:=ConcatPaths([aDir,CrossInstaller.RegisterName]);
-  //result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName]);
-
-  // Specials
-  if (SubarchTarget) then
-  begin
-
-    if WithMagic then
-    begin
-      ABIMagic:=FPC_ABI_MAGIC;
-      SUBARCHMagic:=FPC_SUBARCH_MAGIC;
-    end
-    else
-    begin
-      ABIMagic:=CrossInstaller.ABIName;
-      SUBARCHMagic:=CrossInstaller.SubArchName;
-    end;
-
-    if (CrossInstaller.TargetOS=TOS.ultibo) then
-      result:=ConcatPaths([InstallDirectory,'units',SUBARCHMagic+'-'+CrossInstaller.TargetOSName])
-      //result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic])
-    else
-    begin
-      if CrossInstaller.TargetCPU=TCPU.arm then
-        result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic,ABIMagic])
-      else
-        result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic]);
-    end;
-  end;
 end;
 
 function TFPCCrossInstaller.SubarchTarget:boolean;
@@ -843,7 +793,7 @@ begin
   result:=inherited;
   result:=false; //fail by default
 
-  if assigned(CrossInstaller) then
+  if Assigned(CrossInstaller) then
   begin
     CrossInstaller.Reset;
 
@@ -2480,6 +2430,62 @@ begin
   if index=2 then result:=Build;
 end;
 
+function TFPCInstaller.GetUnitsInstallDirectory(WithMagic:boolean):string;
+var
+  aDir:string;
+  ABIMagic:string;
+  SUBARCHMagic:string;
+begin
+  // Standard directory
+  aDir:=ConcatPaths([InstallDirectory,'units']);
+  {$ifdef UNIX}
+  if FileIsSymlink(aDir) then
+  begin
+    try
+      aDir:=GetPhysicalFilename(aDir,pfeException);
+    except
+    end;
+  end;
+  {$endif UNIX}
+
+  if (NOT Assigned(CrossInstaller)) then
+  begin
+    result:=ConcatPaths([aDir,GetFPCTarget(True)]);
+    exit;
+  end;
+
+  result:=ConcatPaths([aDir,GetFPCTarget(False)]);
+  //result:=ConcatPaths([aDir,CrossInstaller.RegisterName]);
+
+  if (Self is TFPCCrossInstaller) then with (Self as TFPCCrossInstaller) do
+  // Specials
+  if (SubarchTarget) then
+  begin
+
+    if WithMagic then
+    begin
+      ABIMagic:=FPC_ABI_MAGIC;
+      SUBARCHMagic:=FPC_SUBARCH_MAGIC;
+    end
+    else
+    begin
+      ABIMagic:=CrossInstaller.ABIName;
+      SUBARCHMagic:=CrossInstaller.SubArchName;
+    end;
+
+    if (CrossInstaller.TargetOS=TOS.ultibo) then
+      result:=ConcatPaths([InstallDirectory,'units',SUBARCHMagic+'-'+CrossInstaller.TargetOSName])
+      //result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic])
+    else
+    begin
+      if CrossInstaller.TargetCPU=TCPU.arm then
+        result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic,ABIMagic])
+      else
+        result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic]);
+    end;
+  end;
+end;
+
 function TFPCInstaller.GetVersionFromUrl(aUrl: string): string;
 var
   aVersion: string;
@@ -3701,10 +3707,12 @@ var
   ConfigText,ConfigTextStore:TStringList;
   OperationSucceeded: boolean;
   PlainBinPath: string; //directory above the architecture-dependent FBinDir
-  s,s2:string;
-  TxtFile:Text;
-  x,y:integer;
   VersionSnippet:string;
+  aArch,aOS:string;
+  DeleteList:TStringList;
+  TxtFile:Text;
+  s,s2:string;
+  x,y:integer;
 
   function CheckFPCMkCfgOption(aOption:string):boolean;
   var
@@ -4695,8 +4703,62 @@ begin
 
   if OperationSucceeded then
   begin
-    Infoln(infotext+'Start search and removal of stale build files and directories. May take a while.');
-    RemoveStaleBuildDirectories(SourceDirectory,GetTargetCPU,GetTargetOS);
+    if (Self is TFPCCrossInstaller) then
+    begin
+      aArch:=GetFPCTarget(false);
+      aOS:=GetOS((Self as TFPCCrossInstaller).CrossOS_Target);
+    end
+    else
+    begin
+      aArch:=GetFPCTarget(true);
+      aOS:=GetTargetOS;
+    end;
+
+    //if (SourceDirectory<>InstallDirectory) then
+    begin
+      Infoln(infotext+'Start search and removal of stale build files and directories. May take a while.');
+
+      DeleteFilesNameSubdirs(SourceDirectory,'.stackdump');
+      DeleteFilesNameSubdirs(SourceDirectory,'.core');
+
+      // patch residues
+      //DeleteFilesNameSubdirs(SourceDirectory,'.rej');
+      //DeleteFilesNameSubdirs(SourceDirectory,'.orig');
+
+      s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'utils';
+      DeleteFilesNameSubdirs(s2,aArch+'.fpm');
+      DeleteFilesNameSubdirs(s2,'-'+aOS+'.fpm');
+      s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'packages';
+      DeleteFilesNameSubdirs(s2,aArch+'.fpm');
+      DeleteFilesNameSubdirs(s2,'-'+aOS+'.fpm');
+
+      s2:=ConcatPaths([SourceDirectory,'utils','bin']);
+      DeleteDirectoryEx(s2);
+      s2:=ConcatPaths([SourceDirectory,'packages','ide','bin']);
+      DeleteDirectoryEx(s2);
+
+      DeleteList := TStringList.Create;
+      try
+        DeleteList.Add('.ppu');
+        DeleteList.Add('.a');
+        DeleteList.Add('.o');
+        DeleteList.Add('.rsj');
+        {$ifdef MSWINDOWS}
+        DeleteList.Add('.exe');
+        {$ENDIF}
+        if (Pos('-a',FCompilerOptions)=0) then DeleteList.Add('.s');
+        s2:=ConcatPaths([SourceDirectory,'compiler','utils']);
+        DeleteFilesExtensionsSubdirs(s2,DeleteList,'units'+DirectorySeparator+aArch);
+        s2:=ConcatPaths([SourceDirectory,'packages']);
+        DeleteFilesExtensionsSubdirs(s2,DeleteList,'units'+DirectorySeparator+aArch);
+        s2:=ConcatPaths([SourceDirectory,'rtl']);
+        DeleteFilesExtensionsSubdirs(s2,DeleteList,'units'+DirectorySeparator+aArch);
+        s2:=ConcatPaths([SourceDirectory,'utils']);
+        DeleteFilesExtensionsSubdirs(s2,DeleteList,'units'+DirectorySeparator+aArch);
+      finally
+        DeleteList.Free;
+      end;
+    end;
     Infoln(infotext+'Search and removal of stale build files and directories ready.');
     WritelnLog(infotext+'Update/build/config succeeded.',false);
   end;
@@ -4885,28 +4947,9 @@ begin
       {$endif FORCEREVISION}
     end;
 
-    // Delete units
+    // Delete installed units
     // Alf: is it still needed: todo check
-
-    if CrossCompiling then
-    begin
-     aDir:=(Self AS TFPCCrossInstaller).GetUnitsInstallDirectory(false);
-    end
-    else
-    begin
-      aDir:=ConcatPaths([InstallDirectory,'units']);
-      {$IFDEF UNIX}
-      if FileIsSymlink(aDir) then
-      begin
-        try
-          aDir:=GetPhysicalFilename(aDir,pfeException);
-        except
-        end;
-      end;
-      {$ENDIF UNIX}
-      aDir:=aDir+DirectorySeparator+CPUOS_Signature;
-    end;
-
+    aDir:=GetUnitsInstallDirectory(false);
     if DirectoryExists(aDir) then
     begin
       // Only allow unit directories inside our own install te be deleted
@@ -4915,7 +4958,7 @@ begin
     end;
 
     {$IFDEF MSWINDOWS}
-    // delete the units directory !!
+    // delete the units directory inside the source directory !!
     // this is needed due to the fact that make distclean will not cleanout this units directory
     // make distclean will only remove the results of a make, not a make install
     aDir:=ConcatPaths([SourceDirectory,'units',CPUOS_Signature]);
@@ -4927,17 +4970,6 @@ begin
     // finally ... if something is still still still floating around ... delete it !!
     DeleteList := TStringList.Create;
     try
-      (*
-      FindAllFiles(DeleteList,SourceDirectory, '*.ppu; *.a; *.o', True);
-      if DeleteList.Count > 0 then
-      begin
-        for FileCounter := 0 to (DeleteList.Count-1) do
-        begin
-          if Pos(CPUOS_Signature,DeleteList.Strings[FileCounter])>0 then DeleteFile(DeleteList.Strings[FileCounter]);
-        end;
-      end;
-      *)
-
       // delete stray unit and (static) object files, if any !!
       DeleteList.Add('.ppu');
       DeleteList.Add('.a');

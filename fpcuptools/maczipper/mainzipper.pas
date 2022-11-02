@@ -39,7 +39,7 @@ const
   BaseDir='.\..\..\..\deluxebin';
   //BaseDir='.\..\deluxebin';
   BaseName='fpcupdeluxe-';
-  FileList:array[0..7] of string = (BaseName+'i386-darwin-carbon',BaseName+'i386-darwin-cocoa',BaseName+'powerpc-darwin-carbon',BaseName+'powerpc-darwin-cocoa',BaseName+'powerpc64-darwin-cocoa',BaseName+'x86_64-darwin-cocoa',BaseName+'aarch64-darwin-cocoa',BaseName+'x86_64-darwin-qt5');
+  FileList:array[0..8] of string = (BaseName+'i386-darwin-carbon',BaseName+'i386-darwin-cocoa',BaseName+'powerpc-darwin-carbon',BaseName+'powerpc-darwin-cocoa',BaseName+'powerpc64-darwin-cocoa',BaseName+'x86_64-darwin-cocoa',BaseName+'x86_64-darwin-cocoa-legacy',BaseName+'aarch64-darwin-cocoa',BaseName+'x86_64-darwin-qt5');
 
 { TForm1 }
 

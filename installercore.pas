@@ -530,10 +530,10 @@ type
     property Compiler: string {read GetCompiler} write FCompiler;
     // Compiler options passed on to make as OPT= or FPCOPT=
     property CompilerOptions: string write FCompilerOptions;
-    // SubArch for target embedded
-    property CrossOS_SubArch: TSUBARCH read FCrossOS_SubArch;
-    // When cross-compiling for arm: hardfloat or softfloat calling convention
-    property CrossOS_ABI: TABI read FCrossOS_ABI;
+    property CrossCPU_Target: TCPU read FCrossCPU_Target; //When cross-compiling: CPU, e.g. x86_64
+    property CrossOS_Target: TOS read FCrossOS_Target; //When cross-compiling: OS, e.g. win64
+    property CrossOS_SubArch: TSUBARCH read FCrossOS_SubArch;// SubArch for target embedded
+    property CrossOS_ABI: TABI read FCrossOS_ABI;    // When cross-compiling for arm: hardfloat or softfloat calling convention
     // Options for cross compiling. User can specify his own, but cross compilers can set defaults, too
     property CrossOPT: string read FCrossOPT write FCrossOPT;
     property CrossToolsDirectory:string read FCrossToolsDirectory write FCrossToolsDirectory;
@@ -682,9 +682,9 @@ var
   target: string;
 begin
   result:=nil;
-  if ((FCrossCPU_Target<>TCPU.cpuNone) AND (FCrossOS_Target<>TOS.osNone)) then
+  if ((CrossCPU_Target<>TCPU.cpuNone) AND (CrossOS_Target<>TOS.osNone)) then
   begin
-    if (NOT Assigned(FCrossInstaller)) OR ((FCrossInstaller.TargetCPU<>FCrossCPU_Target)  OR (FCrossInstaller.TargetOS<>FCrossOS_Target)) then
+    if (NOT Assigned(FCrossInstaller)) OR ((FCrossInstaller.TargetCPU<>CrossCPU_Target)  OR (FCrossInstaller.TargetOS<>CrossOS_Target)) then
     begin
       target := GetFPCTarget(false);
       FCrossInstaller:=nil;
@@ -723,7 +723,7 @@ begin
   if (NOT DirectoryExists(FInstallDirectory)) then exit;
   if CheckDirectory(FInstallDirectory) then exit;
 
-  if ((FCrossCPU_Target=TCPU.cpuNone) OR (FCrossOS_Target=TOS.osNone)) then exit;
+  if ((CrossCPU_Target=TCPU.cpuNone) OR (CrossOS_Target=TOS.osNone)) then exit;
 
   //if (Self is TFPCCrossInstaller) then
   begin
@@ -794,7 +794,7 @@ begin
         Inc(SnipBegin);
       end;
 
-      result:=((GetCPU(FCrossCPU_Target)=aCPU) AND (GetOS(FCrossOS_Target)=aOS));
+      result:=((GetCPU(CrossCPU_Target)=aCPU) AND (GetOS(CrossOS_Target)=aOS));
 
     finally
       ConfigText.Free;
@@ -2978,7 +2978,7 @@ begin
   if Native then
     result:=GetTargetCPU+'-'+GetTargetOS
   else
-    result:=GetCPU(FCrossCPU_Target)+'-'+GetOS(FCrossOS_Target);
+    result:=GetCPU(CrossCPU_Target)+'-'+GetOS(CrossOS_Target);
 end;
 
 function TInstaller.GetPath: string;
@@ -3066,7 +3066,7 @@ procedure TInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);
 begin
   FCrossCPU_Target:=aCPU;
   FCrossOS_Target:=aOS;
-  if ((FCrossOS_Target in SUBARCH_OS) AND (FCrossCPU_Target in SUBARCH_CPU)) then
+  if ((CrossOS_Target in SUBARCH_OS) AND (CrossCPU_Target in SUBARCH_CPU)) then
     FCrossOS_SubArch:=aSubArch
   else
     FCrossOS_SubArch:=TSUBARCH.saNone;
@@ -3075,11 +3075,11 @@ end;
 procedure TInstaller.SetABI(aABI:TABI);
 begin
   //
-  if (FCrossCPU_Target=TCPU.arm) then
+  if (CrossCPU_Target=TCPU.arm) then
     FCrossOS_ABI:=aABI
   else
   begin
-    if (FCrossOS_Target=TOS.ios) then
+    if (CrossOS_Target=TOS.ios) then
     begin
       FCrossOS_ABI:=aABI;
       if (aABI<>TABI.default) AND (aABI<>TABI.aarch64ios) then
@@ -4170,6 +4170,7 @@ begin
   begin
     for aCPU:=Low(TCPU) to High(TCPU) do
     begin
+      if aCPU=TCPU.cpuNone then continue;
       if (Cpu_Target=GetCPU(aCPU)) then
       begin
         result:=GetDefaultCompilerFilename(aCPU,false);

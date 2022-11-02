@@ -174,11 +174,11 @@ type
     FBootstrapCompilerDirectory: string;
     FClean: boolean;
     FConfigFile: string;
-    FCrossCPU_Target: TCPU;
     {$ifndef FPCONLY}
     FLCL_Platform: string; //really LCL widgetset
     {$endif}
     FCrossOPT: string;
+    FCrossCPU_Target: TCPU;
     FCrossOS_Target: TOS;
     FCrossOS_SubArch: TSUBARCH;
     FFPCDesiredRevision: string;
@@ -1727,9 +1727,9 @@ end;
 
 function TFPCupManager.GetCrossCombo_Target:string;
 begin
-  result:=GetCPU(FCrossCPU_Target)+'-'+GetOS(FCrossOS_Target);
-  if (FCrossOS_SubArch<>TSUBARCH.saNone) then
-    result:=result+'-'+GetSubarch(FCrossOS_SubArch);
+  result:=GetCPU(CrossCPU_Target)+'-'+GetOS(CrossOS_Target);
+  if (CrossOS_SubArch<>TSUBARCH.saNone) then
+    result:=result+'-'+GetSubarch(CrossOS_SubArch);
 end;
 
 { TSequencer }
@@ -2150,7 +2150,7 @@ begin
         exit; //all fine, continue with current FInstaller
       end
       else
-        FInstaller.free; // get rid of old FInstaller
+        FInstaller.Free; // get rid of old FInstaller
     end;
 
     if CrossCompiling then
