@@ -122,7 +122,7 @@ begin
 
 
   {$ifndef WIN32}
-  AsFile:=FBinUtilsPrefix+'as.exe';
+  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
@@ -131,7 +131,7 @@ begin
   if not result then
   begin
     FBinUtilsPrefix:=GetCPU(TargetCPU)+'-go32-';
-    AsFile:=FBinUtilsPrefix+'as.exe';
+    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
       result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);

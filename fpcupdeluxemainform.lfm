@@ -4160,6 +4160,7 @@ object Form1: TForm1
           'morphos'
           'aros'
           'amiga'
+          'go32v2'
           'ios'
           'freertos'
           'ultibo'
