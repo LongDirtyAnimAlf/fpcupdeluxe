@@ -5562,14 +5562,17 @@ object Form1: TForm1
       end
       object MGermanlanguage: TMenuItem
         Caption = 'German (D)'
+        Enabled = False
         OnClick = LanguageClick
       end
       object MChineseCNlanguage: TMenuItem
         Caption = 'Chinese (CN)'
+        Enabled = False
         OnClick = LanguageClick
       end
       object MKoreanlanguage: TMenuItem
         Caption = 'Korean'
+        Enabled = False
         OnClick = LanguageClick
       end
     end

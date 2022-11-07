@@ -871,10 +871,10 @@ begin
 
   // suppress some GIT errors, always
   if AnsiContainsText(line,'fatal: not a git repository') then exit;
+  if AnsiStartsText('fatal: No names found',line) then exit;
 
   //Haiku errors we are not interested in
   {$ifdef Haiku}
-  if AnsiStartsText('fatal: No names found',line) then exit;
   if AnsiStartsText('runtime_loader:',line) then exit;
   {$endif}
 
