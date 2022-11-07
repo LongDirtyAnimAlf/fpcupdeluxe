@@ -80,6 +80,7 @@ type
     MenuFile: TMenuItem;
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
+    MFrenchlanguage: TMenuItem;
     MGermanlanguage: TMenuItem;
     MFPCBugs: TMenuItem;
     MKoreanlanguage: TMenuItem;
@@ -498,6 +499,8 @@ begin
   aLazarusTarget:='';
   bGitlab:=true;
 
+
+
   // get last used install directory, proxy and visual settings
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
@@ -521,9 +524,9 @@ begin
       {$endif}
       {$endif}
     end;
-
     {$ifdef EnableLanguages}
     sLanguage:=ReadString('General','Language',sLanguage);
+    TransLate(sLanguage);
     {$endif}
     {$ifdef RemoteLog}
     sConsentWarning:=ReadBool('General','ConsentWarning',true);
@@ -1949,6 +1952,7 @@ begin
   if Sender=MEnglishlanguage then sLanguage:='en';
   if Sender=MKoreanlanguage then sLanguage:='ko';
   if Sender=MGermanlanguage then sLanguage:='de';
+  if Sender=MFrenchlanguage then sLanguage:='fr';
   TransLate(sLanguage);
   {$endif}
 end;
@@ -4765,9 +4769,6 @@ end;
 procedure TForm1.InitFpcupdeluxe(Data: PtrInt);
 begin
   InitFPCupManager;
-  {$ifdef EnableLanguages}
-  TransLate(sLanguage);
-  {$endif}
   {$ifdef usealternateui}
   // This must only be called once.
   If Not Alternate_ui_created then alternateui_Create_Controls;

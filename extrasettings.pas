@@ -318,7 +318,7 @@ resourcestring
   CaptionCheckUpdateOnly = 'FPC/Laz rebuild only.';
 
   HintCheckSystemFPC = 'Use the system wide install of FPC to build Lazarus.';
-  CaptionCheckSystemFPC = 'Use system FPC for Lazaru.s';
+  CaptionCheckSystemFPC = 'Use system FPC for Lazarus';
 
   HintCheckIncludeHelp = '';
   CaptionCheckIncludeHelp = 'Include Help.';
@@ -412,6 +412,7 @@ end;
 
 procedure TForm2.FormCreate(Sender: TObject);
 var
+  i       : integer;
   CPU       :TCPU;
   OS        :TOS;
   ARMArch   :TARMARCH;
@@ -482,6 +483,9 @@ begin
     Append(CaptionCheckAddContext);
     Append(CaptionCheckAskConfirmation);
   end;
+
+  for i := 0 to MiscellaneousCheckListBox.Count-1 do
+    MiscellaneousCheckListBox.Checked[i] := False;
 
   AskConfirmation        := True;
   FpcupBootstrappersOnly := True;
