@@ -76,8 +76,8 @@ msgid "Split Lazarus source and bins."
 msgstr "Lazarus-Quelle und -Behälter teilen."
 
 #: extrasettings.captionchecksystemfpc
-msgid "Use system FPC for Lazaru.s"
-msgstr "Verwenden Sie System-FPC für Lazaru.s"
+msgid "Use system FPC for Lazarus."
+msgstr "Verwenden Sie System-FPC für Lazarus."
 
 #: extrasettings.captioncheckupdateonly
 msgid "FPC/Laz rebuild only."
@@ -143,11 +143,11 @@ msgstr "Alle installierten Cross-Compiler werden automatisch erstellt!"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilerscheck
 msgid "Checking FPC configfile [fpc.cfg] for cross-compilers in "
-msgstr "Überprüfung der FPC-Konfigurationsdatei [fpc.cfg] auf Cross-Compiler in"
+msgstr "Überprüfung der FPC-Konfigurationsdatei [fpc.cfg] auf Cross-Compiler in "
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersfound
 msgid "Found crosscompiler for "
-msgstr "Crosscompiler gefunden für"
+msgstr "Crosscompiler gefunden für "
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersupdate
 msgid "Going to update cross-compiler."

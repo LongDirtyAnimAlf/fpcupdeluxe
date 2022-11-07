@@ -17,7 +17,7 @@ msgid "Add context for FPC and Lazarus files."
 msgstr "FPC와 라자루스 파일을 추가합니다."
 
 #: extrasettings.captioncheckautoswitchurl
-msgid "Auto-switch repo URL (default=no)"
+msgid "Auto-switch repo URL."
 msgstr "레포 URL 자동전환 (기본=아니오)"
 
 #: extrasettings.captioncheckenableonlinepatching
@@ -25,63 +25,63 @@ msgid "Allow patching of sources by online patches."
 msgstr "온라인 소스에서 패치 허용."
 
 #: extrasettings.captioncheckextraverbose
-msgid "Be extra verbose (default=no)"
+msgid "Be extra verbose."
 msgstr "자세한 내용(기본값=아니오)"
 
 #: extrasettings.captioncheckforcelocalrepoclient
-msgid "Use local repo-client (default=no)"
+msgid "Use local repo-client."
 msgstr "로컬 repo-client 사용(기본값=아니오)"
 
 #: extrasettings.captioncheckfpcupbootstrappersonly
-msgid "Only use fpcup bootstrappers (default=no)"
+msgid "Only use fpcup bootstrappers."
 msgstr "Fpcup 부트스트래퍼만 사용(기본값=아니오)"
 
 #: extrasettings.captioncheckgetupdates
-msgid "Check for fpcupdeluxe updates (default=no)"
+msgid "Check for fpcupdeluxe updates."
 msgstr "Fpcupdeluxe 업데이트 확인(기본값=아니오)"
 
 #: extrasettings.captioncheckincludehelp
-msgid "Include Help (default=no)"
+msgid "Include Help."
 msgstr "도움말 포함(기본=아니오)"
 
 #: extrasettings.captioncheckincludelcl
-msgid "Include LCL with cross-compiler (default=no)"
+msgid "Include LCL with cross-compiler."
 msgstr "교차 관측치가 있는 LCL 포함(기본값=아니오)"
 
 #: extrasettings.captioncheckpackagerepo
-msgid "Get package repositories (default=no)"
+msgid "Get package repositories."
 msgstr "패키지 저장소 가져오기 (기본=아니오)"
 
 #: extrasettings.captioncheckrepo
-msgid "Get FPC/Laz repositories (default=yes)"
+msgid "Get FPC/Laz repositories."
 msgstr "FPC/Laz 리포지토리 가져오기(기본값=예)"
 
 #: extrasettings.captionchecksendinfo
-msgid "Send location and install info (default=no)"
+msgid "Send location and install info."
 msgstr "위치 및 설치 정보 전송(기본값=아니오)"
 
 #: extrasettings.captionchecksplitfpc
-msgid "Split FPC source and bins (default=yes)"
+msgid "Split FPC source and bins."
 msgstr "FPC 소스와 바이너리 분리 (기본=예)"
 
 #: extrasettings.captionchecksplitlazarus
-msgid "Split Lazarus source and bins (default=no)"
+msgid "Split Lazarus source and bins."
 msgstr "Lazarus 소스 및 바이너리 분할(기본값=아니오)"
 
 #: extrasettings.captionchecksystemfpc
-msgid "Use system FPC for Lazarus (default=no)"
+msgid "Use system FPC for Lazarus."
 msgstr "Lazarus에 시스템 FPC 사용(기본값=아니오)"
 
 #: extrasettings.captioncheckupdateonly
-msgid "FPC/Laz rebuild only (default=no)"
+msgid "FPC/Laz rebuild only."
 msgstr "FPC/Laz 리빌드 만 (기본=아니오)"
 
 #: extrasettings.captioncheckusemakejobs
-msgid "Use jobs for GNU make (default=yes)"
+msgid "Use jobs for GNU make."
 msgstr "GNU Make에 작업 사용(기본값=예)"
 
 #: extrasettings.captioncheckusewget
-msgid "Use wget/libcurl as downloader (default=no)"
+msgid "Use wget/libcurl as downloader."
 msgstr "Wget/libcurl을 다운로드 프로그램으로 사용(기본값=아니오)"
 
 #: extrasettings.captionusesoftfloat80bit

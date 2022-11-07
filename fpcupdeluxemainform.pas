@@ -1954,6 +1954,7 @@ begin
   if Sender=MGermanlanguage then sLanguage:='de';
   if Sender=MFrenchlanguage then sLanguage:='fr';
   TransLate(sLanguage);
+  Form2.UpdateList;
   {$endif}
 end;
 

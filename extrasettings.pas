@@ -246,6 +246,7 @@ type
     //function  GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
 
     procedure ResetAll;
+    procedure UpdateList;
 
     property Repo:boolean read GetRepo write SetRepo;
     property PackageRepo:boolean read GetPackageRepo write SetPackageRepo;
@@ -318,7 +319,7 @@ resourcestring
   CaptionCheckUpdateOnly = 'FPC/Laz rebuild only.';
 
   HintCheckSystemFPC = 'Use the system wide install of FPC to build Lazarus.';
-  CaptionCheckSystemFPC = 'Use system FPC for Lazarus';
+  CaptionCheckSystemFPC = 'Use system FPC for Lazarus.';
 
   HintCheckIncludeHelp = '';
   CaptionCheckIncludeHelp = 'Include Help.';
@@ -459,33 +460,7 @@ begin
     RadioGroupARMArch.Items.Add(GetEnumNameSimple(TypeInfo(TARMARCH),Ord(ARMArch)));
   RadioGroupARMArch.ItemIndex:=0;
 
-  with MiscellaneousCheckListBox.Items do
-  begin
-    Append(CaptionCheckRepo);
-    Append(CaptionCheckPackageRepo);
-    Append(CaptionCheckIncludeLCL);
-    Append(CaptionCheckUpdateOnly);
-    Append(CaptionCheckSystemFPC);
-    Append(CaptionCheckIncludeHelp);
-    Append(CaptionCheckSplitFPC);
-    Append(CaptionCheckSplitLazarus);
-    Append(CaptionCheckUseWget);
-    Append(CaptionCheckUseMakeJobs);
-    Append(CaptionCheckExtraVerbose);
-    Append(CaptionCheckAutoSwitchURL);
-    Append(CaptionCheckSendInfo);
-    Append(CaptionCheckFpcupBootstrappersOnly);
-    Append(CaptionCheckForceLocalRepoClient);
-    Append(CaptionCheckGetUpdates);
-    Append(CaptionUseSoftFloat80bit);
-    Append(CaptionCheckEnableOnlinePatching);
-    Append(CaptionCheckApplyLocalChanges);
-    Append(CaptionCheckAddContext);
-    Append(CaptionCheckAskConfirmation);
-  end;
-
-  for i := 0 to MiscellaneousCheckListBox.Count-1 do
-    MiscellaneousCheckListBox.Checked[i] := False;
+  UpdateList;
 
   AskConfirmation        := True;
   FpcupBootstrappersOnly := True;
@@ -590,6 +565,66 @@ begin
 
   //Disable OnlinePatching by default starting with 1.6.8p
   OnlinePatching:=false;
+end;
+
+
+procedure TForm2.UpdateList;
+var
+  i           : integer;
+  boolstore   : array of boolean;
+  boolstore2  : array of boolean;
+begin
+  if (MiscellaneousCheckListBox.Count>0) then
+  begin
+    SetLength(boolstore,MiscellaneousCheckListBox.Count);
+    SetLength(boolstore2,MiscellaneousCheckListBox.Count);
+
+    for i := 0 to MiscellaneousCheckListBox.Count-1 do
+    begin
+      boolstore[i]:=MiscellaneousCheckListBox.Checked[i];
+      boolstore2[i]:=MiscellaneousCheckListBox.ItemEnabled[i];
+    end;
+  end;
+
+  MiscellaneousCheckListBox.Items.Clear;
+
+  with MiscellaneousCheckListBox.Items do
+  begin
+    Append(CaptionCheckRepo);
+    Append(CaptionCheckPackageRepo);
+    Append(CaptionCheckIncludeLCL);
+    Append(CaptionCheckUpdateOnly);
+    Append(CaptionCheckSystemFPC);
+    Append(CaptionCheckIncludeHelp);
+    Append(CaptionCheckSplitFPC);
+    Append(CaptionCheckSplitLazarus);
+    Append(CaptionCheckUseWget);
+    Append(CaptionCheckUseMakeJobs);
+    Append(CaptionCheckExtraVerbose);
+    Append(CaptionCheckAutoSwitchURL);
+    Append(CaptionCheckSendInfo);
+    Append(CaptionCheckFpcupBootstrappersOnly);
+    Append(CaptionCheckForceLocalRepoClient);
+    Append(CaptionCheckGetUpdates);
+    Append(CaptionUseSoftFloat80bit);
+    Append(CaptionCheckEnableOnlinePatching);
+    Append(CaptionCheckApplyLocalChanges);
+    Append(CaptionCheckAddContext);
+    Append(CaptionCheckAskConfirmation);
+  end;
+
+  for i := 0 to MiscellaneousCheckListBox.Count-1 do
+  begin
+    if (i<Length(boolstore)) then
+      MiscellaneousCheckListBox.Checked[i]:=boolstore[i]
+    else
+      MiscellaneousCheckListBox.Checked[i]:=false;
+    if (i<Length(boolstore2)) then
+      MiscellaneousCheckListBox.ItemEnabled[i]:=boolstore2[i]
+    else
+      MiscellaneousCheckListBox.ItemEnabled[i]:=true;
+  end;
+
 end;
 
 procedure TForm2.SetInstallDir(const aInstallDir:string='');
@@ -1234,7 +1269,7 @@ var
 begin
   result:=false;
   aIndex:=GetCheckIndex(aCaption);
-  if aIndex<>-1 then result:=MiscellaneousCheckListBox.Checked[aIndex];
+  if (aIndex<>-1) then result:=MiscellaneousCheckListBox.Checked[aIndex];
 end;
 
 procedure TForm2.SetCheckState(aCaption:string;aState:boolean);

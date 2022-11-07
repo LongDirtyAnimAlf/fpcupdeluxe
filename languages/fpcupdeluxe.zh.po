@@ -66,8 +66,8 @@ msgid "Split Lazarus source and bins."
 msgstr "拆分 Lazarus Source 和 Bins."
 
 #: extrasettings.captionchecksystemfpc
-msgid "Use system FPC for Lazaru.s"
-msgstr "LazarU.S.使用系统 FPC"
+msgid "Use system FPC for Lazarus."
+msgstr "Lazarus 使用系统 FPC."
 
 #: extrasettings.captioncheckupdateonly
 msgid "FPC/Laz rebuild only."
