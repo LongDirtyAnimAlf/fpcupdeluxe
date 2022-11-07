@@ -88,46 +88,72 @@ begin
 end;
 
 function TAny_AllWasm32.GetBinUtils(Basepath:string): boolean;
+// webassembly uses internal assembler.
+// so, look for linker
 const
-  AsName='llvm-mc'; // = asmbin from agllvmmc.pas
+  LDNAME = 'wasm-ld';
+  MAGIC = 'WASMOSTARGETMAGIC';
+  LDNAMES :array[0..1] of string = (LDNAME,'wasm32-'+MAGIC+'-'+LDNAME);
 var
-  AsFile: string;
+  s,LdFile: string;
 begin
   result:=inherited;
   if result then exit;
 
   FBinUtilsPrefix:='';
 
-  AsFile:=AsName+GetExeExt;
+  for s in LDNAMES do
+  begin
+    LdFile:=s;
+    if Pos(MAGIC,s)>0 then
+      LdFile:=StringReplace(s,MAGIC,TargetOSName,[])
+    else
+      LdFile:=s;
 
-  result:=SearchBinUtil(BasePath,AsFile);
-  if not result then
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-  if not result then
-    result:=SimpleSearchBinUtil(BasePath,TargetCPUName+'-all',AsFile);
+    LdFile:=LdFile+GetExeExt;
 
-  {$ifdef UNIX}
+    result:=SearchBinUtil(BasePath,LdFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,LdFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,TargetCPUName+'-all',LdFile);
+
+    if result then break;
+  end;
+
   if (not result) then
   begin
+    {$ifdef UNIX}
     // Look in PATH for suitable binaries
     if (not result) then
     begin
-      AsFile:=Which(AsName);
-      if ((Length(AsFile)>0) AND FileExists(AsFile)) then
+      LdFile:=Which(LDNAME);
+      if ((Length(LdFile)>0) AND FileExists(LdFile)) then
       begin
-        if AsFile=AsName then AsFile:=ExpandFileName(AsFile);
-        FBinUtilsPath:=ExtractFilePath(AsFile);
+        if LdFile=LDNAME then LdFile:=ExpandFileName(LdFile);
+        FBinUtilsPath:=ExtractFilePath(LdFile);
         result:=true;
       end;
     end;
     if (not result) then
     begin
-      AsFile:=Which(TargetCPUName+'-'+TargetOSName+'-'+AsName);
-      if ((Length(AsFile)>0) AND FileExists(AsFile)) then
+      s:=TargetCPUName+'-'+TargetOSName+'-';
+      LdFile:=Which(s+LDNAME);
+      if ((Length(LdFile)>0) AND FileExists(LdFile)) then
       begin
-        if AsFile=AsName then AsFile:=ExpandFileName(AsFile);
-        FBinUtilsPath:=ExtractFilePath(AsFile);
-        FBinUtilsPrefix:=TargetCPUName+'-'+TargetOSName+'-';
+        FBinUtilsPath:=ExtractFilePath(LdFile);
+        FBinUtilsPrefix:=s;
+        result:=true;
+      end;
+    end;
+    if (not result) then
+    begin
+      s:='wasm32-'+TargetOSName+'-';
+      LdFile:=Which(s+LDNAME);
+      if ((Length(LdFile)>0) AND FileExists(LdFile)) then
+      begin
+        FBinUtilsPath:=ExtractFilePath(LdFile);
+        FBinUtilsPrefix:=s;
         result:=true;
       end;
     end;
@@ -136,17 +162,16 @@ begin
     // Look for brew installs
     if (not result) then
     begin
-      AsFile:='/usr/local/opt/llvm/bin/'+AsName;
-      if (FileExists(AsFile)) then
+      LdFile:='/usr/local/opt/llvm/bin/'+LDNAME;
+      if (FileExists(LdFile)) then
       begin
-        FBinUtilsPath:=ExtractFilePath(AsFile);
+        FBinUtilsPath:=ExtractFilePath(LdFile);
         result:=true;
       end;
     end;
     {$endif DARWIN}
-
+    {$endif UNIX}
   end;
-  {$endif UNIX}
 
   SearchBinUtilsInfo(result);
 

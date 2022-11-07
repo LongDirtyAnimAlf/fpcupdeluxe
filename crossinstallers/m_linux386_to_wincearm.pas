@@ -100,7 +100,7 @@ begin
   result:=inherited;
   if result then exit;
 
-  AsFile:=FBinUtilsPrefix+'as';
+  AsFile:=FBinUtilsPrefix+ASFILENAME;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
@@ -110,7 +110,7 @@ begin
   if not result then
   begin
     BinPrefixTry:='arm-wince-pe-';
-    AsFile:=BinPrefixTry+'as';
+    AsFile:=BinPrefixTry+ASFILENAME;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;
@@ -122,7 +122,7 @@ begin
   if not result then
   begin
     BinPrefixTry:='arm-mingw32ce-';
-    AsFile:=BinPrefixTry+'as';
+    AsFile:=BinPrefixTry+ASFILENAME;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;
@@ -132,7 +132,7 @@ begin
   if not result then
   begin
     BinPrefixTry:='arm-cegcc-';
-    AsFile:=BinPrefixTry+'as';
+    AsFile:=BinPrefixTry+ASFILENAME;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;

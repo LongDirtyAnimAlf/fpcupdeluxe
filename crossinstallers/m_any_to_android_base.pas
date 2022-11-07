@@ -119,11 +119,11 @@ begin
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
+  result:=SearchLibrary(Basepath,LIBCFILENAME);
 
   // local paths based on libraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCFILENAME);
 
   // if binaries already found, search for library belonging to these binaries !!
   if (not result) AND (Length(FBinUtilsPath)>0) AND (Pos('Error:',FBinUtilsPath)=0) {AND (SearchModeUsed=TSearchSetting.ssAuto)} then
@@ -262,7 +262,7 @@ begin
     else
       aOption:=TargetCPUName+'-linux-'+OS;
 
-    FilesFound:=FindAllFiles(PresetLibPath,LIBCNAME);
+    FilesFound:=FindAllFiles(PresetLibPath,LIBCFILENAME);
     FilesFoundFiltered:=TStringList.Create;
     try
       for s in FilesFound do
@@ -275,7 +275,7 @@ begin
       begin
         // Get the first ... we were sorting from highest version to lowest
         PresetLibPath:=ExtractFileDir(s);
-        result:=SearchLibrary(PresetLibPath,LIBCNAME);
+        result:=SearchLibrary(PresetLibPath,LIBCFILENAME);
         break;
       end;
     finally
@@ -319,7 +319,7 @@ begin
   result:=inherited;
   if result then exit;
 
-  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(Basepath,AsFile);
 

@@ -140,7 +140,7 @@ begin
   // Also allow for outdated naming
   if (not result) then
   begin
-    BinPrefixTry:=GetOS(TargetOS)+'-';
+    BinPrefixTry:=TargetOSName+'-';
     AsFile:=BinPrefixTry+'nasm'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then

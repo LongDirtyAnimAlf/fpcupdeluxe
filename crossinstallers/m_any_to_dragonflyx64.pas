@@ -66,11 +66,11 @@ begin
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
+  result:=SearchLibrary(Basepath,LIBCFILENAME);
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCFILENAME);
 
   if not result then
   begin
@@ -113,9 +113,9 @@ begin
   result:=inherited;
   if result then exit;
 
-  FBinUtilsPrefix:=GetCPU(TargetCPU)+'-unknown-'+GetOS(TargetOS)+'-';
+  FBinUtilsPrefix:=TargetCPUName+'-unknown-'+TargetOSName+'-';
 
-  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then

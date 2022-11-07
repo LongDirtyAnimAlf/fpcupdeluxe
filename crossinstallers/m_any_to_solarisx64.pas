@@ -72,11 +72,11 @@ begin
   end;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
+  result:=SearchLibrary(Basepath,LIBCFILENAME);
 
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,aDirName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,aDirName,LIBCFILENAME);
 
   if result then
   begin
@@ -108,7 +108,7 @@ begin
   end;
 
   // Start with any names user may have given
-  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
@@ -118,7 +118,7 @@ begin
   if not result then
   begin
     BinPrefixTry:='';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;

@@ -17,7 +17,7 @@
         <TextDesc Value="Installer for FPC and Lazarus."/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="8">
+      <Resources Count="9">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
@@ -26,6 +26,7 @@
         <Resource_5 FileName="icons\gitlablabel.png" Type="RCDATA" ResourceName="GITLABLABEL"/>
         <Resource_6 FileName="icons\svnlabel.png" Type="RCDATA" ResourceName="SVNLABEL"/>
         <Resource_7 FileName="languages\fpcupdeluxe.ko.po" Type="RCDATA" ResourceName="FPCUPDELUXE.KO"/>
+        <Resource_8 FileName="languages\fpcupdeluxe.de.po" Type="RCDATA" ResourceName="FPCUPDELUXE.DE"/>
       </Resources>
     </General>
     <i18n>
@@ -925,7 +926,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="13">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -994,6 +995,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit11>
+      <Unit12>
+        <Filename Value="text.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit12>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

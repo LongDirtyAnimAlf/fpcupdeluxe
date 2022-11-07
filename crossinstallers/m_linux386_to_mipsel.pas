@@ -137,7 +137,7 @@ begin
   result:=inherited;
   if result then exit;
 
-  AsFile:=FBinUtilsPrefix+'as';
+  AsFile:=FBinUtilsPrefix+ASFILENAME;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then

@@ -80,10 +80,10 @@ begin
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
+  result:=SearchLibrary(Basepath,LIBCFILENAME);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCFILENAME);
 
   // do the same as above, but look for a static lib
   if not result then
@@ -94,17 +94,17 @@ begin
 
   // universal libs: begin simple: check presence of library file in basedir
   if not result then
-    result:=SearchLibrary(Basepath,LIBCNAME);
+    result:=SearchLibrary(Basepath,LIBCFILENAME);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,'powerpc-'+GetOS(TargetOS),LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,'powerpc-'+TargetOSName,LIBCFILENAME);
 
   //  universal libs: do the same as above, but look for a static lib
   if not result then
     result:=SearchLibrary(Basepath,StaticLibName);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,'power-'+GetOS(TargetOS),StaticLibName);
+    result:=SimpleSearchLibrary(BasePath,'power-'+TargetOSName,StaticLibName);
 
   if result then
   begin
@@ -148,7 +148,7 @@ begin
   if result then exit;
 
   // Start with any names user may have given
-  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
@@ -157,11 +157,11 @@ begin
   // Also allow for universal crossfpc bins
   if not result then
   begin
-    BinPrefixTry:='powerpc-'+GetOS(TargetOS)+'-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    BinPrefixTry:='powerpc-'+TargetOSName+'-';
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,'powerpc-'+GetOS(TargetOS),AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,'powerpc-'+TargetOSName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
@@ -169,10 +169,10 @@ begin
   if not result then
   begin
     BinPrefixTry:='';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,'powerpc-'+GetOS(TargetOS),AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,'powerpc-'+TargetOSName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 

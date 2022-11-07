@@ -438,8 +438,6 @@ begin
 
   // Safeguards
   if (CrossInstaller.TargetCPU=TCPU.xtensa) AND (CrossInstaller.TargetOS=TOS.freertos) then result:=false;
-
-  if (CrossInstaller.TargetCPU=TCPU.wasm32) then result:=false;
 end;
 
 function TFPCCrossInstaller.InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
@@ -1508,6 +1506,15 @@ begin
               Infoln(infotext+'Specified debug option: '+s2+'. Removing for this target.',etInfo);
               Delete(Options,i,3);
               i:=pos('-g',Options);
+            end;
+            // wasm: remove assembler file settings
+            i:=pos('-a',Options);
+            while (i<>0) do
+            begin
+              s2:=Trim(Copy(Options,i,3));
+              Infoln(infotext+'Specified assembler option: '+s2+'. Removing for this target.',etInfo);
+              Delete(Options,i,3);
+              i:=pos('-a',Options);
             end;
           end;
 

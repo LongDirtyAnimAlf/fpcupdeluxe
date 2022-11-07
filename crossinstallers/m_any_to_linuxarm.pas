@@ -71,17 +71,17 @@ begin
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
+  result:=SearchLibrary(Basepath,LIBCFILENAME);
 
   // local paths based on libraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCFILENAME);
   // also check in the gnueabi directory
   if not result then
-     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabi',LIBCNAME);
+     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabi',LIBCFILENAME);
   // also check in the gnueabihf directory
   if not result then
-     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabihf',LIBCNAME);
+     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabihf',LIBCFILENAME);
 
   SearchLibraryInfo(result);
 
@@ -125,7 +125,7 @@ begin
 
   if (NOT requirehardfloat) then
   begin
-    AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+    AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
       result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -135,7 +135,7 @@ begin
   if (not result) AND (NOT requirehardfloat) then
   begin
     BinPrefixTry:='arm-linux-eabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -150,7 +150,7 @@ begin
   if (not result) AND (NOT requirehardfloat) then
   begin
     BinPrefixTry:='arm-none-eabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -164,7 +164,7 @@ begin
   if (not result) AND (NOT requirehardfloat) then
   begin
     BinPrefixTry:='arm-linux-gnueabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -178,7 +178,7 @@ begin
   if (not result) AND (NOT requirehardfloat) then
   begin
     BinPrefixTry:='arm-none-gnueabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -195,7 +195,7 @@ begin
   begin
     // some special binutils, also working for RPi2 !!
     BinPrefixTry:='armv8-rpi3-linux-gnueabihf-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then
     begin
@@ -225,7 +225,7 @@ begin
   if not result then
   begin
     BinPrefixTry:='arm-linux-gnueabihf-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -241,7 +241,7 @@ begin
   if not result then
   begin
     BinPrefixTry:='arm-none-gnueabihf-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -257,7 +257,7 @@ begin
   if not result then
   begin
     BinPrefixTry:='arm-linux-androideabi-';//standard eg in Android NDK 9
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
 
@@ -265,7 +265,7 @@ begin
   if not result then
   begin
     BinPrefixTry:='';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     // also check in the gnueabi directory
     if (not result) AND (NOT requirehardfloat) then

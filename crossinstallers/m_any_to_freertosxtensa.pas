@@ -220,14 +220,14 @@ begin
     S:=GetEnumNameSimple(TypeInfo(TSUBARCH),Ord(FSubArch));
     ShowInfo('Cross-libs: We have a subarch: '+S);
     if (FSubArch=TSUBARCH.lx6) then
-      FBinUtilsPrefix:=GetCPU(TargetCPU)+'-esp32-elf-';
+      FBinUtilsPrefix:=TargetCPUName+'-esp32-elf-';
     if (FSubArch=TSUBARCH.lx106) then
-      FBinUtilsPrefix:=GetCPU(TargetCPU)+'-lx106-elf-';
+      FBinUtilsPrefix:=TargetCPUName+'-lx106-elf-';
   end
   else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // Start with any names user may have given
-  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then

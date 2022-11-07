@@ -28,6 +28,8 @@ const
   History='inputhistory.xml';
   // Pas2js configuration options:
   Pas2jsConfig='pas2jsdsgnoptions.xml';
+    // Simple webserver options:
+  WebserverConfig='simplewebservergui.xml';
   // BuildIDE config file
   DefaultIDEMakeOptionFilename='idemake.cfg';
   // Versions used when new config files are generated.

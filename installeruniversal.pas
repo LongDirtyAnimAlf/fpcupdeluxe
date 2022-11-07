@@ -313,7 +313,8 @@ begin
     Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(LazarusInstallDir));
 
     //Make sure our FPC units can be found by Lazarus
-    Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
+    //Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
+    Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCInstallDir));
 
     //Make sure Lazarus does not pick up these tools from other installs
     Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
@@ -2559,6 +2560,22 @@ begin
     LazarusConfig.SetVariable(Pas2jsConfig, 'compiler/value', FilePath);
     FilePath:=ConcatPaths([WorkingDir,'bin',GetFPCTarget(true),'compileserver'+GetExeExt]);
     LazarusConfig.SetVariable(Pas2jsConfig, 'webserver/value', FilePath);
+    LazarusConfig.SetVariable(WebserverConfig, 'Server/Exe/Value', FilePath);
+    {$ifdef Windowssssss}
+    FilePath:='C:\Program Files\Google\Chrome\Application\chrome.exe';
+    if FileExists(FilePath) then
+    begin
+      LazarusConfig.SetVariable(WebserverConfig, 'Browser/Kind', 'Chrome');
+    end
+    else
+    begin
+      FilePath:='C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe';
+      if FileExists(FilePath) then
+      begin
+        LazarusConfig.SetVariable(WebserverConfig, 'Browser/Kind', 'Edge');
+      end
+    end;
+    {$endif}
   finally
     LazarusConfig.Free;
   end;

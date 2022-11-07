@@ -122,7 +122,7 @@ begin
 
   BinPrefixTry:=BinUtilsPrefix;
 
-  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -131,7 +131,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-linux-eabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -146,7 +146,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-none-eabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -160,7 +160,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-linux-gnueabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -174,7 +174,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-none-gnueabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -188,7 +188,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-unknown-linux-gnu-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -198,7 +198,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-unknown-linux-gnueabi-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -209,7 +209,7 @@ begin
   if not result then
   begin
     BinPrefixTry:=TargetCPUName+'-linux-androideabi-';//standard eg in Android NDK 9
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
 
@@ -217,7 +217,7 @@ begin
   if not result then
   begin
     BinPrefixTry:='';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     // also check in the gnueabi directory
     if (not result) then

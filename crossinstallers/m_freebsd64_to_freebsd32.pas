@@ -39,11 +39,11 @@ begin
   FLibsPath:='';
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
+  result:=SearchLibrary(Basepath,LIBCFILENAME);
 
   // first search local paths based on libraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCFILENAME);
 
   //FLibsPath:='/usr/lib32';
   //result:=fileexists(FLibsPath+'/'+LibName);
@@ -75,7 +75,7 @@ begin
 
   FBinUtilsPrefix:='';
 
-  AsFile:=FBinUtilsPrefix+'as';
+  AsFile:=FBinUtilsPrefix+ASFILENAME;
 
   result:=SearchBinUtil(BasePath,AsFile);
 
@@ -83,7 +83,7 @@ begin
   if not result then
   begin
     BinPrefixTry:='i386-freebsd-';
-    AsFile:=BinPrefixTry+'as';
+    AsFile:=BinPrefixTry+ASFILENAME;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;

@@ -59,16 +59,15 @@ const
   UnixBinDirs :array[0..2] of string = ('/usr/local/bin','/usr/bin','/bin');
   UnixLibDirs :array[0..2] of string = ('/usr/local/lib','/usr/lib','/lib');
   {$endif}
-  DEFAULTARMCPU = 'ARMV7A';
-
-  LIBCNAME='libc.so';
+  DEFAULTARMCPU  = 'ARMV7A';
 
   CROSSPATH      = 'cross';
   CROSSBINPATH   = CROSSPATH+DirectorySeparator+'bin';
   CROSSLIBPATH   = CROSSPATH+DirectorySeparator+'lib';
 
-  LDSEARCHFILE  = 'ld';
-  SEARCHFILE    = 'as';
+  LIBCFILENAME   = 'libc.so';
+  LDFILENAME     = 'ld';
+  ASFILENAME     = 'as';
 
 type
   TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa,wasm32);
@@ -609,11 +608,11 @@ begin
   result:=SearchUtil(Directory, LookFor, true);
   if NOT result then
   begin
-    if LookFor=LIBCNAME then result:=SearchUtil(Directory, LIBCNAME+'.6', true);
+    if LookFor=LIBCFILENAME then result:=SearchUtil(Directory, LIBCFILENAME+'.6', true);
   end;
   if NOT result then
   begin
-    if LookFor=LIBCNAME then result:=SearchUtil(Directory, LIBCNAME+'.7', true);
+    if LookFor=LIBCFILENAME then result:=SearchUtil(Directory, LIBCFILENAME+'.7', true);
   end;
 end;
 
@@ -622,11 +621,11 @@ begin
   result:=FPCUPToolsSearch(BasePath,DirName,true,LookFor);
   if NOT result then
   begin
-    if LookFor=LIBCNAME then result:=FPCUPToolsSearch(BasePath,DirName,true,LIBCNAME+'.6');
+    if LookFor=LIBCFILENAME then result:=FPCUPToolsSearch(BasePath,DirName,true,LIBCFILENAME+'.6');
   end;
   if NOT result then
   begin
-    if LookFor=LIBCNAME then result:=FPCUPToolsSearch(BasePath,DirName,true,LIBCNAME+'.7');
+    if LookFor=LIBCFILENAME then result:=FPCUPToolsSearch(BasePath,DirName,true,LIBCFILENAME+'.7');
   end;
 end;
 

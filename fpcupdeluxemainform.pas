@@ -25,6 +25,8 @@ uses
 {$define EnableLanguages}
 {$endif}
 //{$endif}
+{$define EnableLanguages}
+
 
 const
   WM_THREADINFO = LM_USER + 2010;
@@ -78,6 +80,7 @@ type
     MenuFile: TMenuItem;
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
+    MGermanlanguage: TMenuItem;
     MFPCBugs: TMenuItem;
     MKoreanlanguage: TMenuItem;
     MLazarusBugs: TMenuItem;
@@ -112,7 +115,7 @@ type
     FixesBtn: TButton;
     StableBtn: TButton;
     AndroidBtn: TButton;
-    Win95Btn: TButton;
+    WABtn: TButton;
     WioBtn: TButton;
     PicoBtn: TButton;
     UltiboBtn: TButton;
@@ -138,7 +141,7 @@ type
     FixesBtn: TBitBtn;
     StableBtn: TBitBtn;
     AndroidBtn: TBitBtn;
-    Win95Btn: TBitBtn;
+    WABtn: TBitBtn;
     WioBtn: TBitBtn;
     PicoBtn: TBitBtn;
     UltiboBtn: TBitBtn;
@@ -163,7 +166,7 @@ type
     procedure IniPropStorageAppSavingProperties({%H-}Sender: TObject);
     procedure ListBoxTargetDrawItem(Control: TWinControl; Index: Integer;
       ARect: TRect; State: TOwnerDrawState);
-    procedure MKoreanlanguageClick(Sender: TObject);
+    procedure LanguageClick(Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick({%H-}Sender: TObject);
@@ -186,8 +189,6 @@ type
     procedure LazarusVersionLabelClick({%H-}Sender: TObject);
     procedure listModulesSelectionChange(Sender: TObject; User: boolean);
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
-    procedure MChineseCNlanguageClick({%H-}Sender: TObject);
-    procedure MEnglishlanguageClick({%H-}Sender: TObject);
     procedure MFPCBugsClick({%H-}Sender: TObject);
     procedure MIssuesForumClick({%H-}Sender: TObject);
     procedure MIssuesGitHubClick({%H-}Sender: TObject);
@@ -297,9 +298,10 @@ uses
   IniFiles,
   StrUtils,
   {$ifdef EnableLanguages}
-  Translations,
+  //Translations,
   LCLTranslator,
-  LazUTF8,
+  DefaultTranslator,
+  //LazUTF8,
   {$endif}
   {$ifdef UNIX}
   BaseUnix,
@@ -337,9 +339,10 @@ begin
 
   Lang:='';
   FallbackLang:='';
-  LazGetLanguageIDs(Lang,FallbackLang); // in unit LazUTF8
+  //LazGetLanguageIDs(Lang,FallbackLang); // in unit LazUTF8
 
   if aLanguage='' then aLanguage:=FallbackLang;
+  if aLanguage='' then aLanguage:='en';
 
   PoFileName:='fpcupdeluxe.' + aLanguage + '.po';
   //SysUtils.DeleteFile(PoFileName);
@@ -1020,30 +1023,6 @@ begin
       HintInfo^.CursorRect:=aList.ItemRect(Index);
     end;
   end;
-end;
-
-procedure TForm1.MChineseCNlanguageClick(Sender: TObject);
-begin
-  {$ifdef EnableLanguages}
-  sLanguage:='zh';
-  TransLate(sLanguage);
-  {$endif}
-end;
-
-procedure TForm1.MEnglishlanguageClick(Sender: TObject);
-begin
-  {$ifdef EnableLanguages}
-  sLanguage:='en';
-  TransLate(sLanguage);
-  {$endif}
-end;
-
-procedure TForm1.MKoreanlanguageClick(Sender: TObject);
-begin
-  {$ifdef EnableLanguages}
-  sLanguage:='ko';
-  TransLate(sLanguage);
-  {$endif}
 end;
 
 procedure TForm1.MFPCBugsClick(Sender: TObject);
@@ -1963,6 +1942,17 @@ begin
   end;
 end;
 
+procedure TForm1.LanguageClick(Sender: TObject);
+begin
+  {$ifdef EnableLanguages}
+  if Sender=MChineseCNlanguage then sLanguage:='zh';
+  if Sender=MEnglishlanguage then sLanguage:='en';
+  if Sender=MKoreanlanguage then sLanguage:='ko';
+  if Sender=MGermanlanguage then sLanguage:='de';
+  TransLate(sLanguage);
+  {$endif}
+end;
+
 procedure TForm1.radgrpTargetChanged(Sender: TObject);
 var
   CPUType:TCPU;
@@ -2087,12 +2077,22 @@ begin
     aLazarusTarget:='stable'+GITLABEXTENSION;
   end;
 
+  if Sender=WABtn then
+  begin
+    s:='Going to install FPC and Lazarus for Web Assembly.';
+    aFPCTarget:='trunk'+GITLABEXTENSION;
+    aLazarusTarget:='trunk'+GITLABEXTENSION;
+    aModule:='pas2js-rtl';
+  end;
+
+  {
   if Sender=Win95Btn then
   begin
     s:='Going to install FPC and Lazarus for Win95.';
     aFPCTarget:='2.6.2'+GITLABEXTENSION;
     aLazarusTarget:='1.2'+GITLABEXTENSION;
   end;
+  }
 
   {
   if Sender=OldBtn then
@@ -2298,7 +2298,14 @@ begin
         aOS:=TOS.android;
       end;
 
-      if (Sender=PicoBtn) OR (Sender=WioBtn) OR (Sender=ESPBtn) OR (Sender=UltiboBtn) OR (Sender=AndroidBtn) then
+      if Sender=WABtn then
+      begin
+        s:='Going to install FPC cross-compiler for Web Assembly.';
+        aCPU:=TCPU.wasm32;
+        aOS:=TOS.wasi;
+      end;
+
+      if (Sender=PicoBtn) OR (Sender=WioBtn) OR (Sender=ESPBtn) OR (Sender=UltiboBtn) OR (Sender=AndroidBtn) OR (Sender=WABtn) then
       begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
@@ -2342,6 +2349,15 @@ begin
         aCPU:=TCPU.aarch64;
         aOS:=TOS.android;
       end;
+
+      {
+      if (Sender=WABtn) then
+      begin
+        s:='Going to install FPC cross-compiler for WebAssembly Embedded.';
+        aCPU:=TCPU.wasm32;
+        aOS:=TOS.embedded;
+      end;
+      }
 
       if ((Sender=AndroidBtn) OR (Sender=UltiboBtn)) then
       begin

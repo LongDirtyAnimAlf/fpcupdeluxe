@@ -67,11 +67,11 @@ begin
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
+  result:=SearchLibrary(Basepath,LIBCFILENAME);
 
   // first search local paths based on libraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCFILENAME);
 
   if not result then
   begin
@@ -105,7 +105,7 @@ begin
   result:=inherited;
   if result then exit;
 
-  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
@@ -118,7 +118,7 @@ begin
     SetLength(BinPrefixTry,Length(BinPrefixTry)-1);
     for i:=MAXFREEBSDVERSION downto MINFREEBSDVERSION do
     begin
-      AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+      AsFile:=BinPrefixTry+InttoStr(i)+'-'+ASFILENAME+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
       if not result then
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -133,7 +133,7 @@ begin
   if not result then
   begin
     // look for binutils in versioned directories
-    AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+    AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
     i:=MAXFREEBSDVERSION;
     while (i>=MINFREEBSDVERSION) do
     begin
@@ -145,7 +145,7 @@ begin
       if not result then
       begin
         // Also allow for (cross)binutils without prefix
-        result:=SimpleSearchBinUtil(BasePath,AsDirectory,'as'+GetExeExt);
+        result:=SimpleSearchBinUtil(BasePath,AsDirectory,ASFILENAME+GetExeExt);
         if result then FBinUtilsPrefix:=''
       end;
       if result then break;

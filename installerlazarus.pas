@@ -303,7 +303,6 @@ uses
 function TLazarusCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   Options      : string;
-  s1           : string;
   LazBuildApp  : string;
 begin
   Result:=inherited;
@@ -384,7 +383,8 @@ begin
         Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(InstallDirectory));
 
         //Make sure our FPC units can be found by Lazarus
-        Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
+        //Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
+        Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCInstallDir));
         //Make sure Lazarus does not pick up these tools from other installs
         Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
         Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
@@ -613,13 +613,12 @@ end;
 
 function TLazarusNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
-  i,j,ExitCode: integer;
-  s1,s2,LazBuildApp,FPCDirStore: string;
+  i,ExitCode                     : integer;
+  s1,s2,LazBuildApp,FPCDirStore  : string;
   {$ifdef MSWindows}
-  OldPath:string;
+  OldPath                        : string;
   {$endif}
-  OperationSucceeded: boolean;
-  LazarusConfig: TUpdateLazConfig;
+  OperationSucceeded             : boolean;
 begin
   Result:=inherited;
 
@@ -695,8 +694,8 @@ begin
     Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(InstallDirectory));
 
     //Make sure our FPC units can be found by Lazarus
-    Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
-    //Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCInstallDir));
+    //Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
+    Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCInstallDir));
     //Make sure Lazarus does not pick up these tools from other installs
     Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
     Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
@@ -999,7 +998,8 @@ begin
       //SysUtils.GetEnvironmentVariable('FPCDIR');
       //Makefile could pickup this FPCDIR setting, so try to set it for fpcupdeluxe
       FPCDirStore:=Processor.Environment.GetVar('FPCDIR');
-      Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
+      //Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
+      Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FPCInstallDir));
       {$IFDEF DEBUG}
       Processor.Process.Parameters.Add('--verbose');
       {$ELSE}
@@ -1922,7 +1922,7 @@ begin
       // set defaults for pas2js
       LazarusConfig.SetVariableIfNewFile(Pas2jsConfig, 'compiler/value', ExtractFilePath(FCompiler)+'pas2js'+GetExeExt);
       LazarusConfig.SetVariableIfNewFile(Pas2jsConfig, 'webserver/value',  ExtractFilePath(FCompiler)+'compileserver'+GetExeExt);
-      //LazarusConfig.SetVariableIfNewFile(Pas2jsConfig, 'webserver/startatport/value', '8000');
+      //LazarusConfig.SetVariableIfNewFile(Pas2jsConfig, 'webserver/startatport/value', '3000');
 
     except
       on E: Exception do

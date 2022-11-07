@@ -196,7 +196,7 @@ begin
   else
   begin
     aDirName:=DirName;
-    aLibName:=LIBCNAME;
+    aLibName:=LIBCFILENAME;
   end;
 
   // begin simple: check presence of library file in basedir
@@ -375,7 +375,7 @@ begin
 
   BinPrefixTry:=FBinUtilsPrefix;
 
-  AsFile:=BinPrefixTry+'as'+GetExeExt;
+  AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
@@ -404,7 +404,7 @@ begin
       BinPrefixTry:='';
       s:=Which('objdump');
       s:=ExtractFileDir(s);
-      AsFile:='as'+GetExeExt;
+      AsFile:=ASFILENAME+GetExeExt;
       result:=SearchBinUtil(s,AsFile);
       if not result then
         result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
@@ -417,7 +417,7 @@ begin
   if not result then
   begin
     BinPrefixTry:=TargetCPUName+'-linux-gnu-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if (not result) then
       result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
@@ -436,7 +436,7 @@ begin
       if (TargetCPU=TCPU.i386) then
       begin
         BinPrefixTry:='i586-linux-gnu-';
-        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
         result:=SearchBinUtil(BasePath,AsFile);
         if (not result) then
           result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
@@ -457,7 +457,7 @@ begin
       if (TargetCPU=TCPU.i386) then
       begin
         BinPrefixTry:='i686-linux-gnu-';
-        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
         result:=SearchBinUtil(BasePath,AsFile);
         if (not result) then
           result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
@@ -480,7 +480,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-suse-linux-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if (not result) then
       result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
@@ -497,7 +497,7 @@ begin
       if (TargetCPU=TCPU.i386) then
       begin
         BinPrefixTry:='i586-suse-linux-';
-        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
         result:=SearchBinUtil(BasePath,AsFile);
         if (not result) then
           result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
@@ -516,7 +516,7 @@ begin
       if (TargetCPU=TCPU.i386) then
       begin
         BinPrefixTry:='i686-suse-linux-';
-        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
         result:=SearchBinUtil(BasePath,AsFile);
         if (not result) then
           result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
@@ -537,7 +537,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:='';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if (not result) then
       result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);

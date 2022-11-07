@@ -1817,7 +1817,6 @@ begin
               if (FileInfo.Attr and faReadOnly)>0 then
                 FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
               if not SysUtils.DeleteFile(CurFilename) then result:=false;
-              if result then CurSrcDirValid:=True;
               if (NOT result) then
               begin
                 ThreadLog('Delete error of file: ' + CurFilename + ' .',etError);

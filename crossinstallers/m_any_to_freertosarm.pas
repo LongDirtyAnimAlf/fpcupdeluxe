@@ -71,12 +71,12 @@ begin
     ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
+  result:=SearchLibrary(Basepath,LIBCFILENAME);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCFILENAME);
   if ((not result) AND (FSubArch<>TSUBARCH.saNone)) then
-    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubarchName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+SubarchName,LIBCFILENAME);
 
   // do the same as above, but look for a static freertos lib
   if not result then
@@ -141,10 +141,10 @@ begin
   result:=inherited;
   if result then exit;
 
-  FBinUtilsPrefix:=GetCPU(TargetCPU)+'-none-eabi-';
+  FBinUtilsPrefix:=TargetCPUName+'-none-eabi-';
 
   // Start with any names user may have given
-  AsFile:=BinUtilsPrefix+'as'+GetExeExt;
+  AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then

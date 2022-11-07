@@ -277,7 +277,7 @@ begin
           AsFile:=BinUtilsPrefix
         else
           AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(DarwinRelease),[]);
-        AsFile:=AsFile+LDSEARCHFILE+GetExeExt;
+        AsFile:=AsFile+LDFILENAME+GetExeExt;
 
         if ((TargetOS=TOS.darwin) AND (OSNAME=iOSNAME)) then
         begin
@@ -289,7 +289,7 @@ begin
         {$ifdef MSWINDOWS}
         if (NOT result) then
         begin
-          AsFile:=TargetCPUName+'-w64-mingw32-'+LDSEARCHFILE+GetExeExt;
+          AsFile:=TargetCPUName+'-w64-mingw32-'+LDFILENAME+GetExeExt;
           result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
         end;
         {$endif MSWINDOWS}
@@ -298,12 +298,12 @@ begin
 
       if (not result) then
       begin
-        AsFile:=LDSEARCHFILE+GetExeExt;
+        AsFile:=LDFILENAME+GetExeExt;
         result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
         {$ifdef MSWINDOWS}
         if (NOT result) then
         begin
-          AsFile:=TargetCPUName+'-w64-mingw32-'+LDSEARCHFILE+GetExeExt;
+          AsFile:=TargetCPUName+'-w64-mingw32-'+LDFILENAME+GetExeExt;
           result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
         end;
         {$endif MSWINDOWS}
@@ -315,14 +315,14 @@ begin
   if not result then
   begin
     // Search in special all-targetos directory
-    AsFile:=SEARCHFILE+GetExeExt;
+    AsFile:=ASFILENAME+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
   end;
 
   // Now start with the normal search sequence
   if not result then
   begin
-    AsFile:=BinUtilsPrefix+SEARCHFILE+GetExeExt;
+    AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
       result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -339,7 +339,7 @@ begin
         AsFile:=BinUtilsPrefix
       else
         AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(DarwinRelease),[]);
-      AsFile:=AsFile+SEARCHFILE+GetExeExt;
+      AsFile:=AsFile+ASFILENAME+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
       if not result then
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -385,7 +385,7 @@ begin
           AsFile:=BinUtilsPrefix
         else
           AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(DarwinRelease),[]);
-        AsFile:=AsFile+SEARCHFILE+GetExeExt;
+        AsFile:=AsFile+ASFILENAME+GetExeExt;
         S:=FindFileInDir(AsFile,PresetBinPath);
         if (Length(S)>0) then
         begin
@@ -404,7 +404,7 @@ begin
           AsFile:=BinUtilsPrefix
         else
           AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(DarwinRelease),[]);
-        AsFile:=AsFile+SEARCHFILE+GetExeExt;
+        AsFile:=AsFile+ASFILENAME+GetExeExt;
         S:=FindFileInDir(AsFile,PresetBinPath);
         if (Length(S)>0) then
         begin
@@ -419,9 +419,9 @@ begin
 
   if result then
   begin
-    // Remove the searchfile itself to get the binutils prefix
-    i:=Pos(SEARCHFILE+GetExeExt,AsFile);
-    if i<1 then i:=Pos(LDSEARCHFILE+GetExeExt,AsFile);
+    // Remove the ASFILENAME itself to get the binutils prefix
+    i:=Pos(ASFILENAME+GetExeExt,AsFile);
+    if i<1 then i:=Pos(LDFILENAME+GetExeExt,AsFile);
     if i>0 then
     begin
       Delete(AsFile,i,MaxInt);

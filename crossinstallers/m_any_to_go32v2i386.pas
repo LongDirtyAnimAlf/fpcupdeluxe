@@ -29,23 +29,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-Setup:
-
-1) FPC 2.7.1 and later can use internal assembler and linker; no external files needed at all
-
-2) FPC 2.6.x:
-Based on cross binaries from
-ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go32v2.zip
-
-Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
-Then place the binaries in c:\development\cross\bin\i386-go32v2
-Binaries include
-i386-go32v2-ar.exe
-i386-go32v2-as.exe
-i386-go32v2-ld.exe (note: not strictly needed if the internal linker is used)
-i386-go32v2-objdump.exe
-i386-go32v2-strip.exe
-
 Remember to distribute cwsdpmi.exe with your programs.
 http://homer.rice.edu/~sandmann/cwsdpmi/index.html
 download
@@ -120,9 +103,7 @@ begin
   result:=inherited;
   if result then exit;
 
-
-  {$ifndef WIN32}
-  AsFile:=FBinUtilsPrefix+'as.exe';
+  AsFile:=FBinUtilsPrefix+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
@@ -130,19 +111,14 @@ begin
 
   if not result then
   begin
-    FBinUtilsPrefix:=GetCPU(TargetCPU)+'-go32-';
-    AsFile:=FBinUtilsPrefix+'as.exe';
+    FBinUtilsPrefix:=TargetCPUName+'-go32-';
+    AsFile:=FBinUtilsPrefix+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
       result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
 
-  if (not result) then
-  begin
-    ShowInfo('Searched binutil '+AsFile+' without results. ',etInfo);
-    FAlreadyWarned:=true;
-  end;
-  {$endif WIN32}
+  SearchBinUtilsInfo(result);
 
   if result then
   begin
@@ -153,20 +129,10 @@ begin
   end
   else
   begin
+    FAlreadyWarned:=true;
     FBinUtilsPrefix:=''; //use built in assembler, linker
-    {$IFDEF WIN32}
-    ShowInfo('Binutil path ignored; it is optional *IF* compiling with FPC 2.7.1+'+LineEnding+
-      'For earlier FPC, download binutils from ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go32v2.zip',etInfo);
-    result:=true; //success
-    {$ENDIF}
-    {$IFDEF WIN64}
-    // Win64 does seem to need the external linker... or an i386 cross compiler I suppose...
-    // todo: generate i386 cross compiler first?!
-    FBinUtilsPrefix:=''; //use built in assembler, linker
-    ShowInfo('No binutil path found; it is required for win64 installs right now.'+LineEnding+
-      'Download binutils from ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go32v2.zip',etInfo);
-    result:=false;
-    {$ENDIF}
+    FBinUtilsPath:='';
+    ShowInfo('Binutil path ignored; it is optional *IF* compiling with > FPC 2.7.1');
   end;
 end;
 

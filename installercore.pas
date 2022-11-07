@@ -70,9 +70,12 @@ const
 
   FPCGITLAB             = GITLAB + 'fpc';
   FPCGITLABREPO         = FPCGITLAB + '/source';
-  FPCGITLABBINARIES     = FPCGITLAB + '/build';
+  FPCGITLABBUILDBINARIES= FPCGITLAB + '/build';
   FPCTRUNKBRANCH        = 'main';
-  FPCBINARIES           = FPCGITLABBINARIES + '/-/raw/'+FPCTRUNKBRANCH;
+  FPCTRUNKBINARIES      = FPCGITLABBUILDBINARIES + '/-/raw/'+FPCTRUNKBRANCH;
+  {$ifdef win32}
+  FPCGITLABBINARIES     = FPCGITLAB + '/binaries';
+  {$endif}
 
   LAZARUSGITLAB         = GITLAB + 'lazarus';
   LAZARUSGITLABREPO     = LAZARUSGITLAB + '/lazarus';
@@ -102,7 +105,7 @@ const
   REVINCFILENAME        = 'revision.inc';
 
   {$IFDEF WINDOWS}
-  PREBUILTBINUTILSURLWINCE = FPCBINARIES+'/install/crossbinwce';
+  PREBUILTBINUTILSURLWINCE = FPCTRUNKBINARIES+'/install/crossbinwce';
   {$ENDIF}
 
   {$ifdef win64}
@@ -124,7 +127,7 @@ const
   //NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win64/nasm-2.13-win64.zip';
   NASMWIN32URL='https://www.nasm.us/pub/nasm/releasebuilds/2.14/win32/nasm-2.14-win32.zip';
   NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.14/win64/nasm-2.14-win64.zip';
-  NASMFPCURL=FPCBINARIES+'/install/crossbinmsdos/nasm.exe';
+  NASMFPCURL=FPCTRUNKBINARIES+'/install/crossbinmsdos/nasm.exe';
 
   GITREPO='https://github.com/LongDirtyAnimAlf';
   FPCUPGITREPO=GITREPO+'/fpcupdeluxe';
@@ -1163,8 +1166,8 @@ begin
     if (Not FileExists(aFile)) then
     begin
       aFile:=IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe';
-      //aURL:=FPCBINARIES+'/install/binw32/';
-      aURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
+      //aURL:=FPCTRUNKBINARIES+'/install/binw32/';
+      aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
       GetFile(aURL+'patch.exe',aFile);
       GetFile(aURL+'patch.exe.manifest',aFile + '.manifest');
     end;
@@ -1172,8 +1175,8 @@ begin
 
 
     // Get pwd binary from default binutils URL. If its not there, the make clean command will fail
-    //aURL:=FPCBINARIES+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
-    aURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
+    //aURL:=FPCTRUNKBINARIES+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
+    aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
     aFile:='pwd.exe';
     GetFile(aURL+aFile,IncludeTrailingPathDelimiter(FMakeDir)+aFile);
 
@@ -1499,8 +1502,8 @@ begin
       // check if we have make ... otherwise get it from standard URL
       if (NOT FileExists(Make)) then
       begin
-        aURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
-        //aURL:=FPCBINARIES+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
+        aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
+        //aURL:=FPCTRUNKBINARIES+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
         Infoln(localinfotext+'Make binary not found. Getting it from: '+aURL+'.',etInfo);
         GetFile(aURL,Make);
         OperationSucceeded:=FileExists(Make);
@@ -1648,11 +1651,11 @@ begin
   SetLength(FUtilFiles,0); //clean out any cruft
 
   {$ifdef MSWINDOWS}
-  //aSourceURL:=FPCBINARIES+'/install/binw32/';
-  aSourceURL:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
+  //aSourceURL:=FPCTRUNKBINARIES+'/install/binw32/';
+  aSourceURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
   {$ifdef win64}
   //aSourceURL64:=FPCBINARIES+'/install/binw64/';
-  aSourceURL64:=FPCGITLABBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw64/';
+  aSourceURL64:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw64/';
   {$endif}
 
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)
@@ -1674,10 +1677,6 @@ begin
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucDebugger64);
   //AddNewUtil('libiconv-2'+GetLibExt,SourceURL64_gdb_default,'',ucDebugger64);
 
-  // add win32/64 gdb from fpcup
-  //AddNewUtil('i386-win32-gdb.zip',SourceURL_gdb,'',ucDebugger32);
-  //AddNewUtil('x86_64-win64-gdb.zip',SourceURL64_gdb,'',ucDebugger64);
-
   {$ifdef win32}
   AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('as' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -1692,14 +1691,6 @@ begin
   AddNewUtil('ginstall' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL,'',ucBinutil);
   AddNewUtil('gmkdir' + GetExeExt,aSourceURL,'',ucBinutil);
-  //AddNewUtil('GoRC' + GetExeExt,aSourceURL,'',ucBinutil);
-  {
-  https://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
-  only has libexpat-1, so no need for these:
-  AddNewUtil('libgcc_s_dw2-1'+GetLibExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('libiconv-2'+GetLibExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('libintl-8'+GetLibExt,aSourceURL,'',ucBinutil);
-  }
   AddNewUtil('ld' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('make' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('mv' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -1710,6 +1701,17 @@ begin
 
   AddNewUtil('Qt4Pas5'+GetLibExt,SourceURL_QT,'',ucQtFile);
   AddNewUtil('Qt5Pas1'+GetLibExt,SourceURL_QT5,'',ucQtFile);
+
+  // Add special versions for crosss-compiling towards win64
+
+  aSourceURL:=FPCGITLABBINARIES+'/-/raw/main/i386-win32/';
+  AddNewUtil('x86_64-win64-ar' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-as' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-ld' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-nm' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-objcopy' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-objdump' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-strip' + GetExeExt,aSourceURL,'',ucBinutil);
   {$endif win32}
 
   {$ifdef win64}

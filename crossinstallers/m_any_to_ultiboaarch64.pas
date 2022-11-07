@@ -118,7 +118,7 @@ begin
 
   BinPrefixTry:=BinUtilsPrefix;
 
-  AsFile:=BinPrefixTry+'as'+GetExeExt;
+  AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -126,7 +126,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-none-gnu-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -140,7 +140,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-none-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -150,7 +150,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-none-gnu-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -160,7 +160,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-none-elf-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -171,7 +171,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-unknown-linux-gnu-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -181,7 +181,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-unknown-linux-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -192,7 +192,7 @@ begin
   if (not result) then
   begin
     BinPrefixTry:='';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     // also check in the gnueabi directory
     if (not result) then
