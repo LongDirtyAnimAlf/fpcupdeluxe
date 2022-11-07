@@ -4335,6 +4335,7 @@ var
   JsonObject   : TJSONObject;
   Releases     : TJSONArray;
   NewVersion   : boolean;
+  Fixes        : boolean;
   i            : integer;
   Ss           : TStringStream;
   Content      : string;
@@ -4343,7 +4344,18 @@ begin
   json:=nil;
   Success:=false;
   NewVersion:=false;
+  Fixes:=false;
   result:='';
+
+  // Check for a fixes version
+  if DELUXEVERSION[Length(DELUXEVERSION)]='f' then
+  begin
+    if DELUXEVERSION[Length(DELUXEVERSION)-1] in ['a'..'z'] then
+    begin
+      Fixes:=true;
+    end;
+  end;
+
   if (Length(aURL)>0) then
   begin
     Ss := TStringStream.Create('');
@@ -4381,7 +4393,9 @@ begin
           if CalculateNumericalVersion(s)>CalculateNumericalVersion(DELUXEVERSION) then NewVersion:=True;
           if CalculateNumericalVersion(s)=CalculateNumericalVersion(DELUXEVERSION) then
           begin
-            if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
+            i:=Length(DELUXEVERSION);
+            if Fixes then Dec(i);
+            if Ord(s[Length(s)])>Ord(DELUXEVERSION[i]) then NewVersion:=True;
           end;
           if NewVersion then
           begin
