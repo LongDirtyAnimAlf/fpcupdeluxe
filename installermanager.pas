@@ -852,13 +852,11 @@ end;
 
 function TFPCupManager.CheckValidCPUOS(aCPU:TCPU;aOS:TOS): boolean;
 var
-  TxtFile:Text;
-  s,sourceline:string;
-  x:integer;
-  sl:TStringList;
-  cpuindex,osindex:integer;
-  aLocalCPU:TCPU;
-  aLocalOS:TOS;
+  s           : string;
+  x           : integer;
+  sl          : TStringList;
+  aLocalCPU   : TCPU;
+  aLocalOS    : TOS;
 begin
   result:=false;
 
@@ -869,8 +867,9 @@ begin
 
   if ((aLocalCPU=TCPU.cpuNone) OR (aLocalOS=TOS.osNone)) then exit;
 
-  //parsing systems.inc for valid CPU / OS system
+  //parsing systems.inc or .pas for valid CPU / OS system
   s:=ConcatPaths([FPCSourceDirectory,'compiler'])+DirectorySeparator+'systems.inc';
+  if (NOT FileExists(s)) then s:=ConcatPaths([FPCSourceDirectory,'compiler'])+DirectorySeparator+'systems.pas';
   if FileExists(s) then
   begin
     sl:=TStringList.Create;
@@ -878,165 +877,14 @@ begin
       sl.LoadFromFile(s);
       s:='system_'+GetCPU(aLocalCPU)+'_'+GetOS(aLocalOS);
       x:=StringListContains(sl,s);
-      if (x<>-1) then result:=true;
+      if (x<>-1) then
+      begin
+        s:=sl[x];
+        if (Pos('obsolete_',s)=0) then result:=true;
+      end;
     finally
       sl.Free;
     end;
-  end;
-
-  if (NOT result) then
-  begin
-
-    cpuindex:=-1;
-    osindex:=-1;
-
-    //parsing fpmkunit.pp for valid CPU / OS combos
-    s:=ConcatPaths([FPCSourceDirectory,'packages','fpmkunit','src'])+DirectorySeparator+'fpmkunit.pp';
-    if FileExists(s) then
-    begin
-
-      AssignFile(TxtFile,s);
-      Reset(TxtFile);
-      while NOT EOF (TxtFile) do
-      begin
-        Readln(TxtFile,s);
-        s:=StringReplace(s, ' ', '', [rfReplaceAll]); //Remove all spaces from string;
-        //s:=DelSpace(s);
-
-        x:=Pos('TCpu=(',s);
-        if x>0 then
-        begin
-          //We got the array with CPU defines: parse it (a bit rough)
-          sourceline:=s;
-          while NOT EOF (TxtFile) do
-          begin
-            Readln(TxtFile,s);
-            s:=StringReplace(s, ' ', '', [rfReplaceAll]); //Remove all spaces from string;
-            sourceline:=sourceline+s;
-            x:=Pos(');',s);
-            if x>0 then
-            begin
-              sourceline:=StringReplace(sourceline, #13, '', [rfReplaceAll]);
-              sourceline:=StringReplace(sourceline, #10, '', [rfReplaceAll]);
-              break;
-            end;
-          end;
-          //Sourceline now holds a single line containing all CPU's available;
-          //E.g. : TCpu=(cpuNone,i386,m68k,...);
-          x:=Pos('=(',sourceline);
-          if x>0 then
-          begin
-            Delete(sourceline,1,x+2);
-          end;
-          x:=Pos(');',sourceline);
-          if x>0 then
-          begin
-            Delete(sourceline,x,MaxInt);
-          end;
-          sl:=TStringList.Create;
-          try
-            sl.Delimiter:=',';
-            sl.StrictDelimiter:=true;
-            sl.DelimitedText:=sourceline;
-            cpuindex:=sl.IndexOf(GetCPU(aLocalCPU));
-          finally
-            sl.Free;
-          end;
-        end;
-
-        x:=Pos('TOS=(',s);
-        if x>0 then
-        begin
-          //We got the array with OS defines: parse it (a bit rough)
-          sourceline:=s;
-          while NOT EOF (TxtFile) do
-          begin
-            Readln(TxtFile,s);
-            s:=StringReplace(s, ' ', '', [rfReplaceAll]); //Remove all spaces from string;
-            sourceline:=sourceline+s;
-            x:=Pos(');',s);
-            if x>0 then
-            begin
-              sourceline:=StringReplace(sourceline, #13, '', [rfReplaceAll]);
-              sourceline:=StringReplace(sourceline, #10, '', [rfReplaceAll]);
-              break;
-            end;
-          end;
-          //Sourceline now holds a single line containing all OS's available;
-          //E.g. : TOS=(osNone,linux,go32v2,win32,.....);
-          x:=Pos('=(',sourceline);
-          if x>0 then
-          begin
-            Delete(sourceline,1,x+2);
-          end;
-          x:=Pos(');',sourceline);
-          if x>0 then
-          begin
-            Delete(sourceline,x,MaxInt);
-          end;
-          sl:=TStringList.Create;
-          try
-            sl.Delimiter:=',';
-            sl.StrictDelimiter:=true;
-            sl.DelimitedText:=sourceline;
-            osindex:=sl.IndexOf(GetOS(aLocalOS));
-          finally
-            sl.Free;
-          end;
-        end;
-
-        x:=Pos('OSCPUSupported:array[TOS,TCpu]',s);
-        if ((x>0) AND (cpuindex>=0) AND (osindex>=0)) then
-        begin
-          // read the dummy line with CPU-OS combo's
-          Readln(TxtFile,s);
-
-          // Read towards the correct OS line
-          while (osindex>=0) do
-          begin
-            Readln(TxtFile,s);
-            Dec(osindex);
-          end;
-
-          x:=Pos('(',s);
-          if x>0 then
-          begin
-            Delete(s,1,x);
-          end;
-          x:=Pos(')',s);
-          if x>0 then
-          begin
-            Delete(s,x,MaxInt);
-          end;
-          s:=StringReplace(s, ' ', '', [rfReplaceAll]); //Remove all spaces from string;
-          s:=Trim(s);
-
-          //We now have: "false,false,false,true,...."
-          sl:=TStringList.Create;
-          try
-            sl.Delimiter:=',';
-            sl.StrictDelimiter:=true;
-            sl.DelimitedText:=s;
-            if sl.Count>cpuindex then
-            begin
-              if sl[cpuindex]='true' then
-              begin
-                result:=true;
-                break;
-              end;
-            end;
-          finally
-            sl.Free;
-          end;
-
-          break;
-
-        end;
-
-      end;
-      CloseFile(TxtFile);
-    end;
-
   end;
 end;
 

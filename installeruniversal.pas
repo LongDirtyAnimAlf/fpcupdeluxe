@@ -191,7 +191,6 @@ type
     function GetModule(ModuleName: string): boolean; override;
   end;
 
-
   // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
   function GetModuleEnabledList(var ModuleList:TStringList):boolean;
   // Gets the sequence representation for all modules in the ini file
