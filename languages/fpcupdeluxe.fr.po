@@ -549,6 +549,10 @@ msgstr "Bogues du CPE"
 msgid "German (D)"
 msgstr "Allemand (D)"
 
+#: tform1.mfrenchlanguage.caption
+msgid "French (F)"
+msgstr "Français (F)"
+
 #: tform1.missuesforum.caption
 msgid "Up Lazarus forum"
 msgstr "Up Lazarus forum"

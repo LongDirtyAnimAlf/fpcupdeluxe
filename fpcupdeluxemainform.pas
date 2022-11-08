@@ -4159,7 +4159,7 @@ begin
 
   AddMessage(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.');
   AddMessage('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro);
-  AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win10 x86_64');
+  AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
   AddMessage('');
 
   BitBtnHalt.Enabled:=true;
