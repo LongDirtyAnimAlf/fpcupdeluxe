@@ -255,6 +255,9 @@ type
     function GetCmdFontName: String;
     procedure SetCmdFontName(aValue: String);
     procedure ParseRevisions(IniDirectory:string);
+    {$ifdef EnableLanguages}
+    procedure Translate(const Language: string);
+    {$endif}
     {$ifndef usealternateui}
     property  FPCTarget:string read FFPCTarget write SetFPCTarget;
     property  LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
@@ -330,11 +333,11 @@ end;
 { TForm1 }
 
 {$ifdef EnableLanguages}
-procedure Translate(const Language: string);
+procedure TForm1.Translate(const Language: string);
 var
-  Res: TResourceStream;
-  PoFileName:string;
-  aLanguage,Lang, FallbackLang, Dir: String;
+  Res                           : TResourceStream;
+  PoFileName                    : string;
+  aLanguage, Lang, FallbackLang : string;
 begin
   aLanguage:=Language;
 
@@ -345,31 +348,26 @@ begin
   if aLanguage='' then aLanguage:=FallbackLang;
   if aLanguage='' then aLanguage:='en';
 
-  PoFileName:='fpcupdeluxe.' + aLanguage + '.po';
+  AddMessage('Trying to set language to '+aLanguage);
+
+  PoFileName:=SafeGetApplicationPath+'fpcupdeluxe.' + aLanguage + '.po';
   //SysUtils.DeleteFile(PoFileName);
 
-  if NOT FileExists(PoFileName) then
+  if (NOT FileExists(PoFileName)) then
   begin
     try
       Res := TResourceStream.Create(HInstance, 'fpcupdeluxe.' + aLanguage, RT_RCDATA);
       Res.SaveToFile(PoFileName);
       Res.Free;
+      AddMessage('Language file for '+aLanguage+' created');
     except
     end;
   end;
 
   if FileExists(PoFileName) then
   begin
-    SetDefaultLang(Language,'','fpcupdeluxe');
-
-    //Dir := AppendPathDelim(AppendPathDelim(ExtractFileDir(ParamStr(0))) + 'languages');
-    //Translations.TranslateUnitResourceStrings('fpcupdeluxemainform',Dir+'fpcupdeluxemainform.%s.po',Lang,FallbackLang);
-
-    //Translations.TranslateResourceStrings(PoFileName,Lang,FallbackLang);
-
-    {$ifdef Windows}
-    //{%H-}GetLocaleFormatSettings($409, DefaultFormatSettings);
-    {$endif}
+    SetDefaultLang(aLanguage,SafeGetApplicationPath,'fpcupdeluxe');
+    AddMessage('Language file for '+aLanguage+' used');
   end;
 end;
 {$endif}
