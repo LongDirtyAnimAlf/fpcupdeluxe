@@ -102,14 +102,17 @@ type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
 
 const
-  ARMArchFPCStr : array[TARMARCH] of string=(
+  ARMArchFPCStr : array[TARMARCH] of string = (
     '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
   );
-  FPCUP_AUTO_MAGIC  = 'FPCUP_AUTO';
+  FPCUP_AUTO_MAGIC      = 'FPCUP_AUTO';
 
-  FPC_TARGET_MAGIC  = '$FPCTARGET';
-  FPC_SUBARCH_MAGIC = '$FPCSUBARCH';
-  FPC_ABI_MAGIC     = '$FPCABI';
+  FPC_TARGET_MAGIC      = '$FPCTARGET';
+  FPC_SUBARCH_MAGIC     = '$FPCSUBARCH';
+  FPC_ABI_MAGIC         = '$FPCABI';
+
+  DEFAULTSEARCHSETTING  = TSearchSetting.ssUp;
+  DEFAULTARMARCH        = TARMARCH.none;
 
 type
   TCrossUtil = record
@@ -378,10 +381,10 @@ end;
 function GetTARMArch(aARMArch:string):TARMARCH;
 begin
   if Length(aARMArch)=0 then
-    result:=TARMARCH.none
+    result:=DEFAULTARMARCH
   else
   if aARMArch='default' then
-    result:=TARMARCH.none
+    result:=DEFAULTARMARCH
   else
     result:=TARMARCH(GetEnumValueSimple(TypeInfo(TARMARCH),aARMArch));
   if Ord(result) < 0 then
@@ -914,13 +917,13 @@ begin
         else
           s2:=s1;
 
-        CrossUtils[CPU,OS,SUBARCH].Setting:=TSearchSetting.ssUp;
+        CrossUtils[CPU,OS,SUBARCH].Setting:=DEFAULTSEARCHSETTING;
         CrossUtils[CPU,OS,SUBARCH].LibDir:='';
         CrossUtils[CPU,OS,SUBARCH].BinDir:='';
         CrossUtils[CPU,OS,SUBARCH].Compiler:='';
 
         aCrossOptionSetting:='';
-        aARMABISetting:=TARMARCH.none;
+        aARMABISetting:=DEFAULTARMARCH;
 
         // Set defaults for CrossBuildOptions
 

@@ -161,7 +161,7 @@ type
     // If yes, an override option will be passed to make (OVERRIDEVERSIONCHECK=1)
     // If no, the FPC make script enforces that the latest stable FPC bootstrap compiler is used.
     // This is required information for setting make file options
-    property CompilerOverrideVersionCheck: boolean read FBootstrapCompilerOverrideVersionCheck;
+    property BootstrapCompilerOverrideVersionCheck: boolean read FBootstrapCompilerOverrideVersionCheck;
     //Indicate to use FPC bootstrappers from FTP server
     property NativeFPCBootstrapCompiler: boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
 
@@ -818,7 +818,7 @@ begin
 
     // first, get/set cross binary utils !!
     BinsAvailable:=false;
-    CrossInstaller.SearchModeUsed:=TSearchSetting.ssUp; // default;
+    CrossInstaller.SearchModeUsed:=DEFAULTSEARCHSETTING;
     if Length(CrossToolsDirectory)>0 then
     begin
       // we have a crosstools setting
@@ -833,7 +833,7 @@ begin
 
     // second, get/set cross libraries !!
     LibsAvailable:=false;
-    CrossInstaller.SearchModeUsed:=TSearchSetting.ssUp;
+    CrossInstaller.SearchModeUsed:=DEFAULTSEARCHSETTING;
     if Length(CrossLibraryDirectory)>0 then
     begin
       // we have a crosslibrary setting
@@ -2141,8 +2141,11 @@ begin
   {else
     Processor.Process.Parameters.Add('DATA2INC=' + FFPCCompilerBinPath+'data2inc'+GetExeExt);}
 
-  if FBootstrapCompilerOverrideVersionCheck then
+  if BootstrapCompilerOverrideVersionCheck then
+  begin
     Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+    if (ModuleName=_FPC) then Infoln(infotext+'Adding OVERRIDEVERSIONCHECK=1 due to wrong version of bootstrapper !!',etWarning);
+  end;
   s1:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
   while Pos('  ',s1)>0 do
   begin
@@ -3125,7 +3128,7 @@ var
   aCompilerList:TStringList;
   i,j,k,l:integer;
   aCompilerArchive,aStandardCompilerArchive:string;
-  aCompilerFound,aFPCUPCompilerFound, aLookForBetterAlternative:boolean;
+  aCompilerFound,aFPCUPCompilerFound, aLookForBetterAlternative, aBootstrapVersionWrong:boolean;
   {$IFDEF FREEBSD}
   FreeBSDVersion:integer;
   {$ENDIF}
@@ -3169,7 +3172,7 @@ begin
 
   if (aBootstrapVersion<>'') then
   begin
-    FBootstrapCompilerOverrideVersionCheck:=false;
+    aBootstrapVersionWrong:=false;
 
     aStandardCompilerArchive:=GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
     // remove file extension
@@ -3298,10 +3301,10 @@ begin
 
             end;
 
-            // look for a previous compiler if not found, and use overrideversioncheck
+            // look for a previous compiler if not found
             if (NOT aCompilerFound) then
             begin
-              FBootstrapCompilerOverrideVersionCheck:=true;
+              aBootstrapVersionWrong:=true;
               s:=GetBootstrapCompilerVersionFromVersion(aLocalBootstrapVersion);
               if aLocalBootstrapVersion<>s
                  then aLocalBootstrapVersion:=s
@@ -3337,10 +3340,10 @@ begin
       {$endif}
 
       // second, try the FPCUP binaries from release, perhaps it is a better version
-      if (NOT aCompilerFound) OR (FBootstrapCompilerOverrideVersionCheck) OR (aLookForBetterAlternative) then
+      if (NOT aCompilerFound) OR (aBootstrapVersionWrong) OR (aLookForBetterAlternative) then
       begin
 
-        if (NOT FBootstrapCompilerOverrideVersionCheck) then
+        if (NOT aBootstrapVersionWrong) then
         begin
           if NativeFPCBootstrapCompiler then
           begin
@@ -3352,6 +3355,8 @@ begin
         begin
           Infoln(localinfotext+'Now looking for a better [version] bootstrap compiler from Github FPCUP(deluxe) releases.',etInfo);
         end;
+
+        (*
 
         aFPCUPBootstrapURL:='';
         aLocalFPCUPBootstrapVersion:=aBootstrapVersion;
@@ -3466,8 +3471,8 @@ begin
             end
             else
             begin
-              // look for a previous (fitting) compiler if not found, and use overrideversioncheck
-              FBootstrapCompilerOverrideVersionCheck:=true;
+              // look for a previous (fitting) compiler if not found
+              aBootstrapVersionWrong:=true;
               s:=GetBootstrapCompilerVersionFromVersion(aLocalFPCUPBootstrapVersion);
               if aLocalFPCUPBootstrapVersion<>s
                  then aLocalFPCUPBootstrapVersion:=s
@@ -3479,6 +3484,7 @@ begin
         finally
           aCompilerList.Free;
         end;
+        *)
 
         // found a less official FPCUP bootstrapper !
         if (aFPCUPCompilerFound) then
@@ -3544,8 +3550,8 @@ begin
                     aCompilerFound:=True;
                     // set standard bootstrap compilername
                     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
-                    // as we do not know exactly what we get, set override
-                    FBootstrapCompilerOverrideVersionCheck:=true;
+                    // as we do not know exactly what we get
+                    aBootstrapVersionWrong:=true;
                     break;
                   end;
                 end;
@@ -3564,7 +3570,7 @@ begin
         begin
           // there is a bootstrapper available: just use it !!
           Infoln(localinfotext+'No correct bootstrapper. But going to use the available one with version ' + s,etInfo);
-          FBootstrapCompilerOverrideVersionCheck:=true;
+          aBootstrapVersionWrong:=true;
           result:=true;
         end;
       end;
@@ -3582,8 +3588,8 @@ begin
           begin
             Compiler:=FBootstrapCompiler;
             s:=CompilerVersion(FCompiler);
-            //Check if version is correct: if so, disable overrideversioncheck !
-            if s=aBootstrapVersion then FBootstrapCompilerOverrideVersionCheck:=false;
+            //Check if version is correct
+            if (s=aBootstrapVersion) then aBootstrapVersionWrong:=false;
           end;
         end;
       end;
@@ -3776,6 +3782,9 @@ begin
 
   Infoln(infotext+'Building module '+ModuleName+'...',etInfo);
 
+  // Assume the bootstrap version is correct, unset OVERRIDEVERSIONCHECK
+  FBootstrapCompilerOverrideVersionCheck:=false;
+
   s:=IncludeTrailingPathDelimiter(SourceDirectory) + MAKEFILENAME;
   if (NOT FileExists(s)) then
   begin
@@ -3897,27 +3906,26 @@ begin
       }
 
       if (CompilerVersion(FCompiler)=RequiredBootstrapVersion)
-        then Infoln(infotext+'To compile this FPC, we will use a fresh compiler with version : '+RequiredBootstrapVersion,etInfo)
+      then
+      begin
+        Infoln(infotext+'To compile this FPC, we will use a fresh compiler with version : '+RequiredBootstrapVersion,etInfo);
+      end
+      else
+      begin
+        // check if we have a lower acceptable requirement for the bootstrapper
+        if (CompilerVersion(FCompiler)=RequiredBootstrapVersionLow) then
+        begin
+          // if so, set bootstrapper to lower one !!
+          RequiredBootstrapVersion:=RequiredBootstrapVersionLow;
+          Infoln(infotext+'To compile this FPC, we can also (and will) use (required) a fresh compiler with version : '+RequiredBootstrapVersion,etInfo);
+        end
         else
         begin
-          // check if we have a lower acceptable requirement for the bootstrapper
-          if (CompilerVersion(FCompiler)=RequiredBootstrapVersionLow) then
-          begin
-            // if so, set bootstrapper to lower one !!
-            RequiredBootstrapVersion:=RequiredBootstrapVersionLow;
-            Infoln(infotext+'To compile this FPC, we can also (and will) use (required) a fresh compiler with version : '+RequiredBootstrapVersion,etInfo);
-          end;
+          // As the bootstrap version is incorrect, set OVERRIDEVERSIONCHECK
+          FBootstrapCompilerOverrideVersionCheck:=true;
         end;
+      end;
     end;
-
-    {$IFDEF CPUAARCH64}
-    // we build with >=3.2.0 , while aarch64 is not available for FPC < 3.2.0
-    FBootstrapCompilerOverrideVersionCheck:=true;
-    {$ENDIF CPUAARCH64}
-    {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
-    // we build with >=3.2.0 , while ppc64le is not available for FPC < 3.2.0
-    FBootstrapCompilerOverrideVersionCheck:=true;
-    {$ENDIF}
 
     // get the correct binutils (Windows only)
     if (Pos('/branches/',URL)>0) then
@@ -3952,98 +3960,6 @@ begin
       end;
     end;
     {$endif}
-
-
-    //if not result then exit;
-
-    {$ifdef win64}
-    // Deals dynamically with either ppc386.exe or native ppcx64.exe
-    if (Pos('ppc386.exe',FCompiler)>0) OR (GetCompilerTargetOS(FCompiler)='win32') then //need to build ppcx64 before
-    begin
-      Infoln('We have ppc386. We need ppcx64. So make it !',etInfo);
-      Processor.Executable := Make;
-      Processor.Process.Parameters.Clear;
-      {$IFDEF MSWINDOWS}
-      if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
-      {$ENDIF}
-      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
-      Processor.Process.Parameters.Add('compiler_cycle');
-      if (NOT FNoJobs) then
-      begin
-        {$ifndef win64}
-        Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-        {$endif win64}
-        Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
-      end;
-      Processor.Process.Parameters.Add('FPC='+FCompiler);
-      Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(SourceDirectory));
-      Processor.Process.Parameters.Add('OS_SOURCE=win32');
-      Processor.Process.Parameters.Add('CPU_SOURCE=i386');
-      Processor.Process.Parameters.Add('OS_TARGET=win64');
-      Processor.Process.Parameters.Add('CPU_TARGET=x86_64');
-      Processor.Process.Parameters.Add('OPT='+STANDARDCOMPILERVERBOSITYOPTIONS);
-      // Override makefile checks that checks for stable compiler in FPC trunk
-      if FBootstrapCompilerOverrideVersionCheck then
-        Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      Infoln(infotext+'Perform compiler cycle for Windows FPC64.',etInfo);
-      ProcessorResult:=Processor.ExecuteAndWait;
-      if ProcessorResult <> 0 then
-      begin
-        result := False;
-        WritelnLog(etError, infotext+'Failed to build ppcx64 bootstrap compiler.');
-        exit;
-      end;
-      // Now we can change the compiler from the i386 to the x64 compiler:
-      Compiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
-      FileUtil.CopyFile(IncludeTrailingPathDelimiter(SourceDirectory)+'compiler\ppcx64.exe',FCompiler,[cffOverwriteFile]);
-      FBootstrapCompilerOverrideVersionCheck:=True;
-    end;
-    {$endif win64}
-    {$ifdef darwin}
-    if Pos('ppcuniversal',FCompiler)>0 then //need to build ppcxxx before
-    begin
-      Infoln(infotext+'We have ppcuniversal. We need '+TargetCompilerName+'. So make it !',etInfo);
-      Processor.Executable := Make;
-      Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
-      Processor.Process.Parameters.Clear;
-      Processor.Process.Parameters.Add('compiler_cycle');
-      if (NOT FNoJobs) then
-      begin
-        Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-        Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
-      end;
-      Processor.Process.Parameters.Add('FPC='+FCompiler);
-      Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(SourceDirectory));
-      Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
-      Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
-      Processor.Process.Parameters.Add('OS_TARGET=' + GetTargetOS);
-      Processor.Process.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
-      Processor.Process.Parameters.Add('OPT='+STANDARDCOMPILERVERBOSITYOPTIONS);
-      // Override makefile checks that checks for stable compiler in FPC trunk
-      if FBootstrapCompilerOverrideVersionCheck then
-        Processor.Process.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      Infoln(infotext+'Perform compiler cycle for Darwin.',etInfo);
-      ProcessorResult:=Processor.ExecuteAndWait;
-      if ProcessorResult <> 0 then
-      begin
-        result := False;
-        WritelnLog(etError, infotext+'Failed to build '+s+' bootstrap compiler.');
-        exit;
-      end;
-
-      // copy over the fresh bootstrapper, if any
-      if FileExists(IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+TargetCompilerName) then
-      begin
-        // Now we can change the compiler from the ppcuniversal to the target compiler:
-        Compiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+TargetCompilerName;
-        Infoln(infotext+'Copy fresh compiler ('+TargetCompilerName+') into: '+ExtractFilePath(FCompiler),etDebug);
-        FileUtil.CopyFile(IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+TargetCompilerName,
-          FCompiler);
-        fpChmod(FCompiler,&755);
-        FBootstrapCompilerOverrideVersionCheck:=True;
-      end;
-    end;
-    {$endif darwin}
   end;//(NOT (Self is TFPCCrossInstaller))
 
   // Do we need to force the use of libc :

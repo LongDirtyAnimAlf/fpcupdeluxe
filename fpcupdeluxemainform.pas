@@ -1591,6 +1591,14 @@ begin
     Special := True;
   end;
 
+  // override warning
+  if (NOT Special) AND (ExistWordInString(PChar(s),'You have overriden the starting compiler versioncheck',[soDown])) then
+  begin
+    FG      := clYellow;
+    BG      := clGreen;
+    Special := True;
+  end;
+
   // diskspace error
   if (NOT Special) AND ((ExistWordInString(PChar(s),'Stream write error',[soDown])) OR (ExistWordInString(PChar(s),'disk full',[soDown]))) then
   begin
@@ -1948,13 +1956,14 @@ end;
 procedure TForm1.LanguageClick(Sender: TObject);
 begin
   {$ifdef EnableLanguages}
+  if ((Sender=nil) OR (Sender=MEnglishlanguage)) then sLanguage:='en';
   if Sender=MChineseCNlanguage then sLanguage:='zh';
-  if Sender=MEnglishlanguage then sLanguage:='en';
   if Sender=MKoreanlanguage then sLanguage:='ko';
   if Sender=MGermanlanguage then sLanguage:='de';
   if Sender=MFrenchlanguage then sLanguage:='fr';
   TransLate(sLanguage);
-  Form2.UpdateList;
+  // This is needed to update the contents of the list
+  Form2.UpdateCheckBoxList;
   {$endif}
 end;
 

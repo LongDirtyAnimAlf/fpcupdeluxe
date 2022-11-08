@@ -246,7 +246,7 @@ type
     //function  GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
 
     procedure ResetAll;
-    procedure UpdateList;
+    procedure UpdateCheckBoxList;
 
     property Repo:boolean read GetRepo write SetRepo;
     property PackageRepo:boolean read GetPackageRepo write SetPackageRepo;
@@ -460,7 +460,7 @@ begin
     RadioGroupARMArch.Items.Add(GetEnumNameSimple(TypeInfo(TARMARCH),Ord(ARMArch)));
   RadioGroupARMArch.ItemIndex:=0;
 
-  UpdateList;
+  UpdateCheckBoxList;
 
   AskConfirmation        := True;
   FpcupBootstrappersOnly := True;
@@ -568,7 +568,7 @@ begin
 end;
 
 
-procedure TForm2.UpdateList;
+procedure TForm2.UpdateCheckBoxList;
 var
   i           : integer;
   boolstore   : array of boolean;
@@ -948,7 +948,7 @@ begin
 
             if CPU=arm then
             begin
-              if (CrossARMArch<>TARMARCH.none) then
+              if (CrossARMArch<>DEFAULTARMARCH) then
               begin
                 if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s2);
                 InfoForm.Memo1.Lines.Append('  ARM Arch : '+GetARMArch(CrossARMArch));
@@ -1161,7 +1161,7 @@ begin
   begin
     i:=(Sender AS TRadioGroup).ItemIndex;
     if i=-1 then
-      xARMArch:=TARMARCH.none
+      xARMArch:=DEFAULTARMARCH
     else
       xARMArch:=TARMARCH(i);
     CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=xARMArch;
@@ -1202,7 +1202,7 @@ function TForm2.GetLibraryDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
 begin
   try
     case CrossUtils[aCPU,aOS,aSubarch].Setting of
-      TSearchSetting.ssUp: result:='';
+      DEFAULTSEARCHSETTING: result:='';
       TSearchSetting.ssAuto: result:=FPCUP_AUTO_MAGIC;
       TSearchSetting.ssCustom: result:=CrossUtils[aCPU,aOS,aSubarch].LibDir;
     else result:='';
@@ -1216,7 +1216,7 @@ function TForm2.GetToolsDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
 begin
   try
     case CrossUtils[aCPU,aOS,aSubarch].Setting of
-      TSearchSetting.ssUp: result:='';
+      DEFAULTSEARCHSETTING: result:='';
       TSearchSetting.ssAuto: result:=FPCUP_AUTO_MAGIC;
       TSearchSetting.ssCustom: result:=CrossUtils[aCPU,aOS,aSubarch].BinDir;
     else result:='';

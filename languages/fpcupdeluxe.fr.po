@@ -413,10 +413,6 @@ msgstr "Définir la sous-architecture"
 msgid "Select a subarch for embedded target."
 msgstr "Sélectionnez un sous-arche pour la cible intégrée."
 
-#: tform1.caption
-msgid "Form1"
-msgstr "Formulaire 1"
-
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
 msgstr "Effacement automatique"

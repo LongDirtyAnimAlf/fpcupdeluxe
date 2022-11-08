@@ -143,7 +143,7 @@ begin
   begin
     i:=(Sender AS TRadioGroup).ItemIndex;
     if i=-1 then
-      xARMArch:=TARMARCH.none
+      xARMArch:=DEFAULTARMARCH
     else
       xARMArch:=TARMARCH(i);
     CrossUtils[LocalCPU,LocalOS,LocalSUBARCH].CrossARMArch:=xARMArch;
@@ -200,7 +200,7 @@ begin
       if Sender=EditBinLocation then
         BinDir:='';
       if (Length(BinDir)=0) AND (Length(LibDir)=0) then
-        Setting:=TSearchSetting.ssUp;
+        Setting:=DEFAULTSEARCHSETTING;
       if Sender=EditCrossBuildOptions then
         CrossBuildOptions:='';
     end;
