@@ -3356,8 +3356,6 @@ begin
           Infoln(localinfotext+'Now looking for a better [version] bootstrap compiler from Github FPCUP(deluxe) releases.',etInfo);
         end;
 
-        (*
-
         aFPCUPBootstrapURL:='';
         aLocalFPCUPBootstrapVersion:=aBootstrapVersion;
         aFPCUPCompilerFound:=false;
@@ -3484,7 +3482,6 @@ begin
         finally
           aCompilerList.Free;
         end;
-        *)
 
         // found a less official FPCUP bootstrapper !
         if (aFPCUPCompilerFound) then
