@@ -1011,7 +1011,7 @@ end;
 
 function TInstaller.InitInfoText(const ExtraInfo:string):string;
 begin
-  result:=Copy(UnCamel(Self.ClassName),2,MaxInt)+ExtraInfo;
+  result:=TrimLeft(Copy(UnCamel(Self.ClassName),2,MaxInt))+ExtraInfo;
   //if (Length(ExtraInfo)>0) then result:=result+' '+ExtraInfo;
 end;
 
@@ -1345,7 +1345,8 @@ begin
             //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-64-bit.zip';
             aURL:='https://github.com/git-for-windows/git/releases/download/v2.33.0.windows.2/MinGit-2.33.0.2-64-bit.zip';
             {$endif}
-            Infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
+            Infoln(localinfotext+'GIT client not found. Downloading it',etInfo);
+            Infoln(localinfotext+'GIT client download (may take time) from '+aURL,etDebug);
             OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
             if NOT OperationSucceeded then
             begin
@@ -1409,7 +1410,8 @@ begin
           aURL:=FPCUPGITREPO+'/releases/download/windowsx64bins_v1.0/'+Output;
           {$endif}
           ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
-          Infoln(localinfotext+'HG (mercurial) client not found. Downloading it (may take time) from '+aURL,etInfo);
+          Infoln(localinfotext+'HG (mercurial) client not found. Downloading it',etInfo);
+          Infoln(localinfotext+'HG (mercurial) client download (may take time) from '+aURL,etDebug);
           OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
           if NOT OperationSucceeded then
           begin
@@ -1522,20 +1524,21 @@ begin
     FNeededExecutablesChecked:=OperationSucceeded;
   end;
   Result := OperationSucceeded;
+  localinfotext:=infotext;
 end;
 
 function TInstaller.CheckAndGetNeededBinUtils: boolean;
 var
   {$IFDEF MSWINDOWS}
-  AllThere: boolean;
-  i: integer;
-  InstallPath:string;
+  AllThere           : boolean;
+  i                  : integer;
+  InstallPath        : string;
   {$ENDIF MSWINDOWS}
-  OperationSucceeded: boolean;
-  s1,s2: string;
+  OperationSucceeded : boolean;
+  s1                 : string;
 begin
   OperationSucceeded := true;
-  s2:=InitInfoText(' (DownloadBinUtils): ');
+  localinfotext:=InitInfoText(' (DownloadBinUtils): ');
   {$IFDEF MSWINDOWS}
   if OperationSucceeded then
   begin
@@ -1574,9 +1577,9 @@ begin
     end;
     if not(AllThere) then
     begin
-      Infoln(s2+'Make path [' + FMakeDir + '] does not have (all) binutils.',etDebug);
-      Infoln(s2+'Going to download needed binutils.',etInfo);
-      //Infoln(s2+'Some binutils missing: going to get them.',etInfo);
+      Infoln(localinfotext+'Make path [' + FMakeDir + '] does not have (all) binutils.',etDebug);
+      Infoln(localinfotext+'Going to download needed binutils.',etInfo);
+      //Infoln(localinfotext+'Some binutils missing: going to get them.',etInfo);
       OperationSucceeded := DownloadBinUtils;
     end;
   end;
@@ -1592,7 +1595,7 @@ begin
       begin
         if CheckExecutable(Make, ['-v'], '') then
         begin
-          Infoln(s2+'Found make binary here: '+Make+'. But it is not GNU Make.',etError);
+          Infoln(localinfotext+'Found make binary here: '+Make+'. But it is not GNU Make.',etError);
           OperationSucceeded := false;
         end;
       end;
@@ -1607,11 +1610,11 @@ begin
       s1:=Which('ld');
       if (NOT CheckExecutable(s1, ['-v'], 'GNU ld')) then
       begin
-        Infoln(s2+'Found ld binary here: '+s1+'. But it is not GNU ld. Expect errors',etWarning);
+        Infoln(localinfotext+'Found ld binary here: '+s1+'. But it is not GNU ld. Expect errors',etWarning);
         s1:=Which('ld.bfd');
         if (NOT CheckExecutable(s1, ['-v'], 'GNU ld')) then
         begin
-          Infoln(s2+'Found GNU ld.bfd binary here: '+s1+'. Could be used through symlinking.',etWarning);
+          Infoln(localinfotext+'Found GNU ld.bfd binary here: '+s1+'. Could be used through symlinking.',etWarning);
         end;
         OperationSucceeded := true;
       end;
@@ -1622,6 +1625,7 @@ begin
   end;
 
   Result := OperationSucceeded;
+  localinfotext:=infotext;
 end;
 
 procedure TInstaller.CreateBinutilsList(aVersion:string);
@@ -2642,8 +2646,6 @@ var
   //WgetFile,WgetZip: string;
   i:integer;
 begin
-  localinfotext:=InitInfoText(' (DownloadWget): ');
-
   Infoln(localinfotext+'No Wget found. Going to download it.',etInfo);
 
   OperationSucceeded := false;
@@ -2956,7 +2958,6 @@ var
   SVNFiles: TStringList;
   OperationSucceeded: boolean;
 begin
-  localinfotext:=InitInfoText(' (FindSVNSubDirs): ');
   SVNDir := IncludeTrailingPathDelimiter(FMakeDir)+'svn';
   SVNFiles := FindAllFiles(SVNDir, SVNClient.RepoExecutableName + GetExeExt, true);
   try
@@ -3252,7 +3253,7 @@ begin
     end;
   end;
 
-  Infoln(infotext+'Checking ' + ModuleName + ' sources with '+Copy(UnCamel(aRepoClient.ClassName),2,MaxInt),etInfo);
+  Infoln(infotext+'Checking ' + ModuleName + ' sources with '+TrimLeft(Copy(UnCamel(aRepoClient.ClassName),2,MaxInt)),etInfo);
 
   aRepoClient.Verbose          := FVerbose;
   aRepoClient.ExportOnly       := FExportOnly;
