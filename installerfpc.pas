@@ -1502,7 +1502,7 @@ begin
           Processor.Process.Parameters.Add('OPT='+s1);
 
           try
-            s1:=infotext+'Running '+Processor.Executable+' [step # '+UnCamel(GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle)))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')';
+            s1:=infotext+'Running make ['+UnCamel(GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle)))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')';
             if (Length(CrossOptions)>0) then s1:=s1+' with CROSSOPT: '+CrossOptions;
             Infoln(s1,etInfo);
 
