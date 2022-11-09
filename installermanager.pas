@@ -2417,7 +2417,7 @@ var
   localinfotext:string;
 begin
   result:=true;
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' ('+SequenceName+'): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' ('+SequenceName+'): ';
   try
     if not assigned(FParent.FModuleList) then
     begin

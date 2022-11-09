@@ -140,6 +140,7 @@
             <Debugging>
               <GenerateDebugInfo Value="False"/>
               <DebugInfoType Value="dsDwarf2"/>
+              <UseLineInfoUnit Value="False"/>
               <StripSymbols Value="True"/>
             </Debugging>
             <Options>

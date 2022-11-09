@@ -200,7 +200,7 @@ uses
 function THelpInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
   result:=true;
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
+  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
@@ -211,7 +211,7 @@ var
   aPath,s:string;
   {$ENDIF MSWINDOWS}
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (InitModule): ';
 
   PlainBinDir := SafeExpandFileName(FFPCCompilerBinPath+'..'+DirectorySeparator+'..');
 
@@ -779,7 +779,7 @@ end;
 
 function THelpLazarusInstaller.InitModule: boolean;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (InitModule): ';
 
   Infoln(localinfotext+'Entering ...',etDebug);
 

@@ -887,6 +887,8 @@ end;
 
 {$ifdef LCL}
 procedure InitDefaultCrossSettings;
+const
+  ARMLESSOS: set of TOS = [TOS.win32..TOS.wasi] - [TOS.android,TOS.win32,TOS.win64,TOS.iphonesim,TOS.java,TOS.msdos,TOS.solaris,TOS.morphos,TOS.aros,TOS.amiga,TOS.go32v2,TOS.wasi];
 var
   CPU:TCPU;
   OS:TOS;
@@ -931,7 +933,7 @@ begin
         if (
           (CPU=TCPU.arm)
           AND (NOT (OS in SUBARCH_OS))
-          AND (NOT (OS in [TOS.android,TOS.win32,TOS.win64,TOS.iphonesim,TOS.java,TOS.msdos,TOS.solaris,TOS.morphos,TOS.aros,TOS.amiga,TOS.go32v2,TOS.wasi]))
+          AND (OS in ARMLESSOS)
           ) then
         begin
           // default: armhf

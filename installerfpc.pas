@@ -936,7 +936,7 @@ begin
                 end
                 else
                 begin
-                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1)+'. Not touching it !');
+                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                 end;
 
                 s1 := FFPCCompilerBinPath + 'RPI2.CFG';
@@ -965,7 +965,7 @@ begin
                 end
                 else
                 begin
-                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1)+'. Not touching it !');
+                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                 end;
 
                 s1 := FFPCCompilerBinPath + 'RPI3.CFG';
@@ -1006,7 +1006,7 @@ begin
                 end
                 else
                 begin
-                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1)+'. Not touching it !');
+                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                 end;
 
                 s1 := FFPCCompilerBinPath + 'QEMUVPB.CFG';
@@ -1045,7 +1045,7 @@ begin
                 end
                 else
                 begin
-                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1)+'. Not touching it !');
+                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                 end;
 
               end;
@@ -1090,7 +1090,7 @@ begin
                 end
                 else
                 begin
-                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1)+'. Not touching it !');
+                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                 end;
 
               end;
@@ -1502,10 +1502,9 @@ begin
           Processor.Process.Parameters.Add('OPT='+s1);
 
           try
-            if CrossOptions='' then
-               Infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')',etInfo)
-            else
-              Infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+') with CROSSOPT: '+CrossOptions,etInfo);
+            s1:=infotext+'Running '+Processor.Executable+' [step # '+UnCamel(GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle)))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')';
+            if (Length(CrossOptions)>0) then s1:=s1+' with CROSSOPT: '+CrossOptions;
+            Infoln(s1,etInfo);
 
             ProcessorResult:=Processor.ExecuteAndWait;
             result:=(ProcessorResult=0);
@@ -1850,7 +1849,7 @@ begin
   if (ModuleName=_FPC) then
   begin
     if (s1<>'0.0.0')
-      then Infoln('FPC native builder: Using FPC bootstrap compiler with version: '+s1, etInfo)
+      then Infoln(infotext+'Using FPC bootstrap compiler with version: '+s1, etInfo)
       else Infoln(infotext+'FPC bootstrap version error: '+s1+' ! Should never happen: expect many errors !!', etError);
   end;
 
@@ -1901,7 +1900,7 @@ begin
       s1:=GetRevision(ModuleName);
       if Length(s1)>0 then FActualRevision:=s1;
     end;
-    Infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
+    Infoln(infotext+'Now building '+ModuleName,etInfo);
   end;
 
   Processor.Executable := Make;
@@ -2245,7 +2244,7 @@ end;
 function TFPCInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
   result:=true;
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
+  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
@@ -2325,7 +2324,7 @@ begin
 
   //if (SourceDirectory<>InstallDirectory) then
   begin
-    Infoln(infotext+'Start search and removal of stale build files and directories. May take a while.');
+    Infoln(infotext+'Start search and removal of stale build files and directories for '+sArch+'. May take a while.');
 
     DeleteFilesNameSubdirs(SourceDirectory,'.stackdump');
     DeleteFilesNameSubdirs(SourceDirectory,'.core');
@@ -2384,11 +2383,22 @@ begin
       DeleteFilesExtensionsSubdirs(aDir,DeleteList,'units'+DirectorySeparator+sArch);
       aDir:=ConcatPaths([SourceDirectory,'utils']);
       DeleteFilesExtensionsSubdirs(aDir,DeleteList,'units'+DirectorySeparator+sArch);
+      DeleteFilesExtensionsSubdirs(aDir,DeleteList,'bin'+DirectorySeparator+sArch);
+
+      {$ifdef MSWINDOWS}
+      // On Unix, its hard to find executables, as they (might) have no extension
+      // So skip this on Unix
+      DeleteList.Clear;
+      DeleteList.Add('.exe');
+      aDir:=ConcatPaths([SourceDirectory,'compiler','utils']);
+      DeleteFilesExtensionsSubdirs(aDir,DeleteList,'');
+      {$ENDIF}
+
     finally
       DeleteList.Free;
     end;
   end;
-  Infoln(infotext+'Search and removal of stale build files and directories ready.');
+  Infoln(infotext+'Search and removal of stale build files and directories ready.',etDebug);
   WritelnLog(infotext+'Update/build/config succeeded.',false);
 end;
 
@@ -2825,7 +2835,7 @@ var
 begin
   result:=true;
   {$IFDEF UNIX}
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CreateFPCScript): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (CreateFPCScript): ';
   FPCCompiler := FFPCCompilerBinPath+'fpc'+GetExeExt;
 
   // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
@@ -2875,7 +2885,7 @@ var
   CompilerName:string;
   OperationSucceeded: boolean;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBootstrapCompiler): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadBootstrapCompiler): ';
 
   OperationSucceeded:=true;
 
@@ -3099,7 +3109,7 @@ begin
 
   if (InitDone) AND (aBootstrapVersion='') then exit;
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (InitModule): ';
 
   result:=CheckAndGetTools;
 
@@ -3728,7 +3738,7 @@ begin
 
   if not result then exit;
 
-  Infoln(infotext+'Building module '+ModuleName+'...',etInfo);
+  Infoln(infotext+'Going to build '+ModuleName,etInfo);
 
   // Assume the bootstrap version is correct, unset OVERRIDEVERSIONCHECK
   FBootstrapCompilerOverrideVersionCheck:=false;
@@ -3744,21 +3754,21 @@ begin
   if (Self is TFPCCrossInstaller) then
   begin
     Compiler:=GetFPCInBinDir;
-    s2:='FPC '+CrossInstaller.RegisterName+' cross-builder: Detected source version FPC (source): '
+    s2:=CrossInstaller.RegisterName+' cross-builder: Detected source version FPC (source): '
   end
   else
   begin
-    s2:='FPC native builder: Detected source version FPC (source): ';
+    s2:='Detected source version FPC (source): ';
     if (VersionSnippet='0.0.0') then
     begin
       VersionSnippet:=CompilerVersion(GetFPCInBinDir);
       if VersionSnippet<>'0.0.0' then
-        s2:='FPC native builder: Detected source version FPC (compiler): ';
+        s2:='Detected source version FPC (compiler): ';
     end;
   end;
 
   if (VersionSnippet<>'0.0.0') then
-    Infoln(s2+VersionSnippet, etInfo);
+    Infoln(infotext+s2+VersionSnippet, etInfo);
 
   // if cross-compiling, skip a lot of code
   // trust the previous work done by this code for the native installer!
@@ -3962,9 +3972,9 @@ begin
           if (VersionSnippet=REVINCERROR) then FUseRevInc:=false;
           if (NOT FUseRevInc) then
           begin
-            Infoln('FPC builder: Contents of auto-generated (Makefile) revision.inc incorrect.', etWarning);
-            Infoln('FPC builder: Revision.inc contents: '+VersionSnippet, etWarning);
-            Infoln('FPC builder: Deleting and preventing use !', etWarning);
+            Infoln(infotext+'Contents of auto-generated (Makefile) revision.inc incorrect.', etWarning);
+            Infoln(infotext+'Contents detected: '+VersionSnippet, etWarning);
+            Infoln(infotext+'Deleting revision.inc and preventing use !', etWarning);
             DeleteFile(s);
           end;
         end;
@@ -4067,7 +4077,7 @@ begin
         end
         else
         begin
-          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s));
         end;
 
         s := FFPCCompilerBinPath + FPINIFILENAME;
@@ -4084,7 +4094,7 @@ begin
         end
         else
         begin
-          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s));
         end;
       end;
 
@@ -4132,7 +4142,7 @@ begin
         end
         else
         begin
-          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s));
         end;
 
         s := IncludeTrailingPathDelimiter(s2)+FPCPKGCOMPILERTEMPLATE;
@@ -4162,7 +4172,7 @@ begin
         end
         else
         begin
-          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+          Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s));
         end;
       end;
 
@@ -4175,7 +4185,7 @@ begin
       end
       else
       begin
-        Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+        Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s));
       end;
 
     end;
@@ -4569,7 +4579,7 @@ begin
         ConfigTextStore.Free;
       end;
 
-      Infoln(infotext+'Tuning of fpc.cfg ready.');
+      Infoln(infotext+'Tuning of fpc.cfg ready.',etDebug);
     end;
 
     // do not build pas2js [yet]: separate install ... use the module with rtl

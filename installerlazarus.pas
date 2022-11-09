@@ -549,7 +549,7 @@ begin
 
   if not DirectoryExists(InstallDirectory) then
   begin
-    Infoln(infotext+'No Lazarus install [yet] ... nothing to be done',etInfo);
+    Infoln(infotext+'No Lazarus install [yet] ... nothing to be done',etDebug);
   end;
   if CheckDirectory(InstallDirectory) then exit;
 
@@ -647,7 +647,7 @@ begin
     end;
     if ((ModuleName=_LAZARUS) OR (ModuleName=_USERIDE)) then
     begin
-      Infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
+      Infoln(infotext+'Now building '+ModuleName,etInfo);
       s1:=ConcatPaths([SourceDirectory,'ide'])+DirectorySeparator+REVINCFILENAME;
       // If not there, store the revision in the appropriate location
       if (NOT FileExists(s1)) then
@@ -883,7 +883,7 @@ begin
         else
         begin
           // nothing to be done: exit graceously
-          Infoln(infotext+'No extra LCL_PLATFORM defined ... nothing to be done', etInfo);
+          Infoln(infotext+'No extra LCL_PLATFORM defined ... nothing to be done', etDebug);
           OperationSucceeded := true;
           Result := true;
           exit;
@@ -1388,7 +1388,7 @@ end;
 function TLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
   Result := true;
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
+  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
@@ -1439,7 +1439,7 @@ begin
 
   if InitDone then exit;
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (InitModule): ';
 
   PlainBinDir := SafeExpandFileName(FFPCCompilerBinPath+'..'+DirectorySeparator+'..');
 
@@ -1979,15 +1979,6 @@ begin
 
   CrossCompiling:=(Self is TLazarusCrossInstaller);
 
-  // If cleaning primary config:
-  if ((NOT CrossCompiling) and (ModuleName=_LAZARUS)) then
-  begin
-    //Infoln(infotext+'If your primary config path has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
-    //  InstallDirectory) + 'lazarus.cfg which points to the primary config path.', etInfo);
-    Infoln(infotext+'Deleting Lazarus primary config file ('+LAZARUSCFG+').', etInfo);
-    DeleteFile(IncludeTrailingPathDelimiter(InstallDirectory) + LAZARUSCFG);
-  end;
-
   if (ModuleName=_LAZARUS) then
   begin
     if CrossCompiling then
@@ -2143,7 +2134,7 @@ begin
         end
         else
         begin
-          Infoln(infotext+'No extra LCL_PLATFORM defined ... nothing to be done', etInfo);
+          Infoln(infotext+'No extra LCL_PLATFORM defined ... nothing to be done', etDebug);
           Result := true;
           exit;
         end;
@@ -2734,7 +2725,7 @@ begin
 
   if not DirectoryExists(SourceDirectory) then
   begin
-    Infoln(infotext+'No Lazarus sources [yet] ... nothing to be done',etInfo);
+    Infoln(infotext+'No Lazarus sources [yet] ... nothing to be done',etDebug);
   end;
   if CheckDirectory(SourceDirectory) then exit;
 

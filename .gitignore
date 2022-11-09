@@ -59,6 +59,7 @@ Temporary Items
 *.local
 
 *.pot
+*.mo
 !./languages/*.po
 
 logger/secrets.inc

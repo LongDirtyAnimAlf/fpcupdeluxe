@@ -670,10 +670,18 @@ end;
 
 procedure TForm1.ProcessInfo(Sender: TObject);
 var
-  s,searchstring:string;
-  x,y:integer;
-  Lines:TStrings;
+  s,searchstring  : string;
+  x,y             : integer;
+  Lines           : TStrings;
+  Handled         : boolean;
+procedure EchoInfo(info:string);
 begin
+  memoSummary.Lines.Append(info);
+  Handled:=true;
+end;
+begin
+  Handled:=false;
+
   {$ifdef READER}
   Lines:=TMemo(Sender).Lines;
   {$else}
@@ -684,110 +692,80 @@ begin
   s:=Trim(s);
   if Length(s)=0 then exit;
 
-  searchstring:='checking out/updating';
-  if (ExistWordInString(PChar(s),searchstring,[soDown])) then
+  if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) then
   begin
-    x:=Pos(searchstring,LowerCase(s));
-    if x>0 then
+    EchoInfo(BeginSnippet+' Start of compile error summary.');
+
+    if (ExistWordInString(PChar(s),'fatal: internal error')) then
     begin
-      x:=x+Length(searchstring);
-      InternalError:=Copy(s,x+1,MaxInt);
-      memoSummary.Lines.Append('Getting/updating '+InternalError);
-    end;
-  end;
-
-  // report about correct tools that are found and used
-  //if (ExistWordInString(PChar(s),'found correct',[soDown])) then
-  //begin
-  //  memoSummary.Lines.Append(s);
-  //end;
-
-  if (ExistWordInString(PChar(s),' native builder: ',[soDown])) OR (ExistWordInString(PChar(s),' cross-builder: ',[soDown])) then
-  begin
-    memoSummary.Lines.Append(s);
-  end;
-
-  // warn about time consuming module operations
-  if ExistWordInString(PChar(s),'UniversalInstaller (GetModule:',[soWholeWord,soDown]) then
-  begin
-    searchstring:=': Getting module ';
-    x:=Pos(searchstring,s);
-    if x>0 then
-    begin
-      x:=x+Length(searchstring);
-      InternalError:=Copy(s,x,MaxInt);
-      memoSummary.Lines.Append(BeginSnippet + ' Getting '+InternalError+' sources ... please wait, could take some time.');
-    end;
-  end
-  else
-  begin
-    // warn about time consuming FPC and Lazarus operations
-    if (
-      (ExistWordInString(PChar(s),'downloadfromurl',[soWholeWord,soDown]))
-      OR
-      (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown]))
-      OR
-      (ExistWordInString(PChar(s),'clone',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord,soDown]))
-    ) then
-    begin
-      memoSummary.Lines.Append(BeginSnippet + ' Performing SVN/GIT/HG/FTP/URL checkout/download. Please wait, could take some time.');
-    end;
-  end;
-
-  if (ExistWordInString(PChar(s),'switch',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
-  begin
-    memoSummary.Lines.Append(BeginSnippet + ' Performing a SVN repo URL switch ... please wait, could take some time.');
-  end;
-
-  // github error
-  if (ExistWordInString(PChar(s),'429 too many requests',[soDown])) then
-  begin
-    memoSummary.Lines.Append('GitHub blocked us due to too many download requests.');
-    memoSummary.Lines.Append('This will last for an hour, so please wait and be patient.');
-    memoSummary.Lines.Append('After this period, please re-run fpcupdeluxe.');
-  end;
-
-  (*
-  searchstring:='the makefile doesn''t support target';
-  if (ExistWordInString(PChar(s),searchstring,[soDown])) then
-  begin
-    memoSummary.Lines.Append('Sorry, but you have chosen a target that is not supported (yet).');
-    x:=Pos(searchstring,LowerCase(s));
-    if x>0 then
-    begin
-      x:=x+Length(searchstring);
-      InternalError:=Copy(s,x+1,MaxInt);
-      x:=Pos(',',LowerCase(InternalError));
-      if x=0 then x:=Pos(' ',LowerCase(InternalError));
+      x:=RPos(' ',s);
       if x>0 then
       begin
-        InternalError:=Copy(InternalError,1,x-1);
-        memoSummary.Lines.Append('Wrong target: '+InternalError);
+        InternalError:=Copy(s,x+1,MaxInt);
+        EchoInfo('Compiler error: '+InternalError);
       end;
-    end;
-  end;
-  *)
-
-  if ( Assigned(FPCUpManager) AND (NOT FPCUpManager.SwitchURL) ) then
-  begin
-    if (ExistWordInString(PChar(s),URL_ERROR,[soDown])) then
+    end
+    else if (ExistWordInString(PChar(s),'error: user defined')) then
     begin
-      s:=
-      'Fpcupdeluxe encountered a (fatal) URL error.' + sLineBreak +
-      'Most common cause: overwtiting an existing install.' + sLineBreak +
-      'Sources with different URL cannot be installed in same directory.' + sLineBreak +
-      'Please select an new install directory when changing versions.';
-      Application.MessageBox(PChar(s), PChar('URL mismatch error'), MB_ICONSTOP);
+      x:=Pos('error: user defined',LowerCase(s));
+      if x>0 then
+      begin
+        x:=x+Length('error: user defined');
+        InternalError:=Copy(s,x+2,MaxInt);
+        EchoInfo('Configuration error: '+InternalError);
+        x:=Pos('80 bit extended floating point',LowerCase(s));
+        if x>0 then
+        begin
+          EchoInfo('Please use trunk that has 80-bit float type using soft float unit !');
+        end;
+      end;
+    end
+    else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
+    begin
+      EchoInfo('We have had a SVN connection failure. Just start again !');
+      EchoInfo(Lines[Pred(Lines.Count)-1]);
+    end
+    else if (ExistWordInString(PChar(s),'fatal:')) then
+    begin
+      EchoInfo(s);
+      EchoInfo(Lines[Pred(Lines.Count)-1]);
+    end
+    else if (ExistWordInString(PChar(s),'error:')) then
+    begin
+      // check if "error:" at the end of the line.
+      // if so:
+      // the real error will follow on the next line(s).
+      // and we have to wait for these lines (done somewhere else in this procedure) !!
+      // if not, just print the error message.
+      if (Pos('error:',lowercase(s))<>(Length(s)-Length('error:')+1)) then EchoInfo(s);
     end;
   end;
 
-  if (ExistWordInString(PChar(s),'Error 217',[soDown])) then
+  if Handled then exit;
+
+  if (Pos(BeginSnippet,s)=1) then
+  //if ExistWordInString(PChar(s),BeginSnippet,[soWholeWord]) then
   begin
-    memoSummary.Lines.Append('We have a fatal FPC runtime error 217: Unhandled exception occurred.');
-    memoSummary.Lines.Append('See: https://www.freepascal.org/docs-html/user/userap4.html');
-    memoSummary.Lines.Append('Most common cause: a stray fpc process still running.');
-    memoSummary.Lines.Append('Please check the task manager for FPC or PPC processes that are still active.');
-    memoSummary.Lines.Append('Re-running fpcupdeluxe does work in most cases however !. So, just do a restart.');
+    if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soMatchCase]) then
+    begin
+      // repeat fpcupdeluxe warning
+      EchoInfo(s);
+    end;
+    if (ExistWordInString(PChar(s),Seriousness[etDebug],[soWholeWord,soMatchCase])) then
+    begin
+      Handled:=true;
+    end;
+  end;
+
+  if Handled then exit;
+
+  if (ExistWordInString(PChar(s),'Error 217')) then
+  begin
+    EchoInfo('We have a fatal FPC runtime error 217: Unhandled exception occurred.');
+    EchoInfo('See: https://www.freepascal.org/docs-html/user/userap4.html');
+    EchoInfo('Most common cause: a stray fpc process still running.');
+    EchoInfo('Please check the task manager for FPC or PPC processes that are still active.');
+    EchoInfo('Re-running fpcupdeluxe does work in most cases however !. So, just do a restart.');
     s:=
     'We have a fatal FPC runtime error 217: Unhandled exception occurred.' + sLineBreak +
     'Most common cause: a stray fpc process still running.' + sLineBreak +
@@ -797,16 +775,18 @@ begin
     Application.MessageBox(PChar(s), PChar('FPC runtime error 217'), MB_ICONSTOP);
   end;
 
+  if Handled then exit;
+
   searchstring:='make (e=';
-  if (ExistWordInString(PChar(s),searchstring,[soDown])) then
+  if (ExistWordInString(PChar(s),searchstring)) then
   begin
-    memoSummary.Lines.Append('Make has generated an error.');
+    EchoInfo('Make has generated an error.');
     x:=Pos('): ',LowerCase(s));
     if x>0 then
     begin
       x:=x+3;
       InternalError:=Copy(s,x,MaxInt);
-      memoSummary.Lines.Append('Make error: '+InternalError);
+      EchoInfo('Make error: '+InternalError);
     end;
 
     //Get make error code
@@ -823,190 +803,200 @@ begin
       // if error=2 then most probable cause: bad checkout of sources.
       if y=2 then
       begin
-        memoSummary.Lines.Append('Most probable cause: bad checkout of sources !');
-        memoSummary.Lines.Append('Most successfull approach: delete sources and run again.');
+        EchoInfo('Most probable cause: bad checkout of sources !');
+        EchoInfo('Most successfull approach: delete sources and run again.');
       end;
     end;
   end;
 
-  searchstring:='unable to connect to a repository at url';
-  if (ExistWordInString(PChar(s),searchstring,[soDown])) then
+  if Handled then exit;
+
+  if (ExistWordInString(PChar(s),'Permission denied')) then
   begin
-    memoSummary.Lines.Append('SVN could not connect to the desired repository.');
+    EchoInfo(s);
+  end;
+
+  if Handled then exit;
+
+  searchstring:='unable to connect to a repository at url';
+  if (ExistWordInString(PChar(s),searchstring)) then
+  begin
+    EchoInfo('SVN could not connect to the desired repository.');
     x:=Pos(searchstring,LowerCase(s));
     if x>0 then
     begin
       x:=x+Length(searchstring);
       InternalError:=Copy(s,x+1,MaxInt);
-      memoSummary.Lines.Append('URL: '+InternalError);
-      memoSummary.Lines.Append('Please check your connection. Or run the SVN command to try yourself:');
-      memoSummary.Lines.Append(Lines[Pred(Lines.Count)-1]);
+      EchoInfo('URL: '+InternalError);
+      EchoInfo('Please check your connection. Or run the SVN command to try yourself:');
+      EchoInfo(Lines[Pred(Lines.Count)-1]);
     end;
   end;
 
-  if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then
-  begin
-    memoSummary.Lines.Append(BeginSnippet+' Start of compile error summary.');
-
-    if (ExistWordInString(PChar(s),'fatal: internal error',[soDown])) then
-    begin
-      x:=RPos(' ',s);
-      if x>0 then
-      begin
-        InternalError:=Copy(s,x+1,MaxInt);
-        memoSummary.Lines.Append('Compiler error: '+InternalError);
-        if (InternalError='2015030501') OR (InternalError='2014051001') OR (InternalError='2014050604') then
-        begin
-          memoSummary.Lines.Append('FPC revision 30351 introduced some changed into the compiler causing this error.');
-          memoSummary.Lines.Append('Has something todo about how floating points are handled. And that has changed.');
-          memoSummary.Lines.Append('See: https://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=30351');
-        end;
-
-        if (InternalError='2013051401') then
-        begin
-          memoSummary.Lines.Append('FPC revision 37182 breaks cross building avr-embedded.');
-          memoSummary.Lines.Append('However, this has been solved in the meantime !');
-          memoSummary.Lines.Append('Please update FPC trunk !!');
-          //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32418');
-          //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=31925');
-        end;
-
-      end;
-    end
-    else if (ExistWordInString(PChar(s),'error: user defined',[soDown])) then
-    begin
-      x:=Pos('error: user defined',LowerCase(s));
-      if x>0 then
-      begin
-        x:=x+Length('error: user defined');
-        InternalError:=Copy(s,x+2,MaxInt);
-        memoSummary.Lines.Append('Configuration error: '+InternalError);
-        x:=Pos('80 bit extended floating point',LowerCase(s));
-        if x>0 then
-        begin
-          memoSummary.Lines.Append('Please use trunk that has 80-bit float type using soft float unit !');
-          memoSummary.Lines.Append('FPC revisions 37294 - 37306 and 37621 add this soft float feature.');
-          memoSummary.Lines.Append('So update your FPC trunk to a revision >= 37621 !!');
-          //memoSummary.Lines.Append('See: https://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=37621');
-          //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32502');
-          //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=29892');
-          //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=9262');
-        end;
-      end;
-    end
-    else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
-    begin
-      memoSummary.Lines.Append('We have had a SVN connection failure. Just start again !');
-      memoSummary.Lines.Append(Lines[Pred(Lines.Count)-1]);
-    end
-    else if (ExistWordInString(PChar(s),'fatal:',[soDown])) then
-    begin
-      memoSummary.Lines.Append(s);
-      memoSummary.Lines.Append(Lines[Pred(Lines.Count)-1]);
-    end
-    else if (ExistWordInString(PChar(s),'error:',[soDown])) then
-    begin
-      // check if "error:" at the end of the line.
-      // if so:
-      // the real error will follow on the next line(s).
-      // and we have to wait for these lines (done somewhere else in this procedure) !!
-      // if not, just print the error message.
-      if (Pos('error:',lowercase(s))<>(Length(s)-Length('error:')+1)) then memoSummary.Lines.Append(s);
-    end;
-  end;
+  if Handled then exit;
 
   //Lazbuild error
-  if (ExistWordInString(PChar(s),'Unable to open the package',[soDown])) then
+  if (ExistWordInString(PChar(s),'Unable to open the package')) then
   begin
-    memoSummary.Lines.Append(s);
-    memoSummary.Lines.Append('Package source is missing. Please check your Lazarus config files.');
+    EchoInfo(s);
+    EchoInfo('Package source is missing. Please check your Lazarus config files.');
   end;
 
+  if Handled then exit;
+
   // linker error
-  if (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find',[soDown])) then
+  if (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find')) then
   begin
     x:=Pos('-l',s);
     if x>0 then
     begin
       // add help into summary memo
-      memoSummary.Lines.Append(BeginSnippet+' Missing library: lib'+Copy(s,x+2,MaxInt));
+      EchoInfo(BeginSnippet+' Missing library: lib'+Copy(s,x+2,MaxInt));
     end;
   end;
+
+  if Handled then exit;
 
   // diskspace errors
-  if (ExistWordInString(PChar(s),'Stream write error',[soDown])) OR (ExistWordInString(PChar(s),'disk full',[soDown])) then
+  if (ExistWordInString(PChar(s),'Stream write error')) OR (ExistWordInString(PChar(s),'disk full')) then
   begin
-    memoSummary.Lines.Append(BeginSnippet+' There is not enough diskspace to finish this operation.');
-    memoSummary.Lines.Append(BeginSnippet+' Please free some space and re-run fpcupdeluxe.');
+    EchoInfo(BeginSnippet+' There is not enough diskspace to finish this operation.');
+    EchoInfo(BeginSnippet+' Please free some space and re-run fpcupdeluxe.');
   end;
+
+  if Handled then exit;
 
   // GLIBC hardening error
-  if (ExistWordInString(PChar(s),'undefined reference to',[soDown])) AND (ExistWordInString(PChar(s),'libc_csu',[soDown])) then
+  if (ExistWordInString(PChar(s),'undefined reference to')) AND (ExistWordInString(PChar(s),'libc_csu')) then
   begin
-    memoSummary.Lines.Append(BeginSnippet+' Might be GLIBC>=2.34 hardening error.');
-    memoSummary.Lines.Append(BeginSnippet+' See: https://gitlab.com/freepascal.org/fpc/source/-/issues/39295');
+    EchoInfo(BeginSnippet+' Might be GLIBC>=2.34 hardening error.');
+    EchoInfo(BeginSnippet+' See: https://gitlab.com/freepascal.org/fpc/source/-/issues/39295');
   end;
+
+  if Handled then exit;
 
   // RAM errors
-  if (ExistWordInString(PChar(s),'call the assembler',[soDown])) OR (ExistWordInString(PChar(s),'call the resource compiler',[soDown])) then
+  if (ExistWordInString(PChar(s),'call the assembler')) OR (ExistWordInString(PChar(s),'call the resource compiler')) then
   begin
-    memoSummary.Lines.Append(BeginSnippet+' Most (99%) likely, there is not enough RAM (swap) to finish this operation.');
-    memoSummary.Lines.Append(BeginSnippet+' Please add some RAM or swap-space (+1GB) and re-run fpcupdeluxe.');
+    EchoInfo(BeginSnippet+' Most (99%) likely, there is not enough RAM (swap) to finish this operation.');
+    EchoInfo(BeginSnippet+' Please add some RAM or swap-space (+1GB) and re-run fpcupdeluxe.');
   end;
+
+  if Handled then exit;
 
   // warn for time consuming help files
-  if (ExistWordInString(PChar(s),'writing',[soDown])) AND (ExistWordInString(PChar(s),'pages...',[soDown])) then
+  if (ExistWordInString(PChar(s),'writing')) AND (ExistWordInString(PChar(s),'pages...')) then
   begin
-    memoSummary.Lines.Append('Busy with help files. Be patient: can be time consuming !!');
+    EchoInfo('Busy with help files. Be patient: can be time consuming !!');
   end;
 
-  if ExistWordInString(PChar(s),BeginSnippet,[soWholeWord,soDown]) then
+  if Handled then exit;
+
+  // report about correct tools that are found and used
+  //if (ExistWordInString(PChar(s),'found correct')) then
+  //begin
+  //  EchoInfo(s);
+  //end;
+
+  // warn about time consuming FPC and Lazarus operations
+  if (
+    (ExistWordInString(PChar(s),'downloadfromurl',[soWholeWord]))
+    OR
+    (ExistWordInString(PChar(s),'checkout',[soWholeWord])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord]))
+    OR
+    (ExistWordInString(PChar(s),'clone',[soWholeWord])) AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord]))
+  ) then
   begin
-    if ExistWordInString(PChar(s),'revision/hash:',[soWholeWord,soDown]) then
+    EchoInfo(BeginSnippet + ' Performing SVN/GIT/HG/FTP/URL checkout/download. Please wait, could take some time.');
+  end;
+
+  if Handled then exit;
+
+  searchstring:='checking out/updating';
+  if (ExistWordInString(PChar(s),searchstring)) then
+  begin
+    x:=Pos(searchstring,LowerCase(s));
+    if x>0 then
     begin
-      // repeat fpcupdeluxe warning
-      memoSummary.Lines.Append(s);
-    end;
-    if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soDown]) then
-    begin
-      // repeat fpcupdeluxe warning
-      memoSummary.Lines.Append(s);
+      x:=x+Length(searchstring);
+      InternalError:=Copy(s,x+1,MaxInt);
+      EchoInfo('Getting/updating '+InternalError);
     end;
   end;
 
-  // go back a few lines to find a special error case
-  x:=(Pred(Lines.Count)-4);
-  if (x>0) then
+  if Handled then exit;
+
+  if (ExistWordInString(PChar(s),'switch',[soWholeWord])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord])) then
   begin
-    s:=Lines[x];
-    s:=Trim(s);
-    s:=LowerCase(s);
-    if Length(s)=0 then exit;
-    // check if "error:" at the end of the line.
-    // if so:
-    // the real error will follow on the next line(s).
-    // and we have to wait for these lines !!
-    // if not, just print the error message (done somewhere else in this procedure).
-    if (Pos('error:',s)>0) AND (Pos('error:',s)=(Length(s)-Length('error:')+1))
-    then
+    EchoInfo(BeginSnippet + ' Performing a SVN repo URL switch ... please wait, could take some time.');
+  end;
+
+  if Handled then exit;
+
+  // github error
+  if (ExistWordInString(PChar(s),'429 too many requests')) then
+  begin
+    EchoInfo('GitHub blocked us due to too many download requests.');
+    EchoInfo('This will last for an hour, so please wait and be patient.');
+    EchoInfo('After this period, please re-run fpcupdeluxe.');
+  end;
+
+  if Handled then exit;
+
+  (*
+  searchstring:='the makefile doesn''t support target';
+  if (ExistWordInString(PChar(s),searchstring)) then
+  begin
+    EchoInfo('Sorry, but you have chosen a target that is not supported (yet).');
+    x:=Pos(searchstring,LowerCase(s));
+    if x>0 then
     begin
-      // print the error itself and the next 2 lines (good or lucky guess)
-      memoSummary.Lines.Append(BeginSnippet+' Start of special error summary:');
-      memoSummary.Lines.Append(Lines[x]);
-      memoSummary.Lines.Append(Lines[x+1]);
-      //temporary for trunk
-      if Pos('BuildUnit_cocoaint.pp',Lines[x+1])>0 then
+      x:=x+Length(searchstring);
+      InternalError:=Copy(s,x+1,MaxInt);
+      x:=Pos(',',LowerCase(InternalError));
+      if x=0 then x:=Pos(' ',LowerCase(InternalError));
+      if x>0 then
       begin
-        memoSummary.Lines.Append('');
-        memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32809');
-        memoSummary.Lines.Append('');
-      end
-      else
-        memoSummary.Lines.Append(Lines[x+2]);
+        InternalError:=Copy(InternalError,1,x-1);
+        EchoInfo('Wrong target: '+InternalError);
+      end;
+    end;
+  end;
+
+  if Handled then exit;
+
+  *)
+
+  if ( Assigned(FPCUpManager) AND (NOT FPCUpManager.SwitchURL) ) then
+  begin
+    if (ExistWordInString(PChar(s),URL_ERROR)) then
+    begin
+      s:=
+      'Fpcupdeluxe encountered a (fatal) URL error.' + sLineBreak +
+      'Most common cause: overwtiting an existing install.' + sLineBreak +
+      'Sources with different URL cannot be installed in same directory.' + sLineBreak +
+      'Please select an new install directory when changing versions.';
+      Application.MessageBox(PChar(s), PChar('URL mismatch error'), MB_ICONSTOP);
+    end;
+  end;
+
+  if Handled then exit;
+
+  if (ExistWordInString(PChar(s),'Native Installer')) OR (ExistWordInString(PChar(s),'Cross Installer')) then
+  begin
+    EchoInfo(s);
+  end;
+
+  if Handled then exit;
+
+  if ExistWordInString(PChar(s),'Installer',[soWholeWord,soMatchCase]) then
+  begin
+    if ( ExistWordInString(PChar(s),'BuildModule',[soMatchCase]) OR ExistWordInString(PChar(s),'ConfigModule',[soMatchCase]) OR ExistWordInString(PChar(s),'GetModule',[soMatchCase]) ) then
+    begin
+      EchoInfo(s);
     end;
   end;
 end;
-
 
 procedure TForm1.LazarusVersionLabelClick(Sender: TObject);
 begin
@@ -1509,10 +1499,11 @@ var
 begin
   s:=CommandOutputScreen.Lines[Line-1];
   s:=Trim(s);
+  Special:=False;
   if Length(s)=0 then exit;
 
   // special override for me: for easy debugging FPC and Lazarus source with plain writelines in source
-  if ExistWordInString(PChar(s),'donalf:',[soWholeWord,soDown]) then
+  if ExistWordInString(PChar(s),'donalf:',[soWholeWord]) then
   begin
     begin
       FG      := clBlack;
@@ -1521,24 +1512,24 @@ begin
     end;
   end;
 
-  if (NOT Special) AND ExistWordInString(PChar(s),BeginSnippet,[soWholeWord,soDown]) then
+  if ((NOT Special) AND (Pos(BeginSnippet,s)=1)) then
   begin
-    if ExistWordInString(PChar(s),Seriousness[etInfo],[soWholeWord,soDown]) then
+    if ExistWordInString(PChar(s),Seriousness[etInfo],[soWholeWord,soMatchCase]) then
     begin
-      if ExistWordInString(PChar(s),'found correct',[soWholeWord,soDown]) then
+      if ExistWordInString(PChar(s),'found correct',[soWholeWord]) then
         FG      := clLime
       else
         FG      := clYellow;
       BG      := clBlack;
       Special := True;
     end;
-    if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soDown]) then
+    if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soMatchCase]) then
     begin
       FG      := clFuchsia;
       BG      := clBlack;
       Special := True;
     end;
-    if ExistWordInString(PChar(s),Seriousness[etError],[soWholeWord,soDown]) then
+    if ExistWordInString(PChar(s),Seriousness[etError],[soWholeWord,soMatchCase]) then
     begin
       FG      := clRed;
       BG      := clWhite;
@@ -1562,49 +1553,49 @@ begin
     Special := True;
   end;
 
-  if (NOT Special) AND ExistWordInString(PChar(s),'Found valid',[soWholeWord,soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'Found valid',[soWholeWord]) then
   begin
     FG      := clOlive;
     BG      := clBlack;
     Special := True;
   end;
 
-  if (NOT Special) AND ExistWordInString(PChar(s),'executing:',[soWholeWord,soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'executing:',[soWholeWord]) then
   begin
     FG      := clAqua;
     BG      := clBlack;
     Special := True;
   end;
 
-  if (NOT Special) AND ((ExistWordInString(PChar(s),'A',[soWholeWord])) OR (ExistWordInString(PChar(s),'U',[soWholeWord]))) then
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'A',[soWholeWord,soMatchCase])) OR (ExistWordInString(PChar(s),'U',[soWholeWord,soMatchCase]))) then
   begin
     FG      := clSkyBlue;
     BG      := clBlack;
     Special := True;
   end;
 
-  if (NOT Special) AND ((ExistWordInString(PChar(s),'HEAD is now at ',[soDown])) OR (ExistWordInString(PChar(s),'Last Changed ',[soDown]))) then
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'HEAD is now at ')) OR (ExistWordInString(PChar(s),'Last Changed '))) then
   begin
     FG      := clMoneyGreen;
     BG      := clBlack;
     Special := True;
   end;
 
-  if (NOT Special) AND ExistWordInString(PChar(s),'failed:',[soWholeWord,soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'failed:',[soWholeWord]) then
   begin
     FG      := TColor($FF00AF); //Text Color  BGR
     BG      := clBlack;
     Special := True;
   end;
 
-  if (NOT Special) AND ((ExistWordInString(PChar(s),'hint:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'note:',[soWholeWord,soDown]))) then
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'hint:',[soWholeWord])) OR (ExistWordInString(PChar(s),'note:',[soWholeWord]))) then
   begin
     FG      := clGreen;
     BG      := clBlack;
     Special := True;
   end;
 
-  if (NOT Special) AND ((ExistWordInString(PChar(s),'warning:',[soWholeWord,soDown]))) then
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'warning:',[soWholeWord]))) then
   begin
     FG      := clMaroon;
     BG      := clBlack;
@@ -1612,7 +1603,7 @@ begin
   end;
 
   // linker error
-  if (NOT Special) AND (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find',[soDown])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find')) then
   begin
     FG      := clRed;
     BG      := clNavy;
@@ -1620,7 +1611,7 @@ begin
   end;
 
   // override warning
-  if (NOT Special) AND (ExistWordInString(PChar(s),'You have overriden the starting compiler versioncheck',[soDown])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'You have overriden the starting compiler versioncheck')) then
   begin
     FG      := clYellow;
     BG      := clGreen;
@@ -1628,7 +1619,7 @@ begin
   end;
 
   // diskspace error
-  if (NOT Special) AND ((ExistWordInString(PChar(s),'Stream write error',[soDown])) OR (ExistWordInString(PChar(s),'disk full',[soDown]))) then
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'Stream write error')) OR (ExistWordInString(PChar(s),'disk full'))) then
   begin
     FG      := clRed;
     BG      := clAqua;
@@ -1636,7 +1627,7 @@ begin
   end;
 
   // github error
-  if (NOT Special) AND (ExistWordInString(PChar(s),'429 too many requests',[soDown])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'429 too many requests')) then
   begin
     FG      := clRed;   //Text Color
     BG      := clNavy;  //BackGround
@@ -1647,34 +1638,34 @@ begin
   if (NOT Special)
   AND
   (
-    (ExistWordInString(PChar(s),'lines compiled,',[soDown]))
+    (ExistWordInString(PChar(s),'lines compiled,'))
     OR
-    (ExistWordInString(PChar(s),'issued',[soWholeWord,soDown]))
+    (ExistWordInString(PChar(s),'issued',[soWholeWord]))
     OR
-    (ExistWordInString(PChar(s),'Target OS: ',[soDown]))
+    (ExistWordInString(PChar(s),'Target OS: '))
     OR
-    (ExistWordInString(PChar(s),'make.exe: ',[soDown]))
+    (ExistWordInString(PChar(s),'make.exe: '))
     OR
-    (ExistWordInString(PChar(s),'make: ',[soDown]))
+    (ExistWordInString(PChar(s),'make: '))
     OR
-    (ExistWordInString(PChar(s),'make[',[soDown]))
+    (ExistWordInString(PChar(s),'make['))
     OR
-    (ExistWordInString(PChar(s),'dependency dropped',[soDown]))
+    (ExistWordInString(PChar(s),'dependency dropped'))
     OR
-    ( ( ExistWordInString(PChar(s),'echo.exe ',[soDown]) OR ExistWordInString(PChar(s),'echo ',[soDown]) OR ExistWordInString(PChar(s),'gecho.exe ',[soDown]) OR ExistWordInString(PChar(s),'gecho ',[soDown]) ) AND ExistWordInString(PChar(s),REVINCFILENAME,[soDown]) )
+    ( ( ExistWordInString(PChar(s),'echo.exe ') OR ExistWordInString(PChar(s),'echo ') OR ExistWordInString(PChar(s),'gecho.exe ') OR ExistWordInString(PChar(s),'gecho ') ) AND ExistWordInString(PChar(s),REVINCFILENAME) )
     OR
-    ( ExistWordInString(PChar(s),'Start ',[soDown]) AND ExistWordInString(PChar(s),'now ',[soDown]) )
+    ( ExistWordInString(PChar(s),'Start ') AND ExistWordInString(PChar(s),'now ') )
     OR
-    (ExistWordInString(PChar(s),'this could take some time',[soDown]))
+    (ExistWordInString(PChar(s),'this could take some time'))
     OR
-    (ExistWordInString(PChar(s),'Skipped package',[soWholeWord,soDown]))
+    (ExistWordInString(PChar(s),'Skipped package',[soWholeWord]))
     OR
-    (ExistWordInString(PChar(s),'Processing Makefile.fpc',[soDown]))
+    (ExistWordInString(PChar(s),'Processing Makefile.fpc'))
     OR
     (
-      (ExistWordInString(PChar(s),'writing',[soDown]))
+      (ExistWordInString(PChar(s),'writing'))
       AND
-      (ExistWordInString(PChar(s),'pages...',[soDown]))
+      (ExistWordInString(PChar(s),'pages...'))
     )
   )
   then
@@ -1685,21 +1676,21 @@ begin
   end;
 
   // svn connection error
-  if (NOT Special) AND (ExistWordInString(PChar(s),'unable to connect to a repository at url',[soDown])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'unable to connect to a repository at url')) then
   begin
     FG      := clRed;
     BG      := clNavy;
     Special := True;
   end;
 
-  if (NOT Special) AND ExistWordInString(PChar(s),'svn: e',[soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'svn: e') then
   begin
     FG      := clFuchsia;
     BG      := clBlack;
     Special := True;
   end;
 
-  if (ExistWordInString(PChar(s),'make (e=',[soDown])) then
+  if (ExistWordInString(PChar(s),'make (e=')) then
   begin
     // make fatal messages ...
     begin
@@ -1709,9 +1700,19 @@ begin
     end;
   end;
 
-  if (NOT Special) AND (ExistWordInString(PChar(s),'make.exe ',[soDown]) OR ExistWordInString(PChar(s),'make ',[soDown]) OR ExistWordInString(PChar(s),'gmake ',[soDown])) then
+  if (ExistWordInString(PChar(s),'Permission denied')) then
   begin
-    if ExistWordInString(PChar(s),'fpmake ',[soDown]) then
+    // Problem when cleaning ... exe still running
+    begin
+      FG      := clRed;
+      BG      := clTeal;
+      Special := True;
+    end;
+  end;
+
+  if (NOT Special) AND (ExistWordInString(PChar(s),'make.exe ') OR ExistWordInString(PChar(s),'make ') OR ExistWordInString(PChar(s),'gmake ')) then
+  begin
+    if ExistWordInString(PChar(s),'fpmake ') then
       FG      := TColor($FFA000)
     else
       FG      := TColor($FF8C00);
@@ -1719,14 +1720,14 @@ begin
     Special := True;
   end;
 
-  if (NOT Special) AND ExistWordInString(PChar(s),'start compiling package',[soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'start compiling package') then
   begin
     FG      := TColor($FFA000);
     BG      := clBlack;
     Special := True;
   end;
 
-  if (NOT Special) AND ExistWordInString(PChar(s),'success:',[soWholeWord,soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'success:',[soWholeWord]) then
   begin
     FG      := TColor($00D7FF);
     BG      := clBlack;
@@ -1734,21 +1735,21 @@ begin
   end;
 
 
-  if (NOT Special) AND (ExistWordInString(PChar(s),'compiled package',[soDown]) OR ExistWordInString(PChar(s),'succeeded',[soDown]) OR ExistWordInString(PChar(s),'completed',[soDown])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'compiled package') OR ExistWordInString(PChar(s),'succeeded') OR ExistWordInString(PChar(s),'completed')) then
   begin
     FG      := TColor($00A5FF);
     BG      := clBlack;
     Special := True;
   end;
 
-  if (NOT Special) AND ExistWordInString(PChar(s),'Extracted #',[soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'Extracted #') then
   begin
     BG      := clBlack;
     FG      := clSilver;
     Special := True;
   end;
 
-  if (NOT Special) AND ExistWordInString(PChar(s),'Download progress ',[soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'Download progress ') then
   begin
     BG      := clBlack;
     FG      := TColor($0045FF);
@@ -1756,7 +1757,7 @@ begin
   end;
 
   // special override for debugging statemachine
-  if ExistWordInString(PChar(s),'sequencer',[soWholeWord,soDown]) then
+  if ExistWordInString(PChar(s),'sequencer',[soWholeWord]) then
   begin
     begin
       FG      := clRed;
@@ -1766,14 +1767,14 @@ begin
   end;
 
   // lazbuild error
-  if (NOT Special) AND (ExistWordInString(PChar(s),'Unable to open the package',[soDown]) OR ExistWordInString(PChar(s),'Unable to load package',[soDown])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'Unable to open the package') OR ExistWordInString(PChar(s),'Unable to load package')) then
   begin
     FG      := clRed;
     BG      := clPurple;
     Special := True;
   end;
 
-  if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'Memory warning:',[soWholeWord,soDown])) then
+  if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) OR (ExistWordInString(PChar(s),'Memory warning:',[soWholeWord])) then
   begin
     // skip git fatal messages ... they are not that fatal ... but not sure yet !
     // if (Pos('fatal: not a git repository',lowercase(s))=0) then
@@ -4732,71 +4733,71 @@ var
 begin
   MsgStr := {%H-}PChar(Msg.lParam);
   MsgPasStr := StrPas(MsgStr);
-
   //MsgPStr := PString(Msg.lParam);
   //MsgPasStr := MsgPStr^;
-
-  {$ifdef Darwin}
-  // suppress all setfocus errors on Darwin, always
-  if AnsiContainsText(MsgPasStr,'.setfocus') then exit;
-  {$endif}
-
-  {$ifdef READER}
-  CommandOutputScreen.Append(MsgPasStr);
-  {$else}
-  // suppress all SynEdit PaintLock errors, always
-  if AnsiContainsText(MsgPasStr,'PaintLock') then exit;
-  {$if defined(FPC_FULLVERSION) and (FPC_FULLVERSION > 30000)}
-  CommandOutputScreen.Append(MsgPasStr);
-  {$else}
-  CommandOutputScreen.Lines.Append(MsgPasStr);
-  {$endif}
-  CommandOutputScreen.CaretX:=0;
-  CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
-  {$endif}
-
-  ProcessInfo(CommandOutputScreen);
-
-  if (ExistWordInString(MsgStr,'error:',[soWholeWord,soDown])) OR (ExistWordInString(MsgStr,'fatal:',[soWholeWord,soDown])) then
-  begin
-    if (ExistWordInString(MsgStr,'failed to get crossbinutils',[soDown])) then
-    begin
-      if (NOT MissingCrossBins) then memoSummary.Lines.Append('Missing correct cross libraries');
-      MissingCrossBins:=true;
-    end
-    else if (ExistWordInString(MsgStr,'failed to get crosslibrary',[soDown])) then
-    begin
-      if (NOT MissingCrossLibs) then memoSummary.Lines.Append('Missing correct cross libraries');
-      MissingCrossLibs:=true;
-    end
-    else if ((ExistWordInString(MsgStr,'CheckAndGetTools',[soDown])) OR (ExistWordInString(MsgStr,'Required package is not installed',[soDown]))) then
-    begin
-      if (NOT MissingTools) then
-      begin
-        {$ifdef Darwin}
-        memoSummary.Lines.Append('Missing some tools: please install Xcode command line tools !');
-        memoSummary.Lines.Append('xcode-select --install');
-        {$else}
-        memoSummary.Lines.Append('Missing some tools: please install missing tools!');
-        {$endif}
-      end;
-      MissingTools:=true;
+  try
     {$ifdef Darwin}
-    end
-    else if (ExistWordInString(MsgStr,'The subversion command line tools are no longer provided by Xcode',[soDown])) then
-    begin
-      if (NOT MissingTools) then
-      begin
-        memoSummary.Lines.Append('SVN is no longer included in Xcode command line tools !');
-        memoSummary.Lines.Append('Use a GIT repo (preferred) or install SVN by yourself (brew).');
-      end;
-      MissingTools:=true;
+    // suppress all setfocus errors on Darwin, always
+    if AnsiContainsText(MsgPasStr,'.setfocus') then exit;
     {$endif}
-    end;
-  end;
 
-  StrDispose(MsgStr);
-  //Dispose(MsgPStr);
+    {$ifdef READER}
+    CommandOutputScreen.Append(MsgPasStr);
+    {$else}
+    // suppress all SynEdit PaintLock errors, always
+    if AnsiContainsText(MsgPasStr,'PaintLock') then exit;
+    {$if defined(FPC_FULLVERSION) and (FPC_FULLVERSION > 30000)}
+    CommandOutputScreen.Append(MsgPasStr);
+    {$else}
+    CommandOutputScreen.Lines.Append(MsgPasStr);
+    {$endif}
+    CommandOutputScreen.CaretX:=0;
+    CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
+    {$endif}
+
+    ProcessInfo(CommandOutputScreen);
+
+    if (ExistWordInString(MsgStr,'error:',[soWholeWord])) OR (ExistWordInString(MsgStr,'fatal:',[soWholeWord])) then
+    begin
+      if (ExistWordInString(MsgStr,'failed to get crossbinutils')) then
+      begin
+        if (NOT MissingCrossBins) then memoSummary.Lines.Append('Missing correct cross libraries');
+        MissingCrossBins:=true;
+      end
+      else if (ExistWordInString(MsgStr,'failed to get crosslibrary')) then
+      begin
+        if (NOT MissingCrossLibs) then memoSummary.Lines.Append('Missing correct cross libraries');
+        MissingCrossLibs:=true;
+      end
+      else if ((ExistWordInString(MsgStr,'CheckAndGetTools')) OR (ExistWordInString(MsgStr,'Required package is not installed'))) then
+      begin
+        if (NOT MissingTools) then
+        begin
+          {$ifdef Darwin}
+          memoSummary.Lines.Append('Missing some tools: please install Xcode command line tools !');
+          memoSummary.Lines.Append('xcode-select --install');
+          {$else}
+          memoSummary.Lines.Append('Missing some tools: please install missing tools!');
+          {$endif}
+        end;
+        MissingTools:=true;
+      {$ifdef Darwin}
+      end
+      else if (ExistWordInString(MsgStr,'The subversion command line tools are no longer provided by Xcode')) then
+      begin
+        if (NOT MissingTools) then
+        begin
+          memoSummary.Lines.Append('SVN is no longer included in Xcode command line tools !');
+          memoSummary.Lines.Append('Use a GIT repo (preferred) or install SVN by yourself (brew).');
+        end;
+        MissingTools:=true;
+      {$endif}
+      end;
+    end;
+  finally
+    StrDispose(MsgStr);
+    //Dispose(MsgPStr);
+  end;
 end;
 
 procedure TForm1.InitFpcupdeluxe(Data: PtrInt);

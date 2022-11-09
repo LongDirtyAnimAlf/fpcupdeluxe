@@ -956,9 +956,9 @@ begin
   {$ifdef win64}
   //result:=(NOT CheckExecutable('echo',['''mytestrevision'''],'''mytestrevision''',false));
   {$endif}
-  //if result then Infoln(localinfotext+'Found stray echo in path. Using gecho.exe command from custom binaries !',etWarning);
+  //if result then Infoln(infotext+'Found stray echo in path. Using gecho.exe command from custom binaries !',etWarning);
   result:=(Length(Which('sh.exe'))>0);
-  if result then Infoln(localinfotext+'Found stray shell in path. Adjusting path !',etInfo);
+  if result then Infoln(infotext+'Found stray shell in path. Adjusting path !',etDebug);
 end;
 {$ENDIF MSWINDOWS}
 
@@ -1017,7 +1017,7 @@ var
   i:integer;
   {$endif}
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckAndGetTools): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (CheckAndGetTools): ';
 
   OperationSucceeded := true;
 
@@ -1529,7 +1529,7 @@ var
   OperationSucceeded: boolean;
   s1,s2: string;
 begin
-  s2:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
+  s2:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadBinUtils): ';
 
   OperationSucceeded := true;
 
@@ -1792,7 +1792,7 @@ var
 begin
   Result := false;
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' ('+Copy(aClient.ClassName,2,MaxInt)+': '+aModuleName+'): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' ('+Copy(aClient.ClassName,2,MaxInt)+': '+aModuleName+'): ';
 
   // check if we do have a client !!
   if NOT aClient.ValidClient then
@@ -2026,7 +2026,7 @@ var
 begin
   result:=true;
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFromSVN: '+aModuleName+'): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadFromSVN: '+aModuleName+'): ';
 
   // check if we do have a client !!
   if NOT SVNClient.ValidClient then
@@ -2218,7 +2218,7 @@ var
 begin
   result:=false;
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFromURL: '+ModuleName+'): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadFromURL: '+ModuleName+'): ';
 
   if (Length(FURL)=0) then exit;
 
@@ -2320,7 +2320,7 @@ var
   InstallPath:string;
   RemotePath:string;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadBinUtils): ';
   //Parent directory of files. Needs trailing backslash.
   ForceDirectoriesSafe(FMakeDir);
   Result := true;
@@ -2385,7 +2385,7 @@ var
   SourceURL,BinsZip:string;
   OperationSucceeded:boolean;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadBinUtils): ';
   //Parent directory of files. Needs trailing backslash.
   ForceDirectoriesSafe(FMakeDir);
   Result := true;
@@ -2449,7 +2449,7 @@ var
   SVNZip,SVNDir,aSourceURL: string;
   i:integer;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadSVN): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadSVN): ';
 
   OperationSucceeded := false;
 
@@ -2520,7 +2520,7 @@ begin
 
   OperationSucceeded := false;
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadOpenSSL): ';
 
   Infoln(localinfotext+'No OpenSSL library files available for SSL. Going to download them. Might take some time.',etWarning);
 
@@ -2544,7 +2544,7 @@ begin
   // Direct download OpenSSL from public sources
   if (NOT OperationSucceeded) then
   begin
-    localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
+    localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadOpenSSL): ';
 
     OpenSSLFileName := GetTempFileNameExt('FPCUPTMP','zip');
 
@@ -2639,7 +2639,7 @@ var
   //WgetFile,WgetZip: string;
   i:integer;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadWget): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadWget): ';
 
   Infoln(localinfotext+'No Wget found. Going to download it.',etInfo);
 
@@ -2701,7 +2701,7 @@ var
   FreetypeDir,FreetypeBin,FreetypZip,FreetypZipDir: string;
   i:integer;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFreetype): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadFreetype): ';
 
   Infoln(localinfotext+'No Freetype found. Going to download it.',etInfo);
 
@@ -2785,7 +2785,7 @@ var
   TargetDir,TargetBin,SourceBin,SourceZip,ZipDir: string;
   i:integer;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (Download '+TARGETNAME+'): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (Download '+TARGETNAME+'): ';
 
   Infoln(localinfotext+'No '+TARGETNAME+' found. Going to download it.');
 
@@ -2873,7 +2873,7 @@ var
   TargetBin,SourceBin,SourceZip,ZipDir: string;
   i:integer;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (Download '+TARGETNAME+'): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (Download '+TARGETNAME+'): ';
 
   OperationSucceeded := false;
 
@@ -2953,7 +2953,7 @@ var
   SVNFiles: TStringList;
   OperationSucceeded: boolean;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (FindSVNSubDirs): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (FindSVNSubDirs): ';
   SVNDir := IncludeTrailingPathDelimiter(FMakeDir)+'svn';
   SVNFiles := FindAllFiles(SVNDir, SVNClient.RepoExecutableName + GetExeExt, true);
   try
@@ -3008,10 +3008,10 @@ begin
   Processor.Environment.SetVar(PATHVARNAME, ResultingPath);
   if ResultingPath <> EmptyStr then
   begin
-    WritelnLog(Copy(Self.ClassName,2,MaxInt)+' (SetPath): External program path:  ' + ResultingPath, false);
+    WritelnLog(Copy(UnCamel(Self.ClassName),2,MaxInt)+' (SetPath): External program path:  ' + ResultingPath, false);
   end;
   if FVerbose then
-    Infoln(Copy(Self.ClassName,2,MaxInt)+' (SetPath): Set path to: ' + ResultingPath,etDebug);
+    Infoln(Copy(UnCamel(Self.ClassName),2,MaxInt)+' (SetPath): Set path to: ' + ResultingPath,etDebug);
 end;
 
 procedure TInstaller.WritelnLog(msg: TStrings; ToConsole: boolean = true);
@@ -3173,7 +3173,7 @@ end;
 function TInstaller.BuildModule(ModuleName: string): boolean;
 begin
   result:=false;
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (BuildModule: '+ModuleName+'): ';
+  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (BuildModule: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
@@ -3181,17 +3181,17 @@ function TInstaller.CleanModule(ModuleName: string): boolean;
 begin
   result:=false;
   FCleanModuleSuccess:=false;
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (CleanModule: '+ModuleName+'): ';
+  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (CleanModule: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
 
   if (not DirectoryExists(FSourceDirectory)) then
   begin
-    Infoln(infotext+'No '+ModuleName+' source directory ('+FSourceDirectory+') found [yet] ... nothing to be done',etInfo);
+    Infoln(infotext+'No '+ModuleName+' source directory ('+FSourceDirectory+') found [yet] ... nothing to be done',etDebug);
     exit(true);
   end;
   if DirectoryIsEmpty(FSourceDirectory) then
   begin
-    Infoln(infotext+'No '+ModuleName+' files found in source directory ('+FSourceDirectory+') ... nothing to be done',etInfo);
+    Infoln(infotext+'No '+ModuleName+' files found in source directory ('+FSourceDirectory+') ... nothing to be done',etDebug);
     exit(true);
   end;
 end;
@@ -3199,14 +3199,14 @@ end;
 function TInstaller.ConfigModule(ModuleName: string): boolean;
 begin
   result:=false;
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (ConfigModule: '+ModuleName+'): ';
+  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (ConfigModule: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
 function TInstaller.GetModule(ModuleName: string): boolean;
 begin
   result:=false;
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (GetModule: '+ModuleName+'): ';
+  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (GetModule: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
 
   ForceDirectoriesSafe(FSourceDirectory);
@@ -3219,7 +3219,7 @@ var
 begin
   result:=true;
 
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckModule: '+ModuleName+'): ';
+  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (CheckModule: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
 
   if NOT DirectoryExists(FSourceDirectory) then exit;
@@ -3249,7 +3249,7 @@ begin
     end;
   end;
 
-  Infoln(infotext+'Checking ' + ModuleName + ' sources with '+aRepoClient.ClassName,etInfo);
+  Infoln(infotext+'Checking ' + ModuleName + ' sources with '+Copy(UnCamel(aRepoClient.ClassName),2,MaxInt),etInfo);
 
   aRepoClient.Verbose          := FVerbose;
   aRepoClient.ExportOnly       := FExportOnly;
@@ -3268,18 +3268,18 @@ begin
   result:=(aRepoClient.ReturnCode<>FRET_LOCAL_REMOTE_URL_NOMATCH);
 
   if result then
-    Infoln(infotext+'sources ok.',etInfo)
+    Infoln(infotext+'Sources ok.',etDebug)
   else
   begin
     Infoln(infotext+URL_ERROR+'.',aEvent);
-    Infoln(infotext+'desired URL='+FURL,aEvent);
-    Infoln(infotext+'source URL='+aRepoClient.Repository,aEvent);
+    Infoln(infotext+'Desired URL='+FURL,aEvent);
+    Infoln(infotext+'Source URL='+aRepoClient.Repository,aEvent);
 
     if ((FSwitchURL) AND (NOT result)) then
     begin
       result:=true;
 
-      Infoln(infotext+'switching source URL',etInfo);
+      Infoln(infotext+'Switching source URL',etInfo);
 
       aRepoClient.Verbose:=FVerbose;
       aRepoClient.ExportOnly:=FExportOnly;
@@ -4006,7 +4006,7 @@ end;
 function TInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
   result:=false;
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (UnInstallModule: '+ModuleName+'): ';
+  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (UnInstallModule: '+ModuleName+'): ';
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
@@ -4014,7 +4014,7 @@ function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false; for
 var
   aUseWget:boolean;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (GetFile): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (GetFile): ';
   aUseWget:=FUseWget;
   if forcenative then aUseWget:=false;
   result:=((FileExists(aFile)) AND (NOT forceoverwrite) AND (FileSize(aFile)>0));

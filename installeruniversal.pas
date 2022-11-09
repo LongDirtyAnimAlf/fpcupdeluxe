@@ -276,6 +276,8 @@ begin
   result:=false;
   FLazarusNeedsRebuild:=false;
 
+  Infoln(infotext+'Going to rebuild Lazarus.',etInfo);
+
   Processor.Process.Parameters.Clear;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusSourceDir);
 
@@ -638,7 +640,7 @@ end;
 function TUniversalInstaller.InitModule: boolean;
 begin
   result:=true;
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (InitModule): ';
 
   Infoln(localinfotext+'Entering ...',etDebug);
   if InitDone then exit;
@@ -691,7 +693,7 @@ var
   PackageFiles: TStringList;
 begin
   result:=false;
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InstallPackage): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (InstallPackage): ';
 
   PackageName:=FileNameWithoutExt(PackagePath);
 
@@ -911,7 +913,7 @@ var
   RegisterOnly:boolean;
 begin
   Failure:=false;
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RemovePackages): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (RemovePackages): ';
 
   BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
   if BaseWorkingdir='' then BaseWorkingdir:=GetValueFromKey(INSTALLMAGIC,sl);
@@ -987,7 +989,7 @@ begin
   Workingdir:=BaseWorkingdir;
   ModuleName:=GetValueFromKey(NAMEMAGIC,sl);
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (AddPackages of '+ModuleName+'): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (AddPackages of '+ModuleName+'): ';
 
   for RegisterOnly:=false to true do
   begin
@@ -1253,7 +1255,7 @@ var
   Workingdir:string;
   ReadyCounter:integer;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RunCommands: '+Directive+'): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (RunCommands: '+Directive+'): ';
 
   result:=true; //not finding any instructions at all should not be a problem.
   BaseWorkingdir:=GetValueFromKey('Workingdir',sl);
@@ -1423,7 +1425,7 @@ begin
 
   PackageName:=FileNameWithoutExt(PackagePath);
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (UnInstallPackage: '+PackageName+'): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (UnInstallPackage: '+PackageName+'): ';
 
   Infoln(localinfotext+'Entering ...',etDebug);
 
@@ -1587,14 +1589,14 @@ begin
   if not result then exit;
 
   // Log to console only:
-  Infoln(infotext+'Building module '+ModuleName+'...',etInfo);
+  Infoln(infotext+'Going to build '+ModuleName,etInfo);
   idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
     // Run all InstallExecute<n> commands:
     // More detailed logging only if verbose or debug:
-    if FVerbose then WritelnLog(infotext+'Building module '+ModuleName+' running all InstallExecute commands in: '+LineEnding+
+    if FVerbose then WritelnLog(infotext+'Going to build '+ModuleName+' running all InstallExecute commands in: '+LineEnding+
       sl.CommaText,true);
     result:=RunCommands('InstallExecute',sl);
     end
@@ -1823,7 +1825,7 @@ begin
       // If Lazarus was marked for rebuild, do so:
       if FLazarusNeedsRebuild then
       begin
-        Infoln(infotext+'Going to rebuild Lazarus because packages were installed.',etInfo);
+        Infoln(infotext+'Packages were installed.',etInfo);
         result:=RebuildLazarus;
       end;
   end
@@ -1854,6 +1856,8 @@ begin
   result:=inherited;
   result:=InitModule;
   if not result then exit;
+
+  RemoteURL:='';
 
   SourceOK:=false;
   idx:=UniModuleList.IndexOf(ModuleName);
@@ -2167,7 +2171,7 @@ begin
     end
     else
     begin
-      Infoln(infotext+'No source directory defined. Skipping fetching of external sources.',etInfo);
+      Infoln(infotext+'No source directory defined. Skipping fetching of external sources.',etDebug);
     end;
   end
   else
@@ -2191,7 +2195,7 @@ begin
   {
   if not DirectoryExists(SourceDirectory) then
   begin
-    Infoln(infotext+'No '+ModuleName+' source directory ('+SourceDirectory+') found [yet] ... nothing to be done',etInfo);
+    Infoln(infotext+'No '+ModuleName+' source directory ('+SourceDirectory+') found [yet] ... nothing to be done',etDebug);
     exit(true);
   end;
   }
@@ -2259,7 +2263,7 @@ begin
     // If Lazarus was marked for rebuild, do so:
     if FLazarusNeedsRebuild then
     begin
-      Infoln(infotext+'Going to rebuild Lazarus because packages were removed.',etInfo);
+      Infoln(infotext+'Packages were removed.',etInfo);
       result:=RebuildLazarus;
     end;
   end
@@ -2809,7 +2813,7 @@ begin
   result:=InitModule;
   if not result then exit;
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' ('+Copy(ClassName,2,MaxInt)+': '+ModuleName+'): ';
+  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' ('+Copy(ClassName,2,MaxInt)+': '+ModuleName+'): ';
 
   aBinURL:='';
   aLibURL:='';

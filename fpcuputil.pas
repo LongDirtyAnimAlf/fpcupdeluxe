@@ -342,7 +342,8 @@ function GetXCodeLocation:string;
 function GetAndroidSDKDir:string;
 function GetAndroidNDKDir:string;
 function CompareVersionStrings(s1,s2: string): longint;
-function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
+function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions = []): Boolean;
+function UnCamel(value:string):string;
 function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 function GetEnumValueSimple(aTypeInfo:PTypeInfo;const aEnum:string):integer;
 function ContainsDigit(const s: string): Boolean;
@@ -3481,9 +3482,60 @@ end;
 function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
 var
   Size : Integer;
+  LocalSearchOptions: TStringSearchOptions;
 begin
   Size:=StrLen(aString);
-  Result := SearchBuf(aString, Size, 0, 0, aSearchString, aSearchOptions)<>nil;
+  LocalSearchOptions:=aSearchOptions;
+  Include(LocalSearchOptions, soDown); // Needed, while we pass 0 as SelStart
+  Result:=SearchBuf(aString, Size, 0, 0, aSearchString, LocalSearchOptions)<>nil;
+end;
+
+function UnCamel(value:string):string;
+var
+  s:string;
+  len,i,j:integer;
+begin
+  result:='';
+  len:=Length(value);
+  if (len=0) then exit;
+
+  SetLength({%H-}s,256);
+  i:=1;
+
+  while (i<=len) do
+  begin
+    if (value[i] in ['A'..'Z']) then break;
+    Inc(i);
+  end;
+
+  j:=1;
+
+  while (i<=len) do
+  begin
+
+    while (i<=len) do
+    begin
+      if (value[i] in ['A'..'Z']) then s[j]:=value[i] else break;
+      Inc(i);
+      Inc(j);
+    end;
+    if ((j>2) AND (i<=len)) then
+    begin
+      s[j]:=s[j-1];
+      s[j-1]:=' ';
+      Inc(j);
+    end;
+    while (i<=len) do
+    begin
+      if (NOT (value[i] in ['A'..'Z'])) then s[j]:=value[i] else break;
+      Inc(i);
+      Inc(j);
+    end;
+
+  end;
+
+  SetLength(s,j-1);
+  result:=s;
 end;
 
 function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
