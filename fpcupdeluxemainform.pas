@@ -284,6 +284,37 @@ resourcestring
   upBuildAllCrossCompilersFound = 'Found crosscompiler for ';
   upBuildAllCrossCompilersUpdate = 'Going to update cross-compiler.';
 
+  upSelectFPCTarget = 'Please select a FPC target first';
+  upSelectLazarusTarget = 'Please select a Lazarus target first';
+  upSelectFPCLazarusTarget = 'Please select a FPC and Lazarus target first';
+  upInstallFPC = 'Going to install/update FPC.';
+  upInstallLazarus = 'Going to install/update Lazarus.';
+  upInstallFPCLazarus = 'Going to install/update FPC and Lazarus.';
+
+  upInstallModule = 'Going to install/update module';
+  upRemoveModule = 'Going to remove module';
+
+  upInstallCrossCompiler = 'Going to install the cross-compiler for';
+  upRemoveCrossCompiler = 'Going to remove the cross-compiler for';
+  upUpdateCrossAll = 'Going to update all crosscompilers';
+  upTryBuildCrossCompiler = 'Trying to build the cross-compiler for';
+
+
+  upMissingTools = 'The building of a crosscompiler failed due to missing cross-tools.';
+  upAdvertiseTools = 'Fpcupdeluxe can try to download them if available !';
+  upLookupTools = 'Looking for fpcupdeluxe cross-tools on GitHub (if any).';
+  upLookupBinTools = 'Going to look for the right cross-bins. Can (will) take some time !';
+  upLookupLibTools = 'Going to look for the right cross-libraries. Can (will) take some time !';
+  upLookup = 'Looking for';
+
+  upInstallDirectory = 'Install directory';
+  upQuestionContinue = 'Do you want to continue ?';
+  upSpaceWarning = 'Having a space in your install path is very ill-advised !';
+
+  upInstallDirectoryCurrent = 'Current install directory';
+  upInstallSettingsCurrent = 'Got settings from install directory';
+
+
 var
   Form1: TForm1;
 
@@ -1090,8 +1121,7 @@ begin
 
   if (Sender<>nil) then
   begin
-    s:='Going to update all crosscompilers !' + sLineBreak +
-       'Do you want to continue ?';
+    s:=upUpdateCrossAll+' !' + sLineBreak + upQuestionContinue;
     if Form2.AskConfirmation then
       if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
         exit;
@@ -2202,9 +2232,9 @@ begin
   end;
 
   s:=s+sLineBreak;
-  s:=s+'Install directory: '+Self.sInstallDir;
+  s:=s+upInstallDirectory+': '+Self.sInstallDir;
   if Form2.AskConfirmation then
-    if (MessageDlg(s+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+    if (MessageDlg(s+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
       exit;
 
   if ( AnsiEndsText(GITLABEXTENSION,aFPCTarget) AND AnsiEndsText(GITLABEXTENSION,aLazarusTarget)) then
@@ -2454,12 +2484,12 @@ begin
     s:=modules;
     s:=StringReplace(s,_UNINSTALL,'',[rfReplaceAll]);
     s:=StringReplace(s,_BUILD+_ONLY,'',[rfReplaceAll]);
-    if Sender=btnInstallModule then s:='Going to install/update module '+s;
-    if Sender=btnUninstallModule then s:='Going to remove module '+s;
+    if Sender=btnInstallModule then s:=upInstallModule+': '+s;
+    if Sender=btnUninstallModule then s:=upRemoveModule+': '+s;
     s:=s+'.'+sLineBreak;
-    s:=s+'Install directory: '+Self.sInstallDir;
+    s:=s+upInstallDirectory+': '+Self.sInstallDir;
     s:=s+sLineBreak;
-    s:=s+'Do you want to continue ?';
+    s:=s+upQuestionContinue;
     if Form2.AskConfirmation then
       if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
         exit;
@@ -2530,7 +2560,7 @@ begin
   if (Sender<>nil) then
   begin
     if Form2.AskConfirmation then
-      if (MessageDlg('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'(Win64 OS disabled extended support for 64-bit applications)'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+      if (MessageDlg('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'(Win64 OS disabled extended support for 64-bit applications)'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
         exit;
   end;
   {$endif}
@@ -2859,8 +2889,7 @@ begin
 
   if Sender=ButtonRemoveCrossCompiler then
   begin
-    s:='Going to remove the cross-compiler for ['+GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target)+'].' + sLineBreak +
-       'Do you want to continue ?';
+    s:=upRemoveCrossCompiler+' ['+GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target)+'].'+sLineBreak+upQuestionContinue;
     if Form2.AskConfirmation then
       if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
         exit;
@@ -2967,8 +2996,7 @@ begin
       if (FPCupManager.CrossOS_Target=TOS.aix)
       then
       begin
-        s:='Be forwarned: this will only work with FPC 3.0 and later.' + sLineBreak +
-           'Do you want to continue ?';
+        s:='Be forwarned: this will only work with FPC 3.0 and later.' + sLineBreak + upQuestionContinue;
       end;
       if (FPCupManager.CrossCPU_Target=TCPU.aarch64)
       {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target=TOS.darwin){$endif}
@@ -2976,8 +3004,7 @@ begin
       OR (FPCupManager.CrossOS_Target=TOS.haiku)
       then
       begin
-        s:='Be forwarned: this will only work with FPC [(>= 3.2) OR (embedded) OR (trunk)].' + sLineBreak +
-           'Do you want to continue ?';
+        s:='Be forwarned: this will only work with FPC [(>= 3.2) OR (embedded) OR (trunk)].'+sLineBreak+upQuestionContinue;
       end;
 
       warning:=false;
@@ -2988,8 +3015,7 @@ begin
 
       if warning then
       begin
-        s:='Be forwarned: this will only work with FPC [(>= 3.2.2) OR (embedded) OR (trunk)].' + sLineBreak +
-           'Do you want to continue ?';
+        s:='Be forwarned: this will only work with FPC [(>= 3.2.2) OR (embedded) OR (trunk)].'+sLineBreak+upQuestionContinue;
       end;
 
       {$ifdef Linux}
@@ -2998,13 +3024,13 @@ begin
       begin
         s:='You could get the native cross-utilities first (advised).' + sLineBreak +
            'E.g.: sudo apt-get install libc6-mips-cross binutils-mips-linux-gnu' + sLineBreak +
-           'Do you want to continue ?';
+           upQuestionContinue;
       end;
       {$endif}
 
       if (length(s)=0) then
-        s:='Do you want to continue ?';
-      s:='Going to install the cross-compiler for' + sLineBreak + '['+FPCupManager.CrossCombo_Target+']' + sLineBreak + s;
+        s:=upQuestionContinue;
+      s:=upInstallCrossCompiler+ sLineBreak+'['+FPCupManager.CrossCombo_Target+']'+sLineBreak+s;
       if Form2.AskConfirmation then
         if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
           exit;
@@ -3150,7 +3176,7 @@ begin
 
       AddMessage(upBuildCrossCompiler);
 
-      s:='Fpcupdeluxe: FPC cross-builder: Building compiler for '+GetOS(FPCupManager.CrossOS_Target);
+      s:='fpcupdeluxe: FPC cross-builder: Building compiler for '+GetOS(FPCupManager.CrossOS_Target);
       if FPCupManager.MUSL then s:=s+'-musl';
       if FPCupManager.SolarisOI then s:=s+'-openindiana';
       s:=s+'-'+GetCPU(FPCupManager.CrossCPU_Target);
@@ -3201,9 +3227,7 @@ begin
 
           if (Sender<>nil) then
           begin
-            if (MessageDlg('The building of a crosscompiler failed due to missing cross-tools.' + sLineBreak +
-                     'Fpcupdeluxe can try to download them if available !' + sLineBreak +
-                     'Do you want to continue ?'
+            if (MessageDlg(upMissingTools+sLineBreak+upAdvertiseTools+sLineBreak+upQuestionContinue
                      ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
                      begin
                        exit;
@@ -3242,9 +3266,9 @@ begin
           begin
             if ((Sender<>nil) AND (CheckAutoClear.Checked)) then memoSummary.Clear;
 
-            memoSummary.Lines.Append('Trying to build the cross-compiler for '+GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target)+'.');
+            memoSummary.Lines.Append(upTryBuildCrossCompiler+' '+GetOS(FPCupManager.CrossOS_Target)+'-'+GetCPU(FPCupManager.CrossCPU_Target)+'.');
 
-            AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
+            AddMessage(upLookupTools);
 
             FPCupManager.GetCrossToolsFileName(BinsFileName,LibsFileName);
             FPCupManager.GetCrossToolsPath(BinPath,LibPath);
@@ -3274,8 +3298,8 @@ begin
 
               if MissingCrossBins then
               begin
-                AddMessage('Going to look for the right cross-bins. Can (will) take some time !',True);
-                AddMessage('Looking for: '+BinsFileName, True);
+                AddMessage(upLookupBinTools,True);
+                AddMessage(upLookup+': '+BinsFileName, True);
 
                 success:=FPCupManager.GetCrossBinsURL(BaseBinsURL,BinsFileName);
 
@@ -3399,8 +3423,8 @@ begin
 
               if MissingCrossLibs then
               begin
-                AddMessage('Going to look for the right cross-libraries. Can (will) take some time !',True);
-                AddMessage('Looking for: '+LibsFileName, True);
+                AddMessage(upLookupLibTools,True);
+                AddMessage(upLookup+': '+LibsFileName, True);
 
                 success:=FPCupManager.GetCrossLibsURL(BaseLibsURL,LibsFileName);
 
@@ -3554,14 +3578,13 @@ var
   s:string;
   FModuleList: TStringList;
 begin
-
   s:='';
   if Sender=BitBtnFPCOnly then
-    if (Length(FPCTarget)=0) then s:='Please select a FPC target first';
+    if (Length(FPCTarget)=0) then s:=upSelectFPCTarget;
   if Sender=BitBtnLazarusOnly then
-    if (Length(LazarusTarget)=0) then s:='Please select a Lazarus target first';
+    if (Length(LazarusTarget)=0) then s:=upSelectLazarusTarget;
   if Sender=BitBtnFPCandLazarus then
-    if (Length(FPCTarget)=0) or (Length(LazarusTarget)=0) then s:='Please select a FPC and Lazarus target first';
+    if (Length(FPCTarget)=0) or (Length(LazarusTarget)=0) then s:=upSelectFPCLazarusTarget;
 
   if Length(s)>0 then
   begin
@@ -3572,13 +3595,13 @@ begin
   if Form2.AskConfirmation then
   begin
     s:='';
-    if Sender=BitBtnFPCOnly then s:='Going to install/update FPC.';
-    if Sender=BitBtnLazarusOnly then s:='Going to install/update Lazarus.';
-    if Sender=BitBtnFPCandLazarus then s:='Going to install/update FPC and Lazarus.';
+    if Sender=BitBtnFPCOnly then s:=upInstallFPC;
+    if Sender=BitBtnLazarusOnly then s:=upInstallLazarus;
+    if Sender=BitBtnFPCandLazarus then s:=upInstallFPCLazarus;
     s:=s+sLineBreak;
-    s:=s+'Install directory: '+Self.sInstallDir;
+    s:=s+upInstallDirectory+': '+Self.sInstallDir;
     s:=s+sLineBreak;
-    s:=s+'Do you want to continue ?';
+    s:=s+upQuestionContinue;
     if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
   end;
 
@@ -4041,13 +4064,15 @@ function TForm1.RealRun:boolean;
 var
   s:string;
   aLazarusVersion:word;
+  {$ifdef RemoteLog}
   aRecordNumber:PtrUInt;
+  {$endif}
 begin
   result:=false;
 
   if Pos(' ',FPCupManager.BaseDirectory)>0 then
   begin
-    if (MessageDlg('Having a space in your install path is ill-advised !'+sLineBreak+'Do you want to continue ?',mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+    if (MessageDlg(upSpaceWarning+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
       exit;
   end;
 
@@ -4323,9 +4348,9 @@ begin
   begin
     with TIniFile.Create(IniDirectory+installerUniversal.DELUXEFILENAME) do
     try
-      AddMessage('Current install directory: '+sInstallDir);
+      AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
       AddMessage('');
-      AddMessage('Got settings from install directory');
+      AddMessage(upInstallSettingsCurrent);
       AddMessage('');
 
       chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);

@@ -196,8 +196,8 @@ object Form2: TForm2
     Height = 438
     Top = 140
     Width = 366
-    HorzScrollBar.Page = 223
-    VertScrollBar.Page = 398
+    HorzScrollBar.Page = 238
+    VertScrollBar.Page = 384
     Anchors = [akTop, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Right = 8
@@ -213,7 +213,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 185
+      Top = 171
       Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -235,7 +235,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 214
+      Top = 200
       Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -257,7 +257,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 276
       Height = 25
-      Top = 185
+      Top = 171
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -278,7 +278,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 276
       Height = 25
-      Top = 214
+      Top = 200
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -299,12 +299,12 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 23
-      Top = 268
-      Width = 344
+      Top = 254
+      Width = 352
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
-      BorderSpacing.Right = 14
+      BorderSpacing.Right = 6
       Enabled = False
       OnDblClick = EditDblClickDelete
       OnEditingDone = EditCrossBuildOptionsEditingDone
@@ -317,7 +317,7 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 249
+      Top = 235
       Width = 219
       BorderSpacing.Left = 4
       BorderSpacing.Top = 12
@@ -332,7 +332,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 316
+      Top = 302
       Width = 260
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -354,7 +354,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 276
       Height = 25
-      Top = 316
+      Top = 302
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -373,7 +373,7 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 297
+      Top = 283
       Width = 97
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -388,13 +388,13 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 51
-      Top = 347
-      Width = 344
+      Top = 333
+      Width = 352
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 8
-      BorderSpacing.Right = 14
+      BorderSpacing.Right = 6
       Caption = 'ARM target'
       ChildSizing.LeftRightSpacing = 6
       ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
@@ -415,19 +415,19 @@ object Form2: TForm2
       AnchorSideRight.Control = ScrollBox1
       AnchorSideRight.Side = asrBottom
       Left = 4
-      Height = 128
+      Height = 114
       Top = 6
       Width = 352
-      ActivePage = tsCPUOS
+      ActivePage = tsSUBARCH
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
       BorderSpacing.Right = 6
-      TabIndex = 0
+      TabIndex = 1
       TabOrder = 8
       object tsCPUOS: TTabSheet
         Caption = 'CPU/OS'
-        ClientHeight = 100
+        ClientHeight = 86
         ClientWidth = 344
         object LabelCPU: TLabel
           AnchorSideLeft.Control = tsCPUOS
@@ -444,7 +444,7 @@ object Form2: TForm2
         object LabelOS: TLabel
           AnchorSideLeft.Control = ComboBoxOS
           AnchorSideTop.Control = LabelCPU
-          Left = 96
+          Left = 116
           Height = 15
           Top = 12
           Width = 49
@@ -458,7 +458,7 @@ object Form2: TForm2
           Left = 4
           Height = 23
           Top = 35
-          Width = 84
+          Width = 104
           BorderSpacing.Left = 4
           BorderSpacing.Top = 8
           ItemHeight = 15
@@ -474,7 +474,7 @@ object Form2: TForm2
           AnchorSideTop.Control = ComboBoxCPU
           AnchorSideRight.Control = tsCPUOS
           AnchorSideRight.Side = asrBottom
-          Left = 96
+          Left = 116
           Height = 23
           Top = 35
           Width = 104
@@ -504,23 +504,26 @@ object Form2: TForm2
       end
       object tsSUBARCH: TTabSheet
         Caption = 'Subarch'
-        ClientHeight = 100
+        ClientHeight = 86
         ClientWidth = 344
         object rgrpSubarch: TRadioGroup
           AnchorSideLeft.Control = tsSUBARCH
           AnchorSideTop.Control = tsSUBARCH
           AnchorSideRight.Control = tsSUBARCH
           AnchorSideRight.Side = asrBottom
+          AnchorSideBottom.Control = tsSUBARCH
+          AnchorSideBottom.Side = asrBottom
           Left = 4
-          Height = 60
-          Top = 8
-          Width = 334
-          Anchors = [akTop, akLeft, akRight]
+          Height = 78
+          Top = 4
+          Width = 336
+          Anchors = [akTop, akLeft, akRight, akBottom]
           AutoFill = True
           AutoSize = True
           BorderSpacing.Left = 4
-          BorderSpacing.Top = 8
-          BorderSpacing.Right = 6
+          BorderSpacing.Top = 4
+          BorderSpacing.Right = 4
+          BorderSpacing.Bottom = 4
           Caption = 'Select subarch'
           ChildSizing.LeftRightSpacing = 6
           ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
@@ -545,7 +548,7 @@ object Form2: TForm2
       AnchorSideBottom.Side = asrBottom
       Left = 4
       Height = 39
-      Top = 138
+      Top = 124
       Width = 352
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True

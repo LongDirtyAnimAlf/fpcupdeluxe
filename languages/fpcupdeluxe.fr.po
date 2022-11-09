@@ -411,7 +411,7 @@ msgstr "Définir la sous-architecture"
 
 #: tform1.buttonsubarchselect.hint
 msgid "Select a subarch for embedded target."
-msgstr "Sélectionnez un sous-arche pour la cible intégrée."
+msgstr "Sélectionner un sous-arche pour la cible intégrée."
 
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
@@ -814,7 +814,7 @@ msgstr "Laz. hash/tag"
 
 #: tform2.labelos.caption
 msgid "Select OS"
-msgstr "Sélectionnez OS"
+msgstr "Sélectionner OS"
 
 #: tform2.radiogrouparmarch.caption
 msgid "ARM target"
@@ -826,7 +826,7 @@ msgstr "Options de recherche"
 
 #: tform2.rgrpsubarch.caption
 msgid "Select subarch"
-msgstr "Sélectionnez la sous-division"
+msgstr "Sélectionner la sous-division"
 
 #: tform2.tscpuos.caption
 msgid "CPU/OS"

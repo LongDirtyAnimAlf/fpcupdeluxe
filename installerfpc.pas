@@ -124,6 +124,7 @@ type
     FNativeFPCBootstrapCompiler: boolean;
     InitDone: boolean;
     function GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
+    function CleanExtra(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone):boolean;
   protected
     function GetUnitsInstallDirectory(WithMagic:boolean):string;
     function GetVersionFromUrl(aUrl: string): string;override;
@@ -227,154 +228,11 @@ uses
 const
   DEFINE_FPC_SOFT_FPUX80 = 'FPC_SOFT_FPUX80';
 
-// remove stale compiled files
-procedure RemoveStaleBuildDirectories(aBaseDir,aCPU,aOS:string);
-var
-  OldPath:string;
-  FileInfo: TSearchRec;
-  //DeleteList:TStringList;
-  aArch:string;
-begin
-
-  aArch:=aCPU+'-'+aOS;
-
-  {
-  DeleteList:=TStringList.Create;
-  try
-    DeleteList.Add('.fpm');
-    OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils';
-    DeleteFilesExtensionsSubdirs(OldPath,DeleteList,aArch);
-    OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'packages';
-    DeleteFilesExtensionsSubdirs(OldPath,DeleteList,aArch);
-  finally
-    DeleteList.Free;
-  end;
-  }
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir);
-  DeleteFilesNameSubdirs(OldPath,'.stackdump');
-  DeleteFilesNameSubdirs(OldPath,'.core');
-
-  // patch residues
-  //DeleteFilesNameSubdirs(OldPath,'.rej');
-  //DeleteFilesNameSubdirs(OldPath,'.orig');
-
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils';
-  DeleteFilesNameSubdirs(OldPath,aArch+'.fpm');
-  DeleteFilesNameSubdirs(OldPath,'-'+aOS+'.fpm');
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'packages';
-  DeleteFilesNameSubdirs(OldPath,aArch+'.fpm');
-  DeleteFilesNameSubdirs(OldPath,'-'+aOS+'.fpm');
-
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator+'bin';
-  DeleteDirectoryEx(OldPath);
-  RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator+'bin');
-
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator+'units'+DirectorySeparator+aArch;
-  DeleteDirectoryEx(OldPath);
-  RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator+'units');
-
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'rtl'+DirectorySeparator+'units'+DirectorySeparator+aArch;
-  DeleteDirectoryEx(OldPath);
-  RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'rtl'+DirectorySeparator+'units');
-
-  DeleteDirectoryEx(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'units'+DirectorySeparator+aArch);
-  RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'units');
-
-  DeleteDirectoryEx(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'bin'+DirectorySeparator+aArch);
-  RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'bin');
-
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'packages'+DirectorySeparator;
-  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
-  begin
-    repeat
-      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
-      begin
-        if (FileInfo.Attr and faDirectory) = faDirectory then
-        begin
-          DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'units'+DirectorySeparator+aArch);
-          RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
-        end;
-      end;
-    until SysUtils.FindNext(FileInfo)<>0;
-    SysUtils.FindClose(FileInfo);
-  end;
-
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator;
-  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
-  begin
-    repeat
-      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
-      begin
-        if (FileInfo.Attr and faDirectory) = faDirectory then
-        begin
-          DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'units'+DirectorySeparator+aArch);
-          RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
-
-          DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'bin'+DirectorySeparator+aArch);
-          RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'bin');
-        end;
-      end;
-    until SysUtils.FindNext(FileInfo)<>0;
-    SysUtils.FindClose(FileInfo);
-  end;
-
-  // for (very) old versions of FPC : fcl and fv directories
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'fcl'+DirectorySeparator;
-  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
-  begin
-    repeat
-      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
-      begin
-        if (FileInfo.Attr and faDirectory) = faDirectory then
-        begin
-          DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'units'+DirectorySeparator+aArch);
-          RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
-        end;
-      end;
-    until SysUtils.FindNext(FileInfo)<>0;
-    SysUtils.FindClose(FileInfo);
-  end;
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'fv'+DirectorySeparator;
-  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
-  begin
-    repeat
-      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
-      begin
-        if (FileInfo.Attr and faDirectory) = faDirectory then
-        begin
-          DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'units'+DirectorySeparator+aArch);
-          RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
-        end;
-      end;
-    until SysUtils.FindNext(FileInfo)<>0;
-    SysUtils.FindClose(FileInfo);
-  end;
-
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'compiler'+DirectorySeparator;
-  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or {%H-}faSymLink {$endif unix},FileInfo)=0 then
-  begin
-    repeat
-      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
-      begin
-        if (FileInfo.Attr and faDirectory) = faDirectory then
-        begin
-          DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'units'+DirectorySeparator+aArch);
-          RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
-        end;
-      end;
-    until SysUtils.FindNext(FileInfo)<>0;
-    SysUtils.FindClose(FileInfo);
-  end;
-
-end;
-
 { TFPCCrossInstaller }
 
 constructor TFPCCrossInstaller.Create;
 begin
   inherited Create;
-  //if Self is TFPCCrossInstaller then
-  //Self.
   FCrossCompilerName:='invalid';
 end;
 
@@ -2440,6 +2298,100 @@ begin
   if index=2 then result:=Build;
 end;
 
+function TFPCInstaller.CleanExtra(aCPU:TCPU;aOS:TOS):boolean;
+var
+  aDir,sArch,sOS  : string;
+  DeleteList      : TStringList;
+begin
+  result:=true;
+
+
+  if ((aCPU=TCPU.cpuNone) AND (aOS=TOS.osNone)) then
+  begin
+    sArch:=GetFPCTarget(true);
+    sOS:=GetTargetOS;
+  end
+  else
+  if ((aCPU<>TCPU.cpuNone) AND (aOS<>TOS.osNone)) then
+  begin
+    sArch:=GetCPU(aCPU)+'-'+GetOS(aOS);
+    sOS:=GetOS(aOS);
+  end
+  else
+  begin
+    Infoln(infotext+'CleanExtra: wrong CPU or OS.');
+    exit;
+  end;
+
+  //if (SourceDirectory<>InstallDirectory) then
+  begin
+    Infoln(infotext+'Start search and removal of stale build files and directories. May take a while.');
+
+    DeleteFilesNameSubdirs(SourceDirectory,'.stackdump');
+    DeleteFilesNameSubdirs(SourceDirectory,'.core');
+
+    // patch residues
+    //DeleteFilesNameSubdirs(SourceDirectory,'.rej');
+    //DeleteFilesNameSubdirs(SourceDirectory,'.orig');
+
+    aDir:=IncludeTrailingPathDelimiter(SourceDirectory)+'utils';
+    DeleteFilesNameSubdirs(aDir,sArch+'.fpm');
+    DeleteFilesNameSubdirs(aDir,'-'+sOS+'.fpm');
+    aDir:=IncludeTrailingPathDelimiter(SourceDirectory)+'packages';
+    DeleteFilesNameSubdirs(aDir,sArch+'.fpm');
+    DeleteFilesNameSubdirs(aDir,'-'+sOS+'.fpm');
+
+    // Delete stray compilers, if any !!
+    aDir:=ConcatPaths([SourceDirectory,'compiler']);
+    if (Self is TFPCCrossInstaller) then
+    begin
+      if Assigned(CrossInstaller) then DeleteFile(aDir+DirectorySeparator+GetCrossCompilerName(CrossInstaller.TargetCPU));
+    end
+    else
+      DeleteFile(aDir+DirectorySeparator+GetCompilerName(GetTargetCPU));
+
+    DeleteFile(aDir+DirectorySeparator+'ppc'+GetExeExt);
+    DeleteFile(aDir+DirectorySeparator+'ppc1'+GetExeExt);
+    DeleteFile(aDir+DirectorySeparator+'ppc2'+GetExeExt);
+    DeleteFile(aDir+DirectorySeparator+'ppc3'+GetExeExt);
+
+    DeleteFile(aDir+DirectorySeparator+'ppcwpo1'+GetExeExt);
+    DeleteFile(aDir+DirectorySeparator+'ppcwpo2'+GetExeExt);
+
+    DeleteFile(aDir+DirectorySeparator+'pp1.wpo');
+    DeleteFile(aDir+DirectorySeparator+'pp2.wpo');
+
+    aDir:=ConcatPaths([SourceDirectory,'utils','bin']);
+    DeleteDirectoryEx(aDir);
+    aDir:=ConcatPaths([SourceDirectory,'packages','ide','bin']);
+    DeleteDirectoryEx(aDir);
+
+    DeleteList := TStringList.Create;
+    try
+      DeleteList.Add('.ppu');
+      DeleteList.Add('.a');
+      DeleteList.Add('.o');
+      DeleteList.Add('.rsj');
+      {$ifdef MSWINDOWS}
+      DeleteList.Add('.exe');
+      {$ENDIF}
+      if (Pos('-a',FCompilerOptions)=0) then DeleteList.Add('.s');
+      aDir:=ConcatPaths([SourceDirectory,'compiler','utils']);
+      DeleteFilesExtensionsSubdirs(aDir,DeleteList,'units'+DirectorySeparator+sArch);
+      aDir:=ConcatPaths([SourceDirectory,'packages']);
+      DeleteFilesExtensionsSubdirs(aDir,DeleteList,'units'+DirectorySeparator+sArch);
+      aDir:=ConcatPaths([SourceDirectory,'rtl']);
+      DeleteFilesExtensionsSubdirs(aDir,DeleteList,'units'+DirectorySeparator+sArch);
+      aDir:=ConcatPaths([SourceDirectory,'utils']);
+      DeleteFilesExtensionsSubdirs(aDir,DeleteList,'units'+DirectorySeparator+sArch);
+    finally
+      DeleteList.Free;
+    end;
+  end;
+  Infoln(infotext+'Search and removal of stale build files and directories ready.');
+  WritelnLog(infotext+'Update/build/config succeeded.',false);
+end;
+
 function TFPCInstaller.GetUnitsInstallDirectory(WithMagic:boolean):string;
 var
   aDir:string;
@@ -3707,7 +3659,8 @@ end;
 
 function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 const
-  FPCUPMAGIC=': base settings';
+  FPCUPMAGIC    = ': base settings';
+  REVINCERROR   = 'error: empty';
 var
   RequiredBootstrapVersion:string;
   RequiredBootstrapVersionLow:string;
@@ -3718,8 +3671,6 @@ var
   OperationSucceeded: boolean;
   PlainBinPath: string; //directory above the architecture-dependent FBinDir
   VersionSnippet:string;
-  aArch,aOS:string;
-  DeleteList:TStringList;
   TxtFile:Text;
   s,s2:string;
   x,y:integer;
@@ -3991,6 +3942,7 @@ begin
         // Check revision.inc for errors
         if FileExists(s) then
         begin
+          VersionSnippet:=REVINCERROR;
           ConfigText:=TStringList.Create;
           try
             ConfigText.LoadFromFile(s);
@@ -4007,9 +3959,12 @@ begin
           finally
             ConfigText.Free;
           end;
+          if (VersionSnippet=REVINCERROR) then FUseRevInc:=false;
           if (NOT FUseRevInc) then
           begin
-            Infoln('FPC builder: Contents of auto-generated (Makefile) revision.inc incorrect. Deleting and preventing use !', etWarning);
+            Infoln('FPC builder: Contents of auto-generated (Makefile) revision.inc incorrect.', etWarning);
+            Infoln('FPC builder: Revision.inc contents: '+VersionSnippet, etWarning);
+            Infoln('FPC builder: Deleting and preventing use !', etWarning);
             DeleteFile(s);
           end;
         end;
@@ -4625,62 +4580,9 @@ begin
   begin
     if (Self is TFPCCrossInstaller) then
     begin
-      aArch:=GetFPCTarget(false);
-      aOS:=GetOS((Self as TFPCCrossInstaller).CrossOS_Target);
-    end
-    else
-    begin
-      aArch:=GetFPCTarget(true);
-      aOS:=GetTargetOS;
+      if Assigned(CrossInstaller) then result:=CleanExtra(CrossInstaller.TargetCPU,CrossInstaller.TargetOS);
     end;
-
-    //if (SourceDirectory<>InstallDirectory) then
-    begin
-      Infoln(infotext+'Start search and removal of stale build files and directories. May take a while.');
-
-      DeleteFilesNameSubdirs(SourceDirectory,'.stackdump');
-      DeleteFilesNameSubdirs(SourceDirectory,'.core');
-
-      // patch residues
-      //DeleteFilesNameSubdirs(SourceDirectory,'.rej');
-      //DeleteFilesNameSubdirs(SourceDirectory,'.orig');
-
-      s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'utils';
-      DeleteFilesNameSubdirs(s2,aArch+'.fpm');
-      DeleteFilesNameSubdirs(s2,'-'+aOS+'.fpm');
-      s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'packages';
-      DeleteFilesNameSubdirs(s2,aArch+'.fpm');
-      DeleteFilesNameSubdirs(s2,'-'+aOS+'.fpm');
-
-      s2:=ConcatPaths([SourceDirectory,'utils','bin']);
-      DeleteDirectoryEx(s2);
-      s2:=ConcatPaths([SourceDirectory,'packages','ide','bin']);
-      DeleteDirectoryEx(s2);
-
-      DeleteList := TStringList.Create;
-      try
-        DeleteList.Add('.ppu');
-        DeleteList.Add('.a');
-        DeleteList.Add('.o');
-        DeleteList.Add('.rsj');
-        {$ifdef MSWINDOWS}
-        DeleteList.Add('.exe');
-        {$ENDIF}
-        if (Pos('-a',FCompilerOptions)=0) then DeleteList.Add('.s');
-        s2:=ConcatPaths([SourceDirectory,'compiler','utils']);
-        DeleteFilesExtensionsSubdirs(s2,DeleteList,'units'+DirectorySeparator+aArch);
-        s2:=ConcatPaths([SourceDirectory,'packages']);
-        DeleteFilesExtensionsSubdirs(s2,DeleteList,'units'+DirectorySeparator+aArch);
-        s2:=ConcatPaths([SourceDirectory,'rtl']);
-        DeleteFilesExtensionsSubdirs(s2,DeleteList,'units'+DirectorySeparator+aArch);
-        s2:=ConcatPaths([SourceDirectory,'utils']);
-        DeleteFilesExtensionsSubdirs(s2,DeleteList,'units'+DirectorySeparator+aArch);
-      finally
-        DeleteList.Free;
-      end;
-    end;
-    Infoln(infotext+'Search and removal of stale build files and directories ready.');
-    WritelnLog(infotext+'Update/build/config succeeded.',false);
+    CleanExtra;
   end;
   Result := OperationSucceeded;
 end;
@@ -4691,13 +4593,11 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 // by Jonas Maebe, 1 November 2012
 // On Windows, removing fpmake.exe, see Build FAQ (Nov 2011), 2.5
 var
-  CrossCompiling: boolean;
-  FileCounter:integer;
-  DeleteList: TStringList;
-  CPUOS_Signature:string;
-  aCleanupCompiler,aCleanupCommand,aDir:string;
-  aCleanupCommandList:TStringList;
-  RunTwice:boolean;
+  CrossCompiling                         : boolean;
+  CPUOS_Signature                        : string;
+  aCleanupCompiler,aCleanupCommand,aDir  : string;
+  aCleanupCommandList,DeleteList         : TStringList;
+  RunTwice                               : boolean;
 begin
   result:=inherited;
 
@@ -4780,7 +4680,7 @@ begin
     {$ELSE}
     Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
     {$ENDIF}
-    if Self is TFPCCrossInstaller then
+    if (Self is TFPCCrossInstaller) then
     begin  // clean out the correct compiler
       Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);
       Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName);
@@ -4877,63 +4777,8 @@ begin
         DeleteDirectoryEx(aDir);
     end;
 
-    {$IFDEF MSWINDOWS}
-    // delete the units directory inside the source directory !!
-    // this is needed due to the fact that make distclean will not cleanout this units directory
-    // make distclean will only remove the results of a make, not a make install
-    aDir:=ConcatPaths([SourceDirectory,'units',CPUOS_Signature]);
-    // Only allow unit directories inside our own install te be deleted
-    if (Pos(BaseDirectory,aDir)=1) then
-      DeleteDirectoryEx(aDir);
-    {$ENDIF}
-
-    // finally ... if something is still still still floating around ... delete it !!
-    DeleteList := TStringList.Create;
-    try
-      // delete stray unit and (static) object files, if any !!
-      DeleteList.Add('.ppu');
-      DeleteList.Add('.a');
-      DeleteList.Add('.o');
-      DeleteFilesExtensionsSubdirs(SourceDirectory,DeleteList,CPUOS_Signature);
-
-      // Delete stray compilers, if any !!
-      aDir:=ConcatPaths([SourceDirectory,'compiler']);
-
-      if CrossCompiling then
-        DeleteFile(aDir+DirectorySeparator+GetCrossCompilerName(CrossInstaller.TargetCPU))
-      else
-        DeleteFile(aDir+DirectorySeparator+GetCompilerName(GetTargetCPU));
-
-      DeleteFile(aDir+DirectorySeparator+'ppc1'+GetExeExt);
-      DeleteFile(aDir+DirectorySeparator+'ppc2'+GetExeExt);
-      DeleteFile(aDir+DirectorySeparator+'ppc3'+GetExeExt);
-
-      // delete stray executables, if any !!
-      if (NOT CrossCompiling) then
-      begin
-        aDir:=ConcatPaths([SourceDirectory,'compiler','utils']);
-        FindAllFiles(DeleteList,aDir, '*'+GetExeExt, False);
-        aDir:=ConcatPaths([SourceDirectory,'utils']);
-        FindAllFiles(DeleteList,aDir, '*'+GetExeExt, True);
-      end;
-      if DeleteList.Count > 0 then
-      begin
-        for FileCounter := 0 to (DeleteList.Count-1) do
-        begin
-          if IsExecutable(DeleteList.Strings[FileCounter]) then
-          begin
-            if Pos(MAKEFILENAME,DeleteList.Strings[FileCounter])=0 then
-            begin
-              Infoln(infotext+'Deleting [stray] executable: '+DeleteList.Strings[FileCounter],etInfo);
-              DeleteFile(DeleteList.Strings[FileCounter]);
-            end;
-          end;
-        end;
-      end;
-
-    finally
-      DeleteList.Free;
-    end;
+    // Final cleansing of source directory
+    CleanExtra;
   end;
 
 end;
