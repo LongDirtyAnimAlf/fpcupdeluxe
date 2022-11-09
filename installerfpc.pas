@@ -1306,7 +1306,7 @@ begin
             // Do we need a new cross-compiler ?
             if (NOT CompilerUpdateNeeded) then
             begin
-              if (MakeCycle=st_Compiler) then Infoln({infotext+}'Skipping cross-compiler build step: compiler seems to be up to date !!',etWarning);
+              if (MakeCycle=st_Compiler) then Infoln(infotext+'Skipping cross-compiler build step: compiler seems to be up to date !!',etInfo);
               continue; // best guess: compilers stem from identical sources, so do not build the cross-compiler again
             end;
           end;
@@ -4712,7 +4712,7 @@ begin
         if (Self AS TFPCCrossInstaller).CompilerUpdateNeeded then
           aCleanupCommandList.Append('compiler_distclean')
         else
-          Infoln({infotext+}'Skipping cross-compiler clean step: compiler seems to be up to date !!',etWarning);
+          Infoln(infotext+'Skipping cross-compiler clean step: compiler seems to be up to date !!',etInfo);
         aCleanupCommandList.Append('rtl_distclean');
         if (Self AS TFPCCrossInstaller).PackagesNeeded then aCleanupCommandList.Append('packages_distclean');
       end;
