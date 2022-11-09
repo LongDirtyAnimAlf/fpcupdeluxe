@@ -1328,7 +1328,7 @@ begin
         Processor.Process.Parameters.Delete(0);
       end;
 
-      Processor.Process.CurrentDirectory:=Workingdir;
+      Infoln(localinfotext+'Running command. '+Processor.GetExeInfo,etInfo);
 
       ProcessorResult:=Processor.ExecuteAndWait;
       s:=Processor.WorkerOutput.Text;
@@ -1588,8 +1588,6 @@ begin
   result:=InitModule;
   if not result then exit;
 
-  // Log to console only:
-  Infoln(infotext+'Going to build '+ModuleName,etInfo);
   idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
     begin
@@ -2208,9 +2206,9 @@ begin
   if idx>=0 then
   begin
     sl:=TStringList(UniModuleList.Objects[idx]);
-    WritelnLog(infotext+'UnInstalling module '+ModuleName);
+    if FVerbose then WritelnLog(infotext+'Going to remove '+ModuleName+' running all UnInstallExecute commands in: '+LineEnding+
+      sl.CommaText,true);
     result:=RunCommands('UnInstallExecute',sl);
-
     // Process all AddPackage<n> directives in reverse.
     // As this changes config files, we keep it outside
     // the section where LazarusConfig is modified
