@@ -366,13 +366,13 @@ end;
 {$ifdef EnableLanguages}
 procedure TForm1.Translate(const Language: string);
 var
-  Res                           : TResourceStream;
   PoFileName                    : string;
-  aLanguage, Lang, FallbackLang : string;
+  aLanguage, FallbackLang       : string;
+  //Lang                          : string;
 begin
   aLanguage:=Language;
 
-  Lang:='';
+  //Lang:='';
   FallbackLang:='';
   //LazGetLanguageIDs(Lang,FallbackLang); // in unit LazUTF8
 
@@ -387,10 +387,8 @@ begin
   if (NOT FileExists(PoFileName)) then
   begin
     try
-      Res := TResourceStream.Create(HInstance, 'fpcupdeluxe.' + aLanguage, RT_RCDATA);
-      Res.SaveToFile(PoFileName);
-      Res.Free;
-      AddMessage('Language file for '+aLanguage+' created');
+      if SaveFileFromResource(PoFileName,'fpcupdeluxe.' + aLanguage) then
+        AddMessage('Language file for '+aLanguage+' created');
     except
     end;
   end;
@@ -907,7 +905,7 @@ begin
     (ExistWordInString(PChar(s),'clone',[soWholeWord])) AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord]))
   ) then
   begin
-    EchoInfo(BeginSnippet + ' Performing SVN/GIT/HG/FTP/URL checkout/download. Please wait, could take some time.');
+    EchoInfo(BeginSnippet+' '+Seriousness[etInfo]+' Performing SVN/GIT/HG/FTP/URL checkout/download. Please wait, could take some time.');
   end;
 
   if Handled then exit;

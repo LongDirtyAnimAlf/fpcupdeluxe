@@ -1388,7 +1388,7 @@ end;
 function TLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
   Result := true;
-  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
+  infotext:=InitInfoText(' (BuildModuleCustom: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
@@ -1439,7 +1439,7 @@ begin
 
   if InitDone then exit;
 
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (InitModule): ';
+  localinfotext:=InitInfoText(' (InitModule): ');
 
   PlainBinDir := SafeExpandFileName(FFPCCompilerBinPath+'..'+DirectorySeparator+'..');
 

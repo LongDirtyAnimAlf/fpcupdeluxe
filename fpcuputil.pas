@@ -342,14 +342,14 @@ function GetXCodeLocation:string;
 function GetAndroidSDKDir:string;
 function GetAndroidNDKDir:string;
 function CompareVersionStrings(s1,s2: string): longint;
-function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions = []): Boolean;
-function UnCamel(value:string):string;
+function ExistWordInString(const aString:pchar; const aSearchString:string; const aSearchOptions: TStringSearchOptions = []): Boolean;
+function UnCamel(const value:string):string;
 function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 function GetEnumValueSimple(aTypeInfo:PTypeInfo;const aEnum:string):integer;
 function ContainsDigit(const s: string): Boolean;
 //Find a library, if any
-function LibWhich(aLibrary: string; out dir: string): boolean;
-function LibWhich(aLibrary: string): boolean;
+function LibWhich(const {%H-}aLibrary: string; out {%H-}dir: string): boolean;
+function LibWhich(const aLibrary: string): boolean;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(const Executable: string): string;
 function IsExecutable(Executable: string):boolean;
@@ -3479,7 +3479,7 @@ begin
   until false;
 end;
 
-function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
+function ExistWordInString(const aString:pchar; const aSearchString:string; const aSearchOptions: TStringSearchOptions): Boolean;
 var
   Size : Integer;
   LocalSearchOptions: TStringSearchOptions;
@@ -3490,7 +3490,7 @@ begin
   Result:=SearchBuf(aString, Size, 0, 0, aSearchString, LocalSearchOptions)<>nil;
 end;
 
-function UnCamel(value:string):string;
+function UnCamel(const value:string):string;
 var
   s:string;
   len,i,j:integer;
@@ -3569,7 +3569,7 @@ begin
   result := false;
 end;
 
-function LibWhich(aLibrary: string; out dir: string): boolean;
+function LibWhich(const aLibrary: string; out dir: string): boolean;
 {$ifdef Unix}
 const
   UNIXSEARCHDIRS : array [0..3] of string = (
@@ -3734,7 +3734,7 @@ begin
   {$endif}
 end;
 
-function LibWhich(aLibrary: string): boolean;
+function LibWhich(const aLibrary: string): boolean;
 var
   aDir:string;
 begin

@@ -640,7 +640,7 @@ end;
 function TUniversalInstaller.InitModule: boolean;
 begin
   result:=true;
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (InitModule): ';
+  localinfotext:=InitInfoText(' (InitModule): ');
 
   Infoln(localinfotext+'Entering ...',etDebug);
   if InitDone then exit;
@@ -693,7 +693,7 @@ var
   PackageFiles: TStringList;
 begin
   result:=false;
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (InstallPackage): ';
+  localinfotext:=InitInfoText(' (InstallPackage): ');
 
   PackageName:=FileNameWithoutExt(PackagePath);
 
@@ -913,7 +913,7 @@ var
   RegisterOnly:boolean;
 begin
   Failure:=false;
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (RemovePackages): ';
+  localinfotext:=InitInfoText(' (RemovePackages): ');
 
   BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
   if BaseWorkingdir='' then BaseWorkingdir:=GetValueFromKey(INSTALLMAGIC,sl);
@@ -989,7 +989,7 @@ begin
   Workingdir:=BaseWorkingdir;
   ModuleName:=GetValueFromKey(NAMEMAGIC,sl);
 
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (AddPackages of '+ModuleName+'): ';
+  localinfotext:=InitInfoText(' (AddPackages of '+ModuleName+'): ');
 
   for RegisterOnly:=false to true do
   begin
@@ -1255,7 +1255,7 @@ var
   Workingdir:string;
   ReadyCounter:integer;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (RunCommands: '+Directive+'): ';
+  localinfotext:=InitInfoText(' (RunCommands: '+Directive+'): ');
 
   result:=true; //not finding any instructions at all should not be a problem.
   BaseWorkingdir:=GetValueFromKey('Workingdir',sl);
@@ -1425,7 +1425,7 @@ begin
 
   PackageName:=FileNameWithoutExt(PackagePath);
 
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (UnInstallPackage: '+PackageName+'): ';
+  localinfotext:=InitInfoText(' (UnInstallPackage: '+PackageName+'): ');
 
   Infoln(localinfotext+'Entering ...',etDebug);
 
@@ -2811,7 +2811,7 @@ begin
   result:=InitModule;
   if not result then exit;
 
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' ('+Copy(ClassName,2,MaxInt)+': '+ModuleName+'): ';
+  localinfotext:=InitInfoText(' ('+Copy(ClassName,2,MaxInt)+': '+ModuleName+'): ');
 
   aBinURL:='';
   aLibURL:='';

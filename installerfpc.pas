@@ -1858,7 +1858,7 @@ begin
   begin
     if ((ModuleName=_FPC) OR (ModuleName=_PAS2JS)) then
     begin
-      Infoln(infotext+'Running CleanModule once more before building FPC from sources, due to previous CleanModule failure.',etInfo);
+      Infoln(infotext+'Running CleanModule once more, due to previous clean failure.',etInfo);
       CleanModule(ModuleName);
     end;
   end;
@@ -2244,7 +2244,7 @@ end;
 function TFPCInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
   result:=true;
-  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
+  infotext:=InitInfoText(' (BuildModuleCustom: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
@@ -2324,7 +2324,7 @@ begin
 
   //if (SourceDirectory<>InstallDirectory) then
   begin
-    Infoln(infotext+'Start search and removal of stale build files and directories for '+sArch+'. May take a while.');
+    Infoln(infotext+'Removal of stale build files and directories for '+sArch+'. May take a while.');
 
     DeleteFilesNameSubdirs(SourceDirectory,'.stackdump');
     DeleteFilesNameSubdirs(SourceDirectory,'.core');
@@ -2835,7 +2835,7 @@ var
 begin
   result:=true;
   {$IFDEF UNIX}
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (CreateFPCScript): ';
+  localinfotext:=InitInfoText(' (CreateFPCScript): ');
   FPCCompiler := FFPCCompilerBinPath+'fpc'+GetExeExt;
 
   // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
@@ -2885,7 +2885,7 @@ var
   CompilerName:string;
   OperationSucceeded: boolean;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadBootstrapCompiler): ';
+  localinfotext:=InitInfoText(' (DownloadBootstrapCompiler): ');
 
   OperationSucceeded:=true;
 
@@ -3028,7 +3028,7 @@ begin
     begin
       if FileExists(BootstrapFilePath) AND (ExtractFileExt(BootstrapFilePath)=GetExeExt) then
       begin
-        Infoln(localinfotext+'Success. Going to copy '+BootstrapFilePath+' to '+FBootstrapCompiler,etInfo);
+        Infoln(localinfotext+'Success. Going to copy '+BootstrapFilePath+' to '+FBootstrapCompiler,etDebug);
         SysUtils.DeleteFile(FBootstrapCompiler); //ignore errors
 
         // We might be moving files across partitions so we cannot use renamefile
@@ -3109,7 +3109,7 @@ begin
 
   if (InitDone) AND (aBootstrapVersion='') then exit;
 
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (InitModule): ';
+  localinfotext:=InitInfoText(' (InitModule): ');
 
   result:=CheckAndGetTools;
 
@@ -3540,7 +3540,8 @@ begin
         Infoln(localinfotext+'Check if we already have a bootstrap compiler with version '+ aLocalBootstrapVersion,etInfo);
         if s<>aLocalBootstrapVersion then
         begin
-          Infoln(localinfotext+'No correct bootstrapper. Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
+          Infoln(localinfotext+'No correct bootstrapper. Going to download new bootstrapper',etInfo);
+          Infoln(localinfotext+'Downloading bootstrapper from '+ FBootstrapCompilerURL,etDebug);
           result:=DownloadBootstrapCompiler;
           // always use the newly downloaded bootstrapper !!
           if result then
@@ -3704,7 +3705,7 @@ var
     except
       on E: Exception do
       begin
-        WritelnLog(etError, infotext+'Running [CheckFPCMkCfgOption] failed with an exception!'+LineEnding+'Details: '+E.Message,true);
+        WritelnLog(etError,infotext+'Running [CheckFPCMkCfgOption] failed with an exception!'+LineEnding+'Details: '+E.Message,true);
       end;
     end;
     result:=(aIndex<>-1);
@@ -3718,7 +3719,7 @@ var
     Processor.Process.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(InstallDirectory));
     Processor.Process.Parameters.Add('-o');
     Processor.Process.Parameters.Add('' + aFile + '');
-    Infoln(infotext+'Creating '+ExtractFileName(aFile));
+    Infoln(infotext+'Creating '+{ExtractFileName}(aFile));
     try
       ProcessorResult:=Processor.ExecuteAndWait;
       result:=(ProcessorResult=0);
@@ -3943,7 +3944,7 @@ begin
     if (SourceVersionNum<>0) then if (SourceVersionNum<CalculateFullVersion(3,2,3)) then FUseRevInc:=false;
     if FUseRevInc then
     begin
-      Infoln('FPC builder: Checking auto-generated (Makefile) revision.inc for compiler revision', etInfo);
+      Infoln('FPC builder: Checking auto-generated (Makefile) revision.inc for errors', etDebug);
       FUseRevInc:=false;
       // Generate revision.inc through Makefile to check its contents
       s:=ConcatPaths([SourceDirectory,'compiler'])+DirectorySeparator+REVINCFILENAME;
@@ -3972,9 +3973,9 @@ begin
           if (VersionSnippet=REVINCERROR) then FUseRevInc:=false;
           if (NOT FUseRevInc) then
           begin
-            Infoln(infotext+'Contents of auto-generated (Makefile) revision.inc incorrect.', etWarning);
-            Infoln(infotext+'Contents detected: '+VersionSnippet, etWarning);
-            Infoln(infotext+'Deleting revision.inc and preventing use !', etWarning);
+            Infoln(infotext+'Contents of auto-generated (Makefile) revision.inc incorrect.', etDebug);
+            Infoln(infotext+'Contents detected: '+VersionSnippet, etDebug);
+            Infoln(infotext+'Deleting revision.inc and preventing use !', etDebug);
             DeleteFile(s);
           end;
         end;
@@ -4111,7 +4112,6 @@ begin
         s  := IncludeTrailingPathDelimiter(s2)+FPCPKGCONFIGFILENAME;
         if (NOT FileExists(s)) then
         begin
-          ForceDirectoriesSafe(s2);
           //Create package configuration fppkg.cfg
           //if CheckFPCMkCfgOption('-3') then
           begin
@@ -4148,7 +4148,6 @@ begin
         s := IncludeTrailingPathDelimiter(s2)+FPCPKGCOMPILERTEMPLATE;
         if (NOT FileExists(s)) then
         begin
-          ForceDirectoriesSafe(s2);
           //Create default compiler template
           //if CheckFPCMkCfgOption('-4') then
           begin

@@ -501,7 +501,7 @@ type
     function GetVersionFromURL({%H-}aUrl:string):string;virtual;
     function GetReleaseCandidateFromSource:integer;virtual;
     function GetVersion:string;
-
+    function InitInfoText(const ExtraInfo:string=''):string;
   public
     InfoText: string;
     LocalInfoText: string;
@@ -630,15 +630,15 @@ type
 
     // Uninstall module
     function UnInstallModule(ModuleName: string): boolean; virtual;
-    procedure Infoln(Message: string; const Level: TEventType=etInfo);
+    procedure Infoln(const Message: string; const Level: TEventType=etInfo);
 
-    function ExecuteCommand(Commandline: string; Verbosity:boolean): integer; overload;
-    function ExecuteCommand(Commandline: string; out Output:string; Verbosity:boolean): integer; overload;
+    function ExecuteCommand(const Commandline: string; Verbosity:boolean): integer; overload;
+    function ExecuteCommand(const Commandline: string; out Output:string; Verbosity:boolean): integer; overload;
     function ExecuteCommand(const ExeName:String;const Arguments:array of String;Verbosity:boolean):integer;
     function ExecuteCommand(const ExeName:String;const Arguments:array of String;out Output:string;Verbosity:boolean):integer;overload;
-    function ExecuteCommandInDir(Commandline, Directory: string; Verbosity:boolean): integer; overload;
-    function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; Verbosity:boolean): integer; overload;
-    function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; PrependPath: string; Verbosity:boolean): integer; overload;
+    function ExecuteCommandInDir(const Commandline, Directory: string; Verbosity:boolean): integer; overload;
+    function ExecuteCommandInDir(const Commandline, Directory: string; out Output:string; Verbosity:boolean): integer; overload;
+    function ExecuteCommandInDir(const Commandline, Directory: string; out Output:string; PrependPath: string; Verbosity:boolean): integer; overload;
     function ExecuteCommandInDir(const ExeName:String;const Arguments:array of String;const Directory:String;out Output:string; PrependPath: string;Verbosity:boolean):integer;overload;
 
     constructor Create;
@@ -1009,6 +1009,12 @@ begin
   if Assigned(SVNClient) then SVNClient.HTTPProxyUser:=FHTTPProxyUser;
 end;
 
+function TInstaller.InitInfoText(const ExtraInfo:string):string;
+begin
+  result:=Copy(UnCamel(Self.ClassName),2,MaxInt)+ExtraInfo;
+  //if (Length(ExtraInfo)>0) then result:=result+' '+ExtraInfo;
+end;
+
 function TInstaller.CheckAndGetTools: boolean;
 var
   CryptoSucceeded,OperationSucceeded: boolean;
@@ -1017,11 +1023,9 @@ var
   i:integer;
   {$endif}
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (CheckAndGetTools): ';
-
   OperationSucceeded := true;
-
-  if not FNeededExecutablesChecked then
+  localinfotext:=InitInfoText(' (CheckAndGetTools): ');
+  if (not FNeededExecutablesChecked) then
   begin
     // The extractors used depend on the bootstrap compiler URL/file we download
     // todo: adapt extractor based on URL that's being passed (low priority as these will be pretty stable)
@@ -1504,7 +1508,8 @@ begin
       begin
         aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
         //aURL:=FPCTRUNKBINARIES+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
-        Infoln(localinfotext+'Make binary not found. Getting it from: '+aURL+'.',etInfo);
+        Infoln(localinfotext+'Make binary not found. Getting it.',etInfo);
+        Infoln(localinfotext+'Make binary download from: '+aURL+'.',etDebug);
         GetFile(aURL,Make);
         OperationSucceeded:=FileExists(Make);
       end;
@@ -1529,10 +1534,8 @@ var
   OperationSucceeded: boolean;
   s1,s2: string;
 begin
-  s2:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadBinUtils): ';
-
   OperationSucceeded := true;
-
+  s2:=InitInfoText(' (DownloadBinUtils): ');
   {$IFDEF MSWINDOWS}
   if OperationSucceeded then
   begin
@@ -1541,7 +1544,6 @@ begin
     AllThere:=true;
     if DirectoryExists(FMakeDir) = false then
     begin
-      Infoln(s2+'Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etInfo);
       AllThere:=false;
     end
     else
@@ -1572,7 +1574,8 @@ begin
     end;
     if not(AllThere) then
     begin
-      Infoln(s2+'Make path [' + FMakeDir + '] does not have (all) binutils. Going to download needed binutils.',etInfo);
+      Infoln(s2+'Make path [' + FMakeDir + '] does not have (all) binutils.',etDebug);
+      Infoln(s2+'Going to download needed binutils.',etInfo);
       //Infoln(s2+'Some binutils missing: going to get them.',etInfo);
       OperationSucceeded := DownloadBinUtils;
     end;
@@ -1792,7 +1795,7 @@ var
 begin
   Result := false;
 
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' ('+Copy(aClient.ClassName,2,MaxInt)+': '+aModuleName+'): ';
+  localinfotext:=InitInfoText(' ('+Copy(aClient.ClassName,2,MaxInt)+': '+aModuleName+'): ');
 
   // check if we do have a client !!
   if NOT aClient.ValidClient then
@@ -2026,7 +2029,7 @@ var
 begin
   result:=true;
 
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadFromSVN: '+aModuleName+'): ';
+  localinfotext:=InitInfoText(' (DownloadFromSVN: '+aModuleName+'): ');
 
   // check if we do have a client !!
   if NOT SVNClient.ValidClient then
@@ -2218,7 +2221,7 @@ var
 begin
   result:=false;
 
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadFromURL: '+ModuleName+'): ';
+  localinfotext:=InitInfoText(' (DownloadFromURL: '+ModuleName+'): ');
 
   if (Length(FURL)=0) then exit;
 
@@ -2320,7 +2323,7 @@ var
   InstallPath:string;
   RemotePath:string;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadBinUtils): ';
+  localinfotext:=InitInfoText(' (DownloadBinUtils): ');
   //Parent directory of files. Needs trailing backslash.
   ForceDirectoriesSafe(FMakeDir);
   Result := true;
@@ -2352,7 +2355,7 @@ begin
       end
       else
       begin
-        Infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
+        Infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etDebug);
 
         if ExtractFileExt(FUtilFiles[Counter].FileName)='.zip' then
         begin
@@ -2385,7 +2388,7 @@ var
   SourceURL,BinsZip:string;
   OperationSucceeded:boolean;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadBinUtils): ';
+  localinfotext:=InitInfoText(' (DownloadBinUtils): ';
   //Parent directory of files. Needs trailing backslash.
   ForceDirectoriesSafe(FMakeDir);
   Result := true;
@@ -2449,7 +2452,7 @@ var
   SVNZip,SVNDir,aSourceURL: string;
   i:integer;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadSVN): ';
+  localinfotext:=InitInfoText(' (DownloadSVN): ');
 
   OperationSucceeded := false;
 
@@ -2500,7 +2503,7 @@ begin
 
   if OperationSucceeded then
   begin
-    WritelnLog(localinfotext + 'SVN download and unpacking ok. Not going to search SVN client itself in ' + SVNDir, true);
+    WritelnLog(etDebug,localinfotext + 'SVN download and unpacking ok', true);
     OperationSucceeded := FindSVNSubDirs;
     if OperationSucceeded then
       SysUtils.Deletefile(SVNZip); //Get rid of temp zip if success.
@@ -2520,7 +2523,7 @@ begin
 
   OperationSucceeded := false;
 
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadOpenSSL): ';
+  localinfotext:=InitInfoText(' (DownloadOpenSSL): ');
 
   Infoln(localinfotext+'No OpenSSL library files available for SSL. Going to download them. Might take some time.',etWarning);
 
@@ -2544,7 +2547,7 @@ begin
   // Direct download OpenSSL from public sources
   if (NOT OperationSucceeded) then
   begin
-    localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadOpenSSL): ';
+    localinfotext:=InitInfoText(' (DownloadOpenSSL): ');
 
     OpenSSLFileName := GetTempFileNameExt('FPCUPTMP','zip');
 
@@ -2639,7 +2642,7 @@ var
   //WgetFile,WgetZip: string;
   i:integer;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadWget): ';
+  localinfotext:=InitInfoText(' (DownloadWget): ');
 
   Infoln(localinfotext+'No Wget found. Going to download it.',etInfo);
 
@@ -2701,7 +2704,7 @@ var
   FreetypeDir,FreetypeBin,FreetypZip,FreetypZipDir: string;
   i:integer;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (DownloadFreetype): ';
+  localinfotext:=InitInfoText(' (DownloadFreetype): ');
 
   Infoln(localinfotext+'No Freetype found. Going to download it.',etInfo);
 
@@ -2785,7 +2788,7 @@ var
   TargetDir,TargetBin,SourceBin,SourceZip,ZipDir: string;
   i:integer;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (Download '+TARGETNAME+'): ';
+  localinfotext:=InitInfoText(' (Download '+TARGETNAME+'): ');
 
   Infoln(localinfotext+'No '+TARGETNAME+' found. Going to download it.');
 
@@ -2873,7 +2876,7 @@ var
   TargetBin,SourceBin,SourceZip,ZipDir: string;
   i:integer;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (Download '+TARGETNAME+'): ';
+  localinfotext:=InitInfoText(' (Download '+TARGETNAME+'): ');
 
   OperationSucceeded := false;
 
@@ -2953,7 +2956,7 @@ var
   SVNFiles: TStringList;
   OperationSucceeded: boolean;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (FindSVNSubDirs): ';
+  localinfotext:=InitInfoText(' (FindSVNSubDirs): ');
   SVNDir := IncludeTrailingPathDelimiter(FMakeDir)+'svn';
   SVNFiles := FindAllFiles(SVNDir, SVNClient.RepoExecutableName + GetExeExt, true);
   try
@@ -3008,10 +3011,10 @@ begin
   Processor.Environment.SetVar(PATHVARNAME, ResultingPath);
   if ResultingPath <> EmptyStr then
   begin
-    WritelnLog(Copy(UnCamel(Self.ClassName),2,MaxInt)+' (SetPath): External program path:  ' + ResultingPath, false);
+    WritelnLog(InitInfoText(' (SetPath): External program path:  ' + ResultingPath), false);
   end;
   if FVerbose then
-    Infoln(Copy(UnCamel(Self.ClassName),2,MaxInt)+' (SetPath): Set path to: ' + ResultingPath,etDebug);
+    Infoln(InitInfoText(' (SetPath): Set path to: ' + ResultingPath),etDebug);
 end;
 
 procedure TInstaller.WritelnLog(msg: TStrings; ToConsole: boolean = true);
@@ -3173,7 +3176,7 @@ end;
 function TInstaller.BuildModule(ModuleName: string): boolean;
 begin
   result:=false;
-  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (BuildModule: '+ModuleName+'): ';
+  infotext:=InitInfoText(' (BuildModule: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
@@ -3181,7 +3184,7 @@ function TInstaller.CleanModule(ModuleName: string): boolean;
 begin
   result:=false;
   FCleanModuleSuccess:=false;
-  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (CleanModule: '+ModuleName+'): ';
+  infotext:=InitInfoText(' (CleanModule: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 
   if (not DirectoryExists(FSourceDirectory)) then
@@ -3199,14 +3202,14 @@ end;
 function TInstaller.ConfigModule(ModuleName: string): boolean;
 begin
   result:=false;
-  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (ConfigModule: '+ModuleName+'): ';
+  infotext:=InitInfoText(' (ConfigModule: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
 function TInstaller.GetModule(ModuleName: string): boolean;
 begin
   result:=false;
-  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (GetModule: '+ModuleName+'): ';
+  infotext:=InitInfoText(' (GetModule: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 
   ForceDirectoriesSafe(FSourceDirectory);
@@ -3219,7 +3222,7 @@ var
 begin
   result:=true;
 
-  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (CheckModule: '+ModuleName+'): ';
+  infotext:=InitInfoText(' (CheckModule: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 
   if NOT DirectoryExists(FSourceDirectory) then exit;
@@ -4006,7 +4009,7 @@ end;
 function TInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
   result:=false;
-  infotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (UnInstallModule: '+ModuleName+'): ';
+  infotext:=InitInfoText(' (UnInstallModule: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 end;
 
@@ -4014,14 +4017,15 @@ function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false; for
 var
   aUseWget:boolean;
 begin
-  localinfotext:=Copy(UnCamel(Self.ClassName),2,MaxInt)+' (GetFile): ';
+  localinfotext:=InitInfoText(' (GetFile): ');
   aUseWget:=FUseWget;
   if forcenative then aUseWget:=false;
   result:=((FileExists(aFile)) AND (NOT forceoverwrite) AND (FileSize(aFile)>0));
   if (NOT result) then
   begin
     if ((forceoverwrite) AND (SysUtils.FileExists(aFile))) then SysUtils.DeleteFile(aFile);
-    Infoln(localinfotext+'Downloading ' + aURL);
+    Infoln(localinfotext+'Downloading ' + ExtractFileName(aFile));
+    Infoln(localinfotext+'Downloading from ' + aURL,etDebug);
     result:=Download(aUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
     if (NOT result) then Infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')');
   end;
@@ -4188,13 +4192,15 @@ begin
      else result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;
 
-procedure TInstaller.Infoln(Message: string; const Level: TEventType=etInfo);
+procedure TInstaller.Infoln(const Message: string; const Level: TEventType=etInfo);
+const
+  cDot : array[boolean] of string = ('.','');
 begin
   // Note: these strings should remain as is so any fpcupgui highlighter can pick it up
   if (Level<>etDebug) then
   begin
     if AnsiPos(LineEnding, Message)>0 then ThreadLog(''); //Write an empty line before multiline messagse
-    ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
+    ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message+cDot[Message[Length(Message)]='.']); //we misuse this for info output
   end
   else
   begin
@@ -4212,14 +4218,14 @@ begin
  {$endif}
 end;
 
-function TInstaller.ExecuteCommand(Commandline: string; Verbosity: boolean): integer;
+function TInstaller.ExecuteCommand(const Commandline: string; Verbosity: boolean): integer;
 var
   s:string='';
 begin
   Result:=ExecuteCommandInDir(Commandline,'',s,Verbosity);
 end;
 
-function TInstaller.ExecuteCommand(Commandline: string; out Output: string;
+function TInstaller.ExecuteCommand(const Commandline: string; out Output: string;
   Verbosity: boolean): integer;
 begin
   Result:=ExecuteCommandInDir(Commandline,'',Output,Verbosity);
@@ -4237,7 +4243,7 @@ begin
   result:=ExecuteCommandInDir(ExeName,Arguments,'',Output,'',Verbosity);
 end;
 
-function TInstaller.ExecuteCommandInDir(Commandline, Directory: string; Verbosity: boolean
+function TInstaller.ExecuteCommandInDir(const Commandline, Directory: string; Verbosity: boolean
   ): integer;
 var
   s:string='';
@@ -4245,13 +4251,13 @@ begin
   Result:=ExecuteCommandInDir(Commandline,Directory,s,Verbosity);
 end;
 
-function TInstaller.ExecuteCommandInDir(Commandline, Directory: string;
+function TInstaller.ExecuteCommandInDir(const Commandline, Directory: string;
   out Output: string; Verbosity: boolean): integer;
 begin
   Result:=ExecuteCommandInDir(CommandLine,Directory,Output,'',Verbosity);
 end;
 
-function TInstaller.ExecuteCommandInDir(Commandline, Directory: string;
+function TInstaller.ExecuteCommandInDir(const Commandline, Directory: string;
   out Output: string; PrependPath: string; Verbosity: boolean): integer;
 var
   OldPath: string;
