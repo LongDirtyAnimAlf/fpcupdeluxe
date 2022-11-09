@@ -68,7 +68,7 @@ I now get InPath="C:\development\fpcbootstrap\ppc386.exe" instead of the fpc\bin
 interface
 
 uses
-  Classes, SysUtils, Laz_XMLCfg, Laz2_DOM, Laz2_XMLRead, Laz2_XMLWrite;
+  Classes, SysUtils, Laz2_XMLCfg, Laz2_DOM, Laz2_XMLRead, Laz2_XMLWrite;
 
 const
   // Some fixed configuration files.
@@ -109,6 +109,19 @@ type
 TConfig=class; //forward declaration
 TUpdateLazConfig=class; //forward declaration
 
+TConfig = class(TXMLConfig)
+private
+  bChanged: boolean;
+  FNew:boolean;
+public
+  constructor Create(const AFilename: String);
+  procedure Save;
+  procedure MovePath(OldPath, NewPath: string);
+  property New:boolean read FNew;
+end;
+
+
+(*
 TConfig = class(TObject)
 private
   bChanged: boolean;
@@ -135,6 +148,8 @@ public
   procedure SetValue(const APath: String; AValue: Integer);
   procedure SetValue(const APath: String; AValue: Boolean);
 end;
+*)
+
 
 { TUpdateLazConfig }
 TUpdateLazConfig = class(TObject)
@@ -241,117 +256,38 @@ begin
   end;
 end;
 
-{ TConfig }
-
-procedure TConfig.DeletePath(OldPath: string);
-var
-  OldChild: TDOMNode;
-  AttrName: string;
+procedure TConfig.Save;
 begin
-  if OldPath[length(OldPath)]='/' then
-    SetLength(OldPath,length(OldPath)-1);
-  OldChild:=FindNode(OldPath+'/blah',AttrName,false); // add dummy attribute to path
-  if not Assigned(OldChild) then
-    exit;
-  OldChild.ParentNode.RemoveChild(OldChild);
-  bChanged:=true;
+  WriteXMLFile(Doc,Filename);
 end;
 
-procedure TConfig.DeleteValue(const APath: string);
+constructor TConfig.Create(const AFilename: String);
 var
-  Node: TDomNode;
-  AttrName: string;
+  FileOnly: string;
 begin
-  Node:=FindNode(APath,AttrName,false);
-  if Node=nil then
-    exit;
-  if Assigned(TDOMElement(Node).GetAttributeNode(AttrName)) then begin
-    begin
-    TDOMElement(Node).RemoveAttribute(AttrName);
-    bChanged:=true;
-    end;
-  end;
-end;
-
-function TConfig.FindNode(APath: string;var AttrName:string;bCreate:boolean): TDomNode;
-var
-  Node,Parent: TDOMNode;
-  NodeName: String;
-  StartPos: integer;
-begin
-  result:=nil;
-  AttrName:='';
-  Node:=Doc.FindNode('CONFIG');
-  while assigned(Node) and (pos('/',APath)>0) do //walk in tree until no more /
+  FNew:=not(FileExists(aFileName));
+  if FNew then
   begin
-    NodeName:=copy(APath,1,pos('/',APath)-1);
-    Delete(APath,1,length(NodeName)+1);
-    Parent:=Node;
-    Node:=Node.FindNode(NodeName);
-    if not assigned(Node) and bCreate then
-      begin
-      Node:=Doc.CreateElement(NodeName);
-      Parent.AppendChild(Node);
-      end;
-  end;
-  if assigned(Node) then
+    FileName:=aFileName;
+  end
+  else
   begin
-    AttrName:=APath;
-    result:=Node;
+    ReadXMLFile(Doc,AFilename);
   end;
-end;
-
-function TConfig.GetValue(const APath, ADefault: String): String;
-var
-  Node, Attr: TDOMNode;
-  AttrName: String;
-  StartPos: integer;
-begin
-  Result:=ADefault;
-  Node:=FindNode(APath,AttrName,false);
-  if Node=nil then
-    exit;
-  Attr := Node.Attributes.GetNamedItem(AttrName);
-  if Assigned(Attr) then
-    Result := Attr.NodeValue;
-end;
-
-function TConfig.GetValue(const APath: String; ADefault: Integer): Integer;
-begin
-  Result := StrToIntDef(GetValue(APath, IntToStr(ADefault)),ADefault);
-end;
-
-function TConfig.GetValue(const APath: String; ADefault: Boolean): Boolean;
-var
-  s: String;
-begin
-  if ADefault then
-    s := 'True'
-  else
-    s := 'False';
-
-  s := GetValue(APath, s);
-
-  if CompareText(s,'TRUE')=0 then
-    Result := True
-  else if CompareText(s,'FALSE')=0 then
-    Result := False
-  else
-    Result := ADefault;
+  bChanged:=false;
 end;
 
 procedure TConfig.MovePath(OldPath, NewPath: string);
 var
-  NewChild, OldChild,Parent: TDOMNode;
-  AttrName:string;
+  NewChild, OldChild: TDOMNode;
   i:integer;
 begin
   if NewPath[length(NewPath)]='/' then
     SetLength(NewPath,length(NewPath)-1);
   if OldPath[length(OldPath)]='/' then
     SetLength(OldPath,length(OldPath)-1);
-  NewChild:=FindNode(NewPath+'/blah',AttrName,false);  // append dummy attribute to path
-  OldChild:=FindNode(OldPath+'/bloh',AttrName,false);
+  NewChild:=FindNode(NewPath+'/blah',false);  // append dummy attribute to path
+  OldChild:=FindNode(OldPath+'/bloh',false);
   while Assigned(NewChild.FirstChild) do
     NewChild.RemoveChild(NewChild.FirstChild);
   for i:=0 to OldChild.ChildNodes.Count-1 do
@@ -360,71 +296,6 @@ begin
     end;
   bChanged:=true;
 end;
-
-procedure TConfig.Save;
-begin
-  WriteXMLFile(Doc,FFilename);
-end;
-
-procedure TConfig.SetValue(const APath, AValue: String);
-var
-  Node: TDOMNode;
-  AttrName: String;
-  StartPos: integer;
-begin
-  Node:=FindNode(APath,AttrName,true);
-  if Node=nil then
-    exit;
-  if (not Assigned(TDOMElement(Node).GetAttributeNode(AttrName))) or
-    (TDOMElement(Node)[AttrName] <> AValue) then
-  begin
-    TDOMElement(Node)[AttrName] := AValue;
-    bChanged:=true;
-  end;
-end;
-
-procedure TConfig.SetValue(const APath: String; AValue: Integer);
-begin
-  SetValue(APath, IntToStr(AValue));
-end;
-
-procedure TConfig.SetValue(const APath: String; AValue: Boolean);
-begin
-  if AValue then
-    SetValue(APath, 'True')
-  else
-    SetValue(APath, 'False');
-end;
-
-constructor TConfig.Create(const AFilename: String);
-var
-  FileOnly: string;
-begin
-  FFilename:=AFilename;
-  FNew:=not(FileExists(AFileName));
-  if FNew then
-  begin
-    Doc:=TXMLDocument.Create;
-    // CONFIG node present in all Lazarus configs=>we ensure the config file gets created if it doesn't exist yet:
-    Doc.AppendChild(Doc.CreateElement('CONFIG'));
-  end
-  else
-    ReadXMLFile(Doc,AFilename,[xrfAllowLowerThanInAttributeValue,xrfAllowSpecialCharsInAttributeValue,xrfAllowSpecialCharsInComments]);
-  bChanged:=false;
-end;
-
-destructor TConfig.Destroy;
-begin
-  If bChanged then
-  begin
-    // Make sure path exists:
-    ForceDirectoriesSafe(ExtractFilePath(FFilename));
-    Save;
-  end;
-  Doc.Free;
-  inherited Destroy;
-end;
-
 
 procedure TUpdateLazConfig.WriteConfig;
 var

@@ -1192,6 +1192,14 @@ begin
             LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigName', 'FpDebug');
             LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigClass', 'TFpDebugDebugger');
             LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',True);
+            (*
+            <Debugger>
+              <Configs>
+                <Config ConfigName="FpDebug" ConfigClass="TFpDebugDebugger" UID="{8F3A9596-14D4-47F0-BBFB-89E0C843A7D4}"/>
+                <Config ConfigName="Standard GDB" ConfigClass="TGDBMIDebugger" DebuggerFilename="C:\fpcupdeluxe\fpcbootstrap\gdb\$(TargetCPU)-$(TargetOS)\gdb.exe" Active="True" UID="{1C86149D-8007-4BE0-BEF5-50FF913DB2AA}"/>
+              </Configs>
+            </Debugger>
+            *)
           finally
             LazarusConfig.Free;
           end;

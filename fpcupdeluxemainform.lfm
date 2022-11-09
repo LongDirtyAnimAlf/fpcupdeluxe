@@ -2772,7 +2772,7 @@ object Form1: TForm1
     AnchorSideBottom.Control = Panel1
     Left = 330
     Height = 120
-    Hint = 'Will show error'
+    Hint = 'Will show info and error'
     Top = 497
     Width = 884
     Anchors = [akLeft, akRight, akBottom]
