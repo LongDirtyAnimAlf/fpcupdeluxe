@@ -981,6 +981,8 @@ var
   ReadyCounter:integer;
   {$ifndef FPCONLY}
   LazarusConfig:TUpdateLazConfig;
+  LegacyList:boolean;
+  ListCount:integer;
   {$endif}
 begin
   BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
@@ -1185,21 +1187,38 @@ begin
 
         if (LowerCase(ModuleName)='fpdebug') then
         begin
-          // due to limited features of TUpdateLazConfig, this will delete any previous item
-          // and that might be not wanted, but keep it like this
           LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
           try
-            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigName', 'FpDebug');
-            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigClass', 'TFpDebugDebugger');
-            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',True);
-            (*
-            <Debugger>
-              <Configs>
-                <Config ConfigName="FpDebug" ConfigClass="TFpDebugDebugger" UID="{8F3A9596-14D4-47F0-BBFB-89E0C843A7D4}"/>
-                <Config ConfigName="Standard GDB" ConfigClass="TGDBMIDebugger" DebuggerFilename="C:\fpcupdeluxe\fpcbootstrap\gdb\$(TargetCPU)-$(TargetOS)\gdb.exe" Active="True" UID="{1C86149D-8007-4BE0-BEF5-50FF913DB2AA}"/>
-              </Configs>
-            </Debugger>
-            *)
+            s2:='EnvironmentOptions/Debugger/Configs/';
+            LegacyList:=LazarusConfig.IsLegacyList(EnvironmentConfig, s2);
+            ListCount:=LazarusConfig.GetListItemCount(EnvironmentConfig, s2, 'Config', LegacyList);
+
+            // Lookup previous setting, if any
+            while (ListCount>0) do
+            begin
+              Dec(ListCount);
+              s:=s2+LazarusConfig.GetListItemXPath(EnvironmentConfig,'Config',ListCount,LegacyList,True)+'/';
+              if AnsiSameText('TFpDebugDebugger',LazarusConfig.GetVariable(EnvironmentConfig, s+'ConfigClass')) then
+              begin
+                // Previous setting found. Leave everything as it is.
+                exit;
+              end;
+            end;
+
+            // Add fpdebug settings and activate
+            ListCount:=LazarusConfig.GetListItemCount(EnvironmentConfig, s2, 'Config', LegacyList);
+            s:=s2+LazarusConfig.GetListItemXPath(EnvironmentConfig,'Config',ListCount,LegacyList,True)+'/';
+            LazarusConfig.SetVariable(EnvironmentConfig, s+'ConfigName', 'FpDebug');
+            LazarusConfig.SetVariable(EnvironmentConfig, s+'ConfigClass', 'TFpDebugDebugger');
+            // Activate fpdebug
+            LazarusConfig.SetVariable(EnvironmentConfig, s+'Active',True);
+            // Deativate other debugger(s)
+            while (ListCount>0) do
+            begin
+              Dec(ListCount);
+              s:=s2+LazarusConfig.GetListItemXPath(EnvironmentConfig,'Config',ListCount,LegacyList,True)+'/';
+              LazarusConfig.SetVariable(EnvironmentConfig, s+'Active',False);
+            end;
           finally
             LazarusConfig.Free;
           end;

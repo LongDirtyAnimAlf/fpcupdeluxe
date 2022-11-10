@@ -509,6 +509,25 @@ begin
     sInstallDir:=SafeGetApplicationPath+'fpcupdeluxe';
 
   {$ifdef DARWIN}
+  aSystemTarget:=ExcludeTrailingPathDelimiter(SafeGetApplicationPath);
+  if AnsiEndsText('/Downloads',aSystemTarget) then
+  begin
+    // Many people try to run fpcupdeluxe from the Downloads folder.
+    // That is NOT allowed.
+    // Fpcupdeluxe must run inside its own folder, due to permission-issues on OSX
+    AddMessage('FATAL ERROR !!!');
+    AddMessage('');
+    AddMessage('Fpcupdeluxe cannot be run inside the Downloads folder.');
+    AddMessage('This is NOT allowed by OSX security measures.');
+    AddMessage('Copy fpcupdeluxe into its own directory and run from there.');
+    AddMessage('Please quit fpcupdeluxe.');
+    DisEnable(nil,false);
+    IniPropStorageApp.Active:=false;
+    exit;
+  end;
+  {$endif}
+
+  {$ifdef DARWIN}
   // we could have started from with an .app , so goto the basedir ... not sure if realy needed, but to be sure.
   AddMessage('Setting base directory to: '+ExcludeTrailingPathDelimiter(SafeGetApplicationPath));
   if (NOT SetCurrentDir(ExcludeTrailingPathDelimiter(SafeGetApplicationPath))) then
@@ -519,14 +538,11 @@ begin
   {$ifdef CPUAARCH64}
   AddMessage('It might be necessary (quarantine problem) to do: sudo xattr -r -d com.apple.quarantine fpcupdeluxe-aarch64-darwin-cocoa.app');
   {$endif}
-
   {$endif}
 
   aFPCTarget:='';
   aLazarusTarget:='';
   bGitlab:=true;
-
-
 
   // get last used install directory, proxy and visual settings
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
@@ -610,6 +626,7 @@ begin
     AddMessage('Please check the folder permissions, and re-start.');
     AddMessage('');
     DisEnable(nil,False);
+    IniPropStorageApp.Active:=false;
   end;
 end;
 
@@ -3872,14 +3889,24 @@ var
 begin
   for i := 0 to ComponentCount - 1 do
   begin
+    if (Sender=nil) then
+    begin
+      if ((Components[i] is TMenuItem)) then
+      begin
+        TMenuItem(Components[i]).Enabled:=value;
+      end;
+    end;
     if (NOT (Components[i] is TControl)) then continue;
     c := Components[i] AS TControl;
-    if c is TLabel then continue;
-    if c is TPanel then continue;
-    if c is TGroupBox then continue;
-    if c = BitBtnHalt then continue;
-    if c = CommandOutputScreen then continue;
-    if c = memoSummary then continue;
+    if (Sender<>nil) then
+    begin
+      if c is TLabel then continue;
+      if c is TPanel then continue;
+      if c is TGroupBox then continue;
+      if c = BitBtnHalt then continue;
+      if c = CommandOutputScreen then continue;
+      if c = memoSummary then continue;
+    end;
     c.Enabled := value;
     {$ifdef usealternateui}
     if ((pos('Halt',c.name)>0) or (pos('Halt',c.caption)>0)) then c.Enabled:=true;

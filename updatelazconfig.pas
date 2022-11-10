@@ -28,39 +28,14 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 unit updatelazconfig;
-{ Creates or updates Lazarus configs (or XML files).
+{
+Creates or updates Lazarus configs (or XML files).
 Can handle arbitrary number of config files.
 Specify filename only if you want to save in the config path set in the Create constructor; else specify path and filename.
 Will save all configs when it is destroyed.
 
 Note: if you pass a variable such as Help#, this will cause an exception in the XML writing code that is called by laz2_xmlcfg
-I'm not adding error protection here, as we should not write those kinds of variables; if we do, I'd like to see the error in the calling module.
-}
-
-{ Changes in v1.0 Lazarus config versus earlier config:
-Ran fpcup without settings, then ran Lazarus 1.1 (trunk) and converted to new format.
-After conversion, probably quite a lot of default settings were filled in by the IDE when saving for the first time.
-Therefore the difference listed below may be exaggerated.
-1. Environmentoptions.xml
-- Version 106=>107, add Lazarus="1.1" (or 1.0 or whatever) attribute to version
-- Version 108: Lazarus 1.2RC2
-- Version 108: Lazarus="1.3"
-- adds history count... list to LazarusDirectory, CompilerFilename, MakeFilename
-- adds a lot of new elements with children: Desktop, PseudoTerminal, Watches, BreakPoints, Locals, CallStack...
-- adds ObjectInspectorOptions section after EnvironmentOptions
-2. FPCDefines.xml
-- for some strange reason, in this line
-3. Newly created files - probably default settings:
-- editoroptions.xml
-- includelinks.xml
-- inputhistory.xml
-- laz_indentation.xml
-- lazarus.dci
-- projectsessions directory
-4. Deleted file: compilertest.pas does not exist in the new verison.
-RealCompiler File="C:\development\fpc\bin\i386-win32\ppc386.exe"
-I now get InPath="C:\development\fpcbootstrap\ppc386.exe" instead of the fpc\bin path
-
+No error protection here, as we should not write those kinds of variables; if we do, I'd like to see the error in the calling module.
 }
 
 {$mode objfpc}{$H+}
@@ -68,7 +43,7 @@ I now get InPath="C:\development\fpcbootstrap\ppc386.exe" instead of the fpc\bin
 interface
 
 uses
-  Classes, SysUtils, Laz2_XMLCfg, Laz2_DOM, Laz2_XMLRead, Laz2_XMLWrite;
+  Classes, SysUtils, Laz2_XMLCfg, Laz2_DOM;
 
 const
   // Some fixed configuration files.
@@ -111,7 +86,6 @@ TUpdateLazConfig=class; //forward declaration
 
 TConfig = class(TXMLConfig)
 private
-  bChanged: boolean;
   FNew:boolean;
 public
   constructor Create(const AFilename: String);
@@ -187,6 +161,10 @@ public
   function IfNewFile(ConfigFile:string):boolean;
   { Sets variable to a certain value, only if a config file is created for us.}
   procedure SetVariableIfNewFile(ConfigFile, Variable, Value: string);
+  function IsLegacyList(ConfigFile, Variable: string):boolean;
+  function GetListItemCount(const ConfigFile, APath, AItemName: string; const aLegacyList: Boolean): Integer;
+  function GetListItemXPath(const ConfigFile, AName: string; const AIndex: Integer; const aLegacyList: Boolean;
+      const aLegacyList1Based: Boolean = False): string;
   { Create object; specify
   path (primary config path) where option files should be created or updated
   Lazarus major, minor and release version that is downloaded (or -1 if unknown
@@ -262,19 +240,9 @@ begin
 end;
 
 constructor TConfig.Create(const AFilename: String);
-var
-  FileOnly: string;
 begin
   FNew:=not(FileExists(aFileName));
-  if FNew then
-  begin
-    FileName:=aFileName;
-  end
-  else
-  begin
-    ReadXMLFile(Doc,AFilename);
-  end;
-  bChanged:=false;
+  FileName:=aFileName;
 end;
 
 procedure TConfig.MovePath(OldPath, NewPath: string);
@@ -294,7 +262,6 @@ begin
     begin
     NewChild.AppendChild(OldChild.ChildNodes.Item[i].CloneNode(True));
     end;
-  bChanged:=true;
 end;
 
 procedure TUpdateLazConfig.WriteConfig;
@@ -519,6 +486,31 @@ begin
   // Don't free this one, as it will remove it from the list
   Config:=GetConfig(ConfigFile);
   if Config.New then Config.SetValue(Variable, Value);
+end;
+
+function TUpdateLazConfig.IsLegacyList(ConfigFile, Variable: string):boolean;
+var
+  Config: TConfig;
+begin
+  Config:=GetConfig(ConfigFile);
+  result:=Config.IsLegacyList(Variable);
+end;
+
+function TUpdateLazConfig.GetListItemCount(const ConfigFile, APath, AItemName: string; const aLegacyList: Boolean): Integer;
+var
+  Config: TConfig;
+begin
+  Config:=GetConfig(ConfigFile);
+  result:=Config.GetListItemCount(APath, AItemName,aLegacyList);
+end;
+
+function TUpdateLazConfig.GetListItemXPath(const ConfigFile, AName: string; const AIndex: Integer; const aLegacyList: Boolean;
+    const aLegacyList1Based: Boolean): string;
+var
+  Config: TConfig;
+begin
+  Config:=GetConfig(ConfigFile);
+  result:=Config.GetListItemXPath(AName,AIndex,aLegacyList,aLegacyList1Based);
 end;
 
 constructor TUpdateLazConfig.Create(ConfigPath: string;

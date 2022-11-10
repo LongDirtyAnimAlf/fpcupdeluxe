@@ -1569,6 +1569,7 @@ var
   RenameNeeded   : boolean;
   {$ENDIF DARWIN}
   LazarusConfig  : TUpdateLazConfig;
+  LegacyList     : boolean;
   PCPSnippet     : TStringList;
   aFileName      : string;
   s,s2           : string;
@@ -1670,10 +1671,12 @@ begin
           end
           else
           begin
-            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigName', 'Standard GDB');
-            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/ConfigClass', 'TGDBMIDebugger');
-            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/DebuggerFilename',GDBPath);
-            LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/Config/Active',True);
+            LegacyList:=LazarusConfig.IsLegacyList(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/');
+            s:='EnvironmentOptions/Debugger/Configs/'+LazarusConfig.GetListItemXPath(EnvironmentConfig,'Config',0,LegacyList,True)+'/';
+            LazarusConfig.SetVariable(EnvironmentConfig, s+'ConfigName', 'Standard GDB');
+            LazarusConfig.SetVariable(EnvironmentConfig, s+'ConfigClass', 'TGDBMIDebugger');
+            LazarusConfig.SetVariable(EnvironmentConfig, s+'DebuggerFilename',GDBPath);
+            LazarusConfig.SetVariable(EnvironmentConfig, s+'Active',True);
             {$IFDEF DARWIN}
             //Available in latest trunk: extra gdb settings
             LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/DisableStartupShell', 'True');
