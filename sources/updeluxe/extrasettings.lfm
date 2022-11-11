@@ -418,12 +418,12 @@ object Form2: TForm2
       Height = 114
       Top = 6
       Width = 352
-      ActivePage = tsSUBARCH
+      ActivePage = tsCPUOS
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
       BorderSpacing.Right = 6
-      TabIndex = 1
+      TabIndex = 0
       TabOrder = 8
       object tsCPUOS: TTabSheet
         Caption = 'CPU/OS'

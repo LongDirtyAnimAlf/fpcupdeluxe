@@ -16,7 +16,7 @@
         <TextName Value="don.alfredo.fpcupdeluxe"/>
         <TextDesc Value="Installer for FPC and Lazarus."/>
       </XPManifest>
-      <Resources Count="10">
+      <Resources Count="11">
         <Resource_0 FileName="sources\fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="sources\settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
@@ -27,6 +27,7 @@
         <Resource_7 FileName="languages\fpcupdeluxe.ko.po" Type="RCDATA" ResourceName="FPCUPDELUXE.KO"/>
         <Resource_8 FileName="languages\fpcupdeluxe.de.po" Type="RCDATA" ResourceName="FPCUPDELUXE.DE"/>
         <Resource_9 FileName="languages\fpcupdeluxe.fr.po" Type="RCDATA" ResourceName="FPCUPDELUXE.FR"/>
+        <Resource_10 FileName="languages\fpcupdeluxe.nl.po" Type="RCDATA" ResourceName="FPCUPDELUXE.NL"/>
       </Resources>
     </General>
     <i18n>
@@ -112,6 +113,9 @@
               </Win32>
             </Options>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item3>
       <Item4 Name="win64">
@@ -147,6 +151,9 @@
               </Win32>
             </Options>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item4>
       <Item5 Name="win64arm64">
@@ -183,7 +190,7 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dDisableRemoteLog"/>
+            <CustomOptions Value="-dDisableRemoteLog  -dReader"/>
           </Other>
         </CompilerOptions>
       </Item5>
@@ -213,6 +220,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item6>
       <Item7 Name="linux64">
@@ -241,6 +251,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item7>
       <Item8 Name="linuxaarch64">
@@ -268,6 +281,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item8>
       <Item9 Name="linuxaarch64QT5">
@@ -299,7 +315,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+            <CustomOptions Value="-dReader -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
       </Item9>
@@ -332,6 +348,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader -k&quot;-rpath=./&quot;"/>
+          </Other>
         </CompilerOptions>
       </Item10>
       <Item11 Name="linuxarm">
@@ -360,6 +379,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item11>
       <Item12 Name="linuxarmQT5">
@@ -391,6 +413,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader -k&quot;-rpath=./&quot;"/>
+          </Other>
         </CompilerOptions>
       </Item12>
       <Item13 Name="linuxarmQT5zip">
@@ -422,6 +447,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader -k&quot;-rpath=./&quot;"/>
+          </Other>
         </CompilerOptions>
       </Item13>
       <Item14 Name="linuxarmv6">
@@ -452,7 +480,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-CpARMV6"/>
+            <CustomOptions Value="-dReader -CpARMV6"/>
           </Other>
         </CompilerOptions>
       </Item14>
@@ -485,7 +513,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+            <CustomOptions Value="-dReader -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
       </Item15>
@@ -519,7 +547,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+            <CustomOptions Value="-dReader -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
       </Item16>
@@ -553,7 +581,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+            <CustomOptions Value="-dReader -k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
       </Item17>
@@ -583,6 +611,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item18>
       <Item19 Name="freebsdx64">
@@ -611,6 +642,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item19>
       <Item20 Name="netbsdx64">
@@ -639,6 +673,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item20>
       <Item21 Name="solarisx64">
@@ -667,6 +704,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item21>
       <Item22 Name="dragonflyx64">
@@ -695,6 +735,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item22>
       <Item23 Name="openbsdx64">
@@ -723,6 +766,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item23>
       <Item24 Name="darwinx64">
@@ -754,6 +800,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item24>
       <Item25 Name="darwinarm64">
@@ -785,6 +834,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dReader"/>
+          </Other>
         </CompilerOptions>
       </Item25>
       <SharedMatrixOptions Count="2">

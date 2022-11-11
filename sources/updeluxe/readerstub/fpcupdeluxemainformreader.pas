@@ -82,6 +82,7 @@ type
     MenuItem6: TMenuItem;
     MFrenchlanguage: TMenuItem;
     MGermanlanguage: TMenuItem;
+    MDutchlanguage: TMenuItem;
     MFPCBugs: TMenuItem;
     MKoreanlanguage: TMenuItem;
     MLazarusBugs: TMenuItem;
@@ -277,7 +278,7 @@ type
 
 resourcestring
   upCheckUpdate = 'Please wait. Checking for updates.';
-  upUpdateFound = 'New fpcupdeluxe version available';
+  upUpdateFound = 'New FPCUPdeluxe version available';
   upUpdateNotFound = 'No updates found.';
   upBuildCrossCompiler = 'Going to install a cross-compiler from available sources.';
   upBuildAllCrossCompilers = 'Going to auto-build all installed cross-compilers !';
@@ -302,8 +303,8 @@ resourcestring
 
 
   upMissingTools = 'The building of a crosscompiler failed due to missing cross-tools.';
-  upAdvertiseTools = 'Fpcupdeluxe can try to download them if available !';
-  upLookupTools = 'Looking for fpcupdeluxe cross-tools on GitHub (if any).';
+  upAdvertiseTools = 'FPCUPdeluxe can try to download them if available !';
+  upLookupTools = 'Looking for FPCUPdeluxe cross-tools on GitHub (if any).';
   upLookupBinTools = 'Going to look for the right cross-bins. Can (will) take some time !';
   upLookupLibTools = 'Going to look for the right cross-libraries. Can (will) take some time !';
   upLookup = 'Looking for';
@@ -318,14 +319,14 @@ resourcestring
 
   // New
 
-  upDarwinFolderWarning1 = 'Fpcupdeluxe cannot be run inside the Downloads folder.';
+  upDarwinFolderWarning1 = 'FPCUPdeluxe cannot be run inside the Downloads folder.';
   upDarwinFolderWarning2 = 'This is NOT allowed by OSX security measures.';
-  upDarwinFolderWarning3 = 'Copy fpcupdeluxe into its own directory and run from there.';
+  upDarwinFolderWarning3 = 'Copy FPCUPdeluxe into its own directory and run from there.';
 
   upFolderWarning1 = 'FPCUPdeluxe could not create its necessary setting-files.';
   upFolderWarning2 = 'Please check the folder permissions, and re-start.';
 
-  upQuitRequest = 'Please quit fpcupdeluxe.';
+  upQuitRequest = 'Please quit FPCUPdeluxe.';
 
 var
   Form1: TForm1;
@@ -2021,6 +2022,7 @@ begin
   if Sender=MKoreanlanguage then sLanguage:='ko';
   if Sender=MGermanlanguage then sLanguage:='de';
   if Sender=MFrenchlanguage then sLanguage:='fr';
+  if Sender=MDutchlanguage then sLanguage:='nl';
   TransLate(sLanguage);
   // This is needed to update the contents of the list
   Form2.UpdateCheckBoxList;

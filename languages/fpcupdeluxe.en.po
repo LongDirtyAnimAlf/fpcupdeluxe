@@ -128,126 +128,181 @@ msgid "Enable software emulation of 80 bit floats."
 msgstr ""
 
 #: fpcupdeluxemainform.upadvertisetools
-msgid "Fpcupdeluxe can try to download them if available !"
+msgid "FPCUPdeluxe can try to download them if available !"
 msgstr ""
 
 #: fpcupdeluxemainform.upbuildallcrosscompilers
+msgctxt "fpcupdeluxemainform.upbuildallcrosscompilers"
 msgid "Going to auto-build all installed cross-compilers !"
 msgstr ""
 
 #: fpcupdeluxemainform.upbuildallcrosscompilerscheck
+msgctxt "fpcupdeluxemainform.upbuildallcrosscompilerscheck"
 msgid "Checking FPC configfile [fpc.cfg] for cross-compilers in "
 msgstr ""
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersfound
+msgctxt "fpcupdeluxemainform.upbuildallcrosscompilersfound"
 msgid "Found crosscompiler for "
 msgstr ""
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersupdate
+msgctxt "fpcupdeluxemainform.upbuildallcrosscompilersupdate"
 msgid "Going to update cross-compiler."
 msgstr ""
 
 #: fpcupdeluxemainform.upbuildcrosscompiler
+msgctxt "fpcupdeluxemainform.upbuildcrosscompiler"
 msgid "Going to install a cross-compiler from available sources."
 msgstr ""
 
 #: fpcupdeluxemainform.upcheckupdate
+msgctxt "fpcupdeluxemainform.upcheckupdate"
 msgid "Please wait. Checking for updates."
 msgstr ""
 
+#: fpcupdeluxemainform.updarwinfolderwarning1
+msgid "FPCUPdeluxe cannot be run inside the Downloads folder."
+msgstr ""
+
+#: fpcupdeluxemainform.updarwinfolderwarning2
+msgctxt "fpcupdeluxemainform.updarwinfolderwarning2"
+msgid "This is NOT allowed by OSX security measures."
+msgstr ""
+
+#: fpcupdeluxemainform.updarwinfolderwarning3
+msgid "Copy FPCUPdeluxe into its own directory and run from there."
+msgstr ""
+
+#: fpcupdeluxemainform.upfolderwarning1
+msgctxt "fpcupdeluxemainform.upfolderwarning1"
+msgid "FPCUPdeluxe could not create its necessary setting-files."
+msgstr ""
+
+#: fpcupdeluxemainform.upfolderwarning2
+msgctxt "fpcupdeluxemainform.upfolderwarning2"
+msgid "Please check the folder permissions, and re-start."
+msgstr ""
+
 #: fpcupdeluxemainform.upinstallcrosscompiler
+msgctxt "fpcupdeluxemainform.upinstallcrosscompiler"
 msgid "Going to install the cross-compiler for"
 msgstr ""
 
 #: fpcupdeluxemainform.upinstalldirectory
+msgctxt "fpcupdeluxemainform.upinstalldirectory"
 msgid "Install directory"
 msgstr ""
 
 #: fpcupdeluxemainform.upinstalldirectorycurrent
+msgctxt "fpcupdeluxemainform.upinstalldirectorycurrent"
 msgid "Current install directory"
 msgstr ""
 
 #: fpcupdeluxemainform.upinstallfpc
+msgctxt "fpcupdeluxemainform.upinstallfpc"
 msgid "Going to install/update FPC."
 msgstr ""
 
 #: fpcupdeluxemainform.upinstallfpclazarus
+msgctxt "fpcupdeluxemainform.upinstallfpclazarus"
 msgid "Going to install/update FPC and Lazarus."
 msgstr ""
 
 #: fpcupdeluxemainform.upinstalllazarus
+msgctxt "fpcupdeluxemainform.upinstalllazarus"
 msgid "Going to install/update Lazarus."
 msgstr ""
 
 #: fpcupdeluxemainform.upinstallmodule
+msgctxt "fpcupdeluxemainform.upinstallmodule"
 msgid "Going to install/update module"
 msgstr ""
 
 #: fpcupdeluxemainform.upinstallsettingscurrent
+msgctxt "fpcupdeluxemainform.upinstallsettingscurrent"
 msgid "Got settings from install directory"
 msgstr ""
 
 #: fpcupdeluxemainform.uplookup
+msgctxt "fpcupdeluxemainform.uplookup"
 msgid "Looking for"
 msgstr ""
 
 #: fpcupdeluxemainform.uplookupbintools
+msgctxt "fpcupdeluxemainform.uplookupbintools"
 msgid "Going to look for the right cross-bins. Can (will) take some time !"
 msgstr ""
 
 #: fpcupdeluxemainform.uplookuplibtools
+msgctxt "fpcupdeluxemainform.uplookuplibtools"
 msgid "Going to look for the right cross-libraries. Can (will) take some time !"
 msgstr ""
 
 #: fpcupdeluxemainform.uplookuptools
-msgid "Looking for fpcupdeluxe cross-tools on GitHub (if any)."
+msgid "Looking for FPCUPdeluxe cross-tools on GitHub (if any)."
 msgstr ""
 
 #: fpcupdeluxemainform.upmissingtools
+msgctxt "fpcupdeluxemainform.upmissingtools"
 msgid "The building of a crosscompiler failed due to missing cross-tools."
 msgstr ""
 
 #: fpcupdeluxemainform.upquestioncontinue
+msgctxt "fpcupdeluxemainform.upquestioncontinue"
 msgid "Do you want to continue ?"
 msgstr ""
 
+#: fpcupdeluxemainform.upquitrequest
+msgid "Please quit FPCUPdeluxe."
+msgstr ""
+
 #: fpcupdeluxemainform.upremovecrosscompiler
+msgctxt "fpcupdeluxemainform.upremovecrosscompiler"
 msgid "Going to remove the cross-compiler for"
 msgstr ""
 
 #: fpcupdeluxemainform.upremovemodule
+msgctxt "fpcupdeluxemainform.upremovemodule"
 msgid "Going to remove module"
 msgstr ""
 
 #: fpcupdeluxemainform.upselectfpclazarustarget
+msgctxt "fpcupdeluxemainform.upselectfpclazarustarget"
 msgid "Please select a FPC and Lazarus target first"
 msgstr ""
 
 #: fpcupdeluxemainform.upselectfpctarget
+msgctxt "fpcupdeluxemainform.upselectfpctarget"
 msgid "Please select a FPC target first"
 msgstr ""
 
 #: fpcupdeluxemainform.upselectlazarustarget
+msgctxt "fpcupdeluxemainform.upselectlazarustarget"
 msgid "Please select a Lazarus target first"
 msgstr ""
 
 #: fpcupdeluxemainform.upspacewarning
+msgctxt "fpcupdeluxemainform.upspacewarning"
 msgid "Having a space in your install path is very ill-advised !"
 msgstr ""
 
 #: fpcupdeluxemainform.uptrybuildcrosscompiler
+msgctxt "fpcupdeluxemainform.uptrybuildcrosscompiler"
 msgid "Trying to build the cross-compiler for"
 msgstr ""
 
 #: fpcupdeluxemainform.upupdatecrossall
+msgctxt "fpcupdeluxemainform.upupdatecrossall"
 msgid "Going to update all crosscompilers"
 msgstr ""
 
 #: fpcupdeluxemainform.upupdatefound
-msgid "New fpcupdeluxe version available"
+msgid "New FPCUPdeluxe version available"
 msgstr ""
 
 #: fpcupdeluxemainform.upupdatenotfound
+msgctxt "fpcupdeluxemainform.upupdatenotfound"
 msgid "No updates found."
 msgstr ""
 
@@ -604,7 +659,7 @@ msgid "Chinese (CN)"
 msgstr ""
 
 #: tform1.memosummary.hint
-msgid "Will show error"
+msgid "Will show info and error"
 msgstr ""
 
 #: tform1.menglishlanguage.caption
@@ -645,6 +700,10 @@ msgstr ""
 
 #: tform1.mgermanlanguage.caption
 msgid "German (D)"
+msgstr ""
+
+#: tform1.mdutchlanguage.caption
+msgid "Dutch (NL)"
 msgstr ""
 
 #: tform1.missuesforum.caption

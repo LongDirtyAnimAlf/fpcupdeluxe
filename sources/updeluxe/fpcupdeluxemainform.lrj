@@ -99,6 +99,7 @@
 {"hash":233686217,"name":"tform1.mchinesecnlanguage.caption","sourcebytes":[67,104,105,110,101,115,101,32,40,67,78,41],"value":"Chinese (CN)"},
 {"hash":139507961,"name":"tform1.mkoreanlanguage.caption","sourcebytes":[75,111,114,101,97,110,32,40,75,82,41],"value":"Korean (KR)"},
 {"hash":77526089,"name":"tform1.mfrenchlanguage.caption","sourcebytes":[70,114,101,110,99,104,32,40,70,41],"value":"French (F)"},
+{"hash":161910345,"name":"tform1.mdutchlanguage.caption","sourcebytes":[68,117,116,99,104,32,40,78,76,41],"value":"Dutch (NL)"},
 {"hash":4691652,"name":"tform1.menuitem1.caption","sourcebytes":[65,98,111,117,116],"value":"About"},
 {"hash":4710148,"name":"tform1.actfileexit.caption","sourcebytes":[69,38,120,105,116],"value":"E&xit"},
 {"hash":315140,"name":"tform1.actfileexit.hint","sourcebytes":[69,120,105,116],"value":"Exit"},

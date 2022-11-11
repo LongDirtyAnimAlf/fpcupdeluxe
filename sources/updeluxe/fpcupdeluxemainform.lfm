@@ -5576,6 +5576,10 @@ object Form1: TForm1
         Caption = 'French (F)'
         OnClick = LanguageClick
       end
+      object MDutchlanguage: TMenuItem
+        Caption = 'Dutch (NL)'
+        OnClick = LanguageClick
+      end
     end
     object MenuItem1: TMenuItem
       Caption = 'About'
