@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 96
+  Left = 39
   Height = 701
-  Top = 71
+  Top = 161
   Width = 1286
   Anchors = []
   Caption = 'Form1'
@@ -44,7 +44,7 @@ object Form1: TForm1
     Left = 330
     Height = 23
     Top = 33
-    Width = 686
+    Width = 688
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
@@ -59,10 +59,10 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = btnSendLog
-    Left = 1028
+    Left = 1030
     Height = 19
     Top = 35
-    Width = 74
+    Width = 72
     Anchors = [akTop, akRight]
     BorderSpacing.Right = 12
     Caption = 'Auto clear'
@@ -264,20 +264,19 @@ object Form1: TForm1
       ShowHint = True
       TabOrder = 3
     end
-    object Win95Btn: TButton
+    object WABtn: TButton
       AnchorSideLeft.Control = AndroidBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
       Left = 447
       Height = 25
-      Hint = 'Get FPC for SAMD51 embedded on Wio Terminal'
       Top = 8
-      Width = 157
+      Width = 221
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 2
       BorderSpacing.Around = 4
-      Caption = 'Install old win95 versions'
+      Caption = 'Install trunk and Web Assembly tools'
       OnClick = QuickBtnClick
       ParentFont = False
       ParentShowHint = False
@@ -285,10 +284,10 @@ object Form1: TForm1
       TabOrder = 4
     end
     object WioBtn: TButton
-      AnchorSideLeft.Control = Win95Btn
+      AnchorSideLeft.Control = WABtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 612
+      Left = 676
       Height = 25
       Hint = 'Get FPC for SAMD51 embedded on Wio Terminal'
       Top = 8
@@ -308,7 +307,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = WioBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 719
+      Left = 783
       Height = 25
       Hint = 'Get FPC for armv6m RPi Pico'
       Top = 8
@@ -328,7 +327,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = PicoBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 828
+      Left = 892
       Height = 25
       Hint = 'Get FPC for ESP32'
       Top = 8
@@ -348,7 +347,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = ESPBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 933
+      Left = 997
       Height = 25
       Hint = 'Install baremetal Ultibo for RPi3'
       Top = 8
@@ -368,7 +367,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = UltiboBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 1049
+      Left = 1113
       Height = 25
       Hint = 'Get the mORMot for FPC'
       Top = 8
@@ -430,6 +429,8 @@ object Form1: TForm1
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = InstallDirEdit
     AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = btnInstallDirSelect
+    AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = btnSetupPlus
     Left = 12
     Height = 555
@@ -440,11 +441,14 @@ object Form1: TForm1
     BorderSpacing.Left = 12
     BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
+    Constraints.MaxWidth = 310
+    Constraints.MinWidth = 220
     ParentFont = False
     TabIndex = 0
     TabOrder = 2
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet
+      AnchorSideRight.Side = asrBottom
       Caption = 'Basic'
       ClientHeight = 527
       ClientWidth = 302
@@ -498,7 +502,7 @@ object Form1: TForm1
         Left = 220
         Height = 19
         Top = 14
-        Width = 51
+        Width = 49
         BorderSpacing.Left = 220
         BorderSpacing.Top = 14
         BorderSpacing.Right = 4
@@ -1027,6 +1031,7 @@ object Form1: TForm1
           'freebsd'
           'netbsd'
           'openbsd'
+          'dragonfly'
           'wince'
           'embedded'
           'java'
@@ -1034,15 +1039,14 @@ object Form1: TForm1
           'aix'
           'solaris'
           'solaris-oi'
-          'dragonfly'
           'msdos'
           'linux-musl'
           'morphos'
           'aros'
           'amiga'
+          'go32v2'
           'ios'
           'freertos'
-          'ultibo'
           'wasi'
         )
         OnSelectionChanged = radgrpTargetChanged
@@ -1218,6 +1222,8 @@ object Form1: TForm1
       end
       object Memo1: TMemo
         AnchorSideLeft.Control = ModuleSheet
+        AnchorSideTop.Control = OPMBtn
+        AnchorSideRight.Control = OPMBtn
         AnchorSideBottom.Control = btnInstallModule
         Left = 8
         Height = 114
@@ -1776,16 +1782,24 @@ object Form1: TForm1
     object MenuItem2: TMenuItem
       Caption = 'Languages'
       object MEnglishlanguage: TMenuItem
-        Caption = 'English'
-        OnClick = MEnglishlanguageClick
+        Caption = 'English (EN)'
+        OnClick = LanguageClick
+      end
+      object MGermanlanguage: TMenuItem
+        Caption = 'German (D)'
+        OnClick = LanguageClick
       end
       object MChineseCNlanguage: TMenuItem
         Caption = 'Chinese (CN)'
-        OnClick = MChineseCNlanguageClick
+        OnClick = LanguageClick
       end
       object MKoreanlanguage: TMenuItem
-        Caption = 'Korean'
-        OnClick = MKoreanlanguageClick
+        Caption = 'Korean (KR)'
+        OnClick = LanguageClick
+      end
+      object MFrenchlanguage: TMenuItem
+        Caption = 'French (F)'
+        OnClick = LanguageClick
       end
     end
     object MenuItem1: TMenuItem

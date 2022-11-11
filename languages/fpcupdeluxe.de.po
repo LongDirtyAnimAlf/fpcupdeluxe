@@ -637,6 +637,14 @@ msgstr "Sprachen"
 msgid "Issues"
 msgstr "Ausgaben"
 
+#: tform1.menuitem5.caption
+msgid "Exit"
+msgstr "Ende"
+
+#: tform1.menuitem6.caption
+msgid "Save log"
+msgstr "Log speichern"
+
 #: tform1.mfpcbugs.caption
 msgid "FPC bugs"
 msgstr "FPC-Fehler"

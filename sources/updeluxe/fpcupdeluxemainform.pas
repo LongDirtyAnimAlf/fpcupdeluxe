@@ -25,7 +25,7 @@ uses
 {.$define EnableLanguages}
 {$endif}
 //{$endif}
-{.$define EnableLanguages}
+{$define EnableLanguages}
 
 
 const
@@ -88,7 +88,6 @@ type
     MIssuesGitHub: TMenuItem;
     MIssuesForum: TMenuItem;
     PageControl1: TPageControl;
-    ESPBtn: TBitBtn;
     radgrpCPU: TRadioGroup;
     radgrpOS: TRadioGroup;
     StatusMessage: TEdit;
@@ -130,6 +129,7 @@ type
     BitBtnFPCSetRevision: TButton;
     BitBtnLazarusSetRevision: TButton;
     OPMBtn: TButton;
+    ESPBtn: TButton;
     {$else}
     CommandOutputScreen: TSynEdit;
     FPCVersionLabel: TLabel;
@@ -156,6 +156,7 @@ type
     BitBtnFPCSetRevision: TBitBtn;
     BitBtnLazarusSetRevision: TBitBtn;
     OPMBtn: TBitBtn;
+    ESPBtn: TBitBtn;
     {$endif}
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure BitBtnSetRevisionClick(Sender: TObject);
@@ -314,6 +315,17 @@ resourcestring
   upInstallDirectoryCurrent = 'Current install directory';
   upInstallSettingsCurrent = 'Got settings from install directory';
 
+
+  // New
+
+  upDarwinFolderWarning1 = 'Fpcupdeluxe cannot be run inside the Downloads folder.';
+  upDarwinFolderWarning2 = 'This is NOT allowed by OSX security measures.';
+  upDarwinFolderWarning3 = 'Copy fpcupdeluxe into its own directory and run from there.';
+
+  upFolderWarning1 = 'FPCUPdeluxe could not create its necessary setting-files.';
+  upFolderWarning2 = 'Please check the folder permissions, and re-start.';
+
+  upQuitRequest = 'Please quit fpcupdeluxe.';
 
 var
   Form1: TForm1;
@@ -519,10 +531,10 @@ begin
     // Fpcupdeluxe must run inside its own folder, due to permission-issues on OSX
     AddMessage('FATAL ERROR !!!');
     AddMessage('');
-    AddMessage('Fpcupdeluxe cannot be run inside the Downloads folder.');
-    AddMessage('This is NOT allowed by OSX security measures.');
-    AddMessage('Copy fpcupdeluxe into its own directory and run from there.');
-    AddMessage('Please quit fpcupdeluxe.');
+    AddMessage(upDarwinFolderWarning1);
+    AddMessage(upDarwinFolderWarning1);
+    AddMessage(upDarwinFolderWarning1);
+    AddMessage(upQuitRequest);
     DisEnable(nil,false);
     IniPropStorageApp.Active:=false;
     exit;
@@ -622,10 +634,12 @@ begin
   else
   begin
     AddMessage('');
-    AddMessage('FPCUPdeluxe could not create its necessary setting-files.');
-    AddMessage('All functions are disabled for now.');
+    AddMessage('FATAL ERROR !!!');
     AddMessage('');
-    AddMessage('Please check the folder permissions, and re-start.');
+    AddMessage(upFolderWarning1);
+    AddMessage(upFolderWarning2);
+    AddMessage('');
+    AddMessage(upQuitRequest);
     AddMessage('');
     DisEnable(nil,False);
     IniPropStorageApp.Active:=false;
@@ -4467,7 +4481,7 @@ begin
   end
   else
   begin
-    AddMessage('Current install directory: '+sInstallDir);
+    AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
     {$ifdef Solaris}
     // current trunk does not build with the standard -O2, so use -O1 for all
     Form2.FPCOptions:='-g -gl -O1';

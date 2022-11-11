@@ -627,6 +627,14 @@ msgstr ""
 msgid "Issues"
 msgstr ""
 
+#: tform1.menuitem5.caption
+msgid "Exit"
+msgstr ""
+
+#: tform1.menuitem6.caption
+msgid "Save log"
+msgstr ""
+
 #: tform1.mfpcbugs.caption
 msgid "FPC bugs"
 msgstr ""

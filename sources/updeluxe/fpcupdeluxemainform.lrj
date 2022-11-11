@@ -30,7 +30,7 @@
 {"hash":4883298,"name":"tform1.espbtn.caption","sourcebytes":[69,83,80,51,50],"value":"ESP32"},
 {"hash":242034451,"name":"tform1.bitbtnhalt.hint","sourcebytes":[84,114,121,32,116,111,32,115,116,111,112,32,99,117,114,114,101,110,116,32,105,110,115,116,97,108,108,32,112,114,111,99,101,115,115],"value":"Try to stop current install process"},
 {"hash":362816,"name":"tform1.bitbtnhalt.caption","sourcebytes":[83,84,79,80],"value":"STOP"},
-{"hash":193681922,"name":"tform1.memosummary.hint","sourcebytes":[87,105,108,108,32,115,104,111,119,32,101,114,114,111,114],"value":"Will show error"},
+{"hash":244021682,"name":"tform1.memosummary.hint","sourcebytes":[87,105,108,108,32,115,104,111,119,32,105,110,102,111,32,97,110,100,32,101,114,114,111,114],"value":"Will show info and error"},
 {"hash":4753907,"name":"tform1.basicsheet.caption","sourcebytes":[66,97,115,105,99],"value":"Basic"},
 {"hash":209902382,"name":"tform1.fpcversionlabel.caption","sourcebytes":[70,80,67,32,118,101,114,115,105,111,110],"value":"FPC version"},
 {"hash":205523390,"name":"tform1.lazarusversionlabel.caption","sourcebytes":[76,97,122,97,114,117,115,32,118,101,114,115,105,111,110],"value":"Lazarus version"},

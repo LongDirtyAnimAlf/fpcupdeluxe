@@ -51,7 +51,11 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, Classes, SysUtils,
+  {$ifdef READER}
+  fpcupdeluxemainformreader,
+  {$else}
   fpcupdeluxemainform,
+  {$endif}
   m_crossinstaller,
   m_any_to_androidarm,
   m_any_to_androidjvm,
@@ -159,7 +163,6 @@ uses
 
 begin
   RequireDerivedFormResource:=True;
-  Application.Title:='fpcupdeluxe';
   Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);
