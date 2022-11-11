@@ -505,10 +505,6 @@ msgstr "Subarch setzen"
 msgid "Select a subarch for embedded target."
 msgstr "Wählen Sie einen Subarch für das eingebettete Ziel aus."
 
-#: tform1.caption
-msgid "Form1"
-msgstr ""
-
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
 msgstr "Automatisch löschen"

@@ -495,10 +495,6 @@ msgstr "设置子拱"
 msgid "Select a subarch for embedded target."
 msgstr "选择嵌入目标的子拱门。"
 
-#: tform1.caption
-msgid "Form1"
-msgstr ""
-
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
 msgstr "自动清除"

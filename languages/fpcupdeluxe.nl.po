@@ -574,10 +574,6 @@ msgstr "Subarch instellen"
 msgid "Select a subarch for embedded target."
 msgstr "Selecteer een subarch voor embedded doel."
 
-#: tform1.caption
-msgid "Form1"
-msgstr "Form1"
-
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
 msgstr "Automatisch wissen"

@@ -34,6 +34,9 @@
     <i18n>
       <EnableI18N Value="True"/>
       <OutDir Value="languages"/>
+      <ExcludedIdentifiers Count="1">
+        <Item1 Value="tform1.caption"/>
+      </ExcludedIdentifiers>
     </i18n>
     <BuildModes Count="28">
       <Item1 Name="Default" Default="True"/>

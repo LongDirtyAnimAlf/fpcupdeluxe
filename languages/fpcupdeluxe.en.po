@@ -550,10 +550,6 @@ msgstr ""
 msgid "Select a subarch for embedded target."
 msgstr ""
 
-#: tform1.caption
-msgid "Form1"
-msgstr ""
-
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
 msgstr ""
