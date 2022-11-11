@@ -713,7 +713,7 @@ msgstr "FPC-bugs"
 
 #: tform1.mfrenchlanguage.caption
 msgid "French (F)"
-msgstr "Frans (V)"
+msgstr "Frans (F)"
 
 #: tform1.mgermanlanguage.caption
 msgid "German (D)"
@@ -729,7 +729,7 @@ msgstr "Naar Lazarus-forum"
 
 #: tform1.missuesgithub.caption
 msgid "Up GitHub issues"
-msgstr "Naar GitHub-problemen"
+msgstr "Naar GitHub-issues"
 
 #: tform1.mkoreanlanguage.caption
 msgid "Korean (KR)"
