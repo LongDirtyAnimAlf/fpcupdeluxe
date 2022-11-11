@@ -839,19 +839,19 @@ msgstr "FPC-patch toevoegen"
 
 #: tform2.btnaddlazpatch.caption
 msgid "Add Laz. patch"
-msgstr "Laz toevoegen. lapje"
+msgstr "Laz.-patch toevoegen"
 
 #: tform2.btnlistcustomoptions.caption
 msgid "List All"
-msgstr "Lijst alles op"
+msgstr "Overzicht"
 
 #: tform2.btnremfpcpatch.caption
 msgid "Rem. FPC patch"
-msgstr "Rem. FPC-patch"
+msgstr "Verwijder FPC-patch"
 
 #: tform2.btnremlazpatch.caption
 msgid "Rem. Laz. patch"
-msgstr "Rem. Laz. lapje"
+msgstr "Verwijder Laz.-patch"
 
 #: tform2.btnselectbindir.caption
 msgid "Tools"
@@ -948,7 +948,7 @@ msgstr "Cross Build-opties overschrijven (b.v. -CfSoft)"
 
 #: tform2.labelfpcbranch.caption
 msgid "FPC branch"
-msgstr "FPC-filiaal"
+msgstr "FPC-branch"
 
 #: tform2.labelfpcoptions.caption
 msgid "FPC options"
@@ -956,11 +956,11 @@ msgstr "FPC-opties"
 
 #: tform2.labelfpcpostinstall.caption
 msgid "FPC post"
-msgstr "FPC-bericht"
+msgstr "FPC achteraf"
 
 #: tform2.labelfpcpreinstall.caption
 msgid "FPC pre"
-msgstr "FPC-vooraf"
+msgstr "FPC vooraf"
 
 #: tform2.labelfpcrevision.caption
 msgid "FPC hash/tag"
@@ -968,7 +968,7 @@ msgstr "FPC-hash/tag"
 
 #: tform2.labellazarusbranch.caption
 msgid "Laz. branch"
-msgstr "Laz. tak"
+msgstr "Laz.-branch"
 
 #: tform2.labellazarusoptions.caption
 msgid "Laz. options"
@@ -976,15 +976,15 @@ msgstr "Laz. opties"
 
 #: tform2.labellazaruspostinstall.caption
 msgid "Lazarus post"
-msgstr "Lazarus bericht"
+msgstr "Lazarus achteraf"
 
 #: tform2.labellazaruspreinstall.caption
 msgid "Lazarus pre"
-msgstr "Lazarus voor"
+msgstr "Lazarus vooraf"
 
 #: tform2.labellazarusrevision.caption
 msgid "Laz. hash/tag"
-msgstr "Laz. hekje"
+msgstr "Laz.-hash/tag"
 
 #: tform2.labelos.caption
 msgid "Select OS"
