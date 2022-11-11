@@ -394,7 +394,11 @@ msgstr "kan proces niet lezen ExitStatus"
 msgid "E&xit"
 msgstr "Einde"
 
-#: tform1.actfileexit.hint tform1.menuitem5.caption
+#: tform1.actfileexit.hint
+msgid "Exit"
+msgstr "Afsluiten"
+
+#: tform1.menuitem5.caption
 msgid "Exit"
 msgstr "Afsluiten"
 
@@ -793,7 +797,7 @@ msgstr "Stabiel"
 msgid "Will install/update stable versions of both FPC and Lazarus"
 msgstr "Zal stabiele versies van zowel FPC als Lazarus installeren/bijwerken"
 
-#: tform1.statusmessage.text
+#: fpcupdeluxemainform.statusmessage.text
 msgid "Sitting and waiting"
 msgstr "Zitten en wachten"
 

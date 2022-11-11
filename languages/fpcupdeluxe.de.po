@@ -25,7 +25,7 @@ msgstr "Bitten Sie immer um Bestätigung."
 
 #: extrasettings.captioncheckautoswitchurl
 msgid "Auto-switch repo URL."
-msgstr "Repository-URL für automatischen Wechsel."
+msgstr "Automatischen Wechsel von Repository-URL."
 
 #: extrasettings.captioncheckenableonlinepatching
 msgid "Allow patching of sources by online patches."
@@ -53,7 +53,7 @@ msgstr "Hilfe einbeziehen."
 
 #: extrasettings.captioncheckincludelcl
 msgid "Include LCL with cross-compiler."
-msgstr "LCL mit Cross-Compiler einbinden."
+msgstr "LCL mit Cross-Compiler einbeziehen."
 
 #: extrasettings.captioncheckpackagerepo
 msgid "Get package repositories."
@@ -138,12 +138,12 @@ msgid "Enable software emulation of 80 bit floats."
 msgstr "Aktivieren Sie die Software-Emulation von 80-Bit-Gleitkommazahlen."
 
 #: fpcupdeluxemainform.upadvertisetools
-msgid "Fpcupdeluxe can try to download them if available !"
-msgstr ""
+msgid "FPCUPdeluxe can try to download them if available !"
+msgstr "FPCUPdeluxe kann versuchen, sie herunterzuladen, falls verfügbar!"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilers
 msgid "Going to auto-build all installed cross-compilers !"
-msgstr "Alle installierten Cross-Compiler werden automatisch erstellt!"
+msgstr "Alle installierten Cross-Compiler werden automatisch erstellt !"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilerscheck
 msgid "Checking FPC configfile [fpc.cfg] for cross-compilers in "
@@ -163,99 +163,123 @@ msgstr "Ich werde einen Cross-Compiler aus verfügbaren Quellen installieren."
 
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
-msgstr "Warten Sie mal. Suche nach Updates."
+msgstr "Bitte warten. "
+
+#: fpcupdeluxemainform.updarwinfolderwarning1
+msgid "FPCUPdeluxe cannot be run inside the Downloads folder."
+msgstr "FPCUPdeluxe kann nicht im Downloads-Ordner ausgeführt werden."
+
+#: fpcupdeluxemainform.updarwinfolderwarning2
+msgid "This is NOT allowed by OSX security measures."
+msgstr "Dies wird von den OSX-Sicherheitsmaßnahmen NICHT zugelassen."
+
+#: fpcupdeluxemainform.updarwinfolderwarning3
+msgid "Copy FPCUPdeluxe into its own directory and run from there."
+msgstr "Kopieren Sie FPCUPdeluxe in ein eigenes Verzeichnis und führen Sie es von dort aus aus."
+
+#: fpcupdeluxemainform.upfolderwarning1
+msgid "FPCUPdeluxe could not create its necessary setting-files."
+msgstr "FPCUPdeluxe konnte die notwendigen Einstellungsdateien nicht erstellen."
+
+#: fpcupdeluxemainform.upfolderwarning2
+msgid "Please check the folder permissions, and re-start."
+msgstr "Bitte überprüfen Sie die Ordnerberechtigungen und starten Sie neu."
 
 #: fpcupdeluxemainform.upinstallcrosscompiler
 msgid "Going to install the cross-compiler for"
-msgstr ""
+msgstr "Cross-Compiler wird installiert für"
 
 #: fpcupdeluxemainform.upinstalldirectory
 msgid "Install directory"
-msgstr ""
+msgstr "Installationsverzeichnis"
 
 #: fpcupdeluxemainform.upinstalldirectorycurrent
 msgid "Current install directory"
-msgstr ""
+msgstr "Aktuelles Installationsverzeichnis"
 
 #: fpcupdeluxemainform.upinstallfpc
 msgid "Going to install/update FPC."
-msgstr ""
+msgstr "FPC wird installiert/aktualisiert."
 
 #: fpcupdeluxemainform.upinstallfpclazarus
 msgid "Going to install/update FPC and Lazarus."
-msgstr ""
+msgstr "Ich werde FPC und Lazarus installieren/aktualisieren."
 
 #: fpcupdeluxemainform.upinstalllazarus
 msgid "Going to install/update Lazarus."
-msgstr ""
+msgstr "Lazarus wird installiert/aktualisiert."
 
 #: fpcupdeluxemainform.upinstallmodule
 msgid "Going to install/update module"
-msgstr ""
+msgstr "Modul wird installiert/aktualisiert"
 
 #: fpcupdeluxemainform.upinstallsettingscurrent
 msgid "Got settings from install directory"
-msgstr ""
+msgstr "Einstellungen aus dem Installationsverzeichnis erhalten"
 
 #: fpcupdeluxemainform.uplookup
 msgid "Looking for"
-msgstr ""
+msgstr "Suche"
 
 #: fpcupdeluxemainform.uplookupbintools
 msgid "Going to look for the right cross-bins. Can (will) take some time !"
-msgstr ""
+msgstr "Ich werde nach den richtigen Cross-Bins suchen. "
 
 #: fpcupdeluxemainform.uplookuplibtools
 msgid "Going to look for the right cross-libraries. Can (will) take some time !"
-msgstr ""
+msgstr "Suche nach den richtigen Kreuzbibliotheken. "
 
 #: fpcupdeluxemainform.uplookuptools
-msgid "Looking for fpcupdeluxe cross-tools on GitHub (if any)."
-msgstr ""
+msgid "Looking for FPCUPdeluxe cross-tools on GitHub (if any)."
+msgstr "Suche nach FPCUPdeluxe-Cross-Tools auf GitHub (falls vorhanden)."
 
 #: fpcupdeluxemainform.upmissingtools
 msgid "The building of a crosscompiler failed due to missing cross-tools."
-msgstr ""
+msgstr "Das Erstellen eines Crosscompilers ist aufgrund fehlender Cross-Tools fehlgeschlagen."
 
 #: fpcupdeluxemainform.upquestioncontinue
 msgid "Do you want to continue ?"
-msgstr ""
+msgstr "Wollen Sie fortfahren?"
+
+#: fpcupdeluxemainform.upquitrequest
+msgid "Please quit FPCUPdeluxe."
+msgstr "Bitte beenden Sie FPCUPdeluxe."
 
 #: fpcupdeluxemainform.upremovecrosscompiler
 msgid "Going to remove the cross-compiler for"
-msgstr ""
+msgstr "Der Cross-Compiler wird entfernt für"
 
 #: fpcupdeluxemainform.upremovemodule
 msgid "Going to remove module"
-msgstr ""
+msgstr "Modul wird entfernt"
 
 #: fpcupdeluxemainform.upselectfpclazarustarget
 msgid "Please select a FPC and Lazarus target first"
-msgstr ""
+msgstr "Bitte wählen Sie zuerst ein FPC- und Lazarus-Target aus"
 
 #: fpcupdeluxemainform.upselectfpctarget
 msgid "Please select a FPC target first"
-msgstr ""
+msgstr "Bitte wählen Sie zuerst ein FPC-Ziel aus"
 
 #: fpcupdeluxemainform.upselectlazarustarget
 msgid "Please select a Lazarus target first"
-msgstr ""
+msgstr "Bitte wählen Sie zuerst ein Lazarus-Ziel aus"
 
 #: fpcupdeluxemainform.upspacewarning
 msgid "Having a space in your install path is very ill-advised !"
-msgstr ""
+msgstr "Ein Leerzeichen in Ihrem Installationspfad zu haben, ist sehr unklug!"
 
 #: fpcupdeluxemainform.uptrybuildcrosscompiler
 msgid "Trying to build the cross-compiler for"
-msgstr ""
+msgstr "Versuch, den Cross-Compiler für zu bauen"
 
 #: fpcupdeluxemainform.upupdatecrossall
 msgid "Going to update all crosscompilers"
-msgstr ""
+msgstr "Alle Crosscompiler werden aktualisiert"
 
 #: fpcupdeluxemainform.upupdatefound
-msgid "New fpcupdeluxe version available"
-msgstr "Neue fpcupdeluxe-Version verfügbar"
+msgid "New FPCUPdeluxe version available"
+msgstr "Neue FPCUPdeluxe-Version verfügbar"
 
 #: fpcupdeluxemainform.upupdatenotfound
 msgid "No updates found."
@@ -268,17 +292,17 @@ msgstr "Abgebrochen"
 #: processutils.liscannotexecute
 #, object-pascal-format
 msgid "cannot execute \"%s\""
-msgstr "kann nicht ausführen \\\"%s \\\""
+msgstr "Kann \"%s\" nicht ausführen"
 
 #: processutils.liscannotfindexecutable
 #, object-pascal-format
 msgid "cannot find executable \"%s\""
-msgstr "kann keine ausführbare Datei finden \\\"%s \\\""
+msgstr "Kann die ausführbare Datei »%s« nicht finden"
 
 #: processutils.lisexecutableisadirectory
 #, object-pascal-format
 msgid "executable \"%s\" is a directory"
-msgstr "ausführbar \\\"%s \\\" ist ein Verzeichnis"
+msgstr "Ausführbare Datei »%s« ist ein Verzeichnis"
 
 #: processutils.lisexecutablelacksthepermissiontorun
 #, object-pascal-format
@@ -288,22 +312,22 @@ msgstr "ausführbar \\\"%s \\\" fehlt die Berechtigung zum Ausführen"
 #: processutils.lisexitcode
 #, object-pascal-format
 msgid "Exit code %s"
-msgstr "Exit-Code%s"
+msgstr "Exit-Code %s"
 
 #: processutils.lisfreeingbufferlines
 #, object-pascal-format
 msgid "freeing buffer lines: %s"
-msgstr "Pufferleitungen freigeben:%s"
+msgstr "Pufferzeilen werden freigegeben: %s"
 
 #: processutils.lismissingdirectory
 #, object-pascal-format
 msgid "missing directory \"%s\""
-msgstr "fehlendes Verzeichnis \\\"%s \\\""
+msgstr "Verzeichnis »%s« fehlt"
 
 #: processutils.lismissingexecutable
 #, object-pascal-format
 msgid "missing executable \"%s\""
-msgstr "ausführbare Datei fehlt \\\"%s \\\""
+msgstr "fehlende ausführbare Datei »%s«"
 
 #: processutils.lissuccess
 msgid "Success"
@@ -317,7 +341,7 @@ msgstr "Werkzeug \\\"%s \\\" hat keine ausführbare Datei"
 #: processutils.lisunabletoexecute
 #, object-pascal-format
 msgid "unable to execute: %s"
-msgstr "kann nicht ausgeführt werden:%s"
+msgstr "Ausführung nicht möglich: %s"
 
 #: processutils.lisunabletoreadprocessexitstatus
 msgid "unable to read process ExitStatus"
@@ -325,11 +349,11 @@ msgstr "Prozess ExitStatus kann nicht gelesen werden"
 
 #: tform1.actfileexit.caption
 msgid "E&xit"
-msgstr "Ausgang"
+msgstr "Ende"
 
 #: tform1.actfileexit.hint
 msgid "Exit"
-msgstr "Ausgang"
+msgstr "Ende"
 
 #: tform1.actfilesave.caption
 msgid "&Save log"
@@ -337,7 +361,7 @@ msgstr "&Protokoll speichern"
 
 #: tform1.actfilesave.hint
 msgid "Save As"
-msgstr "Speichern als"
+msgstr ""
 
 #: tform1.androidbtn.caption
 msgid "LAMW"
@@ -588,7 +612,7 @@ msgstr "Lazarus-Version"
 #: tform1.listboxfpchistory.columns[0].caption
 msgctxt "tform1.listboxfpchistory.columns[0].caption"
 msgid "Hash"
-msgstr "Haschisch"
+msgstr "Hash"
 
 #: tform1.listboxfpchistory.columns[1].caption
 msgctxt "tform1.listboxfpchistory.columns[1].caption"
@@ -598,7 +622,7 @@ msgstr "Datum"
 #: tform1.listboxlazarushistory.columns[0].caption
 msgctxt "tform1.listboxlazarushistory.columns[0].caption"
 msgid "Hash"
-msgstr "Haschisch"
+msgstr "Hash"
 
 #: tform1.listboxlazarushistory.columns[1].caption
 msgctxt "tform1.listboxlazarushistory.columns[1].caption"
@@ -610,8 +634,8 @@ msgid "Chinese (CN)"
 msgstr "Chinesisch (CN)"
 
 #: tform1.memosummary.hint
-msgid "Will show error"
-msgstr "Wird Fehler zeigen"
+msgid "Will show info and error"
+msgstr "Zeigt Informationen und Fehler an"
 
 #: tform1.menglishlanguage.caption
 msgid "English (EN)"
@@ -631,7 +655,7 @@ msgstr "Sprachen"
 
 #: tform1.menuitem3.caption
 msgid "Issues"
-msgstr "Ausgaben"
+msgstr "Fehler"
 
 #: tform1.menuitem5.caption
 msgid "Exit"
@@ -659,11 +683,11 @@ msgstr "Niederländisch (NL)"
 
 #: tform1.missuesforum.caption
 msgid "Up Lazarus forum"
-msgstr "Nach oben Lazarus-Forum"
+msgstr "Nach Lazarus-Forum"
 
 #: tform1.missuesgithub.caption
 msgid "Up GitHub issues"
-msgstr "Up GitHub-Probleme"
+msgstr "Nach GitHub-Probleme"
 
 #: tform1.mkoreanlanguage.caption
 msgid "Korean (KR)"
@@ -671,7 +695,7 @@ msgstr "Koreanisch (KR)"
 
 #: tform1.mlazarusbugs.caption
 msgid "Lazarus bugs"
-msgstr "Lazarus-Käfer"
+msgstr "Lazarus-Fehler"
 
 #: tform1.modulesheet.caption
 msgid "Modules"
@@ -769,7 +793,7 @@ msgstr "FPC-Patch hinzufügen"
 
 #: tform2.btnaddlazpatch.caption
 msgid "Add Laz. patch"
-msgstr "Laz hinzufügen. Patch"
+msgstr "Laz.-Patch hinzufügen."
 
 #: tform2.btnlistcustomoptions.caption
 msgid "List All"
@@ -777,11 +801,11 @@ msgstr "Liste alle auf"
 
 #: tform2.btnremfpcpatch.caption
 msgid "Rem. FPC patch"
-msgstr "Rem. FPC Patch"
+msgstr "FPC-Patch entfernen"
 
 #: tform2.btnremlazpatch.caption
 msgid "Rem. Laz. patch"
-msgstr "Rem. Laz. Patch"
+msgstr "Laz.-Patch entfernen"
 
 #: tform2.btnselectbindir.caption
 msgid "Tools"

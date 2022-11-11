@@ -35,7 +35,7 @@ msgstr "仅使用 FPCUP 引导程序。"
 
 #: extrasettings.captioncheckgetupdates
 msgid "Check for fpcupdeluxe updates."
-msgstr "检查 FPCupDeluxe 更新。"
+msgstr "检查 FPCUPdeluxe 更新。"
 
 #: extrasettings.captioncheckincludehelp
 msgid "Include Help."
@@ -92,7 +92,7 @@ msgstr "双击 FPC 和拉撒路文件将打开拉撒路。"
 
 #: extrasettings.hintcheckapplylocalchanges
 msgid "Fpcupdeluxe can re-apply the local changes automagically by using local auto-patch."
-msgstr "通过使用本地自动修补，FPCupDeluxe 可以自动重新应用本地更改。"
+msgstr "通过使用本地自动修补，FPCUPdeluxe 可以自动重新应用本地更改。"
 
 #: extrasettings.hintcheckaskconfirmation
 msgid "Show a confirmation dialog with yes/no before every build."
@@ -100,15 +100,15 @@ msgstr "在每次生成之前显示一个带有“是/否”的确认对话框�
 
 #: extrasettings.hintcheckenableonlinepatching
 msgid "Fpcupdeluxe can patch the sources automagically by using online patches."
-msgstr "FPCupDeluxe 可以使用在线补丁程序自动修补源代码。"
+msgstr "FPCUPdeluxe 可以使用在线补丁程序自动修补源代码。"
 
 #: extrasettings.hintcheckforcelocalrepoclient
 msgid "Use the repo-client by fpcupdeluxe."
-msgstr "通过 fpcupdeluxe 使用 repo-client."
+msgstr "通过 FPCUPdeluxe 使用 repo-client."
 
 #: extrasettings.hintcheckgetupdates
 msgid "Check for updates of fpcupdeluxe binaries."
-msgstr "检查 fpcupdeluxe 二进制文件的更新。"
+msgstr "检查 FPCUPdeluxe 二进制文件的更新。"
 
 #: extrasettings.hintcheckrepo
 msgid "Download whole repository, or only latest files."
@@ -116,7 +116,7 @@ msgstr "下载整个存储库，或仅下载最新文件。"
 
 #: extrasettings.hintchecksendinfo
 msgid "Location and install info will be send to public central fpcupdeluxe server."
-msgstr "位置和安装信息将发送到公共中心 FPCupDeluxe 服务器。"
+msgstr "位置和安装信息将发送到公共中心 FPCUPdeluxe 服务器。"
 
 #: extrasettings.hintchecksystemfpc
 msgid "Use the system wide install of FPC to build Lazarus."
@@ -129,7 +129,7 @@ msgstr "启用 80 位浮点数的软件模拟。"
 
 #: fpcupdeluxemainform.upadvertisetools
 msgid "Fpcupdeluxe can try to download them if available !"
-msgstr ""
+msgstr "FPCUPdeluxe 可以尝试下载它们（如果可用）"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilers
 msgid "Going to auto-build all installed cross-compilers !"
@@ -157,7 +157,7 @@ msgstr "请稍等。正在检查更新。"
 
 #: fpcupdeluxemainform.upinstallcrosscompiler
 msgid "Going to install the cross-compiler for"
-msgstr ""
+msgstr "准备安装交叉编译器"
 
 #: fpcupdeluxemainform.upinstalldirectory
 msgid "Install directory"
@@ -165,55 +165,55 @@ msgstr ""
 
 #: fpcupdeluxemainform.upinstalldirectorycurrent
 msgid "Current install directory"
-msgstr ""
+msgstr "当前安装目录"
 
 #: fpcupdeluxemainform.upinstallfpc
 msgid "Going to install/update FPC."
-msgstr ""
+msgstr "准备安装/更新 FPC"
 
 #: fpcupdeluxemainform.upinstallfpclazarus
 msgid "Going to install/update FPC and Lazarus."
-msgstr ""
+msgstr "准备安装/更新 FPC 和 Lazarus"
 
 #: fpcupdeluxemainform.upinstalllazarus
 msgid "Going to install/update Lazarus."
-msgstr ""
+msgstr "安装/更新 Lazarus"
 
 #: fpcupdeluxemainform.upinstallmodule
 msgid "Going to install/update module"
-msgstr ""
+msgstr "安装/更新模块"
 
 #: fpcupdeluxemainform.upinstallsettingscurrent
 msgid "Got settings from install directory"
-msgstr ""
+msgstr "从安装目录获取设置"
 
 #: fpcupdeluxemainform.uplookup
 msgid "Looking for"
-msgstr ""
+msgstr "寻找"
 
 #: fpcupdeluxemainform.uplookupbintools
 msgid "Going to look for the right cross-bins. Can (will) take some time !"
-msgstr ""
+msgstr "去寻找合适的交叉箱。 可以（将）需要一些时间"
 
 #: fpcupdeluxemainform.uplookuplibtools
 msgid "Going to look for the right cross-libraries. Can (will) take some time !"
-msgstr ""
+msgstr "去寻找合适的交叉库。 可以（将）需要一些时间"
 
 #: fpcupdeluxemainform.uplookuptools
 msgid "Looking for fpcupdeluxe cross-tools on GitHub (if any)."
-msgstr ""
+msgstr "在 GitHub 上寻找 fpcupdeluxe 交叉工具（如果有的话）"
 
 #: fpcupdeluxemainform.upmissingtools
 msgid "The building of a crosscompiler failed due to missing cross-tools."
-msgstr ""
+msgstr "由于缺少交叉工具，交叉编译器的构建失败"
 
 #: fpcupdeluxemainform.upquestioncontinue
 msgid "Do you want to continue ?"
-msgstr ""
+msgstr "你想继续吗"
 
 #: fpcupdeluxemainform.upremovecrosscompiler
 msgid "Going to remove the cross-compiler for"
-msgstr ""
+msgstr "将删除交叉编译器"
 
 #: fpcupdeluxemainform.upremovemodule
 msgid "Going to remove module"
@@ -221,27 +221,27 @@ msgstr ""
 
 #: fpcupdeluxemainform.upselectfpclazarustarget
 msgid "Please select a FPC and Lazarus target first"
-msgstr ""
+msgstr "请先选择一个 FPC 和 Lazarus 目标"
 
 #: fpcupdeluxemainform.upselectfpctarget
 msgid "Please select a FPC target first"
-msgstr ""
+msgstr "请先选择一个 FPC 目标"
 
 #: fpcupdeluxemainform.upselectlazarustarget
 msgid "Please select a Lazarus target first"
-msgstr ""
+msgstr "请先选择一个 Lazarus 目标"
 
 #: fpcupdeluxemainform.upspacewarning
 msgid "Having a space in your install path is very ill-advised !"
-msgstr ""
+msgstr "在您的安装路径中有一个空间是非常不明智的"
 
 #: fpcupdeluxemainform.uptrybuildcrosscompiler
 msgid "Trying to build the cross-compiler for"
-msgstr ""
+msgstr "尝试构建交叉编译器"
 
 #: fpcupdeluxemainform.upupdatecrossall
 msgid "Going to update all crosscompilers"
-msgstr ""
+msgstr "将更新所有交叉编译器"
 
 #: fpcupdeluxemainform.upupdatefound
 msgid "New fpcupdeluxe version available"
@@ -635,6 +635,10 @@ msgstr "法语（F）"
 msgid "German (D)"
 msgstr "德语（D）"
 
+#: tform1.mdutchlanguage.caption
+msgid "Dutch (NL)"
+msgstr "荷兰语（NL）"
+
 #: tform1.missuesforum.caption
 msgid "Up Lazarus forum"
 msgstr "拉撒路论坛"
@@ -681,11 +685,11 @@ msgstr "获取 ARMV6M RPI Pico 的 FPC"
 
 #: tform1.radgrpcpu.caption
 msgid "CPU"
-msgstr "中央处理器"
+msgstr "CPU"
 
 #: tform1.radgrpos.caption
 msgid "OS"
-msgstr "奥斯"
+msgstr "OS"
 
 #: tform1.realfpcurl.hint
 msgctxt "tform1.realfpcurl.hint"
@@ -705,7 +709,7 @@ msgstr "稳定的"
 msgid "Will install/update stable versions of both FPC and Lazarus"
 msgstr "将安装/更新 FPC 和 Lazarus 的稳定版本"
 
-#: tform1.statusmessage.text
+#: fpcupdeluxemainform.statusmessage.text
 msgid "Sitting and waiting"
 msgstr "坐着等待"
 
@@ -896,7 +900,7 @@ msgstr "拉兹。哈希/标签"
 
 #: tform2.labelos.caption
 msgid "Select OS"
-msgstr "选择操作系统"
+msgstr "选择 OS"
 
 #: tform2.radiogrouparmarch.caption
 msgid "ARM target"
@@ -912,9 +916,35 @@ msgstr "选择子拱"
 
 #: tform2.tscpuos.caption
 msgid "CPU/OS"
-msgstr "CPU/操作系统"
+msgstr "CPU/OS"
 
 #: tform2.tssubarch.caption
 msgid "Subarch"
 msgstr "亚拱"
 
+#: fpcupdeluxemainform.updarwinfolderwarning1
+msgid "FPCUPdeluxe cannot be run inside the Downloads folder."
+msgstr "FPCUPdeluxe 无法在 Downloads 文件夹中运行。"
+
+#: fpcupdeluxemainform.updarwinfolderwarning2
+msgctxt "fpcupdeluxemainform.updarwinfolderwarning2"
+msgid "This is NOT allowed by OSX security measures."
+msgstr "这是 OSX 安全措施所不允许的。"
+
+#: fpcupdeluxemainform.updarwinfolderwarning3
+msgid "Copy FPCUPdeluxe into its own directory and run from there."
+msgstr "将 FPCUPdeluxe 复制到它自己的目录中并从那里运行。"
+
+#: fpcupdeluxemainform.upfolderwarning1
+msgctxt "fpcupdeluxemainform.upfolderwarning1"
+msgid "FPCUPdeluxe could not create its necessary setting-files."
+msgstr "FPCupDeluxe 无法创建必要的设置文件。"
+
+#: fpcupdeluxemainform.upfolderwarning2
+msgctxt "fpcupdeluxemainform.upfolderwarning2"
+msgid "Please check the folder permissions, and re-start."
+msgstr "请检查文件夹权限，然后重新启动。"
+
+#: fpcupdeluxemainform.upquitrequest
+msgid "Please quit FPCUPdeluxe."
+msgstr "请退出 FPCUPdeluxe."

@@ -316,9 +316,6 @@ resourcestring
   upInstallDirectoryCurrent = 'Current install directory';
   upInstallSettingsCurrent = 'Got settings from install directory';
 
-
-  // New
-
   upDarwinFolderWarning1 = 'FPCUPdeluxe cannot be run inside the Downloads folder.';
   upDarwinFolderWarning2 = 'This is NOT allowed by OSX security measures.';
   upDarwinFolderWarning3 = 'Copy FPCUPdeluxe into its own directory and run from there.';

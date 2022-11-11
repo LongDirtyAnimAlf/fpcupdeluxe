@@ -5,7 +5,7 @@
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linux64,linuxaarch64,linuxaarch64QT5,linuxaarch64QT5zip,linuxarm,linuxarmQT5,linuxarmQT5zip,linuxarmv6,linuxi386QT5,linuxx64QT5,linuxx64QT5zip,linuxppc64,freebsdi386,freebsdx64,netbsdx64,solarisx64,dragonflyx64,openbsdx64"/>
     <BuildModes Active="Default"/>
-    <Units Count="15">
+    <Units Count="19">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -23,8 +23,8 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="2006"/>
-        <CursorPos X="25" Y="2010"/>
+        <TopLine Value="25"/>
+        <CursorPos X="48" Y="13"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -120,105 +120,137 @@
         <CursorPos X="72" Y="2530"/>
         <UsageCount Value="10"/>
       </Unit14>
+      <Unit15>
+        <Filename Value="languages\fpcupdeluxe.en.po"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="138"/>
+        <CursorPos X="24" Y="154"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="PO"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="languages\fpcupdeluxe.nl.po"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="163"/>
+        <CursorPos X="24" Y="179"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="PO"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="languages\fpcupdeluxe.fr.po"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="152"/>
+        <CursorPos X="23" Y="168"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="PO"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="languages\fpcupdeluxe.de.po"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="275"/>
+        <CursorPos X="24" Y="164"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="PO"/>
+      </Unit18>
     </Units>
     <JumpHistory Count="25" HistoryIndex="24">
       <Position1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="5" Column="10"/>
+        <Caret Line="12" Column="12"/>
       </Position1>
       <Position2>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="17" Column="25"/>
+        <Caret Line="107" Column="13" TopLine="103"/>
       </Position2>
       <Position3>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="5" Column="11"/>
+        <Caret Line="198" Column="14" TopLine="182"/>
       </Position3>
       <Position4>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="17" Column="23" TopLine="13"/>
+        <Caret Line="639" TopLine="512"/>
       </Position4>
       <Position5>
-        <Filename Value="up.lpr"/>
-        <Caret Line="55" TopLine="41"/>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="424" TopLine="403"/>
       </Position5>
       <Position6>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="12" Column="12"/>
+        <Caret Line="425" Column="28" TopLine="403"/>
       </Position6>
       <Position7>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="107" Column="13" TopLine="103"/>
+        <Caret Line="3889" Column="42" TopLine="3863"/>
       </Position7>
       <Position8>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="198" Column="14" TopLine="182"/>
+        <Caret Line="312" Column="15" TopLine="308"/>
       </Position8>
       <Position9>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="639" TopLine="512"/>
+        <Caret Line="314" Column="57" TopLine="308"/>
       </Position9>
       <Position10>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="424" TopLine="403"/>
+        <Caret Line="329" Column="28" TopLine="308"/>
       </Position10>
       <Position11>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="425" Column="28" TopLine="403"/>
+        <Caret Line="427" Column="28" TopLine="399"/>
       </Position11>
       <Position12>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3889" Column="42" TopLine="3863"/>
+        <Caret Line="4491" Column="43" TopLine="4464"/>
       </Position12>
       <Position13>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="312" Column="15" TopLine="308"/>
+        <Caret Line="315" Column="54" TopLine="297"/>
       </Position13>
       <Position14>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="314" Column="57" TopLine="308"/>
+        <Caret Line="426" TopLine="401"/>
       </Position14>
       <Position15>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="329" Column="28" TopLine="308"/>
       </Position15>
       <Position16>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="427" Column="28" TopLine="399"/>
+        <Caret Line="315" Column="9" TopLine="287"/>
       </Position16>
       <Position17>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4491" Column="43" TopLine="4464"/>
+        <Caret Line="4396" Column="42" TopLine="4369"/>
       </Position17>
       <Position18>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="315" Column="54" TopLine="297"/>
       </Position18>
       <Position19>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="426" TopLine="401"/>
+        <Caret Line="329" TopLine="297"/>
       </Position19>
       <Position20>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="330" TopLine="298"/>
       </Position20>
       <Position21>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="315" Column="9" TopLine="287"/>
+        <Caret Line="2018" Column="33" TopLine="2005"/>
       </Position21>
       <Position22>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4396" Column="42" TopLine="4369"/>
+        <Caret Line="322" Column="25" TopLine="301"/>
       </Position22>
       <Position23>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="329" Column="16" TopLine="301"/>
       </Position23>
       <Position24>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="329" TopLine="297"/>
+        <Caret Line="319" TopLine="301"/>
       </Position24>
       <Position25>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="330" TopLine="298"/>
+        <Caret Line="27" Column="25" TopLine="16"/>
       </Position25>
     </JumpHistory>
     <RunParams>

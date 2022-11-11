@@ -740,7 +740,7 @@ msgstr "Stable"
 msgid "Will install/update stable versions of both FPC and Lazarus"
 msgstr "FPC 및 Lazarus의 안정적인 버전 설치/업데이트"
 
-#: tform1.statusmessage.text
+#: fpcupdeluxemainform.statusmessage.text
 msgid "Sitting and waiting"
 msgstr "기다리세요"
 
