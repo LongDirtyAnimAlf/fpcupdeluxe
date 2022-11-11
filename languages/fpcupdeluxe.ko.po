@@ -16,6 +16,14 @@ msgstr ""
 msgid "Add context for FPC and Lazarus files."
 msgstr "FPC와 라자루스 파일을 추가합니다."
 
+#: extrasettings.captioncheckapplylocalchanges
+msgid "Re-apply local changes when updating."
+msgstr ""
+
+#: extrasettings.captioncheckaskconfirmation
+msgid "Always ask for confirmation."
+msgstr ""
+
 #: extrasettings.captioncheckautoswitchurl
 msgid "Auto-switch repo URL."
 msgstr "레포 URL 자동전환 (기본=아니오)"
@@ -93,6 +101,14 @@ msgstr "80비트 플로트의 소프트웨어 에뮬레이션을 활성화합니
 msgid "Double clicking on FPC and Lazarus files will open Lazarus."
 msgstr "FPC와 Lazarus 파일을 더블 클릭하면 Lazarus가 열립니다."
 
+#: extrasettings.hintcheckapplylocalchanges
+msgid "Fpcupdeluxe can re-apply the local changes automagically by using local auto-patch."
+msgstr ""
+
+#: extrasettings.hintcheckaskconfirmation
+msgid "Show a confirmation dialog with yes/no before every build."
+msgstr ""
+
 #: extrasettings.hintcheckenableonlinepatching
 msgid "Fpcupdeluxe can patch the sources automagically by using online patches."
 msgstr "Fpcupdeluxe는 온라인 패치를 사용하여 소스를 자동으로 패치할 수 있습니다."
@@ -106,7 +122,9 @@ msgid "Check for updates of fpcupdeluxe binaries."
 msgstr "Fpcupdeluxe 파일의 업데이트를 확인합니다."
 
 #: extrasettings.hintcheckrepo
-msgid "Download whole repository, or only latest files"
+#, fuzzy
+#| msgid "Download whole repository, or only latest files"
+msgid "Download whole repository, or only latest files."
 msgstr "전체 리포지토리 또는 최신 파일만 다운로드"
 
 #: extrasettings.hintchecksendinfo
@@ -121,6 +139,10 @@ msgstr "FPC의 시스템 전체 설치를 사용하여 Lazarus를 구축합니�
 msgctxt "extrasettings.hintusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
 msgstr "80비트 플로트의 소프트웨어 에뮬레이션을 활성화합니다."
+
+#: fpcupdeluxemainform.upadvertisetools
+msgid "Fpcupdeluxe can try to download them if available !"
+msgstr ""
 
 #: fpcupdeluxemainform.upbuildallcrosscompilers
 msgid "Going to auto-build all installed cross-compilers !"
@@ -145,6 +167,94 @@ msgstr "사용 가능한 원본에서 크로스 컴파일러를 설치합니다.
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
 msgstr "업데이트 확인중입니다. 기다리세요."
+
+#: fpcupdeluxemainform.upinstallcrosscompiler
+msgid "Going to install the cross-compiler for"
+msgstr ""
+
+#: fpcupdeluxemainform.upinstalldirectory
+msgid "Install directory"
+msgstr ""
+
+#: fpcupdeluxemainform.upinstalldirectorycurrent
+msgid "Current install directory"
+msgstr ""
+
+#: fpcupdeluxemainform.upinstallfpc
+msgid "Going to install/update FPC."
+msgstr ""
+
+#: fpcupdeluxemainform.upinstallfpclazarus
+msgid "Going to install/update FPC and Lazarus."
+msgstr ""
+
+#: fpcupdeluxemainform.upinstalllazarus
+msgid "Going to install/update Lazarus."
+msgstr ""
+
+#: fpcupdeluxemainform.upinstallmodule
+msgid "Going to install/update module"
+msgstr ""
+
+#: fpcupdeluxemainform.upinstallsettingscurrent
+msgid "Got settings from install directory"
+msgstr ""
+
+#: fpcupdeluxemainform.uplookup
+msgid "Looking for"
+msgstr ""
+
+#: fpcupdeluxemainform.uplookupbintools
+msgid "Going to look for the right cross-bins. Can (will) take some time !"
+msgstr ""
+
+#: fpcupdeluxemainform.uplookuplibtools
+msgid "Going to look for the right cross-libraries. Can (will) take some time !"
+msgstr ""
+
+#: fpcupdeluxemainform.uplookuptools
+msgid "Looking for fpcupdeluxe cross-tools on GitHub (if any)."
+msgstr ""
+
+#: fpcupdeluxemainform.upmissingtools
+msgid "The building of a crosscompiler failed due to missing cross-tools."
+msgstr ""
+
+#: fpcupdeluxemainform.upquestioncontinue
+msgid "Do you want to continue ?"
+msgstr ""
+
+#: fpcupdeluxemainform.upremovecrosscompiler
+msgid "Going to remove the cross-compiler for"
+msgstr ""
+
+#: fpcupdeluxemainform.upremovemodule
+msgid "Going to remove module"
+msgstr ""
+
+#: fpcupdeluxemainform.upselectfpclazarustarget
+msgid "Please select a FPC and Lazarus target first"
+msgstr ""
+
+#: fpcupdeluxemainform.upselectfpctarget
+msgid "Please select a FPC target first"
+msgstr ""
+
+#: fpcupdeluxemainform.upselectlazarustarget
+msgid "Please select a Lazarus target first"
+msgstr ""
+
+#: fpcupdeluxemainform.upspacewarning
+msgid "Having a space in your install path is very ill-advised !"
+msgstr ""
+
+#: fpcupdeluxemainform.uptrybuildcrosscompiler
+msgid "Trying to build the cross-compiler for"
+msgstr ""
+
+#: fpcupdeluxemainform.upupdatecrossall
+msgid "Going to update all crosscompilers"
+msgstr ""
 
 #: fpcupdeluxemainform.upupdatefound
 msgid "New fpcupdeluxe version available"
@@ -216,20 +326,38 @@ msgstr "%s 실행할수 없습니다"
 msgid "unable to read process ExitStatus"
 msgstr "exitStatus 프로세스를 읽을 수 없습니다"
 
-#: tform1.autocrossupdate.caption
-msgid "Auto-update compilers"
-msgstr "컴파일러 자동 업데이트"
+#: tform1.actfileexit.caption
+msgid "E&xit"
+msgstr ""
 
-#: tform1.autocrossupdate.hint
-msgid "Auto-update all installed cross-compilers."
-msgstr "설치된 모든 교차 컴파일러를 자동 업데이트합니다."
+#: tform1.actfileexit.hint
+msgid "Exit"
+msgstr ""
+
+#: tform1.actfilesave.caption
+msgid "&Save log"
+msgstr ""
+
+#: tform1.actfilesave.hint
+msgid "Save As"
+msgstr ""
+
+#: tform1.androidbtn.caption
+msgid "LAMW"
+msgstr ""
+
+#: tform1.androidbtn.hint
+msgid "Will install/update FPC and Lazarus stable and LAMW"
+msgstr ""
 
 #: tform1.basicsheet.caption
 msgid "Basic"
 msgstr "기본"
 
 #: tform1.bitbtnfpcandlazarus.caption
-msgid "Install/update FPC+Laz"
+#, fuzzy
+#| msgid "Install/update FPC+Laz"
+msgid "Install/update FPC+Lazarus"
 msgstr "설치/업데이트 FPC+Laz"
 
 #: tform1.bitbtnfpcandlazarus.hint
@@ -237,37 +365,93 @@ msgid "Will install/update the selected version of both FPC and Lazarus."
 msgstr "선택한 버전의 FPC와 Lazarus를 모두 설치/업데이트합니다."
 
 #: tform1.bitbtnfpconly.caption
+#, fuzzy
+#| msgid "Only"
 msgctxt "tform1.bitbtnfpconly.caption"
-msgid "Only"
+msgid "Only FPC"
 msgstr "오직"
 
 #: tform1.bitbtnfpconly.hint
 msgid "Only install/update selected FPC version."
 msgstr "선택한 FPC 버전만 설치/업데이트합니다."
 
+#: tform1.bitbtnfpconlytag.caption
+msgctxt "tform1.bitbtnfpconlytag.caption"
+msgid "Add Tag"
+msgstr ""
+
+#: tform1.bitbtnfpconlytag.hint
+msgid "Add tag/url into FPC install list"
+msgstr ""
+
+#: tform1.bitbtnfpcsetrevision.caption
+msgid "Set FPC hash in Setup+"
+msgstr ""
+
+#: tform1.bitbtnfpcsetrevision.hint
+msgid "Set FPC revision"
+msgstr ""
+
 #: tform1.bitbtnhalt.caption
-msgid "Halt"
+#, fuzzy
+#| msgid "Halt"
+msgid "STOP"
 msgstr "중지"
 
 #: tform1.bitbtnhalt.hint
-msgid "Try to quit fpcupdeluxe"
+#, fuzzy
+#| msgid "Try to quit fpcupdeluxe"
+msgid "Try to stop current install process"
 msgstr "Fpcupdeluxe 종료합니다"
 
 #: tform1.bitbtnlazarusonly.caption
+#, fuzzy
+#| msgid "Only"
 msgctxt "tform1.bitbtnlazarusonly.caption"
-msgid "Only"
+msgid "Only Lazarus"
 msgstr "오직"
 
 #: tform1.bitbtnlazarusonly.hint
 msgid "Only install/update selected Lazarus version."
 msgstr "선택한 Lazarus 버전만 설치/업데이트합니다."
 
+#: tform1.bitbtnlazarusonlytag.caption
+msgctxt "tform1.bitbtnlazarusonlytag.caption"
+msgid "Add Tag"
+msgstr ""
+
+#: tform1.bitbtnlazarusonlytag.hint
+msgid "Add tag/url into Lazarus install list"
+msgstr ""
+
+#: tform1.bitbtnlazarussetrevision.caption
+msgid "Set Lazarus hash in Setup+"
+msgstr ""
+
+#: tform1.bitbtnlazarussetrevision.hint
+msgid "Set Lazarus revision"
+msgstr ""
+
+#: tform1.btnchecktoolslocations.caption
+msgid "Check Tools Location"
+msgstr ""
+
 #: tform1.btnclearlog.caption
 msgid "Clear log"
 msgstr "로그 삭제"
 
+#: tform1.btncreatelazarusconfig.caption
+msgid "Create Lazarus Configuration"
+msgstr ""
+
+#: tform1.btngetopenssl.caption
+msgid "Get OpenSSL by Browser"
+msgstr ""
+
 #: tform1.btninstalldirselect.caption
-msgid "Set InstallDir"
+#, fuzzy
+#| msgid "Set InstallDir"
+msgid "Set install path"
 msgstr "설치폴더 설정"
 
 #: tform1.btninstallmodule.caption
@@ -277,6 +461,14 @@ msgstr "모듈 설치"
 #: tform1.btninstallmodule.hint
 msgid "Install the selected module."
 msgstr "선택모듈 설치."
+
+#: tform1.btnsendlog.caption
+msgid "Email log"
+msgstr ""
+
+#: tform1.btnsendlog.hint
+msgid "Send email to fpcup maintainer containing Commandscreen output."
+msgstr ""
 
 #: tform1.btnsetupplus.caption
 msgid "Setup+"
@@ -294,37 +486,85 @@ msgstr "모듈 삭제"
 msgid "Uninstall the selected module."
 msgstr "선택 모듈 삭제."
 
+#: tform1.btnupdatelazarusmakefiles.caption
+msgid "Update Lazarus Makefiles"
+msgstr ""
+
+#: tform1.buttonautocrossupdate.caption
+msgid "Update all"
+msgstr ""
+
+#: tform1.buttonautocrossupdate.hint
+#, fuzzy
+msgctxt "tform1.buttonautocrossupdate.hint"
+msgid "Auto-update all installed cross-compilers."
+msgstr "설치된 모든 교차 컴파일러를 자동 업데이트합니다."
+
 #: tform1.buttoninstallcrosscompiler.caption
-msgid "Install cross-compiler"
+#, fuzzy
+#| msgid "Install cross-compiler"
+msgid "Install compiler"
 msgstr "크로스 컴파일러 설치"
 
 #: tform1.buttoninstallcrosscompiler.hint
 msgid "Install the selected CPU-OS cross-compiler."
 msgstr "선택한 CPU-OS 크로스 컴파일러를 설치합니다."
 
+#: tform1.buttonremovecrosscompiler.caption
+msgid "Remove compiler"
+msgstr ""
+
+#: tform1.buttonremovecrosscompiler.hint
+msgid "Remove the selected CPU-OS cross-compiler."
+msgstr ""
+
+#: tform1.buttonsubarchselect.caption
+msgid "Set subarch"
+msgstr ""
+
+#: tform1.buttonsubarchselect.hint
+msgid "Select a subarch for embedded target."
+msgstr ""
+
+#: tform1.caption
+msgid "Form1"
+msgstr ""
+
 #: tform1.checkautoclear.caption
-msgid "AutoClear"
+msgid "Auto clear"
 msgstr "자동정리"
+
+#: tform1.chkgitlab.caption
+msgid "GitLab"
+msgstr ""
+
+#: tform1.chkmakefilefpc.caption
+msgid "Check Makefile FPC"
+msgstr ""
+
+#: tform1.chkmakefilelaz.caption
+msgid "Check Makefile Lazarus"
+msgstr ""
+
+#: tform1.createstartup.caption
+msgid "Re-create startup scripts"
+msgstr ""
 
 #: tform1.crosssheet.caption
 msgid "Cross"
 msgstr "교차"
 
-#: tform1.dinobtn.caption
-msgid "2.0.2+0.9.16"
-msgstr "2.0.2+0.9.16"
+#: tform1.espbtn.caption
+msgid "ESP32"
+msgstr ""
 
-#: tform1.dinobtn.hint
-msgid "Will install/update prehistoric FPC and Lazarus"
-msgstr "오래된 FPC 및 Lazarus 설치/업데이트"
+#: tform1.espbtn.hint
+msgid "Get FPC for ESP32 [lx6] boards"
+msgstr ""
 
-#: tform1.embeddedbtn.caption
-msgid "Embedded"
-msgstr "임베디드"
-
-#: tform1.embeddedbtn.hint
-msgid "Get FPC for SAM embedded"
-msgstr "SAM 내장 FPC 가져오기"
+#: tform1.extrasheet.caption
+msgid "Extras"
+msgstr ""
 
 #: tform1.fixesbtn.caption
 msgid "Fixes"
@@ -334,29 +574,81 @@ msgstr "고정"
 msgid "Will install/update current fixes versions of both FPC and Lazarus"
 msgstr "FPC 및 Lazarus의 현재 수정 버전을 설치/업데이트합니다"
 
-#: tform1.fpcversionlabel.caption
+#: tform1.fpchistorylabel.caption
+msgid "FPC revision history"
+msgstr ""
+
+#: tform1.fpctaglabel.caption
+#, fuzzy
+msgctxt "tform1.fpctaglabel.caption"
 msgid "FPC version"
 msgstr "FPC 버전"
+
+#: tform1.fpcversionlabel.caption
+msgctxt "tform1.fpcversionlabel.caption"
+msgid "FPC version"
+msgstr "FPC 버전"
+
+#: tform1.historysheet.caption
+msgid "History"
+msgstr ""
 
 #: tform1.installdiredit.hint
 msgid "Directory to install FPC and Lazarus"
 msgstr "라자루스 와 FPC 설치할 디렉토리"
 
-#: tform1.lazarusversionlabel.caption
+#: tform1.lazarushistorylabel.caption
+msgid "Lazarus revision history"
+msgstr ""
+
+#: tform1.lazarustaglabel.caption
+#, fuzzy
+msgctxt "tform1.lazarustaglabel.caption"
 msgid "Lazarus version"
 msgstr "라자루스 버전"
 
-#: tform1.mchineeslanguage.caption
-msgid "Chinees"
-msgstr "중국어"
+#: tform1.lazarusversionlabel.caption
+msgctxt "tform1.lazarusversionlabel.caption"
+msgid "Lazarus version"
+msgstr "라자루스 버전"
+
+#: tform1.listboxfpchistory.columns[0].caption
+msgctxt "tform1.listboxfpchistory.columns[0].caption"
+msgid "Hash"
+msgstr ""
+
+#: tform1.listboxfpchistory.columns[1].caption
+msgctxt "tform1.listboxfpchistory.columns[1].caption"
+msgid "Date"
+msgstr ""
+
+#: tform1.listboxlazarushistory.columns[0].caption
+msgctxt "tform1.listboxlazarushistory.columns[0].caption"
+msgid "Hash"
+msgstr ""
+
+#: tform1.listboxlazarushistory.columns[1].caption
+msgctxt "tform1.listboxlazarushistory.columns[1].caption"
+msgid "Date"
+msgstr ""
+
+#: tform1.mchinesecnlanguage.caption
+msgid "Chinese (CN)"
+msgstr ""
 
 #: tform1.memosummary.hint
 msgid "Will show error"
 msgstr "오류 보기"
 
 #: tform1.menglishlanguage.caption
-msgid "English"
+#, fuzzy
+#| msgid "English"
+msgid "English (EN)"
 msgstr "영어"
+
+#: tform1.menufile.caption
+msgid "&File"
+msgstr ""
 
 #: tform1.menuitem1.caption
 msgid "About"
@@ -365,6 +657,38 @@ msgstr "관하여"
 #: tform1.menuitem2.caption
 msgid "Languages"
 msgstr "언어"
+
+#: tform1.menuitem3.caption
+msgid "Issues"
+msgstr ""
+
+#: tform1.mfpcbugs.caption
+msgid "FPC bugs"
+msgstr ""
+
+#: tform1.mfrenchlanguage.caption
+msgid "French (F)"
+msgstr ""
+
+#: tform1.mgermanlanguage.caption
+msgid "German (D)"
+msgstr ""
+
+#: tform1.missuesforum.caption
+msgid "Up Lazarus forum"
+msgstr ""
+
+#: tform1.missuesgithub.caption
+msgid "Up GitHub issues"
+msgstr ""
+
+#: tform1.mkoreanlanguage.caption
+msgid "Korean (KR)"
+msgstr ""
+
+#: tform1.mlazarusbugs.caption
+msgid "Lazarus bugs"
+msgstr ""
 
 #: tform1.modulesheet.caption
 msgid "Modules"
@@ -378,21 +702,21 @@ msgstr "mORMot"
 msgid "Get the mORMot for FPC"
 msgstr "FPC용 mORMot 획득"
 
-#: tform1.npbtn.caption
-msgid "NewPascal"
-msgstr "새로운파스칼"
+#: tform1.opmbtn.caption
+msgid "OPM"
+msgstr ""
 
-#: tform1.npbtn.hint
-msgid "Will install/update NewPascal."
-msgstr "새로운 파스칼 설치/업그레이드."
+#: tform1.opmbtn.hint
+msgid "Will install/update the Online Package Manager"
+msgstr ""
 
-#: tform1.oldbtn.caption
-msgid "2.6.4 + 1.4"
-msgstr "2.6.4 + 1.4"
+#: tform1.picobtn.caption
+msgid "Pico"
+msgstr ""
 
-#: tform1.oldbtn.hint
-msgid "Will install/update FPC 2.6.4 and Lazarus 1.4"
-msgstr "FPC 2.6.4 및 Lazarus 1.4 설치/업데이트"
+#: tform1.picobtn.hint
+msgid "Get FPC for armv6m RPi Pico"
+msgstr ""
 
 #: tform1.radgrpcpu.caption
 msgid "CPU"
@@ -424,6 +748,10 @@ msgstr "FPC 및 Lazarus의 안정적인 버전 설치/업데이트"
 msgid "Sitting and waiting"
 msgstr "기다리세요"
 
+#: tform1.tagsheet.caption
+msgid "Tags"
+msgstr ""
+
 #: tform1.trunkbtn.caption
 msgid "Trunk"
 msgstr "Trunk"
@@ -431,3 +759,201 @@ msgstr "Trunk"
 #: tform1.trunkbtn.hint
 msgid "Will install/update trunk version of both FPC and Lazarus."
 msgstr "FPC와 Lazarus의 트렁크 버전을 설치/업데이트합니다."
+
+#: tform1.ultibobtn.hint
+msgid "Install baremetal Ultibo for RPi3"
+msgstr ""
+
+#: tform1.wabtn.caption
+msgid "WA"
+msgstr ""
+
+#: tform1.wabtn.hint
+msgid "Install FPC and Lazarus for Web Assembly"
+msgstr ""
+
+#: tform1.wiobtn.caption
+msgid "Wio"
+msgstr ""
+
+#: tform1.wiobtn.hint
+msgid "Get FPC for SAMD51 embedded on Wio Terminal"
+msgstr ""
+
+#: tform2.btnaddfpcpatch.caption
+msgid "Add FPC patch"
+msgstr ""
+
+#: tform2.btnaddlazpatch.caption
+msgid "Add Laz. patch"
+msgstr ""
+
+#: tform2.btnlistcustomoptions.caption
+msgid "List All"
+msgstr ""
+
+#: tform2.btnremfpcpatch.caption
+msgid "Rem. FPC patch"
+msgstr ""
+
+#: tform2.btnremlazpatch.caption
+msgid "Rem. Laz. patch"
+msgstr ""
+
+#: tform2.btnselectbindir.caption
+msgid "Tools"
+msgstr ""
+
+#: tform2.btnselectcompiler.caption
+msgid "Compiler"
+msgstr ""
+
+#: tform2.btnselectlibdir.caption
+msgid "Libraries"
+msgstr ""
+
+#: tform2.caption
+msgid "Advanced settings"
+msgstr ""
+
+#: tform2.chkfpcdebug.caption
+msgctxt "tform2.chkfpcdebug.caption"
+msgid "Debug"
+msgstr ""
+
+#: tform2.chklazarusdebug.caption
+msgctxt "tform2.chklazarusdebug.caption"
+msgid "Debug"
+msgstr ""
+
+#: tform2.editbinlocation.hint
+msgctxt "tform2.editbinlocation.hint"
+msgid "Double click to clear"
+msgstr ""
+
+#: tform2.editcompileroverride.hint
+msgctxt "tform2.editcompileroverride.hint"
+msgid "Double click to clear"
+msgstr ""
+
+#: tform2.editliblocation.hint
+msgctxt "tform2.editliblocation.hint"
+msgid "Double click to clear"
+msgstr ""
+
+#: tform2.groupbox1.caption
+msgid "Proxy settings"
+msgstr ""
+
+#: tform2.groupbox2.caption
+msgid "Miscellaneous settings"
+msgstr ""
+
+#: tform2.groupboxcompileoptions.caption
+msgid "Options Override"
+msgstr ""
+
+#: tform2.groupboxfpclazbranchrevision.caption
+msgid "Branch and revision"
+msgstr ""
+
+#: tform2.groupboxfpclazscripts.caption
+msgid "Pre and post install scripts"
+msgstr ""
+
+#: tform2.grppatching.caption
+msgid "Source patching"
+msgstr ""
+
+#: tform2.label1.caption
+msgid "HTTP proxy URL:"
+msgstr ""
+
+#: tform2.label2.caption
+msgid "HTTP proxy port:"
+msgstr ""
+
+#: tform2.label3.caption
+msgid "HTTP proxy username:"
+msgstr ""
+
+#: tform2.label4.caption
+msgid "HTTP proxy password:"
+msgstr ""
+
+#: tform2.labelcompileroverride.caption
+msgid "Compiler Override"
+msgstr ""
+
+#: tform2.labelcpu.caption
+msgid "Select CPU"
+msgstr ""
+
+#: tform2.labelcrossbuildoptions.caption
+msgid "Cross Build Options Override (i.e. -CfSoft)"
+msgstr ""
+
+#: tform2.labelfpcbranch.caption
+msgid "FPC branch"
+msgstr ""
+
+#: tform2.labelfpcoptions.caption
+msgid "FPC options"
+msgstr ""
+
+#: tform2.labelfpcpostinstall.caption
+msgid "FPC post"
+msgstr ""
+
+#: tform2.labelfpcpreinstall.caption
+msgid "FPC pre"
+msgstr ""
+
+#: tform2.labelfpcrevision.caption
+msgid "FPC hash/tag"
+msgstr ""
+
+#: tform2.labellazarusbranch.caption
+msgid "Laz. branch"
+msgstr ""
+
+#: tform2.labellazarusoptions.caption
+msgid "Laz. options"
+msgstr ""
+
+#: tform2.labellazaruspostinstall.caption
+msgid "Lazarus post"
+msgstr ""
+
+#: tform2.labellazaruspreinstall.caption
+msgid "Lazarus pre"
+msgstr ""
+
+#: tform2.labellazarusrevision.caption
+msgid "Laz. hash/tag"
+msgstr ""
+
+#: tform2.labelos.caption
+msgid "Select OS"
+msgstr ""
+
+#: tform2.radiogrouparmarch.caption
+msgid "ARM target"
+msgstr ""
+
+#: tform2.rgrpsearchoptions.caption
+msgid "Search options"
+msgstr ""
+
+#: tform2.rgrpsubarch.caption
+msgid "Select subarch"
+msgstr ""
+
+#: tform2.tscpuos.caption
+msgid "CPU/OS"
+msgstr ""
+
+#: tform2.tssubarch.caption
+msgid "Subarch"
+msgstr ""
+

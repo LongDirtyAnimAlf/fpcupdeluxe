@@ -1,13 +1,49 @@
+{ FPC/Lazarus installer/updater
+Copyright (C) 2012-2013 Reinier Olislagers, Ludo Brands
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at your
+option) any later version with the following modification:
+
+As a special exception, the copyright holders of this library give you
+permission to link this library with independent modules to produce an
+executable, regardless of the license terms of these independent modules,and
+to copy and distribute the resulting executable under terms of your choice,
+provided that you also meet, for each linked independent module, the terms
+and conditions of the license of that module. An independent module is a
+module which is not derived from or based on this library. If you modify
+this library, you may extend this exception to your version of the library,
+but you are not obligated to do so. If you do not wish to do so, delete this
+exception statement from your version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License
+for more details.
+
+You should have received a copy of the GNU Library General Public License
+along with this library; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+}
+
 unit updatelazconfig;
+{
+Creates or updates Lazarus configs (or XML files).
+Can handle arbitrary number of config files.
+Specify filename only if you want to save in the config path set in the Create constructor; else specify path and filename.
+Will save all configs when it is destroyed.
+
+Note: if you pass a variable such as Help#, this will cause an exception in the XML writing code that is called by laz2_xmlcfg
+No error protection here, as we should not write those kinds of variables; if we do, I'd like to see the error in the calling module.
+}
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils,
-  xmlconf,DOM, XMLRead, XMLWrite;
-  //XMLCfg, Laz2_DOM, Laz2_XMLRead, Laz2_XMLWrite;
+  Classes, SysUtils, Laz2_XMLCfg, Laz2_DOM;
 
 const
   // Some fixed configuration files.
@@ -28,7 +64,7 @@ const
   History='inputhistory.xml';
   // Pas2js configuration options:
   Pas2jsConfig='pas2jsdsgnoptions.xml';
-    // Simple webserver options:
+  // Simple webserver options:
   WebserverConfig='simplewebservergui.xml';
   // BuildIDE config file
   DefaultIDEMakeOptionFilename='idemake.cfg';
@@ -48,6 +84,18 @@ type
 TConfig=class; //forward declaration
 TUpdateLazConfig=class; //forward declaration
 
+TConfig = class(TXMLConfig)
+private
+  FNew:boolean;
+public
+  constructor Create(const AFilename: String);
+  procedure Save;
+  procedure MovePath(OldPath, NewPath: string);
+  property New:boolean read FNew;
+end;
+
+
+(*
 TConfig = class(TObject)
 private
   bChanged: boolean;
@@ -62,7 +110,7 @@ public
   // Delete a child from a different part of the tree
   procedure DeletePath(OldPath: string);
   procedure DeleteValue(const APath: string);
-  function FindNode(APath: string;var AttrName:DOMString;bCreate:boolean):TDomNode;
+  function FindNode(APath: string;var AttrName:string;bCreate:boolean):TDomNode;
   function GetValue(const APath, ADefault: String): String;
   function GetValue(const APath: String; ADefault: Integer): Integer;
   function GetValue(const APath: String; ADefault: Boolean): Boolean;
@@ -70,10 +118,12 @@ public
   procedure MovePath(OldPath, NewPath: string);
   // Save our changes to the config variable
   procedure Save;
-  procedure SetValue(const APath, AValue: DOMString);
+  procedure SetValue(const APath, AValue: String);
   procedure SetValue(const APath: String; AValue: Integer);
   procedure SetValue(const APath: String; AValue: Boolean);
 end;
+*)
+
 
 { TUpdateLazConfig }
 TUpdateLazConfig = class(TObject)
@@ -111,6 +161,10 @@ public
   function IfNewFile(ConfigFile:string):boolean;
   { Sets variable to a certain value, only if a config file is created for us.}
   procedure SetVariableIfNewFile(ConfigFile, Variable, Value: string);
+  function IsLegacyList(ConfigFile, Variable: string):boolean;
+  function GetListItemCount(const ConfigFile, APath, AItemName: string; const aLegacyList: Boolean): Integer;
+  function GetListItemXPath(const ConfigFile, AName: string; const AIndex: Integer; const aLegacyList: Boolean;
+      const aLegacyList1Based: Boolean = False): string;
   { Create object; specify
   path (primary config path) where option files should be created or updated
   Lazarus major, minor and release version that is downloaded (or -1 if unknown
@@ -180,189 +234,35 @@ begin
   end;
 end;
 
-{ TConfig }
-
-procedure TConfig.DeletePath(OldPath: string);
-var
-  OldChild: TDOMNode;
-  AttrName: DOMString;
+procedure TConfig.Save;
 begin
-  if OldPath[length(OldPath)]='/' then
-    SetLength(OldPath,length(OldPath)-1);
-  OldChild:=FindNode(OldPath+'/blah',AttrName,false); // add dummy attribute to path
-  if not Assigned(OldChild) then
-    exit;
-  OldChild.ParentNode.RemoveChild(OldChild);
-  bChanged:=true;
+  WriteXMLFile(Doc,Filename);
 end;
 
-procedure TConfig.DeleteValue(const APath: string);
-var
-  Node: TDomNode;
-  AttrName: DOMString;
+constructor TConfig.Create(const AFilename: String);
 begin
-  Node:=FindNode(APath,AttrName,false);
-  if Node=nil then
-    exit;
-  if Assigned(TDOMElement(Node).GetAttributeNode(AttrName)) then begin
-    begin
-    TDOMElement(Node).RemoveAttribute(AttrName);
-    bChanged:=true;
-    end;
-  end;
-end;
-
-function TConfig.FindNode(APath: string;var AttrName:DOMString;bCreate:boolean): TDomNode;
-var
-  Node,Parent: TDOMNode;
-  NodeName: DOMString;
-  StartPos: integer;
-begin
-  result:=nil;
-  AttrName:='';
-  Node:=Doc.FindNode('CONFIG');
-  while assigned(Node) and (pos('/',APath)>0) do //walk in tree until no more /
-  begin
-    NodeName:=DOMString(copy(APath,1,pos('/',APath)-1));
-    Delete(APath,1,length(NodeName)+1);
-    Parent:=Node;
-    Node:=Node.FindNode(NodeName);
-    if not assigned(Node) and bCreate then
-      begin
-      Node:=Doc.CreateElement(NodeName);
-      Parent.AppendChild(Node);
-      end;
-  end;
-  if assigned(Node) then
-  begin
-    AttrName:=APath;
-    result:=Node;
-  end;
-end;
-
-function TConfig.GetValue(const APath, ADefault: String): String;
-var
-  Node, Attr: TDOMNode;
-  AttrName: DOMString;
-  StartPos: integer;
-begin
-  Result:=ADefault;
-  Node:=FindNode(APath,{%H-}AttrName,false);
-  if Node=nil then
-    exit;
-  Attr := Node.Attributes.GetNamedItem(AttrName);
-  if Assigned(Attr) then
-    Result := Attr.NodeValue;
-end;
-
-function TConfig.GetValue(const APath: String; ADefault: Integer): Integer;
-begin
-  Result := StrToIntDef(GetValue(APath, IntToStr(ADefault)),ADefault);
-end;
-
-function TConfig.GetValue(const APath: String; ADefault: Boolean): Boolean;
-var
-  s: String;
-begin
-  if ADefault then
-    s := 'True'
-  else
-    s := 'False';
-
-  s := GetValue(APath, s);
-
-  if CompareText(s,'TRUE')=0 then
-    Result := True
-  else if CompareText(s,'FALSE')=0 then
-    Result := False
-  else
-    Result := ADefault;
+  FNew:=not(FileExists(aFileName));
+  FileName:=aFileName;
 end;
 
 procedure TConfig.MovePath(OldPath, NewPath: string);
 var
   NewChild, OldChild: TDOMNode;
-  AttrName:DOMString;
   i:integer;
 begin
   if NewPath[length(NewPath)]='/' then
     SetLength(NewPath,length(NewPath)-1);
   if OldPath[length(OldPath)]='/' then
     SetLength(OldPath,length(OldPath)-1);
-  NewChild:=FindNode(NewPath+'/blah',AttrName,false);  // append dummy attribute to path
-  OldChild:=FindNode(OldPath+'/bloh',AttrName,false);
+  NewChild:=FindNode(NewPath+'/blah',false);  // append dummy attribute to path
+  OldChild:=FindNode(OldPath+'/bloh',false);
   while Assigned(NewChild.FirstChild) do
     NewChild.RemoveChild(NewChild.FirstChild);
   for i:=0 to OldChild.ChildNodes.Count-1 do
     begin
     NewChild.AppendChild(OldChild.ChildNodes.Item[i].CloneNode(True));
     end;
-  bChanged:=true;
 end;
-
-procedure TConfig.Save;
-begin
-  WriteXMLFile(Doc,FFilename);
-end;
-
-procedure TConfig.SetValue(const APath, AValue: DOMString);
-var
-  Node: TDOMNode;
-  AttrName: DOMString;
-  StartPos: integer;
-begin
-  Node:=FindNode(APath,AttrName,true);
-  if Node=nil then
-    exit;
-  if (not Assigned(TDOMElement(Node).GetAttributeNode(AttrName))) or
-    (TDOMElement(Node)[AttrName] <> AValue) then
-  begin
-    TDOMElement(Node)[AttrName] := AValue;
-    bChanged:=true;
-  end;
-end;
-
-procedure TConfig.SetValue(const APath: String; AValue: Integer);
-begin
-  SetValue(APath, IntToStr(AValue));
-end;
-
-procedure TConfig.SetValue(const APath: String; AValue: Boolean);
-begin
-  if AValue then
-    SetValue(APath, 'True')
-  else
-    SetValue(APath, 'False');
-end;
-
-constructor TConfig.Create(const AFilename: String);
-begin
-  FFilename:=AFilename;
-  FNew:=not(FileExists(AFileName));
-  if FNew then
-  begin
-    Doc:=TXMLDocument.Create;
-    // CONFIG node present in all Lazarus configs=>we ensure the config file gets created if it doesn't exist yet:
-    Doc.AppendChild(Doc.CreateElement('CONFIG'));
-  end
-  else
-    //ReadXMLFile(Doc,AFilename,[xrfAllowLowerThanInAttributeValue,xrfAllowSpecialCharsInAttributeValue,xrfAllowSpecialCharsInComments]);
-    ReadXMLFile(Doc,AFilename);
-  bChanged:=false;
-end;
-
-destructor TConfig.Destroy;
-begin
-  If bChanged then
-  begin
-    // Make sure path exists:
-    ForceDirectoriesSafe(ExtractFilePath(FFilename));
-    Save;
-  end;
-  Doc.Free;
-  inherited Destroy;
-end;
-
 
 procedure TUpdateLazConfig.WriteConfig;
 var
@@ -415,60 +315,60 @@ begin
         EnvironmentConfig:
           begin
             Version:='';
-            if FLazarusMajorVer<>-1 then
+            if (FLazarusMajorVer<>-1) then
             begin
               Version:=Version+IntToStr(FLazarusMajorVer);
-              if FLazarusMinor<>-1 then
+              if (FLazarusMinor<>-1) then
               begin
                 Version:=Version+'.'+IntToStr(FLazarusMinor);
-                if FLazarusRelease<>-1 then
-                Version:=Version+'.'+IntToStr(FLazarusRelease);
+                if (FLazarusRelease<>-1) then
+                  Version:=Version+'.'+IntToStr(FLazarusRelease);
               end;
-            end;
-            if FLazarusPatch>0 then
+              if (FLazarusPatch>0) then
+                Version:=Version+'RC'+IntToStr(FLazarusPatch);
+            end
+            else
             begin
-              Version:=Version+'RC'+IntToStr(FLazarusPatch);
-            end;
-
-            // If we don't add these, we trigger an upgrade process on first start on Lazarus 1.1+.
-            NewConfig.SetValue('EnvironmentOptions/Version/Lazarus',Version);
-            if FLazarusMajorVer=-1 then
-            begin // default to newest. Update this when new version appears
               NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
               NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', TrunkLazarusNewEnvironmentConfig);
-            end
-            else if FLazarusMajorVer=0 then
+            end;
+
+            if (Length(Version)>0) then NewConfig.SetValue('EnvironmentOptions/Version/Lazarus',Version);
+
+            Version:='';
+            if (FLazarusMajorVer=0) then
             begin
               if FLazarusMinor<=0 then
                 NewConfig.SetValue('EnvironmentOptions/Version/Lazarus','0.9.31');
-              NewConfig.SetValue('EnvironmentOptions/Version/Value', '106')
+              Version:='106';
             end
-            else if FLazarusMajorVer=1 then
-              case FLazarusMinor of
-                0 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '107'); //for version 1.0
-                1 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '107'); //for version 1.0,1.1
-                2 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.2
-                3 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.3
-                4 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.4
-                5 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '109'); //for version 1.5
-                6 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '109'); //for version 1.6
-                7 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.7
-                8 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.8 (fixes)
-                9 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.9 (old trunk)
-              end
-            else if FLazarusMajorVer=2 then
-              case FLazarusMinor of
-                0 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 2.0
-                else
-                  begin
-                    NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
-                    NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', TrunkLazarusNewEnvironmentConfig);
-                  end;
-              end
-            else { 3 or higher? keep latest known, we can leave lazarus version though }
+            else
+            if (FLazarusMajorVer=1) then
             begin
-              NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
+              case FLazarusMinor of
+                0 : Version := '107'; //for version 1.0
+                1 : Version := '107'; //for version 1.0,1.1
+                2 : Version := '108'; //for version 1.2
+                3 : Version := '108'; //for version 1.3
+                4 : Version := '108'; //for version 1.4
+                5 : Version := '109'; //for version 1.5
+                6 : Version := '109'; //for version 1.6
+              else
+                Version:='110';
+              end
+            end
+            else
+            if (FLazarusMajorVer=2) then
+            begin
+              Version:='110';
+            end
+            else
+            if (FLazarusMajorVer>=3) then
+            begin
+              Version:=TrunkVersionNewEnvironmentConfig;
             end;
+
+            if (Length(Version)>0) then NewConfig.SetValue('EnvironmentOptions/Version/Value', Version);
 
             {$ifdef CPUAARCH64}
             // IDE does not size correctly when set to auto
@@ -586,6 +486,31 @@ begin
   // Don't free this one, as it will remove it from the list
   Config:=GetConfig(ConfigFile);
   if Config.New then Config.SetValue(Variable, Value);
+end;
+
+function TUpdateLazConfig.IsLegacyList(ConfigFile, Variable: string):boolean;
+var
+  Config: TConfig;
+begin
+  Config:=GetConfig(ConfigFile);
+  result:=Config.IsLegacyList(Variable);
+end;
+
+function TUpdateLazConfig.GetListItemCount(const ConfigFile, APath, AItemName: string; const aLegacyList: Boolean): Integer;
+var
+  Config: TConfig;
+begin
+  Config:=GetConfig(ConfigFile);
+  result:=Config.GetListItemCount(APath, AItemName,aLegacyList);
+end;
+
+function TUpdateLazConfig.GetListItemXPath(const ConfigFile, AName: string; const AIndex: Integer; const aLegacyList: Boolean;
+    const aLegacyList1Based: Boolean): string;
+var
+  Config: TConfig;
+begin
+  Config:=GetConfig(ConfigFile);
+  result:=Config.GetListItemXPath(AName,AIndex,aLegacyList,aLegacyList1Based);
 end;
 
 constructor TUpdateLazConfig.Create(ConfigPath: string;

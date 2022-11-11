@@ -66,9 +66,7 @@ logger/secrets.inc
 secrets/
 
 *.log
-libfpcup/
-libfpclazup/
-libfpclazupdeluxe/
+buildlibs/
 backup/
 icons/
 bin/
@@ -81,6 +79,7 @@ logger/LAMWmORMotProject/gen/
 crosstools/
 bootstrappers/
 deluxebin/
+upbin/
 lib/
 lib*/
 !fpcuptools/*

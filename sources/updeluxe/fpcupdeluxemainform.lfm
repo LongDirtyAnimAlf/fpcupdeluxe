@@ -44,7 +44,7 @@ object Form1: TForm1
     Left = 330
     Height = 23
     Top = 33
-    Width = 626
+    Width = 628
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6
     BorderSpacing.Right = 12
@@ -59,10 +59,10 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = btnSendLog
-    Left = 968
+    Left = 970
     Height = 19
     Top = 35
-    Width = 74
+    Width = 72
     Anchors = [akTop, akRight]
     BorderSpacing.Right = 12
     Caption = 'Auto clear'
@@ -3728,7 +3728,7 @@ object Form1: TForm1
         Left = 220
         Height = 19
         Top = 14
-        Width = 54
+        Width = 52
         BorderSpacing.Left = 220
         BorderSpacing.Top = 14
         BorderSpacing.Right = 4

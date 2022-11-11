@@ -22,10 +22,10 @@ uses
 
 //{$ifdef lcl_fullversion}
 {$if lcl_fullversion>2010000}
-{$define EnableLanguages}
+{.$define EnableLanguages}
 {$endif}
 //{$endif}
-{$define EnableLanguages}
+{.$define EnableLanguages}
 
 
 const
@@ -379,7 +379,7 @@ begin
   if aLanguage='' then aLanguage:=FallbackLang;
   if aLanguage='' then aLanguage:='en';
 
-  AddMessage('Trying to set language to '+aLanguage);
+  //AddMessage('Trying to set language to '+aLanguage);
 
   PoFileName:=SafeGetApplicationPath+'fpcupdeluxe.' + aLanguage + '.po';
   //SysUtils.DeleteFile(PoFileName);
@@ -388,7 +388,9 @@ begin
   begin
     try
       if SaveFileFromResource(PoFileName,'fpcupdeluxe.' + aLanguage) then
-        AddMessage('Language file for '+aLanguage+' created');
+      begin
+        //AddMessage('Language file for '+aLanguage+' created');
+      end;
     except
     end;
   end;
@@ -396,7 +398,7 @@ begin
   if FileExists(PoFileName) then
   begin
     SetDefaultLang(aLanguage,SafeGetApplicationPath,'fpcupdeluxe');
-    AddMessage('Language file for '+aLanguage+' used');
+    //AddMessage('Language file for '+aLanguage+' used');
   end;
 end;
 {$endif}

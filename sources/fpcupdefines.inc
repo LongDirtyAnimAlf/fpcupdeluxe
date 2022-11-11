@@ -1,3 +1,7 @@
+{$ifndef DisableRemoteLog}
+{$define RemoteLog}
+{$endif}
+
 {$define FORCEREVISION}
 {.$define FORCELAZBUILD}
 {.$define DISABLELAZBUILDJOBS}

@@ -52,9 +52,6 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, Classes, SysUtils,
   fpcupdeluxemainform,
-  //extrasettings,
-  //installerManager, installerUniversal,
-  //modulesettings, unzipprogress, infounit, fpcuputil,
   m_crossinstaller,
   m_any_to_androidarm,
   m_any_to_androidjvm,
@@ -158,10 +155,11 @@ uses
   m_any_to_wasi_wasm32,
   m_any_to_embedded_wasm32;
 
-{$R *.res}
+{$R up.res}
 
 begin
   RequireDerivedFormResource:=True;
+  Application.Title:='fpcupdeluxe';
   Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);

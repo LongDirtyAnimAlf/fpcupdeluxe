@@ -137,6 +137,10 @@ msgctxt "extrasettings.hintusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
 msgstr "Aktivieren Sie die Software-Emulation von 80-Bit-Gleitkommazahlen."
 
+#: fpcupdeluxemainform.upadvertisetools
+msgid "Fpcupdeluxe can try to download them if available !"
+msgstr ""
+
 #: fpcupdeluxemainform.upbuildallcrosscompilers
 msgid "Going to auto-build all installed cross-compilers !"
 msgstr "Alle installierten Cross-Compiler werden automatisch erstellt!"
@@ -160,6 +164,94 @@ msgstr "Ich werde einen Cross-Compiler aus verfügbaren Quellen installieren."
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
 msgstr "Warten Sie mal. Suche nach Updates."
+
+#: fpcupdeluxemainform.upinstallcrosscompiler
+msgid "Going to install the cross-compiler for"
+msgstr ""
+
+#: fpcupdeluxemainform.upinstalldirectory
+msgid "Install directory"
+msgstr ""
+
+#: fpcupdeluxemainform.upinstalldirectorycurrent
+msgid "Current install directory"
+msgstr ""
+
+#: fpcupdeluxemainform.upinstallfpc
+msgid "Going to install/update FPC."
+msgstr ""
+
+#: fpcupdeluxemainform.upinstallfpclazarus
+msgid "Going to install/update FPC and Lazarus."
+msgstr ""
+
+#: fpcupdeluxemainform.upinstalllazarus
+msgid "Going to install/update Lazarus."
+msgstr ""
+
+#: fpcupdeluxemainform.upinstallmodule
+msgid "Going to install/update module"
+msgstr ""
+
+#: fpcupdeluxemainform.upinstallsettingscurrent
+msgid "Got settings from install directory"
+msgstr ""
+
+#: fpcupdeluxemainform.uplookup
+msgid "Looking for"
+msgstr ""
+
+#: fpcupdeluxemainform.uplookupbintools
+msgid "Going to look for the right cross-bins. Can (will) take some time !"
+msgstr ""
+
+#: fpcupdeluxemainform.uplookuplibtools
+msgid "Going to look for the right cross-libraries. Can (will) take some time !"
+msgstr ""
+
+#: fpcupdeluxemainform.uplookuptools
+msgid "Looking for fpcupdeluxe cross-tools on GitHub (if any)."
+msgstr ""
+
+#: fpcupdeluxemainform.upmissingtools
+msgid "The building of a crosscompiler failed due to missing cross-tools."
+msgstr ""
+
+#: fpcupdeluxemainform.upquestioncontinue
+msgid "Do you want to continue ?"
+msgstr ""
+
+#: fpcupdeluxemainform.upremovecrosscompiler
+msgid "Going to remove the cross-compiler for"
+msgstr ""
+
+#: fpcupdeluxemainform.upremovemodule
+msgid "Going to remove module"
+msgstr ""
+
+#: fpcupdeluxemainform.upselectfpclazarustarget
+msgid "Please select a FPC and Lazarus target first"
+msgstr ""
+
+#: fpcupdeluxemainform.upselectfpctarget
+msgid "Please select a FPC target first"
+msgstr ""
+
+#: fpcupdeluxemainform.upselectlazarustarget
+msgid "Please select a Lazarus target first"
+msgstr ""
+
+#: fpcupdeluxemainform.upspacewarning
+msgid "Having a space in your install path is very ill-advised !"
+msgstr ""
+
+#: fpcupdeluxemainform.uptrybuildcrosscompiler
+msgid "Trying to build the cross-compiler for"
+msgstr ""
+
+#: fpcupdeluxemainform.upupdatecrossall
+msgid "Going to update all crosscompilers"
+msgstr ""
 
 #: fpcupdeluxemainform.upupdatefound
 msgid "New fpcupdeluxe version available"
@@ -413,6 +505,10 @@ msgstr "Subarch setzen"
 msgid "Select a subarch for embedded target."
 msgstr "Wählen Sie einen Subarch für das eingebettete Ziel aus."
 
+#: tform1.caption
+msgid "Form1"
+msgstr ""
+
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
 msgstr "Automatisch löschen"
@@ -545,6 +641,10 @@ msgstr "Ausgaben"
 msgid "FPC bugs"
 msgstr "FPC-Fehler"
 
+#: tform1.mfrenchlanguage.caption
+msgid "French (F)"
+msgstr "Französisch (F)"
+
 #: tform1.mgermanlanguage.caption
 msgid "German (D)"
 msgstr "Deutsch (D)"
@@ -560,10 +660,6 @@ msgstr "Up GitHub-Probleme"
 #: tform1.mkoreanlanguage.caption
 msgid "Korean (KR)"
 msgstr "Koreanisch (KR)"
-
-#: tform1.mfrenchlanguage.caption
-msgid "French (F)"
-msgstr "Französisch (F)"
 
 #: tform1.mlazarusbugs.caption
 msgid "Lazarus bugs"
@@ -835,3 +931,4 @@ msgstr "CPU/OS"
 #: tform2.tssubarch.caption
 msgid "Subarch"
 msgstr "Subarch"
+
