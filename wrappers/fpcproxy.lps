@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units Count="4">
+      <Unit0>
+        <Filename Value="fpcproxy.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="24"/>
+        <CursorPos X="3" Y="50"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="C:\fpclazbydeluxe\trunklatest\fpcsrc\packages\fcl-process\src\processbody.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="136"/>
+        <CursorPos X="30" Y="154"/>
+        <UsageCount Value="10"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="C:\fpclazbydeluxe\trunklatest\fpcsrc\packages\fcl-process\src\process.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="19"/>
+        <CursorPos X="3" Y="43"/>
+        <UsageCount Value="10"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="C:\fpclazbydeluxe\trunklatest\fpcsrc\rtl\inc\systemh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1510"/>
+        <CursorPos X="3" Y="1526"/>
+        <UsageCount Value="10"/>
+      </Unit3>
+    </Units>
+    <JumpHistory Count="9" HistoryIndex="8">
+      <Position1>
+        <Filename Value="fpcproxy.lpr"/>
+        <Caret Line="9" Column="15"/>
+      </Position1>
+      <Position2>
+        <Filename Value="fpcproxy.lpr"/>
+        <Caret Line="33" TopLine="13"/>
+      </Position2>
+      <Position3>
+        <Filename Value="fpcproxy.lpr"/>
+        <Caret Line="35" Column="5" TopLine="16"/>
+      </Position3>
+      <Position4>
+        <Filename Value="fpcproxy.lpr"/>
+        <Caret Line="10" Column="28"/>
+      </Position4>
+      <Position5>
+        <Filename Value="fpcproxy.lpr"/>
+        <Caret Line="20" TopLine="3"/>
+      </Position5>
+      <Position6>
+        <Filename Value="fpcproxy.lpr"/>
+        <Caret Line="44" Column="12" TopLine="18"/>
+      </Position6>
+      <Position7>
+        <Filename Value="fpcproxy.lpr"/>
+        <Caret Line="3" Column="3"/>
+      </Position7>
+      <Position8>
+        <Filename Value="fpcproxy.lpr"/>
+        <Caret Line="6" Column="5"/>
+      </Position8>
+      <Position9>
+        <Filename Value="fpcproxy.lpr"/>
+        <Caret Line="41" Column="10" TopLine="19"/>
+      </Position9>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>
