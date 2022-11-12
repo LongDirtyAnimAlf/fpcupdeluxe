@@ -156,12 +156,12 @@ const
   SSL_DLL_Name    = 'ssleay32';
 
   {$ifdef win64}
-    SSL_DLL_Names:    array[1..4] of string = ('libssl-3-x64',    'libssl-1_1-x64',    SSL_DLL_Name, 'libssl32');
-    Crypto_DLL_Names: array[1..4] of string = ('libcrypto-3-x64', 'libcrypto-1_1-x64', Crypto_DLL_Name, Crypto_DLL_Name);
+    SSL_DLL_Names:    array[1..3] of string = ({'libssl-3-x64',}    'libssl-1_1-x64',    SSL_DLL_Name, 'libssl32');
+    Crypto_DLL_Names: array[1..3] of string = ({'libcrypto-3-x64',} 'libcrypto-1_1-x64', Crypto_DLL_Name, Crypto_DLL_Name);
   {$endif}
   {$ifdef win32}
-    SSL_DLL_Names:    array[1..4] of string = ('libssl-3',    'libssl-1_1',    SSL_DLL_Name, 'libssl32');
-    Crypto_DLL_Names: array[1..4] of string = ('libcrypto-3', 'libcrypto-1_1', Crypto_DLL_Name, Crypto_DLL_Name);
+    SSL_DLL_Names:    array[1..3] of string = ({'libssl-3',}    'libssl-1_1',    SSL_DLL_Name, 'libssl32');
+    Crypto_DLL_Names: array[1..3] of string = ({'libcrypto-3',} 'libcrypto-1_1', Crypto_DLL_Name, Crypto_DLL_Name);
   {$endif}
 
   {$ifdef win64}

@@ -325,6 +325,12 @@ resourcestring
 
   upQuitRequest = 'Please quit FPCUPdeluxe.';
 
+  upInstallConfimation = 'Going to install %s and %s%s.';
+  upInstallConfimationSimple = 'Going to install the %s.';
+
+  upSelectCPUTarget = 'Please select a CPU target first.';
+  upSelectOSTarget = 'Please select an OS target first.';
+
 var
   Form1: TForm1;
 
@@ -369,6 +375,29 @@ uses
 function NaturalCompare(aList: TStringList; aIndex1, aIndex2: Integer): Integer;
 begin
   Result := NaturalCompareText(aList[aIndex2], aList[aIndex1]);
+end;
+
+// "stolen" from opkman_common
+function MessageDlgEx(const AMsg: string; ADlgType: TMsgDlgType;
+  AButtons: TMsgDlgButtons; AParent: TForm): TModalResult;
+var
+  MsgFrm: TForm;
+begin
+  MsgFrm := CreateMessageDialog(AMsg, ADlgType, AButtons);
+  try
+    MsgFrm.FormStyle := fsSystemStayOnTop;
+    if AParent <> nil then
+    begin
+      MsgFrm.Position := poDefaultSizeOnly;
+      MsgFrm.Left := AParent.Left + (AParent.Width - MsgFrm.Width) div 2;
+      MsgFrm.Top := AParent.Top + (AParent.Height - MsgFrm.Height) div 2;
+    end
+    else
+      MsgFrm.Position := poWorkAreaCenter;
+    Result := MsgFrm.ShowModal;
+  finally
+    MsgFrm.Free
+  end;
 end;
 
 { TForm1 }
@@ -1395,10 +1424,10 @@ end;
 
 procedure TForm1.BitBtnHaltClick(Sender: TObject);
 begin
-  if (MessageDlg('I am going to try to halt.' + sLineBreak +
+  if (MessageDlgEx('I am going to try to halt.' + sLineBreak +
              'Do not (yet) expect too much of it.' + sLineBreak +
              'Its a non-finished feature !'
-             ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+             ,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
              begin
                exit;
              end;
@@ -2131,28 +2160,28 @@ begin
 
   if Sender=TrunkBtn then
   begin
-    s:='Going to install both FPC trunk and Lazarus trunk.';
+    s:=Format(upInstallConfimation,['FPC trunk','Lazarus trunk','']);
     aFPCTarget:='trunk'+GITLABEXTENSION;
     aLazarusTarget:='trunk'+GITLABEXTENSION;
   end;
 
   if Sender=FixesBtn then
   begin
-    s:='Going to install FPC fixes and Lazarus fixes.';
+    s:=Format(upInstallConfimation,['FPC fixes','Lazarus fixes','']);
     aFPCTarget:='fixes'+GITLABEXTENSION;
     aLazarusTarget:='fixes'+GITLABEXTENSION;
   end;
 
   if Sender=StableBtn then
   begin
-    s:='Going to install FPC stable and Lazarus stable.';
+    s:=Format(upInstallConfimation,['FPC stable','Lazarus stable','']);
     aFPCTarget:='stable'+GITLABEXTENSION;
     aLazarusTarget:='stable'+GITLABEXTENSION;
   end;
 
   if Sender=WABtn then
   begin
-    s:='Going to install FPC and Lazarus for Web Assembly.';
+    s:=Format(upInstallConfimation,['FPC trunk','Lazarus trunk',' + cross WebAssembly compiler + tools']);
     aFPCTarget:='trunk'+GITLABEXTENSION;
     aLazarusTarget:='trunk'+GITLABEXTENSION;
     aModule:='pas2js-rtl';
@@ -2181,7 +2210,7 @@ begin
 
   if Sender=AndroidBtn then
   begin
-    s:='Going to install FPC and Lazarus stable, armv7/arm64 cross-android compilers and LAMW.';
+    s:=Format(upInstallConfimation,['FPC stable','Lazarus stable',' + cross armv7/arm64 android compilers + LAMW']);
     aFPCTarget:='stable'+GITLABEXTENSION;
     aLazarusTarget:='stable'+GITLABEXTENSION;
     aModule:='lamw';
@@ -2221,12 +2250,12 @@ begin
   begin
     if Sender=PicoBtn then
     begin
-      s:='Going to install FPC and Lazarus for Raspberry Pico.';
+      s:=Format(upInstallConfimation,['FPC embedded','Lazarus trunk',' + cross arm Raspberry Pico compiler + tools']);
       aModule:='develtools4fpc';
     end;
     if Sender=WioBtn then
     begin
-      s:='Going to install FPC and Lazarus for Wio Terminal.';
+      s:=Format(upInstallConfimation,['FPC embedded','Lazarus trunk',' + cross arm Wio Terminal compiler + tools']);
       aModule:='develtools4fpc,mbf-freertos-wio';
     end;
     aFPCTarget:='embedded'+GITLABEXTENSION;
@@ -2235,7 +2264,7 @@ begin
 
   if Sender=ESPBtn then
   begin
-    s:='Going to install FPC and Lazarus for ESP32.';
+    s:=Format(upInstallConfimation,['FPC trunk','Lazarus trunk',' + cross arm ESP32 (FreeRTOS) compiler + tools']);
     aModule:='xtensatools4fpc';
     aFPCTarget:='trunk'+GITLABEXTENSION;
     aLazarusTarget:='trunk'+GITLABEXTENSION;
@@ -2243,29 +2272,29 @@ begin
 
   if Sender=mORMotBtn then
   begin
-    s:='Going to install the mORMot.';
+    s:=Format(upInstallConfimationSimple,['mORMot']);
     aModule:='mORMot';
     //aModule:='mORMot,zeos';
   end;
 
   if Sender=UltiboBtn then
   begin
-    s:='Going to install the Ultibo.';
+    s:=Format(upInstallConfimationSimple,['Ultibo']);
     aFPCTarget:='ultibo.git';
     aLazarusTarget:='ultibo.git';
   end;
 
   if Sender=OPMBtn then
   begin
-    s:='Going to install the Online Package Manager ';
+    s:=Format(upInstallConfimationSimple,['Online Package Manager']);
     aModule:='opm';
     //FPCupManager.OnlyModules:='mORMot,zeos';
   end;
 
-  s:=s+sLineBreak;
+  s:=s+sLineBreak+sLineBreak;
   s:=s+upInstallDirectory+': '+Self.sInstallDir;
   if Form2.AskConfirmation then
-    if (MessageDlg(s+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+    if (MessageDlgEx(s+sLineBreak+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
       exit;
 
   if ( AnsiEndsText(GITLABEXTENSION,aFPCTarget) AND AnsiEndsText(GITLABEXTENSION,aLazarusTarget)) then
@@ -2522,7 +2551,7 @@ begin
     s:=s+sLineBreak;
     s:=s+upQuestionContinue;
     if Form2.AskConfirmation then
-      if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+      if (MessageDlgEx(s,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
         exit;
 
     if Sender=btnInstallModule then
@@ -2591,7 +2620,7 @@ begin
   if (Sender<>nil) then
   begin
     if Form2.AskConfirmation then
-      if (MessageDlg('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'(Win64 OS disabled extended support for 64-bit applications)'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+      if (MessageDlgEx('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'(Win64 OS disabled extended support for 64-bit applications)'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo])<>mrYes) then
         exit;
   end;
   {$endif}
@@ -2865,13 +2894,13 @@ begin
 
   if (FPCupManager.CrossCPU_Target=TCPU.cpuNone) then
   begin
-    if Sender<>nil then Application.MessageBox(PChar('Please select a CPU target first.'), PChar('CPU error'), MB_ICONERROR);
+    if Sender<>nil then Application.MessageBox(PChar(upSelectCPUTarget), PChar('CPU error'), MB_ICONERROR);
     exit;
   end;
 
   if (FPCupManager.CrossOS_Target=TOS.osNone) then
   begin
-    if Sender<>nil then Application.MessageBox(PChar('Please select an OS target first.'), PChar('OS error'), MB_ICONERROR);
+    if Sender<>nil then Application.MessageBox(PChar(upSelectOSTarget), PChar('OS error'), MB_ICONERROR);
     exit;
   end;
 
@@ -2880,7 +2909,7 @@ begin
     if (NOT (FPCupManager.CrossOS_Target in [TOS.freertos,TOS.ultibo])) then
     begin
       memoSummary.Lines.Append('');
-      memoSummary.Lines.Append('FPC source (fpmkunit.pp): No valid CPU / OS target.');
+      memoSummary.Lines.Append('From current FPC source: No valid CPU/OS target.');
       memoSummary.Lines.Append('Cross-building will continue, but with great changes of errors !!');
     end;
   end;
@@ -2922,7 +2951,7 @@ begin
   begin
     s:=upRemoveCrossCompiler+' ['+GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target)+'].'+sLineBreak+upQuestionContinue;
     if Form2.AskConfirmation then
-      if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+      if (MessageDlgEx(s,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
         exit;
 
     DisEnable(Sender,False);
@@ -3061,9 +3090,9 @@ begin
 
       if (length(s)=0) then
         s:=upQuestionContinue;
-      s:=upInstallCrossCompiler+ sLineBreak+'['+FPCupManager.CrossCombo_Target+']'+sLineBreak+s;
+      s:=upInstallCrossCompiler+' ['+FPCupManager.CrossCombo_Target+']'+sLineBreak+s;
       if Form2.AskConfirmation then
-        if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+        if (MessageDlgEx(s,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
           exit;
     end;
 
@@ -3258,8 +3287,8 @@ begin
 
           if (Sender<>nil) then
           begin
-            if (MessageDlg(upMissingTools+sLineBreak+upAdvertiseTools+sLineBreak+upQuestionContinue
-                     ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+            if (MessageDlgEx(upMissingTools+sLineBreak+upAdvertiseTools+sLineBreak+upQuestionContinue
+                     ,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
                      begin
                        exit;
                      end;
@@ -3633,7 +3662,7 @@ begin
     s:=s+upInstallDirectory+': '+Self.sInstallDir;
     s:=s+sLineBreak;
     s:=s+upQuestionContinue;
-    if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then exit;
+    if (MessageDlgEx(s,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then exit;
   end;
 
   DisEnable(Sender,False);
@@ -4113,7 +4142,7 @@ begin
 
   if Pos(' ',FPCupManager.BaseDirectory)>0 then
   begin
-    if (MessageDlg(upSpaceWarning+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+    if (MessageDlgEx(upSpaceWarning+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
       exit;
   end;
 
@@ -4858,7 +4887,7 @@ begin
   begin
     if (sConsentWarning) then
     begin
-      aModalResult:=(MessageDlg(
+      aModalResult:=(MessageDlgEx(
                    'Attention !'+sLineBreak+
                    sLineBreak +
                    'Fpcupdeluxe is able to log some install info.' + sLineBreak +
@@ -4867,7 +4896,7 @@ begin
                    '(see URL shown in screen and statusbar)' + sLineBreak +
                    sLineBreak +
                    'Do you want logging info to be gathered ?'
-                 ,mtConfirmation,[mbYes, mbNo],0));
+                 ,mtConfirmation,[mbYes, mbNo],Self));
       if aModalResult=mrYes
          then Form2.SendInfo:=True
          else Form2.SendInfo:=False;

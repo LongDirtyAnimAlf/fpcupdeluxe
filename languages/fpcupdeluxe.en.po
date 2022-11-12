@@ -175,6 +175,16 @@ msgstr ""
 msgid "Please check the folder permissions, and re-start."
 msgstr ""
 
+#: fpcupdeluxemainform.upinstallconfimation
+#, object-pascal-format
+msgid "Going to install %s and %s%s."
+msgstr ""
+
+#: fpcupdeluxemainform.upinstallconfimationsimple
+#, object-pascal-format
+msgid "Going to install the %s."
+msgstr ""
+
 #: fpcupdeluxemainform.upinstallcrosscompiler
 msgid "Going to install the cross-compiler for"
 msgstr ""
@@ -243,6 +253,10 @@ msgstr ""
 msgid "Going to remove module"
 msgstr ""
 
+#: fpcupdeluxemainform.upselectcputarget
+msgid "Please select a CPU target first."
+msgstr ""
+
 #: fpcupdeluxemainform.upselectfpclazarustarget
 msgid "Please select a FPC and Lazarus target first"
 msgstr ""
@@ -253,6 +267,10 @@ msgstr ""
 
 #: fpcupdeluxemainform.upselectlazarustarget
 msgid "Please select a Lazarus target first"
+msgstr ""
+
+#: fpcupdeluxemainform.upselectostarget
+msgid "Please select an OS target first."
 msgstr ""
 
 #: fpcupdeluxemainform.upspacewarning
