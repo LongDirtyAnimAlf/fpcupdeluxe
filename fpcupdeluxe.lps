@@ -22,6 +22,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
+        <TopLine Value="2606"/>
+        <CursorPos X="262" Y="2623"/>
         <UsageCount Value="23"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -35,6 +37,7 @@
         <EditorIndex Value="1"/>
         <UsageCount Value="23"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
@@ -367,11 +370,10 @@
       </Position28>
       <Position29>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret TopLine="16"/>
+        <Caret Line="383" Column="18" TopLine="369"/>
       </Position29>
       <Position30>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="383" Column="18" TopLine="369"/>
       </Position30>
     </JumpHistory>
     <RunParams>

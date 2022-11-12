@@ -2620,7 +2620,7 @@ begin
   if (Sender<>nil) then
   begin
     if Form2.AskConfirmation then
-      if (MessageDlgEx('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'(Win64 OS disabled extended support for 64-bit applications)'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo])<>mrYes) then
+      if (MessageDlgEx('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'(Win64 OS disabled extended support for 64-bit applications)'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
         exit;
   end;
   {$endif}

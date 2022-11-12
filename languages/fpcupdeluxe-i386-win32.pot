@@ -127,169 +127,210 @@ msgctxt "extrasettings.hintusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
 msgstr ""
 
-#: fpcupdeluxemainform.upadvertisetools
+#: fpcupdeluxemainformreader.upadvertisetools
+msgctxt "fpcupdeluxemainformreader.upadvertisetools"
 msgid "FPCUPdeluxe can try to download them if available !"
 msgstr ""
 
-#: fpcupdeluxemainform.upbuildallcrosscompilers
+#: fpcupdeluxemainformreader.upbuildallcrosscompilers
+msgctxt "fpcupdeluxemainformreader.upbuildallcrosscompilers"
 msgid "Going to auto-build all installed cross-compilers !"
 msgstr ""
 
-#: fpcupdeluxemainform.upbuildallcrosscompilerscheck
+#: fpcupdeluxemainformreader.upbuildallcrosscompilerscheck
+msgctxt "fpcupdeluxemainformreader.upbuildallcrosscompilerscheck"
 msgid "Checking FPC configfile [fpc.cfg] for cross-compilers in "
 msgstr ""
 
-#: fpcupdeluxemainform.upbuildallcrosscompilersfound
+#: fpcupdeluxemainformreader.upbuildallcrosscompilersfound
+msgctxt "fpcupdeluxemainformreader.upbuildallcrosscompilersfound"
 msgid "Found crosscompiler for "
 msgstr ""
 
-#: fpcupdeluxemainform.upbuildallcrosscompilersupdate
+#: fpcupdeluxemainformreader.upbuildallcrosscompilersupdate
+msgctxt "fpcupdeluxemainformreader.upbuildallcrosscompilersupdate"
 msgid "Going to update cross-compiler."
 msgstr ""
 
-#: fpcupdeluxemainform.upbuildcrosscompiler
+#: fpcupdeluxemainformreader.upbuildcrosscompiler
+msgctxt "fpcupdeluxemainformreader.upbuildcrosscompiler"
 msgid "Going to install a cross-compiler from available sources."
 msgstr ""
 
-#: fpcupdeluxemainform.upcheckupdate
+#: fpcupdeluxemainformreader.upcheckupdate
+msgctxt "fpcupdeluxemainformreader.upcheckupdate"
 msgid "Please wait. Checking for updates."
 msgstr ""
 
-#: fpcupdeluxemainform.updarwinfolderwarning1
+#: fpcupdeluxemainformreader.updarwinfolderwarning1
+msgctxt "fpcupdeluxemainformreader.updarwinfolderwarning1"
 msgid "FPCUPdeluxe cannot be run inside the Downloads folder."
 msgstr ""
 
-#: fpcupdeluxemainform.updarwinfolderwarning2
+#: fpcupdeluxemainformreader.updarwinfolderwarning2
+msgctxt "fpcupdeluxemainformreader.updarwinfolderwarning2"
 msgid "This is NOT allowed by OSX security measures."
 msgstr ""
 
-#: fpcupdeluxemainform.updarwinfolderwarning3
+#: fpcupdeluxemainformreader.updarwinfolderwarning3
+msgctxt "fpcupdeluxemainformreader.updarwinfolderwarning3"
 msgid "Copy FPCUPdeluxe into its own directory and run from there."
 msgstr ""
 
-#: fpcupdeluxemainform.upfolderwarning1
+#: fpcupdeluxemainformreader.upfolderwarning1
+msgctxt "fpcupdeluxemainformreader.upfolderwarning1"
 msgid "FPCUPdeluxe could not create its necessary setting-files."
 msgstr ""
 
-#: fpcupdeluxemainform.upfolderwarning2
+#: fpcupdeluxemainformreader.upfolderwarning2
+msgctxt "fpcupdeluxemainformreader.upfolderwarning2"
 msgid "Please check the folder permissions, and re-start."
 msgstr ""
 
-#: fpcupdeluxemainform.upinstallconfimation
+#: fpcupdeluxemainformreader.upinstallconfimation
 #, object-pascal-format
+msgctxt "fpcupdeluxemainformreader.upinstallconfimation"
 msgid "Going to install %s and %s%s."
 msgstr ""
 
-#: fpcupdeluxemainform.upinstallconfimationsimple
+#: fpcupdeluxemainformreader.upinstallconfimationsimple
 #, object-pascal-format
+msgctxt "fpcupdeluxemainformreader.upinstallconfimationsimple"
 msgid "Going to install the %s."
 msgstr ""
 
-#: fpcupdeluxemainform.upinstallcrosscompiler
+#: fpcupdeluxemainformreader.upinstallcrosscompiler
+msgctxt "fpcupdeluxemainformreader.upinstallcrosscompiler"
 msgid "Going to install the cross-compiler for"
 msgstr ""
 
-#: fpcupdeluxemainform.upinstalldirectory
+#: fpcupdeluxemainformreader.upinstalldirectory
+msgctxt "fpcupdeluxemainformreader.upinstalldirectory"
 msgid "Install directory"
 msgstr ""
 
-#: fpcupdeluxemainform.upinstalldirectorycurrent
+#: fpcupdeluxemainformreader.upinstalldirectorycurrent
+msgctxt "fpcupdeluxemainformreader.upinstalldirectorycurrent"
 msgid "Current install directory"
 msgstr ""
 
-#: fpcupdeluxemainform.upinstallfpc
+#: fpcupdeluxemainformreader.upinstallfpc
+msgctxt "fpcupdeluxemainformreader.upinstallfpc"
 msgid "Going to install/update FPC."
 msgstr ""
 
-#: fpcupdeluxemainform.upinstallfpclazarus
+#: fpcupdeluxemainformreader.upinstallfpclazarus
+msgctxt "fpcupdeluxemainformreader.upinstallfpclazarus"
 msgid "Going to install/update FPC and Lazarus."
 msgstr ""
 
-#: fpcupdeluxemainform.upinstalllazarus
+#: fpcupdeluxemainformreader.upinstalllazarus
+msgctxt "fpcupdeluxemainformreader.upinstalllazarus"
 msgid "Going to install/update Lazarus."
 msgstr ""
 
-#: fpcupdeluxemainform.upinstallmodule
+#: fpcupdeluxemainformreader.upinstallmodule
+msgctxt "fpcupdeluxemainformreader.upinstallmodule"
 msgid "Going to install/update module"
 msgstr ""
 
-#: fpcupdeluxemainform.upinstallsettingscurrent
+#: fpcupdeluxemainformreader.upinstallsettingscurrent
+msgctxt "fpcupdeluxemainformreader.upinstallsettingscurrent"
 msgid "Got settings from install directory"
 msgstr ""
 
-#: fpcupdeluxemainform.uplookup
+#: fpcupdeluxemainformreader.uplookup
+msgctxt "fpcupdeluxemainformreader.uplookup"
 msgid "Looking for"
 msgstr ""
 
-#: fpcupdeluxemainform.uplookupbintools
+#: fpcupdeluxemainformreader.uplookupbintools
+msgctxt "fpcupdeluxemainformreader.uplookupbintools"
 msgid "Going to look for the right cross-bins. Can (will) take some time !"
 msgstr ""
 
-#: fpcupdeluxemainform.uplookuplibtools
+#: fpcupdeluxemainformreader.uplookuplibtools
+msgctxt "fpcupdeluxemainformreader.uplookuplibtools"
 msgid "Going to look for the right cross-libraries. Can (will) take some time !"
 msgstr ""
 
-#: fpcupdeluxemainform.uplookuptools
+#: fpcupdeluxemainformreader.uplookuptools
+msgctxt "fpcupdeluxemainformreader.uplookuptools"
 msgid "Looking for FPCUPdeluxe cross-tools on GitHub (if any)."
 msgstr ""
 
-#: fpcupdeluxemainform.upmissingtools
+#: fpcupdeluxemainformreader.upmissingtools
+msgctxt "fpcupdeluxemainformreader.upmissingtools"
 msgid "The building of a crosscompiler failed due to missing cross-tools."
 msgstr ""
 
-#: fpcupdeluxemainform.upquestioncontinue
+#: fpcupdeluxemainformreader.upquestioncontinue
+msgctxt "fpcupdeluxemainformreader.upquestioncontinue"
 msgid "Do you want to continue ?"
 msgstr ""
 
-#: fpcupdeluxemainform.upquitrequest
+#: fpcupdeluxemainformreader.upquitrequest
+msgctxt "fpcupdeluxemainformreader.upquitrequest"
 msgid "Please quit FPCUPdeluxe."
 msgstr ""
 
-#: fpcupdeluxemainform.upremovecrosscompiler
+#: fpcupdeluxemainformreader.upremovecrosscompiler
+msgctxt "fpcupdeluxemainformreader.upremovecrosscompiler"
 msgid "Going to remove the cross-compiler for"
 msgstr ""
 
-#: fpcupdeluxemainform.upremovemodule
+#: fpcupdeluxemainformreader.upremovemodule
+msgctxt "fpcupdeluxemainformreader.upremovemodule"
 msgid "Going to remove module"
 msgstr ""
 
-#: fpcupdeluxemainform.upselectcputarget
+#: fpcupdeluxemainformreader.upselectcputarget
+msgctxt "fpcupdeluxemainformreader.upselectcputarget"
 msgid "Please select a CPU target first."
 msgstr ""
 
-#: fpcupdeluxemainform.upselectfpclazarustarget
+#: fpcupdeluxemainformreader.upselectfpclazarustarget
+msgctxt "fpcupdeluxemainformreader.upselectfpclazarustarget"
 msgid "Please select a FPC and Lazarus target first"
 msgstr ""
 
-#: fpcupdeluxemainform.upselectfpctarget
+#: fpcupdeluxemainformreader.upselectfpctarget
+msgctxt "fpcupdeluxemainformreader.upselectfpctarget"
 msgid "Please select a FPC target first"
 msgstr ""
 
-#: fpcupdeluxemainform.upselectlazarustarget
+#: fpcupdeluxemainformreader.upselectlazarustarget
+msgctxt "fpcupdeluxemainformreader.upselectlazarustarget"
 msgid "Please select a Lazarus target first"
 msgstr ""
 
-#: fpcupdeluxemainform.upselectostarget
+#: fpcupdeluxemainformreader.upselectostarget
+msgctxt "fpcupdeluxemainformreader.upselectostarget"
 msgid "Please select an OS target first."
 msgstr ""
 
-#: fpcupdeluxemainform.upspacewarning
+#: fpcupdeluxemainformreader.upspacewarning
+msgctxt "fpcupdeluxemainformreader.upspacewarning"
 msgid "Having a space in your install path is very ill-advised !"
 msgstr ""
 
-#: fpcupdeluxemainform.uptrybuildcrosscompiler
+#: fpcupdeluxemainformreader.uptrybuildcrosscompiler
+msgctxt "fpcupdeluxemainformreader.uptrybuildcrosscompiler"
 msgid "Trying to build the cross-compiler for"
 msgstr ""
 
-#: fpcupdeluxemainform.upupdatecrossall
+#: fpcupdeluxemainformreader.upupdatecrossall
+msgctxt "fpcupdeluxemainformreader.upupdatecrossall"
 msgid "Going to update all crosscompilers"
 msgstr ""
 
-#: fpcupdeluxemainform.upupdatefound
+#: fpcupdeluxemainformreader.upupdatefound
+msgctxt "fpcupdeluxemainformreader.upupdatefound"
 msgid "New FPCUPdeluxe version available"
 msgstr ""
 
-#: fpcupdeluxemainform.upupdatenotfound
+#: fpcupdeluxemainformreader.upupdatenotfound
+msgctxt "fpcupdeluxemainformreader.upupdatenotfound"
 msgid "No updates found."
 msgstr ""
 
@@ -353,438 +394,6 @@ msgstr ""
 
 #: processutils.lisunabletoreadprocessexitstatus
 msgid "unable to read process ExitStatus"
-msgstr ""
-
-#: tform1.actfileexit.caption
-msgid "E&xit"
-msgstr ""
-
-#: tform1.actfileexit.hint
-msgid "Exit"
-msgstr ""
-
-#: tform1.actfilesave.caption
-msgid "&Save log"
-msgstr ""
-
-#: tform1.actfilesave.hint
-msgid "Save As"
-msgstr ""
-
-#: tform1.androidbtn.caption
-msgid "LAMW"
-msgstr ""
-
-#: tform1.androidbtn.hint
-msgid "Will install/update FPC and Lazarus stable and LAMW"
-msgstr ""
-
-#: tform1.basicsheet.caption
-msgid "Basic"
-msgstr ""
-
-#: tform1.bitbtnfpcandlazarus.caption
-msgid "Install/update FPC+Lazarus"
-msgstr ""
-
-#: tform1.bitbtnfpcandlazarus.hint
-msgid "Will install/update the selected version of both FPC and Lazarus."
-msgstr ""
-
-#: tform1.bitbtnfpconly.caption
-msgid "Only FPC"
-msgstr ""
-
-#: tform1.bitbtnfpconly.hint
-msgid "Only install/update selected FPC version."
-msgstr ""
-
-#: tform1.bitbtnfpconlytag.caption
-msgctxt "tform1.bitbtnfpconlytag.caption"
-msgid "Add Tag"
-msgstr ""
-
-#: tform1.bitbtnfpconlytag.hint
-msgid "Add tag/url into FPC install list"
-msgstr ""
-
-#: tform1.bitbtnfpcsetrevision.caption
-msgid "Set FPC hash in Setup+"
-msgstr ""
-
-#: tform1.bitbtnfpcsetrevision.hint
-msgid "Set FPC revision"
-msgstr ""
-
-#: tform1.bitbtnhalt.caption
-msgid "STOP"
-msgstr ""
-
-#: tform1.bitbtnhalt.hint
-msgid "Try to stop current install process"
-msgstr ""
-
-#: tform1.bitbtnlazarusonly.caption
-msgid "Only Lazarus"
-msgstr ""
-
-#: tform1.bitbtnlazarusonly.hint
-msgid "Only install/update selected Lazarus version."
-msgstr ""
-
-#: tform1.bitbtnlazarusonlytag.caption
-msgctxt "tform1.bitbtnlazarusonlytag.caption"
-msgid "Add Tag"
-msgstr ""
-
-#: tform1.bitbtnlazarusonlytag.hint
-msgid "Add tag/url into Lazarus install list"
-msgstr ""
-
-#: tform1.bitbtnlazarussetrevision.caption
-msgid "Set Lazarus hash in Setup+"
-msgstr ""
-
-#: tform1.bitbtnlazarussetrevision.hint
-msgid "Set Lazarus revision"
-msgstr ""
-
-#: tform1.btnchecktoolslocations.caption
-msgid "Check Tools Location"
-msgstr ""
-
-#: tform1.btnclearlog.caption
-msgid "Clear log"
-msgstr ""
-
-#: tform1.btncreatelazarusconfig.caption
-msgid "Create Lazarus Configuration"
-msgstr ""
-
-#: tform1.btngetopenssl.caption
-msgid "Get OpenSSL by Browser"
-msgstr ""
-
-#: tform1.btninstalldirselect.caption
-msgid "Set install path"
-msgstr ""
-
-#: tform1.btninstallmodule.caption
-msgid "Install module"
-msgstr ""
-
-#: tform1.btninstallmodule.hint
-msgid "Install the selected module."
-msgstr ""
-
-#: tform1.btnsendlog.caption
-msgid "Email log"
-msgstr ""
-
-#: tform1.btnsendlog.hint
-msgid "Send email to fpcup maintainer containing Commandscreen output."
-msgstr ""
-
-#: tform1.btnsetupplus.caption
-msgid "Setup+"
-msgstr ""
-
-#: tform1.btnsetupplus.hint
-msgid "Open the extended settings form."
-msgstr ""
-
-#: tform1.btnuninstallmodule.caption
-msgid "Uninstall module"
-msgstr ""
-
-#: tform1.btnuninstallmodule.hint
-msgid "Uninstall the selected module."
-msgstr ""
-
-#: tform1.btnupdatelazarusmakefiles.caption
-msgid "Update Lazarus Makefiles"
-msgstr ""
-
-#: tform1.buttonautocrossupdate.caption
-msgid "Update all"
-msgstr ""
-
-#: tform1.buttonautocrossupdate.hint
-msgid "Auto-update all installed cross-compilers."
-msgstr ""
-
-#: tform1.buttoninstallcrosscompiler.caption
-msgid "Install compiler"
-msgstr ""
-
-#: tform1.buttoninstallcrosscompiler.hint
-msgid "Install the selected CPU-OS cross-compiler."
-msgstr ""
-
-#: tform1.buttonremovecrosscompiler.caption
-msgid "Remove compiler"
-msgstr ""
-
-#: tform1.buttonremovecrosscompiler.hint
-msgid "Remove the selected CPU-OS cross-compiler."
-msgstr ""
-
-#: tform1.buttonsubarchselect.caption
-msgid "Set subarch"
-msgstr ""
-
-#: tform1.buttonsubarchselect.hint
-msgid "Select a subarch for embedded target."
-msgstr ""
-
-#: tform1.checkautoclear.caption
-msgid "Auto clear"
-msgstr ""
-
-#: tform1.chkgitlab.caption
-msgid "GitLab"
-msgstr ""
-
-#: tform1.chkmakefilefpc.caption
-msgid "Check Makefile FPC"
-msgstr ""
-
-#: tform1.chkmakefilelaz.caption
-msgid "Check Makefile Lazarus"
-msgstr ""
-
-#: tform1.createstartup.caption
-msgid "Re-create startup scripts"
-msgstr ""
-
-#: tform1.crosssheet.caption
-msgid "Cross"
-msgstr ""
-
-#: tform1.espbtn.caption
-msgid "ESP32"
-msgstr ""
-
-#: tform1.espbtn.hint
-msgid "Get FPC for ESP32 [lx6] boards"
-msgstr ""
-
-#: tform1.extrasheet.caption
-msgid "Extras"
-msgstr ""
-
-#: tform1.fixesbtn.caption
-msgid "Fixes"
-msgstr ""
-
-#: tform1.fixesbtn.hint
-msgid "Will install/update current fixes versions of both FPC and Lazarus"
-msgstr ""
-
-#: tform1.fpchistorylabel.caption
-msgid "FPC revision history"
-msgstr ""
-
-#: tform1.fpctaglabel.caption
-msgctxt "tform1.fpctaglabel.caption"
-msgid "FPC version"
-msgstr ""
-
-#: tform1.fpcversionlabel.caption
-msgctxt "tform1.fpcversionlabel.caption"
-msgid "FPC version"
-msgstr ""
-
-#: tform1.historysheet.caption
-msgid "History"
-msgstr ""
-
-#: tform1.installdiredit.hint
-msgid "Directory to install FPC and Lazarus"
-msgstr ""
-
-#: tform1.lazarushistorylabel.caption
-msgid "Lazarus revision history"
-msgstr ""
-
-#: tform1.lazarustaglabel.caption
-msgctxt "tform1.lazarustaglabel.caption"
-msgid "Lazarus version"
-msgstr ""
-
-#: tform1.lazarusversionlabel.caption
-msgctxt "tform1.lazarusversionlabel.caption"
-msgid "Lazarus version"
-msgstr ""
-
-#: tform1.listboxfpchistory.columns[0].caption
-msgctxt "tform1.listboxfpchistory.columns[0].caption"
-msgid "Hash"
-msgstr ""
-
-#: tform1.listboxfpchistory.columns[1].caption
-msgctxt "tform1.listboxfpchistory.columns[1].caption"
-msgid "Date"
-msgstr ""
-
-#: tform1.listboxlazarushistory.columns[0].caption
-msgctxt "tform1.listboxlazarushistory.columns[0].caption"
-msgid "Hash"
-msgstr ""
-
-#: tform1.listboxlazarushistory.columns[1].caption
-msgctxt "tform1.listboxlazarushistory.columns[1].caption"
-msgid "Date"
-msgstr ""
-
-#: tform1.mchinesecnlanguage.caption
-msgid "Chinese (CN)"
-msgstr ""
-
-#: tform1.mdutchlanguage.caption
-msgid "Dutch (NL)"
-msgstr ""
-
-#: tform1.memosummary.hint
-msgid "Will show info and error"
-msgstr ""
-
-#: tform1.menglishlanguage.caption
-msgid "English (EN)"
-msgstr ""
-
-#: tform1.menufile.caption
-msgid "&File"
-msgstr ""
-
-#: tform1.menuitem1.caption
-msgid "About"
-msgstr ""
-
-#: tform1.menuitem2.caption
-msgid "Languages"
-msgstr ""
-
-#: tform1.menuitem3.caption
-msgid "Issues"
-msgstr ""
-
-#: tform1.mfpcbugs.caption
-msgid "FPC bugs"
-msgstr ""
-
-#: tform1.mfrenchlanguage.caption
-msgid "French (F)"
-msgstr ""
-
-#: tform1.mgermanlanguage.caption
-msgid "German (D)"
-msgstr ""
-
-#: tform1.missuesforum.caption
-msgid "Up Lazarus forum"
-msgstr ""
-
-#: tform1.missuesgithub.caption
-msgid "Up GitHub issues"
-msgstr ""
-
-#: tform1.mkoreanlanguage.caption
-msgid "Korean (KR)"
-msgstr ""
-
-#: tform1.mlazarusbugs.caption
-msgid "Lazarus bugs"
-msgstr ""
-
-#: tform1.modulesheet.caption
-msgid "Modules"
-msgstr ""
-
-#: tform1.mormotbtn.caption
-msgid "mORMot"
-msgstr ""
-
-#: tform1.mormotbtn.hint
-msgid "Get the mORMot for FPC"
-msgstr ""
-
-#: tform1.opmbtn.caption
-msgid "OPM"
-msgstr ""
-
-#: tform1.opmbtn.hint
-msgid "Will install/update the Online Package Manager"
-msgstr ""
-
-#: tform1.picobtn.caption
-msgid "Pico"
-msgstr ""
-
-#: tform1.picobtn.hint
-msgid "Get FPC for armv6m RPi Pico"
-msgstr ""
-
-#: tform1.radgrpcpu.caption
-msgid "CPU"
-msgstr ""
-
-#: tform1.radgrpos.caption
-msgid "OS"
-msgstr ""
-
-#: tform1.realfpcurl.hint
-msgctxt "tform1.realfpcurl.hint"
-msgid "Double click to allow editing"
-msgstr ""
-
-#: tform1.reallazurl.hint
-msgctxt "tform1.reallazurl.hint"
-msgid "Double click to allow editing"
-msgstr ""
-
-#: tform1.stablebtn.caption
-msgid "Stable"
-msgstr ""
-
-#: tform1.stablebtn.hint
-msgid "Will install/update stable versions of both FPC and Lazarus"
-msgstr ""
-
-#: tform1.statusmessage.text
-msgid "Sitting and waiting"
-msgstr ""
-
-#: tform1.tagsheet.caption
-msgid "Tags"
-msgstr ""
-
-#: tform1.trunkbtn.caption
-msgid "Trunk"
-msgstr ""
-
-#: tform1.trunkbtn.hint
-msgid "Will install/update trunk version of both FPC and Lazarus."
-msgstr ""
-
-#: tform1.ultibobtn.hint
-msgid "Install baremetal Ultibo for RPi3"
-msgstr ""
-
-#: tform1.wabtn.caption
-msgid "WA"
-msgstr ""
-
-#: tform1.wabtn.hint
-msgid "Install FPC and Lazarus for Web Assembly"
-msgstr ""
-
-#: tform1.wiobtn.caption
-msgid "Wio"
-msgstr ""
-
-#: tform1.wiobtn.hint
-msgid "Get FPC for SAMD51 embedded on Wio Terminal"
 msgstr ""
 
 #: tform2.btnaddfpcpatch.caption
