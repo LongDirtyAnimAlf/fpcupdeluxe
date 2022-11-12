@@ -4339,7 +4339,7 @@ begin
   AddMessage(Self.Caption);
   {$ifndef NetBSD}
   AddMessage('Running on '+GetDistro);
-  AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win10 x86_64');
+  AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
   {$ifdef FreeBSD}
   AddMessage('Detected mayor FreeBSD version '+InttoStr(GetFreeBSDVersion));
   {$endif FreeBSD}
@@ -4358,7 +4358,6 @@ begin
 
   Cores:=GetLogicalCpuCount;
   if Cores<>0 then AddMessage('CPU cores used: '+InttoStr(Cores));
-
   MemAvailable:=GetTotalPhysicalMemory;
   if (MemAvailable<>0) then AddMessage('Available physical memory: '+InttoStr(MemAvailable)+' MB');
 
@@ -4390,8 +4389,7 @@ begin
     with TIniFile.Create(IniDirectory+installerUniversal.DELUXEFILENAME) do
     try
       AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
-      AddMessage('');
-      AddMessage(upInstallSettingsCurrent);
+      AddMessage(upInstallSettingsCurrent+'.');
       AddMessage('');
 
       chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);

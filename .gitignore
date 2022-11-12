@@ -59,9 +59,9 @@ Temporary Items
 *.bak
 *.local
 
-*.pot
-*.mo
-!./languages/*.po
+languages/*.mo
+languages/*.pot
+!languages/fpcupdeluxe-i386-win32.pot
 
 logger/secrets.inc
 secrets/

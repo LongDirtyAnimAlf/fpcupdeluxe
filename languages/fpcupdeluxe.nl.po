@@ -242,7 +242,7 @@ msgstr "Module gaan installeren/updaten"
 #: fpcupdeluxemainform.upinstallsettingscurrent
 msgctxt "fpcupdeluxemainform.upinstallsettingscurrent"
 msgid "Got settings from install directory"
-msgstr "Heb instellingen uit de installatiemap"
+msgstr "Gebruik de instellingen uit de installatiemap"
 
 #: fpcupdeluxemainform.uplookup
 msgctxt "fpcupdeluxemainform.uplookup"
@@ -252,7 +252,7 @@ msgstr "Zoeken naar"
 #: fpcupdeluxemainform.uplookupbintools
 msgctxt "fpcupdeluxemainform.uplookupbintools"
 msgid "Going to look for the right cross-bins. Can (will) take some time !"
-msgstr "Ga op zoek naar de juiste kruisbakken. Kan (zal) even duren !"
+msgstr "Ga op zoek naar de juiste cross-tools. Kan (zal) even duren !"
 
 #: fpcupdeluxemainform.uplookuplibtools
 msgctxt "fpcupdeluxemainform.uplookuplibtools"
