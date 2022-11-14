@@ -1,123 +1,86 @@
 object Form1: TForm1
-  Left = 530
+  Left = 166
   Height = 502
   Top = 210
   Width = 1110
   Caption = 'Form1'
   ClientHeight = 502
   ClientWidth = 1110
-  LCLVersion = '2.1.0.0'
-  object Button1: TButton
-    Left = 32
-    Height = 77
-    Top = 64
-    Width = 183
-    Caption = 'Button1'
-    OnClick = Button1Click
-    TabOrder = 0
-  end
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '2.3.0.0'
   object Memo1: TMemo
-    Left = 672
+    Left = 360
     Height = 452
     Top = 24
     Width = 341
-    Lines.Strings = (
-      'Memo1'
-    )
     ScrollBars = ssVertical
-    TabOrder = 1
+    TabOrder = 0
   end
   object Button2: TButton
-    Left = 36
+    Left = 8
     Height = 38
-    Top = 176
-    Width = 94
-    Caption = 'Button2'
+    Top = 240
+    Width = 88
+    Caption = 'Get baselibs'
     OnClick = Button2Click
-    TabOrder = 2
+    TabOrder = 1
   end
   object BaseLibsMemo: TMemo
-    Left = 280
-    Height = 456
-    Top = 24
-    Width = 248
+    Left = 136
+    Height = 192
+    Top = 240
+    Width = 176
     Lines.Strings = (
+      'crt1'
       'crtbegin'
       'crtbeginS'
       'crtend'
       'crtendS'
       'crti'
       'crtn'
-      'ld-'
-      'ld-linux-'
-      'libatk-'
-      'libblkid'
-      'libbsd'
-      'libbz2'
-      'libc'
-      'libc-'
+      'libatk-1.0'
       'libcairo'
-      'libcrypt'
-      'libdatrie'
-      'libdb-'
-      'libdbus-'
+      'libdbus'
       'libdl'
-      'libdl-'
-      'libdmx'
       'libdouble-conversion'
       'libdrm'
       'libEGL'
       'libexif'
-      'libexpat'
       'libffi'
       'libFLAC'
       'libfontconfig'
       'libfreetype'
-      'libfribidi'
-      'libgbm'
       'libgcc_s'
-      'libgdk_pixbuf_xlib-'
-      'libgdk_pixbuf-'
-      'libgdk-x11-'
-      'libgio-2.'
+      'libgdk-x11-2.0'
+      'libgdk_pixbuf-2.0'
       'libGL'
-      'libglade-'
+      'libglade'
       'libglapi'
       'libGLESv1_CM'
       'libGLESv2'
       'libGLEW'
-      'libglib-2.'
-      'libgmodule-'
-      'libgobject-'
+      'libglib-2'
+      'libgmodule'
+      'libgmodule-2.0'
+      'libgobject'
+      'libgobject-2.0'
       'libgraphite2'
-      'libgthread-'
-      'libgtk-'
-      'libgtk-x11-'
-      'libharfbuzz'
+      'libgthread'
+      'libgthread-2.0'
+      'libgtk-x11-2.0'
       'libiconv'
       'libicudata'
       'libicui18n'
       'libicuuc'
       'libintl'
       'libjpeg'
-      'liblayer_utils'
-      'liblzma'
-      'libm'
-      'libm-'
+      'liblatk-1.0'
       'libncurses'
-      'libpango-'
-      'libpangocairo-1.'
-      'libpangoft2-1.'
-      'libpangoxft-'
+      'libpango-1.0'
       'libpcre'
       'libpcre16'
-      'libpixman-'
-      'libpng12'
-      'libpng16'
-      'libproxy'
       'libpthread'
-      'libpthread-'
-      'libpulse'
       'libQt5Core'
       'libQt5Gui'
       'libQt5Network'
@@ -125,70 +88,111 @@ object Form1: TForm1
       'libQt5PrintSupport'
       'libQt5Widgets'
       'libQt5X11Extras'
-      'libraw'
       'libreadline'
-      'libresolv'
-      'librt'
-      'librt-'
-      'libsasl2'
       'libSDL-'
       'libSDL2-'
-      'libselinux'
-      'libsensors'
       'libsqlite3'
-      'libssl3'
       'libstdc++'
-      'libthai'
       'libtiff'
       'libudev'
       'libusb-'
-      'libuuid'
       'libv4l1'
       'libv4l2'
       'libv4lconvert'
-      'libVkLayer_core_validation'
-      'libVkLayer_device_limits'
-      'libVkLayer_image'
-      'libVkLayer_object_tracker'
-      'libVkLayer_parameter_validation'
-      'libVkLayer_swapchain'
-      'libVkLayer_threading'
-      'libVkLayer_unique_objects'
       'libvulkan'
-      'libwayland-client'
-      'libwayland-server'
       'libX11'
-      'libX11-xcb'
-      'libXau'
-      'libxcb'
-      'libxcb-dri2'
-      'libxcb-dri3'
-      'libxcb-glx'
-      'libxcb-present'
-      'libxcb-render'
-      'libxcb-shm'
-      'libxcb-sync'
-      'libXcomposite'
-      'libXcursor'
-      'libXdamage'
-      'libXdmcp'
-      'libXext'
-      'libXfixes'
-      'libXi'
-      'libXinerama'
-      'libXrandr'
-      'libXrender'
-      'libxshmfence'
       'libXtst'
       'libXxf86vm'
       'libz'
     )
     ScrollBars = ssVertical
-    TabOrder = 3
+    TabOrder = 2
     WordWrap = False
   end
+  object Memo2: TMemo
+    Left = 736
+    Height = 452
+    Top = 24
+    Width = 341
+    ScrollBars = ssVertical
+    TabOrder = 3
+  end
+  object Memo3: TMemo
+    Left = 136
+    Height = 214
+    Top = 8
+    Width = 172
+    Lines.Strings = (
+      'ld-uClibc.so'
+      'libatk-1.0.so'
+      'libcairo.so'
+      'libc.so'
+      'libdl.so'
+      'libgdk-3.so'
+      'libgdk_pixbuf-2.0.so'
+      'libgio-2.0.so'
+      'libglib-2.0.so'
+      'libgmodule-2.0.so'
+      'libgobject-2.0.so'
+      'libgobject-2.0.so'
+      'libgobject-2.0.so'
+      'libgthread-2.0.so'
+      'libgtk-3.so'
+      'libjavascriptcoregtk-3.0.so'
+      'libm.so'
+      'libpango-1.0.so'
+      'libpango-1.0.so'
+      'libpangocairo-1.0.so'
+      'libpthread.so'
+      'libpx.so'
+      'libSDL-1.1.so'
+      'libSDL-1.2.so'
+      'libSDL-1.2.so'
+      'libSDL_image-1.2.so'
+      'libSDL_mixer-1.2.so'
+      'libSDL_ttf-2.0.so'
+      'libwebkitgtk-3.0.so'
+      'libwebkitgtk-3.0.so'
+      'libX11.so'
+    )
+    ReadOnly = True
+    ScrollBars = ssVertical
+    TabOrder = 4
+    WordWrap = False
+  end
+  object Button1: TButton
+    Left = 14
+    Height = 63
+    Top = 8
+    Width = 73
+    Caption = 'Button1'
+    OnClick = Button1Click
+    TabOrder = 5
+  end
+  object Button5: TButton
+    Left = 23
+    Height = 39
+    Top = 151
+    Width = 83
+    Caption = 'Get Lazarus'
+    OnClick = Button5Click
+    TabOrder = 6
+  end
+  object Button6: TButton
+    Left = 24
+    Height = 31
+    Top = 448
+    Width = 288
+    Caption = 'Button6'
+    OnClick = Button6Click
+    TabOrder = 7
+  end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
-    Left = 190
-    Top = 19
+    Left = 544
+    Top = 64
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 416
+    Top = 40
   end
 end
