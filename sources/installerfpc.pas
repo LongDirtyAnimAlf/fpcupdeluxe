@@ -4151,21 +4151,7 @@ begin
         end;
 
         s := IncludeTrailingPathDelimiter(s2)+FPCPKGCOMPILERTEMPLATE;
-        {$ifdef MSWINDOWS}
-        // On Windows, a file without extension is not detected as a file.
-        // Try to circumvent. Very tricky indeed.
-        x:=-1;
-        FileList:=TStringList.Create;
-        try
-          FindAllFiles(FileList,s2,'',false);
-          x:=StringListEndsWith(FileList,DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
-        finally
-          FileList.Free;
-        end;
-        if (x=-1) then
-        {$else}
         if (NOT FileExists(s)) then
-        {$endif}
         begin
           //Create default compiler template
           //if CheckFPCMkCfgOption('-4') then
@@ -4780,9 +4766,9 @@ begin
   begin
     if (NOT CrossCompiling) then
     begin
-      Infoln(infotext+'Deleting some FPC package config files.', etInfo);
-      //DeleteFile(IncludeTrailingPathDelimiter(BaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGFILENAME);
-      DeleteFile(IncludeTrailingPathDelimiter(BaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
+      //Infoln(infotext+'Deleting some FPC package config files.', etInfo);
+      //DeleteFile(ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCONFIGFILENAME);
+      //DeleteFile(ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
       {$IFDEF UNIX}
       // Delete any fpc.sh shell scripts
       Infoln(infotext+'Deleting fpc.sh script.', etInfo);

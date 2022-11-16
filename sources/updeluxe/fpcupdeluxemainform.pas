@@ -1814,8 +1814,8 @@ begin
     Special := True;
   end;
 
-  // special override for debugging statemachine
-  if ExistWordInString(PChar(s),'sequencer',[soWholeWord]) then
+  // special override for debugging statemachine and tools availability
+  if ((ExistWordInString(PChar(s),'sequencer',[soWholeWord])) OR (ExistWordInString(PChar(s),'libs: none')) OR (ExistWordInString(PChar(s),'bins: none'))) then
   begin
     begin
       FG      := clRed;
@@ -2106,6 +2106,8 @@ var
   success:boolean;
   BinsFileName,LibsFileName,BaseBinsURL,BaseLibsURL,BinPath,LibPath:string;
 begin
+  AddMessage('Please be patient. Might take some time to scan all libs and bins.');
+  AddMessage('');
   for aOS := Low(TOS) to High(TOS) do
   begin
     if aOS=osNone then continue;
@@ -2139,6 +2141,9 @@ begin
   end;
   FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
   FPCupManager.CrossOS_Target:=TOS.osNone;
+
+  AddMessage('');
+  AddMessage('Scanning libs and bins ready.');
 end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);
