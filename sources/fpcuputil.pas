@@ -437,7 +437,7 @@ uses
   ,bzip2stream
   ,DCPdes
   ,DCPsha256
-  ,NumCPULib  in './numcpulib/NumCPULib.pas'
+  ,NumCPULib  in '../numcpulib/NumCPULib.pas'
   {$IFDEF USEMORMOT}
   ,mormot.net.client
   ,mormot.core.buffers
@@ -5660,7 +5660,15 @@ begin
 
   With TProcess.Create(nil) do
   try
-    CommandLine:=WGETBinary+' -q --no-check-certificate --user-agent="'+FUserAgent+'" --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
+    Executable:=WGETBinary;
+    // It seems that gitlab and github do'nt like the ipv6+wget combo
+    if ((Pos('github.com/',URL)>0) OR (Pos('gitlab.com/',URL)>0)) then Parameters.Add('-4');
+    Parameters.Add('-q');
+    Parameters.Add('--no-check-certificate');
+    Parameters.Add('--user-agent="'+FUserAgent+'"');
+    Parameters.Add('--tries='+InttoStr(MaxRetries));
+    Parameters.Add('--output-document=-');
+    Parameters.Add(URL);
     Options:=[poUsePipes,poNoConsole];
     Execute;
     while Running do
@@ -6031,8 +6039,8 @@ begin
   if AnsiStartsText('http',P) then
   begin
     Output:='';
-    result:=RunCommand(WGETBinary,['--no-check-certificate','--user-agent="'+FUserAgent+'"','--tries='+InttoStr(MaxRetries),'--spider',aURL],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-
+    // It seems that gitlab and github don't like the ipv6+wget combo, so add option "-4"
+    result:=RunCommand(WGETBinary,['-4','--no-check-certificate','--user-agent="'+FUserAgent+'"','--tries='+InttoStr(MaxRetries),'--spider',aURL],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
     if result then
     begin
       result:=(Pos('Remote file exists',Output)>0);

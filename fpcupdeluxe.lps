@@ -5,15 +5,15 @@
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linux64,linuxaarch64,linuxaarch64QT5,linuxaarch64QT5zip,linuxarm,linuxarmQT5,linuxarmQT5zip,linuxarmv6,linuxi386QT5,linuxx64QT5,linuxx64QT5zip,linuxppc64,freebsdi386,freebsdx64,netbsdx64,solarisx64,dragonflyx64,openbsdx64"/>
     <BuildModes Active="Default"/>
-    <Units Count="32">
+    <Units Count="43">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="49"/>
-        <CursorPos X="22" Y="57"/>
-        <UsageCount Value="23"/>
+        <TopLine Value="137"/>
+        <CursorPos Y="170"/>
+        <UsageCount Value="29"/>
       </Unit0>
       <Unit1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
@@ -21,10 +21,8 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="2606"/>
-        <CursorPos X="262" Y="2623"/>
-        <UsageCount Value="23"/>
+        <CursorPos Y="6"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -35,7 +33,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit2>
@@ -43,7 +41,7 @@
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynEditPopup"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="29"/>
       </Unit3>
       <Unit4>
         <Filename Value="sources\updeluxe\aboutfrm.pas"/>
@@ -52,7 +50,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="AboutFrm"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="29"/>
       </Unit4>
       <Unit5>
         <Filename Value="sources\updeluxe\infounit.pas"/>
@@ -60,7 +58,7 @@
         <ComponentName Value="InfoForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="29"/>
       </Unit5>
       <Unit6>
         <Filename Value="sources\updeluxe\modulesettings.pas"/>
@@ -68,13 +66,13 @@
         <ComponentName Value="Form3"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="29"/>
       </Unit6>
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="2"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit7>
@@ -82,21 +80,23 @@
         <Filename Value="sources\settings.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="3"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit8>
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <UsageCount Value="23"/>
+        <CursorPos X="29" Y="4"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
       </Unit9>
       <Unit10>
         <Filename Value="sources\processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="29"/>
       </Unit10>
       <Unit11>
         <Filename Value="sources\updeluxe\subarch.pas"/>
@@ -104,278 +104,237 @@
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="29"/>
       </Unit11>
       <Unit12>
+        <Filename Value="text.txt"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="3"/>
+        <UsageCount Value="23"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="sources\text1.txt"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="11"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit13>
+      <Unit14>
         <Filename Value="sources\fpcupdefines.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="26"/>
         <UsageCount Value="10"/>
-      </Unit12>
-      <Unit13>
+      </Unit14>
+      <Unit15>
         <Filename Value="C:\fpcupsystems\stable\lazarus\ide\buildmanager.pas"/>
         <UnitName Value="BuildManager"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="490"/>
         <CursorPos X="7" Y="497"/>
         <UsageCount Value="10"/>
-      </Unit13>
-      <Unit14>
+      </Unit15>
+      <Unit16>
         <Filename Value="C:\fpcupsystems\stable\lazarus\ide\environmentopts.pp"/>
         <UnitName Value="EnvironmentOpts"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2513"/>
         <CursorPos X="72" Y="2530"/>
         <UsageCount Value="10"/>
-      </Unit14>
-      <Unit15>
+      </Unit16>
+      <Unit17>
         <Filename Value="languages\fpcupdeluxe.en.po"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="138"/>
         <CursorPos X="24" Y="154"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="PO"/>
-      </Unit15>
-      <Unit16>
+      </Unit17>
+      <Unit18>
         <Filename Value="languages\fpcupdeluxe.nl.po"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="163"/>
         <CursorPos X="24" Y="179"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="PO"/>
-      </Unit16>
-      <Unit17>
+      </Unit18>
+      <Unit19>
         <Filename Value="languages\fpcupdeluxe.fr.po"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="152"/>
         <CursorPos X="23" Y="168"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="PO"/>
-      </Unit17>
-      <Unit18>
+      </Unit19>
+      <Unit20>
         <Filename Value="languages\fpcupdeluxe.de.po"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="275"/>
         <CursorPos X="24" Y="164"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="PO"/>
-      </Unit18>
-      <Unit19>
+      </Unit20>
+      <Unit21>
         <Filename Value="sources\installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="143"/>
-        <CursorPos Y="164"/>
-        <UsageCount Value="11"/>
-      </Unit19>
-      <Unit20>
+        <TopLine Value="2621"/>
+        <CursorPos Y="2645"/>
+        <UsageCount Value="12"/>
+      </Unit21>
+      <Unit22>
         <Filename Value="sources\m_crossinstaller.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="306"/>
         <CursorPos X="53" Y="322"/>
         <UsageCount Value="11"/>
-      </Unit20>
-      <Unit21>
+      </Unit22>
+      <Unit23>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\dialogs.pp"/>
         <UnitName Value="Dialogs"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="28"/>
         <CursorPos X="39" Y="44"/>
         <UsageCount Value="10"/>
-      </Unit21>
-      <Unit22>
+      </Unit23>
+      <Unit24>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\include\messagedialogs.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="121"/>
         <CursorPos X="31" Y="148"/>
         <UsageCount Value="10"/>
-      </Unit22>
-      <Unit23>
+      </Unit24>
+      <Unit25>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\include\lclintfh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="76"/>
         <CursorPos X="16" Y="92"/>
         <UsageCount Value="10"/>
-      </Unit23>
-      <Unit24>
+      </Unit25>
+      <Unit26>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\include\lclintf.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="370"/>
         <CursorPos X="3" Y="373"/>
         <UsageCount Value="10"/>
-      </Unit24>
-      <Unit25>
+      </Unit26>
+      <Unit27>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\include\intfbaselcl.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="536"/>
         <CursorPos X="3" Y="543"/>
         <UsageCount Value="10"/>
-      </Unit25>
-      <Unit26>
+      </Unit27>
+      <Unit28>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\interfacebase.pp"/>
         <UnitName Value="InterfaceBase"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="189"/>
         <CursorPos X="4" Y="195"/>
         <UsageCount Value="10"/>
-      </Unit26>
-      <Unit27>
+      </Unit28>
+      <Unit29>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\include\promptdialog.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="22"/>
         <CursorPos X="15" Y="38"/>
         <UsageCount Value="10"/>
-      </Unit27>
-      <Unit28>
+      </Unit29>
+      <Unit30>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\interfaces\fpgui\fpguiwsprivate.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2169"/>
         <CursorPos X="3" Y="2186"/>
         <UsageCount Value="10"/>
-      </Unit28>
-      <Unit29>
+      </Unit30>
+      <Unit31>
         <Filename Value="C:\fpcupsystems\stable\lazarus\components\lazcontrols\shortpathedit.pas"/>
         <UnitName Value="ShortPathEdit"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="30"/>
         <CursorPos X="14" Y="23"/>
         <UsageCount Value="10"/>
-      </Unit29>
-      <Unit30>
+      </Unit31>
+      <Unit32>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\editbtn.pas"/>
         <UnitName Value="EditBtn"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="337"/>
         <CursorPos X="3" Y="354"/>
         <UsageCount Value="10"/>
-      </Unit30>
-      <Unit31>
+      </Unit32>
+      <Unit33>
         <Filename Value="C:\fpcupsystems\stable\lazarus\components\onlinepackagemanager\opkman_common.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="19" Y="25"/>
         <UsageCount Value="10"/>
-      </Unit31>
+      </Unit33>
+      <Unit34>
+        <Filename Value="C:\fpcupsystems\trunk\lazarus\lcl\interfaces\gtk3\gtk3bindings\lazgmodule2.pas"/>
+        <UnitName Value="LazGModule2"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="21" Y="15"/>
+        <UsageCount Value="11"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="sources\fpcuputil.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="5995"/>
+        <CursorPos Y="6042"/>
+        <UsageCount Value="12"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="C:\fpcupsystems\stable\lazarus\components\lazutils\fileutil.pas"/>
+        <UnitName Value="FileUtil"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="189"/>
+        <CursorPos X="16" Y="205"/>
+        <UsageCount Value="10"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="C:\fpcupsystems\stable\lazarus\components\lazutils\fileutil.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="209"/>
+        <CursorPos X="3" Y="217"/>
+        <UsageCount Value="10"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="sources\installerfpc.pas"/>
+        <UnitName Value="installerFpc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4157"/>
+        <CursorPos X="46" Y="4174"/>
+        <UsageCount Value="12"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\objpas\sysutils\filutilh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="206"/>
+        <CursorPos X="10" Y="206"/>
+        <UsageCount Value="11"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\packages\fpmkunit\src\fpmkunit.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="6205"/>
+        <CursorPos X="14" Y="6209"/>
+        <UsageCount Value="11"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\linux\x86_64\stat.inc"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="3" Y="17"/>
+        <UsageCount Value="11"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\fcl-process\src\processbody.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="108"/>
+        <CursorPos X="14" Y="124"/>
+        <UsageCount Value="11"/>
+      </Unit42>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
-      <Position1>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3770" Column="33" TopLine="3743"/>
-      </Position1>
-      <Position2>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3772" Column="33" TopLine="3745"/>
-      </Position2>
-      <Position3>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3774" Column="33" TopLine="3747"/>
-      </Position3>
-      <Position4>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3772" Column="17" TopLine="3747"/>
-      </Position4>
-      <Position5>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2624" Column="14" TopLine="2606"/>
-      </Position5>
-      <Position6>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3376" Column="39" TopLine="3349"/>
-      </Position6>
-      <Position7>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3407" Column="39" TopLine="3380"/>
-      </Position7>
-      <Position8>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3423" Column="76" TopLine="3396"/>
-      </Position8>
-      <Position9>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3436" Column="80" TopLine="3409"/>
-      </Position9>
-      <Position10>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3502" Column="39" TopLine="3475"/>
-      </Position10>
-      <Position11>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3531" Column="39" TopLine="3504"/>
-      </Position11>
-      <Position12>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3547" Column="76" TopLine="3520"/>
-      </Position12>
-      <Position13>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3560" Column="80" TopLine="3533"/>
-      </Position13>
-      <Position14>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-      </Position14>
-      <Position15>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="283" Column="35" TopLine="255"/>
-      </Position15>
-      <Position16>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="284" Column="39" TopLine="256"/>
-      </Position16>
-      <Position17>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="287" Column="45" TopLine="259"/>
-      </Position17>
-      <Position18>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="292" Column="27" TopLine="264"/>
-      </Position18>
-      <Position19>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="293" Column="31" TopLine="265"/>
-      </Position19>
-      <Position20>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="294" Column="34" TopLine="266"/>
-      </Position20>
-      <Position21>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="296" Column="30" TopLine="268"/>
-      </Position21>
-      <Position22>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="297" Column="29" TopLine="269"/>
-      </Position22>
-      <Position23>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="299" Column="8" TopLine="271"/>
-      </Position23>
-      <Position24>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3093" Column="76" TopLine="3075"/>
-      </Position24>
-      <Position25>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3290" Column="37" TopLine="3263"/>
-      </Position25>
-      <Position26>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="305" Column="3" TopLine="288"/>
-      </Position26>
-      <Position27>
-        <Filename Value="sources\updeluxe\extrasettings.pas"/>
-        <Caret Line="264" Column="18" TopLine="261"/>
-      </Position27>
-      <Position28>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="305" Column="3" TopLine="288"/>
-      </Position28>
-      <Position29>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="383" Column="18" TopLine="369"/>
-      </Position29>
-      <Position30>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-      </Position30>
-    </JumpHistory>
+    <JumpHistory HistoryIndex="-1"/>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>

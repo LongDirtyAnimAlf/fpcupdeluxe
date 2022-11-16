@@ -1144,10 +1144,15 @@ begin
     else
       Infoln(localinfotext+'SVN client found: ' + SVNClient.RepoExecutable+'.',etDebug);
 
-
     {$ifndef USEONLYCURL}
-    FWget:=Which('wget');
+    FWget:=Which('wget'+GetExeExt);
     if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + 'wget\wget.exe';
+    {$ifdef win32}
+    if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + 'wget\wget-openssl-x86.exe';
+    {$endif}
+    {$ifdef win64}
+    if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + 'wget\wget-openssl-x64.exe';
+    {$endif}
     if Not FileExists(FWget) then
     begin
       Infoln(localinfotext+'Getting Wget.',etInfo);
@@ -2625,7 +2630,9 @@ end;
 function TInstaller.DownloadWget: boolean;
 const
   {$ifdef win64}
-  NewSourceURL : array [0..1] of string = (
+  NewSourceURL : array [0..2] of string = (
+    FPCUPGITREPO+'/releases/download/windowsx64bins_v1.0/wget-openssl-x64.exe',
+    // From https://github.com/webfolderio/wget-windows/releases/download/v1.21.3.june.19.2022/wget-openssl-x64.exe
     FPCUPGITREPO+'/releases/download/windowsx64bins_v1.0/wget.exe',
     //'https://eternallybored.org/misc/wget/1.19.4/64/wget.exe'
     //'https://eternallybored.org/misc/wget/1.20/64/wget.exe'
@@ -2633,7 +2640,9 @@ const
     );
   {$endif}
   {$ifdef win32}
-  NewSourceURL : array [0..1] of string = (
+  NewSourceURL : array [0..2] of string = (
+    FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/wget-openssl-x86.exe',
+    // From https://github.com/webfolderio/wget-windows/releases/download/v1.21.3.june.19.2022/wget-openssl-x86.exe
     FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/wget.exe',
     //'https://eternallybored.org/misc/wget/1.19.4/32/wget.exe'
     //'https://eternallybored.org/misc/wget/1.20/32/wget.exe'
@@ -2642,23 +2651,21 @@ const
   {$endif}
 var
   OperationSucceeded: boolean;
-  WgetExe: string;
+  WgetDir,WgetExe: string;
   //WgetFile,WgetZip: string;
   i:integer;
 begin
+  OperationSucceeded := false;
   Infoln(localinfotext+'No Wget found. Going to download it.',etInfo);
 
-  OperationSucceeded := false;
+  WgetDir:=ConcatPaths([FMakeDir,'wget']);
+  WgetExe:=WgetDir+DirectorySeparator+'wget'+GetExeExt;
 
-  if ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'wget') then
+  if ForceDirectoriesSafe(WgetDir) then
   begin
-    WgetExe := IncludeTrailingPathDelimiter(FMakeDir)+'wget'+DirectorySeparator+'wget.exe';
-
-    //WgetZip := GetTempFileNameExt('FPCUPTMP','zip');
-
     for i:=0 to (Length(NewSourceURL)-1) do
     try
-      //WgetFile:=FileNameFromURL(NewSourceURL[i]);
+      WgetExe:=WgetDir+DirectorySeparator+FileNameFromURL(NewSourceURL[i]);
 
       //always get this file with the native downloader !!
       OperationSucceeded:=GetFile(NewSourceURL[i],WgetExe,true,true);
@@ -2672,7 +2679,6 @@ begin
         SysUtils.DeleteFile(WgetExe)
       else
         break;
-
     except
       on E: Exception do
       begin
@@ -2682,8 +2688,7 @@ begin
     end;
 
   end;
-
-  if NOT OperationSucceeded then SysUtils.Deletefile(WgetExe);
+  if OperationSucceeded then FWget:=WgetExe;
   Result := OperationSucceeded;
 end;
 
