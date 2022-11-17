@@ -22,8 +22,6 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="2098"/>
-        <CursorPos X="18" Y="2110"/>
         <UsageCount Value="31"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -95,15 +93,15 @@
         <Loaded Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="sources\processutils.pas"/>
-        <UsageCount Value="31"/>
-      </Unit10>
-      <Unit11>
         <Filename Value="sources\updeluxe\subarch.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UsageCount Value="31"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="sources\processutils.pas"/>
         <UsageCount Value="31"/>
       </Unit11>
       <Unit12>
@@ -123,7 +121,7 @@
       <Unit14>
         <Filename Value="sources\fpcupdefines.inc"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="26"/>
+        <CursorPos X="3" Y="12"/>
         <UsageCount Value="10"/>
       </Unit14>
       <Unit15>
@@ -302,8 +300,8 @@
         <Filename Value="sources\installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="4144"/>
-        <CursorPos Y="4155"/>
+        <TopLine Value="22"/>
+        <CursorPos X="13" Y="34"/>
         <UsageCount Value="13"/>
       </Unit38>
       <Unit39>
@@ -334,7 +332,7 @@
         <UsageCount Value="11"/>
       </Unit42>
     </Units>
-    <JumpHistory Count="2" HistoryIndex="1">
+    <JumpHistory Count="3" HistoryIndex="2">
       <Position1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="1817" Column="53" TopLine="1799"/>
@@ -343,6 +341,10 @@
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="2110" Column="18" TopLine="2098"/>
       </Position2>
+      <Position3>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="2110" Column="18" TopLine="2098"/>
+      </Position3>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

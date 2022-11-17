@@ -334,68 +334,6 @@ msgctxt "fpcupdeluxemainform.upupdatenotfound"
 msgid "No updates found."
 msgstr ""
 
-#: processutils.lisaborted
-msgid "Aborted"
-msgstr ""
-
-#: processutils.liscannotexecute
-#, object-pascal-format
-msgid "cannot execute \"%s\""
-msgstr ""
-
-#: processutils.liscannotfindexecutable
-#, object-pascal-format
-msgid "cannot find executable \"%s\""
-msgstr ""
-
-#: processutils.lisexecutableisadirectory
-#, object-pascal-format
-msgid "executable \"%s\" is a directory"
-msgstr ""
-
-#: processutils.lisexecutablelacksthepermissiontorun
-#, object-pascal-format
-msgid "executable \"%s\" lacks the permission to run"
-msgstr ""
-
-#: processutils.lisexitcode
-#, object-pascal-format
-msgid "Exit code %s"
-msgstr ""
-
-#: processutils.lisfreeingbufferlines
-#, object-pascal-format
-msgid "freeing buffer lines: %s"
-msgstr ""
-
-#: processutils.lismissingdirectory
-#, object-pascal-format
-msgid "missing directory \"%s\""
-msgstr ""
-
-#: processutils.lismissingexecutable
-#, object-pascal-format
-msgid "missing executable \"%s\""
-msgstr ""
-
-#: processutils.lissuccess
-msgid "Success"
-msgstr ""
-
-#: processutils.listoolhasnoexecutable
-#, object-pascal-format
-msgid "tool \"%s\" has no executable"
-msgstr ""
-
-#: processutils.lisunabletoexecute
-#, object-pascal-format
-msgid "unable to execute: %s"
-msgstr ""
-
-#: processutils.lisunabletoreadprocessexitstatus
-msgid "unable to read process ExitStatus"
-msgstr ""
-
 #: tform1.actfileexit.caption
 msgid "E&xit"
 msgstr ""
