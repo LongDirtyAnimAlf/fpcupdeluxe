@@ -437,7 +437,7 @@ uses
   ,bzip2stream
   ,DCPdes
   ,DCPsha256
-  ,NumCPULib  in '../numcpulib/NumCPULib.pas'
+  ,NumCPULib  in './numcpulib/NumCPULib.pas'
   {$IFDEF USEMORMOT}
   ,mormot.net.client
   ,mormot.core.buffers

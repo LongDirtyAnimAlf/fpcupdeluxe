@@ -144,6 +144,9 @@ type
     function GetSplitLazarus:boolean;
     procedure SetSplitLazarus(value:boolean);
 
+    function GetDockedLazarus:boolean;
+    procedure SetDockedLazarus(value:boolean);
+
     function GetUseWget:boolean;
     procedure SetUseWget(value:boolean);
 
@@ -259,6 +262,7 @@ type
 
     property SplitFPC:boolean read GetSplitFPC write SetSplitFPC;
     property SplitLazarus:boolean read GetSplitLazarus write SetSplitLazarus;
+    property DockedLazarus:boolean read GetDockedLazarus write SetDockedLazarus;
 
     property UseWget:boolean read GetUseWget write SetUseWget;
     property MakeJobs:boolean read GetMakeJobs write SetMakeJobs;
@@ -329,6 +333,9 @@ resourcestring
 
   HintCheckSplitLazarus = '';
   CaptionCheckSplitLazarus = 'Split Lazarus source and bins.';
+
+  HintCheckDockedLazarus = 'Build a docked Lazarus IDE';
+  CaptionCheckDockedLazarus = 'Docked Lazarus IDE.';
 
   HintCheckUseWget = '';
   CaptionCheckUseWget = 'Use wget/libcurl as downloader.';
@@ -557,6 +564,8 @@ begin
   SplitLazarus:=False;
   SetCheckEnabled(CaptionCheckSplitLazarus,False);
 
+  DockedLazarus:=False;
+
   {$IF defined(CPUAARCH64) OR defined(CPUARM) OR defined(Haiku)}
   // disable some features
   UseSoftFloat:=false;
@@ -598,6 +607,7 @@ begin
     Append(CaptionCheckIncludeHelp);
     Append(CaptionCheckSplitFPC);
     Append(CaptionCheckSplitLazarus);
+    Append(CaptionCheckDockedLazarus);
     Append(CaptionCheckUseWget);
     Append(CaptionCheckUseMakeJobs);
     Append(CaptionCheckExtraVerbose);
@@ -1359,6 +1369,15 @@ end;
 procedure TForm2.SetSplitLazarus(value:boolean);
 begin
   SetCheckState(CaptionCheckSplitLazarus,value);
+end;
+
+function TForm2.GetDockedLazarus:boolean;
+begin
+  result:=GetCheckState(CaptionCheckDockedLazarus);
+end;
+procedure TForm2.SetDockedLazarus(value:boolean);
+begin
+  SetCheckState(CaptionCheckDockedLazarus,value);
 end;
 
 function TForm2.GetUseWget:boolean;

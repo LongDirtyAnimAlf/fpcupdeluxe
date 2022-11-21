@@ -196,9 +196,10 @@ end;
 procedure TGitClient.CheckOut(UseForce:boolean=false);
 // SVN checkout is more or less equivalent to git clone
 var
-  Command: string = '';
-  Output: string = '';
-  RetryAttempt: integer;
+  Command       : string = '';
+  Output        : string = '';
+  RetryAttempt  : integer;
+  Branch        : string;
   //TargetFile: string;
 begin
   if NOT ValidClient then exit;
@@ -231,9 +232,6 @@ begin
     begin
       // initial : very shallow clone = fast !!
       Command := ' clone --recurse-submodules --depth 1';
-      if (DesiredBranch<>'') then
-        Command := Command +' -b ' + DesiredBranch;
-
     end;
   end
   else
@@ -244,18 +242,26 @@ begin
     {$else}
     Command := ' clone --recurse-submodules';
     {$endif}
-    if (DesiredBranch<>'') then
-      Command := Command +' -b ' + DesiredBranch;
   end;
 
   if (Command<>'') then
   begin
+    Branch:='';
+    if (DesiredBranch<>'') then
+    begin
+      Branch := DesiredBranch;
+    end
+    else
     if (Length(DesiredRevision)>0) AND (Uppercase(trim(DesiredRevision)) <> 'HEAD') then
-      Command := Command+ ' ' + DesiredRevision;
-
+    begin
+      Branch := DesiredRevision;
+    end
+    else
     if (Length(DesiredTag)>0) AND (Uppercase(trim(DesiredTag)) <> 'MAIN') AND (Uppercase(trim(DesiredTag)) <> 'MASTER') then
-      //Command := Command+ ' --depth 1 --branch ' + DesiredTag;
-      Command := Command+ ' --branch ' + DesiredTag;
+    begin
+      Branch := DesiredTag;
+    end;
+    if (Length(Branch)>0) then Command := Command+ ' --branch ' + Branch;
 
     Command := Command + ' ' +  Repository + ' ' + LocalRepository;
 
@@ -665,8 +671,6 @@ begin
     result:='';
   end;
 end;
-
-
 
 function TGitClient.GetLocalRevision: string;
 var

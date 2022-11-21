@@ -752,51 +752,59 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) then
   begin
-    EchoInfo(BeginSnippet+' Start of compile error summary.');
 
-    if (ExistWordInString(PChar(s),'fatal: internal error')) then
+    if (ExistWordInString(PChar(s),'fatal: Remote branch')) then
     begin
-      x:=RPos(' ',s);
-      if x>0 then
-      begin
-        InternalError:=Copy(s,x+1,MaxInt);
-        EchoInfo('Compiler error: '+InternalError);
-      end;
+      EchoInfo('We have had a GIT branch failure. Should be non-fatal !');
     end
-    else if (ExistWordInString(PChar(s),'error: user defined')) then
+    else
     begin
-      x:=Pos('error: user defined',LowerCase(s));
-      if x>0 then
+      EchoInfo(BeginSnippet+' Start of compile error summary.');
+      if (ExistWordInString(PChar(s),'fatal: internal error')) then
       begin
-        x:=x+Length('error: user defined');
-        InternalError:=Copy(s,x+2,MaxInt);
-        EchoInfo('Configuration error: '+InternalError);
-        x:=Pos('80 bit extended floating point',LowerCase(s));
+        x:=RPos(' ',s);
         if x>0 then
         begin
-          EchoInfo('Please use trunk that has 80-bit float type using soft float unit !');
+          InternalError:=Copy(s,x+1,MaxInt);
+          EchoInfo('Compiler error: '+InternalError);
         end;
+      end
+      else if (ExistWordInString(PChar(s),'error: user defined')) then
+      begin
+        x:=Pos('error: user defined',LowerCase(s));
+        if x>0 then
+        begin
+          x:=x+Length('error: user defined');
+          InternalError:=Copy(s,x+2,MaxInt);
+          EchoInfo('Configuration error: '+InternalError);
+          x:=Pos('80 bit extended floating point',LowerCase(s));
+          if x>0 then
+          begin
+            EchoInfo('Please use trunk that has 80-bit float type using soft float unit !');
+          end;
+        end;
+      end
+      else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
+      begin
+        EchoInfo('We have had a SVN connection failure. Just start again !');
+        EchoInfo(Lines[Pred(Lines.Count)-1]);
+      end
+      else if (ExistWordInString(PChar(s),'fatal:')) then
+      begin
+        EchoInfo(s);
+        EchoInfo(Lines[Pred(Lines.Count)-1]);
+      end
+      else if (ExistWordInString(PChar(s),'error:')) then
+      begin
+        // check if "error:" at the end of the line.
+        // if so:
+        // the real error will follow on the next line(s).
+        // and we have to wait for these lines (done somewhere else in this procedure) !!
+        // if not, just print the error message.
+        if (Pos('error:',lowercase(s))<>(Length(s)-Length('error:')+1)) then EchoInfo(s);
       end;
-    end
-    else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
-    begin
-      EchoInfo('We have had a SVN connection failure. Just start again !');
-      EchoInfo(Lines[Pred(Lines.Count)-1]);
-    end
-    else if (ExistWordInString(PChar(s),'fatal:')) then
-    begin
-      EchoInfo(s);
-      EchoInfo(Lines[Pred(Lines.Count)-1]);
-    end
-    else if (ExistWordInString(PChar(s),'error:')) then
-    begin
-      // check if "error:" at the end of the line.
-      // if so:
-      // the real error will follow on the next line(s).
-      // and we have to wait for these lines (done somewhere else in this procedure) !!
-      // if not, just print the error message.
-      if (Pos('error:',lowercase(s))<>(Length(s)-Length('error:')+1)) then EchoInfo(s);
     end;
+
   end;
 
   if Handled then exit;
@@ -3756,6 +3764,11 @@ begin
       end;
     end;
 
+    if (Form2.DockedLazarus) then
+    begin
+      if ((Sender=BitBtnLazarusOnly) OR (Sender=BitBtnFPCandLazarus)) then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',anchordocking';
+    end;
+
     //Delete stray comma
     s:=FPCupManager.IncludeModules;
     if Pos(',',s)=1 then
@@ -4475,6 +4488,7 @@ begin
 
       Form2.SplitFPC:=ReadBool('General','SplitFPC',Form2.SplitFPC);
       Form2.SplitLazarus:=ReadBool('General','SplitLazarus',Form2.SplitLazarus);
+      Form2.DockedLazarus:=ReadBool('General','DockedLazarus',Form2.DockedLazarus);
 
       Form2.UseWget:=ReadBool('General','UseWget',Form2.UseWget);
       Form2.MakeJobs:=ReadBool('General','MakeJobs',Form2.MakeJobs);
@@ -4575,6 +4589,7 @@ begin
 
       WriteBool('General','SplitFPC',Form2.SplitFPC);
       WriteBool('General','SplitLazarus',Form2.SplitLazarus);
+      WriteBool('General','DockedLazarus',Form2.DockedLazarus);
 
       WriteBool('General','SystemFPC',Form2.SystemFPC);
 

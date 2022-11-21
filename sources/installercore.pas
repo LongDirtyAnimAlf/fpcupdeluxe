@@ -1862,30 +1862,34 @@ begin
 
   aClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
   aClient.DesiredBranch := FBranch; //We want to update to this specific branch
-  aClient.DesiredTag := FTAG; //We want to update to this specific branch
+  aClient.DesiredTag := FTAG; //We want to update to this specific tag
 
   Output:=localinfotext+'Running '+UpperCase(aClient.RepoExecutableName)+' checkout or update';
-  if (Length(aClient.DesiredRevision)>0) then
+  ReturnCode:=Length(aClient.DesiredRevision);
+  if (ReturnCode>0) then
   begin
     Output:=Output+' of revision '+aClient.DesiredRevision;
-    if ( ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient) ) then
+    if ( ((aModuleName=_FPC) OR (aModuleName=_LAZARUS) OR (aModuleName=_LAZBUILD)) AND (aClient is TGitClient) ) then
     begin
       // A normal (short) githash is 7 or longer
-      if (Length(FDesiredRevision)<7) then
+      if (ReturnCode<7) then
       begin
         s:=(aClient as TGitClient).GetGitHash;
         if (Length(s)>0) then
         begin
           Output:=Output+' with GIT hash '+s;
-          aClient.DesiredTag := s;
-          aClient.DesiredBranch := '';
+          aClient.DesiredTag := '';
+          aClient.DesiredBranch := s;
           aClient.DesiredRevision:='';
         end;
       end
       else
+      // A short githash is 7
+      // A long githash is 40
+      if ((ReturnCode=7) OR (ReturnCode=40)) then
       begin
-        aClient.DesiredTag := FDesiredRevision;
-        aClient.DesiredBranch := '';
+        aClient.DesiredTag := '';
+        aClient.DesiredBranch := FDesiredRevision;
         aClient.DesiredRevision:='';
       end;
 

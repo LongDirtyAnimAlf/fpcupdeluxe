@@ -2017,6 +2017,7 @@ begin
     else
       (FInstaller as TFPCInstaller).NativeFPCBootstrapCompiler:=FParent.NativeFPCBootstrapCompiler;
     FInstaller.CompilerOptions:=FParent.FPCOPT;
+
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
     FInstaller.URL:=FParent.FPCURL;
     FInstaller.Branch:=FParent.FPCBranch;
@@ -2059,7 +2060,6 @@ begin
 
     FInstaller.CompilerOptions:=FParent.LazarusOPT;
 
-    FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
     // LCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
     (FInstaller as TLazarusInstaller).LCL_Platform:=FParent.LCL_Platform;
@@ -2067,6 +2067,7 @@ begin
     (FInstaller as TLazarusInstaller).PreInstallScriptPath:=FParent.LazarusPreInstallScriptPath;
     (FInstaller as TLazarusInstaller).PostInstallScriptPath:=FParent.LazarusPostInstallScriptPath;
 
+    FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
     FInstaller.URL:=FParent.LazarusURL;
     FInstaller.Branch:=FParent.LazarusBranch;
     FInstaller.TAG:=FParent.LazarusTag;
