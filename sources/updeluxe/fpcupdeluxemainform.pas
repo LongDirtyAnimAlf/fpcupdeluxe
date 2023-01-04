@@ -81,6 +81,7 @@ type
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
     MDutchlanguage: TMenuItem;
+    MUkrainianLanguage: TMenuItem;
     MFrenchlanguage: TMenuItem;
     MGermanlanguage: TMenuItem;
     MFPCBugs: TMenuItem;
@@ -2057,6 +2058,7 @@ begin
   if Sender=MGermanlanguage then sLanguage:='de';
   if Sender=MFrenchlanguage then sLanguage:='fr';
   if Sender=MDutchlanguage then sLanguage:='nl';
+  if Sender=MUkrainianLanguage then sLanguage:='uk';
   TransLate(sLanguage);
   // This is needed to update the contents of the list
   Form2.UpdateCheckBoxList;

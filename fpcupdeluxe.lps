@@ -22,6 +22,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
+        <TopLine Value="404"/>
+        <CursorPos Y="413"/>
         <UsageCount Value="31"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -332,7 +334,7 @@
         <UsageCount Value="11"/>
       </Unit42>
     </Units>
-    <JumpHistory Count="3" HistoryIndex="2">
+    <JumpHistory Count="7" HistoryIndex="6">
       <Position1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="1817" Column="53" TopLine="1799"/>
@@ -345,10 +347,36 @@
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="2110" Column="18" TopLine="2098"/>
       </Position3>
+      <Position4>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+      </Position4>
+      <Position5>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="2053" Column="3" TopLine="2051"/>
+      </Position5>
+      <Position6>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="2062" Column="7" TopLine="2052"/>
+      </Position6>
+      <Position7>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="262" Column="15" TopLine="248"/>
+      </Position7>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Line Value="413"/>
+      </Item>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>

@@ -161,7 +161,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <Libraries Value="libs\$(TargetOS);C:\msys64\mingw32\lib\;C:\msys64\mingw32\i686-w64-mingw32\lib\;C:\msys64\mingw32\lib\gcc\i686-w64-mingw32\9.3.0\"/>
+            <Libraries Value="libs\$(TargetOS);C:\msys64\mingw32\lib;C:\msys64\mingw32\i686-w64-mingw32\lib;C:\msys64\mingw32\lib\gcc\i686-w64-mingw32\9.3.0"/>
             <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-curl"/>
           </SearchPaths>
@@ -995,6 +995,7 @@ if TargetOS=&apos;openbsd&apos; then
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf2Set"/>
         <UseLineInfoUnit Value="False"/>
       </Debugging>
       <Options>
