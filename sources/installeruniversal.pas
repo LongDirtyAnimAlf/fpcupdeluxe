@@ -228,7 +228,7 @@ uses
   fpcuputil;
 
 Const
-  MAXSYSMODULES=250;
+  MAXSYSMODULES=300;
   MAXUSERMODULES=20;
   // Allow enough instructions per module:
   MAXINSTRUCTIONS=255;

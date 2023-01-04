@@ -17,6 +17,10 @@ msgstr ""
 msgid "Auto-switch repo URL."
 msgstr ""
 
+#: extrasettings.captioncheckdockedlazarus
+msgid "Docked Lazarus IDE."
+msgstr ""
+
 #: extrasettings.captioncheckenableonlinepatching
 msgid "Allow patching of sources by online patches."
 msgstr ""
@@ -96,6 +100,10 @@ msgstr ""
 
 #: extrasettings.hintcheckaskconfirmation
 msgid "Show a confirmation dialog with yes/no before every build."
+msgstr ""
+
+#: extrasettings.hintcheckdockedlazarus
+msgid "Build a docked Lazarus IDE"
 msgstr ""
 
 #: extrasettings.hintcheckenableonlinepatching
@@ -643,6 +651,10 @@ msgstr ""
 
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
+msgstr ""
+
+#: tform1.mukrainianlanguage.caption
+msgid "Ukrainian (UK)"
 msgstr ""
 
 #: tform1.memosummary.hint

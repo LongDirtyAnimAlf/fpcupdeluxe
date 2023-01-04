@@ -5580,6 +5580,10 @@ object Form1: TForm1
         Caption = 'Dutch (NL)'
         OnClick = LanguageClick
       end
+      object MUkrainianLanguage: TMenuItem
+        Caption = 'Ukrainian (UK)'
+        OnClick = LanguageClick
+      end
     end
     object MenuItem1: TMenuItem
       Caption = 'About'

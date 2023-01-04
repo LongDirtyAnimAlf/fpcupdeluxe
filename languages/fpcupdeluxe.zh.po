@@ -28,6 +28,10 @@ msgstr "始终要求确认."
 msgid "Auto-switch repo URL."
 msgstr "自动切换repo的URL."
 
+#: extrasettings.captioncheckdockedlazarus
+msgid "Docked Lazarus IDE."
+msgstr ""
+
 #: extrasettings.captioncheckenableonlinepatching
 msgid "Allow patching of sources by online patches."
 msgstr "允许通过在线修补程序修补源文件."
@@ -110,6 +114,10 @@ msgstr "Fpcupdeluxe可以通过使用本地自动补丁来自动地重新应用�
 #: extrasettings.hintcheckaskconfirmation
 msgid "Show a confirmation dialog with yes/no before every build."
 msgstr "在每次构建前,显示一个带有 是/否 的确认对话框."
+
+#: extrasettings.hintcheckdockedlazarus
+msgid "Build a docked Lazarus IDE"
+msgstr ""
 
 #: extrasettings.hintcheckenableonlinepatching
 msgid ""
@@ -642,6 +650,9 @@ msgstr "简体中文(CN)"
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
 msgstr "荷兰语(NL)"
+#: tform1.mukrainianlanguage.caption
+msgid "Ukrainian (UK)"
+msgstr "乌克兰 (UK)"
 
 #: tform1.memosummary.hint
 msgid "Will show info and error"

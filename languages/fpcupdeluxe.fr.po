@@ -26,6 +26,9 @@ msgstr "Demandez toujours une confirmation."
 #: extrasettings.captioncheckautoswitchurl
 msgid "Auto-switch repo URL."
 msgstr "Auto-switch repo URL."
+#: extrasettings.captioncheckdockedlazarus
+msgid "Docked Lazarus IDE."
+msgstr ""
 
 #: extrasettings.captioncheckenableonlinepatching
 msgid "Allow patching of sources by online patches."
@@ -107,6 +110,9 @@ msgstr "Fpcupdeluxe peut ré-appliquer les changements locaux automatiquement en
 #: extrasettings.hintcheckaskconfirmation
 msgid "Show a confirmation dialog with yes/no before every build."
 msgstr "Afficher une boîte de dialogue de confirmation avec oui/non avant chaque construction."
+#: extrasettings.hintcheckdockedlazarus
+msgid "Build a docked Lazarus IDE"
+msgstr ""
 
 #: extrasettings.hintcheckenableonlinepatching
 msgid "Fpcupdeluxe can patch the sources automagically by using online patches."
@@ -632,6 +638,10 @@ msgstr "Date"
 #: tform1.mchinesecnlanguage.caption
 msgid "Chinese (CN)"
 msgstr "Chinois (CN)"
+
+#: tform1.mukrainianlanguage.caption
+msgid "Ukrainian (UK)"
+msgstr "Ukrainien (UK)"
 
 #: tform1.memosummary.hint
 msgid "Will show info and error"

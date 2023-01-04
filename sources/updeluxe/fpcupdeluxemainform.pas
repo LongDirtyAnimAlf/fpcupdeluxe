@@ -81,6 +81,7 @@ type
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
     MDutchlanguage: TMenuItem;
+    MUkrainianLanguage: TMenuItem;
     MFrenchlanguage: TMenuItem;
     MGermanlanguage: TMenuItem;
     MFPCBugs: TMenuItem;
@@ -246,6 +247,7 @@ type
     procedure Edit1Change({%H-}Sender: TObject);
     function  PrepareRun(Sender: TObject):boolean;
     function  RealRun:boolean;
+    procedure GetSystemInfo;
     function  GetFPCUPSettings(IniDirectory:string):boolean;
     function  SetFPCUPSettings(IniDirectory:string):boolean;
     procedure FillSourceListboxes;
@@ -1191,7 +1193,7 @@ begin
     CheckAutoClear.Checked:=false;
 
     memoSummary.Lines.Append(upBuildAllCrossCompilers);
-    memoSummary.Lines.Append(upBuildAllCrossCompilersCheck + BinPath);
+    memoSummary.Lines.Append(upBuildAllCrossCompilersCheck+' '+BinPath);
     memoSummary.Lines.Append('');
 
   end
@@ -1291,9 +1293,9 @@ begin
             if (aTOS in SUBARCH_OS) AND (aTCPU in SUBARCH_CPU) AND (aTSUBARCH=saNone) then continue;
 
             if aTSUBARCH=saNone then
-              AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS)
+              AddMessage(upBuildAllCrossCompilersFound+' '+aCPU + '-' + aOS)
             else
-              AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS+ '-' + GetSubarch(aTSUBARCH));
+              AddMessage(upBuildAllCrossCompilersFound+' '+aCPU + '-' + aOS+ '-' + GetSubarch(aTSUBARCH));
 
             // build compiler
             if (Sender<>nil) then
@@ -2057,8 +2059,14 @@ begin
   if Sender=MGermanlanguage then sLanguage:='de';
   if Sender=MFrenchlanguage then sLanguage:='fr';
   if Sender=MDutchlanguage then sLanguage:='nl';
+  if Sender=MUkrainianLanguage then sLanguage:='uk';
+
   TransLate(sLanguage);
-  // This is needed to update the contents of the list
+
+  // Refresh welcome screen
+  GetSystemInfo;
+
+  // This is needed to update the contents of the options list
   Form2.UpdateCheckBoxList;
   {$endif}
 end;
@@ -4370,79 +4378,19 @@ end;
 function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   aStoredTarget:string;
-  Cores,MemAvailable,SwapAvailable:DWord;
-  {$ifdef LCLQT5}
-  QT5LibraryLocation:string;
-  {$endif}
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
-  {$ifdef READER}
-  CommandOutputScreen.Clear;
-  {$else}
-  CommandOutputScreen.ClearAll;
-  {$endif}
-  AddMessage('Welcome @ FPCUPdeluxe.');
-  AddMessage(Self.Caption);
-  {$ifndef NetBSD}
-  AddMessage('Running on '+GetDistro);
-  AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
-  {$ifdef FreeBSD}
-  AddMessage('Detected mayor FreeBSD version '+InttoStr(GetFreeBSDVersion));
-  {$endif FreeBSD}
-  {$endif NetBSD}
-
-  {$IFDEF LINUX}
-  if IsLinuxMUSL then AddMessage('Seems we are running on a MUSL Linux.');
-  {$ENDIF LINUX}
-
-  {$ifdef LCLQT5}
-  if LibWhich(LIBQT5,QT5LibraryLocation) then
-    AddMessage('Found system wide '+LIBQT5+'. '+QT5LibraryLocation+'. And that will be used.')
-  else
-    AddMessage('No system wide '+LIBQT5+' found. Some QT5 trickery will be used');
-  {$endif}
-
-  Cores:=GetLogicalCpuCount;
-  if Cores<>0 then AddMessage('CPU cores used: '+InttoStr(Cores));
-  MemAvailable:=GetTotalPhysicalMemory;
-  if (MemAvailable<>0) then AddMessage('Available physical memory: '+InttoStr(MemAvailable)+' MB');
-
-  SwapAvailable:=GetSwapFileSize;
-
-  {$IFDEF LINUX}
-  AddMessage('Available swap: '+InttoStr(SwapAvailable)+' MB');
-  {$ENDIF}
-
-  MemAvailable:=MemAvailable+SwapAvailable;
-
-  if (MemAvailable<>0) AND (MemAvailable<1500) then
-  begin
-    AddMessage('Please be warned: memory is very limited for building Lazarus');
-    {$IFDEF UNIX}
-    AddMessage('Memory advice: Please add (more) swap space !!');
-    AddMessage('Memory advice: To build Lazarus, you will need (at least) 1GB of (swap-)RAM space.');
-    memoSummary.Lines.Append(BeginSnippet+' Most likely, there will not enough RAM (swap) to build Lazarus.');
-    memoSummary.Lines.Append(BeginSnippet+' Expected error: Can''t call the assembler');
-    memoSummary.Lines.Append(BeginSnippet+' Expected error:  Can''t call the resource compiler');
-    memoSummary.Lines.Append(BeginSnippet+' Please add some RAM or swap-space (+1GB) and re-run fpcupdeluxe.');
-    {$ENDIF UNIX}
-  end;
-
-  AddMessage('');
+  GetSystemInfo;
 
   if result then
   begin
     with TIniFile.Create(IniDirectory+installerUniversal.DELUXEFILENAME) do
     try
-      AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
       AddMessage(upInstallSettingsCurrent+'.');
       AddMessage('');
 
       chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
-
-      // get names of cross-compilers
-      AutoUpdateCrossCompiler(nil);
 
       FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
 
@@ -4514,15 +4462,9 @@ begin
       Free;
     end;
 
-    AddMessage('');
-
     Form2.SetInstallDir(IniDirectory);
 
     ParseRevisions(IniDirectory);
-
-    {$ifdef usealternateui}
-    alternateui_update_interface_buttons;
-    {$endif}
   end
   else
   begin
@@ -4534,6 +4476,84 @@ begin
     {$endif}
   end;
 end;
+
+procedure TForm1.GetSystemInfo;
+var
+  Cores,MemAvailable,SwapAvailable:DWord;
+  {$ifdef LCLQT5}
+  QT5LibraryLocation:string;
+  {$endif}
+begin
+  {$ifdef READER}
+  CommandOutputScreen.Clear;
+  {$else}
+  CommandOutputScreen.ClearAll;
+  {$endif}
+
+  if (CommandOutputScreen.Lines.Count>0) then
+    CommandOutputScreen.Lines.Strings[0]:='Welcome @ FPCUPdeluxe.'
+  else
+    AddMessage('Welcome @ FPCUPdeluxe.');
+
+  AddMessage(Self.Caption);
+  {$ifndef NetBSD}
+  AddMessage('Running on '+GetDistro);
+  AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
+  {$ifdef FreeBSD}
+  AddMessage('Detected mayor FreeBSD version '+InttoStr(GetFreeBSDVersion));
+  {$endif FreeBSD}
+  {$endif NetBSD}
+
+  {$IFDEF LINUX}
+  if IsLinuxMUSL then AddMessage('Seems we are running on a MUSL Linux.');
+  {$ENDIF LINUX}
+
+  {$ifdef LCLQT5}
+  if LibWhich(LIBQT5,QT5LibraryLocation) then
+    AddMessage('Found system wide '+LIBQT5+'. '+QT5LibraryLocation+'. And that will be used.')
+  else
+    AddMessage('No system wide '+LIBQT5+' found. Some QT5 trickery will be used');
+  {$endif}
+
+  Cores:=GetLogicalCpuCount;
+  if Cores<>0 then AddMessage('CPU cores used: '+InttoStr(Cores));
+  MemAvailable:=GetTotalPhysicalMemory;
+  if (MemAvailable<>0) then AddMessage('Available physical memory: '+InttoStr(MemAvailable)+' MB');
+
+  SwapAvailable:=GetSwapFileSize;
+
+  {$IFDEF LINUX}
+  AddMessage('Available swap: '+InttoStr(SwapAvailable)+' MB');
+  {$ENDIF}
+
+  MemAvailable:=MemAvailable+SwapAvailable;
+
+  if (MemAvailable<>0) AND (MemAvailable<1500) then
+  begin
+    AddMessage('Please be warned: memory is very limited for building Lazarus');
+    {$IFDEF UNIX}
+    AddMessage('Memory advice: Please add (more) swap space !!');
+    AddMessage('Memory advice: To build Lazarus, you will need (at least) 1GB of (swap-)RAM space.');
+    memoSummary.Lines.Append(BeginSnippet+' Most likely, there will not enough RAM (swap) to build Lazarus.');
+    memoSummary.Lines.Append(BeginSnippet+' Expected error: Can''t call the assembler');
+    memoSummary.Lines.Append(BeginSnippet+' Expected error:  Can''t call the resource compiler');
+    memoSummary.Lines.Append(BeginSnippet+' Please add some RAM or swap-space (+1GB) and re-run fpcupdeluxe.');
+    {$ENDIF UNIX}
+  end;
+
+  AddMessage('');
+  AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
+  AddMessage('');
+
+  // get names of cross-compilers
+  AutoUpdateCrossCompiler(nil);
+  AddMessage('');
+
+ {$ifdef usealternateui}
+ alternateui_update_interface_buttons;
+ {$endif}
+end;
+
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;
 var

@@ -242,7 +242,12 @@ end;
 constructor TConfig.Create(const AFilename: String);
 begin
   FNew:=not(FileExists(aFileName));
-  FileName:=aFileName;
+  try
+    FileName:=aFileName;
+  except
+    //on EXMLReadError do
+    //  Exit;//eat XML exceptions
+  end;
 end;
 
 procedure TConfig.MovePath(OldPath, NewPath: string);

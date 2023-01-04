@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 166
+  Left = 440
   Height = 502
-  Top = 210
+  Top = 197
   Width = 1110
   Caption = 'Form1'
   ClientHeight = 502
@@ -100,10 +100,8 @@ object Form1: TForm1
       'libv4l2'
       'libv4lconvert'
       'libvulkan'
-      'libX11'
       'libXtst'
       'libXxf86vm'
-      'libz'
     )
     ScrollBars = ssVertical
     TabOrder = 2
@@ -154,6 +152,7 @@ object Form1: TForm1
       'libwebkitgtk-3.0.so'
       'libwebkitgtk-3.0.so'
       'libX11.so'
+      'libz.so'
     )
     ReadOnly = True
     ScrollBars = ssVertical
