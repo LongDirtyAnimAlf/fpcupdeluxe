@@ -409,18 +409,23 @@ begin
     end;
   end;
 
-  if ((Length(Command)=0) AND (Length(DesiredBranch)>0)) then
+  if (Length(Command)=0) then
   begin
-    Command := ' rev-parse --abbrev-ref HEAD';
-    //Command := ' symbolic-ref --short HEAD';
-    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-    Command:='';
-    if FReturnCode = 0 then
+    // Perhaps we also need to check that DesiredBranch is empty or "main" or FPCTRUNKBRANCH or LAZARUSTRUNKBRANCH
+    if (Length(DesiredRevision)>0) AND (Uppercase(trim(DesiredRevision)) <> 'HEAD') then DesiredBranch := DesiredRevision;
+    if (Length(DesiredBranch)>0) then
     begin
-      if (DesiredBranch<>Trim(Output)) then
-        Command := ' checkout --force '+DesiredBranch
-      else
-        Command := ' pull';
+      Command := ' rev-parse --abbrev-ref HEAD';
+      //Command := ' symbolic-ref --short HEAD';
+      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+      Command:='';
+      if FReturnCode = 0 then
+      begin
+        if (DesiredBranch<>Trim(Output)) then
+          Command := ' checkout --force '+DesiredBranch
+        else
+          Command := ' pull';
+      end;
     end;
   end;
 

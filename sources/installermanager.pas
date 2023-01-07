@@ -235,6 +235,7 @@ type
     FSequencer: TSequencer;
     FSolarisOI:boolean;
     FMUSL:boolean;
+    FFPCUnicode:boolean;
     FAutoTools:boolean;
     FRunInfo:string;
     procedure SetURL(ATarget,AValue: string);
@@ -372,6 +373,7 @@ type
     property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
     property SolarisOI:boolean read FSolarisOI write FSolarisOI;
     property MUSL:boolean read FMUSL write FMUSL;
+    property FPCUnicode:boolean read FFPCUnicode write FFPCUnicode;
     property AutoTools:boolean read FAutoTools write FAutoTools;
     property RunInfo:string read GetRunInfo write SetRunInfo;
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
@@ -1471,6 +1473,10 @@ begin
     end;
   end;
 
+  WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',false);
+  WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,false);
+
+  (*
   try
     WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',false);
     WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,false);
@@ -1481,6 +1487,7 @@ begin
     RunInfo:='Perhaps another fpcup is running?';
     exit;
   end;
+  *)
 
   try
     if SkipModules<>'' then
@@ -1541,6 +1548,7 @@ begin
   FSwitchURL:=false;
   FSolarisOI:=false;
   FMUSL:=false;
+  FFPCUnicode:=false;
   FAutoTools:=false;
 
   FCrossOS_Target:=TOS.osNone;
@@ -2022,6 +2030,9 @@ begin
     FInstaller.URL:=FParent.FPCURL;
     FInstaller.Branch:=FParent.FPCBranch;
     FInstaller.TAG:=FParent.FPCTag;
+
+    FInstaller.FPCUnicode:=FParent.NoJobs;
+
   end
 
   {$ifndef FPCONLY}

@@ -449,6 +449,7 @@ type
     FSwitchURL: boolean;
     FSolarisOI: boolean;
     FMUSL: boolean;
+    FFPCUnicode: boolean;
     FMUSLLinker: string;
     property Shell: string read GetShell;
     property Make: string read GetMake;
@@ -564,6 +565,8 @@ type
     property SolarisOI: boolean write FSolarisOI;
     // do we have musl instead of libc
     property MUSL: boolean write FMUSL;
+    // do we need to build the FPC Unicode version of FPC
+    property FPCUnicode: boolean write FFPCUnicode;
     // Are we installing Ultibo
     property Ultibo: boolean read FUltibo write FUltibo;
     property Log: TLogger write FLog;
@@ -4441,9 +4444,10 @@ begin
   FReleaseVersion := -1;
   FPatchVersion   := -1;
 
-  FMUSL      := false;
-  FSolarisOI := false;
-  FUltibo    := false;
+  FMUSL           := false;
+  FSolarisOI      := false;
+  FUltibo         := false;
+  FFPCUnicode     := false;
 
   {$ifdef Linux}
   FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';

@@ -1921,6 +1921,13 @@ begin
     Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
   end;
 
+  {$IFDEF MSWINDOWS}
+  if FFPCUnicode then
+  begin
+    Processor.Process.Parameters.Add('SUB_TARGET=unicodertl');
+  end;
+  {$ENDIF}
+
   //Processor.Process.Parameters.Add('FPC='+FCompiler);
   Processor.Process.Parameters.Add('PP='+FCompiler);
 

@@ -127,6 +127,9 @@ type
     function GetPackageRepo:boolean;
     procedure SetPackageRepo(value:boolean);
 
+    function GetFPCUnicode:boolean;
+    procedure SetFPCUnicode(value:boolean);
+
     function GetUpdateOnly:boolean;
     procedure SetUpdateOnly(value:boolean);
 
@@ -254,6 +257,8 @@ type
     property Repo:boolean read GetRepo write SetRepo;
     property PackageRepo:boolean read GetPackageRepo write SetPackageRepo;
 
+    property FPCUnicode:boolean read GetFPCUnicode write SetFPCUnicode;
+
     property UpdateOnly:boolean read GetUpdateOnly write SetUpdateOnly;
     property SystemFPC:boolean read GetSystemFPC write SetSystemFPC;
 
@@ -315,6 +320,9 @@ resourcestring
 
   HintCheckPackageRepo = '';
   CaptionCheckPackageRepo = 'Get package repositories.';
+
+  HintCheckFPCUnicode = 'Build FPC unicode for better Delphi compatibility.';
+  CaptionCheckFPCUnicode = 'Build FPC unicode.';
 
   HintCheckIncludeLCL = '';
   CaptionCheckIncludeLCL = 'Include LCL with cross-compiler.';
@@ -473,6 +481,7 @@ begin
   FpcupBootstrappersOnly := True;
   Repo                   := True;
   PackageRepo            := False;
+  FPCUnicode             := False;
   IncludeHelp            := False;
   IncludeLCL             := False;
   {$ifdef RemoteLog}
@@ -483,6 +492,8 @@ begin
   try
     Repo:=ReadBool('General','GetRepo',Repo);
     PackageRepo:=ReadBool('General','GetPackageRepo',PackageRepo);
+
+    FPCUnicode:=ReadBool('General','BuildFPCUnicode',FPCUnicode);
 
     IncludeHelp:=ReadBool('General','IncludeHelp',IncludeHelp);
     IncludeLCL:=ReadBool('Cross','IncludeLCL',IncludeLCL);
@@ -601,6 +612,7 @@ begin
   begin
     Append(CaptionCheckRepo);
     Append(CaptionCheckPackageRepo);
+    Append(CaptionCheckFPCUnicode);
     Append(CaptionCheckIncludeLCL);
     Append(CaptionCheckUpdateOnly);
     Append(CaptionCheckSystemFPC);
@@ -999,6 +1011,8 @@ begin
     WriteBool('General','GetRepo',Repo);
     WriteBool('General','GetPackageRepo',PackageRepo);
 
+    WriteBool('General','BuildFPCUnicode',FPCUnicode);
+
     WriteBool('General','IncludeHelp',IncludeHelp);
     WriteBool('Cross','IncludeLCL',IncludeLCL);
 
@@ -1316,6 +1330,15 @@ begin
   SetCheckState(CaptionCheckPackageRepo,value);
 end;
 
+function TForm2.GetFPCUnicode:boolean;
+begin
+  result:=GetCheckState(CaptionCheckFPCUnicode);
+end;
+procedure TForm2.SetFPCUnicode(value:boolean);
+begin
+  SetCheckState(CaptionCheckFPCUnicode,value);
+end;
+
 function TForm2.GetIncludeLCL:boolean;
 begin
   result:=GetCheckState(CaptionCheckIncludeLCL);
@@ -1531,8 +1554,6 @@ procedure TForm2.SetLazarusDebug(value:boolean);
 begin
   chkLazarusDebug.Checked:=value;
 end;
-
-
 
 function TForm2.GetFPCRevision:string;
 begin

@@ -4026,6 +4026,8 @@ begin
 
   FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
 
+  FPCupManager.FPCUnicode:=Form2.FPCUnicode;
+
   FPCupManager.SoftFloat:=Form2.UseSoftFloat;
   FPCupManager.OnlinePatching:=Form2.OnlinePatching;
   FPCupManager.ReApplyLocalChanges:=Form2.ApplyLocalChanges;
