@@ -1933,6 +1933,8 @@ begin
         aAfterRevision := aClient.LocalRevision;
         if ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
         begin
+          Output:=(aClient as TGitClient).GetCommitMessage;
+          if (Length(Output)>0) then Infoln(localinfotext+'Current commit message: '+Output,etInfo);
           Output:=(aClient as TGitClient).GetSVNRevision;
           SVNRevision:=StrToIntDef(Output,0);
           if (SVNRevision=0) then Output:='';

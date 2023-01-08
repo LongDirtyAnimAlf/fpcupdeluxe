@@ -1584,6 +1584,9 @@ begin
   begin
     if ExistWordInString(PChar(s),Seriousness[etInfo],[soWholeWord,soMatchCase]) then
     begin
+      if ExistWordInString(PChar(s),'Client: ',[soMatchCase]) then
+        FG      := clFuchsia
+      else
       if ExistWordInString(PChar(s),'found correct',[soWholeWord]) then
         FG      := clLime
       else
@@ -4442,6 +4445,7 @@ begin
 
       Form2.UseWget:=ReadBool('General','UseWget',Form2.UseWget);
       Form2.MakeJobs:=ReadBool('General','MakeJobs',Form2.MakeJobs);
+      Form2.FPCUnicode:=ReadBool('General','BuildFPCUnicode',Form2.FPCUnicode);
 
       Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
       Form2.UpdateOnly:=ReadBool('General','UpdateOnly',False);
@@ -4617,6 +4621,7 @@ begin
 
       WriteBool('General','UseWget',Form2.UseWget);
       WriteBool('General','MakeJobs',Form2.MakeJobs);
+      WriteBool('General','BuildFPCUnicode',Form2.FPCUnicode);
       WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
       WriteBool('General','UpdateOnly',Form2.UpdateOnly);
       WriteBool('General','UseSoftFloat',Form2.UseSoftFloat);

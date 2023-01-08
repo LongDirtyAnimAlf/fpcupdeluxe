@@ -73,6 +73,7 @@ type
     procedure Update; override;
     function GetSVNRevision: string;
     function GetGitHash: string;
+    function GetCommitMessage: string;
   end;
 
 implementation
@@ -822,5 +823,33 @@ begin
   end;
 end;
 
+function TGitClient.GetCommitMessage: string;
+var
+  Output:string;
+  i,j:integer;
+begin
+  result:='';
+
+  if ExportOnly then exit;
+  if NOT ValidClient then exit;
+  if NOT DirectoryExists(LocalRepository) then exit;
+
+  Output:='';
+
+  i:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['show','-s','--format=%s%b'],LocalRepository, Output, '', Verbose);
+  Output:=Trim(Output);
+  if ((i=0) and (Length(Output)>0)) then
+  begin
+    j:=1;
+    while Output[j] in [' ','*'] do
+    begin
+      Inc(j);
+      if (j>Length(Output)) then break;
+    end;
+    Dec(j);
+    Delete(Output,1,j);
+    result:=Output;
+  end;
+end;
 
 end.

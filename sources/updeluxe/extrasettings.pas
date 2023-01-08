@@ -493,8 +493,6 @@ begin
     Repo:=ReadBool('General','GetRepo',Repo);
     PackageRepo:=ReadBool('General','GetPackageRepo',PackageRepo);
 
-    FPCUnicode:=ReadBool('General','BuildFPCUnicode',FPCUnicode);
-
     IncludeHelp:=ReadBool('General','IncludeHelp',IncludeHelp);
     IncludeLCL:=ReadBool('Cross','IncludeLCL',IncludeLCL);
 
@@ -1010,8 +1008,6 @@ begin
   try
     WriteBool('General','GetRepo',Repo);
     WriteBool('General','GetPackageRepo',PackageRepo);
-
-    WriteBool('General','BuildFPCUnicode',FPCUnicode);
 
     WriteBool('General','IncludeHelp',IncludeHelp);
     WriteBool('Cross','IncludeLCL',IncludeLCL);
