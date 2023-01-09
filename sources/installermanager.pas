@@ -1473,13 +1473,9 @@ begin
     end;
   end;
 
-  WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',false);
-  WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,false);
-
-  (*
   try
-    WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',false);
-    WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,false);
+    WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',true);
+    WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,true);
   except
     // Writing to log failed, probably duplicate run. Inform user and get out.
     RunInfo:='***ERROR***';
@@ -1487,7 +1483,6 @@ begin
     RunInfo:='Perhaps another fpcup is running?';
     exit;
   end;
-  *)
 
   try
     if SkipModules<>'' then
@@ -2031,8 +2026,7 @@ begin
     FInstaller.Branch:=FParent.FPCBranch;
     FInstaller.TAG:=FParent.FPCTag;
 
-    FInstaller.FPCUnicode:=FParent.NoJobs;
-
+    FInstaller.FPCUnicode:=FParent.FPCUnicode;
   end
 
   {$ifndef FPCONLY}
@@ -2430,6 +2424,7 @@ var
 begin
   result:=true;
   localinfotext:=TrimLeft(Copy(UnCamel(Self.ClassName),2,MaxInt))+' ('+SequenceName+'): ';
+  FParent.WritelnLog(etDebug,localinfotext+'Started sequencer for ' + SequenceName);
   try
     if not assigned(FParent.FModuleList) then
     begin

@@ -222,6 +222,8 @@ const
   _LAZARUS                 = 'Lazarus';
   _LAZARUSSIMPLE           = _LAZARUS+'Simple';
 
+  _UNICODEFPC              = 'Unicode'+_FPC;
+
   _REVISIONFPC             = 'Revision'+_FPC;
   _REVISIONLAZARUS         = 'Revision'+_LAZARUS;
 

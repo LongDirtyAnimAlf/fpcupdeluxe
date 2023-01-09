@@ -1921,13 +1921,6 @@ begin
     Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
   end;
 
-  {$IFDEF MSWINDOWS}
-  if FFPCUnicode then
-  begin
-    Processor.Process.Parameters.Add('SUB_TARGET=unicodertl');
-  end;
-  {$ENDIF}
-
   //Processor.Process.Parameters.Add('FPC='+FCompiler);
   Processor.Process.Parameters.Add('PP='+FCompiler);
 
@@ -2122,6 +2115,10 @@ begin
     begin
       Processor.Process.CurrentDirectory:=ConcatPaths([SourceDirectory,'compiler']);
     end;
+    _UNICODEFPC:
+    begin
+      Processor.Process.CurrentDirectory:=ConcatPaths([SourceDirectory,'rtl']);
+    end;
     _PAS2JS:
     begin
       Processor.Process.CurrentDirectory:=ConcatPaths([SourceDirectory,'utils','pas2js']);
@@ -2129,7 +2126,7 @@ begin
       // is this still needed !!?? No !!
       //SysUtils.DeleteFile(IncludeTrailingPathDelimiter(Processor.Process.CurrentDirectory)+'fpmake'+GetExeExt);
       //ExecuteCommandInDir(FFPCCompilerBinPath+'fpcmake'+GetExeExt,Processor.Process.CurrentDirectory,FVerbose);
-    end;
+    end
     else
     begin
       Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
@@ -2155,6 +2152,14 @@ begin
   if ModuleName=_REVISIONFPC then
   begin
     Processor.Process.Parameters.Add('revision');
+  end
+  else
+  if ModuleName=_UNICODEFPC then
+  begin
+    Processor.Process.Parameters.Add('clean');
+    Processor.Process.Parameters.Add('all');
+    Processor.Process.Parameters.Add('install');
+    Processor.Process.Parameters.Add('SUB_TARGET=unicodertl');
   end
   else
   begin
@@ -4599,6 +4604,32 @@ begin
 
   if OperationSucceeded then
   begin
+
+    if FFPCUnicode then
+    begin
+      Infoln(infotext+'Building FPC Unicode RTL.',etInfo);
+
+      s:=ExtractFilePath(FCompiler)+'fpc-unicodertl.cfg';
+      if FileExists(s) then
+      begin
+        Infoln(localinfotext+'Unicode config already exists ('+s+'); trying to overwrite it.',etInfo);
+        SysUtils.DeleteFile(s);
+      end;
+      AssignFile(TxtFile,s);
+      try
+        Rewrite(TxtFile);
+        writeln(TxtFile,'-dUNICODERTL');
+        writeln(TxtFile,'-Municodestrings');
+      finally
+        CloseFile(TxtFile);
+      end;
+
+      if BuildModuleCustom(_UNICODEFPC) then
+      begin
+
+      end;
+    end;
+
     if (Self is TFPCCrossInstaller) then
     begin
       if Assigned(CrossInstaller) then result:=CleanExtra(CrossInstaller.TargetCPU,CrossInstaller.TargetOS);

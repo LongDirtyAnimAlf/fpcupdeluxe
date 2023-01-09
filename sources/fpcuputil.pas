@@ -4964,7 +4964,7 @@ procedure TLogger.SetLogFile(AValue: string);
 begin
   if AValue<>FLog.FileName then
   begin
-    FLog.Active:=false;//save WriteLog output
+    FLog.Active:=false;//save writelog
     FLog.FileName:=AValue;
   end;
 end;
@@ -4989,7 +4989,7 @@ end;
 
 destructor TLogger.Destroy;
 begin
-  FLog.Active:=false;//save WriteLog text
+  FLog.Active:=false;//save writelog
   FLog.Free;
   inherited Destroy;
 end;
