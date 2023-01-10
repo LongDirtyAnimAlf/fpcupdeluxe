@@ -255,6 +255,9 @@ var
   NativeAge,CrossAge:Longint;
 begin
   result:=true;
+  {$ifdef buildnative}
+  exit;
+  {$endif}
   NativeCompiler:=GetFPCInBinDir;
   if (FileExists(NativeCompiler)) then
   begin

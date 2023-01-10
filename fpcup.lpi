@@ -27,7 +27,7 @@
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="nogui"/>
     </MacroValues>
-    <BuildModes Count="16">
+    <BuildModes Count="17">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
         <MacroValues Count="1">
@@ -157,7 +157,44 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item4>
-      <Item5 Name="linuxi386">
+      <Item5 Name="win64arm64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="upbin\fpcup-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
+            <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="aarch64"/>
+            <TargetOS Value="win64"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-dFPCONLY"/>
+            <ExecuteBefore>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item5>
+      <Item6 Name="linuxi386">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -196,8 +233,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item5>
-      <Item6 Name="linux64">
+      </Item6>
+      <Item7 Name="linux64">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -236,8 +273,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item6>
-      <Item7 Name="linuxaarch64">
+      </Item7>
+      <Item8 Name="linuxaarch64">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -276,8 +313,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item7>
-      <Item8 Name="freebsdi386">
+      </Item8>
+      <Item9 Name="freebsdi386">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -316,8 +353,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item8>
-      <Item9 Name="freebsdx64">
+      </Item9>
+      <Item10 Name="freebsdx64">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -356,8 +393,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item9>
-      <Item10 Name="linuxppc64">
+      </Item10>
+      <Item11 Name="linuxppc64">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -396,8 +433,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item10>
-      <Item11 Name="linuxarmhf">
+      </Item11>
+      <Item12 Name="linuxarmhf">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -436,8 +473,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item11>
-      <Item12 Name="darwinx64">
+      </Item12>
+      <Item13 Name="darwinx64">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -476,8 +513,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item12>
-      <Item13 Name="darwinarm64">
+      </Item13>
+      <Item14 Name="darwinarm64">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -516,8 +553,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item13>
-      <Item14 Name="darwini386">
+      </Item14>
+      <Item15 Name="darwini386">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -556,8 +593,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item14>
-      <Item15 Name="darwinppc">
+      </Item15>
+      <Item16 Name="darwinppc">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -596,8 +633,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item15>
-      <Item16 Name="darwinppc64">
+      </Item16>
+      <Item17 Name="darwinppc64">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="nogui"/>
         </MacroValues>
@@ -636,7 +673,7 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item16>
+      </Item17>
       <SharedMatrixOptions Count="1">
         <Item1 ID="233755810855" Modes="Default,Debug,win32,win64,linuxi386,linux64,linuxaarch64,freebsdi386,freebsdx64,linuxppc64,linuxarmhf,darwinx64,darwinarm64,darwini386,darwinppc,darwinppc64" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
       </SharedMatrixOptions>

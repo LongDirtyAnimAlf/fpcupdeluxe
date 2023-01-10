@@ -30,6 +30,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
+{$i fpcupdefines.inc}
+
 interface
 
 uses
@@ -1501,16 +1503,18 @@ begin
     begin
       aSequence:=_DEFAULT;
       {$ifdef win32}
+      {$ifndef buildnative}
       // Run Windows specific cross compiler or regular version
       if Pos(_CROSSWIN,SkipModules)=0 then aSequence:=_DEFAULT+'win32';
+      {$endif}
       {$endif}
       {$ifdef win64}
       //not yet
       //if Pos(_CROSSWIN,SkipModules)=0 then aSequence:=_DEFAULT+'win64';
       {$endif}
-      {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
+      {$if defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
       aSequence:=_DEFAULTSIMPLE;
-      {$ENDIF}
+      {$endif}
 
       result:=FSequencer.Run(aSequence);
 
@@ -2424,7 +2428,7 @@ var
 begin
   result:=true;
   localinfotext:=TrimLeft(Copy(UnCamel(Self.ClassName),2,MaxInt))+' ('+SequenceName+'): ';
-  FParent.WritelnLog(etDebug,localinfotext+'Started sequencer for ' + SequenceName);
+  //FParent.WritelnLog(etDebug,localinfotext+'Started sequencer for ' + SequenceName);
   try
     if not assigned(FParent.FModuleList) then
     begin

@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linux64,linuxaarch64,freebsdi386,freebsdx64,linuxppc64,linuxarmhf,darwinx64,darwinarm64,darwini386,darwinppc,darwinppc64"/>
-    <BuildModes Active="linuxarmhf"/>
+    <BuildModes Active="win64arm64"/>
     <Units Count="1">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
