@@ -367,9 +367,9 @@ function FileNameAllExt(const AFilename: string): string;
 function DoubleQuoteIfNeeded(s: string): string;
 function UppercaseFirstChar(s: String): String;
 function DirectoryIsEmpty(Directory: string): Boolean;
-function GetTargetCPU:string;
-function GetTargetOS:string;
-function GetTargetCPUOS:string;
+function GetSourceCPU:string;
+function GetSourceOS:string;
+function GetSourceCPUOS:string;
 function GetFPCBuildVersion:string;
 function GetDistro(const aID:string=''):string;
 function GetFreeBSDVersion:byte;
@@ -4226,24 +4226,24 @@ begin
   SysUtils.FindClose(FileInfo);
 end;
 
-function GetTargetCPU:string;
+function GetSourceCPU:string;
 begin
   result:=lowercase({$i %FPCTARGETCPU%});
 end;
 
-function GetTargetOS:string;
+function GetSourceOS:string;
 begin
   result:=lowercase({$i %FPCTARGETOS%});
 end;
 
-function GetTargetCPUOS:string;
+function GetSourceCPUOS:string;
 begin
-  result:=GetTargetCPU+'-'+GetTargetOS;
+  result:=GetSourceCPU+'-'+GetSourceOS;
 end;
 
 function GetFPCBuildVersion:string;
 begin
-  result:=lowercase({$I %FPCVERSION%});// + ' on ' +GetTargetCPUOS;
+  result:=lowercase({$I %FPCVERSION%});// + ' on ' +GetSourceCPUOS;
 end;
 
 function GetDistro(const aID:string):string;
@@ -4342,11 +4342,11 @@ begin
       if (t='unknown') then
       begin
         if RunCommand('uname',['-r'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF})
-           then t := GetTargetOS+' '+lowercase(Trim(s));
+           then t := GetSourceOS+' '+lowercase(Trim(s));
       end;
       {$endif}
 
-      if (t='unknown') then t := GetTargetOS;
+      if (t='unknown') then t := GetSourceOS;
 
       if (NOT success) then if RunCommand('uname',['-r'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF})
          then t := t+' '+lowercase(Trim(s));
@@ -4356,7 +4356,7 @@ begin
       begin
         if Length(s)>0 then t:=Trim(s);
       end;
-      if Length(s)=0 then t:=GetTargetOS;
+      if Length(s)=0 then t:=GetSourceOS;
       if RunCommand('sw_vers',['-productVersion'], s) then
       begin
         if Length(s)>0 then
@@ -4487,7 +4487,7 @@ begin
               // name: "fpcupdeluxe-aarch64-linux"
               // created_at: "2018-10-14T06:58:44Z"
               s:=JsonObject.Get('name');
-              aFile:='fpcupdeluxe-'+GetTargetCPUOS;
+              aFile:='fpcupdeluxe-'+GetSourceCPUOS;
               {$ifdef Darwin}
               {$ifdef LCLCARBON}
               aFile:=aFile+'-carbon';

@@ -306,7 +306,7 @@ begin
     {$ENDIF}
 
     Processor.Process.Parameters.Add('FPC=' + FCompiler);
-    Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+    Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
     Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
 
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(LazarusInstallDir));
@@ -426,8 +426,8 @@ begin
     {$endif}
 
     Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(LazarusPrimaryConfigPath));
-    Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);
-    Processor.Process.Parameters.Add('--os=' + GetTargetOS);
+    Processor.Process.Parameters.Add('--cpu=' + GetSourceCPU);
+    Processor.Process.Parameters.Add('--os=' + GetSourceOS);
 
     if FLCL_Platform <> '' then
       Processor.Process.Parameters.Add('--ws=' + FLCL_Platform);
@@ -842,8 +842,8 @@ begin
   {$ENDIF}
 
   Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
-  Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);
-  Processor.Process.Parameters.Add('--os=' + GetTargetOS);
+  Processor.Process.Parameters.Add('--cpu=' + GetSourceCPU);
+  Processor.Process.Parameters.Add('--os=' + GetSourceOS);
   if FLCL_Platform <> '' then
             Processor.Process.Parameters.Add('--ws=' + FLCL_Platform);
   if RegisterPackageFeature then
@@ -2743,7 +2743,7 @@ begin
               {$ifdef Windows}
               aFile:='develtools4fpc-x86_64-win64';
               {$else}
-              aFile:='develtools4fpc-'+GetTargetCPUOS;
+              aFile:='develtools4fpc-'+GetSourceCPUOS;
               {$endif}
               Assets:=Release.Get('assets',TJSONArray(nil));
               for iassets:=0 to Pred(Assets.Count) do
@@ -2848,8 +2848,8 @@ begin
   aBinURL:='';
   aLibURL:='';
 
-  aBinFile:='xtensa-binutils-'+GetTargetCPUOS+'.zip';
-  aLibFile:='xtensa-libs-'+GetTargetCPUOS+'.zip';
+  aBinFile:='xtensa-binutils-'+GetSourceCPUOS+'.zip';
+  aLibFile:='xtensa-libs-'+GetSourceCPUOS+'.zip';
 
   idx:=UniModuleList.IndexOf(ModuleName);
   if (idx>=0) then

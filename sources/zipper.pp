@@ -2634,16 +2634,16 @@ Begin
             // infozip unicode path extra field
           else if ExtraFieldHeader.Header_ID = INFOZIP_UNICODE_PATH_ID then
             begin
-            FZipStream.ReadBuffer(Infozip_unicode_path_ver,1);
+            FZipStream.ReadBuffer({$%H-}Infozip_unicode_path_ver,1);
             if Infozip_unicode_path_ver=1 then
               begin
-              FZipStream.ReadBuffer(Infozip_unicode_path_crc32,sizeof(Infozip_unicode_path_crc32));
+              FZipStream.ReadBuffer({$%H-}Infozip_unicode_path_crc32,sizeof(Infozip_unicode_path_crc32));
               {$IFDEF FPC_BIG_ENDIAN}
               Infozip_unicode_path_crc32:=SwapEndian(Infozip_unicode_path_crc32);
               {$ENDIF}
               if CRC32Str(S)=Infozip_unicode_path_crc32 then
                 begin
-                SetLength(U,ExtraFieldHeader.Data_Size-5);
+                SetLength({$%H-}U,ExtraFieldHeader.Data_Size-5);
 				FZipStream.ReadBuffer(U[1],Length(U));
                 NewNode.UTF8ArchiveFileName:=U;
                 end

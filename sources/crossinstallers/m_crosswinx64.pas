@@ -74,7 +74,6 @@ end;
 constructor TWinx64.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TWin32';
   FTargetCPU:=TCPU.x86_64;
   FTargetOS:=TOS.win64;
   Reset;
@@ -86,7 +85,6 @@ begin
   inherited Destroy;
 end;
 
-{$IFDEF WIN32}
 var
   Winx64:TWinx64;
 
@@ -97,6 +95,5 @@ initialization
 finalization
   Winx64.Destroy;
 
-{$ENDIF WIN32}
 end.
 

@@ -138,7 +138,6 @@ end;
 constructor Twin32_linuxmips.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TWinAll';
   FTargetCPU:=TCPU.mips;
   FTargetOS:=TOS.linux;
   Reset;
@@ -154,14 +153,12 @@ end;
 var
   Win32_linuxmips:Twin32_linuxmips;
 
-{$IF (DEFINED (WIN32)) OR (DEFINED(WIN64))}
-// Even though it's officially for Win32, win64 can run x86 binaries without problem, so allow it.
 initialization
   Win32_linuxmips:=Twin32_linuxmips.Create;
   RegisterCrossCompiler(Win32_linuxmips.RegisterName,Win32_linuxmips);
 
 finalization
   Win32_linuxmips.Destroy;
-{$ENDIF}
+
 end.
 

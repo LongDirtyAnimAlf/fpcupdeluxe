@@ -83,7 +83,6 @@ end;
 constructor TFreeBSD_Linux386.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='FreeBSD';
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.linux;
   Reset;

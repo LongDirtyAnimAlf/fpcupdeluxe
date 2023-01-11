@@ -54,7 +54,6 @@ end;
 constructor Tanyinternallinker_winx64.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TAnyinternallinker';
   FTargetCPU:=TCPU.x86_64;
   FTargetOS:=TOS.win64;
   Reset;

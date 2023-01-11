@@ -39,7 +39,6 @@ end;
 constructor TDarwin386iphonesim.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TDarwinAny';
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.iphonesim;
   Reset;

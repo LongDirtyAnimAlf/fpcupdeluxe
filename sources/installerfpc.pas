@@ -1314,15 +1314,15 @@ begin
             end;
           end;
 
-          if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
+          if (MakeCycle in [st_Packages,st_PackagesInstall{,st_NativeCompiler}]) then
           begin
             if (NOT PackagesNeeded) then continue;
           end;
 
           {$endif crosssimple}
 
-          Processor.Process.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
-          Processor.Process.Parameters.Add('OS_SOURCE='+GetTargetOS);
+          Processor.Process.Parameters.Add('CPU_SOURCE='+GetSourceCPU);
+          Processor.Process.Parameters.Add('OS_SOURCE='+GetSourceOS);
           Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName); //cross compile for different OS...
           Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName); // and processor.
           if (CrossInstaller.SubArch<>TSubarch.saNone) then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArchName);
@@ -1437,17 +1437,20 @@ begin
             {$endif}
           end;
 
+          {$ifndef crosssimple}
+          if (MakeCycle=st_NativeCompiler) then
+          begin
+            {$ifdef buildnative}
+            // Only build with debug info
+            //CrossOptions:='-O1 -g -gl';
+            CrossOptions:='-O1';
+            {$endif}
+          end;
+          {$endif}
+
           CrossOptions:=Trim(CrossOptions);
 
-          if (
-            (CrossOptions<>'')
-            {$ifndef crosssimple}
-            //Do not add cross-options when building native compiler
-            //Correct options will be taken from fpc.cfg
-            AND
-            (MakeCycle<>st_NativeCompiler)
-            {$endif}
-            ) then
+          if (Length(CrossOptions)>0) then
           begin
             Processor.Process.Parameters.Add('CROSSOPT='+CrossOptions);
           end;
@@ -1458,7 +1461,7 @@ begin
 
           {$ifndef FPC_HAS_TYPE_EXTENDED}
           // soft 80 bit float if available
-          if (GetTargetCPU=GetCPU(TCPU.x86_64)) then
+          if (GetSourceCPU=GetCPU(TCPU.x86_64)) then
           begin
             if ( (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.i8086)  OR (CrossInstaller.TargetCPU=TCPU.x86_64) ) then
             begin
@@ -1532,7 +1535,7 @@ begin
               if FileExists(s2) then
               begin
                 {$ifdef Darwin}
-                if CrossCompilerName=GetCompilerName(GetTargetCPU) then
+                if CrossCompilerName=GetCompilerName(GetSourceCPU) then
                 begin
                   Infoln(infotext+'Cross-compiler and native compiler share the same name: '+CrossCompilerName+'.',etInfo);
                   Infoln(infotext+'Skipping manual compiler-copy to bin-directory ! To be investigated.',etInfo);
@@ -1611,7 +1614,7 @@ begin
           if FileExists(s2) then
           begin
             {$ifdef Darwin}
-            if CrossCompilerName=GetCompilerName(GetTargetCPU) then
+            if CrossCompilerName=GetCompilerName(GetSourceCPU) then
             begin
               Infoln(infotext+'Cross-compiler and native compiler share the same name: '+CrossCompilerName+'.',etInfo);
               Infoln(infotext+'Skipping manual compiler-copy to bin-directory ! To be investigated.',etInfo);
@@ -1993,10 +1996,10 @@ begin
   {$ELSE}
   Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
   {$ENDIF}
-  Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
-  Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
-  Processor.Process.Parameters.Add('OS_TARGET=' + GetTargetOS);
-  Processor.Process.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
+  Processor.Process.Parameters.Add('OS_SOURCE=' + GetSourceOS);
+  Processor.Process.Parameters.Add('CPU_SOURCE=' + GetSourceCPU);
+  Processor.Process.Parameters.Add('OS_TARGET=' + GetSourceOS);
+  Processor.Process.Parameters.Add('CPU_TARGET=' + GetSourceCPU);
 
   if (SourceVersionNum<CalculateFullVersion(2,4,4)) then
     Processor.Process.Parameters.Add('DATA2INC=echo');
@@ -2082,7 +2085,7 @@ begin
   {$endif FORCEREVISION}
 
   {$ifndef FPC_HAS_TYPE_EXTENDED}
-  if (GetTargetCPU=GetCPU(TCPU.x86_64)) then
+  if (GetSourceCPU=GetCPU(TCPU.x86_64)) then
   begin
     if FSoftFloat then
     begin
@@ -2325,7 +2328,7 @@ begin
   if ((aCPU=TCPU.cpuNone) AND (aOS=TOS.osNone)) then
   begin
     sArch:=GetFPCTarget(true);
-    sOS:=GetTargetOS;
+    sOS:=GetSourceOS;
   end
   else
   if ((aCPU<>TCPU.cpuNone) AND (aOS<>TOS.osNone)) then
@@ -2364,7 +2367,7 @@ begin
       if Assigned(CrossInstaller) then DeleteFile(aDir+DirectorySeparator+GetCrossCompilerName(CrossInstaller.TargetCPU));
     end
     else
-      DeleteFile(aDir+DirectorySeparator+GetCompilerName(GetTargetCPU));
+      DeleteFile(aDir+DirectorySeparator+GetCompilerName(GetSourceCPU));
 
     DeleteFile(aDir+DirectorySeparator+'ppc'+GetExeExt);
     DeleteFile(aDir+DirectorySeparator+'ppc1'+GetExeExt);
@@ -3136,8 +3139,8 @@ begin
   WritelnLog(localinfotext+'FPC options:        ' + FCompilerOptions, false);
 
   // set standard bootstrap compilername
-  FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
-  if NOT FileExists(FBootstrapCompiler) then FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
+  FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetSourceCPUOS+'-'+GetCompilerName(GetSourceCPU);
+  if NOT FileExists(FBootstrapCompiler) then FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetSourceCPU);
 
   {$IFDEF Darwin}
     {$IFDEF CPU32}
@@ -3153,7 +3156,7 @@ begin
   begin
     aBootstrapVersionWrong:=false;
 
-    aStandardCompilerArchive:=GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
+    aStandardCompilerArchive:=GetSourceCPUOS+'-'+GetCompilerName(GetSourceCPU);
     // remove file extension
     aStandardCompilerArchive:=ChangeFileExt(aStandardCompilerArchive,'');
     {$IFDEF MSWINDOWS}
@@ -3237,7 +3240,7 @@ begin
               {$IFDEF FREEBSD}
               // FreeBSD : special because of versions
               FreeBSDVersion:=-1;
-              s:=GetTargetCPUOS;
+              s:=GetSourceCPUOS;
               for i:=0 to Pred(aCompilerList.Count) do
               begin
                 Infoln(localinfotext+'Found online '+aLocalBootstrapVersion+' bootstrap compiler: '+aCompilerList[i],etDebug);
@@ -3367,7 +3370,7 @@ begin
             aFPCUPBootstrapperName:='fpcup-';
             aFPCUPBootstrapperName:=aFPCUPBootstrapperName+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll]);
             aFPCUPBootstrapperName:=aFPCUPBootstrapperName+'-';
-            aFPCUPBootstrapperName:=aFPCUPBootstrapperName+GetTargetCPU;
+            aFPCUPBootstrapperName:=aFPCUPBootstrapperName+GetSourceCPU;
             {$ifdef CPUARMHF}
             aFPCUPBootstrapperName:=aFPCUPBootstrapperName+'hf';
             {$endif CPUARMHF}
@@ -3382,9 +3385,9 @@ begin
             //perhaps needed for special Solaris OpenIndiana bootstrapper
             //if FSolarisOI then aFPCUPBootstrapperName:=aFPCUPBootstrapperName+'OI';
             {$endif Solaris}
-            aFPCUPBootstrapperName:=aFPCUPBootstrapperName+GetTargetOS;
+            aFPCUPBootstrapperName:=aFPCUPBootstrapperName+GetSourceOS;
             aFPCUPBootstrapperName:=aFPCUPBootstrapperName+'-';
-            aFPCUPBootstrapperName:=aFPCUPBootstrapperName+GetCompilerName(GetTargetCPU);
+            aFPCUPBootstrapperName:=aFPCUPBootstrapperName+GetCompilerName(GetSourceCPU);
 
             Infoln(localinfotext+'Looking online for a FPCUP(deluxe) bootstrapper with name: '+aFPCUPBootstrapperName,etInfo);
 
@@ -3403,14 +3406,14 @@ begin
                 begin
                   j:=GetFreeBSDVersion;
                   if j=0 then j:=DEFAULTFREEBSDVERSION; // Use FreeBSD default version when GetFreeBSDVersion does not give a result
-                  aFPCUPBootstrapURL:=StringReplace(aFPCUPBootstrapperName,'-'+GetTargetOS,'-'+GetTargetOS+InttoStr(j),[]);
+                  aFPCUPBootstrapURL:=StringReplace(aFPCUPBootstrapperName,'-'+GetSourceOS,'-'+GetSourceOS+InttoStr(j),[]);
                   aFPCUPCompilerFound:=(Pos(aFPCUPBootstrapURL,aCompilerList[i])>0);
                   if (NOT aFPCUPCompilerFound) then
                   begin
                     //try other versions if available
                     for j:=14 downto 9 do
                     begin
-                      aFPCUPBootstrapURL:=StringReplace(aFPCUPBootstrapperName,'-'+GetTargetOS,'-'+GetTargetOS+InttoStr(j),[]);
+                      aFPCUPBootstrapURL:=StringReplace(aFPCUPBootstrapperName,'-'+GetSourceOS,'-'+GetSourceOS+InttoStr(j),[]);
                       aFPCUPCompilerFound:=(Pos(aFPCUPBootstrapURL,aCompilerList[i])>0);
                       if aFPCUPCompilerFound then break;
                     end;
@@ -3436,7 +3439,7 @@ begin
               begin
                 j:=GetFreeBSDVersion;
                 if j=0 then j:=DEFAULTFREEBSDVERSION; // Use FreeBSD default version when GetFreeBSDVersion does not give a result
-                aFPCUPBootstrapURL:=FPCUPGITREPOBOOTSTRAPPER+'/'+StringReplace(aFPCUPBootstrapperName,'-'+GetTargetOS,'-'+GetTargetOS+InttoStr(j),[]);
+                aFPCUPBootstrapURL:=FPCUPGITREPOBOOTSTRAPPER+'/'+StringReplace(aFPCUPBootstrapperName,'-'+GetSourceOS,'-'+GetSourceOS+InttoStr(j),[]);
                 aFPCUPCompilerFound:=aDownLoader.checkURL(aFPCUPBootstrapURL);
               end;
               {$endif}
@@ -3471,7 +3474,7 @@ begin
             Infoln(localinfotext+'Got a bootstrap compiler from FPCUP(deluxe) provided bootstrapper binaries.',etInfo);
             FBootstrapCompilerURL := aFPCUPBootstrapURL;
             // set standard bootstrap compilername
-            FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
+            FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetSourceCPU);
           end
           else
           begin
@@ -3487,7 +3490,7 @@ begin
               aLocalBootstrapVersion:=aLocalFPCUPBootstrapVersion;
               FBootstrapCompilerURL:=aFPCUPBootstrapURL;
               // set standard bootstrap compilername
-              FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
+              FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetSourceCPU);
             end;
           end;
         end;
@@ -3511,13 +3514,13 @@ begin
             try
               aCompilerList.Clear;
               VersionFromString(aBootstrapVersion,i,j,k,{%H-}l);
-              s:=FPCFTPSNAPSHOTURL+'/v'+InttoStr(i)+InttoStr(j)+'/'+GetTargetCPUOS+'/';
+              s:=FPCFTPSNAPSHOTURL+'/v'+InttoStr(i)+InttoStr(j)+'/'+GetSourceCPUOS+'/';
               result:=aDownLoader.getFTPFileList(s,aCompilerList);
               if result then
               begin
                 for i:=0 to Pred(aCompilerList.Count) do
                 begin
-                  if (Pos(GetTargetCPUOS+'-fpc-',aCompilerList[i])=1) then
+                  if (Pos(GetSourceCPUOS+'-fpc-',aCompilerList[i])=1) then
                   begin
                     // we got a snapshot
                     Infoln(localinfotext+'Found a official FPC snapshot achive.',etDebug);
@@ -3525,7 +3528,7 @@ begin
                     FBootstrapCompilerURL:=s+aCompilerList[i];
                     aCompilerFound:=True;
                     // set standard bootstrap compilername
-                    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
+                    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetSourceCPU);
                     // as we do not know exactly what we get
                     aBootstrapVersionWrong:=true;
                     break;
@@ -3826,7 +3829,7 @@ begin
       // can we use a FPC bootstrapper that is already on the system (somewhere in the path) ?
       if NativeFPCBootstrapCompiler then
       begin
-        s:=GetCompilerName(GetTargetCPU);
+        s:=GetCompilerName(GetSourceCPU);
         s:=Which(s);
         {$ifdef Darwin}
         // Due to codesigning, do not copy, but just use it.
@@ -3949,9 +3952,9 @@ begin
   end
   else
   begin
-    if (GetTargetOS=GetOS(TOS.dragonfly)) then FUseLibc:=True;
-    if (GetTargetOS=GetOS(TOS.freebsd)) then FUseLibc:=True;
-    if (GetTargetOS=GetOS(TOS.openbsd)) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
+    if (GetSourceOS=GetOS(TOS.dragonfly)) then FUseLibc:=True;
+    if (GetSourceOS=GetOS(TOS.freebsd)) then FUseLibc:=True;
+    if (GetSourceOS=GetOS(TOS.openbsd)) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end;
 
   {$ifdef FORCEREVISION}
@@ -4082,7 +4085,7 @@ begin
             Processor.Process.Parameters.Clear;
             Processor.Process.Parameters.Add('-1');
             Processor.Process.Parameters.Add('-d');
-            Processor.Process.Parameters.Add('fpctargetos='+GetTargetOS);
+            Processor.Process.Parameters.Add('fpctargetos='+GetSourceOS);
 
             {$IFDEF UNIX}
             //s2:=GetStartupObjects;
@@ -4181,10 +4184,10 @@ begin
             Processor.Process.Parameters.Add('fpcbin='+FCompiler);
 
             Processor.Process.Parameters.Add('-d');
-            Processor.Process.Parameters.Add('fpctargetos='+GetTargetOS);
+            Processor.Process.Parameters.Add('fpctargetos='+GetSourceOS);
 
             Processor.Process.Parameters.Add('-d');
-            Processor.Process.Parameters.Add('fpctargetcpu='+GetTargetCPU);
+            Processor.Process.Parameters.Add('fpctargetcpu='+GetSourceCPU);
 
             RunFPCMkCfgOption(s);
           end;
@@ -4482,7 +4485,7 @@ begin
         begin
           ConfigText.Append('# Prevents crti not found linking errors');
           ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
-          //ConfigText.Append('#IFDEF CPU'+UpperCase(GetTargetCPU));
+          //ConfigText.Append('#IFDEF CPU'+UpperCase(GetSourceCPU));
           if CompareVersionStrings(s,'10.8')>=0 then
             ConfigText.Append('-WM10.8')
           else
@@ -4693,13 +4696,13 @@ begin
 
   aCleanupCompiler:='';
   if (SourceDirectory<>InstallDirectory) then
-    aCleanupCompiler:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+GetCompilerName(GetTargetCPU);
+    aCleanupCompiler:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+GetCompilerName(GetSourceCPU);
 
   if (NOT FileExists(aCleanupCompiler)) then
   begin
     if FileExists(FCompiler)
        then aCleanupCompiler:=FCompiler
-       else aCleanupCompiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
+       else aCleanupCompiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetSourceCPU);
   end;
 
   if FileExists(aCleanupCompiler) then
@@ -4730,8 +4733,8 @@ begin
     {$IFDEF MSWINDOWS}
     Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
     //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-    Processor.Process.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
-    Processor.Process.Parameters.Add('OS_SOURCE='+GetTargetOS);
+    Processor.Process.Parameters.Add('CPU_SOURCE='+GetSourceCPU);
+    Processor.Process.Parameters.Add('OS_SOURCE='+GetSourceOS);
     {$ELSE}
     Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
     {$ENDIF}
@@ -4743,8 +4746,8 @@ begin
     end
     else
     begin
-      Processor.Process.Parameters.Add('CPU_TARGET='+GetTargetCPU);
-      Processor.Process.Parameters.Add('OS_TARGET='+GetTargetOS);
+      Processor.Process.Parameters.Add('CPU_TARGET='+GetSourceCPU);
+      Processor.Process.Parameters.Add('OS_TARGET='+GetSourceOS);
     end;
 
     aCleanupCommandList:=TStringList.Create;
@@ -5100,7 +5103,7 @@ constructor TFPCInstaller.Create;
 begin
   inherited Create;
 
-  FTargetCompilerName:=GetCompilerName(GetTargetCPU);
+  FTargetCompilerName:=GetCompilerName(GetSourceCPU);
 
   FCompiler  := '';
   FUseLibc   := false;

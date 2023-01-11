@@ -556,11 +556,11 @@ begin
 
   if (Length(FBuildArch)=0) then
   begin
-    FBuildArch:=GetTargetOS+'-';
-    if GetTargetCPU='i386' then
+    FBuildArch:=GetSourceOS+'-';
+    if GetSourceCPU='i386' then
       FBuildArch:=FBuildArch+'x86'
     else
-      FBuildArch:=FBuildArch+GetTargetCPU;
+      FBuildArch:=FBuildArch+GetSourceCPU;
   end;
   OS:=TargetOSName;
   NDKVERSIONBASENAME:=OS+'-ndk-r';

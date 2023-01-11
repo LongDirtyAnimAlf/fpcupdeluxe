@@ -131,8 +131,8 @@ type
   TCrossInstaller = class(TObject)
   private
     function GetCrossModuleName:string;
-    function GetTargetCPUName:string;
-    function GetTargetOSName:string;
+    function GetSourceCPUName:string;
+    function GetSourceOSName:string;
     function GetSubarchName:string;
     function GetABIName:string;
   protected
@@ -212,8 +212,8 @@ type
     property TargetOS:TOS read FTargetOS;
     property SubArch:TSUBARCH read FSubArch;
     property ABI:TABI read FABI;
-    property TargetCPUName: string read GetTargetCPUName;
-    property TargetOSName: string read GetTargetOSName;
+    property TargetCPUName: string read GetSourceCPUName;
+    property TargetOSName: string read GetSourceOSName;
     property SubArchName:string read GetSubarchName;
     property ABIName:string read GetABIName;
     property RegisterName:string read FRegisterName;
@@ -464,15 +464,15 @@ end;
 
 function TCrossInstaller.GetCrossModuleName:string;
 begin
-  result:=FCrossModuleNamePrefix+'_'+GetTargetOSName+'-'+GetTargetCPUName;
+  result:=FCrossModuleNamePrefix+'_'+GetSourceOSName+'-'+GetSourceCPUName;
 end;
 
-function TCrossInstaller.GetTargetCPUName:string;
+function TCrossInstaller.GetSourceCPUName:string;
 begin
   result:=GetCPU(TargetCPU);
 end;
 
-function TCrossInstaller.GetTargetOSName:string;
+function TCrossInstaller.GetSourceOSName:string;
 begin
   result:=GetOS(TargetOS);
 end;
@@ -844,6 +844,8 @@ begin
   FCrossOpts.Clear;
   FSubArch:=TSUBARCH.saNone;
   FABI:=TABI.default;
+
+  FCrossModuleNamePrefix:='T'+GetSourceCPUOS;
 
   FRegisterName:=TargetCPUName+'-'+TargetOSName;
   FBinUtilsDirectoryID:=FRegisterName;

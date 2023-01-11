@@ -152,7 +152,6 @@ end;
 constructor TLinux386_mips.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TLinux386';
   FTargetCPU:=TCPU.mips;
   FTargetOS:=TOS.linux;
   Reset;

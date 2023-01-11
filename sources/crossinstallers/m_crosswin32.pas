@@ -75,7 +75,6 @@ end;
 constructor TWin32.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TWin64';
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.win32;
   Reset;
@@ -87,7 +86,6 @@ begin
   inherited Destroy;
 end;
 
-{$IFDEF WIN64}
 var
   Win32:TWin32;
 
@@ -97,6 +95,6 @@ initialization
 
 finalization
   Win32.Destroy;
-{$ENDIF}
+
 end.
 

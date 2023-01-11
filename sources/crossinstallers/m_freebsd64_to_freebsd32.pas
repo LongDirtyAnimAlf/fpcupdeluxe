@@ -105,7 +105,6 @@ end;
 constructor TFreeBSD64_FreeBSD386.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TFreeBSD64';
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.freebsd;
   Reset;

@@ -60,7 +60,6 @@ end;
 constructor TDarwinpowerpc.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TDarwin32';
   FTargetCPU:=TCPU.powerpc;
   FTargetOS:=TOS.darwin;
   Reset;

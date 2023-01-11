@@ -2998,7 +2998,7 @@ end;
 function TInstaller.GetFPCTarget(Native: boolean): string;
 begin
   if Native then
-    result:=GetTargetCPU+'-'+GetTargetOS
+    result:=GetSourceCPU+'-'+GetSourceOS
   else
     result:=GetCPU(CrossCPU_Target)+'-'+GetOS(CrossOS_Target);
 end;
@@ -4454,7 +4454,7 @@ begin
   FFPCUnicode     := false;
 
   {$ifdef Linux}
-  FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';
+  FMUSLLinker:='/lib/ld-musl-'+GetSourceCPU+'.so.1';
   FMUSL:=(FileExists(FMUSLLinker) AND IsLinuxMUSL);
   if FMUSL then Infoln('Fpcupdeluxe: We have a MUSL Linux version !',etInfo);
   {$endif}

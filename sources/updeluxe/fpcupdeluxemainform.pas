@@ -478,7 +478,7 @@ begin
   {$else}
   aDataClient.UpInfo.UpVersion:=DELUXEVERSION;
   {$endif}
-  aDataClient.UpInfo.UpOS:=GetTargetCPUOS;
+  aDataClient.UpInfo.UpOS:=GetSourceCPUOS;
   {$endif}
 
   {$ifndef MSWINDOWS}
@@ -528,7 +528,7 @@ begin
   {$endif}
     DELUXEVERSION+
     ' for ' +
-    GetTargetCPUOS+
+    GetSourceCPUOS+
     '-'+
     aSystemTarget;
 
@@ -1157,8 +1157,8 @@ var
   i:integer;
   s,aResultMessage:string;
 begin
-  aOS := GetTargetOS;
-  aCPU := GetTargetCPU;
+  aOS := GetSourceOS;
+  aCPU := GetSourceCPU;
 
   aTCPU:=TCPU.cpuNone;
   aTOS:=TOS.osNone;
@@ -4092,7 +4092,7 @@ begin
   FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
 
   // set custom FPC compiler by special user input through setup+
-  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTCPU(GetTargetCPU),GetTOS(GetTargetOS),TSUBARCH.saNone);
+  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTCPU(GetSourceCPU),GetTOS(GetSourceOS),TSUBARCH.saNone);
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
   FPCupManager.BaseDirectory:=sInstallDir;
@@ -4282,9 +4282,11 @@ begin
   {$endif}
 
   AddMessage(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.');
-  AddMessage('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro);
+  AddMessage('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetSourceCPUOS+' running on '+GetDistro);
   AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
   AddMessage('');
+
+  FPCupManager.SaveSettings;
 
   BitBtnHalt.Enabled:=true;
   try

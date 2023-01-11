@@ -39,7 +39,6 @@ end;
 constructor TiOSarm.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TDarwinAny';
   FTargetCPU:=TCPU.arm;
   FTargetOS:=TOS.ios;
   Reset;

@@ -155,7 +155,6 @@ end;
 constructor TWin32_wincearm.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='WinAll';
   FTargetCPU:=TCPU.arm;
   FTargetOS:=TOS.wince;
   Reset;
@@ -168,8 +167,6 @@ begin
   inherited Destroy;
 end;
 
-{$IF (DEFINED (WIN32)) OR (DEFINED(WIN64))}
-// Even though it's officially for Win32, win64 can run x86 binaries without problem, so allow it.
 var
   Win32_wincearm:TWin32_wincearm;
 
@@ -179,6 +176,6 @@ initialization
 
 finalization
   Win32_wincearm.Destroy;
-{$ENDIF}
+
 end.
 

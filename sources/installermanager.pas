@@ -386,10 +386,9 @@ type
     procedure GetCrossToolsPath(out BinPath,LibPath:string);
     function GetCrossBinsURL(out BaseBinsURL:string; var BinsFileName:string):boolean;
     function GetCrossLibsURL(out BaseLibsURL:string; var LibsFileName:string):boolean;
-
+    procedure SaveSettings;
     // Stop talking. Do it! Returns success status
     function Run: boolean;
-
     constructor Create;
     destructor Destroy; override;
   end;
@@ -949,6 +948,46 @@ begin
   end;
 end;
 
+procedure TFPCupManager.SaveSettings;
+const
+  {$ifdef unix}
+  BatchExt     ='.sh';
+  {$else}
+  BatchExt     ='.bat';
+  {$endif unix}
+var
+  CrossCompiling:boolean;
+  TxtFile:Text;
+  s:string;
+begin
+  CrossCompiling:=(CrossCPU_Target<>TCPU.cpuNone) OR (CrossOS_Target<>TOS.osNone);
+  s:=SafeGetApplicationPath+'upbuild';
+  if CrossCompiling then s:=s+'_'+CrossCombo_Target;
+  s:=s+BatchExt;
+  SysUtils.DeleteFile(s);
+  AssignFile(TxtFile,s);
+  try
+    Rewrite(TxtFile);
+    {$ifdef unix}
+    writeln(TxtFile,'#!/bin/sh');
+    {$endif unix}
+    Write(TxtFile,'fpclazup'+GetExeExt);
+    Write(TxtFile,' --installdir='+BaseDirectory);
+    if (NOT CrossCompiling) then
+    begin
+      Write(TxtFile,' --fpcURL='+FPCURL);
+      Write(TxtFile,' --lazURL='+LazarusURL);
+      if (Length(FPCBranch)>0) then Write(TxtFile,' --fpcBranch='+FPCBranch);
+      if (Length(LazarusBranch)>0) then Write(TxtFile,' --lazBranch='+LazarusBranch);
+    end;
+    if (CrossCPU_Target<>TCPU.cpuNone) then Write(TxtFile,' --cputarget='+GetCPU(CrossCPU_Target));
+    if (CrossOS_Target<>TOS.osNone) then Write(TxtFile,' --ostarget='+GetOS(CrossOS_Target));
+    if (FPCInstallDirectory<>FPCSourceDirectory) then Write(TxtFile,' --fpcsplit');
+  finally
+    CloseFile(TxtFile);
+  end;
+end;
+
 procedure TFPCupManager.GetCrossToolsFileName(out BinsFileName,LibsFileName:string);
 var
   s:string;
@@ -1182,35 +1221,35 @@ begin
 
   BaseBinsURL:='';
 
-  if GetTargetOS=GetOS(TOS.win32) then BaseBinsURL:='wincrossbins'
+  if GetSourceOS=GetOS(TOS.win32) then BaseBinsURL:='wincrossbins'
   else
-     if GetTargetOS=GetOS(TOS.win64) then BaseBinsURL:='wincrossbins'
+     if GetSourceOS=GetOS(TOS.win64) then BaseBinsURL:='wincrossbins'
      else
-        if GetTargetOS=GetOS(TOS.linux) then
+        if GetSourceOS=GetOS(TOS.linux) then
         begin
-          if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386crossbins';
-          if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64crossbins';
-          if GetTargetCPU=GetCPU(TCPU.arm) then BaseBinsURL:='linuxarmcrossbins';
+          if GetSourceCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386crossbins';
+          if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64crossbins';
+          if GetSourceCPU=GetCPU(TCPU.arm) then BaseBinsURL:='linuxarmcrossbins';
         end
         else
-          if GetTargetOS=GetOS(TOS.freebsd) then
+          if GetSourceOS=GetOS(TOS.freebsd) then
           begin
-            if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='freebsdx64crossbins';
+            if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='freebsdx64crossbins';
           end
           else
-            if GetTargetOS=GetOS(TOS.solaris) then
+            if GetSourceOS=GetOS(TOS.solaris) then
             begin
               {if FPCupManager.SolarisOI then}
               begin
-                if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='solarisoix64crossbins';
+                if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='solarisoix64crossbins';
               end;
             end
             else
-              if GetTargetOS=GetOS(TOS.darwin) then
+              if GetSourceOS=GetOS(TOS.darwin) then
               begin
-                if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='darwini386crossbins';
-                if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='darwinx64crossbins';
-                if GetTargetCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='darwinarm64crossbins';
+                if GetSourceCPU=GetCPU(TCPU.i386) then BaseBinsURL:='darwini386crossbins';
+                if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='darwinx64crossbins';
+                if GetSourceCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='darwinarm64crossbins';
               end;
 
   s:=GetURLDataFromCache(FPCUPGITREPOAPIRELEASES+'?per_page=100');
@@ -1459,14 +1498,14 @@ begin
   FShortcutCreated:=false;
 
   if
-    (FSequencer.FParent.CrossCPU_Target=GetTCPU(GetTargetCPU))
+    (FSequencer.FParent.CrossCPU_Target=GetTCPU(GetSourceCPU))
     AND
-    (FSequencer.FParent.CrossOS_Target=GetTOS(GetTargetOS))
+    (FSequencer.FParent.CrossOS_Target=GetTOS(GetSourceOS))
   then
   begin
     //if (NOT FSequencer.FParent.MUSL) then
     {$ifdef Linux}
-    if (NOT (Self.MUSL AND (GetTOS(GetTargetOS)=TOS.linux))) then
+    if (NOT (Self.MUSL AND (GetTOS(GetSourceOS)=TOS.linux))) then
     {$endif}
     begin
       RunInfo:='No crosscompiling to own target !';
@@ -1477,7 +1516,7 @@ begin
 
   try
     WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',true);
-    WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,true);
+    WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetSourceCPUOS+' running on '+GetDistro,true);
   except
     // Writing to log failed, probably duplicate run. Inform user and get out.
     RunInfo:='***ERROR***';
@@ -1921,7 +1960,7 @@ begin
     {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
     if (Length(WidgetTypeName)=0) then WidgetTypeName:=GetLCLWidgetTypeName;
     {$ENDIF}
-    FParent.WritelnLog(etInfo,'Checking dev-libs for: '+WidgetTypeName, true);
+    FParent.WritelnLog(etInfo,'Checking dev-libs for '+WidgetTypeName+' LCLWidgetType.', true);
     result:=CheckDevLibs(WidgetTypeName);
   end
   {$endif}
@@ -1939,7 +1978,7 @@ end;
 
 function TSequencer.DoSetCPU(aCPU: string): boolean;
 begin
-  if aCPU=GetTargetCPU
+  if aCPU=GetSourceCPU
      then FParent.CrossCPU_Target:=TCPU.cpuNone
      else FParent.CrossCPU_Target:=GetTCPU(aCPU);
   ResetAllExecuted;
@@ -1948,7 +1987,7 @@ end;
 
 function TSequencer.DoSetOS(aOS: string): boolean;
 begin
-  if aOS=GetTargetOS
+  if aOS=GetSourceOS
      then FParent.CrossOS_Target:=TOS.osNone
      else FParent.CrossOS_Target:=GetTOS(aOS);
   ResetAllExecuted;

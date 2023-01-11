@@ -159,7 +159,6 @@ end;
 constructor TLinux386_wincearm.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TLinux386';
   FTargetCPU:=TCPU.arm;
   FTargetOS:=TOS.wince;
   Reset;

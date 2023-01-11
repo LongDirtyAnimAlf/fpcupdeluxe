@@ -112,7 +112,6 @@ end;
 constructor TWinarm64.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TWin32';
   FTargetCPU:=TCPU.aarch64;
   FTargetOS:=TOS.win64;
   Reset;
@@ -124,7 +123,6 @@ begin
   inherited Destroy;
 end;
 
-{$IFDEF WIN32}
 var
   Winarm64:TWinarm64;
 
@@ -135,6 +133,5 @@ initialization
 finalization
   Winarm64.Destroy;
 
-{$ENDIF WIN32}
 end.
 

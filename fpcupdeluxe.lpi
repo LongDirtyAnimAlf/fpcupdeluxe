@@ -837,6 +837,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dDisableRemoteLog"/>
+          </Other>
         </CompilerOptions>
       </Item26>
       <Item27 Name="linux64gtk3">

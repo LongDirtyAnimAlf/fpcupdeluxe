@@ -143,9 +143,17 @@ uses
   m_any_to_openbsdx64,
   {$endif}
   {$ifdef MSWINDOWS}
-  m_win32_to_linuxmips, m_win32_to_wincearm,
+  // Even though it's officially for Win32, win64 can run x86 binaries without problem, so allow it.
+  m_win32_to_linuxmips,
+  m_win32_to_wincearm,
   {$ifdef win64}
   m_crosswin32,
+  {$ifdef CPUX86_64}
+  m_crosswinarm64,
+  {$endif}
+  {$ifdef CPUAARCH64}
+  m_crosswinx64,
+  {$endif}
   {$endif win64}
   {$ifdef win32}
   m_crosswinx64,

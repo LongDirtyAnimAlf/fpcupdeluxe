@@ -39,7 +39,6 @@ end;
 constructor TDarwin32.Create;
 begin
   inherited Create;
-  FCrossModuleNamePrefix:='TDarwinAny';
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.darwin;
   Reset;

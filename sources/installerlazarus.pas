@@ -375,7 +375,7 @@ begin
 
 
         Processor.Process.Parameters.Add('FPC=' + FCompiler);
-        Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+        Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
         Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
 
         Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
@@ -408,15 +408,15 @@ begin
         //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
         {$endif}
 
-        Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
-        Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
+        Processor.Process.Parameters.Add('OS_SOURCE=' + GetSourceOS);
+        Processor.Process.Parameters.Add('CPU_SOURCE=' + GetSourceCPU);
 
         Processor.Process.Parameters.Add('OS_TARGET=' + CrossInstaller.TargetOSName);
         Processor.Process.Parameters.Add('CPU_TARGET=' + CrossInstaller.TargetCPUName);
 
         //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
         //Todo: to be investigated
-        //Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+        //Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
 
         //Set standard options
         Options := STANDARDCOMPILERVERBOSITYOPTIONS;
@@ -466,11 +466,11 @@ begin
 
         // Apparently, the .compiled file, that are used to check for a rebuild, do not contain a cpu setting if cpu and cross-cpu do not differ !!
         // So, use this test to prevent a rebuild !!!
-        if (GetTargetCPU<>CrossInstaller.TargetCPUName) then
+        if (GetSourceCPU<>CrossInstaller.TargetCPUName) then
           Processor.Process.Parameters.Add('--cpu=' + CrossInstaller.TargetCPUName);
 
         // See above: the same for OS !
-        if (GetTargetOS<>CrossInstaller.TargetOSName) then
+        if (GetSourceOS<>CrossInstaller.TargetOSName) then
           Processor.Process.Parameters.Add('--os=' + CrossInstaller.TargetOSName);
 
         if FLCL_Platform <> '' then
@@ -686,7 +686,7 @@ begin
     {$ENDIF}
 
     Processor.Process.Parameters.Add('FPC=' + FCompiler);
-    Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+    Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
     Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
 
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
@@ -721,7 +721,7 @@ begin
 
     //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
     //Todo: to be investigated
-    //Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+    //Processor.Process.Parameters.Add('FPCFPMAKE=' + ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
 
     if FLCL_Platform <> '' then
       Processor.Process.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
@@ -1009,8 +1009,8 @@ begin
       {$ENDIF}
 
       Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(PrimaryConfigPath));
-      Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);
-      Processor.Process.Parameters.Add('--os=' + GetTargetOS);
+      Processor.Process.Parameters.Add('--cpu=' + GetSourceCPU);
+      Processor.Process.Parameters.Add('--os=' + GetSourceOS);
 
       if FLCL_Platform <> '' then
         Processor.Process.Parameters.Add('--ws=' + FLCL_Platform);
@@ -1082,8 +1082,8 @@ begin
           {$ENDIF}
 
           Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(PrimaryConfigPath));
-          Processor.Process.Parameters.Add('--cpu=' + GetTargetCPU);
-          Processor.Process.Parameters.Add('--os=' + GetTargetOS);
+          Processor.Process.Parameters.Add('--cpu=' + GetSourceCPU);
+          Processor.Process.Parameters.Add('--os=' + GetSourceOS);
 
           if FLCL_Platform <> '' then
             Processor.Process.Parameters.Add('--ws=' + FLCL_Platform);
@@ -1631,7 +1631,7 @@ begin
 
         {$IFDEF MSWINDOWS}
         // On Windows, we provide our own GDB
-        GDBPath:=ConcatPaths([FMakeDir,'gdb',GetTargetCPUOS])+DirectorySeparator+'gdb.exe';
+        GDBPath:=ConcatPaths([FMakeDir,'gdb',GetSourceCPUOS])+DirectorySeparator+'gdb.exe';
         if FileExists(GDBPath) then
         begin
           if (SourceVersionNum>=CalculateFullVersion(0,9,31)) then
@@ -1651,7 +1651,7 @@ begin
         {$ENDIF}
         if FileExists(GDBPath) then
         begin
-          s:=ConcatPaths([FMakeDir,'gdb',GetTargetCPUOS]);
+          s:=ConcatPaths([FMakeDir,'gdb',GetSourceCPUOS]);
           ForceDirectoriesSafe(s);
           s:=s+DirectorySeparator+'gdb';
           if (fpSymlink(pchar(GDBPath),pchar(s))=0) then
@@ -2050,7 +2050,7 @@ begin
     {$ENDIF}
 
     Processor.Process.Parameters.Add('FPC=' + FCompiler);
-    Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+    Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
 
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
     Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
@@ -2062,8 +2062,8 @@ begin
     //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
     {$endif}
 
-    Processor.Process.Parameters.Add('OS_SOURCE=' + GetTargetOS);
-    Processor.Process.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
+    Processor.Process.Parameters.Add('OS_SOURCE=' + GetSourceOS);
+    Processor.Process.Parameters.Add('CPU_SOURCE=' + GetSourceCPU);
 
     if (CrossCompiling) then
     begin
@@ -2073,8 +2073,8 @@ begin
     end
     else
     begin
-      Processor.Process.Parameters.Add('OS_TARGET=' + GetTargetOS);
-      Processor.Process.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
+      Processor.Process.Parameters.Add('OS_TARGET=' + GetSourceOS);
+      Processor.Process.Parameters.Add('CPU_TARGET=' + GetSourceCPU);
     end;
 
     CleanDirectory:='';
@@ -2344,8 +2344,8 @@ begin
       begin
         s:=REGEXPACKAGE;
         s:=StringReplace(s,VERSIONEXPRESSION,CompilerVersion(FCompiler),[]);
-        s:=StringReplace(s,CPUEXPRESSION,GetTargetCPU,[]);
-        s:=StringReplace(s,OSEXPRESSION,GetTargetOS,[]);
+        s:=StringReplace(s,CPUEXPRESSION,GetSourceCPU,[]);
+        s:=StringReplace(s,OSEXPRESSION,GetSourceOS,[]);
 
         UpdateWarnings:=TStringList.Create;
         try
@@ -2362,7 +2362,7 @@ begin
       s:=Processor.Environment.GetVar('FPCDIR');
       try
         Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
-        Processor.Process.Parameters.Add('-T' + GetTargetCPU + '-' + GetTargetOS);
+        Processor.Process.Parameters.Add('-T' + GetSourceCPU + '-' + GetSourceOS);
 
         Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(SourceDirectory);
         ProcessorResult := Processor.ExecuteAndWait;
