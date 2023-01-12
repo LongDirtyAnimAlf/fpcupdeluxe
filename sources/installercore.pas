@@ -231,6 +231,10 @@ const
   _MAKEFILECHECKFPC        = _MAKEFILECHECK+_FPC;
   _MAKEFILECHECKLAZARUS    = _MAKEFILECHECK+_LAZARUS;
 
+
+  _NATIVECROSSFPC          = 'Native'+_FPC;
+
+
   _DEFAULT                 = 'Default';
   _DEFAULTSIMPLE           = 'DefaultSimple';
 

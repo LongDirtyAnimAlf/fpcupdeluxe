@@ -85,6 +85,7 @@
 {"hash":183339427,"name":"tform1.btnupdatelazarusmakefiles.caption","sourcebytes":[85,112,100,97,116,101,32,76,97,122,97,114,117,115,32,77,97,107,101,102,105,108,101,115],"value":"Update Lazarus Makefiles"},
 {"hash":235299006,"name":"tform1.btncreatelazarusconfig.caption","sourcebytes":[67,114,101,97,116,101,32,76,97,122,97,114,117,115,32,67,111,110,102,105,103,117,114,97,116,105,111,110],"value":"Create Lazarus Configuration"},
 {"hash":157428270,"name":"tform1.btnchecktoolslocations.caption","sourcebytes":[67,104,101,99,107,32,84,111,111,108,115,32,76,111,99,97,116,105,111,110],"value":"Check Tools Location"},
+{"hash":258779938,"name":"tform1.btnbuildnativecompiler.caption","sourcebytes":[66,117,105,108,100,32,78,97,116,105,118,101,32,67,111,109,112,105,108,101,114],"value":"Build Native Compiler"},
 {"hash":264172734,"name":"tform1.btnsendlog.hint","sourcebytes":[83,101,110,100,32,101,109,97,105,108,32,116,111,32,102,112,99,117,112,32,109,97,105,110,116,97,105,110,101,114,32,99,111,110,116,97,105,110,105,110,103,32,67,111,109,109,97,110,100,115,99,114,101,101,110,32,111,117,116,112,117,116,46],"value":"Send email to fpcup maintainer containing Commandscreen output."},
 {"hash":134102887,"name":"tform1.btnsendlog.caption","sourcebytes":[69,109,97,105,108,32,108,111,103],"value":"Email log"},
 {"hash":2805797,"name":"tform1.menufile.caption","sourcebytes":[38,70,105,108,101],"value":"&File"},

@@ -1542,10 +1542,8 @@ begin
     begin
       aSequence:=_DEFAULT;
       {$ifdef win32}
-      {$ifndef buildnative}
       // Run Windows specific cross compiler or regular version
       if Pos(_CROSSWIN,SkipModules)=0 then aSequence:=_DEFAULT+'win32';
-      {$endif}
       {$endif}
       {$ifdef win64}
       //not yet
@@ -2029,7 +2027,7 @@ begin
   //check if this is a known module:
 
   // FPC:
-  if ((ModuleName=_FPC) OR (ModuleName=_MAKEFILECHECKFPC)) then
+  if ((ModuleName=_FPC) OR (ModuleName=_MAKEFILECHECKFPC) OR (ModuleName=_NATIVECROSSFPC)) then
   begin
     if assigned(FInstaller) then
     begin

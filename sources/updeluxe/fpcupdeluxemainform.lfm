@@ -5496,6 +5496,22 @@ object Form1: TForm1
         OnClick = btnCheckToolsLocationsClick
         TabOrder = 6
       end
+      object btnBuildNativeCompiler: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = btnCheckToolsLocations
+        AnchorSideTop.Side = asrBottom
+        Left = 80
+        Height = 25
+        Top = 303
+        Width = 142
+        AutoSize = True
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 16
+        Caption = 'Build Native Compiler'
+        OnClick = btnBuildNativeCompilerClick
+        TabOrder = 7
+      end
     end
   end
   object btnSendLog: TButton

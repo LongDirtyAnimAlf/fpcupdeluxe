@@ -403,6 +403,10 @@ msgstr ""
 msgid "Set Lazarus revision"
 msgstr ""
 
+#: tform1.btnbuildnativecompiler.caption
+msgid "Build Native Compiler"
+msgstr ""
+
 #: tform1.btnchecktoolslocations.caption
 msgid "Check Tools Location"
 msgstr ""

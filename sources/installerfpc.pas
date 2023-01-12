@@ -105,6 +105,11 @@ Const
 
     _DECLARE+_MAKEFILECHECKFPC+_SEP+
     _BUILDMODULE+_MAKEFILECHECKFPC+_SEP+
+    _END+
+
+    _DECLARE+_NATIVECROSSFPC+_SEP+
+    _CLEANMODULE+_NATIVECROSSFPC+_SEP+
+    _BUILDMODULE+_NATIVECROSSFPC+_SEP+
 
     _ENDFINAL;
 
@@ -225,8 +230,10 @@ uses
   {$ENDIF}
   ;
 
+{$ifndef FPC_HAS_TYPE_EXTENDED}
 const
   DEFINE_FPC_SOFT_FPUX80 = 'FPC_SOFT_FPUX80';
+{$endif}
 
 { TFPCCrossInstaller }
 
@@ -255,9 +262,6 @@ var
   NativeAge,CrossAge:Longint;
 begin
   result:=true;
-  {$ifdef buildnative}
-  exit;
-  {$endif}
   NativeCompiler:=GetFPCInBinDir;
   if (FileExists(NativeCompiler)) then
   begin
@@ -629,9 +633,9 @@ function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 // crosswin32-64 and crosswin64-32 steps.
 type
   {$ifdef crosssimple}
-  TSTEPS = (st_MakeAll,st_MakeCrossInstall);
+  TSTEPS = (st_Start,st_MakeAll,st_MakeCrossInstall,st_Finished);
   {$else}
-  TSTEPS = (st_Compiler,st_CompilerInstall,st_Rtl,st_RtlInstall,st_Packages,st_PackagesInstall,st_NativeCompiler);
+  TSTEPS = (st_Start,st_Compiler,st_CompilerInstall,st_Rtl,st_RtlInstall,st_Packages,st_PackagesInstall,st_NativeCompiler,st_Finished);
   {$endif}
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
@@ -733,6 +737,8 @@ begin
 
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
         begin
+          if ((ModuleName=_NATIVECROSSFPC) AND (MakeCycle<>st_NativeCompiler)) then continue;
+          if ((ModuleName<>_NATIVECROSSFPC) AND (MakeCycle=st_NativeCompiler)) then continue;
 
           // ARMHF crosscompiler build option
           if (MakeCycle=st_Compiler) then
@@ -907,197 +913,199 @@ begin
             //Edit dedicated settings of config snippet
             InsertFPCCFGSnippet(FPCCfg,s1);
 
-            if (CrossInstaller.TargetOS=TOS.ultibo) then
+            // Creating Ultibo configuration files
+            if (MakeCycle=High(TSTEPS)) then
             begin
-              // Creating Ultibo configuration files
-
-              if (CrossInstaller.TargetCPU=TCPU.arm) then
+              if (CrossInstaller.TargetOS=TOS.ultibo) then
               begin
-                s1 := FFPCCompilerBinPath + 'RPI.CFG';
-                if (NOT FileExists(s1)) then
+
+                if (CrossInstaller.TargetCPU=TCPU.arm) then
                 begin
-                  //create RPI.CFG
-                  AssignFile(TxtFile,s1);
-                  Rewrite(TxtFile);
-                  try
-                    writeln(TxtFile,'#');
-                    writeln(TxtFile,'# Raspberry Pi (A/B/A+/B+/Zero) specific config file');
-                    writeln(TxtFile,'#');
-                    writeln(TxtFile,'-CfVFPV2');
-                    writeln(TxtFile,'-CIARM');
-                    writeln(TxtFile,'-CaEABIHF');
-                    writeln(TxtFile,'-OoFASTMATH');
-                    writeln(TxtFile,'-dRPI');
-                    writeln(TxtFile,'-dBCM2708');
-                    s2:=GetUnitsInstallDirectory(true);
-                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv6),[]);
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-                  finally
-                    CloseFile(TxtFile);
+                  s1 := FFPCCompilerBinPath + 'RPI.CFG';
+                  if (NOT FileExists(s1)) then
+                  begin
+                    //create RPI.CFG
+                    AssignFile(TxtFile,s1);
+                    Rewrite(TxtFile);
+                    try
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'# Raspberry Pi (A/B/A+/B+/Zero) specific config file');
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'-CfVFPV2');
+                      writeln(TxtFile,'-CIARM');
+                      writeln(TxtFile,'-CaEABIHF');
+                      writeln(TxtFile,'-OoFASTMATH');
+                      writeln(TxtFile,'-dRPI');
+                      writeln(TxtFile,'-dBCM2708');
+                      s2:=GetUnitsInstallDirectory(true);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv6),[]);
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                    finally
+                      CloseFile(TxtFile);
+                    end;
+                  end
+                  else
+                  begin
+                    Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                   end;
-                end
-                else
-                begin
-                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
+
+                  s1 := FFPCCompilerBinPath + 'RPI2.CFG';
+                  if (NOT FileExists(s1)) then
+                  begin
+                    //create RPI2.CFG
+                    AssignFile(TxtFile,s1);
+                    Rewrite(TxtFile);
+                    try
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'# Raspberry Pi 2B specific config file');
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'-CfVFPV3');
+                      writeln(TxtFile,'-CIARM');
+                      writeln(TxtFile,'-CaEABIHF');
+                      writeln(TxtFile,'-OoFASTMATH');
+                      writeln(TxtFile,'-dRPI2');
+                      writeln(TxtFile,'-dBCM2709');
+                      s2:=GetUnitsInstallDirectory(true);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                    finally
+                      CloseFile(TxtFile);
+                    end;
+                  end
+                  else
+                  begin
+                    Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
+                  end;
+
+                  s1 := FFPCCompilerBinPath + 'RPI3.CFG';
+                  if (NOT FileExists(s1)) then
+                   begin
+                    //create RPI3.CFG
+                    AssignFile(TxtFile,s1);
+                    Rewrite(TxtFile);
+                    try
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'# Raspberry Pi 3B/3B+/3A+/CM3/Zero2W specific config file');
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'#IFDEF CPUARM');
+                      writeln(TxtFile,'-CfVFPV3');
+                      writeln(TxtFile,'-CIARM');
+                      writeln(TxtFile,'-CaEABIHF');
+                      writeln(TxtFile,'-OoFASTMATH');
+                      writeln(TxtFile,'-dRPI3');
+                      writeln(TxtFile,'-dBCM2710');
+                      s2:=GetUnitsInstallDirectory(true);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                      writeln(TxtFile,'#ENDIF');
+                      writeln(TxtFile,'#IFDEF CPUAARCH64');
+                      writeln(TxtFile,'-CfVFP');
+                      writeln(TxtFile,'-OoFASTMATH');
+                      writeln(TxtFile,'-dRPI3');
+                      writeln(TxtFile,'-dBCM2710');
+                      s2:=GetUnitsInstallDirectory(true);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                      writeln(TxtFile,'#ENDIF');
+                    finally
+                      CloseFile(TxtFile);
+                    end;
+                  end
+                  else
+                  begin
+                    Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
+                  end;
+
+                  s1 := FFPCCompilerBinPath + 'QEMUVPB.CFG';
+                  if (NOT FileExists(s1)) then
+                  begin
+                    //create QEMUVPB.CFG
+                    AssignFile(TxtFile,s1);
+                    Rewrite(TxtFile);
+                    try
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'# QEMU VersatilePB specific config file');
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'#IFDEF CPUARM');
+                      writeln(TxtFile,'-CfVFPV3');
+                      writeln(TxtFile,'-CIARM');
+                      writeln(TxtFile,'-CaEABIHF');
+                      writeln(TxtFile,'-OoFASTMATH');
+                      writeln(TxtFile,'-dQEMUVPB');
+                      s2:=GetUnitsInstallDirectory(true);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                      writeln(TxtFile,'#ENDIF');
+                      writeln(TxtFile,'#IFDEF CPUAARCH64');
+                      writeln(TxtFile,'-CfVFP');
+                      writeln(TxtFile,'-OoFASTMATH');
+                      writeln(TxtFile,'-dQEMUVPB');
+                      s2:=GetUnitsInstallDirectory(true);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                      writeln(TxtFile,'#ENDIF');
+                    finally
+                      CloseFile(TxtFile);
+                    end;
+                  end
+                  else
+                  begin
+                    Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
+                  end;
+
                 end;
 
-                s1 := FFPCCompilerBinPath + 'RPI2.CFG';
-                if (NOT FileExists(s1)) then
+                if ((CrossInstaller.TargetCPU=TCPU.arm) OR (CrossInstaller.TargetCPU=TCPU.aarch64)) then
                 begin
-                  //create RPI2.CFG
-                  AssignFile(TxtFile,s1);
-                  Rewrite(TxtFile);
-                  try
-                    writeln(TxtFile,'#');
-                    writeln(TxtFile,'# Raspberry Pi 2B specific config file');
-                    writeln(TxtFile,'#');
-                    writeln(TxtFile,'-CfVFPV3');
-                    writeln(TxtFile,'-CIARM');
-                    writeln(TxtFile,'-CaEABIHF');
-                    writeln(TxtFile,'-OoFASTMATH');
-                    writeln(TxtFile,'-dRPI2');
-                    writeln(TxtFile,'-dBCM2709');
-                    s2:=GetUnitsInstallDirectory(true);
-                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-                  finally
-                    CloseFile(TxtFile);
+                  s1 := FFPCCompilerBinPath + 'RPI4.CFG';
+                  if (NOT FileExists(s1)) then
+                  begin
+                    //create RPI4.CFG
+                    AssignFile(TxtFile,s1);
+                    Rewrite(TxtFile);
+                    try
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'# Raspberry Pi 4B/400/CM4 specific config file');
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'#IFDEF CPUARM');
+                      writeln(TxtFile,'-CfVFPV3');
+                      writeln(TxtFile,'-CIARM');
+                      writeln(TxtFile,'-CaEABIHF');
+                      writeln(TxtFile,'-OoFASTMATH');
+                      writeln(TxtFile,'-dRPI4');
+                      writeln(TxtFile,'-dBCM2711');
+                      s2:=GetUnitsInstallDirectory(true);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                      writeln(TxtFile,'#ENDIF');
+                      writeln(TxtFile,'#IFDEF CPUAARCH64');
+                      writeln(TxtFile,'-CfVFP');
+                      writeln(TxtFile,'-OoFASTMATH');
+                      writeln(TxtFile,'-dRPI4');
+                      writeln(TxtFile,'-dBCM2711');
+                      s2:=GetUnitsInstallDirectory(true);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                      writeln(TxtFile,'#ENDIF');
+                    finally
+                      CloseFile(TxtFile);
+                    end;
+                  end
+                  else
+                  begin
+                    Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                   end;
-                end
-                else
-                begin
-                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
-                end;
 
-                s1 := FFPCCompilerBinPath + 'RPI3.CFG';
-                if (NOT FileExists(s1)) then
-                 begin
-                  //create RPI3.CFG
-                  AssignFile(TxtFile,s1);
-                  Rewrite(TxtFile);
-                  try
-                    writeln(TxtFile,'#');
-                    writeln(TxtFile,'# Raspberry Pi 3B/3B+/3A+/CM3/Zero2W specific config file');
-                    writeln(TxtFile,'#');
-                    writeln(TxtFile,'#IFDEF CPUARM');
-                    writeln(TxtFile,'-CfVFPV3');
-                    writeln(TxtFile,'-CIARM');
-                    writeln(TxtFile,'-CaEABIHF');
-                    writeln(TxtFile,'-OoFASTMATH');
-                    writeln(TxtFile,'-dRPI3');
-                    writeln(TxtFile,'-dBCM2710');
-                    s2:=GetUnitsInstallDirectory(true);
-                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-                    writeln(TxtFile,'#ENDIF');
-                    writeln(TxtFile,'#IFDEF CPUAARCH64');
-                    writeln(TxtFile,'-CfVFP');
-                    writeln(TxtFile,'-OoFASTMATH');
-                    writeln(TxtFile,'-dRPI3');
-                    writeln(TxtFile,'-dBCM2710');
-                    s2:=GetUnitsInstallDirectory(true);
-                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-                    writeln(TxtFile,'#ENDIF');
-                  finally
-                    CloseFile(TxtFile);
-                  end;
-                end
-                else
-                begin
-                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                 end;
-
-                s1 := FFPCCompilerBinPath + 'QEMUVPB.CFG';
-                if (NOT FileExists(s1)) then
-                begin
-                  //create QEMUVPB.CFG
-                  AssignFile(TxtFile,s1);
-                  Rewrite(TxtFile);
-                  try
-                    writeln(TxtFile,'#');
-                    writeln(TxtFile,'# QEMU VersatilePB specific config file');
-                    writeln(TxtFile,'#');
-                    writeln(TxtFile,'#IFDEF CPUARM');
-                    writeln(TxtFile,'-CfVFPV3');
-                    writeln(TxtFile,'-CIARM');
-                    writeln(TxtFile,'-CaEABIHF');
-                    writeln(TxtFile,'-OoFASTMATH');
-                    writeln(TxtFile,'-dQEMUVPB');
-                    s2:=GetUnitsInstallDirectory(true);
-                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-                    writeln(TxtFile,'#ENDIF');
-                    writeln(TxtFile,'#IFDEF CPUAARCH64');
-                    writeln(TxtFile,'-CfVFP');
-                    writeln(TxtFile,'-OoFASTMATH');
-                    writeln(TxtFile,'-dQEMUVPB');
-                    s2:=GetUnitsInstallDirectory(true);
-                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-                    writeln(TxtFile,'#ENDIF');
-                  finally
-                    CloseFile(TxtFile);
-                  end;
-                end
-                else
-                begin
-                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
-                end;
-
               end;
-
-              if ((CrossInstaller.TargetCPU=TCPU.arm) OR (CrossInstaller.TargetCPU=TCPU.aarch64)) then
-              begin
-                s1 := FFPCCompilerBinPath + 'RPI4.CFG';
-                if (NOT FileExists(s1)) then
-                begin
-                  //create RPI4.CFG
-                  AssignFile(TxtFile,s1);
-                  Rewrite(TxtFile);
-                  try
-                    writeln(TxtFile,'#');
-                    writeln(TxtFile,'# Raspberry Pi 4B/400/CM4 specific config file');
-                    writeln(TxtFile,'#');
-                    writeln(TxtFile,'#IFDEF CPUARM');
-                    writeln(TxtFile,'-CfVFPV3');
-                    writeln(TxtFile,'-CIARM');
-                    writeln(TxtFile,'-CaEABIHF');
-                    writeln(TxtFile,'-OoFASTMATH');
-                    writeln(TxtFile,'-dRPI4');
-                    writeln(TxtFile,'-dBCM2711');
-                    s2:=GetUnitsInstallDirectory(true);
-                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-                    writeln(TxtFile,'#ENDIF');
-                    writeln(TxtFile,'#IFDEF CPUAARCH64');
-                    writeln(TxtFile,'-CfVFP');
-                    writeln(TxtFile,'-OoFASTMATH');
-                    writeln(TxtFile,'-dRPI4');
-                    writeln(TxtFile,'-dBCM2711');
-                    s2:=GetUnitsInstallDirectory(true);
-                    s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
-                    writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
-                    writeln(TxtFile,'#ENDIF');
-                  finally
-                    CloseFile(TxtFile);
-                  end;
-                end
-                else
-                begin
-                  Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
-                end;
-
-              end;
-
             end;
 
             {$ifdef UNIX}
@@ -1111,6 +1119,8 @@ begin
             end;
             {$endif}
 
+            // We are in steps start or finish, so just continue;
+            continue;
           end;
 
           Processor.Executable := Make;
@@ -1266,7 +1276,6 @@ begin
             end;
             st_NativeCompiler:
             begin
-              {$ifdef buildnative}
               if (
                 //Only native compiler if we have libs of if we do not need libs !!
                 ( (CrossInstaller.LibsPath<>'') OR (CrossInstaller.TargetOS=TOS.win32) OR (CrossInstaller.TargetOS=TOS.win64))
@@ -1280,13 +1289,12 @@ begin
                 Processor.Process.Parameters.Add('FPC='+FCompiler);
                 //s1:=CrossCompilerName;
                 //Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1);
+                UnitSearchPath:=GetUnitsInstallDirectory(true);
                 Processor.Process.Parameters.Add('-C');
                 Processor.Process.Parameters.Add('compiler');
                 Processor.Process.Parameters.Add('compiler');
-              end else continue;
-              {$else}
-              continue;
-              {$endif}
+              end
+              else continue;
             end;
           end;
 
@@ -1440,11 +1448,12 @@ begin
           {$ifndef crosssimple}
           if (MakeCycle=st_NativeCompiler) then
           begin
-            {$ifdef buildnative}
             // Only build with debug info
             //CrossOptions:='-O1 -g -gl';
-            CrossOptions:='-O1';
-            {$endif}
+            //CrossOptions:='-O1';
+            //Do not add cross-options when building native compiler
+            //Correct options will be taken from fpc.cfg
+            CrossOptions:='';
           end;
           {$endif}
 
@@ -1505,12 +1514,23 @@ begin
           end;
           {$ENDIF}
 
+          {$ifndef crosssimple}
+          if (MakeCycle=st_NativeCompiler) then
+          begin
+            UnitSearchPath:=GetUnitsInstallDirectory(false);
+            s1:=s1+' -Fu'+UnitSearchPath;
+            s1:=s1+' -Fu'+UnitSearchPath+DirectorySeparator+'rtl';
+          end;
+          {$endif}
+
           Processor.Process.Parameters.Add('OPT='+s1);
 
           try
             s1:=infotext+'Running make ['+UnCamel(GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle)))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')';
             if (Length(CrossOptions)>0) then s1:=s1+' with CROSSOPT: '+CrossOptions;
             Infoln(s1,etInfo);
+
+            Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
 
             ProcessorResult:=Processor.ExecuteAndWait;
             result:=(ProcessorResult=0);
@@ -1572,7 +1592,7 @@ begin
 
         end;// loop over MakeCycle
 
-        if result then Infoln(infotext+'Building native compiler for '+GetFPCTarget(false)+' finished.',etInfo);
+        if result then Infoln(infotext+'Building cross-compiler for '+GetFPCTarget(false)+' finished.',etInfo);
 
         if (not result) then
         begin
@@ -1605,117 +1625,130 @@ begin
         end
         else
         begin
-
-          // Get the correct name of the cross-compiler in source-directory
-          s1:='ppcross'+ppcSuffix[CrossInstaller.TargetCPU];
-          s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
-          {$ifdef crosssimple}
-          {$IFDEF UNIX}
-          if FileExists(s2) then
+          if (ModuleName=_NATIVECROSSFPC) then
           begin
-            {$ifdef Darwin}
-            if CrossCompilerName=GetCompilerName(GetSourceCPU) then
+            s1:=GetCompilerName(CrossInstaller.TargetCPU);
+            s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
+            if FileExists(s2) then
             begin
-              Infoln(infotext+'Cross-compiler and native compiler share the same name: '+CrossCompilerName+'.',etInfo);
-              Infoln(infotext+'Skipping manual compiler-copy to bin-directory ! To be investigated.',etInfo);
-              // Perhaps we need to contruct a "fat" binary
-              // lipo -create s1 CrossCompilerName -output s1
-              // TODO
-              // I do not know what to do at the moment
-            end
-            else
-            {$endif Darwin}
-            begin
-              // copy over / rename the cross-compiler towards the FPC bin-directory, with the right compilername.
-              Infoln(infotext+'Copy cross-compiler ('+s1+') into: '+FBinPath,etInfo);
-              s1:=ConcatPaths([FBinPath,CrossCompilerName]);
-              //FileUtil.CopyFile(s2,s1);
+              s1:=ConcatPaths([FFPCCompilerBinPath,'native_'+GetFPCTarget(false)+'_'+GetCompilerName(CrossInstaller.TargetCPU)]);
               SysUtils.DeleteFile(s1);
               SysUtils.RenameFile(s2,s1);
-              fpChmod(s1,&755);
             end;
           end;
-          {$ENDIF}
-          {$endif crosssimple}
 
-          // delete cross-compiler in source-directory
-          SysUtils.DeleteFile(s2);
-
-          {$IFDEF UNIX}
-          result:=CreateFPCScript;
-          {$ENDIF UNIX}
-
-          {$ifdef MSWINDOWS}
-          // get wince debugger
-          if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.wince) then
+          if (ModuleName=_FPC) then
           begin
-            for Counter := low(FUtilFiles) to high(FUtilFiles) do
+            // Get the correct name of the cross-compiler in source-directory
+            s1:='ppcross'+ppcSuffix[CrossInstaller.TargetCPU];
+            s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
+            {$ifdef crosssimple}
+            {$IFDEF UNIX}
+            if FileExists(s2) then
             begin
-              if (FUtilFiles[Counter].Category=ucDebuggerWince) then
+              {$ifdef Darwin}
+              if CrossCompilerName=GetCompilerName(GetSourceCPU) then
               begin
-                if NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\gdb.exe') then
+                Infoln(infotext+'Cross-compiler and native compiler share the same name: '+CrossCompilerName+'.',etInfo);
+                Infoln(infotext+'Skipping manual compiler-copy to bin-directory ! To be investigated.',etInfo);
+                // Perhaps we need to contruct a "fat" binary
+                // lipo -create s1 CrossCompilerName -output s1
+                // TODO
+                // I do not know what to do at the moment
+              end
+              else
+              {$endif Darwin}
+              begin
+                // copy over / rename the cross-compiler towards the FPC bin-directory, with the right compilername.
+                Infoln(infotext+'Copy cross-compiler ('+s1+') into: '+FBinPath,etInfo);
+                s1:=ConcatPaths([FBinPath,CrossCompilerName]);
+                //FileUtil.CopyFile(s2,s1);
+                SysUtils.DeleteFile(s1);
+                SysUtils.RenameFile(s2,s1);
+                fpChmod(s1,&755);
+              end;
+            end;
+            {$ENDIF}
+            {$endif crosssimple}
+
+            // delete cross-compiler in source-directory
+            SysUtils.DeleteFile(s2);
+
+            {$IFDEF UNIX}
+            result:=CreateFPCScript;
+            {$ENDIF UNIX}
+
+            {$ifdef MSWINDOWS}
+            // get wince debugger
+            if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.wince) then
+            begin
+              for Counter := low(FUtilFiles) to high(FUtilFiles) do
+              begin
+                if (FUtilFiles[Counter].Category=ucDebuggerWince) then
                 begin
-                  s1:=GetTempFileNameExt('FPCUPTMP','zip');
-                  if GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,s1) then
+                  if NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\gdb.exe') then
                   begin
-                    with TNormalUnzipper.Create do
+                    s1:=GetTempFileNameExt('FPCUPTMP','zip');
+                    if GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,s1) then
                     begin
-                      try
-                        if DoUnZip(s1,IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\',[]) then
-                          Infoln(localinfotext+'Downloading and installing GDB debugger (' + FUtilFiles[Counter].FileName + ') for WinCE success.',etInfo);
-                      finally
-                        Free;
+                      with TNormalUnzipper.Create do
+                      begin
+                        try
+                          if DoUnZip(s1,IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\',[]) then
+                            Infoln(localinfotext+'Downloading and installing GDB debugger (' + FUtilFiles[Counter].FileName + ') for WinCE success.',etInfo);
+                        finally
+                          Free;
+                        end;
                       end;
                     end;
+                    SysUtils.Deletefile(s1);
                   end;
-                  SysUtils.Deletefile(s1);
                 end;
               end;
             end;
-          end;
 
-          {$endif}
+            {$endif}
 
-          // move debugger, if any
-          //if (CrossInstaller.TargetCPU in TCPU.arm) AND (CrossInstaller.TargetOS=TOS.embedded) then
-          begin
-            if NOT FileExists(ConcatPaths([FMakeDir,'gdb',CrossInstaller.RegisterName,'gdb'+GetExeExt])) then
+            // move debugger, if any
+            //if (CrossInstaller.TargetCPU in TCPU.arm) AND (CrossInstaller.TargetOS=TOS.embedded) then
             begin
-              //Get cross-binaries directory
-
-
-              i:=Pos('-FD',CrossInstaller.FPCCFGSnippet);
-              if i>0 then
+              if NOT FileExists(ConcatPaths([FMakeDir,'gdb',CrossInstaller.RegisterName,'gdb'+GetExeExt])) then
               begin
-                j:=Pos(#13,CrossInstaller.FPCCFGSnippet,i);
-                if j=0 then j:=Pos(#10,CrossInstaller.FPCCFGSnippet,i);
-                s1:=Copy(CrossInstaller.FPCCFGSnippet,i+3,j-(i+3));
-                s1:=IncludeTrailingPathDelimiter(s1);
-                //Get cross-binaries prefix
-                i:=Pos('-XP',CrossInstaller.FPCCFGSnippet);
+                //Get cross-binaries directory
+                i:=Pos('-FD',CrossInstaller.FPCCFGSnippet);
                 if i>0 then
                 begin
                   j:=Pos(#13,CrossInstaller.FPCCFGSnippet,i);
                   if j=0 then j:=Pos(#10,CrossInstaller.FPCCFGSnippet,i);
-                  s2:=Copy(CrossInstaller.FPCCFGSnippet,i+3,j-(i+3));
-                  s1:=s1+s2+'gdb'+GetExeExt;
-                  if FileExists(s1) then
+                  s1:=Copy(CrossInstaller.FPCCFGSnippet,i+3,j-(i+3));
+                  s1:=IncludeTrailingPathDelimiter(s1);
+                  //Get cross-binaries prefix
+                  i:=Pos('-XP',CrossInstaller.FPCCFGSnippet);
+                  if i>0 then
                   begin
-                    s2:=ConcatPaths([FMakeDir,'gdb',CrossInstaller.RegisterName])+DirectorySeparator;
-                    ForceDirectoriesSafe(s2);
-                    {$ifdef Darwin}
-                    SysUtils.RenameFile(s1,s2+ExtractFileName(s1));
-                    s1:=s2+ExtractFileName(s1);
-                    s2:=s2+'gdb'+GetExeExt;
-                    fpSymlink(pchar(s1),pchar(s2));
-                    {$else}
-                    FileUtil.CopyFile(s1,s2+'gdb'+GetExeExt);
-                    {$endif}
+                    j:=Pos(#13,CrossInstaller.FPCCFGSnippet,i);
+                    if j=0 then j:=Pos(#10,CrossInstaller.FPCCFGSnippet,i);
+                    s2:=Copy(CrossInstaller.FPCCFGSnippet,i+3,j-(i+3));
+                    s1:=s1+s2+'gdb'+GetExeExt;
+                    if FileExists(s1) then
+                    begin
+                      s2:=ConcatPaths([FMakeDir,'gdb',CrossInstaller.RegisterName])+DirectorySeparator;
+                      ForceDirectoriesSafe(s2);
+                      {$ifdef Darwin}
+                      SysUtils.RenameFile(s1,s2+ExtractFileName(s1));
+                      s1:=s2+ExtractFileName(s1);
+                      s2:=s2+'gdb'+GetExeExt;
+                      fpSymlink(pchar(s1),pchar(s2));
+                      {$else}
+                      FileUtil.CopyFile(s1,s2+'gdb'+GetExeExt);
+                      {$endif}
+                    end;
                   end;
                 end;
               end;
             end;
           end;
+
         end;
       end;
     end;
@@ -2174,6 +2207,8 @@ begin
     //if (InstallDirectory<>SourceDirectory) then
     Processor.Process.Parameters.Add('install');
   end;
+
+  Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
 
   try
     ProcessorResult:=Processor.ExecuteAndWait;
@@ -2734,6 +2769,9 @@ begin
   // we need at least 3.2.0 for aarch64
   if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.2.0') then result:='3.2.0';
   {$IFDEF DARWIN}
+  if CalculateNumericalVersion(result)<CalculateNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
+  {$ENDIF}
+  {$IFDEF WIN64}
   if CalculateNumericalVersion(result)<CalculateNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
   {$ENDIF}
   {$ENDIF}
@@ -3693,18 +3731,18 @@ const
   FPCUPMAGIC    = ': base settings';
   REVINCERROR   = 'error: empty';
 var
-  RequiredBootstrapVersion:string;
-  RequiredBootstrapVersionLow:string;
-  RequiredBootstrapVersionHigh:string;
-  FPCCfg: string;
-  FPCMkCfg: string; //path+file of fpcmkcfg
-  FileList,ConfigText,ConfigTextStore:TStringList;
-  OperationSucceeded: boolean;
-  PlainBinPath: string; //directory above the architecture-dependent FBinDir
-  VersionSnippet:string;
-  TxtFile:Text;
-  s,s2:string;
-  x,y:integer;
+  RequiredBootstrapVersion       : string;
+  RequiredBootstrapVersionLow    : string;
+  RequiredBootstrapVersionHigh   : string;
+  FPCCfg                         : string;
+  FPCMkCfg                       : string; //path+file of fpcmkcfg
+  ConfigText,ConfigTextStore     : TStringList;
+  OperationSucceeded             : boolean;
+  PlainBinPath                   : string; //directory above the architecture-dependent FBinDir
+  VersionSnippet                 : string;
+  TxtFile                        : Text;
+  s,s2                           : string;
+  x,y                            : integer;
 
   function CheckFPCMkCfgOption(aOption:string):boolean;
   var
@@ -4730,18 +4768,18 @@ begin
     Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(SourceDirectory));
     Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
     Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
+    Processor.Process.Parameters.Add('CPU_SOURCE='+GetSourceCPU);
+    Processor.Process.Parameters.Add('OS_SOURCE='+GetSourceOS);
     {$IFDEF MSWINDOWS}
     Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
     //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-    Processor.Process.Parameters.Add('CPU_SOURCE='+GetSourceCPU);
-    Processor.Process.Parameters.Add('OS_SOURCE='+GetSourceOS);
     {$ELSE}
     Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
     {$ENDIF}
     if (Self is TFPCCrossInstaller) then
     begin  // clean out the correct compiler
-      Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);
       Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName);
+      Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);
       if (CrossInstaller.SubArch<>TSubarch.saNone) then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArchName);
     end
     else
@@ -4757,12 +4795,22 @@ begin
       if CrossCompiling then
       begin
         aCleanupCommandList.Clear;
-        if (Self AS TFPCCrossInstaller).CompilerUpdateNeeded then
-          aCleanupCommandList.Append('compiler_distclean')
+        if (ModuleName=_NATIVECROSSFPC) then
+        begin
+          //aCleanupCommandList.Append('-C');
+          //aCleanupCommandList.Append('compiler');
+          //aCleanupCommandList.Append('clean');
+          aCleanupCommandList.Append('compiler_clean');
+        end
         else
-          Infoln(infotext+'Skipping cross-compiler clean step: compiler seems to be up to date !!',etInfo);
-        aCleanupCommandList.Append('rtl_distclean');
-        if (Self AS TFPCCrossInstaller).PackagesNeeded then aCleanupCommandList.Append('packages_distclean');
+        begin
+          if (Self AS TFPCCrossInstaller).CompilerUpdateNeeded then
+            aCleanupCommandList.Append('compiler_distclean')
+          else
+            Infoln(infotext+'Skipping cross-compiler clean step: compiler seems to be up to date !!',etInfo);
+          aCleanupCommandList.Append('rtl_distclean');
+          if (Self AS TFPCCrossInstaller).PackagesNeeded then aCleanupCommandList.Append('packages_distclean');
+        end;
       end;
 
       for aCleanupCommand in aCleanupCommandList do
@@ -4783,6 +4831,7 @@ begin
         else
           Infoln(infotext+'Running make '+aCleanupCommand+' twice for target '+CrossInstaller.RegisterName,etInfo);
       end;
+      Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
       try
         ProcessorResult:=Processor.ExecuteAndWait;
         result:=(ProcessorResult=0);
@@ -4827,12 +4876,15 @@ begin
 
     // Delete installed units
     // Alf: is it still needed: todo check
-    aDir:=GetUnitsInstallDirectory(false);
-    if DirectoryExists(aDir) then
+    if (ModuleName=_FPC) then
     begin
-      // Only allow unit directories inside our own install te be deleted
-      if (Pos(BaseDirectory,aDir)=1) then
-        DeleteDirectoryEx(aDir);
+      aDir:=GetUnitsInstallDirectory(false);
+      if DirectoryExists(aDir) then
+      begin
+        // Only allow unit directories inside our own install te be deleted
+        if (Pos(BaseDirectory,aDir)=1) then
+          DeleteDirectoryEx(aDir);
+      end;
     end;
 
     // Final cleansing of source directory

@@ -8,10 +8,6 @@
 
 {.$define crosssimple}
 
-{$ifdef WINDOWS}
-{.$define buildnative}
-{$endif WINDOWS}
-
 {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
 {.$DEFINE USEMORMOT}
 {$ENDIF}

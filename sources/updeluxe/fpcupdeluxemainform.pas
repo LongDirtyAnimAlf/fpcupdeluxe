@@ -37,6 +37,7 @@ type
   TForm1 = class(TForm)
     ActionList1: TActionList;
     btnCheckToolsLocations: TButton;
+    btnBuildNativeCompiler: TButton;
     chkGitlab: TCheckBox;
     imgSVN: TImage;
     imgGitlab: TImage;
@@ -164,6 +165,7 @@ type
     procedure BitBtnSetRevisionClick(Sender: TObject);
     procedure btnCheckToolsLocationsClick(Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
+    procedure btnBuildNativeCompilerClick(Sender: TObject);
     procedure ButtonSubarchSelectClick({%H-}Sender: TObject);
     procedure chkGitlabChange(Sender: TObject);
     procedure IniPropStorageAppRestoringProperties({%H-}Sender: TObject);
@@ -1984,6 +1986,38 @@ procedure TForm1.btnUpdateLazarusMakefilesClick(Sender: TObject);
 begin
 end;
 
+procedure TForm1.btnBuildNativeCompilerClick(Sender: TObject);
+var
+  CPUType:TCPU;
+  OSType:TOS;
+begin
+  CPUType:=TCPU.cpuNone;
+  OSType:=TOS.osNone;
+  if (radgrpOS.ItemIndex<>-1) then
+    OSType:=GetTOS(radgrpOS.Items[radgrpOS.ItemIndex]);
+  if (radgrpCPU.ItemIndex<>-1) then
+    CPUType:=GetTCPU(radgrpCPU.Items[radgrpCPU.ItemIndex]);
+
+  if ((OSType=win32) AND (CPUType in [x86_64,aarch64])) then OSType:=win64;
+
+  if ((CPUType<>TCPU.cpuNone) AND (OSType<>TOS.osNone)) then
+  begin
+    DisEnable(Sender,False);
+    try
+      if (NOT PrepareRun(Sender)) then exit;
+      FPCupManager.CrossCPU_Target:=CPUType;
+      FPCupManager.CrossOS_Target:=OSType;
+      FPCupManager.OnlyModules:=_NATIVECROSSFPC;
+      sStatus:='Going to build native compiler for '+FPCupManager.CrossCombo_Target;
+      RealRun;
+      FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
+      FPCupManager.CrossOS_Target:=TOS.osNone;
+    finally
+      DisEnable(Sender,True);
+    end;
+  end;
+end;
+
 procedure TForm1.IniPropStorageAppRestoringProperties(Sender: TObject);
 begin
   {$ifdef Haiku}
@@ -2640,7 +2674,7 @@ var
 begin
   result:=false;
 
-  {$ifdef win64}
+  {$if defined(win64) and not defined(aarch64)}
   if (Sender<>nil) then
   begin
     if Form2.AskConfirmation then
@@ -3184,8 +3218,7 @@ begin
       FPCupManager.CrossOPT:=Form2.GetCrossBuildOptions(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
 
       // use the available source to build the cross-compiler ... change nothing about source and url !!
-      FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;//'FPCCleanOnly,FPCBuildOnly';
-      //FPCupManager.OnlyModules:=_FPC+_BUILD+_ONLY;
+      FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;
 
       // handle inclusion of LCL when cross-compiling
       IncludeLCL:=Form2.IncludeLCL;

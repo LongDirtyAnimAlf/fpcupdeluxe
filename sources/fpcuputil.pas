@@ -322,8 +322,6 @@ function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex
 function StringListEndsWith(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
 function StringListContains(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
 function StringListSame(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
-function GetTotalPhysicalMemory: DWord;
-function GetSwapFileSize: DWord;
 function XdgConfigHome: String;
 {$IFDEF UNIX}
 function GetStartupObjects:string;
@@ -334,6 +332,8 @@ function IsLinuxMUSL:boolean;
 {$ENDIF LINUX}
 {$ENDIF UNIX}
 function GetLogicalCpuCount: integer;
+function GetTotalPhysicalMemory: DWord;
+function GetSwapFileSize: DWord;
 {$ifdef Darwin}
 function GetDarwinSDKVersion(aSDK: string):string;
 function GetDarwinSDKLocation:string;
@@ -2872,16 +2872,6 @@ begin
       Inc(result);
 end;
 
-function GetTotalPhysicalMemory: DWord;
-begin
-  result:=TNumCPULib.GetTotalPhysicalMemory();
-end;
-
-function GetSwapFileSize: DWord;
-begin
-  result:=TNumCPULib.GetTotalSwapMemory();
-end;
-
 {$IFDEF UNIX}
 function GetStartupObjects:string;
 const
@@ -3213,6 +3203,10 @@ var
 begin
   result:=1;
 
+  {$if defined(win64) and defined(aarch64)}
+  exit;
+  {$endif}
+
   { Uses NumCPULib Library }
   { Copyright (c) 2019 Ugochukwu Mmaduekwe }
   { Github Repository https://github.com/Xor-el }
@@ -3239,6 +3233,22 @@ begin
 
   if (result<1) then result:=1;
   if (result>16) then result:=16;
+end;
+
+function GetTotalPhysicalMemory: DWord;
+begin
+  {$if defined(win64) and defined(aarch64)}
+  exit(0);
+  {$endif}
+  result:=TNumCPULib.GetTotalPhysicalMemory();
+end;
+
+function GetSwapFileSize: DWord;
+begin
+  {$if defined(win64) and defined(aarch64)}
+  exit(0);
+  {$endif}
+  result:=TNumCPULib.GetTotalSwapMemory();
 end;
 
 {$ifdef Darwin}
