@@ -407,8 +407,8 @@ type
     SMcheckmodule, SMuninstallmodule, SMconfigmodule{$ifndef FPCONLY}, SMResetLCL{$endif}, SMSetOS, SMSetCPU, SMInvalid);
 
   TState=record
-    instr:TKeyword;
     param:string;
+    instr:TKeyword;
   end;
 
   { TSequencer }
@@ -976,9 +976,13 @@ begin
     if (NOT CrossCompiling) then
     begin
       Write(TxtFile,' --fpcURL='+FPCURL);
+      {$ifndef FPCONLY}
       Write(TxtFile,' --lazURL='+LazarusURL);
+      {$endif}
       if (Length(FPCBranch)>0) then Write(TxtFile,' --fpcBranch='+FPCBranch);
+      {$ifndef FPCONLY}
       if (Length(LazarusBranch)>0) then Write(TxtFile,' --lazBranch='+LazarusBranch);
+      {$endif}
     end;
     if (CrossCPU_Target<>TCPU.cpuNone) then Write(TxtFile,' --cputarget='+GetCPU(CrossCPU_Target));
     if (CrossOS_Target<>TOS.osNone) then Write(TxtFile,' --ostarget='+GetOS(CrossOS_Target));
@@ -1490,12 +1494,17 @@ end;
 function TFPCupManager.Run: boolean;
 var
   aSequence:string;
+  aMoment:TDateTime;
 begin
   result:=false;
 
   FRunInfo:='';
 
   FShortcutCreated:=false;
+
+  //aMoment:=now;
+
+  //aSequence:=DateTimeToStr(aMoment);
 
   if
     (FSequencer.FParent.CrossCPU_Target=GetTCPU(GetSourceCPU))
@@ -1514,6 +1523,10 @@ begin
     end;
   end;
 
+  //WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',true);
+  //WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetSourceCPUOS+' running on '+GetDistro,true);
+
+  (*
   try
     WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',true);
     WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetSourceCPUOS+' running on '+GetDistro,true);
@@ -1524,6 +1537,7 @@ begin
     RunInfo:='Perhaps another fpcup is running?';
     exit;
   end;
+  *)
 
   try
     if SkipModules<>'' then

@@ -1518,8 +1518,11 @@ begin
           if (MakeCycle=st_NativeCompiler) then
           begin
             UnitSearchPath:=GetUnitsInstallDirectory(false);
-            s1:=s1+' -Fu'+UnitSearchPath;
-            s1:=s1+' -Fu'+UnitSearchPath+DirectorySeparator+'rtl';
+            //s1:=s1+' -Fu'+UnitSearchPath;
+            //s1:=s1+' -Fu'+UnitSearchPath+DirectorySeparator+'rtl';
+            {$ifdef DEBUG}
+            //s1:=s1+' -gw3 -gl';
+            {$endif}
           end;
           {$endif}
 
@@ -2358,7 +2361,6 @@ var
   DeleteList      : TStringList;
 begin
   result:=true;
-
 
   if ((aCPU=TCPU.cpuNone) AND (aOS=TOS.osNone)) then
   begin
@@ -4068,8 +4070,8 @@ begin
     // <somewhere>/lib/fpc/$fpcversion/units
     s:=IncludeTrailingPathDelimiter(InstallDirectory)+'units';
     DeleteFile(s);
-    fpSymlink(pchar(IncludeTrailingPathDelimiter(InstallDirectory)+'lib/fpc/'+SourceVersionStr+'/units'),
-      pchar(s));
+    s2:=IncludeTrailingPathDelimiter(InstallDirectory)+'lib/fpc/'+SourceVersionStr+'/units';
+    fpSymlink(pchar(s2),pchar(s));
   end;
   {$ENDIF UNIX}
 
@@ -4691,9 +4693,10 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 var
   CrossCompiling                         : boolean;
   CPUOS_Signature                        : string;
-  aCleanupCompiler,aCleanupCommand,aDir  : string;
+  aCleanupCompiler,aCleanupCommand,aPath : string;
   aCleanupCommandList,DeleteList         : TStringList;
   RunTwice                               : boolean;
+  aCPU                                   : TCPU;
 begin
   result:=inherited;
 
@@ -4857,33 +4860,54 @@ begin
 
   if FCleanModuleSuccess then
   begin
-    if (NOT CrossCompiling) then
-    begin
-      //Infoln(infotext+'Deleting some FPC package config files.', etInfo);
-      //DeleteFile(ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCONFIGFILENAME);
-      //DeleteFile(ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
-      {$IFDEF UNIX}
-      // Delete any fpc.sh shell scripts
-      Infoln(infotext+'Deleting fpc.sh script.', etInfo);
-      Sysutils.DeleteFile(FFPCCompilerBinPath+'fpc.sh');
-      {$ENDIF UNIX}
-      {$ifdef FORCEREVISION}
-      //Infoln(infotext+'Deleting '+REVINCFILENAME, etInfo);
-      //aDir:=ConcatPaths([SourceDirectory,'compiler']);
-      //DeleteFile(aDir+DirectorySeparator+REVINCFILENAME);
-      {$endif FORCEREVISION}
-    end;
-
-    // Delete installed units
-    // Alf: is it still needed: todo check
     if (ModuleName=_FPC) then
     begin
-      aDir:=GetUnitsInstallDirectory(false);
-      if DirectoryExists(aDir) then
+      if (NOT CrossCompiling) then
+      begin
+        //Infoln(infotext+'Deleting some FPC package config files.', etInfo);
+        //DeleteFile(ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCONFIGFILENAME);
+        //DeleteFile(ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
+        {$IFDEF UNIX}
+        // Delete any fpc.sh shell scripts
+        Infoln(infotext+'Deleting fpc.sh script.', etInfo);
+        Sysutils.DeleteFile(FFPCCompilerBinPath+'fpc.sh');
+        {$ENDIF UNIX}
+        {$ifdef FORCEREVISION}
+        //Infoln(infotext+'Deleting '+REVINCFILENAME, etInfo);
+        //aPath:=ConcatPaths([SourceDirectory,'compiler']);
+        //DeleteFile(aPath+DirectorySeparator+REVINCFILENAME);
+        {$endif FORCEREVISION}
+
+        if DirectoryExists(FFPCCompilerBinPath) then
+        begin
+          // Delete compiler binary
+          aCPU:=GetTCPU(GetSourceCPU);
+          if (aCPU<>TCPU.cpuNone) then
+          begin
+            aPath:=ConcatPaths([FFPCCompilerBinPath,GetCompilerName(aCPU)]);
+            if FileExists(aPath) then Sysutils.DeleteFile(aPath);
+          end;
+          // Delete all [cross-]compiler binaries
+          for aCPU in TCPU do
+          begin
+            //if (aCPU=TCPU.cpuNone) then continue;
+            aPath:=ConcatPaths([FFPCCompilerBinPath,GetCrossCompilerName(aCPU)]);
+            if FileExists(aPath) then Sysutils.DeleteFile(aPath);
+          end;
+        end;
+      end;
+
+      // Delete all installed units
+      // Alf: is it still needed: todo check
+      if CrossCompiling then
+        aPath:=GetUnitsInstallDirectory(false)
+      else
+        aPath:=ConcatPaths([InstallDirectory,'units']);
+      if DirectoryExists(aPath) then
       begin
         // Only allow unit directories inside our own install te be deleted
-        if (Pos(BaseDirectory,aDir)=1) then
-          DeleteDirectoryEx(aDir);
+        if (Pos(BaseDirectory,aPath)=1) then
+          DeleteDirectoryEx(aPath);
       end;
     end;
 

@@ -2060,7 +2060,7 @@ begin
     InternetGetLastResponseInfo(@Err, nil, ErrLen);
     if GetLastError() = ERROR_INSUFFICIENT_BUFFER then
     begin
-      SetLength(ErrMsg, ErrLen);
+      SetLength({%H-}ErrMsg, ErrLen);
       InternetGetLastResponseInfo(@Err, PChar(ErrMsg), ErrLen);
       SetString(Result, PChar(ErrMsg), ErrLen);
     end else begin
@@ -2127,7 +2127,7 @@ begin
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
 
-  ThreadLog('Using PowerShell to download '+TargetFile);
+  ThreadLog('Using bitsadmin to download '+TargetFile);
 
   result:=RunCommand('bitsadmin.exe',['/transfer','"JobName"',URL,TargetFile],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
   if result then
@@ -2212,20 +2212,15 @@ begin
 
   {$ifndef USEONLYCURL}
   {$ifdef Windows}
-  //Third resort: use Windows INet
   if (NOT result) then
   begin
-    result:=DownloadByWinINet(URL,aDataStream);
+    //Second resort on older Windows: use Windows INet
+    // Available from Windows 2000 and better = NT 5.0
+    if (CheckWin32Version(5,0)) then
+    begin
+      result:=DownloadByWinINet(URL,aDataStream);
+    end;
   end;
-
-  //Fourth resort: use BitsAdmin
-  {
-  if (NOT result) then
-  begin
-    SysUtils.Deletefile(TargetFile);
-    result:=DownloadByBitsAdmin(URL,TargetFile);
-  end;
-  }
   {$endif}
   {$endif USEONLYCURL}
 
@@ -2271,38 +2266,31 @@ begin
 
   {$ifndef USEONLYCURL}
   {$ifdef MSWindows}
-
-  if (NOT CheckWin32Version(6,2)) then
-  begin
-    //Second resort on older Windows: use Windows INet
-    if (NOT result) then
-    begin
-      SysUtils.Deletefile(TargetFile);
-      result:=DownloadByWinINet(URL,TargetFile);
-    end;
-  end;
-
-  //Second or third resort: use Windows PowerShell
   if (NOT result) then
   begin
-    SysUtils.Deletefile(TargetFile);
-    result:=DownloadByPowerShell(URL,TargetFile);
-  end;
-
-  if CheckWin32Version(6,2) then
-  begin
-    //Second or third resort: use Windows PowerShell
-    if (NOT result) then
+    //Second resort on older Windows: use Windows INet
+    // Available from Windows 2000 and better = NT 5.0
+    if (CheckWin32Version(5,0)) then
     begin
       SysUtils.Deletefile(TargetFile);
       result:=DownloadByWinINet(URL,TargetFile);
     end;
   end;
 
-  if (NOT CheckWin32Version(6,0)) then
+  //Second or third resort: use Windows PowerShell on Windows 7 and better
+  if (NOT result) then
   begin
-    //Third or fourth resort: use BitsAdmin on older Windows
-    if (NOT result) then
+    if (CheckWin32Version(6,1)) then
+    begin
+      SysUtils.Deletefile(TargetFile);
+      result:=DownloadByPowerShell(URL,TargetFile);
+    end;
+  end;
+
+  if (NOT result) then
+  begin
+    //Third or fourth resort: use BitsAdmin on older Windows starting from 3.0
+    if (CheckWin32Version(3,0) AND (NOT CheckWin32Version(10,0))) then
     begin
       SysUtils.Deletefile(TargetFile);
       result:=DownloadByBitsAdmin(URL,TargetFile);
