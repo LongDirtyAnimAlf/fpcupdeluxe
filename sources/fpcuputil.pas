@@ -71,9 +71,8 @@ Const
   GetLibExt='.dll';
   {$else}
   GetExeExt='';
-  //GetLibExt='.so';
+  GetLibExt='.so';
   {$endif}
-
 
 type
   {TNormalUnzipper}

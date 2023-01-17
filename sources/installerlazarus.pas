@@ -1020,7 +1020,7 @@ begin
       // Assume new Laz version on failure getting revision
       if StrToIntDef(ActualRevision, 38971) >= 38971 then
       begin
-        Processor.Process.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FCompilerOptions);
+        Processor.Process.Parameters.Add('--build-ide="-dKeepInstalledPackages '+FCompilerOptions+'"');
       end
       else
       begin
@@ -1029,7 +1029,7 @@ begin
         // which could well be a stripped IDE
         // Let's see how/if CompilerOptions clashes with the settings in normal build mode
         WritelnLog(infotext+'LazBuild: building UserIDE but falling back to --build-mode="Normal IDE"', true);
-        Processor.Process.Parameters.Add('--build-ide= ' + FCompilerOptions);
+        Processor.Process.Parameters.Add('--build-ide="'+FCompilerOptions+'"');
         Processor.Process.Parameters.Add('--build-mode="Normal IDE"');
       end;
 

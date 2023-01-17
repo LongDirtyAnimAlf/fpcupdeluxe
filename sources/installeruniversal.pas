@@ -439,8 +439,8 @@ begin
     if FLCL_Platform <> '' then
       Processor.Process.Parameters.Add('--ws=' + FLCL_Platform);
 
-    Processor.Process.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
-    //Processor.Process.Parameters.Add('--build-ide= ' + FLazarusCompilerOptions);
+    Processor.Process.Parameters.Add('--build-ide="-dKeepInstalledPackages '+FLazarusCompilerOptions+'"');
+    //Processor.Process.Parameters.Add('--build-ide="'+FLazarusCompilerOptions+'"');
     //Processor.Process.Parameters.Add('--build-mode="Normal IDE"');
 
     Infoln(infotext+'Running lazbuild to get IDE with user-specified packages', etInfo);
@@ -3377,8 +3377,7 @@ var
   URLData        : TCEFBuildsURL;
   ResultCode     : integer;
 begin
-  //result:=inherited;
-  result:=true;
+  result:=inherited;
 
   if (not result) then exit;
 
@@ -3389,7 +3388,8 @@ begin
       aURL:=URLData.URL;
       aFile:=GetTempFileNameExt('FPCUPTMP','tar.bz2');
 
-      WritelnLog(localinfotext+'Going to download '+aURL+' into '+aFile,true);
+      WritelnLog(localinfotext+'Going to download CEF libraries',true);
+      WritelnLog(localinfotext+'Downloading '+aURL+' into '+aFile,true);
 
       try
         result:=Download(FUseWget, aURL, aFile);
@@ -3423,16 +3423,16 @@ begin
             aFile:=SourceDirectory+DirectorySeparator+ExtractFileName(aFile);
             if ExtractFileExt(aFile)='.tar' then
             begin
-              RunCommandIndir(SourceDirectory,F7zip ,['e','-aoa','-ttar',aFile,'-r','*Release\*.dll','*Release\vk_swiftshader_icd.json','*Resources\icudtl.dat'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+              RunCommandIndir(SourceDirectory,F7zip ,['e','-aoa','-ttar',aFile,'-r','*Release\*'+GetLibExt,'*Release\vk_swiftshader_icd.json','*Release\*.bin','*Resources\*.*'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
             end;
           end;
           {$endif MSWINDOWS}
 
           {$ifdef UNIX}
           {$ifdef BSD}
-          RunCommandIndir(SourceDirectory,FTar,['-jxf',aFile,'--include','*Release\*.so*','*Release\vk_swiftshader_icd.json','*Resources\icudtl.dat'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+          RunCommandIndir(SourceDirectory,FTar,['-jxf',aFile,'--include','*Release\*'+GetLibExt+'*','*Release\vk_swiftshader_icd.json','*Release\*.bin','*Resources\*.*'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
           {$else}
-          RunCommandIndir(SourceDirectory,FTar,['-jxf',aFile,'--wildcards','--no-anchored','*Release\*.so*','*Release\vk_swiftshader_icd.json','*Resources\icudtl.dat'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+          RunCommandIndir(SourceDirectory,FTar,['-jxf',aFile,'--wildcards','--no-anchored','*Release\*'+GetLibExt+'*','*Release\vk_swiftshader_icd.json','*Release\*.bin','*Resources\*.*'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
           {$endif}
           {$endif}
 
