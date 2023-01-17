@@ -2192,6 +2192,7 @@ begin
         'mORMot2'          : FInstaller:=TmORMot2Installer.Create;
         'wst'              : FInstaller:=TWSTInstaller.Create;
         'pas2js-rtl'       : FInstaller:=TPas2jsInstaller.Create;
+        'CEF4Delphi'       : FInstaller:=TCEFInstaller.Create;
       else
         FInstaller:=TUniversalInstaller.Create;
       end;

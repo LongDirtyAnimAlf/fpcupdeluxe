@@ -191,6 +191,13 @@ type
     function GetModule(ModuleName: string): boolean; override;
   end;
 
+  { TCEFInstaller }
+  TCEFInstaller = class(TUniversalInstaller)
+  public
+    function GetModule(ModuleName: string): boolean; override;
+  end;
+
+
   // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
   function GetModuleEnabledList(var ModuleList:TStringList):boolean;
   // Gets the sequence representation for all modules in the ini file
@@ -432,8 +439,8 @@ begin
     if FLCL_Platform <> '' then
       Processor.Process.Parameters.Add('--ws=' + FLCL_Platform);
 
-    Processor.Process.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FCompilerOptions);
-    //Processor.Process.Parameters.Add('--build-ide= ' + FCompilerOptions);
+    Processor.Process.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
+    //Processor.Process.Parameters.Add('--build-ide= ' + FLazarusCompilerOptions);
     //Processor.Process.Parameters.Add('--build-mode="Normal IDE"');
 
     Infoln(infotext+'Running lazbuild to get IDE with user-specified packages', etInfo);
@@ -3346,6 +3353,106 @@ begin
   {$endif}
 end;
 
+
+function TCEFInstaller.GetModule(ModuleName: string): boolean;
+type
+  TCEFBuildsURL = record
+    CPU:TCPU;
+    OS:TOS;
+    URL:string;
+  end;
+const
+  CEFBuildsURLTable :array [0..5] of TCEFBuildsURL =
+  (
+  (CPU:i386;     OS:win32;   URL:'https://cef-builds.spotifycdn.com/cef_binary_109.1.11%2Bg6d4fdb2%2Bchromium-109.0.5414.87_windows32.tar.bz2'),
+  (CPU:x86_64;   OS:win64;   URL:'https://cef-builds.spotifycdn.com/cef_binary_109.1.11%2Bg6d4fdb2%2Bchromium-109.0.5414.87_windows64.tar.bz2'),
+  (CPU:x86_64;   OS:linux;   URL:'https://cef-builds.spotifycdn.com/cef_binary_109.1.11%2Bg6d4fdb2%2Bchromium-109.0.5414.87_linux64.tar.bz2'),
+  (CPU:arm;      OS:linux;   URL:'https://cef-builds.spotifycdn.com/cef_binary_109.1.11%2Bg6d4fdb2%2Bchromium-109.0.5414.87_linuxarm.tar.bz2'),
+  (CPU:aarch64;  OS:linux;   URL:'https://cef-builds.spotifycdn.com/cef_binary_109.1.11%2Bg6d4fdb2%2Bchromium-109.0.5414.87_linuxarm64.tar.bz2'),
+  (CPU:x86_64;   OS:darwin;  URL:'https://cef-builds.spotifycdn.com/cef_binary_109.1.11%2Bg6d4fdb2%2Bchromium-109.0.5414.87_macosx64.tar.bz2')
+  );
+var
+  aURL,aFile     : string;
+  Output         : string;
+  URLData        : TCEFBuildsURL;
+  ResultCode     : integer;
+begin
+  //result:=inherited;
+  result:=true;
+
+  if (not result) then exit;
+
+  for URLData in CEFBuildsURLTable do
+  begin
+    if ((URLData.CPU=GetTCPU(GetSourceCPU)) AND (URLData.OS=GetTOS(GetSourceOS))) then
+    begin
+      aURL:=URLData.URL;
+      aFile:=GetTempFileNameExt('FPCUPTMP','tar.bz2');
+
+      WritelnLog(localinfotext+'Going to download '+aURL+' into '+aFile,true);
+
+      try
+        result:=Download(FUseWget, aURL, aFile);
+        if result then result:=FileExists(aFile);
+      except
+        on E: Exception do
+        begin
+         result:=false;
+        end;
+      end;
+
+      if result then
+      begin
+        if (FileSize(aFile)>5000) then
+        begin
+          ResultCode:=-1;
+          WritelnLog(localinfotext+'Download ok. Extracting files. Please wait.',True);
+
+          SourceDirectory:=SourceDirectory+DirectorySeparator+'libs';
+          if DirectoryExists(SourceDirectory) then DeleteDirectoryEx(SourceDirectory);
+          ForceDirectoriesSafe(SourceDirectory);
+
+          {$ifdef MSWINDOWS}
+          RunCommandIndir(SourceDirectory,F7zip ,['x',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+          SysUtils.Deletefile(aFile); //Get rid of temp file in temp-directory.
+          if (ResultCode=0) then
+          begin
+            //We now have a .tar file in the target directory
+            //Change extension and unpack tar-file
+            aFile:=StringReplace(aFile,'.bz2','',[]);
+            aFile:=SourceDirectory+DirectorySeparator+ExtractFileName(aFile);
+            if ExtractFileExt(aFile)='.tar' then
+            begin
+              RunCommandIndir(SourceDirectory,F7zip ,['e','-aoa','-ttar',aFile,'-r','*Release\*.dll','*Release\vk_swiftshader_icd.json','*Resources\icudtl.dat'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+            end;
+          end;
+          {$endif MSWINDOWS}
+
+          {$ifdef UNIX}
+          {$ifdef BSD}
+          RunCommandIndir(SourceDirectory,FTar,['-jxf',aFile,'--include','*Release\*.so*','*Release\vk_swiftshader_icd.json','*Resources\icudtl.dat'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+          {$else}
+          RunCommandIndir(SourceDirectory,FTar,['-jxf',aFile,'--wildcards','--no-anchored','*Release\*.so*','*Release\vk_swiftshader_icd.json','*Resources\icudtl.dat'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+          {$endif}
+          {$endif}
+
+          if (ResultCode<>0) then
+          begin
+            result := False;
+            Infoln(localinfotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+          end;
+
+        end;
+      end;
+      SysUtils.Deletefile(aFile); //Get rid of temp file.
+
+      break;
+    end;
+  end;
+
+  // Do not fail
+  result:=true;
+end;
 
 procedure ClearUniModuleList;
 var
