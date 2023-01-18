@@ -309,7 +309,6 @@ if TargetOS=&apos;openbsd&apos; then
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
         </CompilerOptions>

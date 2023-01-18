@@ -3372,10 +3372,11 @@ const
   (CPU:x86_64;   OS:darwin;  URL:'https://cef-builds.spotifycdn.com/cef_binary_109.1.11%2Bg6d4fdb2%2Bchromium-109.0.5414.87_macosx64.tar.bz2')
   );
 var
-  aURL,aFile     : string;
-  Output         : string;
-  URLData        : TCEFBuildsURL;
-  ResultCode     : integer;
+  aURL,aFile               : string;
+  Output                   : string;
+  URLData                  : TCEFBuildsURL;
+  i,ResultCode             : integer;
+  OperationSucceeded       : boolean;
 begin
   result:=inherited;
 
@@ -3386,6 +3387,7 @@ begin
     if ((URLData.CPU=GetTCPU(GetSourceCPU)) AND (URLData.OS=GetTOS(GetSourceOS))) then
     begin
       aURL:=URLData.URL;
+
       aFile:=GetTempFileNameExt('FPCUPTMP','tar.bz2');
 
       WritelnLog(localinfotext+'Going to download CEF libraries',true);
@@ -3412,7 +3414,7 @@ begin
           if DirectoryExists(SourceDirectory) then DeleteDirectoryEx(SourceDirectory);
           ForceDirectoriesSafe(SourceDirectory);
 
-          {$ifdef MSWINDOWS}
+          // First, unpack the .bz2 to get the .tar
           RunCommandIndir(SourceDirectory,F7zip ,['x',aFile],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
           SysUtils.Deletefile(aFile); //Get rid of temp file in temp-directory.
           if (ResultCode=0) then
@@ -3423,11 +3425,30 @@ begin
             aFile:=SourceDirectory+DirectorySeparator+ExtractFileName(aFile);
             if ExtractFileExt(aFile)='.tar' then
             begin
-              RunCommandIndir(SourceDirectory,F7zip ,['e','-aoa','-ttar',aFile,'-r','*Release\*'+GetLibExt,'*Release\vk_swiftshader_icd.json','*Release\*.bin','*Resources\*.*'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+              // First, get the name of the top-directory
+              RunCommandIndir(SourceDirectory,F7zip ,['l',aFile,'-ba','-ttar','-x!*\*?'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+              Output:=Trim(Output);
+              i:=RPos(#32,Output);
+              if (i>0) then
+                aURL:=Copy(Output,i+1,MaxInt)
+              else
+                aURL:='*';
+              aURL:=aURL+DirectorySeparator;
+              // Now get a selection of files from the archive: only the files that are needed.
+              OperationSucceeded:=True;
+              if OperationSucceeded then OperationSucceeded:=RunCommand(F7zip ,['e','-aoa','-ttar',aFile,'-r',aURL+'Release\*'+GetLibExt,aURL+'Release\vk_swiftshader_icd.json',aURL+'Release\*.bin','-o'+SourceDirectory],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+              if OperationSucceeded then OperationSucceeded:=RunCommand(F7zip ,['e','-aoa','-ttar',aFile,'-r',aURL+'Resources\*.pak',aURL+'Resources\*.dat','-x!locales','-o'+SourceDirectory],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+              if OperationSucceeded then OperationSucceeded:=RunCommand(F7zip ,['e','-aoa','-ttar',aFile,'-r',aURL+'Resources\locales\*.pak','-o'+IncludeTrailingPathDelimiter(SourceDirectory)+'locales'],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+
+              if (NOT OperationSucceeded) then
+              begin
+                ResultCode:=-1;
+              end;
+
             end;
           end;
-          {$endif MSWINDOWS}
 
+          (*
           {$ifdef UNIX}
           {$ifdef BSD}
           RunCommandIndir(SourceDirectory,FTar,['-jxf',aFile,'--include','*Release\*'+GetLibExt+'*','*Release\vk_swiftshader_icd.json','*Release\*.bin','*Resources\*.*'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
@@ -3435,6 +3456,7 @@ begin
           RunCommandIndir(SourceDirectory,FTar,['-jxf',aFile,'--wildcards','--no-anchored','*Release\*'+GetLibExt+'*','*Release\vk_swiftshader_icd.json','*Release\*.bin','*Resources\*.*'],Output,ResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
           {$endif}
           {$endif}
+          *)
 
           if (ResultCode<>0) then
           begin

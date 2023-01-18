@@ -41,7 +41,7 @@ uses
    - UTF8-encoded AnsiString
    - WideString
    - UnicodeString}
-function CFStrToAnsiStr(cfStr    : CFStringRef;
+function CFStrToAnsiStr(const cfStr    : CFStringRef;
                         encoding : CFStringEncoding = kCFStringEncodingWindowsLatin1): AnsiString;
 
 procedure AnsiStrToCFStr(const aStr     : AnsiString;
@@ -129,8 +129,8 @@ function UniStrToNSStr(const aStr : UnicodeString) : NSString; overload;
 
 implementation
 
-function CFStrToAnsiStr(cfStr    : CFStringRef;
-                        encoding : CFStringEncoding = kCFStringEncodingWindowsLatin1): AnsiString;
+function CFStrToAnsiStr(const cfStr    : CFStringRef;
+                        encoding : CFStringEncoding): AnsiString;
  {Convert CFString to AnsiString.
   If encoding is not specified, encode using CP1252.}
 var

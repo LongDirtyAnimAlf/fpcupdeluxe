@@ -134,12 +134,17 @@ const
 
   BOOTSTRAPPERVERSION='bootstrappers_v1.0';
   FPCUPGITREPOBOOTSTRAPPER=FPCUPGITREPO+'/releases/download/'+BOOTSTRAPPERVERSION;
+
+  TOOLSVERSION='Tools_v1.0';
+  FPCUPTOOLS=FPCUPGITREPO+'/releases/download/'+TOOLSVERSION;
+
   FPCUPGITREPOAPI='https://api.github.com/repos/LongDirtyAnimAlf/fpcupdeluxe';
   FPCUPGITREPOAPIRELEASES=FPCUPGITREPOAPI+'/releases';
   FPCUPGITREPOBOOTSTRAPPERAPI=FPCUPGITREPOAPIRELEASES+'/tags/'+BOOTSTRAPPERVERSION;
 
   SOURCEPATCHES='patches_v1.0';
   FPCUPGITREPOSOURCEPATCHESAPI=FPCUPGITREPOAPIRELEASES+'/tags/'+SOURCEPATCHES;
+
 
   FPCUP_ACKNOWLEDGE='acknowledgement_fpcup.txt';
 
@@ -1074,8 +1079,9 @@ begin
     {$ENDIF DARWIN}
     {$ENDIF BSD}
 
-    {$IFDEF MSWINDOWS}
     ForceDirectoriesSafe(FMakeDir);
+
+    {$IFDEF MSWINDOWS}
 
     {$ifdef win64}
     // the standard make by FPC does not work when Git is present (and in the path), but this one works ??!!
@@ -1201,60 +1207,33 @@ begin
     // do not fail
     OperationSucceeded:=True;
 
+    {$ENDIF MSWINDOWS}
+
     F7zip:=Which('7z');
     if Not FileExists(F7zip) then Which('7za');
-    if Not FileExists(F7zip) then F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '\7Zip\7za.exe';
+    if Not FileExists(F7zip) then Which('7zz');
+    Output:='7za';
+    if Not FileExists(F7zip) then F7zip := ConcatPaths([FMakeDir,'7Zip',Output+GetExeExt]);
+    {$IFNDEF MSWINDOWS}
+    Output:='7zz';
+    if Not FileExists(F7zip) then F7zip := ConcatPaths([FMakeDir,'7Zip',Output+GetExeExt]);
+    {$ENDIF MSWINDOWS}
     if Not FileExists(F7zip) then
     begin
-      ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip');
-      // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
-      Output:='7za920.zip';
-      SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-      aURL:=FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/';
-      OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-      if OperationSucceeded then
-      begin
-        // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
-        if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output)<50000) then
-        begin
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-          OperationSucceeded:=false;
-        end;
-      end;
-      if NOT OperationSucceeded then
-      begin
-        // try another URL
-        SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-        aURL:='https://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/';
-        OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-      end;
-      if NOT OperationSucceeded then
-      begin
-        // try one more time on different URL
-        SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-        aURL:='http://7-zip.org/a/';
-        OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-      end;
-
-      if OperationSucceeded then
-      begin
-        with TNormalUnzipper.Create do
-        begin
-          try
-            OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\',['7za.exe']);
-          finally
-            Free;
-          end;
-        end;
-        if OperationSucceeded then
-        begin
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-          OperationSucceeded:=FileExists(F7zip);
-        end;
-      end;
+      ForceDirectoriesSafe(ExtractFileDir(F7zip));
+      {$IFDEF DARWIN}
+      Output:=Output+'_all-apple';
+      {$ELSE}
+      Output:=Output+'_'+GetSourceCPUOS+GetExeExt;
+      {$ENDIF}
+      OperationSucceeded:=GetFile(FPCUPTOOLS+'/'+Output,F7zip);
+      if OperationSucceeded then OperationSucceeded:=FileExists(F7zip);
+      if (NOT OperationSucceeded) then F7zip:='7za'+GetExeExt;
       // do not fail ... perhaps there is another 7zip available in the path
       OperationSucceeded:=True;
     end;
+
+    {$IFDEF MSWINDOWS}
 
     if (NOT Ultibo) then
     begin
