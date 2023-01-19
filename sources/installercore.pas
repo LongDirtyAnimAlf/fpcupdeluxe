@@ -1032,8 +1032,9 @@ end;
 function TInstaller.CheckAndGetTools: boolean;
 var
   CryptoSucceeded,OperationSucceeded: boolean;
+  Output: string;
   {$ifdef MSWINDOWS}
-  aURL,aFile,Output: string;
+  aURL,aFile: string;
   i:integer;
   {$endif}
 begin
