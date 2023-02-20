@@ -94,6 +94,7 @@
 {"hash":133833261,"name":"tform1.missuesforum.caption","sourcebytes":[85,112,32,76,97,122,97,114,117,115,32,102,111,114,117,109],"value":"Up Lazarus forum"},
 {"hash":72785747,"name":"tform1.mfpcbugs.caption","sourcebytes":[70,80,67,32,98,117,103,115],"value":"FPC bugs"},
 {"hash":159355763,"name":"tform1.mlazarusbugs.caption","sourcebytes":[76,97,122,97,114,117,115,32,98,117,103,115],"value":"Lazarus bugs"},
+{"hash":69273251,"name":"tform1.monlinedocs.caption","sourcebytes":[79,110,108,105,110,101,32,100,111,99,115],"value":"Online docs"},
 {"hash":82521923,"name":"tform1.menuitem2.caption","sourcebytes":[76,97,110,103,117,97,103,101,115],"value":"Languages"},
 {"hash":224799497,"name":"tform1.menglishlanguage.caption","sourcebytes":[69,110,103,108,105,115,104,32,40,69,78,41],"value":"English (EN)"},
 {"hash":59044089,"name":"tform1.mgermanlanguage.caption","sourcebytes":[71,101,114,109,97,110,32,40,68,41],"value":"German (D)"},

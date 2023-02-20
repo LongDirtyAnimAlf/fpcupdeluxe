@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 56
-  Height = 701
-  Top = 110
+  Left = 31
+  Height = 832
+  Top = 74
   Width = 1226
   Anchors = []
   Caption = 'Form1'
-  ClientHeight = 681
+  ClientHeight = 812
   ClientWidth = 1226
   Constraints.MinHeight = 400
   Menu = MainMenu1
@@ -24,7 +24,7 @@ object Form1: TForm1
     Left = 12
     Height = 31
     Hint = 'Open the extended settings form.'
-    Top = 582
+    Top = 713
     Width = 310
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
@@ -95,7 +95,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = memoSummary
     Left = 330
-    Height = 427
+    Height = 558
     Top = 62
     Width = 884
     BorderSpacing.Top = 6
@@ -669,7 +669,7 @@ object Form1: TForm1
     AnchorSideBottom.Side = asrBottom
     Left = 6
     Height = 56
-    Top = 621
+    Top = 752
     Width = 1208
     Align = alBottom
     AutoSize = True
@@ -2773,7 +2773,7 @@ object Form1: TForm1
     Left = 330
     Height = 120
     Hint = 'Will show info and error'
-    Top = 497
+    Top = 628
     Width = 884
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
@@ -2794,7 +2794,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = btnSetupPlus
     Left = 12
-    Height = 539
+    Height = 670
     Top = 35
     Width = 310
     ActivePage = BasicSheet
@@ -2811,7 +2811,7 @@ object Form1: TForm1
     object BasicSheet: TTabSheet
       AnchorSideRight.Side = asrBottom
       Caption = 'Basic'
-      ClientHeight = 511
+      ClientHeight = 642
       ClientWidth = 302
       ParentFont = False
       object FPCVersionLabel: TLabel
@@ -2840,7 +2840,7 @@ object Form1: TForm1
         AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = BitBtnFPCOnly
         Left = 8
-        Height = 277
+        Height = 408
         Top = 80
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
@@ -2883,7 +2883,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = BitBtnLazarusOnly
         Left = 163
-        Height = 277
+        Height = 408
         Top = 80
         Width = 131
         Anchors = [akTop, akRight, akBottom]
@@ -2909,7 +2909,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Only install/update selected FPC version.'
-        Top = 373
+        Top = 504
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3064,7 +3064,7 @@ object Form1: TForm1
         Left = 163
         Height = 61
         Hint = 'Only install/update selected Lazarus version.'
-        Top = 373
+        Top = 504
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -3220,7 +3220,7 @@ object Form1: TForm1
         Left = 8
         Height = 61
         Hint = 'Will install/update the selected version of both FPC and Lazarus.'
-        Top = 442
+        Top = 573
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -4062,7 +4062,7 @@ object Form1: TForm1
     end
     object CrossSheet: TTabSheet
       Caption = 'Cross'
-      ClientHeight = 511
+      ClientHeight = 642
       ClientWidth = 302
       ParentFont = False
       object radgrpCPU: TRadioGroup
@@ -4070,7 +4070,7 @@ object Form1: TForm1
         AnchorSideTop.Control = CrossSheet
         AnchorSideBottom.Control = ButtonInstallCrossCompiler
         Left = 8
-        Height = 371
+        Height = 502
         Top = 8
         Width = 128
         Anchors = [akTop, akLeft, akBottom]
@@ -4086,7 +4086,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 351
+        ClientHeight = 482
         ClientWidth = 124
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -4120,7 +4120,7 @@ object Form1: TForm1
         AnchorSideBottom.Control = CrossSheet
         AnchorSideBottom.Side = asrBottom
         Left = 152
-        Height = 497
+        Height = 628
         Top = 8
         Width = 140
         Anchors = [akTop, akRight, akBottom]
@@ -4137,7 +4137,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 477
+        ClientHeight = 608
         ClientWidth = 136
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -4165,6 +4165,7 @@ object Form1: TForm1
           'ios'
           'freertos'
           'wasi'
+          'atari'
         )
         OnSelectionChanged = radgrpTargetChanged
         ParentFont = False
@@ -4181,7 +4182,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Install the selected CPU-OS cross-compiler.'
-        Top = 387
+        Top = 518
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -4205,7 +4206,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Select a subarch for embedded target.'
-        Top = 480
+        Top = 611
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -4229,7 +4230,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Remove the selected CPU-OS cross-compiler.'
-        Top = 418
+        Top = 549
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -4252,7 +4253,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Auto-update all installed cross-compilers.'
-        Top = 449
+        Top = 580
         Width = 128
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -4268,7 +4269,7 @@ object Form1: TForm1
     end
     object ModuleSheet: TTabSheet
       Caption = 'Modules'
-      ClientHeight = 511
+      ClientHeight = 642
       ClientWidth = 302
       ParentFont = False
       object listModules: TListBox
@@ -4278,7 +4279,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = Memo1
         Left = 8
-        Height = 386
+        Height = 517
         Top = 8
         Width = 286
         Anchors = [akTop, akLeft, akRight, akBottom]
@@ -4302,7 +4303,7 @@ object Form1: TForm1
         Left = 8
         Height = 25
         Hint = 'Install the selected module.'
-        Top = 478
+        Top = 609
         Width = 101
         Anchors = [akLeft, akBottom]
         AutoSize = True
@@ -4323,7 +4324,7 @@ object Form1: TForm1
         Left = 178
         Height = 25
         Hint = 'Uninstall the selected module.'
-        Top = 478
+        Top = 609
         Width = 116
         Anchors = [akRight, akBottom]
         AutoSize = True
@@ -4343,7 +4344,7 @@ object Form1: TForm1
         AnchorSideBottom.Control = btnInstallModule
         Left = 8
         Height = 60
-        Top = 406
+        Top = 537
         Width = 189
         Anchors = [akTop, akLeft, akRight, akBottom]
         BorderSpacing.Left = 8
@@ -4362,7 +4363,7 @@ object Form1: TForm1
         Left = 205
         Height = 42
         Hint = 'Will install/update the Online Package Manager'
-        Top = 406
+        Top = 537
         Width = 89
         Anchors = [akRight, akBottom]
         AutoSize = True
@@ -4509,7 +4510,7 @@ object Form1: TForm1
     end
     object TagSheet: TTabSheet
       Caption = 'Tags'
-      ClientHeight = 511
+      ClientHeight = 642
       ClientWidth = 302
       ParentFont = False
       object FPCTagLabel: TLabel
@@ -4557,7 +4558,7 @@ object Form1: TForm1
         AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = BitBtnFPCOnlyTag
         Left = 8
-        Height = 305
+        Height = 436
         Top = 34
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
@@ -4582,7 +4583,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = BitBtnLazarusOnlyTag
         Left = 163
-        Height = 305
+        Height = 436
         Top = 34
         Width = 131
         Anchors = [akTop, akRight, akBottom]
@@ -4609,7 +4610,7 @@ object Form1: TForm1
         Left = 8
         Height = 70
         Hint = 'Add tag/url into FPC install list'
-        Top = 355
+        Top = 486
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 16
@@ -4764,7 +4765,7 @@ object Form1: TForm1
         Left = 163
         Height = 70
         Hint = 'Add tag/url into Lazarus install list'
-        Top = 355
+        Top = 486
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 16
@@ -4917,7 +4918,7 @@ object Form1: TForm1
         AnchorSideBottom.Side = asrBottom
         Left = 8
         Height = 70
-        Top = 433
+        Top = 564
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Left = 8
@@ -4930,7 +4931,7 @@ object Form1: TForm1
     end
     object HistorySheet: TTabSheet
       Caption = 'History'
-      ClientHeight = 511
+      ClientHeight = 642
       ClientWidth = 302
       object FPCHistoryLabel: TLabel
         AnchorSideLeft.Control = HistorySheet
@@ -5300,7 +5301,7 @@ object Form1: TForm1
         AnchorSideBottom.Control = HistorySheet
         AnchorSideBottom.Side = asrBottom
         Left = 8
-        Height = 61
+        Height = 192
         Top = 442
         Width = 286
         Anchors = [akTop, akLeft, akRight, akBottom]
@@ -5379,7 +5380,7 @@ object Form1: TForm1
     end
     object ExtraSheet: TTabSheet
       Caption = 'Extras'
-      ClientHeight = 511
+      ClientHeight = 642
       ClientWidth = 302
       ParentFont = False
       object btnGetOpenSSL: TButton
@@ -5569,6 +5570,13 @@ object Form1: TForm1
       object MLazarusBugs: TMenuItem
         Caption = 'Lazarus bugs'
         OnClick = MLazarusBugsClick
+      end
+      object Separator1: TMenuItem
+        Caption = '-'
+      end
+      object MOnlineDocs: TMenuItem
+        Caption = 'Online docs'
+        OnClick = MOnlineDocsClick
       end
     end
     object MenuItem2: TMenuItem

@@ -134,8 +134,8 @@ begin
 
         if (TargetOS=TOS.darwin) then
         begin
-          if (Major>11) then continue;
-          if (Major=11) and (Minor>5) then continue;
+          if (Major>12) then continue;
+          if (Major=12) and (Minor>3) then continue;
           if (Major<10) then continue;
 
           if (TargetCPU=TCPU.i386) then

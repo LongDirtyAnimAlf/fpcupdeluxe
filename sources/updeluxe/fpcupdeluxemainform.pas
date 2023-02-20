@@ -82,6 +82,8 @@ type
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
     MDutchlanguage: TMenuItem;
+    Separator1: TMenuItem;
+    MOnlineDocs: TMenuItem;
     MUkrainianLanguage: TMenuItem;
     MFrenchlanguage: TMenuItem;
     MGermanlanguage: TMenuItem;
@@ -173,6 +175,7 @@ type
     procedure ListBoxTargetDrawItem(Control: TWinControl; Index: Integer;
       ARect: TRect; State: TOwnerDrawState);
     procedure LanguageClick(Sender: TObject);
+    procedure MOnlineDocsClick(Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick({%H-}Sender: TObject);
@@ -2108,6 +2111,11 @@ begin
   {$endif}
 end;
 
+procedure TForm1.MOnlineDocsClick(Sender: TObject);
+begin
+  OpenURL('https://dsiders.gitlab.io/lazdocsnext');
+end;
+
 procedure TForm1.radgrpTargetChanged(Sender: TObject);
 var
   CPUType:TCPU;
@@ -2410,6 +2418,12 @@ begin
 
     if Form2.UpdateOnly then
     begin
+    end;
+
+    if (Sender=WioBtn) OR (Sender=PicoBtn) then
+    begin
+      // Due to changes in Lazarus, we need a trunk/main version of Lazarus that can be compiled with an embedded (old) FPC trunk
+      FPCupManager.LazarusDesiredRevision:='0ae37a906c942d24591917ceaafbad67d1b1b96c';
     end;
 
     success:=RealRun;
@@ -4319,7 +4333,7 @@ begin
   AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
   AddMessage('');
 
-  FPCupManager.SaveSettings;
+  //FPCupManager.SaveSettings;
 
   BitBtnHalt.Enabled:=true;
   try

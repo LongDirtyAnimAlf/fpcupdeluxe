@@ -1073,6 +1073,7 @@ begin
         if (OS=solaris) AND ((CPU<>x86_64) AND (CPU<>sparc)) then continue;
         if (OS=ios) AND ((CPU<>arm) AND (CPU<>aarch64)) then continue;
         if ((OS=wasi) AND (CPU<>wasm32)) then continue;
+        if ((OS=atari) AND (CPU<>m68k)) then continue;
 
 
         if (CPU=xtensa) AND ((OS<>linux) AND (OS<>freertos)) then continue;
