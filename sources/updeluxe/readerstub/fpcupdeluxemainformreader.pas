@@ -37,6 +37,7 @@ type
   TForm1 = class(TForm)
     ActionList1: TActionList;
     btnCheckToolsLocations: TButton;
+    btnBuildNativeCompiler: TButton;
     chkGitlab: TCheckBox;
     imgSVN: TImage;
     imgGitlab: TImage;
@@ -81,6 +82,9 @@ type
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
     MDutchlanguage: TMenuItem;
+    Separator1: TMenuItem;
+    MOnlineDocs: TMenuItem;
+    MUkrainianLanguage: TMenuItem;
     MFrenchlanguage: TMenuItem;
     MGermanlanguage: TMenuItem;
     MFPCBugs: TMenuItem;
@@ -163,8 +167,11 @@ type
     procedure BitBtnSetRevisionClick(Sender: TObject);
     procedure btnCheckToolsLocationsClick(Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
+    procedure btnBuildNativeCompilerClick(Sender: TObject);
+    procedure MOnlineDocsClick(Sender: TObject);
     procedure ButtonSubarchSelectClick({%H-}Sender: TObject);
     procedure chkGitlabChange(Sender: TObject);
+    procedure CommandOutputScreenChange(Sender: TObject);
     procedure IniPropStorageAppRestoringProperties({%H-}Sender: TObject);
     procedure IniPropStorageAppSavingProperties({%H-}Sender: TObject);
     procedure ListBoxTargetDrawItem(Control: TWinControl; Index: Integer;
@@ -257,6 +264,7 @@ type
     function GetCmdFontName: String;
     procedure SetCmdFontName(aValue: String);
     procedure ParseRevisions(IniDirectory:string);
+    procedure GetSystemInfo;
     {$ifdef EnableLanguages}
     procedure Translate(const Language: string);
     {$endif}
@@ -752,51 +760,59 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) then
   begin
-    EchoInfo(BeginSnippet+' Start of compile error summary.');
 
-    if (ExistWordInString(PChar(s),'fatal: internal error')) then
+    if (ExistWordInString(PChar(s),'fatal: Remote branch')) then
     begin
-      x:=RPos(' ',s);
-      if x>0 then
-      begin
-        InternalError:=Copy(s,x+1,MaxInt);
-        EchoInfo('Compiler error: '+InternalError);
-      end;
+      EchoInfo('We have had a GIT branch failure. Should be non-fatal !');
     end
-    else if (ExistWordInString(PChar(s),'error: user defined')) then
+    else
     begin
-      x:=Pos('error: user defined',LowerCase(s));
-      if x>0 then
+      EchoInfo(BeginSnippet+' Start of compile error summary.');
+      if (ExistWordInString(PChar(s),'fatal: internal error')) then
       begin
-        x:=x+Length('error: user defined');
-        InternalError:=Copy(s,x+2,MaxInt);
-        EchoInfo('Configuration error: '+InternalError);
-        x:=Pos('80 bit extended floating point',LowerCase(s));
+        x:=RPos(' ',s);
         if x>0 then
         begin
-          EchoInfo('Please use trunk that has 80-bit float type using soft float unit !');
+          InternalError:=Copy(s,x+1,MaxInt);
+          EchoInfo('Compiler error: '+InternalError);
         end;
+      end
+      else if (ExistWordInString(PChar(s),'error: user defined')) then
+      begin
+        x:=Pos('error: user defined',LowerCase(s));
+        if x>0 then
+        begin
+          x:=x+Length('error: user defined');
+          InternalError:=Copy(s,x+2,MaxInt);
+          EchoInfo('Configuration error: '+InternalError);
+          x:=Pos('80 bit extended floating point',LowerCase(s));
+          if x>0 then
+          begin
+            EchoInfo('Please use trunk that has 80-bit float type using soft float unit !');
+          end;
+        end;
+      end
+      else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
+      begin
+        EchoInfo('We have had a SVN connection failure. Just start again !');
+        EchoInfo(Lines[Pred(Lines.Count)-1]);
+      end
+      else if (ExistWordInString(PChar(s),'fatal:')) then
+      begin
+        EchoInfo(s);
+        EchoInfo(Lines[Pred(Lines.Count)-1]);
+      end
+      else if (ExistWordInString(PChar(s),'error:')) then
+      begin
+        // check if "error:" at the end of the line.
+        // if so:
+        // the real error will follow on the next line(s).
+        // and we have to wait for these lines (done somewhere else in this procedure) !!
+        // if not, just print the error message.
+        if (Pos('error:',lowercase(s))<>(Length(s)-Length('error:')+1)) then EchoInfo(s);
       end;
-    end
-    else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
-    begin
-      EchoInfo('We have had a SVN connection failure. Just start again !');
-      EchoInfo(Lines[Pred(Lines.Count)-1]);
-    end
-    else if (ExistWordInString(PChar(s),'fatal:')) then
-    begin
-      EchoInfo(s);
-      EchoInfo(Lines[Pred(Lines.Count)-1]);
-    end
-    else if (ExistWordInString(PChar(s),'error:')) then
-    begin
-      // check if "error:" at the end of the line.
-      // if so:
-      // the real error will follow on the next line(s).
-      // and we have to wait for these lines (done somewhere else in this procedure) !!
-      // if not, just print the error message.
-      if (Pos('error:',lowercase(s))<>(Length(s)-Length('error:')+1)) then EchoInfo(s);
     end;
+
   end;
 
   if Handled then exit;
@@ -1183,7 +1199,7 @@ begin
     CheckAutoClear.Checked:=false;
 
     memoSummary.Lines.Append(upBuildAllCrossCompilers);
-    memoSummary.Lines.Append(upBuildAllCrossCompilersCheck + BinPath);
+    memoSummary.Lines.Append(upBuildAllCrossCompilersCheck+' '+BinPath);
     memoSummary.Lines.Append('');
 
   end
@@ -1283,9 +1299,9 @@ begin
             if (aTOS in SUBARCH_OS) AND (aTCPU in SUBARCH_CPU) AND (aTSUBARCH=saNone) then continue;
 
             if aTSUBARCH=saNone then
-              AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS)
+              AddMessage(upBuildAllCrossCompilersFound+' '+aCPU + '-' + aOS)
             else
-              AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS+ '-' + GetSubarch(aTSUBARCH));
+              AddMessage(upBuildAllCrossCompilersFound+' '+aCPU + '-' + aOS+ '-' + GetSubarch(aTSUBARCH));
 
             // build compiler
             if (Sender<>nil) then
@@ -1574,6 +1590,9 @@ begin
   begin
     if ExistWordInString(PChar(s),Seriousness[etInfo],[soWholeWord,soMatchCase]) then
     begin
+      if ExistWordInString(PChar(s),'Client: ',[soMatchCase]) then
+        FG      := clFuchsia
+      else
       if ExistWordInString(PChar(s),'found correct',[soWholeWord]) then
         FG      := clLime
       else
@@ -1814,8 +1833,8 @@ begin
     Special := True;
   end;
 
-  // special override for debugging statemachine
-  if ExistWordInString(PChar(s),'sequencer',[soWholeWord]) then
+  // special override for debugging statemachine and tools availability
+  if ((ExistWordInString(PChar(s),'sequencer',[soWholeWord])) OR (ExistWordInString(PChar(s),'libs: none')) OR (ExistWordInString(PChar(s),'bins: none'))) then
   begin
     begin
       FG      := clRed;
@@ -1971,6 +1990,38 @@ procedure TForm1.btnUpdateLazarusMakefilesClick(Sender: TObject);
 begin
 end;
 
+procedure TForm1.btnBuildNativeCompilerClick(Sender: TObject);
+var
+  CPUType:TCPU;
+  OSType:TOS;
+begin
+  CPUType:=TCPU.cpuNone;
+  OSType:=TOS.osNone;
+  if (radgrpOS.ItemIndex<>-1) then
+    OSType:=GetTOS(radgrpOS.Items[radgrpOS.ItemIndex]);
+  if (radgrpCPU.ItemIndex<>-1) then
+    CPUType:=GetTCPU(radgrpCPU.Items[radgrpCPU.ItemIndex]);
+
+  if ((OSType=win32) AND (CPUType in [x86_64,aarch64])) then OSType:=win64;
+
+  if ((CPUType<>TCPU.cpuNone) AND (OSType<>TOS.osNone)) then
+  begin
+    DisEnable(Sender,False);
+    try
+      if (NOT PrepareRun(Sender)) then exit;
+      FPCupManager.CrossCPU_Target:=CPUType;
+      FPCupManager.CrossOS_Target:=OSType;
+      FPCupManager.OnlyModules:=_NATIVECROSSFPC;
+      sStatus:='Going to build native compiler for '+FPCupManager.CrossCombo_Target;
+      RealRun;
+      FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
+      FPCupManager.CrossOS_Target:=TOS.osNone;
+    finally
+      DisEnable(Sender,True);
+    end;
+  end;
+end;
+
 procedure TForm1.IniPropStorageAppRestoringProperties(Sender: TObject);
 begin
   {$ifdef Haiku}
@@ -2049,10 +2100,21 @@ begin
   if Sender=MGermanlanguage then sLanguage:='de';
   if Sender=MFrenchlanguage then sLanguage:='fr';
   if Sender=MDutchlanguage then sLanguage:='nl';
+  if Sender=MUkrainianLanguage then sLanguage:='uk';
+
   TransLate(sLanguage);
-  // This is needed to update the contents of the list
+
+  // Refresh welcome screen
+  GetSystemInfo;
+
+  // This is needed to update the contents of the options list
   Form2.UpdateCheckBoxList;
   {$endif}
+end;
+
+procedure TForm1.MOnlineDocsClick(Sender: TObject);
+begin
+  OpenURL('https://dsiders.gitlab.io/lazdocsnext');
 end;
 
 procedure TForm1.radgrpTargetChanged(Sender: TObject);
@@ -2106,6 +2168,8 @@ var
   success:boolean;
   BinsFileName,LibsFileName,BaseBinsURL,BaseLibsURL,BinPath,LibPath:string;
 begin
+  AddMessage('Please be patient. Might take some time to scan all libs and bins.');
+  AddMessage('');
   for aOS := Low(TOS) to High(TOS) do
   begin
     if aOS=osNone then continue;
@@ -2139,6 +2203,9 @@ begin
   end;
   FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
   FPCupManager.CrossOS_Target:=TOS.osNone;
+
+  AddMessage('');
+  AddMessage('Scanning libs and bins ready.');
 end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);
@@ -2352,6 +2419,12 @@ begin
 
     if Form2.UpdateOnly then
     begin
+    end;
+
+    if (Sender=WioBtn) OR (Sender=PicoBtn) then
+    begin
+      // Due to changes in Lazarus, we need a trunk/main version of Lazarus that can be compiled with an embedded (old) FPC trunk
+      FPCupManager.LazarusDesiredRevision:='0ae37a906c942d24591917ceaafbad67d1b1b96c';
     end;
 
     success:=RealRun;
@@ -2616,7 +2689,7 @@ var
 begin
   result:=false;
 
-  {$ifdef win64}
+  {$if defined(win64) and not defined(aarch64)}
   if (Sender<>nil) then
   begin
     if Form2.AskConfirmation then
@@ -3160,8 +3233,7 @@ begin
       FPCupManager.CrossOPT:=Form2.GetCrossBuildOptions(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
 
       // use the available source to build the cross-compiler ... change nothing about source and url !!
-      FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;//'FPCCleanOnly,FPCBuildOnly';
-      //FPCupManager.OnlyModules:=_FPC+_BUILD+_ONLY;
+      FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;
 
       // handle inclusion of LCL when cross-compiling
       IncludeLCL:=Form2.IncludeLCL;
@@ -3751,6 +3823,11 @@ begin
       end;
     end;
 
+    if (Form2.DockedLazarus) then
+    begin
+      if ((Sender=BitBtnLazarusOnly) OR (Sender=BitBtnFPCandLazarus)) then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',anchordocking';
+    end;
+
     //Delete stray comma
     s:=FPCupManager.IncludeModules;
     if Pos(',',s)=1 then
@@ -3999,6 +4076,8 @@ begin
   MissingTools:=false;
 
   FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
+
+  FPCupManager.FPCUnicode:=Form2.FPCUnicode;
 
   FPCupManager.SoftFloat:=Form2.UseSoftFloat;
   FPCupManager.OnlinePatching:=Form2.OnlinePatching;
@@ -4255,6 +4334,8 @@ begin
   AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
   AddMessage('');
 
+  //FPCupManager.SaveSettings;
+
   BitBtnHalt.Enabled:=true;
   try
     {$ifdef READER}
@@ -4352,19 +4433,124 @@ end;
 function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   aStoredTarget:string;
+begin
+  result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
+
+  GetSystemInfo;
+
+  if result then
+  begin
+    with TIniFile.Create(IniDirectory+installerUniversal.DELUXEFILENAME) do
+    try
+      AddMessage(upInstallSettingsCurrent+'.');
+      AddMessage('');
+
+      chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
+
+      FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
+
+      // Read FPC target from settngs
+      aStoredTarget:=ReadString('Target','fpcVersion','');
+      if (Length(aStoredTarget)=0) then
+      begin
+        //Fallback to previous settings
+        aStoredTarget:=ReadString('URL','fpcURL','');
+        if (Length(aStoredTarget)>0) then
+          aStoredTarget:=installerUniversal.GetKeyword(FPCURLLOOKUPMAGIC,aStoredTarget);
+      end;
+      if (Length(aStoredTarget)<>0) then
+        FPCTarget:=aStoredTarget;
+
+      // Read Lazarus target from settngs
+      aStoredTarget:=ReadString('Target','lazVersion','');
+      if (Length(aStoredTarget)=0) then
+      begin
+        //Fallback to previous settings
+        aStoredTarget:=ReadString('URL','lazURL','');
+        if (Length(aStoredTarget)>0) then
+          aStoredTarget:=installerUniversal.GetKeyword(LAZARUSURLLOOKUPMAGIC,aStoredTarget);
+      end;
+      if (Length(aStoredTarget)<>0) then
+        LazarusTarget:=aStoredTarget;
+
+      radgrpCPU.ItemIndex:=ReadInteger('Cross','CPUTarget',radgrpCPU.ItemIndex);
+      radgrpOS.ItemIndex:=ReadInteger('Cross','OSTarget',radgrpOS.ItemIndex);
+
+      if (listModules.Items.Count>0) then listModules.ItemIndex:=ReadInteger('General','Module',listModules.ItemIndex);
+
+      Form2.FPCOptions:=ReadString('General','FPCOptions',Form2.FPCOptions);
+      Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
+
+      Form2.FPCDebug:=ReadBool('General','FPCDebug',Form2.FPCDebug);
+      Form2.LazarusDebug:=ReadBool('General','LazarusDebug',Form2.LazarusDebug);
+
+      Form2.FPCRevision:=ReadString('General','FPCRevision','');
+      Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
+      Form2.FPCBranch:=ReadString('General','FPCBranch','');
+      Form2.LazarusBranch:=ReadString('General','LazarusBranch','');
+
+      Form2.SplitFPC:=ReadBool('General','SplitFPC',Form2.SplitFPC);
+      Form2.SplitLazarus:=ReadBool('General','SplitLazarus',Form2.SplitLazarus);
+      Form2.DockedLazarus:=ReadBool('General','DockedLazarus',Form2.DockedLazarus);
+
+      Form2.UseWget:=ReadBool('General','UseWget',Form2.UseWget);
+      Form2.MakeJobs:=ReadBool('General','MakeJobs',Form2.MakeJobs);
+      Form2.FPCUnicode:=ReadBool('General','BuildFPCUnicode',Form2.FPCUnicode);
+
+      Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
+      Form2.UpdateOnly:=ReadBool('General','UpdateOnly',False);
+
+      Form2.UseSoftFloat:=ReadBool('General','UseSoftFloat',Form2.UseSoftFloat);
+      Form2.OnlinePatching:=ReadBool('General','OnlinePatching',Form2.OnlinePatching);
+      Form2.ApplyLocalChanges:=ReadBool('General','ApplyLocalChanges',Form2.ApplyLocalChanges);
+
+      Form2.SystemFPC:=ReadBool('General','SystemFPC',False);
+
+      Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
+      Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
+
+      Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',False);
+
+      Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
+
+      Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
+    finally
+      Free;
+    end;
+
+    Form2.SetInstallDir(IniDirectory);
+
+    ParseRevisions(IniDirectory);
+  end
+  else
+  begin
+    AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
+    {$ifdef Solaris}
+    // current trunk does not build with the standard -O2, so use -O1 for all
+    Form2.FPCOptions:='-g -gl -O1';
+    FPCupManager.FPCOPT:=Form2.FPCOptions;
+    {$endif}
+  end;
+end;
+
+procedure TForm1.GetSystemInfo;
+var
   Cores,MemAvailable,SwapAvailable:DWord;
   {$ifdef LCLQT5}
   QT5LibraryLocation:string;
   {$endif}
 begin
-  result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
-
   {$ifdef READER}
   CommandOutputScreen.Clear;
   {$else}
   CommandOutputScreen.ClearAll;
   {$endif}
-  AddMessage('Welcome @ FPCUPdeluxe.');
+
+  if (CommandOutputScreen.Lines.Count>0) then
+    CommandOutputScreen.Lines.Strings[0]:='Welcome @ FPCUPdeluxe.'
+  else
+    AddMessage('Welcome @ FPCUPdeluxe.');
+
   AddMessage(Self.Caption);
   {$ifndef NetBSD}
   AddMessage('Running on '+GetDistro);
@@ -4412,109 +4598,18 @@ begin
   end;
 
   AddMessage('');
+  AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
+  AddMessage('');
 
-  if result then
-  begin
-    with TIniFile.Create(IniDirectory+installerUniversal.DELUXEFILENAME) do
-    try
-      AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
-      AddMessage(upInstallSettingsCurrent+'.');
-      AddMessage('');
+  // get names of cross-compilers
+  AutoUpdateCrossCompiler(nil);
+  AddMessage('');
 
-      chkGitlab.Checked:=ReadBool('General','Gitlab',chkGitlab.Checked);
-
-      // get names of cross-compilers
-      AutoUpdateCrossCompiler(nil);
-
-      FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
-
-      // Read FPC target from settngs
-      aStoredTarget:=ReadString('Target','fpcVersion','');
-      if (Length(aStoredTarget)=0) then
-      begin
-        //Fallback to previous settings
-        aStoredTarget:=ReadString('URL','fpcURL','');
-        if (Length(aStoredTarget)>0) then
-          aStoredTarget:=installerUniversal.GetKeyword(FPCURLLOOKUPMAGIC,aStoredTarget);
-      end;
-      if (Length(aStoredTarget)<>0) then
-        FPCTarget:=aStoredTarget;
-
-      // Read Lazarus target from settngs
-      aStoredTarget:=ReadString('Target','lazVersion','');
-      if (Length(aStoredTarget)=0) then
-      begin
-        //Fallback to previous settings
-        aStoredTarget:=ReadString('URL','lazURL','');
-        if (Length(aStoredTarget)>0) then
-          aStoredTarget:=installerUniversal.GetKeyword(LAZARUSURLLOOKUPMAGIC,aStoredTarget);
-      end;
-      if (Length(aStoredTarget)<>0) then
-        LazarusTarget:=aStoredTarget;
-
-      radgrpCPU.ItemIndex:=ReadInteger('Cross','CPUTarget',radgrpCPU.ItemIndex);
-      radgrpOS.ItemIndex:=ReadInteger('Cross','OSTarget',radgrpOS.ItemIndex);
-
-      if (listModules.Items.Count>0) then listModules.ItemIndex:=ReadInteger('General','Module',listModules.ItemIndex);
-
-      Form2.FPCOptions:=ReadString('General','FPCOptions',Form2.FPCOptions);
-      Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
-
-      Form2.FPCDebug:=ReadBool('General','FPCDebug',Form2.FPCDebug);
-      Form2.LazarusDebug:=ReadBool('General','LazarusDebug',Form2.LazarusDebug);
-
-      Form2.FPCRevision:=ReadString('General','FPCRevision','');
-      Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
-      Form2.FPCBranch:=ReadString('General','FPCBranch','');
-      Form2.LazarusBranch:=ReadString('General','LazarusBranch','');
-
-      Form2.SplitFPC:=ReadBool('General','SplitFPC',Form2.SplitFPC);
-      Form2.SplitLazarus:=ReadBool('General','SplitLazarus',Form2.SplitLazarus);
-
-      Form2.UseWget:=ReadBool('General','UseWget',Form2.UseWget);
-      Form2.MakeJobs:=ReadBool('General','MakeJobs',Form2.MakeJobs);
-
-      Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
-      Form2.UpdateOnly:=ReadBool('General','UpdateOnly',False);
-
-      Form2.UseSoftFloat:=ReadBool('General','UseSoftFloat',Form2.UseSoftFloat);
-      Form2.OnlinePatching:=ReadBool('General','OnlinePatching',Form2.OnlinePatching);
-      Form2.ApplyLocalChanges:=ReadBool('General','ApplyLocalChanges',Form2.ApplyLocalChanges);
-
-      Form2.SystemFPC:=ReadBool('General','SystemFPC',False);
-
-      Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
-      Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
-
-      Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',False);
-
-      Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
-
-      Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
-    finally
-      Free;
-    end;
-
-    AddMessage('');
-
-    Form2.SetInstallDir(IniDirectory);
-
-    ParseRevisions(IniDirectory);
-
-    {$ifdef usealternateui}
-    alternateui_update_interface_buttons;
-    {$endif}
-  end
-  else
-  begin
-    AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
-    {$ifdef Solaris}
-    // current trunk does not build with the standard -O2, so use -O1 for all
-    Form2.FPCOptions:='-g -gl -O1';
-    FPCupManager.FPCOPT:=Form2.FPCOptions;
-    {$endif}
-  end;
+ {$ifdef usealternateui}
+ alternateui_update_interface_buttons;
+ {$endif}
 end;
+
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;
 var
@@ -4570,11 +4665,13 @@ begin
 
       WriteBool('General','SplitFPC',Form2.SplitFPC);
       WriteBool('General','SplitLazarus',Form2.SplitLazarus);
+      WriteBool('General','DockedLazarus',Form2.DockedLazarus);
 
       WriteBool('General','SystemFPC',Form2.SystemFPC);
 
       WriteBool('General','UseWget',Form2.UseWget);
       WriteBool('General','MakeJobs',Form2.MakeJobs);
+      WriteBool('General','BuildFPCUnicode',Form2.FPCUnicode);
       WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
       WriteBool('General','UpdateOnly',Form2.UpdateOnly);
       WriteBool('General','UseSoftFloat',Form2.UseSoftFloat);
@@ -4790,6 +4887,11 @@ begin
   FillSourceListboxes;
 
   ScrollToSelected;
+end;
+
+procedure TForm1.CommandOutputScreenChange(Sender: TObject);
+begin
+
 end;
 
 procedure TForm1.HandleInfo(var Msg: TLMessage);

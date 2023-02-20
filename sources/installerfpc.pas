@@ -2766,7 +2766,10 @@ begin
   else if s='1.9.2' then result:='1.9.0'
   else if s='1.9.0' then result:='0.0.0';
 
-
+  {$IFDEF CPULOONGARCH64}
+  // we need at least 3.3.1 for loongarch64
+  if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.3.1') then result:='3.3.1';
+  {$ENDIF}
   {$IFDEF CPUAARCH64}
   // we need at least 3.2.0 for aarch64
   if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.2.0') then result:='3.2.0';
@@ -2859,10 +2862,16 @@ begin
         end;
       end;
 
+    {$IFDEF CPULOONGARCH64}
+    // we need at least 3.3.1 for longarch64
+    if FinalVersion<CalculateNumericalVersion('3.3.1') then FinalVersion:=CalculateNumericalVersion('3.3.1');
+    {$ENDIF}
+
     {$IFDEF CPUAARCH64}
     // we need at least 3.2.0 for aarch64
     if FinalVersion<CalculateNumericalVersion('3.2.0') then FinalVersion:=CalculateNumericalVersion('3.2.0');
     {$ENDIF}
+
 
     {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
     // we need at least 3.2.0 for ppc64le

@@ -3124,43 +3124,49 @@ begin
         end;
       end;
 
-      s:='';
-      if (FPCupManager.CrossOS_Target=TOS.aix)
-      then
-      begin
-        s:='Be forwarned: this will only work with FPC 3.0 and later.' + sLineBreak + upQuestionContinue;
-      end;
-      if (FPCupManager.CrossCPU_Target=TCPU.aarch64)
-      {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target=TOS.darwin){$endif}
-      OR (FPCupManager.CrossOS_Target=TOS.msdos)
-      OR (FPCupManager.CrossOS_Target=TOS.haiku)
-      then
-      begin
-        s:='Be forwarned: this will only work with FPC [(>= 3.2) OR (embedded) OR (trunk)].'+sLineBreak+upQuestionContinue;
-      end;
-
       warning:=false;
-      if (((FPCupManager.CrossCPU_Target=TCPU.aarch64) {OR (FPCupManager.CrossCPU_Target=TCPU.i386)} OR (FPCupManager.CrossCPU_Target=TCPU.x86_64)) AND (FPCupManager.CrossOS_Target=TOS.android))
-        then warning:=true;
-      if (((FPCupManager.CrossCPU_Target=TCPU.aarch64) OR (FPCupManager.CrossCPU_Target=TCPU.arm)) AND (FPCupManager.CrossOS_Target=TOS.ios))
-        then warning:=true;
 
-      if warning then
+      if (NOT warning) then
       begin
-        s:='Be forwarned: this will only work with FPC [(>= 3.2.2) OR (embedded) OR (trunk)].'+sLineBreak+upQuestionContinue;
+        warning:=((FPCupManager.CrossCPU_Target=TCPU.aarch64) AND (FPCupManager.CrossOS_Target=TOS.freebsd));
+        if warning then s:='Be forwarned: this will only work with FPC [(>= 3.3.1)].'+sLineBreak+upQuestionContinue;
+      end;
+
+      if (NOT warning) then
+      begin
+        warning:=((((FPCupManager.CrossCPU_Target=TCPU.aarch64) {OR (FPCupManager.CrossCPU_Target=TCPU.i386)} OR (FPCupManager.CrossCPU_Target=TCPU.x86_64)) AND (FPCupManager.CrossOS_Target=TOS.android)));
+        if (NOT warning) then warning:=((((FPCupManager.CrossCPU_Target=TCPU.aarch64) OR (FPCupManager.CrossCPU_Target=TCPU.arm)) AND (FPCupManager.CrossOS_Target=TOS.ios)));
+        if warning then s:='Be forwarned: this will only work with FPC [(>= 3.2.2) OR (embedded) OR (trunk)].'+sLineBreak+upQuestionContinue;
+      end;
+
+      if (NOT warning) then
+      begin
+        warning:=(
+          (FPCupManager.CrossCPU_Target=TCPU.aarch64)
+          {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target=TOS.darwin){$endif}
+          OR (FPCupManager.CrossOS_Target=TOS.msdos)
+          OR (FPCupManager.CrossOS_Target=TOS.haiku)
+        );
+        if (warning) then s:='Be forwarned: this will only work with FPC [(>= 3.2) OR (embedded) OR (trunk)].'+sLineBreak+upQuestionContinue;
+      end;
+
+      if (NOT warning) then
+      begin
+        warning:=(FPCupManager.CrossOS_Target=TOS.aix);
+        if (warning) then s:='Be forwarned: this will only work with FPC 3.0 and later.' + sLineBreak + upQuestionContinue;
       end;
 
       {$ifdef Linux}
-      if ((FPCupManager.CrossCPU_Target=TCPU.mips) OR (FPCupManager.CrossCPU_Target=TCPU.mipsel))
-      then
+      if (NOT warning) then
       begin
-        s:='You could get the native cross-utilities first (advised).' + sLineBreak +
-           'E.g.: sudo apt-get install libc6-mips-cross binutils-mips-linux-gnu' + sLineBreak +
-           upQuestionContinue;
+        warning:=((FPCupManager.CrossCPU_Target=TCPU.mips) OR (FPCupManager.CrossCPU_Target=TCPU.mipsel));
+        if (warning) then s:='You could get the native cross-utilities first (advised).' + sLineBreak +
+             'E.g.: sudo apt-get install libc6-mips-cross binutils-mips-linux-gnu' + sLineBreak +
+             upQuestionContinue;
       end;
       {$endif}
 
-      if (length(s)=0) then
+      if (NOT warning) then
         s:=upQuestionContinue;
       s:=upInstallCrossCompiler+' ['+FPCupManager.CrossCombo_Target+']'+sLineBreak+s;
       if Form2.AskConfirmation then

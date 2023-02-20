@@ -1086,6 +1086,7 @@ begin
         if (CPU=sparc64) AND (OS<>linux) then continue;
         if ((CPU=riscv32) OR (CPU=riscv64)) AND ((OS<>linux) AND (OS<>embedded)) then continue;
         if (CPU=wasm32) AND ((OS<>wasi) AND (OS<>embedded)) then continue;
+        if (CPU=loongarch64) AND (OS<>linux) then continue;
 
         s1:=GetCPU(CPU)+'-'+GetOS(OS);
 
