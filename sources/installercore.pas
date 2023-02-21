@@ -665,6 +665,8 @@ type
   TBaseHelpInstaller = class(TInstaller);
   TBaseWinInstaller = class(TInstaller);
 
+  function GetMinimumFPCVersion(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone): string;
+
 implementation
 
 uses
@@ -690,6 +692,57 @@ uses
   {$ENDIF}
   {$endif}
   ;
+
+
+function GetMinimumFPCVersion(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone): string;
+var
+  localCPU:TCPU;
+  localOS:TOS;
+procedure SetResult(const aNewVersion:string; var aVersion:string);
+begin
+  if CalculateNumericalVersion(aNewVersion)>CalculateNumericalVersion(aVersion) then aVersion:=aNewVersion;
+end;
+begin
+  result:='';
+  localCPU:=aCPU;
+  localOS:=aOS;
+  if ((localCPU=TCPU.cpuNone) AND (localOS=TOS.osNone)) then
+  begin
+    // We build native, so get native CPU and OS.
+    localCPU:=GetTCPU(GetSourceCPU);
+    localOS:=GetTOS(GetSourceOS);
+  end;
+  if (aCPU in [TCPU.loongarch64,TCPU.xtensa,TCPU.wasm32]) then SetResult('3.3.1',result);
+  if (aOS in [TOS.freertos,TOS.wasi]) then SetResult('3.3.1',result);
+  if (aOS in [TOS.aix]) then SetResult('3.0.0',result);
+  if (aCPU=TCPU.aarch64) then
+  begin
+    SetResult('3.2.0',result);
+    if (aOS in [TOS.darwin,TOS.win64,TOS.embedded,TOS.freebsd]) then SetResult('3.3.1',result);
+  end;
+  if (aOS=TOS.haiku) then
+  begin
+    if (aCPU=TCPU.i386) then SetResult('3.0.0',result);
+    if (aCPU=TCPU.x86_64) then SetResult('3.2.0',result);
+  end;
+  if (aOS=TOS.ios) then
+  begin
+    if (aCPU in [TCPU.arm,TCPU.aarch64]) then SetResult('3.2.2',result);
+  end;
+  if (aOS=TOS.android) then
+  begin
+    if (aCPU in [TCPU.x86_64,TCPU.aarch64]) then SetResult('3.2.2',result);
+  end;
+  {$IF DEFINED(FPC_ABI_ELFV2)}
+  if (aCPU=TCPU.powerpc64) then SetResult('3.2.0',result);
+  {$ENDIF}
+  {$IFDEF CPUZ80}
+  SetResult('3.3.1',result);
+  {$ENDIF}
+  {$IF DEFINED(CPUMIPS64) OR DEFINED(CPUMIPS64EL)}
+  SetResult('3.3.1',result);
+  {$ENDIF}
+end;
 
 { TInstaller }
 

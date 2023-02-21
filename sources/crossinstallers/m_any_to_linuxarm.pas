@@ -111,11 +111,13 @@ end;
 
 function Tany_linuxarm.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile,aOption: string;
+  AsFile: string;
   BinPrefixTry:string;
-  i:integer;
   hardfloat:boolean;
   requirehardfloat:boolean;
+  {$ifdef Darwin}
+  i:integer;
+  {$endif}
 begin
   result:=inherited;
   if result then exit;

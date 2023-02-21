@@ -80,14 +80,6 @@ begin
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
     AddFPCCFGSnippet('-Xr/usr/lib');
   end;
-
-  if not result then
-  begin
-    //no libs yet: go on without them
-    ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
-    FLibsPath:='';
-    result:=true;
-  end;
 end;
 
 {$ifndef FPCONLY}
@@ -107,20 +99,33 @@ begin
   if result then exit;
 
   AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
+  BinPrefixTry:=FBinUtilsPrefix;
 
   result:=SearchBinUtil(BasePath,AsFile);
 
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
+  // Also allow for (cross)binutils with special prefix
   if not result then
   begin
     BinPrefixTry:=TargetCPUName+'-unknown-'+TargetOSName+'-gnu-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
+
+  // Also allow for (cross)binutils without prefix in the right directory
+  if (not result) then
+  begin
+    BinPrefixTry:='';
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if (not result) then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
+
+  if result then FBinUtilsPrefix:=BinPrefixTry;
 
   SearchBinUtilsInfo(result);
 

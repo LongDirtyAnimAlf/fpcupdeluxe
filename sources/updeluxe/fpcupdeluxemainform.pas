@@ -3126,34 +3126,11 @@ begin
 
       warning:=false;
 
-      if (NOT warning) then
+      s:=GetMinimumFPCVersion(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+      if (Length(s)>0) then
       begin
-        warning:=((FPCupManager.CrossCPU_Target=TCPU.aarch64) AND (FPCupManager.CrossOS_Target=TOS.freebsd));
-        if warning then s:='Be forwarned: this will only work with FPC [(>= 3.3.1)].'+sLineBreak+upQuestionContinue;
-      end;
-
-      if (NOT warning) then
-      begin
-        warning:=((((FPCupManager.CrossCPU_Target=TCPU.aarch64) {OR (FPCupManager.CrossCPU_Target=TCPU.i386)} OR (FPCupManager.CrossCPU_Target=TCPU.x86_64)) AND (FPCupManager.CrossOS_Target=TOS.android)));
-        if (NOT warning) then warning:=((((FPCupManager.CrossCPU_Target=TCPU.aarch64) OR (FPCupManager.CrossCPU_Target=TCPU.arm)) AND (FPCupManager.CrossOS_Target=TOS.ios)));
-        if warning then s:='Be forwarned: this will only work with FPC [(>= 3.2.2) OR (embedded) OR (trunk)].'+sLineBreak+upQuestionContinue;
-      end;
-
-      if (NOT warning) then
-      begin
-        warning:=(
-          (FPCupManager.CrossCPU_Target=TCPU.aarch64)
-          {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target=TOS.darwin){$endif}
-          OR (FPCupManager.CrossOS_Target=TOS.msdos)
-          OR (FPCupManager.CrossOS_Target=TOS.haiku)
-        );
-        if (warning) then s:='Be forwarned: this will only work with FPC [(>= 3.2) OR (embedded) OR (trunk)].'+sLineBreak+upQuestionContinue;
-      end;
-
-      if (NOT warning) then
-      begin
-        warning:=(FPCupManager.CrossOS_Target=TOS.aix);
-        if (warning) then s:='Be forwarned: this will only work with FPC 3.0 and later.' + sLineBreak + upQuestionContinue;
+        warning:=true;
+        if warning then s:='Be forwarned: this will only work with FPC [(>='+s+')].'+sLineBreak+upQuestionContinue;
       end;
 
       {$ifdef Linux}

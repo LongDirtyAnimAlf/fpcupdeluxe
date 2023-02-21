@@ -1494,17 +1494,10 @@ end;
 function TFPCupManager.Run: boolean;
 var
   aSequence:string;
-  aMoment:TDateTime;
 begin
   result:=false;
-
   FRunInfo:='';
-
   FShortcutCreated:=false;
-
-  //aMoment:=now;
-
-  //aSequence:=DateTimeToStr(aMoment);
 
   if
     (FSequencer.FParent.CrossCPU_Target=GetTCPU(GetSourceCPU))
@@ -2508,13 +2501,19 @@ begin
       SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
       // Don't run sequence if already run
       case SeqAttr^.Executed of
-        ESFailed : begin
-          FParent.RunInfo:=localinfotext+'Already ran sequence name '+SequenceName+' ending in failure. Not running again.';
-          result:=false;
-          exit;
+        ESNever :
+          begin
+            //FParent.RunInfo:=localinfotext+'Sequence name '+SequenceName+' will start running.';
           end;
-        ESSucceeded : begin
-          exit;
+        ESFailed :
+          begin
+            FParent.RunInfo:=localinfotext+'Already ran sequence name '+SequenceName+' ending in failure. Not running again.';
+            result:=false;
+            exit;
+          end;
+        ESSucceeded :
+          begin
+            exit;
           end;
         end;
       // Get entry point in FStateMachine
@@ -2526,8 +2525,8 @@ begin
       while true do
       begin
         case FStateMachine[InstructionPointer].instr of
-          SMdeclare     :;
-          SMdeclareHidden :;
+          SMdeclare     : ;
+          SMdeclareHidden : ;
           SMdo          : if not IsSkipped(FStateMachine[InstructionPointer].param) then
                             result:=Run(FStateMachine[InstructionPointer].param);
           SMrequire     : result:=Run(FStateMachine[InstructionPointer].param);
@@ -2547,6 +2546,7 @@ begin
           {$endif}
           SMSetOS       : DoSetOS(FStateMachine[InstructionPointer].param);
           SMSetCPU      : DoSetCPU(FStateMachine[InstructionPointer].param);
+          SMInvalid     : ;
         end;
         if (NOT result) OR (SeqAttr^.Executed=ESFailed) then
         begin

@@ -1296,6 +1296,10 @@ begin
               end
               else continue;
             end;
+            st_Start,st_Finished:
+            begin
+              // make compiler happy
+            end;
           end;
 
           Processor.Process.Parameters.Add('CROSSINSTALL=1');
@@ -2739,7 +2743,7 @@ begin
 
   result:='0.0.0';
 
-  if s=FPCTRUNKVERSION then result:=FPCTRUNKBOOTVERSION
+  if s='3.3.1' then result:='3.2.0'
   else if s='3.2.2' then result:='3.2.0'
   else if s='3.2.0' then result:='3.0.4'
   else if ((s='3.0.5') OR (s='3.0.4')) then result:='3.0.2'
@@ -2766,37 +2770,11 @@ begin
   else if s='1.9.2' then result:='1.9.0'
   else if s='1.9.0' then result:='0.0.0';
 
-  {$IFDEF CPULOONGARCH64}
-  // we need at least 3.3.1 for loongarch64
-  if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.3.1') then result:='3.3.1';
-  {$ENDIF}
-  {$IFDEF CPUAARCH64}
-  // we need at least 3.2.0 for aarch64
-  if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.2.0') then result:='3.2.0';
-  {$IFDEF DARWIN}
-  if CalculateNumericalVersion(result)<CalculateNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
-  {$ENDIF}
-  {$IFDEF WIN64}
-  if CalculateNumericalVersion(result)<CalculateNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
-  {$ENDIF}
-  {$ENDIF}
-
-  {$IFDEF HAIKU}
-  {$IFDEF CPUX64}
-  // we need at least 3.2.0 for Haiku x86_64
-  if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.2.0') then result:='3.2.0';
-  //if CalculateNumericalVersion(result)<CalculateNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
-  {$ENDIF}
-  {$IFDEF CPUX32}
-  // we need at least 3.0.0 for Haiku x32
-  if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.0.0') then result:='3.0.0';
-  {$ENDIF}
-  {$ENDIF}
-
-  {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
-  // we need at least 3.2.0 for ppc64le
-  if CalculateNumericalVersion(result)<CalculateNumericalVersion('3.2.0') then result:='3.2.0';
-  {$ENDIF}
+  s:=GetMinimumFPCVersion;
+  if (Length(s)>0) then
+  begin
+    if CalculateNumericalVersion(result)<CalculateNumericalVersion(s) then result:=s;
+  end;
 end;
 
 function TFPCInstaller.GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
@@ -2862,27 +2840,10 @@ begin
         end;
       end;
 
-    {$IFDEF CPULOONGARCH64}
-    // we need at least 3.3.1 for longarch64
-    if FinalVersion<CalculateNumericalVersion('3.3.1') then FinalVersion:=CalculateNumericalVersion('3.3.1');
-    {$ENDIF}
-
-    {$IFDEF CPUAARCH64}
-    // we need at least 3.2.0 for aarch64
-    if FinalVersion<CalculateNumericalVersion('3.2.0') then FinalVersion:=CalculateNumericalVersion('3.2.0');
-    {$ENDIF}
-
-
-    {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
-    // we need at least 3.2.0 for ppc64le
-    if FinalVersion<CalculateNumericalVersion('3.2.0') then FinalVersion:=CalculateNumericalVersion('3.2.0');
-    {$ENDIF}
-
-    //3.3.1 allows 3.0.4 but 3.0.4 does not work anymore for 3.3.1 ... so only allow 3.2.0 or higher
-    if (SourceVersionNum=CalculateNumericalVersion('3.3.1')) then
+    s:=GetMinimumFPCVersion;
+    if (Length(s)>0) then
     begin
-      RequiredVersion:=CalculateNumericalVersion('3.2.0');
-      if (FinalVersion<RequiredVersion) then FinalVersion:=RequiredVersion;
+      if FinalVersion<CalculateNumericalVersion(s) then FinalVersion:=CalculateNumericalVersion(s);
     end;
 
     result:=InttoStr(FinalVersion DIV 10000);
@@ -4703,9 +4664,12 @@ var
   CrossCompiling                         : boolean;
   CPUOS_Signature                        : string;
   aCleanupCompiler,aCleanupCommand,aPath : string;
-  aCleanupCommandList,DeleteList         : TStringList;
+  aCleanupCommandList                    : TStringList;
   RunTwice                               : boolean;
   aCPU                                   : TCPU;
+  {$IFDEF MSWINDOWS}
+  DeleteList                             : TStringList;
+  {$ENDIF}
 begin
   result:=inherited;
 
