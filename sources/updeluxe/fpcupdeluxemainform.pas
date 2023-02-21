@@ -165,7 +165,7 @@ type
     {$endif}
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure BitBtnSetRevisionClick(Sender: TObject);
-    procedure btnCheckToolsLocationsClick(Sender: TObject);
+    procedure btnCheckToolsLocationsClick({%H-}Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
     procedure btnBuildNativeCompilerClick(Sender: TObject);
     procedure ButtonSubarchSelectClick({%H-}Sender: TObject);
@@ -175,7 +175,7 @@ type
     procedure ListBoxTargetDrawItem(Control: TWinControl; Index: Integer;
       ARect: TRect; State: TOwnerDrawState);
     procedure LanguageClick(Sender: TObject);
-    procedure MOnlineDocsClick(Sender: TObject);
+    procedure MOnlineDocsClick({%H-}Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick({%H-}Sender: TObject);
@@ -2684,7 +2684,9 @@ var
   IncludeLCL,ZipFile:boolean;
   i:integer;
   aList: TStringList;
+  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
   frmSeq: TfrmSequencial;
+  {$ENDIF}
 begin
   result:=false;
 
@@ -4874,7 +4876,7 @@ end;
 procedure TForm1.HandleInfo(var Msg: TLMessage);
 var
   MsgStr: PChar;
-  MsgPStr: PString;
+  //MsgPStr: PString;
   MsgPasStr: string;
 begin
   MsgStr := {%H-}PChar(Msg.lParam);

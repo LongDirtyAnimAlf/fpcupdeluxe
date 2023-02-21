@@ -135,8 +135,7 @@ end;
 
 function TAny_FreeRTOSArm.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile,aOption: string;
-  i:integer;
+  AsFile: string;
 begin
   result:=inherited;
   if result then exit;

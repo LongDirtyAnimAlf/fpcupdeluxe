@@ -46,9 +46,6 @@ const
   FRET_UNKNOWN_REVISION = repoclient.FRET_UNKNOWN_REVISION;
 
 type
-  EHGClientError = class(ERepoClientError);
-  { ThgClient }
-
   THGClient = class(TRepoClient)
   protected
     procedure CheckOut(UseForce:boolean=false); override;
@@ -70,6 +67,7 @@ type
     procedure Revert; override;
   end;
 
+  EHGClientError = class(ERepoClientError);
 
 implementation
 

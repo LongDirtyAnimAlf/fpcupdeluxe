@@ -134,15 +134,15 @@ end;
 
 function TAny_Embeddedmipsel.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile,aOption: string;
+  AsFile: string;
   BinPrefixTry: string;
-  i:integer;
 begin
   result:=inherited;
   if result then exit;
 
   // Start with any names user may have given
   AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
+  BinPrefixTry:=BinUtilsPrefix;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -154,7 +154,6 @@ begin
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   // Now also allow for mipsel-elf- binutilsprefix
@@ -164,7 +163,6 @@ begin
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   // Now also allow for pic32- binutilsprefix
@@ -174,7 +172,6 @@ begin
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   // Now also allow for xc32- binutilsprefix
@@ -184,7 +181,6 @@ begin
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   // Now also allow for mips-sde-elf binutilsprefix
@@ -194,7 +190,6 @@ begin
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   // Now also allow for mipsel-sde-elf binutilsprefix
@@ -204,7 +199,6 @@ begin
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
 
@@ -215,8 +209,9 @@ begin
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
+
+  if result then FBinUtilsPrefix:=BinPrefixTry;
 
   SearchBinUtilsInfo(result);
 

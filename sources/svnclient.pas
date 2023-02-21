@@ -46,9 +46,6 @@ const
   FRET_UNKNOWN_REVISION = repoclient.FRET_UNKNOWN_REVISION;
 
 type
-  ESVNClientError = class(ERepoClientError);
-  { TSVNClient }
-
   TSVNClient = class(TRepoClient)
   private
     FUserName: string;
@@ -85,6 +82,7 @@ type
     procedure Log(var Log: TStringList); override;
   end;
 
+  ESVNClientError = class(ERepoClientError);
 
 implementation
 

@@ -44,14 +44,7 @@ const
   FRET_UNKNOWN_REVISION = repoclient.FRET_UNKNOWN_REVISION;
 
 type
-  EGitClientError = class(ERepoClientError);
-  { TGitClient }
-
   TGitClient = class(TRepoClient)
-  { Support for http proxy via git config, e.g.
-  git config --global http.proxy $http_proxy
-  however, we're not writing config changes for users, so
-  we don't provide http proxy support for git. }
   protected
     procedure CheckOut(UseForce:boolean=false); override;
     function GetProxyCommand: string;
@@ -75,6 +68,8 @@ type
     function GetGitHash: string;
     function GetCommitMessage: string;
   end;
+
+  EGitClientError = class(ERepoClientError);
 
 implementation
 

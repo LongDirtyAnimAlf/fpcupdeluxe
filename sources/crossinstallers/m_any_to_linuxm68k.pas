@@ -59,8 +59,6 @@ end;
 { TAny_Linuxm68k }
 
 function TAny_Linuxm68k.GetLibs(Basepath:string): boolean;
-const
-  LibName='libc.a';
 begin
   result:=FLibsFound;
   if result then exit;
