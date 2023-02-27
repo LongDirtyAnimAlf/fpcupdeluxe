@@ -3,8 +3,9 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="12"/>
-    <ManyBuildModesSelection Value="darwinarm64cocoa,linuxloongarch64"/>
-    <Units Count="113">
+    <ManyBuildModesSelection Value="darwinarm64cocoa,linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,freebsdx64"/>
+    <BuildModes Active="freebsdaarch64"/>
+    <Units Count="121">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -20,7 +21,7 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
+        <CursorPos X="7" Y="12"/>
         <UsageCount Value="43"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -31,7 +32,7 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="43"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -771,17 +772,20 @@
       <Unit100>
         <Filename Value="sources\installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="1"/>
         <TopLine Value="623"/>
-        <CursorPos X="20" Y="643"/>
+        <CursorPos X="30" Y="643"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit100>
       <Unit101>
         <Filename Value="sources\repoclient.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="44"/>
-        <CursorPos X="14" Y="53"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="125"/>
+        <CursorPos Y="155"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit101>
       <Unit102>
         <Filename Value="C:\fpcupsystems\trunk\fpcsrc\packages\fcl-web\examples\intercept\simpleserver.pas"/>
@@ -859,8 +863,72 @@
         <CursorPos X="24" Y="145"/>
         <UsageCount Value="10"/>
       </Unit112>
+      <Unit113>
+        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\gas\config\tc-aarch64.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="163"/>
+        <CursorPos X="53" Y="184"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit113>
+      <Unit114>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\gas\config\tc-aarch64.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="8365"/>
+        <CursorPos X="33" Y="8383"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit114>
+      <Unit115>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\gas\config\tc-aarch64.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="163"/>
+        <CursorPos X="46" Y="184"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit115>
+      <Unit116>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\gas\config\tc-arm.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="147"/>
+        <CursorPos X="33" Y="168"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit116>
+      <Unit117>
+        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\gas\frags.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="221"/>
+        <CursorPos X="3" Y="243"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit117>
+      <Unit118>
+        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\gas\config\tc-arm.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="211"/>
+        <CursorPos X="53" Y="232"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit118>
+      <Unit119>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\gas\config\tc-arm.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="10839"/>
+        <CursorPos Y="10860"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit119>
+      <Unit120>
+        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\gas\config\tc-arm.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="27503"/>
+        <CursorPos X="44" Y="27526"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit120>
     </Units>
-    <JumpHistory Count="13" HistoryIndex="12">
+    <JumpHistory Count="17" HistoryIndex="16">
       <Position1>
         <Filename Value="sources\updeluxe\extrasettings.pas"/>
         <Caret Line="1075" Column="106" TopLine="1067"/>
@@ -913,6 +981,20 @@
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="4947" Column="22" TopLine="4914"/>
       </Position13>
+      <Position14>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+      </Position14>
+      <Position15>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+      </Position15>
+      <Position16>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="12" Column="7"/>
+      </Position16>
+      <Position17>
+        <Filename Value="sources\installerlazarus.pas"/>
+        <Caret Line="643" Column="30" TopLine="623"/>
+      </Position17>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

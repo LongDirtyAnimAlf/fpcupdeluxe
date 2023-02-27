@@ -116,20 +116,17 @@ begin
   inherited Destroy;
 end;
 
+{$if defined(FREEBSD) AND defined(CPU64)}
 var
   FreeBSD64_FreeBSD386:TFreeBSD64_FreeBSD386;
 
-//todo: FreeBSD64_FreeBSD386: enable when working. For this, we'll probably need to pass -32 to ld etc. Perhaps do this with batch scripts
-{$IFDEF FREEBSD}
-{$IFDEF CPUX64}
 initialization
   FreeBSD64_FreeBSD386:=TFreeBSD64_FreeBSD386.Create;
   RegisterCrossCompiler(FreeBSD64_FreeBSD386.RegisterName,FreeBSD64_FreeBSD386);
 
 finalization
   FreeBSD64_FreeBSD386.Destroy;
-{$ENDIF CPUX64}
-{$ENDIF FREEBSD}
+{$endif}
 end.
 
 

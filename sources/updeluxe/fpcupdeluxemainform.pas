@@ -525,7 +525,7 @@ begin
   aDataClient.UpInfo.UpWidget:=aSystemTarget;
   {$endif}
 
-  Self.Caption:=
+  Form1.Caption:=
   {$ifdef usealternateui}
   'FPCUPdeluxery V'+
   {$else}

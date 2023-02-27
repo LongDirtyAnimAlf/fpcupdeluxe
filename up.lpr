@@ -129,11 +129,11 @@ uses
   m_any_to_darwinpowerpc,
   m_any_to_darwinpowerpc64,
   {$endif}
-  {$IF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
+  {$if defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
   m_freebsd_to_linux386,
-  {$ifdef CPU64}
+  {$if defined(FREEBSD) AND defined(CPU64)}
   m_freebsd64_to_freebsd32,
-  {$endif CPU64}
+  {$endif}
   m_freebsd_to_linux64,
   {$else}
   m_any_to_linux386,

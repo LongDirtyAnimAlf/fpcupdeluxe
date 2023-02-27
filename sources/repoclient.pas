@@ -46,10 +46,6 @@ const
   CONNECTIONMAXRETRIES = 10;
 
 type
-  ERepoClientError = class(Exception);
-
-  { TRepoClient }
-
   TRepoClient = class(TObject)
   private
     FParent:TObject;
@@ -155,6 +151,7 @@ type
     destructor Destroy; override;
   end;
 
+  ERepoClientError = class(Exception);
 
 implementation
 

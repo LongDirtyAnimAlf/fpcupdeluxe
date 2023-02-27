@@ -1,5 +1,5 @@
 {"version":1,"strings":[
-{"hash":5073153,"name":"tform1.caption","sourcebytes":[70,111,114,109,49],"value":"Form1"},
+{"hash":115438661,"name":"tform1.caption","sourcebytes":[70,80,67,85,80,100,101,108,117,120,101],"value":"FPCUPdeluxe"},
 {"hash":215109326,"name":"tform1.btnsetupplus.hint","sourcebytes":[79,112,101,110,32,116,104,101,32,101,120,116,101,110,100,101,100,32,115,101,116,116,105,110,103,115,32,102,111,114,109,46],"value":"Open the extended settings form."},
 {"hash":94157867,"name":"tform1.btnsetupplus.caption","sourcebytes":[83,101,116,117,112,43],"value":"Setup+"},
 {"hash":237853223,"name":"tform1.statusmessage.text","sourcebytes":[83,105,116,116,105,110,103,32,97,110,100,32,119,97,105,116,105,110,103],"value":"Sitting and waiting"},

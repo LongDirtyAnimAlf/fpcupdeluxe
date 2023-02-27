@@ -63,8 +63,6 @@ begin
 end;
 
 function TFreeBSD_Linux386.GetBinUtils(Basepath:string): boolean;
-var
-  i:integer;
 begin
   result:=inherited;
   if result then exit;
@@ -94,7 +92,7 @@ begin
   inherited Destroy;
 end;
 
-{$IFDEF FREEBSD}
+{$if defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
 var
   FreeBSD_Linux386:TFreeBSD_Linux386;
 
@@ -103,7 +101,7 @@ initialization
   RegisterCrossCompiler(FreeBSD_Linux386.RegisterName,FreeBSD_Linux386);
 finalization
   FreeBSD_Linux386.Destroy;
-{$ENDIF FREEBSD}
+{$endif}
 
 end.
 

@@ -62,8 +62,7 @@ end;
 
 function TAny_OpenBSDx64.GetLibs(Basepath:string): boolean;
 const
-  LibName1='libc.so.95.0'; // crosslibs v1.2
-  LibName2='libc.so.96.1'; // crosslibs v1.3
+  LibNames : array[0..2] of string = ('libc.so.95.0','libc.so.96.1','libc.so.96.2');
 var
   sd,lc:string;
 begin
@@ -71,13 +70,12 @@ begin
 
   if result then exit;
 
-  // begin simple: check presence of library file in basedir
-  if (NOT result) then result:=SearchLibrary(Basepath,LibName1);
-  if (NOT result) then result:=SearchLibrary(Basepath,LibName2);
-
-  // first search local paths based on libbraries provided for or adviced by fpc itself
-  if (NOT result) then result:=SimpleSearchLibrary(BasePath,DirName,LibName1);
-  if (NOT result) then result:=SimpleSearchLibrary(BasePath,DirName,LibName2);
+  for lc in LibNames do
+  begin
+    if (NOT result) then result:=SearchLibrary(Basepath,lc);
+    if (NOT result) then result:=SimpleSearchLibrary(BasePath,DirName,lc);
+    if result then break;
+  end;
 
   if (NOT result) then
   begin
@@ -95,13 +93,14 @@ begin
   if result then
   begin
     FLibsFound:=true;
-    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
-    //todo: implement -Xr for other platforms if this setup works
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-      //AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath));
     AddFPCCFGSnippet('-k--allow-shlib-undefined');
     AddFPCCFGSnippet('-k--allow-multiple-definition');
+    // AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath));
+    // -XR does not always work !!
+    // So use a direct linker command !!
+    AddFPCCFGSnippet('-k--library-path='+IncludeTrailingPathDelimiter(FLibsPath)); // help the linker in finding the correct libs
     AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
   end;
 end;

@@ -3,7 +3,7 @@ object Form2: TForm2
   Height = 762
   Top = 157
   Width = 842
-  Caption = 'Advanced settings'
+  Caption = 'Advanced Settings'
   ClientHeight = 762
   ClientWidth = 842
   OnClose = FormClose

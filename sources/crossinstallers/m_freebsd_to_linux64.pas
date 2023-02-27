@@ -145,7 +145,7 @@ begin
   inherited Destroy;
 end;
 
-{$IFDEF FREEBSD}
+{$if defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
 var
   FreeBSD_Linux64:TFreeBSD_Linux64;
 
@@ -155,6 +155,6 @@ initialization
 
 finalization
   FreeBSD_Linux64.Destroy;
-{$ENDIF FREEBSD}
+{$endif}
 end.
 

@@ -1,5 +1,5 @@
 {"version":1,"strings":[
-{"hash":140918771,"name":"tform2.caption","sourcebytes":[65,100,118,97,110,99,101,100,32,115,101,116,116,105,110,103,115],"value":"Advanced settings"},
+{"hash":140918259,"name":"tform2.caption","sourcebytes":[65,100,118,97,110,99,101,100,32,83,101,116,116,105,110,103,115],"value":"Advanced Settings"},
 {"hash":97867267,"name":"tform2.groupbox1.caption","sourcebytes":[80,114,111,120,121,32,115,101,116,116,105,110,103,115],"value":"Proxy settings"},
 {"hash":110268426,"name":"tform2.label1.caption","sourcebytes":[72,84,84,80,32,112,114,111,120,121,32,85,82,76,58],"value":"HTTP proxy URL:"},
 {"hash":151389722,"name":"tform2.label2.caption","sourcebytes":[72,84,84,80,32,112,114,111,120,121,32,112,111,114,116,58],"value":"HTTP proxy port:"},
