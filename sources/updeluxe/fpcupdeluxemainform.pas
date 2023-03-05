@@ -264,6 +264,7 @@ type
     function GetCmdFontName: String;
     procedure SetCmdFontName(aValue: String);
     procedure ParseRevisions(IniDirectory:string);
+    procedure AddRevision(TargetFPC,TargetLAZ:boolean;aHash:string;aDate:TDateTime);
     {$ifdef EnableLanguages}
     procedure Translate(const Language: string);
     {$endif}
@@ -4197,6 +4198,7 @@ function TForm1.RealRun:boolean;
 var
   s:string;
   aLazarusVersion:word;
+  crossing:boolean;
   {$ifdef RemoteLog}
   aRecordNumber:PtrUInt;
   {$endif}
@@ -4208,6 +4210,8 @@ begin
     if (MessageDlgEx(upSpaceWarning+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
       exit;
   end;
+
+  crossing:=((FPCupManager.CrossCPU_Target<>TCPU.cpuNone) AND (FPCupManager.CrossOS_Target<>TOS.osNone));
 
   StatusMessage.Text:=sStatus;
 
@@ -4223,7 +4227,6 @@ begin
   FPCupManager.FPCOpt:=FPCupManager.FPCOpt+' -Fl/usr/local/lib -Fl/usr/pkg/lib';
   FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib -Fl/usr/pkg/lib -Fl/usr/X11R7/lib';
   {$endif}
-
 
   if AnsiEndsText(GITLABEXTENSION,FPCTarget) then
   begin
@@ -4248,39 +4251,42 @@ begin
     if (Pos('github.com/ultibohub/LazarusIDE',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='ultibo';
   end;
 
-  // branch and revision overrides from setup+
-  s:=Form2.FPCRevision;
-  if Length(s)>0 then FPCupManager.FPCDesiredRevision:=s;
-  s:=Form2.FPCBranch;
-  if Length(s)>0 then FPCupManager.FPCBranch:=s;
-
-  s:=Form2.LazarusRevision;
-  if Length(s)>0 then FPCupManager.LazarusDesiredRevision:=s;
-  s:=Form2.LazarusBranch;
-  if Length(s)>0 then FPCupManager.LazarusBranch:=s;
-
-  // overrides for old versions of Lazarus
-  aLazarusVersion:=CalculateNumericalVersion(LazarusTarget);
-  if (aLazarusVersion<>0) AND (aLazarusVersion<CalculateFullVersion(1,0,0)) then
+  if (NOT crossing) then
   begin
-    s:=FPCupManager.OnlyModules;
-    if (Length(s)>0) then
+    // branch and revision overrides from setup+
+    s:=Form2.FPCRevision;
+    if Length(s)>0 then FPCupManager.FPCDesiredRevision:=s;
+    s:=Form2.FPCBranch;
+    if Length(s)>0 then FPCupManager.FPCBranch:=s;
+
+    s:=Form2.LazarusRevision;
+    if Length(s)>0 then FPCupManager.LazarusDesiredRevision:=s;
+    s:=Form2.LazarusBranch;
+    if Length(s)>0 then FPCupManager.LazarusBranch:=s;
+
+    // overrides for old versions of Lazarus
+    aLazarusVersion:=CalculateNumericalVersion(LazarusTarget);
+    if (aLazarusVersion<>0) AND (aLazarusVersion<CalculateFullVersion(1,0,0)) then
     begin
-      if Pos(_LAZARUSSIMPLE,s)=0 then s:=StringReplace(s,_LAZARUS,_LAZARUSSIMPLE,[]);
-      {$ifdef mswindows}
-      {$ifdef win32}
-      s:=StringReplace(s,_FPC+_CROSSWIN,'',[]);
-      s:=StringReplace(s,_LAZARUS+_CROSSWIN,'',[]);
-      {$endif}
-      {$endif}
-      FPCupManager.OnlyModules:=s;
-    end
-    else
-    begin
-      FPCupManager.OnlyModules:=_FPC+','+_LAZARUSSIMPLE;
+      s:=FPCupManager.OnlyModules;
+      if (Length(s)>0) then
+      begin
+        if Pos(_LAZARUSSIMPLE,s)=0 then s:=StringReplace(s,_LAZARUS,_LAZARUSSIMPLE,[]);
+        {$ifdef mswindows}
+        {$ifdef win32}
+        s:=StringReplace(s,_FPC+_CROSSWIN,'',[]);
+        s:=StringReplace(s,_LAZARUS+_CROSSWIN,'',[]);
+        {$endif}
+        {$endif}
+        FPCupManager.OnlyModules:=s;
+      end
+      else
+      begin
+        FPCupManager.OnlyModules:=_FPC+','+_LAZARUSSIMPLE;
+      end;
+      AddMessage('Detected a very old version of Lazarus !');
+      AddMessage('Switching towards old lazarus sequence !!');
     end;
-    AddMessage('Detected a very old version of Lazarus !');
-    AddMessage('Switching towards old lazarus sequence !!');
   end;
 
   AddMessage('');
@@ -4309,7 +4315,6 @@ begin
   {$ifdef RemoteLog}
   aDataClient.UpInfo.FPCVersion:=FPCTarget;
   aDataClient.UpInfo.LazarusVersion:=LazarusTarget;
-
   aDataClient.UpInfo.UpInstallDir:=FPCupManager.BaseDirectory;
   {$endif}
 
@@ -4391,6 +4396,11 @@ begin
       LazarusVersionLabel.Font.Color:=clLime;
       StatusMessage.Text:='That went well !!!';
 
+      s:=FPCupManager.FPCDesiredRevision;
+      if Length(s)>0 then AddRevision(True,False,s,Now);
+      s:=FPCupManager.LazarusDesiredRevision;
+      if Length(s)>0 then AddRevision(False,True,s,Now);
+
       {$ifdef RemoteLog}
       aDataClient.UpInfo.LogEntry:='Success !';
       aRecordNumber:=aDataClient.SendData;
@@ -4400,7 +4410,6 @@ begin
         //AddMessage('');
       end;
       {$endif}
-
     end;
 
     memoSummary.Lines.Append(BeginSnippet+' Done !!');
@@ -5088,6 +5097,42 @@ begin
 
   end;
 
+end;
+
+procedure TForm1.AddRevision(TargetFPC,TargetLAZ:boolean;aHash:string;aDate:TDateTime);
+type
+  TTarget             = (FPC,LAZARUS);
+var
+  aTarget             : TTarget;
+  hash                : string;
+  AItem               : TListItem;
+  TargetViewArray     : array[TTarget] of TListView;
+begin
+  TargetViewArray[TTarget.FPC]:=ListBoxFPCHistory;
+  TargetViewArray[TTarget.Lazarus]:=ListBoxLazarusHistory;
+  if TargetFPC then aTarget:=TTarget.FPC;
+  if TargetLAZ then aTarget:=TTarget.LAZARUS;
+  TargetViewArray[aTarget].Items.BeginUpdate;
+  try
+    hash:=aHash;
+    if ( (Length(hash)>0) AND (hash<>'failure') AND (hash<>'unknown') ) then
+    begin
+      AItem:=TargetViewArray[aTarget].FindCaption(0,hash,false,true,false);
+      if (aItem=nil) then aItem:=TargetViewArray[aTarget].Items.Add;
+      with aItem do
+      begin
+        Caption:=hash;
+        if (SubItems.Count=0) then
+          SubItems.Add(DateTimeToStr(aDate))
+        else
+          SubItems[0]:=DateTimeToStr(aDate);
+      end;
+    end;
+    if aTarget=TTarget.FPC then BitBtnFPCSetRevision.Enabled:=(TargetViewArray[aTarget].Items.Count>0);
+    if aTarget=TTarget.LAZARUS then BitBtnLazarusSetRevision.Enabled:=(TargetViewArray[aTarget].Items.Count>0);
+  finally
+    TargetViewArray[aTarget].Items.EndUpdate;
+  end;
 end;
 
 procedure TForm1.CheckForUpdates(Data: PtrInt);
