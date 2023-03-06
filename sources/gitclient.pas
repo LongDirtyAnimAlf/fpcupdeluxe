@@ -691,6 +691,15 @@ begin
 
       if (FLocalRevision = FRET_UNKNOWN_REVISION) then
       begin
+        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['log','-1','--pretty=format:%h'],LocalRepository, Output, '', Verbose);
+        if (FReturnCode = 0) then
+        begin
+          FLocalRevision := trim(Output);
+        end
+      end;
+
+      if (FLocalRevision = FRET_UNKNOWN_REVISION) then
+      begin
         FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--long','--always'],LocalRepository, Output, '', Verbose);
         if (FReturnCode = 0) then
         begin
@@ -798,13 +807,10 @@ var
   i,j:integer;
 begin
   result:='';
-
   if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
-
   if (Length(DesiredRevision)=0) OR (Uppercase(trim(DesiredRevision)) = 'HEAD') then exit;
-
   Output:='';
   i:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['log','--all','--grep=@'+DesiredRevision,'--pretty=oneline'],LocalRepository, Output, '', Verbose);
   if (i=0) then

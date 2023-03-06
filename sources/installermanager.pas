@@ -2582,25 +2582,9 @@ begin
         localinfotext:=Installer.ActualRevision;
         if (Length(localinfotext)>0) then
         begin
-          if (Installer is TFPCNativeInstaller) then
-          begin
-            FParent.FPCDesiredRevision:=localinfotext;
-          end;
-          if (Installer is TLazarusNativeInstaller) then
-          begin
-            FParent.LazarusDesiredRevision:=localinfotext;
-          end;
+          if (Installer is TFPCNativeInstaller) then FParent.FPCDesiredRevision:=localinfotext;
+          if (Installer is TLazarusNativeInstaller) then FParent.LazarusDesiredRevision:=localinfotext;
         end;
-        (*
-        if (SequenceName=_FPC) then
-        begin
-          FParent.FPCDesiredRevision:=Installer.ActualRevision;
-        end;
-        if (SequenceName=_LAZARUS) then
-        begin
-          FParent.LazarusDesiredRevision:=Installer.ActualRevision;
-        end;
-        *)
       end;
       FInstaller.Destroy;
       FInstaller:=nil;

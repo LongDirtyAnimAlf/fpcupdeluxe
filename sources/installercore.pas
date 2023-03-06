@@ -1924,9 +1924,9 @@ begin
         end;
       end
       else
-      // A short githash is 7
+      // A short githash is 7 or 10
       // A long githash is 40
-      if ((ReturnCode=7) OR (ReturnCode=40)) then
+      if ((ReturnCode=7) OR (ReturnCode=10) OR (ReturnCode=40)) then
       begin
         aClient.DesiredTag := '';
         aClient.DesiredBranch := FDesiredRevision;
