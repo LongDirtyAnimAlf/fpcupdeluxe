@@ -9,7 +9,7 @@ sudo apk add gtk+2.0
 sudo apk add binutils gcc musl-dev make git 7zip
 
 sudo ln -s /usr/lib/libX11.so.6 /usr/lib/libX11.so
-sudo ln -s /usr/lib/libgdk-pixbuf-2.0.so.0 /usr/lib/libgdk_pixbuf-2.0.so
+sudo ln -s /usr/lib/libgdk_pixbuf-2.0.so.0 /usr/lib/libgdk_pixbuf-2.0.so
 sudo ln -s /usr/lib/libgdk-x11-2.0.so.0 /usr/lib/libgdk-x11-2.0.so
 sudo ln -s /usr/lib/libpango-1.0.so.0 /usr/lib/libpango-1.0.so
 sudo ln -s /usr/lib/libgtk-x11-2.0.so.0 /usr/lib/libgtk-x11-2.0.so

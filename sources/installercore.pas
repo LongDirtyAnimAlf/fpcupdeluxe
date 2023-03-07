@@ -1280,6 +1280,9 @@ begin
       {$ENDIF}
       OperationSucceeded:=GetFile(FPCUPTOOLS+'/'+Output,F7zip);
       if OperationSucceeded then OperationSucceeded:=FileExists(F7zip);
+      {$IFNDEF MSWINDOWS}
+      if OperationSucceeded then fpChmod(F7zip,&755);
+      {$ENDIF MSWINDOWS}
       if (NOT OperationSucceeded) then F7zip:='7za'+GetExeExt;
       // do not fail ... perhaps there is another 7zip available in the path
       OperationSucceeded:=True;

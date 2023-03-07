@@ -1994,6 +1994,7 @@ procedure TForm1.btnBuildNativeCompilerClick(Sender: TObject);
 var
   CPUType:TCPU;
   OSType:TOS;
+  sOS:string;
 begin
   CPUType:=TCPU.cpuNone;
   OSType:=TOS.osNone;
@@ -2011,6 +2012,9 @@ begin
       if (NOT PrepareRun(Sender)) then exit;
       FPCupManager.CrossCPU_Target:=CPUType;
       FPCupManager.CrossOS_Target:=OSType;
+      sOS:=radgrpOS.Items[radgrpOS.ItemIndex];
+      if sOS='linux-musl' then FPCupManager.MUSL:=true;
+      if sOS='solaris-oi' then FPCupManager.SolarisOI:=true;
       FPCupManager.OnlyModules:=_NATIVECROSSFPC;
       sStatus:='Going to build native compiler for '+FPCupManager.CrossCombo_Target;
       RealRun;
@@ -2915,8 +2919,7 @@ begin
     if s='windows' then
     begin
       if FPCupManager.CrossCPU_Target=TCPU.i386 then FPCupManager.CrossOS_Target:=TOS.win32;
-      if FPCupManager.CrossCPU_Target=TCPU.x86_64 then FPCupManager.CrossOS_Target:=TOS.win64;
-      if FPCupManager.CrossCPU_Target=TCPU.aarch64 then FPCupManager.CrossOS_Target:=TOS.win64;
+      if FPCupManager.CrossCPU_Target in [TCPU.x86_64,TCPU.aarch64] then FPCupManager.CrossOS_Target:=TOS.win64;
     end;
 
     if FPCupManager.CrossOS_Target=TOS.osNone then FPCupManager.CrossOS_Target:=GetTOS(s);
