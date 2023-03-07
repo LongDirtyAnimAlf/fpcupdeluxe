@@ -322,7 +322,8 @@ begin
 
     //Make sure our FPC units can be found by Lazarus
     //Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
-    Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCInstallDir));
+    //Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCInstallDir));
+    Processor.Process.Parameters.Add('FPCDIR='+ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
     //Make sure Lazarus does not pick up these tools from other installs
     Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
@@ -417,7 +418,7 @@ begin
     Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
 
     OldPath:=Processor.Environment.GetVar('FPCDIR');
-    Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FFPCSourceDir));
+    Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
     {$IFDEF DEBUG}
     Processor.Process.Parameters.Add('--verbose');
     {$ELSE}
@@ -2565,6 +2566,7 @@ begin
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
   Processor.Process.Parameters.Add('PP='+FCompiler);
   //Processor.Process.Parameters.Add('FPCDIR=' + IncludeTrailingPathDelimiter(Workingdir)+'compiler');
+  //Processor.Process.Parameters.Add('FPCDIR='+ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
   Processor.Process.Parameters.Add('clean');
   Processor.Process.Parameters.Add('all');

@@ -45,6 +45,8 @@ const
 
 type
   TGitClient = class(TRepoClient)
+  private
+    procedure Init;
   protected
     procedure CheckOut(UseForce:boolean=false); override;
     function GetProxyCommand: string;
@@ -268,18 +270,29 @@ begin
 
   if (ReturnCode=AbortedExitCode) then exit;
 
-  // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
-  RetryAttempt := 1;
-  if (FReturnCode <> 0) then
+  if (FReturnCode<>0) then
   begin
-    // if we have a proxy, set it now !
-    if Length(GetProxyCommand)>0 then TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, Verbose);
-    while (FReturnCode <> 0) and (RetryAttempt < ERRORMAXRETRIES) do
+    // If command fails, e.g. due to SSL verify error, retry with SSL-verify disabled
+    // Message: "SSL certificate problem: self signed certificate in certificate chain"
+    if (Pos('SSL certificate problem',Output)>0) then
     begin
-      Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose); //attempt again
-      if (ReturnCode=AbortedExitCode) then exit;
-      RetryAttempt := RetryAttempt + 1;
+      Init;
+    end
+    else
+    begin
+      RetryAttempt := 1;
+      // if we have a proxy, set it now !
+      if (RetryAttempt=1) then
+      begin
+        if Length(GetProxyCommand)>0 then TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, Verbose);
+      end;
+      while (FReturnCode <> 0) and (RetryAttempt < ERRORMAXRETRIES) do
+      begin
+        Sleep(500); //Give everybody a chance to relax ;)
+        FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose); //attempt again
+        if (ReturnCode=AbortedExitCode) then exit;
+        Inc(RetryAttempt);
+      end;
     end;
   end;
 end;
@@ -357,10 +370,6 @@ procedure TGitClient.Update;
 var
   Command: string;
   Output: string = '';
-  Tags: string = '';
-  aCurrentTag,aCurrentBranch:string;
-  aNewTag,aNewBranch:string;
-  i:integer;
 begin
   FReturnCode := 0;
   if ExportOnly then exit;
@@ -369,39 +378,27 @@ begin
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
 
-  {
-  //FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['tag'], LocalRepository, Tags, '', Verbose);
-  FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['show','--no-color','--oneline','-s'], LocalRepository, Output, '', Verbose);
-  //FReturnCode := TInstaller(Parent).ExecuteCommand(FRepoExecutable,['show','--no-color','--oneline','-s',LocalRepository], Output, Verbose);
-  //RunCommandInDir(LocalRepository,FRepoExecutable,['show','--no-color','--oneline','-s'], Output,FReturnCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-  if FReturnCode = 0 then
+  // Check if we have a remote
+  FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' remote -v', LocalRepository, Output, Verbose);
+  if (FReturnCode=0) then
   begin
-    i:=Pos('tag: ',Output);
-    if (i>0) then
+    if (Length(Trim(Output))=0) then
     begin
-      aCurrentTag:=Copy(Output,i+5,MaxInt);
-      i:=Pos(')',aCurrentTag);
-      if (i>0) then
-      begin
-        SetLength(aCurrentTag,i-1);
-      end;
+      // No remote: do an init.
+      // This should never happen, but anyhow.
+      Init;
+      exit;
     end;
   end;
-  }
 
   Command:='';
 
   if ((Length(Command)=0) AND (Length(DesiredTag)>0)) then
   begin
-    Command := ' describe --tags --abbrev=0';
-    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-    Command:='';
+    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' describe --tags --abbrev=0', LocalRepository, Output, Verbose);
     if FReturnCode = 0 then
     begin
-      if (DesiredTag<>Trim(Output)) then
-        Command := ' checkout --force '+DesiredTag
-      else
-        Command := ' pull';
+      if (DesiredTag<>Trim(Output)) then Command := ' checkout --force '+DesiredTag;
     end;
   end;
 
@@ -411,68 +408,65 @@ begin
     if (Length(DesiredRevision)>0) AND (Uppercase(trim(DesiredRevision)) <> 'HEAD') then DesiredBranch := DesiredRevision;
     if (Length(DesiredBranch)>0) then
     begin
-      Command := ' rev-parse --abbrev-ref HEAD';
-      //Command := ' symbolic-ref --short HEAD';
-      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-      Command:='';
-      if FReturnCode = 0 then
+      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' rev-parse --abbrev-ref HEAD', LocalRepository, Output, Verbose);
+      if (FReturnCode<>0) then FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' branch --show-current', LocalRepository, Output, Verbose);
+      if (FReturnCode=0) then
       begin
-        if (DesiredBranch<>Trim(Output)) then
-          Command := ' checkout --force '+DesiredBranch
-        else
-          Command := ' pull';
+        if (DesiredBranch<>Trim(Output)) then Command := ' checkout --force '+DesiredBranch;
       end;
-    end;
+    end
   end;
 
-  if (Length(Command)>0) then
+  if (Length(Command)=0) then
   begin
-    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-    FReturnOutput := Output;
-  end
-  else
-  begin
-    Command := ' init';
-    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-    Command := ' remote add origin '+Repository;
-    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+    // Just do a simple pull
     Command := ' pull';
-    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-    Command := ' fetch --tags';
-    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-
-    //Command := ' pull --all --recurse-submodules=yes';
-    //FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-    //FReturnOutput := Output;
-
-    //if (FReturnCode = 0) then
-    begin
-      Command:='';
-      if (Length(DesiredTag)>0) then Command := DesiredTag;
-      if (Length(DesiredBranch)>0) then Command := DesiredBranch;
-      if (Length(Command)=0) then
-      begin
-        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['log','--branches','-1','--pretty=format:"%H"'],LocalRepository, Output, '', Verbose);
-        if (FReturnCode = 0) then Command:=Trim(Output);
-      end;
-      Command:=' checkout --force ' + Command;
-      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-      FReturnOutput := Output;
-    end;
-
-    {
-    if (FReturnCode = 0){ and (Length(DesiredRevision)>0) and (uppercase(trim(DesiredRevision)) <> 'HEAD')}
-    then
-    begin
-      //SSL Certificate problem
-      //git config --system http.sslCAPath /absolute/path/to/git/certificates
-      // always reset hard towards desired revision
-      Command := ' reset --hard ' + DesiredRevision;
-      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Verbose);
-    end;
-    }
   end;
 
+  FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
+  FReturnOutput := Output;
+end;
+
+procedure TGitClient.Init;
+var
+  Command       : string;
+  Output        : string = '';
+  RunOnlyTwice  : boolean;
+begin
+  FReturnCode := 0;
+  if ExportOnly then exit;
+  if NOT ValidClient then exit;
+
+  // Invalidate our revision number cache
+  FLocalRevision := FRET_UNKNOWN_REVISION;
+
+  ForceDirectoriesSafe(LocalRepository);
+
+  Command := ' init --quiet';
+  FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
+  Command := ' remote add origin '+Repository;
+  FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
+
+  for RunOnlyTwice in boolean do
+  begin
+    Command := ' fetch --tags --quiet';
+    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
+    if (FReturnCode=0) then break;
+    if (NOT RunOnlyTwice) then
+    begin
+      // If command fails, e.g. due to SSL verify error, retry with SSL-verify disabled
+      // Message: "SSL certificate problem: self signed certificate in certificate chain"
+      if (Pos('SSL certificate problem',Output)>0) then
+      begin
+        // Disable SSL verification
+        Command := ' config --local http.sslVerify false';
+        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
+      end;
+    end;
+  end;
+
+  Command := ' pull origin HEAD';
+  FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
 end;
 
 procedure TGitClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
@@ -852,5 +846,7 @@ begin
     result:=Output;
   end;
 end;
+
+
 
 end.
