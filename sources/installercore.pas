@@ -669,6 +669,9 @@ implementation
 
 uses
   StrUtils,
+  {$IFDEF UNIX}
+  BaseUnix,
+  {$ENDIF UNIX}
   {$ifdef LCL}
   //For messaging to MainForm: no writeln
   Forms,
@@ -1280,9 +1283,9 @@ begin
       {$ENDIF}
       OperationSucceeded:=GetFile(FPCUPTOOLS+'/'+Output,F7zip);
       if OperationSucceeded then OperationSucceeded:=FileExists(F7zip);
-      {$IFNDEF MSWINDOWS}
+      {$IFDEF UNIX}
       if OperationSucceeded then fpChmod(F7zip,&755);
-      {$ENDIF MSWINDOWS}
+      {$ENDIF UNIX}
       if (NOT OperationSucceeded) then F7zip:='7za'+GetExeExt;
       // do not fail ... perhaps there is another 7zip available in the path
       OperationSucceeded:=True;

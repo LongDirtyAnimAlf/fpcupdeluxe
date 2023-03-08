@@ -302,6 +302,8 @@ begin
   result:=TOS.osNone;
   if length(aOS)>0 then
   begin
+    if (Pos('windows',aOS)>0) then xOS:=TOS.win32
+    else
     if (Pos('linux',aOS)>0) then xOS:=TOS.linux
     else
     if (Pos('solaris',aOS)>0) then xOS:=TOS.solaris

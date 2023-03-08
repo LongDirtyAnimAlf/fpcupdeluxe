@@ -2682,6 +2682,13 @@ begin
 end;
 
 function TForm1.ButtonProcessCrossCompiler(Sender: TObject):boolean;
+procedure ShowInfo(info:string);
+begin
+  if (NOT Assigned(Sender)) then
+    memoSummary.Lines.Append(info)
+  else
+    ShowMessage(info);
+end;
 var
   BinsFileName,LibsFileName,BaseBinsURL,BaseLibsURL,BinPath,LibPath:string;
   ToolTargetPath,ToolTargetFile,UnZipper,s:string;
@@ -2704,226 +2711,117 @@ begin
   end;
   {$endif}
 
-  if (radgrpCPU.ItemIndex=-1) and (radgrpOS.ItemIndex=-1) then
+  FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
+  if (radgrpCPU.ItemIndex<>-1) then
+    FPCupManager.CrossCPU_Target:=GetTCPU(radgrpCPU.Items[radgrpCPU.ItemIndex]);
+
+  FPCupManager.CrossOS_Target:=TOS.osNone;
+  if (radgrpOS.ItemIndex<>-1) then
+    FPCupManager.CrossOS_Target:=GetTOS(radgrpOS.Items[radgrpOS.ItemIndex]);
+
+  if ((FPCupManager.CrossOS_Target=TOS.win32) AND (FPCupManager.CrossCPU_Target in [TCPU.x86_64,TCPU.aarch64])) then FPCupManager.CrossOS_Target:=TOS.win64;
+  if ((FPCupManager.CrossOS_Target=TOS.win32) AND (FPCupManager.CrossCPU_Target in [TCPU.cpuNone])) then FPCupManager.CrossCPU_Target:=TCPU.i386;
+  if (FPCupManager.CrossOS_Target=TOS.msdos) then FPCupManager.CrossCPU_Target:=TCPU.i8086;
+  //For i8086 embedded and win16 are also ok, but not [yet] implemented by fpcupdeluxe
+  if (FPCupManager.CrossCPU_Target=TCPU.i8086) then FPCupManager.CrossOS_Target:=TOS.msdos;
+  if (FPCupManager.CrossOS_Target=TOS.go32v2) then FPCupManager.CrossCPU_Target:=TCPU.i386;
+  //if (FPCupManager.CrossOS_Target=TOS.dragonfly) then FPCupManager.CrossCPU_Target:=TCPU.x86_64;
+  //if (FPCupManager.CrossOS_Target=TOS.java) then FPCupManager.CrossCPU_Target:=TCPU.jvm;
+
+  if (FPCupManager.CrossCPU_Target=TCPU.cpuNone) AND (FPCupManager.CrossOS_Target=TOS.osNone) then
   begin
-    if (Sender<>nil) then ShowMessage('Please select a CPU and OS target first');
+    ShowInfo('Please select a CPU and OS target first.');
     exit;
   end;
 
-  // the below three checks are just temporary and rough
-  // we should use the array OSCPUSupported : array[TOS,TCpu] of boolean
+  if (FPCupManager.CrossOS_Target=TOS.embedded) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.avr,TCPU.arm,TCPU.aarch64,TCPU.mipsel,TCPU.wasm32]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for embedded.');
+      exit;
+    end;
+  end;
 
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
+  if (FPCupManager.CrossOS_Target=TOS.freertos) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.xtensa,TCPU.arm]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for FreeRTOS.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossOS_Target=TOS.ultibo) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.aarch64,TCPU.arm]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for Ultibo.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossOS_Target=TOS.android) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.i386,TCPU.arm,TCPU.mipsel,TCPU.jvm,TCPU.aarch64,TCPU.x86_64]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for android.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossOS_Target=TOS.dragonfly) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.x86_64]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for dragonfly.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossOS_Target=TOS.wasi) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.wasm32]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for WebAssembly.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossCPU_Target=TCPU.jvm) then
+  begin
+    success:=(FPCupManager.CrossOS_Target in [TOS.android,TOS.java]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid OS target for jvm.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossCPU_Target=TCPU.wasm32) then
+  begin
+    success:=(FPCupManager.CrossOS_Target in [TOS.wasi,TOS.embedded]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid OS target for WebAssembly.');
+      exit;
+    end;
+  end;
+
+  if (radgrpOS.ItemIndex<>-1) then
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s=GetOS(TOS.embedded) then
-    begin
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>GetCPU(TCPU.mipsel))  and (s<>GetCPU(TCPU.wasm32)) then
-        begin
-          success:=false;
-        end;
-      end else success:=false;
-    end;
+    if s='linux-musl' then FPCupManager.MUSL:=true;
+    if s='solaris-oi' then FPCupManager.SolarisOI:=true;
   end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for embedded.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s=GetOS(TOS.freertos) then
-    begin
-      success:=false;
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s=GetCPU(TCPU.xtensa)) OR (s=GetCPU(TCPU.arm)) then
-          success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for FreeRTOS.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s=GetOS(TOS.ultibo) then
-    begin
-      success:=false;
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s=GetCPU(TCPU.arm)) OR (s=GetCPU(TCPU.aarch64)) then
-          success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for Ultibo.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s=GetOS(TOS.android) then
-    begin
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.i386)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.mipsel)) and (s<>GetCPU(TCPU.jvm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>'x8664') and (s<>GetCPU(TCPU.x86_64)) then
-        begin
-          success:=false;
-        end;
-      end else success:=false;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for android.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpCPU.ItemIndex<>-1 then
-  begin
-    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-    if s='jvm' then
-    begin
-      success:=false;
-      if radgrpOS.ItemIndex<>-1 then
-      begin
-        s:=radgrpOS.Items[radgrpOS.ItemIndex];
-        if (s=GetOS(TOS.android)) OR (s=GetOS(TOS.java)) then success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid OS target for jvm.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s='dragonfly' then
-    begin
-      success:=false;
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s=GetCPU(TCPU.x86_64)) then success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for dragonfly.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s=GetOS(TOS.wasi) then
-    begin
-      success:=false;
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s=GetCPU(TCPU.wasm32)) then
-          success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for WebAssembly.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpCPU.ItemIndex<>-1 then
-  begin
-    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-    if s=GetCPU(TCPU.wasm32) then
-    begin
-      success:=false;
-      if radgrpOS.ItemIndex<>-1 then
-      begin
-        s:=radgrpOS.Items[radgrpOS.ItemIndex];
-        if ((s=GetOS(TOS.wasi)) OR (s=GetOS(TOS.embedded))) then success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid OS target for WebAssembly.');
-    exit;
-  end;
-
-  // OS=amiga) AND (CPU<>m68k))
-  // OS=morphos) AND (CPU<>powerpc))
 
   if (NOT PrepareRun(Sender)) then exit;
-
-  if radgrpCPU.ItemIndex<>-1 then
-  begin
-    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-    FPCupManager.CrossCPU_Target:=GETTCPU(s);
-  end;
-
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s='i-sim' then FPCupManager.CrossOS_Target:=TOS.iphonesim;
-    if s='linux-musl' then
-    begin
-      FPCupManager.MUSL:=true;
-      FPCupManager.CrossOS_Target:=TOS.linux;
-    end;
-
-    if s='solaris-oi' then
-    begin
-      FPCupManager.SolarisOI:=true;
-      FPCupManager.CrossOS_Target:=TOS.solaris;
-    end;
-
-    //rename windows target os to the correct FPC target os
-    if s='windows' then
-    begin
-      if FPCupManager.CrossCPU_Target=TCPU.i386 then FPCupManager.CrossOS_Target:=TOS.win32;
-      if FPCupManager.CrossCPU_Target in [TCPU.x86_64,TCPU.aarch64] then FPCupManager.CrossOS_Target:=TOS.win64;
-    end;
-
-    if FPCupManager.CrossOS_Target=TOS.osNone then FPCupManager.CrossOS_Target:=GetTOS(s);
-  end;
 
   {$ifdef Linux}
   if FPCupManager.MUSL then
@@ -2962,13 +2860,6 @@ begin
 
   end;
   {$endif}
-
-  if (FPCupManager.CrossOS_Target=TOS.java) then FPCupManager.CrossCPU_Target:=TCPU.jvm;
-  if (FPCupManager.CrossOS_Target=TOS.msdos) then FPCupManager.CrossCPU_Target:=TCPU.i8086;
-  //For i8086 embedded and win16 are also ok, but not [yet] implemented by fpcupdeluxe
-  if (FPCupManager.CrossCPU_Target=TCPU.i8086) then FPCupManager.CrossOS_Target:=TOS.msdos;
-  if (FPCupManager.CrossOS_Target=TOS.go32v2) then FPCupManager.CrossCPU_Target:=TCPU.i386;
-  if (FPCupManager.CrossOS_Target=TOS.dragonfly) then FPCupManager.CrossCPU_Target:=TCPU.x86_64;
 
   if (FPCupManager.CrossCPU_Target=TCPU.cpuNone) then
   begin
