@@ -2481,7 +2481,7 @@ begin
   end;
   {$endif UNIX}
 
-  if (NOT Assigned(CrossInstaller)) then
+  if (NOT (Self is TFPCCrossInstaller)) then
   begin
     result:=ConcatPaths([aDir,GetFPCTarget(True)]);
     exit;
@@ -4872,10 +4872,7 @@ begin
 
       // Delete all installed units
       // Alf: is it still needed: todo check
-      if CrossCompiling then
-        aPath:=GetUnitsInstallDirectory(false)
-      else
-        aPath:=ConcatPaths([InstallDirectory,'units']);
+      aPath:=GetUnitsInstallDirectory(false);
       if DirectoryExists(aPath) then
       begin
         // Only allow unit directories inside our own install te be deleted

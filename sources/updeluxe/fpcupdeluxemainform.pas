@@ -2711,6 +2711,8 @@ begin
   end;
   {$endif}
 
+  if (NOT PrepareRun(nil)) then exit;
+
   FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
   if (radgrpCPU.ItemIndex<>-1) then
     FPCupManager.CrossCPU_Target:=GetTCPU(radgrpCPU.Items[radgrpCPU.ItemIndex]);
@@ -2820,8 +2822,6 @@ begin
     if s='linux-musl' then FPCupManager.MUSL:=true;
     if s='solaris-oi' then FPCupManager.SolarisOI:=true;
   end;
-
-  if (NOT PrepareRun(Sender)) then exit;
 
   {$ifdef Linux}
   if FPCupManager.MUSL then
@@ -3920,24 +3920,27 @@ var
 begin
   result:=false;
 
-  s:='';
-  if (Sender<>BitBtnLazarusOnly) AND AnsiEndsText('.svn',FPCTarget) then
+  if Assigned(Sender) then
   begin
-    s:='You have selected a FPC source from SVN';
-  end;
-  if (Sender<>BitBtnFPCOnly) AND AnsiEndsText('.svn',LazarusTarget) then
-  begin
+    s:='';
+    if (Sender<>BitBtnLazarusOnly) AND AnsiEndsText('.svn',FPCTarget) then
+    begin
+      s:='You have selected a FPC source from SVN';
+    end;
+    if (Sender<>BitBtnFPCOnly) AND AnsiEndsText('.svn',LazarusTarget) then
+    begin
+      if (Length(s)>0) then
+        s:=s+' and y'
+      else
+        s:='Y';
+      s:=s+'ou have selected a Lazarus source from SVN';
+    end;
     if (Length(s)>0) then
-      s:=s+' and y'
-    else
-      s:='Y';
-    s:=s+'ou have selected a Lazarus source from SVN';
-  end;
-  if (Length(s)>0) then
-  begin
-    s:=s+'.'+LineEnding+'Please select another source: SVN is no longer available.';
-    Application.MessageBox(PChar(s), PChar('SVN source error'), MB_ICONSTOP);
-    exit;
+    begin
+      s:=s+'.'+LineEnding+'Please select another source: SVN is no longer available.';
+      Application.MessageBox(PChar(s), PChar('SVN source error'), MB_ICONSTOP);
+      exit;
+    end;
   end;
 
   FPCVersionLabel.Font.Color:=clDefault;
