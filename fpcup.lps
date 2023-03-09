@@ -9,10 +9,9 @@
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="37"/>
-        <CursorPos X="25" Y="47"/>
-        <UsageCount Value="34"/>
+        <CursorPos X="82" Y="38"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit0>
     </Units>
