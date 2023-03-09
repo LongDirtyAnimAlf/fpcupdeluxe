@@ -1127,8 +1127,8 @@ procedure TFPCupManager.GetCrossToolsPath(out BinPath,LibPath:string);
 begin
   // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
   // Normally, we have the standard names for libs and bins paths
-  LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(CrossCPU_Target)])+'-';
-  BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'bin',GetCPU(CrossCPU_Target)])+'-';
+  LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSLIBPATH),GetCPU(CrossCPU_Target)])+'-';
+  BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSBINPATH),GetCPU(CrossCPU_Target)])+'-';
 
   if MUSL then
   begin

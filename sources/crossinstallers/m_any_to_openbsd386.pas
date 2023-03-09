@@ -80,7 +80,7 @@ begin
   if (NOT result) then
   begin
     // OpenBSD uses versioned libc, so also use a wildcard search
-    sd:=ConcatPaths([BasePath,CROSSPATH,'lib',DirName]);
+    sd:=ConcatPaths([BasePath,CROSSLIBPATH,DirName]);
     lc:=FindFileInDirWildCard('libc.so*',sd);
     if FileExists(lc) then
     begin

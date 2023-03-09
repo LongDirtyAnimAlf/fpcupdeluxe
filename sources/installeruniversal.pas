@@ -3050,7 +3050,7 @@ begin
             if (idx<>-1) then
             begin
               Infoln(localinfotext+'Setting correct path in '+ExtractFileName(aFile)+'.',etInfo);
-              aList.Strings[idx]:='set CROSS='+ConcatPaths([BaseDirectory,'cross']);
+              aList.Strings[idx]:='set CROSS='+ConcatPaths([BaseDirectory,CROSSDIRNAME]);
               aList.SaveToFile(aFile);
             end;
             aList.Clear;

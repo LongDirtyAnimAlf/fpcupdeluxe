@@ -3116,16 +3116,12 @@ begin
 
       // handle inclusion of LCL when cross-compiling
       IncludeLCL:=Form2.IncludeLCL;
-      if (FPCupManager.CrossOS_Target=TOS.java) then IncludeLCL:=false;
-      if (FPCupManager.CrossOS_Target=TOS.android) then IncludeLCL:=false;
-      if (FPCupManager.CrossOS_Target=TOS.ios) then IncludeLCL:=false;
-      if (FPCupManager.CrossOS_Target=TOS.embedded) then IncludeLCL:=false;
-      if (FPCupManager.CrossOS_Target=TOS.freertos) then IncludeLCL:=false;
+      if (NOT (FPCupManager.CrossOS_Target in LCL_OS)) then IncludeLCL:=false;
 
       if IncludeLCL then
       begin
         FPCupManager.OnlyModules:=FPCupManager.OnlyModules+','+_LCL;
-        if ((FPCupManager.CrossOS_Target=TOS.win32) OR (FPCupManager.CrossOS_Target=TOS.win64)) then
+        if (FPCupManager.CrossOS_Target in [TOS.win32,TOS.win64]) then
            FPCupManager.LCL_Platform:='win32'
         else
         if (FPCupManager.CrossOS_Target=TOS.wince) then
@@ -3142,7 +3138,7 @@ begin
           {$endif}
         end
         else
-        if ((FPCupManager.CrossOS_Target=TOS.amiga) OR (FPCupManager.CrossOS_Target=TOS.aros) OR (FPCupManager.CrossOS_Target=TOS.morphos)) then
+        if (FPCupManager.CrossOS_Target in [TOS.amiga,TOS.aros,TOS.morphos]) then
            FPCupManager.LCL_Platform:='mui'
         else
         begin

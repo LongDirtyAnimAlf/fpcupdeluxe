@@ -4997,7 +4997,7 @@ begin
         for i:=0 to (FilesList.Count-1) do
         begin
           aSF:=FilesList[i];
-          aDP:=ConcatPaths([ConcatPaths([BaseDirectory,{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(TCPU.arm)+'-'+GetOS(TOS.ultibo),'armv6']),ExtractRelativePath(IncludeTrailingPathDelimiter(s),ExtractFilePath(aSF))]);
+          aDP:=ConcatPaths([ConcatPaths([BaseDirectory,{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSLIBPATH),GetCPU(TCPU.arm)+'-'+GetOS(TOS.ultibo),'armv6']),ExtractRelativePath(IncludeTrailingPathDelimiter(s),ExtractFilePath(aSF))]);
           ForceDirectoriesSafe(aDP);
           MoveFile(aSF,IncludeTrailingPathDelimiter(aDP)+ExtractFileName(aSF));
         end;
@@ -5008,7 +5008,7 @@ begin
         for i:=0 to (FilesList.Count-1) do
         begin
           aSF:=FilesList[i];
-          aDP:=ConcatPaths([ConcatPaths([BaseDirectory,{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(TCPU.arm)+'-'+GetOS(TOS.ultibo),'armv7a']),ExtractRelativePath(IncludeTrailingPathDelimiter(s),ExtractFilePath(aSF))]);
+          aDP:=ConcatPaths([ConcatPaths([BaseDirectory,{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSLIBPATH),GetCPU(TCPU.arm)+'-'+GetOS(TOS.ultibo),'armv7a']),ExtractRelativePath(IncludeTrailingPathDelimiter(s),ExtractFilePath(aSF))]);
           ForceDirectoriesSafe(aDP);
           MoveFile(aSF,IncludeTrailingPathDelimiter(aDP)+ExtractFileName(aSF));
         end;
@@ -5019,7 +5019,7 @@ begin
         for i:=0 to (FilesList.Count-1) do
         begin
           aSF:=FilesList[i];
-          aDP:=ConcatPaths([ConcatPaths([BaseDirectory,{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSPATH),'lib',GetCPU(TCPU.aarch64)+'-'+GetOS(TOS.ultibo),'armv8']),ExtractRelativePath(IncludeTrailingPathDelimiter(s),ExtractFilePath(aSF))]);
+          aDP:=ConcatPaths([ConcatPaths([BaseDirectory,{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSLIBPATH),GetCPU(TCPU.aarch64)+'-'+GetOS(TOS.ultibo),'armv8']),ExtractRelativePath(IncludeTrailingPathDelimiter(s),ExtractFilePath(aSF))]);
           ForceDirectoriesSafe(aDP);
           MoveFile(aSF,IncludeTrailingPathDelimiter(aDP)+ExtractFileName(aSF));
         end;

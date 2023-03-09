@@ -376,7 +376,7 @@ begin
   if (not result) then
   begin
     // do a brute force search of correct binutils
-    PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
+    PresetBinPath:=ConcatPaths([BasePath,CROSSBINPATH,TargetCPUName+'-'+TargetOSName]);
     if DirectoryExists(PresetBinPath) then
     begin
       for DarwinRelease:=MAXDARWINVERSION downto MINDARWINVERSION do
@@ -395,7 +395,7 @@ begin
         end;
       end;
     end;
-    PresetBinPath:=ConcatPaths([BasePath,CROSSPATH,'bin','all-'+TargetOSName]);
+    PresetBinPath:=ConcatPaths([BasePath,CROSSBINPATH,'all-'+TargetOSName]);
     if DirectoryExists(PresetBinPath) then
     begin
       for DarwinRelease:=MAXDARWINVERSION downto MINDARWINVERSION do

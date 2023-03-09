@@ -61,9 +61,11 @@ const
   {$endif}
   DEFAULTARMCPU  = 'ARMV7A';
 
-  CROSSPATH      = 'cross';
-  CROSSBINPATH   = CROSSPATH+DirectorySeparator+'bin';
-  CROSSLIBPATH   = CROSSPATH+DirectorySeparator+'lib';
+  CROSSDIRNAME      = 'cross';
+  CROSSLIBDIRNAME   = 'lib';
+  CROSSBINDIRNAME   = 'bin';
+  CROSSLIBPATH      = CROSSDIRNAME+DirectorySeparator+CROSSLIBDIRNAME;
+  CROSSBINPATH      = CROSSDIRNAME+DirectorySeparator+CROSSBINDIRNAME;
 
   LIBCFILENAME   = 'libc.so';
   LDFILENAME     = 'ld';
@@ -81,6 +83,7 @@ type
   TABIS     = set of TABI;
 
 const
+  LCL_OS             = [TOS.win32,TOS.win64,TOS.linux,TOS.darwin,TOS.freebsd,TOS.openbsd,TOS.aix,TOS.wince,TOS.haiku,TOS.solaris,TOS.dragonfly,TOS.netbsd,TOS.morphos,TOS.aros,TOS.amiga];
   SUBARCH_OS         = [TOS.embedded,TOS.freertos,TOS.ultibo];
   SUBARCH_CPU        = [TCPU.arm,TCPU.aarch64,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.riscv64,TCPU.xtensa]; //for Ultibo added TCPU.aarch64
   SUBARCH_ARM        = [TSUBARCH.armv4..TSUBARCH.armv7m];
@@ -171,7 +174,7 @@ type
     {$ifndef FPCONLY}
     // In your descendent, implement this function when needed: you can download libraries or check for their existence for Lazarus LCL cross compile libs:
     // Note: the libraries should be presumably under the basepath using the Lazarus naming convention??
-    function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual;
+    function GetLibsLCL({%H-}LCL_Platform:string; {%H-}Basepath:string):boolean;virtual;
     {$endif}
     procedure AddFPCCFGSnippet(aSnip: string);
     procedure ReplaceFPCCFGSnippet(aOldSnip,aNewSnip: string);
@@ -577,7 +580,7 @@ begin
 
   aPath:=FLibsPath.Split(DirectorySeparator);
 
-  // Perform Subarch magic for libpath
+  // Perform Subarch magic for CROSSLIBDIRNAME
   if (FSubArch<>TSUBARCH.saNone) then
   begin
     aIndex:=StringsSame(aPath,SubArchName);
@@ -588,7 +591,7 @@ begin
     end;
   end;
 
-  // Perform ABI magic for libpath
+  // Perform ABI magic for CROSSLIBDIRNAME
   aIndex:=StringsSame(aPath,RegisterName);
   if (aIndex<>-1) then
   begin
@@ -693,23 +696,23 @@ begin
   // first search local paths based on libraries provided for or adviced by fpc itself
   sd:=IncludeTrailingPathDelimiter(BasePath);
   if LibsOrBins
-     then sd:=sd+'lib'
-     else sd:=sd+'bin';
+     then sd:=sd+CROSSLIBDIRNAME
+     else sd:=sd+CROSSBINDIRNAME;
   if Length(DirName)>0 then sd:=sd+DirectorySeparator+DirName;
   sd:=SafeExpandFileName(sd);
   result:=SearchUtil(sd, LookFor, LibsOrBins);
   if ((NOT result) AND (NOT LibsOrBins)) then
   begin
-    sd:=sd+DirectorySeparator+'bin';
+    sd:=sd+DirectorySeparator+CROSSBINDIRNAME;
     result:=SearchUtil(sd, LookFor, LibsOrBins);
   end;
 
   if not result then
   begin
-    sd:=IncludeTrailingPathDelimiter(BasePath)+CROSSPATH+DirectorySeparator;
+    sd:=IncludeTrailingPathDelimiter(BasePath)+CROSSDIRNAME+DirectorySeparator;
     if LibsOrBins
-       then sd:=sd+'lib'
-       else sd:=sd+'bin';
+       then sd:=sd+CROSSLIBDIRNAME
+       else sd:=sd+CROSSBINDIRNAME;
     if Length(DirName)>0 then sd:=sd+DirectorySeparator+DirName;
     sd:=SafeExpandFileName(sd);
     result:=SearchUtil(sd, LookFor, LibsOrBins);
@@ -722,16 +725,16 @@ begin
 
   if not result then
   begin
-    sd:=SafeGetApplicationPath+CROSSPATH+DirectorySeparator;
+    sd:=SafeGetApplicationPath+CROSSDIRNAME+DirectorySeparator;
     if LibsOrBins
-       then sd:=sd+'lib'
-       else sd:=sd+'bin';
+       then sd:=sd+CROSSLIBDIRNAME
+       else sd:=sd+CROSSBINDIRNAME;
     if (Length(DirName)>0) then sd:=sd+DirectorySeparator+DirName;
     sd:=SafeExpandFileName(sd);
     result:=SearchUtil(sd, LookFor, LibsOrBins);
     if ((NOT result) AND (NOT LibsOrBins)) then
     begin
-      sd:=sd+DirectorySeparator+'bin';
+      sd:=sd+DirectorySeparator+CROSSBINDIRNAME;
       result:=SearchUtil(sd, LookFor, LibsOrBins);
     end;
   end;
@@ -740,8 +743,8 @@ begin
   if (SearchModeUsed=TSearchSetting.ssAuto) then
   begin
     if LibsOrBins
-       then sd:='lib'
-       else sd:='bin';
+       then sd:=CROSSLIBDIRNAME
+       else sd:=CROSSBINDIRNAME;
 
     if not result then
       if Length(DirName)>0 then result:=SearchUtil('/usr/local/'+sd+'/'+DirName,
@@ -898,7 +901,6 @@ var
   OS:TOS;
   SUBARCH:TSUBARCH;
   Subarchs:TSUBARCHS;
-  s1,s2:string;
   aCrossOptionSetting:string;
   aARMABISetting:TARMARCH;
 begin
@@ -912,17 +914,10 @@ begin
 
       SetSelectedSubArch(CPU,OS,TSUBARCH.saNone);
 
-      s1:=GetCPU(CPU)+'-'+GetOS(OS);
-
       Subarchs:=GetSubarchs(CPU,OS);
 
       for SUBARCH in Subarchs do
       begin
-        if (SUBARCH<>TSUBARCH.saNone) then
-          s2:=s1+'-'+GetSubarch(SUBARCH)
-        else
-          s2:=s1;
-
         CrossUtils[CPU,OS,SUBARCH].Setting:=DEFAULTSEARCHSETTING;
         CrossUtils[CPU,OS,SUBARCH].LibDir:='';
         CrossUtils[CPU,OS,SUBARCH].BinDir:='';

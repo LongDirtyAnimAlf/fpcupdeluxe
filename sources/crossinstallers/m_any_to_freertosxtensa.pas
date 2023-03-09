@@ -196,7 +196,7 @@ begin
           S:='-WP'+S;
           FCrossOpts.Add(S+' ');
           AddFPCCFGSnippet(S);
-          S:=ConcatPaths([BasePath,CROSSPATH,'lib',TargetCPUName+'-'+TargetOSName]);
+          S:=ConcatPaths([BasePath,CROSSLIBPATH,TargetCPUName+'-'+TargetOSName]);
           PresetLibPath:=ConcatPaths([S,SubArchName]);
           if DirectoryExists(PresetLibPath) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(PresetLibPath));
         end;
@@ -309,7 +309,7 @@ begin
     S:=Trim(GetEnvironmentVariable('IDF_PATH'));
     if (Length(S)=0) then
     begin
-      FilePath:=ConcatPaths([BasePath,CROSSPATH,'bin',TargetCPUName+'-'+TargetOSName]);
+      FilePath:=ConcatPaths([BasePath,CROSSBINPATH,TargetCPUName+'-'+TargetOSName]);
       ESPToolFiles:=FindAllFiles(FilePath, 'esptool.py', true);
       FilePath:='';
       try

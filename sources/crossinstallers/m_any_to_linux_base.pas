@@ -178,12 +178,17 @@ end;
 {$ENDIF MULTILIB}
 
 function Tany_linux.GetLibs(Basepath:string): boolean;
+{$IFDEF UNIX}
 const
   SDSTARTMAGIC='SEARCH_DIR("=';
   SDENDMAGIC='");';
+{$ENDIF UNIX}
 var
-  aDirName,aLibName,s,sd:string;
+  aDirName,aLibName:string;
+  {$IFDEF UNIX}
+  s,sd:string;
   i,j:integer;
+  {$ENDIF UNIX}
 begin
   result:=FLibsFound;
   if result then exit;
@@ -234,6 +239,7 @@ begin
 
   if (NOT result) then
   begin
+    {$IFDEF UNIX}
     {$IFDEF MULTILIB}
     if CheckMultilib then
     begin
@@ -278,6 +284,7 @@ begin
       end;
     end;
     {$ENDIF MULTILIB}
+    {$ENDIF UNIX}
 
     {$IFDEF MULTILIB}
     if (NOT CheckMultilib) then
@@ -361,8 +368,10 @@ var
   AsFile: string;
   BinPrefixTry: string;
   aDirName: string;
+  {$IFDEF UNIX}
   s: string;
   i: integer;
+  {$ENDIF UNIX}
 begin
   result:=inherited;
 
