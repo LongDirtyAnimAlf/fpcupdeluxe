@@ -295,6 +295,14 @@ begin
       end;
     end;
   end;
+
+  if (FReturnCode=0) then
+  begin
+    // Disable detached head warning
+    Command := ' config --local advice.detachedHead false';
+    TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Verbose);
+  end;
+
 end;
 
 procedure TGitClient.CheckOutOrUpdate;
@@ -444,6 +452,10 @@ begin
 
   Command := ' init --quiet';
   FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
+  // Disable detached head warning
+  Command := ' config --local advice.detachedHead false';
+  FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
+
   Command := ' remote add origin '+Repository;
   FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
 
