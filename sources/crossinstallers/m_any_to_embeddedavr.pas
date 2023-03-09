@@ -165,9 +165,11 @@ end;
 
 function TAny_Embeddedavr.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile,aOption: string;
+  AsFile: string;
   BinPrefixTry: string;
+  {$ifdef unix}
   i:integer;
+  {$endif unix}
 begin
   result:=inherited;
   if result then exit;

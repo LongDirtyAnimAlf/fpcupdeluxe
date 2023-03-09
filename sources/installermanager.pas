@@ -2583,7 +2583,9 @@ begin
         if (Length(localinfotext)>0) then
         begin
           if (Installer is TFPCNativeInstaller) then FParent.FPCDesiredRevision:=localinfotext;
+          {$ifndef FPCONLY}
           if (Installer is TLazarusNativeInstaller) then FParent.LazarusDesiredRevision:=localinfotext;
+          {$endif}
         end;
       end;
       FInstaller.Destroy;
