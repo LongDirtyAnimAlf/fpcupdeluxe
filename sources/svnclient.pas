@@ -64,9 +64,6 @@ type
     function GetRepoExecutableName: string; override;
     function FindRepoExecutable: string; override;
   public
-    property UserName: string read FUserName write FUserName;
-    property Password: string read FPassword write FPassword;
-
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
     function GetDiffAll: string; override;
@@ -80,6 +77,9 @@ type
     function CheckURL: boolean;
     // Run SVN log command for repository and put results into Log
     procedure Log(var Log: TStringList); override;
+  published
+    property UserName: string read FUserName write FUserName;
+    property Password: string read FPassword write FPassword;
   end;
 
   ESVNClientError = class(ERepoClientError);

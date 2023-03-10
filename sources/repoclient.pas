@@ -109,6 +109,13 @@ type
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); virtual;
     // Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
     procedure Revert; virtual;
+    // Shows list of files that have been modified locally (and not committed)
+    procedure LocalModifications({%H-}var FileList: TStringList); virtual;
+    // Checks to see if local directory is a valid repository for the repository URL given (if any)
+    function LocalRepositoryExists: boolean; virtual;
+    constructor Create(aParent:TObject);
+    destructor Destroy; override;
+  published
     // Get/set desired revision to checkout/pull to (if none given, use HEAD/tip/newest)
     property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
     // Get/set desired branch to checkout/pull
@@ -123,10 +130,6 @@ type
     property HTTPProxyUser: string read FHTTPProxyUser write FHTTPProxyUser;
     // If using http transport, an http proxy can be used. Proxy password (optional)
     property HTTPProxyPassword: string read FHTTPProxyPassword write FHTTPProxyPassword;
-    // Shows list of files that have been modified locally (and not committed)
-    procedure LocalModifications({%H-}var FileList: TStringList); virtual;
-    // Checks to see if local directory is a valid repository for the repository URL given (if any)
-    function LocalRepositoryExists: boolean; virtual;
     // Local directory that has a repository/checkout.
     // When setting, relative paths will be expanded; trailing path delimiters will be removed
     property LocalRepository: string read FLocalRepository write SetLocalRepository;
@@ -147,8 +150,6 @@ type
     property ForceLocal: boolean read FForceLocal write FForceLocal;
     property ValidClient: boolean read GetValidClient;
     property RepoExecutableName: string read GetRepoExecutableName;
-    constructor Create(aParent:TObject);
-    destructor Destroy; override;
   end;
 
   ERepoClientError = class(Exception);

@@ -390,6 +390,27 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
 
+
+  if FMUSL then
+  begin
+    if (not result) then
+    begin
+      BinPrefixTry:=TargetCPUName+'-unknown-linux-musl-';
+      AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
+      result:=SearchBinUtil(BasePath,AsFile);
+      if (not result) then
+        result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+    end;
+    if (not result) then
+    begin
+      BinPrefixTry:=TargetCPUName+'-alpine-linux-musl-';
+      AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
+      result:=SearchBinUtil(BasePath,AsFile);
+      if (not result) then
+        result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+    end;
+  end;
+
   {$IFDEF UNIX}
   // User may also have placed them into their regular search path:
   if (not result) then

@@ -713,29 +713,29 @@ begin
     localCPU:=GetTCPU(GetSourceCPU);
     localOS:=GetTOS(GetSourceOS);
   end;
-  if (aCPU in [TCPU.loongarch64,TCPU.xtensa,TCPU.wasm32]) then SetResult('3.3.1',result);
-  if (aOS in [TOS.freertos,TOS.wasi]) then SetResult('3.3.1',result);
-  if (aOS in [TOS.aix]) then SetResult('3.0.0',result);
-  if (aCPU=TCPU.aarch64) then
+  if (localCPU in [TCPU.loongarch64,TCPU.xtensa,TCPU.wasm32]) then SetResult('3.3.1',result);
+  if (localOS in [TOS.freertos,TOS.wasi]) then SetResult('3.3.1',result);
+  if (localOS in [TOS.aix]) then SetResult('3.0.0',result);
+  if (localCPU=TCPU.aarch64) then
   begin
     SetResult('3.2.0',result);
-    if (aOS in [TOS.darwin,TOS.win64,TOS.embedded,TOS.freebsd]) then SetResult('3.3.1',result);
+    if (localOS in [TOS.darwin,TOS.win64,TOS.embedded,TOS.freebsd]) then SetResult('3.3.1',result);
   end;
-  if (aOS=TOS.haiku) then
+  if (localOS=TOS.haiku) then
   begin
-    if (aCPU=TCPU.i386) then SetResult('3.0.0',result);
-    if (aCPU=TCPU.x86_64) then SetResult('3.2.0',result);
+    if (localCPU=TCPU.i386) then SetResult('3.0.0',result);
+    if (localCPU=TCPU.x86_64) then SetResult('3.2.0',result);
   end;
-  if (aOS=TOS.ios) then
+  if (localOS=TOS.ios) then
   begin
-    if (aCPU in [TCPU.arm,TCPU.aarch64]) then SetResult('3.2.2',result);
+    if (localCPU in [TCPU.arm,TCPU.aarch64]) then SetResult('3.2.2',result);
   end;
-  if (aOS=TOS.android) then
+  if (localOS=TOS.android) then
   begin
-    if (aCPU in [TCPU.x86_64,TCPU.aarch64]) then SetResult('3.2.2',result);
+    if (localCPU in [TCPU.x86_64,TCPU.aarch64]) then SetResult('3.2.2',result);
   end;
   {$IF DEFINED(FPC_ABI_ELFV2)}
-  if (aCPU=TCPU.powerpc64) then SetResult('3.2.0',result);
+  if (localCPU=TCPU.powerpc64) then SetResult('3.2.0',result);
   {$ENDIF}
   {$IFDEF CPUZ80}
   SetResult('3.3.1',result);
@@ -3992,7 +3992,19 @@ begin
             idx:=StringListStartsWith(RevisionStringList,'const RevisionStr');
             if (idx<>-1) then
             begin
-              RevString:=Trim(RevisionStringList.Strings[idx]);
+              RevString:=RevisionStringList.Strings[idx];
+              idx:=Pos('=',RevString);
+              if (idx>0) then
+              begin
+                RevString:=Copy(RevString,idx+1,MaxInt);
+                idx:=Pos(';',RevString);
+                if (idx>0) then
+                begin
+                  Delete(RevString,idx,1);
+                end;
+                RevString:=Trim(RevString);
+              end
+              else RevString:='';
             end;
           end;
 

@@ -60,6 +60,11 @@ end;
 { Tany_linuxloongarch64 }
 
 function Tany_linuxloongarch64.GetLibs(Basepath:string): boolean;
+const
+  LINKER1='ld.so.1';
+  LINKER2='ld-linux-loongarch-lp64d.so.1';
+var
+  DynLinker:string;
 begin
   result:=FLibsFound;
 
@@ -78,7 +83,18 @@ begin
   begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-    AddFPCCFGSnippet('-Xr/usr/lib');
+    DynLinker:='';
+    if FileExists(ConcatPaths([FLibsPath,LINKER1])) then
+    begin
+      AddFPCCFGSnippet('-Xr/lib64');
+      DynLinker:='/lib64/'+LINKER1;
+    end;
+    if FileExists(ConcatPaths([FLibsPath,LINKER2])) then
+    begin
+      AddFPCCFGSnippet('-Xr/usr/lib64');
+      DynLinker:='/usr/lib64/'+LINKER2;
+    end;
+    if (Length(DynLinker)>0) then AddFPCCFGSnippet('-FL'+DynLinker);
   end;
 end;
 
