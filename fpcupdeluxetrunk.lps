@@ -3,18 +3,16 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="12"/>
-    <ManyBuildModesSelection Value="darwinarm64cocoa,linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,freebsdx64"/>
-    <BuildModes Active="linuxmuslx64"/>
-    <Units Count="125">
+    <ManyBuildModesSelection Value="darwinarm64cocoa,linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,freebsdx64,linuxmuslx64"/>
+    <Units Count="126">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="61"/>
-        <CursorPos X="20" Y="70"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="184"/>
+        <CursorPos X="30" Y="193"/>
         <UsageCount Value="45"/>
-        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
@@ -22,6 +20,7 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <CursorPos X="7" Y="12"/>
         <UsageCount Value="45"/>
         <Loaded Value="True"/>
@@ -33,7 +32,7 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="1"/>
         <UsageCount Value="45"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -110,8 +109,8 @@
         <Filename Value="sources\installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="656"/>
-        <CursorPos X="51" Y="690"/>
+        <TopLine Value="499"/>
+        <CursorPos X="28" Y="519"/>
         <UsageCount Value="13"/>
       </Unit13>
       <Unit14>
@@ -751,8 +750,8 @@
         <Filename Value="sources\installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1264"/>
-        <CursorPos X="37" Y="1302"/>
+        <TopLine Value="1923"/>
+        <CursorPos Y="1950"/>
         <UsageCount Value="11"/>
       </Unit97>
       <Unit98>
@@ -774,15 +773,15 @@
         <Filename Value="sources\installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="623"/>
-        <CursorPos X="30" Y="643"/>
+        <TopLine Value="615"/>
+        <CursorPos X="83" Y="617"/>
         <UsageCount Value="11"/>
       </Unit100>
       <Unit101>
         <Filename Value="sources\repoclient.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="125"/>
-        <CursorPos Y="155"/>
+        <TopLine Value="332"/>
+        <CursorPos X="43" Y="345"/>
         <UsageCount Value="11"/>
       </Unit101>
       <Unit102>
@@ -815,8 +814,8 @@
       <Unit106>
         <Filename Value="sources\gitclient.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="35"/>
-        <CursorPos Y="71"/>
+        <TopLine Value="592"/>
+        <CursorPos X="3" Y="594"/>
         <UsageCount Value="10"/>
       </Unit106>
       <Unit107>
@@ -836,8 +835,8 @@
       <Unit109>
         <Filename Value="sources\svnclient.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="31"/>
-        <CursorPos Y="84"/>
+        <TopLine Value="46"/>
+        <CursorPos Y="66"/>
         <UsageCount Value="10"/>
       </Unit109>
       <Unit110>
@@ -928,21 +927,18 @@
       <Unit121>
         <Filename Value="C:\fpcupsystems\trunk\lazarus\components\debuggerintf\ideminilibc.pas"/>
         <UnitName Value="IDEMiniLibC"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="40"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="39"/>
         <CursorPos X="36" Y="72"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit121>
       <Unit122>
         <Filename Value="C:\fpcupsystems\trunk\lazarus\components\debuggerintf\dbgintfpseudoterminal.pas"/>
         <UnitName Value="DbgIntfPseudoTerminal"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="61"/>
         <CursorPos Y="125"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit122>
       <Unit123>
         <Filename Value="C:\fpcupsystems\trunk\fpcsrc\rtl\linux\ostypes.inc"/>
@@ -954,100 +950,25 @@
       <Unit124>
         <Filename Value="C:\fpcupsystems\trunk\lazarus\components\fpdebug\fpdbgdarwinclasses.pas"/>
         <UnitName Value="FpDbgDarwinClasses"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="210"/>
         <CursorPos Y="233"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit124>
+      <Unit125>
+        <Filename Value="sources\installeruniversal.pas"/>
+        <UnitName Value="installerUniversal"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1969"/>
+        <CursorPos X="26" Y="1989"/>
+        <UsageCount Value="10"/>
+      </Unit125>
     </Units>
-    <JumpHistory Count="22" HistoryIndex="21">
+    <JumpHistory Count="1">
       <Position1>
-        <Filename Value="sources\updeluxe\extrasettings.pas"/>
-        <Caret Line="1075" Column="106" TopLine="1067"/>
-      </Position1>
-      <Position2>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="178" Column="37" TopLine="158"/>
-      </Position2>
-      <Position3>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="168" Column="48" TopLine="148"/>
-      </Position3>
-      <Position4>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2687" Column="18" TopLine="2667"/>
-      </Position4>
-      <Position5>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3435" Column="25" TopLine="3402"/>
-      </Position5>
-      <Position6>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3275" Column="35" TopLine="3242"/>
-      </Position6>
-      <Position7>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2689" TopLine="2667"/>
-      </Position7>
-      <Position8>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4879" Column="7" TopLine="4858"/>
-      </Position8>
-      <Position9>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4884" Column="12" TopLine="4858"/>
-      </Position9>
-      <Position10>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4885" Column="25" TopLine="4858"/>
-      </Position10>
-      <Position11>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4947" Column="22" TopLine="4914"/>
-      </Position11>
-      <Position12>
-        <Filename Value="sources\updeluxe\extrasettings.pas"/>
-        <Caret Line="1072" Column="14" TopLine="1067"/>
-      </Position12>
-      <Position13>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4947" Column="22" TopLine="4914"/>
-      </Position13>
-      <Position14>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-      </Position14>
-      <Position15>
-        <Filename Value="sources\updeluxe\extrasettings.pas"/>
-      </Position15>
-      <Position16>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="12" Column="7"/>
-      </Position16>
-      <Position17>
-        <Filename Value="up.lpr"/>
-        <Caret Line="70" Column="20" TopLine="61"/>
-      </Position17>
-      <Position18>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\debuggerintf\ideminilibc.pas"/>
-        <Caret Line="71" Column="10" TopLine="39"/>
-      </Position18>
-      <Position19>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\debuggerintf\ideminilibc.pas"/>
-        <Caret Line="41" Column="30" TopLine="24"/>
-      </Position19>
-      <Position20>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\debuggerintf\ideminilibc.pas"/>
-        <Caret Line="41" Column="30" TopLine="33"/>
-      </Position20>
-      <Position21>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\debuggerintf\ideminilibc.pas"/>
-        <Caret Line="71" Column="52" TopLine="37"/>
-      </Position21>
-      <Position22>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\debuggerintf\dbgintfpseudoterminal.pas"/>
-        <Caret Line="126" Column="36" TopLine="95"/>
-      </Position22>
+      </Position1>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
