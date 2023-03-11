@@ -1783,9 +1783,9 @@ begin
         begin
           // Strange: running needs a .so.1 file .... but linking needs a .so file ...
           s2:=IncludeTrailingPathDelimiter(GDBPath)+LIBQT5;
-          if (NOT FileExists(s2)) then FileUtil.CopyFile(s,s2);
+          if (NOT FileExists(s2)) then FileCopy(s,s2);
           s2:=s2+'.1';
-          if (NOT FileExists(s2)) then FileUtil.CopyFile(s,s2);
+          if (NOT FileExists(s2)) then FileCopy(s,s2);
         end;
       end;
       {$ENDIF LCLQT5}
@@ -2027,7 +2027,7 @@ begin
     begin
       LHelpTemp:=GetTempFileNameExt('','');
       try
-        CopyFile(
+        FileCopy(
           IncludeTrailingPathDelimiter(InstallDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,
           LHelpTemp,[cffOverWriteFile]);
       except
@@ -2194,7 +2194,7 @@ begin
   if LHelpTemp<>'' then
   begin
     try
-      CopyFile(
+      FileCopy(
         LHelpTemp,
         IncludeTrailingPathDelimiter(InstallDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,
         [cffOverWriteFile]);
@@ -2213,19 +2213,19 @@ begin
     s:=ConcatPaths([InstallDirectory,'lazbuild']);
     if FileExists(s+GetExeExt) then
     begin
-      FileUtil.CopyFile(s+GetExeExt,s+'.old'+GetExeExt);
+      FileCopy(s+GetExeExt,s+'.old'+GetExeExt);
       SysUtils.DeleteFile(s+GetExeExt);
     end;
     s:=ConcatPaths([InstallDirectory,'lazarus']);
     if FileExists(s+GetExeExt) then
     begin
-      FileUtil.CopyFile(s+GetExeExt,s+'.old'+GetExeExt);
+      FileCopy(s+GetExeExt,s+'.old'+GetExeExt);
       SysUtils.DeleteFile(s+GetExeExt);
     end;
     s:=ConcatPaths([InstallDirectory,'startlazarus']);
     if FileExists(s+GetExeExt) then
     begin
-      FileUtil.CopyFile(s+GetExeExt,s+'.old'+GetExeExt);
+      FileCopy(s+GetExeExt,s+'.old'+GetExeExt);
       SysUtils.DeleteFile(s+GetExeExt);
     end;
   end;
@@ -2602,9 +2602,9 @@ begin
       if FileExists(FilePath+LIBQT5+'.1') then
       begin
         if (NOT FileExists(s+LIBQT5+'.1')) then
-          FileUtil.CopyFile(FilePath+LIBQT5+'.1',s+LIBQT5+'.1');
+          FileCopy(FilePath+LIBQT5+'.1',s+LIBQT5+'.1');
         if (NOT FileExists(s+LIBQT5)) then
-          FileUtil.CopyFile(FilePath+LIBQT5+'.1',s+LIBQT5);
+          FileCopy(FilePath+LIBQT5+'.1',s+LIBQT5);
       end;
     end;
     {$endif}
@@ -2618,9 +2618,9 @@ begin
         if FileExists(FilePath+LIBQT5+'.1') then
         begin
           if (NOT FileExists(s+LIBQT5+'.1')) then
-            FileUtil.CopyFile(FilePath+LIBQT5+'.1',s+LIBQT5+'.1');
+            FileCopy(FilePath+LIBQT5+'.1',s+LIBQT5+'.1');
           if (NOT FileExists(s+LIBQT5)) then
-            FileUtil.CopyFile(FilePath+LIBQT5+'.1',s+LIBQT5);
+            FileCopy(FilePath+LIBQT5+'.1',s+LIBQT5);
         end;
       end;
     end;
@@ -2635,11 +2635,11 @@ begin
       if FileExists(FilePath+LIBQT5+s) then
       begin
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s)) then
-          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s);
+          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s);
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+'.1')) then
-          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+'.1');
+          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+'.1');
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
-          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
+          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
       end;
 
       //The below can be trivial, but just in case
@@ -2647,17 +2647,17 @@ begin
       if FileExists(FilePath+LIBQT5+s) then
       begin
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s)) then
-          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s);
+          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s);
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
-          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
+          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
       end;
       s:='';
       if FileExists(FilePath+LIBQT5+s) then
       begin
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s)) then
-          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s);
+          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s);
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
-          FileUtil.CopyFile(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
+          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
       end;
     end;
 
@@ -2704,15 +2704,17 @@ begin
     *)
 
     {$ifdef BSD}
-    FilePath:=IncludeTrailingPathDelimiter(SourceDirectory)+'ide/include/';
-    if (NOT DirectoryExists(FilePath+'dragonfly')) then
+    FilePath:=ConcatPaths([SourceDirectory,'ide','include'])+DirectorySeparator;
+    if (DirectoryExists(FilePath+'netbsd')) then
     begin
-      if DirCopy(FilePath+'netbsd',FilePath+'dragonfly')
-        then Infoln(infotext+'Adding dragonfly include file for IDE.',etInfo)
-        else Infoln(infotext+'Adding dragonfly include file for IDE failure.',etError);
+      if (NOT DirectoryExists(FilePath+'dragonfly')) then
+      begin
+        if DirCopy(FilePath+'netbsd',FilePath+'dragonfly')
+          then Infoln(infotext+'Adding dragonfly include file for IDE.',etInfo)
+          else Infoln(infotext+'Adding dragonfly include file for IDE failure.',etError);
+      end;
     end;
     {$endif}
-
   end
   else
   begin

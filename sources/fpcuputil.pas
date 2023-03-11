@@ -60,6 +60,8 @@ uses
   {$ENDIF}
   {$endif USEONLYCURL}
   //fpftpclient,
+  FileUtil,
+  LazFileUtils,
   eventlog;
 
 Const
@@ -249,6 +251,8 @@ procedure DeleteDesktopShortcut(ShortcutName: string);
 function FindFileInDirList(Filename, DirectoryList: String): String;
 function FindFileInDir(Filename, Path: String): String;
 function FindFileInDirWildCard(Filename, Path: String): String;
+// Copy a file the safe way
+function FileCopy(const Src, Dest: string;Flags: TCopyFileFlags=[cffOverwriteFile]):boolean;
 // Copy a directory recursive
 function DirCopy(SourcePath, DestPath: String): Boolean;
 function CheckDirectory(DirectoryName: string):boolean;
@@ -300,6 +304,7 @@ function FixPath(const s:string):string;
 function FileIsReadOnly(const s:string):boolean;
 function MaybeQuoted(const s:string):string;
 function MaybeQuotedSpacesOnly(const s:string):string;
+function UnQuote(const s:string):string;
 function OccurrencesOfChar(const ContentString: string; const CharToCount: char): integer;
 // Like ExpandFilename but does not expand an empty string to current directory
 function SafeExpandFileName (Const FileName : String): String;
@@ -401,8 +406,6 @@ uses
   ftplist,
   {$ENDIF}
   {$endif}
-  FileUtil,
-  LazFileUtils,
   {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30000)}
   fpwebclient,
   fphttpwebclient,
@@ -436,7 +439,7 @@ uses
   ,bzip2stream
   ,DCPdes
   ,DCPsha256
-  ,NumCPULib  in './numcpulib/NumCPULib.pas'
+  ,NumCPULib  in '../numcpulib/NumCPULib.pas'
   {$IFDEF USEMORMOT}
   ,mormot.net.client
   ,mormot.core.buffers
@@ -968,7 +971,7 @@ begin
     begin
       BackupFileName:=ChangeFileExt(filename,'.bak');
       while FileExists(BackupFileName) do BackupFileName := BackupFileName + 'k';
-      FileUtil.CopyFile(filename,BackupFileName);
+      FileCopy(filename,BackupFileName);
       if SysUtils.DeleteFile(filename) then
       begin
         ms.Position:=0;
@@ -1103,20 +1106,20 @@ begin
       aDirectory:=ConcatPaths(['usr','share','applications']);
       if ( (FpGeteuid=0) AND DirectoryExists(aDirectory) ) then
       begin
-        FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile),[]);
+        FileCopy(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile),[]);
       end
       else
       begin
         // Create shortcut directly on User-Desktop
         aDirectory:=ConcatPaths([GetUserDir,'Desktop']);
         if DirectoryExists(aDirectory) then
-           FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile),[]);
+           FileCopy(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile),[]);
         // Create user menu item
         if (NOT OperationSucceeded) then
         begin
           aDirectory:=ConcatPaths([GetUserDir,'.local','share','applications']);
           if DirectoryExists(aDirectory) then
-            FileUtil.CopyFile(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile),[]);
+            FileCopy(XdgDesktopFile,aDirectory+DirectorySeparator+ExtractFileName(XdgDesktopFile),[]);
         end;
       end;
     end;
@@ -1601,6 +1604,53 @@ begin
     end;
   finally
     FilesFound.Free;
+  end;
+end;
+
+function FileCopy(const Src,Dest : string;Flags: TCopyFileFlags):boolean;
+Var
+  D : String;
+  Fin,FOut : TFileStream;
+  Count : Int64;
+  A : Integer;
+{$ifdef UNIX}
+  FileStat: stat;
+{$endif UNIX}
+begin
+  result:=false;
+  D:=IncludeTrailingPathDelimiter(Dest);
+  if DirectoryExists(D) then
+  begin
+    D:=D+ExtractFileName(Src);
+  end
+  else
+  begin
+    D:=Dest;
+  end;
+  if (NOT (cffOverwriteFile in Flags)) and FileExists(D) then exit;
+  {$ifdef DARWIN}
+  { First delete file on Darwin OS to avoid codesign issues }
+  if FileExists(D) then SysUtils.DeleteFile(D);
+  {$endif DARWIN}
+  FIn:=TFileStream.Create(Src,fmopenRead or fmShareDenyNone);
+  try
+    FOut:=TFileStream.Create(D,fmCreate or fmShareDenyNone);
+    try
+      Count:=Fout.CopyFrom(FIn,0);
+      result:=(Count=Fin.Size);
+      if (NOT result) then exit;
+    finally
+      FreeAndNil(Fout);
+    end;
+    A:=FileGetDate(FIn.Handle);
+    If (A<>-1) then FileSetDate(D,A);
+{$ifdef UNIX}
+    // Copy the file-access rights on Unix, especially the executable-bit
+    filestat:=Default(stat);
+    if (FpStat(Src,FileStat)=0) then FpChmod(D,FileStat.st_mode);
+{$endif UNIX}
+  finally
+    FreeAndNil(Fin);
   end;
 end;
 
@@ -2613,7 +2663,7 @@ begin
   try
     if FileExists(SrcFileName) then
     begin
-      if FileUtil.CopyFile(SrcFilename, DestFileName) then SysUtils.DeleteFile(SrcFileName);
+      if FileCopy(SrcFilename, DestFileName) then SysUtils.DeleteFile(SrcFileName);
       result:=true;
     end
     else
@@ -2733,6 +2783,23 @@ begin
     result:='"'+s+'"'
   else
     result:=s;
+end;
+
+function UnQuote(const s:string):string;
+const
+  QUOTE_CHARS = ['@', '#', '$', '%', '^', '&', '*', '''', '`', '~', '"'];
+var
+  sl:word;
+begin
+  result := s;
+  sl:=length(result);
+  if (sl>1) then
+  begin
+     if ((result[1] in QUOTE_CHARS) AND (result[sl] in QUOTE_CHARS)) then
+     begin
+       result:=Copy(result,2,sl-2);
+     end;
+  end;
 end;
 
 function StringsStartsWith(const SearchIn:array of string; SearchFor:string; StartIndex:integer; CS:boolean): integer;

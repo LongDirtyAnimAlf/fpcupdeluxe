@@ -1115,7 +1115,7 @@ begin
               s1:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl']);
               s2:=IncludeTrailingPathDelimiter(s1)+'System.class';
               s1:=IncludeTrailingPathDelimiter(s1)+'system.class';
-              if (NOT FileExists(s1)) then FileUtil.CopyFile(s2,s1);
+              if (NOT FileExists(s1)) then FileCopy(s2,s1);
             end;
             {$endif}
 
@@ -1229,7 +1229,7 @@ begin
                 if FileExists(s1) then
                 begin
                   Infoln(infotext+'Copy [cross-]compiler ('+ExtractFileName(s1)+') into: '+ExtractFilePath(s2),etInfo);
-                  FileUtil.CopyFile(s1,s2);
+                  FileCopy(s1,s2);
                   fpChmod(s2,&755);
                 end;
               end;
@@ -1577,7 +1577,7 @@ begin
                   // copy over / rename the cross-compiler towards the FPC bin-directory, with the right compilername.
                   Infoln(infotext+'Copy cross-compiler ('+s1+') into: '+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath),etInfo);
                   s1:=FFPCCompilerBinPath+CrossCompilerName;
-                  //FileUtil.CopyFile(s2,s1);
+                  //FileCopy(s2,s1);
                   SysUtils.DeleteFile(s1);
                   SysUtils.RenameFile(s2,s1);
                   fpChmod(s1,&755);
@@ -1669,7 +1669,7 @@ begin
                 // copy over / rename the cross-compiler towards the FPC bin-directory, with the right compilername.
                 Infoln(infotext+'Copy cross-compiler ('+s1+') into: '+FBinPath,etInfo);
                 s1:=ConcatPaths([FBinPath,CrossCompilerName]);
-                //FileUtil.CopyFile(s2,s1);
+                //FileCopy(s2,s1);
                 SysUtils.DeleteFile(s1);
                 SysUtils.RenameFile(s2,s1);
                 fpChmod(s1,&755);
@@ -1747,7 +1747,7 @@ begin
                       s2:=s2+'gdb'+GetExeExt;
                       fpSymlink(pchar(s1),pchar(s2));
                       {$else}
-                      FileUtil.CopyFile(s1,s2+'gdb'+GetExeExt);
+                      FileCopy(s1,s2+'gdb'+GetExeExt);
                       {$endif}
                     end;
                   end;
@@ -1920,9 +1920,9 @@ begin
     ForceDirectoriesSafe(FFPCCompilerBinPath);
     s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'utils'+DirectorySeparator+'tply';
     s1:=FFPCCompilerBinPath+YYLEX;
-    if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYLEX,s1);
+    if (NOT FileExists(s1)) then FileCopy(s2+DirectorySeparator+YYLEX,s1);
     s1:=FFPCCompilerBinPath+YYPARSE;
-    if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYPARSE,s1);
+    if (NOT FileExists(s1)) then FileCopy(s2+DirectorySeparator+YYPARSE,s1);
 
     {$IFDEF UNIX}
     s1:=ConcatPaths([InstallDirectory,'lib','fpc',SourceVersionStr]);
@@ -1935,9 +1935,9 @@ begin
 
     s1:=IncludeTrailingPathDelimiter(SourceDirectory)+'utils'+DirectorySeparator+'tply';
     s3:=s2+DirectorySeparator+YYLEX;
-    if (NOT FileExists(s3)) then FileUtil.CopyFile(s1+DirectorySeparator+YYLEX,s3);
+    if (NOT FileExists(s3)) then FileCopy(s1+DirectorySeparator+YYLEX,s3);
     s3:=s2+DirectorySeparator+YYPARSE;
-    if (NOT FileExists(s3)) then FileUtil.CopyFile(s1+DirectorySeparator+YYPARSE,s3);
+    if (NOT FileExists(s3)) then FileCopy(s1+DirectorySeparator+YYPARSE,s3);
     {$ENDIF UNIX}
   end;
 
@@ -2270,7 +2270,7 @@ begin
         for FileCounter:=low(FUtilFiles) to high(FUtilFiles) do
         begin
           if FUtilFiles[FileCounter].Category=ucBinutil then
-            FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[FileCounter].FileName,
+            FileCopy(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[FileCounter].FileName,
               FFPCCompilerBinPath+FUtilFiles[FileCounter].FileName);
         end;
         // Also, we can change the make/binutils path to our new environment
@@ -3040,7 +3040,7 @@ begin
         // Give the bootstrapper its correct name
         if FileExists(BootstrapFilePath) then
         begin
-          //FileUtil.CopyFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
+          //FileCopy(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
           SysUtils.DeleteFile(BootstrapFileArchiveDir+CompilerName);
           SysUtils.RenameFile(BootstrapFilePath,BootstrapFileArchiveDir+CompilerName);
         end;
@@ -3064,9 +3064,9 @@ begin
         // We might be moving files across partitions so we cannot use renamefile
         // However, this gives errors on Darwin due to the copied file not being signed.
         // So, use rename and fall-over to copy in case of error
-        //OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, FBootstrapCompiler);
+        //OperationSucceeded:=FileCopy(BootstrapFilePath, FBootstrapCompiler);
         OperationSucceeded:=SysUtils.RenameFile(BootstrapFilePath,FBootstrapCompiler);
-        if (NOT OperationSucceeded) then OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, FBootstrapCompiler);
+        if (NOT OperationSucceeded) then OperationSucceeded:=FileCopy(BootstrapFilePath, FBootstrapCompiler);
 
         //Sysutils.DeleteFile(ArchiveDir + CompilerName);
       end else OperationSucceeded:=False;
@@ -3846,7 +3846,7 @@ begin
         if FileExists(s) then Compiler:=s;
         {$else}
         //Copy the compiler to our bootstrap directory
-        if FileExists(s) then FileUtil.CopyFile(s,FCompiler);
+        if FileExists(s) then FileCopy(s,FCompiler);
         {$endif}
         if NOT FileExists(s) then
         begin
@@ -3917,6 +3917,7 @@ begin
     end;
 
     // get the correct binutils (Windows only)
+    {$IFDEF MSWINDOWS}
     if (Pos('/branches/',URL)>0) then
     begin
       CreateBinutilsList(RequiredBootstrapVersion);
@@ -3929,6 +3930,7 @@ begin
         s:=s+'.rc'+InttoStr(x);
       CreateBinutilsList(s);
     end;
+    {$ENDIF MSWINDOWS}
 
     result:=CheckAndGetNeededBinUtils;
 
@@ -3939,13 +3941,13 @@ begin
       if DirectoryExists(FFPCCompilerBinPath) then
       begin
         s:=FFPCCompilerBinPath+'gstrip';
-        if (NOT FileExists(s)) then FileUtil.CopyFile('/usr/bin/strip',s);
+        if (NOT FileExists(s)) then FileCopy('/usr/bin/strip',s);
       end
       else
       begin
         ForceDirectoriesSafe(InstallDirectory);
         s:=IncludeTrailingPathDelimiter(InstallDirectory)+'gstrip';
-        if (NOT FileExists(s)) then FileUtil.CopyFile('/usr/bin/strip',s);
+        if (NOT FileExists(s)) then FileCopy('/usr/bin/strip',s);
       end;
     end;
     {$endif}
@@ -4030,7 +4032,7 @@ begin
       Infoln(infotext+'Copy compiler ('+TargetCompilerName+') into: '+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath),etDebug);
       s:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+TargetCompilerName;
       s2:=FFPCCompilerBinPath+TargetCompilerName;
-      //FileUtil.CopyFile(s,s2);
+      //FileCopy(s,s2);
       SysUtils.DeleteFile(s2);
       SysUtils.RenameFile(s,s2);
       fpChmod(s2,&755);

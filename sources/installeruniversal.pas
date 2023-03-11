@@ -2485,15 +2485,15 @@ begin
 
   {$ifdef Windows}
   versionitis_exe:=Workingdir+DirectorySeparator+'win-versionitis'+GetExeExt;
-  FileUtil.CopyFile(Workingdir+DirectorySeparator+'versionitis'+GetExeExt,versionitis_exe);
+  FileCopy(Workingdir+DirectorySeparator+'versionitis'+GetExeExt,versionitis_exe);
   {$else}
   versionitis_exe:=Workingdir+DirectorySeparator+'versionitis'+GetExeExt;
   {$endif}
 
   // Tricky: copy awgg.lpi to prevent failure of versionitis
   ForceDirectoriesSafe(Workingdir+DirectorySeparator+'src');
-  FileUtil.CopyFile(Workingdir+DirectorySeparator+'awgg.lpi',Workingdir+DirectorySeparator+'src'+DirectorySeparator+'awgg.lpi');
-  FileUtil.CopyFile(Workingdir+DirectorySeparator+'src'+DirectorySeparator+'versionitis.pas',Workingdir+DirectorySeparator+'versionitis.pas');
+  FileCopy(Workingdir+DirectorySeparator+'awgg.lpi',Workingdir+DirectorySeparator+'src'+DirectorySeparator+'awgg.lpi');
+  FileCopy(Workingdir+DirectorySeparator+'src'+DirectorySeparator+'versionitis.pas',Workingdir+DirectorySeparator+'versionitis.pas');
 
   Processor.Process.Parameters.Clear;
   Processor.Executable := versionitis_exe;
@@ -2686,12 +2686,12 @@ begin
     aSourceFile:=ConcatPaths([FLREDir,'src'])+DirectorySeparator+'FLRE.pas';
     aTargetFile:=ConcatPaths([Workingdir,'data'])+DirectorySeparator+'FLRE.pas';
     if FileExists(aSourceFile) then
-      FileUtil.CopyFile(aSourceFile,aTargetFile,[]);
+      FileCopy(aSourceFile,aTargetFile,[]);
 
     aSourceFile:=ConcatPaths([FLREDir,'src'])+DirectorySeparator+'PUCU.pas';
     aTargetFile:=ConcatPaths([Workingdir,'data'])+DirectorySeparator+'PUCU.pas';
     if FileExists(aSourceFile) then
-      FileUtil.CopyFile(aSourceFile,aTargetFile,[]);
+      FileCopy(aSourceFile,aTargetFile,[]);
   end;
 end;
 

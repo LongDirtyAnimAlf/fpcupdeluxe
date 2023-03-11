@@ -441,7 +441,9 @@ type
     FMinorVersion: integer; //minor part of the version number, e.g. 0 for 1.0.8, or -1 if unknown
     FReleaseVersion: integer; //release part of the version number, e.g. 8 for 1.0.8, or -1 if unknown
     FPatchVersion: integer; //release candidate part of the version number, e.g. 3 for 1.0.8_RC3, or -1 if unknown
+    {$IFDEF MSWINDOWS}
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
+    {$ENDIF MSWINDOWS}
     FExportOnly: boolean;
     FNoJobs: boolean;
     FOnlinePatching: boolean;
@@ -466,8 +468,6 @@ type
     function CheckAndGetTools: boolean;
     // Check for existence of required binutils; if not there, get them if possible
     function CheckAndGetNeededBinUtils: boolean;
-    // Make a list (in FUtilFiles) of all binutils that can be downloaded
-    procedure CreateBinutilsList({%H-}aVersion:string='');
     // Get a diff of all modified files in and below the directory and save it
     procedure CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
     // Clone/update using HG; use FSourceDirectory as local repository
@@ -483,6 +483,8 @@ type
     // Clone/update using Git; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     {$IFDEF MSWINDOWS}
+    // Make a list (in FUtilFiles) of all binutils that can be downloaded
+    procedure CreateBinutilsList({%H-}aVersion:string='');
     // Download make.exe, patch.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
     function DownloadSVN: boolean;
@@ -1422,7 +1424,7 @@ begin
                 OperationSucceeded:=FileExists(aFile);
                 //Copy certificate ... might be necessary
                 //aURL:=IncludeTrailingPathDelimiter(FMakeDir)+'git\mingw32\';
-                //if (NOT FileExists(aURL+'bin\curl-ca-bundle.crt')) then FileUtil.CopyFile(aURL+'ssl\certs\ca-bundle.crt',aURL+'bin\curl-ca-bundle.crt');
+                //if (NOT FileExists(aURL+'bin\curl-ca-bundle.crt')) then FileCopy(aURL+'ssl\certs\ca-bundle.crt',aURL+'bin\curl-ca-bundle.crt');
               end;
             end;
             if OperationSucceeded then RepoExecutable:=aFile else RepoExecutable:=RepoExecutableName+GetExeExt;
@@ -1679,129 +1681,6 @@ begin
   localinfotext:=infotext;
 end;
 
-procedure TInstaller.CreateBinutilsList(aVersion:string);
-{$ifdef MSWINDOWS}
-const
-  SourceURL_gdb_default = LAZARUSBINARIES+'/i386-win32/gdb/bin/';
-  SourceURL64_gdb_default = LAZARUSBINARIES+'/x86_64-win64/gdb/bin/';
-  SourceURL_QT = LAZARUSBINARIES+'/i386-win32/qt/';
-  SourceURL_QT5 = LAZARUSBINARIES+'/i386-win32/qt5/';
-{$endif}
-  procedure AddNewUtil(FileName, RootURL, OS: string; Category: TUtilCategory);
-  var
-    i: integer;
-  begin
-    SetLength(FUtilFiles, 2+high(FUtilFiles)-low(FUtilFiles));
-    i:=high(FUtilFiles);
-    FUtilFiles[i].FileName:=FileName;
-    FUtilFiles[i].RootURL:=RootURL;
-    FUtilFiles[i].OS:=OS;
-    FUtilFiles[i].Category:=Category;
-  end;
-{$ifdef MSWINDOWS}
-var
-  aSourceURL:string;
-  {$ifdef win64}
-  aSourceURL64:string;
-  {$endif}
-{$endif}
-begin
-  SetLength(FUtilFiles,0); //clean out any cruft
-
-  {$ifdef MSWINDOWS}
-  //aSourceURL:=FPCTRUNKBINARIES+'/install/binw32/';
-  aSourceURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
-  {$ifdef win64}
-  //aSourceURL64:=FPCBINARIES+'/install/binw64/';
-  aSourceURL64:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw64/';
-  {$endif}
-
-  // Common to both 32 and 64 bit windows (i.e. 32 bit files)
-  AddNewUtil('cpp' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('dlltool' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('fp32.ico',aSourceURL,'',ucBinutil);
-  AddNewUtil('gcc' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('grep' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('patch' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('patch' + GetExeExt + '.manifest',aSourceURL,'',ucBinutil);
-  AddNewUtil('unzip' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('windres' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('windres.h',aSourceURL,'',ucBinutil);
-  AddNewUtil('zip' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('nm' + GetExeExt,aSourceURL,'',ucBinutil);
-
-  // add win32/64 gdb from lazarus
-  AddNewUtil('gdb' + GetExeExt,SourceURL_gdb_default,'',ucDebugger32);
-  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucDebugger64);
-  //AddNewUtil('libiconv-2'+GetLibExt,SourceURL64_gdb_default,'',ucDebugger64);
-
-  {$ifdef win32}
-  AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('as' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('cmp' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('cp' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('diff' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('gdate' + GetExeExt,aSourceURL,'',ucBinutil);
-  // just add default 32 bit debugger for all usercases as a binutil !
-  AddNewUtil('gdb' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('libexpat-1'+GetLibExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('gecho' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('ginstall' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL,'',ucBinutil);
-  AddNewUtil('gmkdir' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('ld' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('make' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('mv' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('objdump' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('pwd' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('rm' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('strip' + GetExeExt,aSourceURL,'',ucBinutil);
-
-  AddNewUtil('Qt4Pas5'+GetLibExt,SourceURL_QT,'',ucQtFile);
-  AddNewUtil('Qt5Pas1'+GetLibExt,SourceURL_QT5,'',ucQtFile);
-
-  // Add special versions for crosss-compiling towards win64
-
-  aSourceURL:=FPCGITLABBINARIES+'/-/raw/main/i386-win32/';
-  AddNewUtil('x86_64-win64-ar' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('x86_64-win64-as' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('x86_64-win64-ld' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('x86_64-win64-nm' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('x86_64-win64-objcopy' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('x86_64-win64-objdump' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('x86_64-win64-strip' + GetExeExt,aSourceURL,'',ucBinutil);
-  {$endif win32}
-
-  {$ifdef win64}
-  AddNewUtil('ar' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('as' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('cmp' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('cp' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('diff' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('gdate' + GetExeExt,aSourceURL64,'',ucBinutil);
-  // just add default 64 bit debugger for all usercases as a binutil !
-  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucBinutil);
-  //AddNewUtil('libiconv-2'+GetLibExt,SourceURL64_gdb_default,'',ucBinutil);
-  AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL64,'',ucBinutil);
-  AddNewUtil('gmkdir' + GetExeExt,aSourceURL64,'',ucBinutil);
-  //AddNewUtil('GoRC' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('ld' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('make' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('mv' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('objdump' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('pwd' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('rm' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('strip' + GetExeExt,aSourceURL64,'',ucBinutil);
-  {$endif win64}
-
-  // add wince gdb
-  AddNewUtil('gdb-6.4-win32-arm-wince.zip',FPCFTPURL+'contrib/cross/','',ucDebuggerWince);
-
-  {$endif MSWINDOWS}
-end;
-
 procedure TInstaller.CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
 var
   DiffFile: Text;
@@ -1930,9 +1809,9 @@ begin
         end;
       end
       else
-      // A short githash is 7 or 10
+      // A short githash is 7 or 8 or 10
       // A long githash is 40
-      if ((ReturnCode=7) OR (ReturnCode=10) OR (ReturnCode=40)) then
+      if ((ReturnCode=7) OR (ReturnCode=8) OR (ReturnCode=10) OR (ReturnCode=40)) then
       begin
         aClient.DesiredTag := '';
         aClient.DesiredBranch := FDesiredRevision;
@@ -2376,6 +2255,122 @@ begin
 end;
 
 {$IFDEF MSWINDOWS}
+procedure TInstaller.CreateBinutilsList(aVersion:string);
+const
+  SourceURL_gdb_default = LAZARUSBINARIES+'/i386-win32/gdb/bin/';
+  SourceURL64_gdb_default = LAZARUSBINARIES+'/x86_64-win64/gdb/bin/';
+  SourceURL_QT = LAZARUSBINARIES+'/i386-win32/qt/';
+  SourceURL_QT5 = LAZARUSBINARIES+'/i386-win32/qt5/';
+  procedure AddNewUtil(FileName, RootURL, OS: string; Category: TUtilCategory);
+  var
+    i: integer;
+  begin
+    SetLength(FUtilFiles, 2+high(FUtilFiles)-low(FUtilFiles));
+    i:=high(FUtilFiles);
+    FUtilFiles[i].FileName:=FileName;
+    FUtilFiles[i].RootURL:=RootURL;
+    FUtilFiles[i].OS:=OS;
+    FUtilFiles[i].Category:=Category;
+  end;
+var
+  aSourceURL:string;
+  {$ifdef win64}
+  aSourceURL64:string;
+  {$endif}
+begin
+  SetLength(FUtilFiles,0); //clean out any cruft
+
+  //aSourceURL:=FPCTRUNKBINARIES+'/install/binw32/';
+  aSourceURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
+  {$ifdef win64}
+  //aSourceURL64:=FPCBINARIES+'/install/binw64/';
+  aSourceURL64:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw64/';
+  {$endif}
+
+  // Common to both 32 and 64 bit windows (i.e. 32 bit files)
+  AddNewUtil('cpp' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('dlltool' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('fp32.ico',aSourceURL,'',ucBinutil);
+  AddNewUtil('gcc' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('grep' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('patch' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('patch' + GetExeExt + '.manifest',aSourceURL,'',ucBinutil);
+  AddNewUtil('unzip' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('windres' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('windres.h',aSourceURL,'',ucBinutil);
+  AddNewUtil('zip' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('nm' + GetExeExt,aSourceURL,'',ucBinutil);
+
+  // add win32/64 gdb from lazarus
+  AddNewUtil('gdb' + GetExeExt,SourceURL_gdb_default,'',ucDebugger32);
+  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucDebugger64);
+  //AddNewUtil('libiconv-2'+GetLibExt,SourceURL64_gdb_default,'',ucDebugger64);
+
+  {$ifdef win32}
+  AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('as' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('cmp' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('cp' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('diff' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('gdate' + GetExeExt,aSourceURL,'',ucBinutil);
+  // just add default 32 bit debugger for all usercases as a binutil !
+  AddNewUtil('gdb' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('libexpat-1'+GetLibExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('gecho' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('ginstall' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL,'',ucBinutil);
+  AddNewUtil('gmkdir' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('ld' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('make' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('mv' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('objdump' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('pwd' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('rm' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('strip' + GetExeExt,aSourceURL,'',ucBinutil);
+
+  AddNewUtil('Qt4Pas5'+GetLibExt,SourceURL_QT,'',ucQtFile);
+  AddNewUtil('Qt5Pas1'+GetLibExt,SourceURL_QT5,'',ucQtFile);
+
+  // Add special versions for crosss-compiling towards win64
+
+  aSourceURL:=FPCGITLABBINARIES+'/-/raw/main/i386-win32/';
+  AddNewUtil('x86_64-win64-ar' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-as' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-ld' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-nm' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-objcopy' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-objdump' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('x86_64-win64-strip' + GetExeExt,aSourceURL,'',ucBinutil);
+  {$endif win32}
+
+  {$ifdef win64}
+  AddNewUtil('ar' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('as' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('cmp' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('cp' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('diff' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('gdate' + GetExeExt,aSourceURL64,'',ucBinutil);
+  // just add default 64 bit debugger for all usercases as a binutil !
+  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucBinutil);
+  //AddNewUtil('libiconv-2'+GetLibExt,SourceURL64_gdb_default,'',ucBinutil);
+  AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL64,'',ucBinutil);
+  AddNewUtil('gmkdir' + GetExeExt,aSourceURL64,'',ucBinutil);
+  //AddNewUtil('GoRC' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('ld' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('make' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('mv' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('objdump' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('pwd' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('rm' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('strip' + GetExeExt,aSourceURL64,'',ucBinutil);
+  {$endif win64}
+
+  // add wince gdb
+  AddNewUtil('gdb-6.4-win32-arm-wince.zip',FPCFTPURL+'contrib/cross/','',ucDebuggerWince);
+end;
+
 function TInstaller.DownloadBinUtils: boolean;
 var
   Counter: integer;
@@ -4007,7 +4002,7 @@ begin
               else RevString:='';
             end;
           end;
-
+          RevString:=UnQuote(RevString);
         end;
       finally
         RevisionStringList.Free;
