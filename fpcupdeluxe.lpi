@@ -395,7 +395,7 @@
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
-            <TargetCPU Value="arm"/>
+            <TargetCPU Value="aarch64"/>
             <TargetOS Value="linux"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
@@ -408,6 +408,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+          </Other>
         </CompilerOptions>
       </Item12>
       <Item13 Name="linuxarm">

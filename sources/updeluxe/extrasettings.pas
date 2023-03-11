@@ -1060,33 +1060,8 @@ begin
       begin
         if CPU=cpuNone then continue;
 
-        // skip non-combi's to reduce size of ini-file
-        if ((OS=morphos) AND (CPU<>powerpc)) then continue;
-        if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java) AND (OS<>android)) then continue;
-        if (OS=ultibo) AND ((CPU<>arm) AND (CPU<>aarch64)) then continue;
-        if (OS=android) AND ((CPU<>arm) AND (CPU<>aarch64) AND (CPU<>jvm) AND (CPU<>mipsel)) then continue;
-        if (OS=iphonesim) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
-        if (OS=wince) AND (CPU<>arm) then continue;
-        if (OS=win32) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
-        if (OS=win64) AND ((CPU<>i386) AND (CPU<>x86_64) AND (CPU<>aarch64)) then continue;
-        if (OS=haiku) AND ((CPU<>i386) AND (CPU<>x86_64) {AND (CPU<>arm)}) then continue;
-        if (OS=solaris) AND ((CPU<>x86_64) AND (CPU<>sparc)) then continue;
-        if (OS=ios) AND ((CPU<>arm) AND (CPU<>aarch64)) then continue;
-        if ((OS=wasi) AND (CPU<>wasm32)) then continue;
-        if ((OS=atari) AND (CPU<>m68k)) then continue;
-
-
-        if (CPU=xtensa) AND ((OS<>linux) AND (OS<>freertos)) then continue;
-        if (CPU=m68k) AND ((OS<>linux) AND (OS<>amiga)) then continue;
-        if (CPU=powerpc) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
-        if (CPU=powerpc64) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
-        if (CPU=mips) AND (OS<>linux) then continue;
-        if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android) AND (OS<>embedded)) then continue;
-        if (CPU=avr) AND (OS<>embedded) then continue;
-        if (CPU=sparc64) AND (OS<>linux) then continue;
-        if ((CPU=riscv32) OR (CPU=riscv64)) AND ((OS<>linux) AND (OS<>embedded)) then continue;
-        if (CPU=wasm32) AND ((OS<>wasi) AND (OS<>embedded)) then continue;
-        if (CPU=loongarch64) AND (OS<>linux) then continue;
+        // skip default non-combi's to reduce size of ini-file
+        if (NOT IsCPUOSComboValid(CPU,OS)) then continue;
 
         s1:=GetCPU(CPU)+'-'+GetOS(OS);
 

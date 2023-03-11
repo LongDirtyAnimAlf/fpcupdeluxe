@@ -128,6 +128,7 @@ type
     //Available:boolean;
   end;
 
+  //TFPCTargetValid = array[TCPU,TOS] of boolean;
   TCrossUtils = array[TCPU,TOS,TSUBARCH] of TCrossUtil;
 
   { TCrossInstaller }
@@ -240,6 +241,7 @@ function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
 function GetABI(aABI:TABI):string;
 function GetTABI(aABI:string):TABI;
 function GetABIs(aCPU:TCPU;aOS:TOS):TABIS;
+function IsCPUOSComboValid(CPU:TCPU;OS:TOS):boolean;
 {$ifdef LCL}
 function  GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
 procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
@@ -249,6 +251,7 @@ procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller)
 function GetExeExt: string;
 
 var
+  //FPCTargetValid:TFPCTargetValid;
   {$ifdef LCL}
   CrossUtils:TCrossUtils;
   SUBARCHStore:array[TCPU,TOS] of TSUBARCH;
@@ -449,6 +452,44 @@ begin
 end;
 {$endif LCL}
 
+function IsCPUOSComboValid(CPU:TCPU;OS:TOS):boolean;
+begin
+  // This is very static.
+  // Might be replaced by a scan of systems.inc, as done by TFPCupManager.CheckValidCPUOS
+
+  result:=false;
+
+  if CPU=cpuNone then exit;
+  if OS=osNone then exit;
+
+  if (OS=morphos) AND (CPU<>powerpc) then exit;
+  if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java) AND (OS<>android)) then exit;
+  if (OS=ultibo) AND ((CPU<>arm) AND (CPU<>aarch64)) then exit;
+  if (OS=android) AND ((CPU<>arm) AND (CPU<>aarch64) AND (CPU<>jvm) AND (CPU<>mipsel)) then exit;
+  if (OS=iphonesim) AND ((CPU<>i386) AND (CPU<>x86_64)) then exit;
+  if (OS=wince) AND (CPU<>arm) then exit;
+  if (OS=win32) AND ((CPU<>i386) AND (CPU<>x86_64)) then exit;
+  if (OS=win64) AND ((CPU<>i386) AND (CPU<>x86_64) AND (CPU<>aarch64)) then exit;
+  if (OS=haiku) AND ((CPU<>i386) AND (CPU<>x86_64) {AND (CPU<>arm)}) then exit;
+  if (OS=solaris) AND ((CPU<>x86_64) AND (CPU<>sparc)) then exit;
+  if (OS=ios) AND ((CPU<>arm) AND (CPU<>aarch64)) then exit;
+  if ((OS=wasi) AND (CPU<>wasm32)) then exit;
+  if ((OS=atari) AND (CPU<>m68k)) then exit;
+
+  if (CPU=xtensa) AND ((OS<>linux) AND (OS<>freertos)) then exit;
+  if (CPU=m68k) AND ((OS<>linux) AND (OS<>amiga)) then exit;
+  if (CPU=powerpc) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then exit;
+  if (CPU=powerpc64) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then exit;
+  if (CPU=mips) AND (OS<>linux) then exit;
+  if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android) AND (OS<>embedded)) then exit;
+  if (CPU=avr) AND (OS<>embedded) then exit;
+  if (CPU=sparc64) AND (OS<>linux) then exit;
+  if ((CPU=riscv32) OR (CPU=riscv64)) AND ((OS<>linux) AND (OS<>embedded)) then exit;
+  if (CPU=wasm32) AND ((OS<>wasi) AND (OS<>embedded)) then exit;
+  if (CPU=loongarch64) AND (OS<>linux) then exit;
+
+  result:=true;
+end;
 
 function GetExeExt: string;
 begin
