@@ -2769,10 +2769,16 @@ begin
   else if s='1.9.6' then result:='1.9.4'
   else if s='1.9.4' then result:='1.9.2'
   else if s='1.9.2' then result:='1.9.0'
-  else if s='1.9.0' then result:='0.0.0';
-
-  s:=GetMinimumFPCVersion;
-  if CalculateNumericalVersion(result)<CalculateNumericalVersion(s) then result:=s;
+  else if s='1.9.0' then result:='1.0.10'
+  else if s='1.0.10' then result:='1.0.8'
+  else if s='1.0.8' then result:='1.0.6'
+  else if s='1.0.6' then result:='1.0.4'
+  else if s='1.0.4' then result:='1.0.2'
+  else if s='1.0.2' then result:='1.0.0'
+  else if s='1.0.0' then result:='0.99.14'
+  else if s='0.99.14' then result:='0.99.12'
+  else if s='0.99.12' then result:='0.99.10'
+  else if s='0.99.10' then result:='0.99.8';
 end;
 
 function TFPCInstaller.GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
