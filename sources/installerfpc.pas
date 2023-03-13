@@ -2743,7 +2743,8 @@ begin
 
   result:='0.0.0';
 
-  if s='3.3.1' then result:='3.2.0'
+  if s='3.3.1' then result:='3.2.2'
+  else if s='3.2.4' then result:='3.2.2'
   else if s='3.2.2' then result:='3.2.0'
   else if s='3.2.0' then result:='3.0.4'
   else if ((s='3.0.5') OR (s='3.0.4')) then result:='3.0.2'
@@ -2771,10 +2772,7 @@ begin
   else if s='1.9.0' then result:='0.0.0';
 
   s:=GetMinimumFPCVersion;
-  if (Length(s)>0) then
-  begin
-    if CalculateNumericalVersion(result)<CalculateNumericalVersion(s) then result:=s;
-  end;
+  if CalculateNumericalVersion(result)<CalculateNumericalVersion(s) then result:=s;
 end;
 
 function TFPCInstaller.GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
@@ -2839,12 +2837,6 @@ begin
             FinalVersion := RequiredVersion2;
         end;
       end;
-
-    s:=GetMinimumFPCVersion;
-    if (Length(s)>0) then
-    begin
-      if FinalVersion<CalculateNumericalVersion(s) then FinalVersion:=CalculateNumericalVersion(s);
-    end;
 
     result:=InttoStr(FinalVersion DIV 10000);
     FinalVersion:=FinalVersion MOD 10000;
@@ -3703,18 +3695,19 @@ const
   FPCUPMAGIC    = ': base settings';
   REVINCERROR   = 'error: empty';
 var
-  RequiredBootstrapVersion       : string;
-  RequiredBootstrapVersionLow    : string;
-  RequiredBootstrapVersionHigh   : string;
-  FPCCfg                         : string;
-  FPCMkCfg                       : string; //path+file of fpcmkcfg
-  ConfigText,ConfigTextStore     : TStringList;
-  OperationSucceeded             : boolean;
-  PlainBinPath                   : string; //directory above the architecture-dependent FBinDir
-  VersionSnippet                 : string;
-  TxtFile                        : Text;
-  s,s2                           : string;
-  x,y                            : integer;
+  RequiredBootstrapVersion        : string;
+  RequiredBootstrapVersionLow     : string;
+  RequiredBootstrapVersionHigh    : string;
+  RequiredBootstrapVersionMinimum : string;
+  FPCCfg                          : string;
+  FPCMkCfg                        : string; //path+file of fpcmkcfg
+  ConfigText,ConfigTextStore      : TStringList;
+  OperationSucceeded              : boolean;
+  PlainBinPath                    : string; //directory above the architecture-dependent FBinDir
+  VersionSnippet                  : string;
+  TxtFile                         : Text;
+  s,s2                            : string;
+  x,y                             : integer;
 
   function CheckFPCMkCfgOption(aOption:string):boolean;
   var
@@ -3883,7 +3876,11 @@ begin
       // get the bootstrapper, among other things (binutils)
       // start with the highest requirement ??!!
       RequiredBootstrapVersion:=RequiredBootstrapVersionHigh;
-      result:=InitModule(RequiredBootstrapVersion);
+
+      // Check for specials
+      RequiredBootstrapVersionMinimum:=GetMinimumFPCVersion;
+      if CalculateNumericalVersion(RequiredBootstrapVersion)>CalculateNumericalVersion(RequiredBootstrapVersionMinimum) then RequiredBootstrapVersionMinimum:=RequiredBootstrapVersion;
+      result:=InitModule(RequiredBootstrapVersionMinimum);
 
       {
       if (NOT result) then

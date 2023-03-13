@@ -83,4 +83,5 @@ deluxebin/
 upbin/
 lib/
 lib*/
-!fpcuptools/*
+!/fpcuptools/*
+!/libQt5Pas*

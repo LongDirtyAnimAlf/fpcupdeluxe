@@ -706,7 +706,7 @@ begin
   if CalculateNumericalVersion(aNewVersion)>CalculateNumericalVersion(aVersion) then aVersion:=aNewVersion;
 end;
 begin
-  result:='';
+  result:='0.0.0';
   localCPU:=aCPU;
   localOS:=aOS;
   if ((localCPU=TCPU.cpuNone) AND (localOS=TOS.osNone)) then

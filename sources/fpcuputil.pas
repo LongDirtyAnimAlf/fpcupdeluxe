@@ -1058,6 +1058,7 @@ var
   XdgMimeContent: TStringList;
   Output,XdgDesktopFile,XdgMimeFile: string;
   aDirectory:string;
+  aIconFile:string;
 begin
   {$ifdef Haiku}
   exit;
@@ -1073,8 +1074,14 @@ begin
     XdgDesktopContent.Add('Version=1.0');
     XdgDesktopContent.Add('Encoding=UTF-8');
     XdgDesktopContent.Add('Type=Application');
-    XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus.ico');
-    //XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus128x128.png');
+    aIconFile:='';
+    {$ifdef LINUX}
+    aIconFile:=ExtractFilePath(Target)+'images/icons/lazarus128x128.png';
+    if (NOT FileExists(aIconFile)) then aIconFile:=ExtractFilePath(Target)+'images/icons/lazarus32x32.png';
+    if (NOT FileExists(aIconFile)) then aIconFile:=ExtractFilePath(Target)+'images/icons/lazarus.png';
+    {$endif}
+    if (Length(aIconFile)=0) OR (NOT FileExists(aIconFile)) then aIconFile:=ExtractFilePath(Target)+'images/icons/lazarus.ico';
+    XdgDesktopContent.Add('Icon='+aIconFile);
     XdgDesktopContent.Add('Path='+ExtractFilePath(Target));
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments+' %f');
     XdgDesktopContent.Add('Name='+ShortcutName);
