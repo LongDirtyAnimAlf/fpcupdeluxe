@@ -875,7 +875,12 @@ begin
 
   Output:='';
 
-  i:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['name-rev','--name-only','HEAD'],LocalRepository, Output, '', Verbose);
+  FReturnCode:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--exact-match','HEAD'],LocalRepository, Output, '', Verbose);
+  if (FReturnCode<>0) then
+    FReturnCode:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--contains','--all','HEAD'],LocalRepository, Output, '', Verbose);
+  if (FReturnCode<>0) then
+    FReturnCode:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['name-rev','--name-only','HEAD'],LocalRepository, Output, '', Verbose);
+
   Output:=Trim(Output);
   j:=Pos(TAGMAGIC,Output);
   if (j<1) then j:=1 else j:=j+Length(TAGMAGIC);
