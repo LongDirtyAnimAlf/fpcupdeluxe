@@ -82,6 +82,7 @@ begin
   if result then
   begin
     FLibsFound:=True;
+    AddFPCCFGSnippet('-Xd'); // do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
     DynLinker:='';
     if FileExists(ConcatPaths([FLibsPath,LINKER1])) then
