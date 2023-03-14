@@ -41,8 +41,7 @@ type
     chkGitlab: TCheckBox;
     imgSVN: TImage;
     imgGitlab: TImage;
-    ListBoxFPCHistory: TListView;
-    ListBoxLazarusHistory: TListView;
+    ListBoxFPCHistoryNew: TListView;
     btnCreateLazarusConfig: TButton;
     ButtonSubarchSelect: TButton;
     btnSendLog: TButton;
@@ -65,6 +64,7 @@ type
     IniPropStorageApp: TIniPropStorage;
     ListBoxFPCTarget: TListBox;
     ListBoxFPCTargetTag: TListBox;
+    ListBoxLazarusHistoryNew: TListView;
     ListBoxLazarusTarget: TListBox;
     ListBoxLazarusTargetTag: TListBox;
     listModules: TListBox;
@@ -165,10 +165,9 @@ type
     {$endif}
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure BitBtnSetRevisionClick(Sender: TObject);
-    procedure btnCheckToolsLocationsClick(Sender: TObject);
+    procedure btnCheckToolsLocationsClick({%H-}Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
     procedure btnBuildNativeCompilerClick(Sender: TObject);
-    procedure MOnlineDocsClick(Sender: TObject);
     procedure ButtonSubarchSelectClick({%H-}Sender: TObject);
     procedure chkGitlabChange(Sender: TObject);
     procedure CommandOutputScreenChange(Sender: TObject);
@@ -177,6 +176,7 @@ type
     procedure ListBoxTargetDrawItem(Control: TWinControl; Index: Integer;
       ARect: TRect; State: TOwnerDrawState);
     procedure LanguageClick(Sender: TObject);
+    procedure MOnlineDocsClick({%H-}Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick({%H-}Sender: TObject);
@@ -253,6 +253,7 @@ type
     procedure Edit1Change({%H-}Sender: TObject);
     function  PrepareRun(Sender: TObject):boolean;
     function  RealRun:boolean;
+    procedure GetSystemInfo;
     function  GetFPCUPSettings(IniDirectory:string):boolean;
     function  SetFPCUPSettings(IniDirectory:string):boolean;
     procedure FillSourceListboxes;
@@ -264,7 +265,7 @@ type
     function GetCmdFontName: String;
     procedure SetCmdFontName(aValue: String);
     procedure ParseRevisions(IniDirectory:string);
-    procedure GetSystemInfo;
+    procedure AddRevision(TargetFPC,TargetLAZ:boolean;aHash,aName:string;aDate:TDateTime);
     {$ifdef EnableLanguages}
     procedure Translate(const Language: string);
     {$endif}
@@ -526,7 +527,7 @@ begin
   aDataClient.UpInfo.UpWidget:=aSystemTarget;
   {$endif}
 
-  Self.Caption:=
+  Form1.Caption:=
   {$ifdef usealternateui}
   'FPCUPdeluxery V'+
   {$else}
@@ -1994,6 +1995,7 @@ procedure TForm1.btnBuildNativeCompilerClick(Sender: TObject);
 var
   CPUType:TCPU;
   OSType:TOS;
+  sOS:string;
 begin
   CPUType:=TCPU.cpuNone;
   OSType:=TOS.osNone;
@@ -2011,6 +2013,9 @@ begin
       if (NOT PrepareRun(Sender)) then exit;
       FPCupManager.CrossCPU_Target:=CPUType;
       FPCupManager.CrossOS_Target:=OSType;
+      sOS:=radgrpOS.Items[radgrpOS.ItemIndex];
+      if sOS='linux-musl' then FPCupManager.MUSL:=true;
+      if sOS='solaris-oi' then FPCupManager.SolarisOI:=true;
       FPCupManager.OnlyModules:=_NATIVECROSSFPC;
       sStatus:='Going to build native compiler for '+FPCupManager.CrossCombo_Target;
       RealRun;
@@ -2143,17 +2148,17 @@ begin
   valid:=false;
   if (Sender=BitBtnFPCSetRevision) then
   begin
-    if Assigned(ListBoxFPCHistory.Selected) then
+    if Assigned(ListBoxFPCHistoryNew.Selected) then
     begin
-      Form2.ForceFPCRevision:=ListBoxFPCHistory.Selected.Caption;
+      Form2.ForceFPCRevision:=ListBoxFPCHistoryNew.Selected.Caption;
       valid:=true;
     end;
   end;
   if (Sender=BitBtnLazarusSetRevision) then
   begin
-    if Assigned(ListBoxLazarusHistory.Selected) then
+    if Assigned(ListBoxLazarusHistoryNew.Selected) then
     begin
-      Form2.ForceLazarusRevision:=ListBoxLazarusHistory.Selected.Caption;
+      Form2.ForceLazarusRevision:=ListBoxLazarusHistoryNew.Selected.Caption;
       valid:=true;
     end;
   end;
@@ -2678,6 +2683,13 @@ begin
 end;
 
 function TForm1.ButtonProcessCrossCompiler(Sender: TObject):boolean;
+procedure ShowInfo(info:string);
+begin
+  if (NOT Assigned(Sender)) then
+    memoSummary.Lines.Append(info)
+  else
+    ShowMessage(info);
+end;
 var
   BinsFileName,LibsFileName,BaseBinsURL,BaseLibsURL,BinPath,LibPath:string;
   ToolTargetPath,ToolTargetFile,UnZipper,s:string;
@@ -2685,7 +2697,9 @@ var
   IncludeLCL,ZipFile:boolean;
   i:integer;
   aList: TStringList;
+  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
   frmSeq: TfrmSequencial;
+  {$ENDIF}
 begin
   result:=false;
 
@@ -2698,226 +2712,116 @@ begin
   end;
   {$endif}
 
-  if (radgrpCPU.ItemIndex=-1) and (radgrpOS.ItemIndex=-1) then
+  if (NOT PrepareRun(nil)) then exit;
+
+  FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
+  if (radgrpCPU.ItemIndex<>-1) then
+    FPCupManager.CrossCPU_Target:=GetTCPU(radgrpCPU.Items[radgrpCPU.ItemIndex]);
+
+  FPCupManager.CrossOS_Target:=TOS.osNone;
+  if (radgrpOS.ItemIndex<>-1) then
+    FPCupManager.CrossOS_Target:=GetTOS(radgrpOS.Items[radgrpOS.ItemIndex]);
+
+  if ((FPCupManager.CrossOS_Target=TOS.win32) AND (FPCupManager.CrossCPU_Target in [TCPU.x86_64,TCPU.aarch64])) then FPCupManager.CrossOS_Target:=TOS.win64;
+  if ((FPCupManager.CrossOS_Target=TOS.win32) AND (FPCupManager.CrossCPU_Target in [TCPU.cpuNone])) then FPCupManager.CrossCPU_Target:=TCPU.i386;
+  if (FPCupManager.CrossOS_Target=TOS.msdos) then FPCupManager.CrossCPU_Target:=TCPU.i8086;
+  //For i8086 embedded and win16 are also ok, but not [yet] implemented by fpcupdeluxe
+  if (FPCupManager.CrossCPU_Target=TCPU.i8086) then FPCupManager.CrossOS_Target:=TOS.msdos;
+  if (FPCupManager.CrossOS_Target=TOS.go32v2) then FPCupManager.CrossCPU_Target:=TCPU.i386;
+  //if (FPCupManager.CrossOS_Target=TOS.dragonfly) then FPCupManager.CrossCPU_Target:=TCPU.x86_64;
+  //if (FPCupManager.CrossOS_Target=TOS.java) then FPCupManager.CrossCPU_Target:=TCPU.jvm;
+
+  if (FPCupManager.CrossCPU_Target=TCPU.cpuNone) AND (FPCupManager.CrossOS_Target=TOS.osNone) then
   begin
-    if (Sender<>nil) then ShowMessage('Please select a CPU and OS target first');
+    ShowInfo('Please select a CPU and OS target first.');
     exit;
   end;
 
-  // the below three checks are just temporary and rough
-  // we should use the array OSCPUSupported : array[TOS,TCpu] of boolean
+  if (FPCupManager.CrossOS_Target=TOS.embedded) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.avr,TCPU.arm,TCPU.aarch64,TCPU.mipsel,TCPU.wasm32]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for embedded.');
+      exit;
+    end;
+  end;
 
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
+  if (FPCupManager.CrossOS_Target=TOS.freertos) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.xtensa,TCPU.arm]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for FreeRTOS.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossOS_Target=TOS.ultibo) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.aarch64,TCPU.arm]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for Ultibo.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossOS_Target=TOS.android) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.i386,TCPU.arm,TCPU.mipsel,TCPU.jvm,TCPU.aarch64,TCPU.x86_64]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for android.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossOS_Target=TOS.dragonfly) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.x86_64]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for dragonfly.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossOS_Target=TOS.wasi) then
+  begin
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.wasm32]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid CPU target for WebAssembly.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossCPU_Target=TCPU.jvm) then
+  begin
+    success:=(FPCupManager.CrossOS_Target in [TOS.android,TOS.java]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid OS target for jvm.');
+      exit;
+    end;
+  end;
+
+  if (FPCupManager.CrossCPU_Target=TCPU.wasm32) then
+  begin
+    success:=(FPCupManager.CrossOS_Target in [TOS.wasi,TOS.embedded]);
+    if (NOT success) then
+    begin
+      ShowInfo('No valid OS target for WebAssembly.');
+      exit;
+    end;
+  end;
+
+  if (radgrpOS.ItemIndex<>-1) then
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s=GetOS(TOS.embedded) then
-    begin
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>GetCPU(TCPU.mipsel))  and (s<>GetCPU(TCPU.wasm32)) then
-        begin
-          success:=false;
-        end;
-      end else success:=false;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for embedded.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s=GetOS(TOS.freertos) then
-    begin
-      success:=false;
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s=GetCPU(TCPU.xtensa)) OR (s=GetCPU(TCPU.arm)) then
-          success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for FreeRTOS.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s=GetOS(TOS.ultibo) then
-    begin
-      success:=false;
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s=GetCPU(TCPU.arm)) OR (s=GetCPU(TCPU.aarch64)) then
-          success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for Ultibo.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s=GetOS(TOS.android) then
-    begin
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>GetCPU(TCPU.i386)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.mipsel)) and (s<>GetCPU(TCPU.jvm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>'x8664') and (s<>GetCPU(TCPU.x86_64)) then
-        begin
-          success:=false;
-        end;
-      end else success:=false;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for android.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpCPU.ItemIndex<>-1 then
-  begin
-    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-    if s='jvm' then
-    begin
-      success:=false;
-      if radgrpOS.ItemIndex<>-1 then
-      begin
-        s:=radgrpOS.Items[radgrpOS.ItemIndex];
-        if (s=GetOS(TOS.android)) OR (s=GetOS(TOS.java)) then success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid OS target for jvm.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s='dragonfly' then
-    begin
-      success:=false;
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s=GetCPU(TCPU.x86_64)) then success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for dragonfly.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s=GetOS(TOS.wasi) then
-    begin
-      success:=false;
-      if radgrpCPU.ItemIndex<>-1 then
-      begin
-        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s=GetCPU(TCPU.wasm32)) then
-          success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid CPU target for WebAssembly.');
-    exit;
-  end;
-
-  success:=true;
-  if radgrpCPU.ItemIndex<>-1 then
-  begin
-    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-    if s=GetCPU(TCPU.wasm32) then
-    begin
-      success:=false;
-      if radgrpOS.ItemIndex<>-1 then
-      begin
-        s:=radgrpOS.Items[radgrpOS.ItemIndex];
-        if ((s=GetOS(TOS.wasi)) OR (s=GetOS(TOS.embedded))) then success:=true;
-      end;
-    end;
-  end;
-
-  if (NOT success) then
-  begin
-    if Sender<>nil then ShowMessage('No valid OS target for WebAssembly.');
-    exit;
-  end;
-
-  // OS=amiga) AND (CPU<>m68k))
-  // OS=morphos) AND (CPU<>powerpc))
-
-  if (NOT PrepareRun(Sender)) then exit;
-
-  if radgrpCPU.ItemIndex<>-1 then
-  begin
-    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-    FPCupManager.CrossCPU_Target:=GETTCPU(s);
-  end;
-
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s='i-sim' then FPCupManager.CrossOS_Target:=TOS.iphonesim;
-    if s='linux-musl' then
-    begin
-      FPCupManager.MUSL:=true;
-      FPCupManager.CrossOS_Target:=TOS.linux;
-    end;
-
-    if s='solaris-oi' then
-    begin
-      FPCupManager.SolarisOI:=true;
-      FPCupManager.CrossOS_Target:=TOS.solaris;
-    end;
-
-    //rename windows target os to the correct FPC target os
-    if s='windows' then
-    begin
-      if FPCupManager.CrossCPU_Target=TCPU.i386 then FPCupManager.CrossOS_Target:=TOS.win32;
-      if FPCupManager.CrossCPU_Target=TCPU.x86_64 then FPCupManager.CrossOS_Target:=TOS.win64;
-      if FPCupManager.CrossCPU_Target=TCPU.aarch64 then FPCupManager.CrossOS_Target:=TOS.win64;
-    end;
-
-    if FPCupManager.CrossOS_Target=TOS.osNone then FPCupManager.CrossOS_Target:=GetTOS(s);
+    if s='linux-musl' then FPCupManager.MUSL:=true;
+    if s='solaris-oi' then FPCupManager.SolarisOI:=true;
   end;
 
   {$ifdef Linux}
@@ -2957,13 +2861,6 @@ begin
 
   end;
   {$endif}
-
-  if (FPCupManager.CrossOS_Target=TOS.java) then FPCupManager.CrossCPU_Target:=TCPU.jvm;
-  if (FPCupManager.CrossOS_Target=TOS.msdos) then FPCupManager.CrossCPU_Target:=TCPU.i8086;
-  //For i8086 embedded and win16 are also ok, but not [yet] implemented by fpcupdeluxe
-  if (FPCupManager.CrossCPU_Target=TCPU.i8086) then FPCupManager.CrossOS_Target:=TOS.msdos;
-  if (FPCupManager.CrossOS_Target=TOS.go32v2) then FPCupManager.CrossCPU_Target:=TCPU.i386;
-  if (FPCupManager.CrossOS_Target=TOS.dragonfly) then FPCupManager.CrossCPU_Target:=TCPU.x86_64;
 
   if (FPCupManager.CrossCPU_Target=TCPU.cpuNone) then
   begin
@@ -3125,43 +3022,26 @@ begin
         end;
       end;
 
-      s:='';
-      if (FPCupManager.CrossOS_Target=TOS.aix)
-      then
-      begin
-        s:='Be forwarned: this will only work with FPC 3.0 and later.' + sLineBreak + upQuestionContinue;
-      end;
-      if (FPCupManager.CrossCPU_Target=TCPU.aarch64)
-      {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target=TOS.darwin){$endif}
-      OR (FPCupManager.CrossOS_Target=TOS.msdos)
-      OR (FPCupManager.CrossOS_Target=TOS.haiku)
-      then
-      begin
-        s:='Be forwarned: this will only work with FPC [(>= 3.2) OR (embedded) OR (trunk)].'+sLineBreak+upQuestionContinue;
-      end;
-
       warning:=false;
-      if (((FPCupManager.CrossCPU_Target=TCPU.aarch64) {OR (FPCupManager.CrossCPU_Target=TCPU.i386)} OR (FPCupManager.CrossCPU_Target=TCPU.x86_64)) AND (FPCupManager.CrossOS_Target=TOS.android))
-        then warning:=true;
-      if (((FPCupManager.CrossCPU_Target=TCPU.aarch64) OR (FPCupManager.CrossCPU_Target=TCPU.arm)) AND (FPCupManager.CrossOS_Target=TOS.ios))
-        then warning:=true;
 
-      if warning then
+      s:=GetMinimumFPCVersion(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+      if (Length(s)>0) then
       begin
-        s:='Be forwarned: this will only work with FPC [(>= 3.2.2) OR (embedded) OR (trunk)].'+sLineBreak+upQuestionContinue;
+        warning:=true;
+        if warning then s:='Be forwarned: this will only work with FPC [(>='+s+')].'+sLineBreak+upQuestionContinue;
       end;
 
       {$ifdef Linux}
-      if ((FPCupManager.CrossCPU_Target=TCPU.mips) OR (FPCupManager.CrossCPU_Target=TCPU.mipsel))
-      then
+      if (NOT warning) then
       begin
-        s:='You could get the native cross-utilities first (advised).' + sLineBreak +
-           'E.g.: sudo apt-get install libc6-mips-cross binutils-mips-linux-gnu' + sLineBreak +
-           upQuestionContinue;
+        warning:=((FPCupManager.CrossCPU_Target=TCPU.mips) OR (FPCupManager.CrossCPU_Target=TCPU.mipsel));
+        if (warning) then s:='You could get the native cross-utilities first (advised).' + sLineBreak +
+             'E.g.: sudo apt-get install libc6-mips-cross binutils-mips-linux-gnu' + sLineBreak +
+             upQuestionContinue;
       end;
       {$endif}
 
-      if (length(s)=0) then
+      if (NOT warning) then
         s:=upQuestionContinue;
       s:=upInstallCrossCompiler+' ['+FPCupManager.CrossCombo_Target+']'+sLineBreak+s;
       if Form2.AskConfirmation then
@@ -3237,16 +3117,12 @@ begin
 
       // handle inclusion of LCL when cross-compiling
       IncludeLCL:=Form2.IncludeLCL;
-      if (FPCupManager.CrossOS_Target=TOS.java) then IncludeLCL:=false;
-      if (FPCupManager.CrossOS_Target=TOS.android) then IncludeLCL:=false;
-      if (FPCupManager.CrossOS_Target=TOS.ios) then IncludeLCL:=false;
-      if (FPCupManager.CrossOS_Target=TOS.embedded) then IncludeLCL:=false;
-      if (FPCupManager.CrossOS_Target=TOS.freertos) then IncludeLCL:=false;
+      if (NOT (FPCupManager.CrossOS_Target in LCL_OS)) then IncludeLCL:=false;
 
       if IncludeLCL then
       begin
         FPCupManager.OnlyModules:=FPCupManager.OnlyModules+','+_LCL;
-        if ((FPCupManager.CrossOS_Target=TOS.win32) OR (FPCupManager.CrossOS_Target=TOS.win64)) then
+        if (FPCupManager.CrossOS_Target in [TOS.win32,TOS.win64]) then
            FPCupManager.LCL_Platform:='win32'
         else
         if (FPCupManager.CrossOS_Target=TOS.wince) then
@@ -3263,7 +3139,7 @@ begin
           {$endif}
         end
         else
-        if ((FPCupManager.CrossOS_Target=TOS.amiga) OR (FPCupManager.CrossOS_Target=TOS.aros) OR (FPCupManager.CrossOS_Target=TOS.morphos)) then
+        if (FPCupManager.CrossOS_Target in [TOS.amiga,TOS.aros,TOS.morphos]) then
            FPCupManager.LCL_Platform:='mui'
         else
         begin
@@ -4041,24 +3917,27 @@ var
 begin
   result:=false;
 
-  s:='';
-  if (Sender<>BitBtnLazarusOnly) AND AnsiEndsText('.svn',FPCTarget) then
+  if Assigned(Sender) then
   begin
-    s:='You have selected a FPC source from SVN';
-  end;
-  if (Sender<>BitBtnFPCOnly) AND AnsiEndsText('.svn',LazarusTarget) then
-  begin
+    s:='';
+    if (Sender<>BitBtnLazarusOnly) AND AnsiEndsText('.svn',FPCTarget) then
+    begin
+      s:='You have selected a FPC source from SVN';
+    end;
+    if (Sender<>BitBtnFPCOnly) AND AnsiEndsText('.svn',LazarusTarget) then
+    begin
+      if (Length(s)>0) then
+        s:=s+' and y'
+      else
+        s:='Y';
+      s:=s+'ou have selected a Lazarus source from SVN';
+    end;
     if (Length(s)>0) then
-      s:=s+' and y'
-    else
-      s:='Y';
-    s:=s+'ou have selected a Lazarus source from SVN';
-  end;
-  if (Length(s)>0) then
-  begin
-    s:=s+'.'+LineEnding+'Please select another source: SVN is no longer available.';
-    Application.MessageBox(PChar(s), PChar('SVN source error'), MB_ICONSTOP);
-    exit;
+    begin
+      s:=s+'.'+LineEnding+'Please select another source: SVN is no longer available.';
+      Application.MessageBox(PChar(s), PChar('SVN source error'), MB_ICONSTOP);
+      exit;
+    end;
   end;
 
   FPCVersionLabel.Font.Color:=clDefault;
@@ -4213,6 +4092,7 @@ function TForm1.RealRun:boolean;
 var
   s:string;
   aLazarusVersion:word;
+  crossing:boolean;
   {$ifdef RemoteLog}
   aRecordNumber:PtrUInt;
   {$endif}
@@ -4224,6 +4104,8 @@ begin
     if (MessageDlgEx(upSpaceWarning+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
       exit;
   end;
+
+  crossing:=((FPCupManager.CrossCPU_Target<>TCPU.cpuNone) AND (FPCupManager.CrossOS_Target<>TOS.osNone));
 
   StatusMessage.Text:=sStatus;
 
@@ -4239,7 +4121,6 @@ begin
   FPCupManager.FPCOpt:=FPCupManager.FPCOpt+' -Fl/usr/local/lib -Fl/usr/pkg/lib';
   FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib -Fl/usr/pkg/lib -Fl/usr/X11R7/lib';
   {$endif}
-
 
   if AnsiEndsText(GITLABEXTENSION,FPCTarget) then
   begin
@@ -4264,39 +4145,42 @@ begin
     if (Pos('github.com/ultibohub/LazarusIDE',FPCupManager.LazarusURL)>0) then FPCupManager.LazarusBranch:='ultibo';
   end;
 
-  // branch and revision overrides from setup+
-  s:=Form2.FPCRevision;
-  if Length(s)>0 then FPCupManager.FPCDesiredRevision:=s;
-  s:=Form2.FPCBranch;
-  if Length(s)>0 then FPCupManager.FPCBranch:=s;
-
-  s:=Form2.LazarusRevision;
-  if Length(s)>0 then FPCupManager.LazarusDesiredRevision:=s;
-  s:=Form2.LazarusBranch;
-  if Length(s)>0 then FPCupManager.LazarusBranch:=s;
-
-  // overrides for old versions of Lazarus
-  aLazarusVersion:=CalculateNumericalVersion(LazarusTarget);
-  if (aLazarusVersion<>0) AND (aLazarusVersion<CalculateFullVersion(1,0,0)) then
+  if (NOT crossing) then
   begin
-    s:=FPCupManager.OnlyModules;
-    if (Length(s)>0) then
+    // branch and revision overrides from setup+
+    s:=Form2.FPCRevision;
+    if Length(s)>0 then FPCupManager.FPCDesiredRevision:=s;
+    s:=Form2.FPCBranch;
+    if Length(s)>0 then FPCupManager.FPCBranch:=s;
+
+    s:=Form2.LazarusRevision;
+    if Length(s)>0 then FPCupManager.LazarusDesiredRevision:=s;
+    s:=Form2.LazarusBranch;
+    if Length(s)>0 then FPCupManager.LazarusBranch:=s;
+
+    // overrides for old versions of Lazarus
+    aLazarusVersion:=CalculateNumericalVersion(LazarusTarget);
+    if (aLazarusVersion<>0) AND (aLazarusVersion<CalculateFullVersion(1,0,0)) then
     begin
-      if Pos(_LAZARUSSIMPLE,s)=0 then s:=StringReplace(s,_LAZARUS,_LAZARUSSIMPLE,[]);
-      {$ifdef mswindows}
-      {$ifdef win32}
-      s:=StringReplace(s,_FPC+_CROSSWIN,'',[]);
-      s:=StringReplace(s,_LAZARUS+_CROSSWIN,'',[]);
-      {$endif}
-      {$endif}
-      FPCupManager.OnlyModules:=s;
-    end
-    else
-    begin
-      FPCupManager.OnlyModules:=_FPC+','+_LAZARUSSIMPLE;
+      s:=FPCupManager.OnlyModules;
+      if (Length(s)>0) then
+      begin
+        if Pos(_LAZARUSSIMPLE,s)=0 then s:=StringReplace(s,_LAZARUS,_LAZARUSSIMPLE,[]);
+        {$ifdef mswindows}
+        {$ifdef win32}
+        s:=StringReplace(s,_FPC+_CROSSWIN,'',[]);
+        s:=StringReplace(s,_LAZARUS+_CROSSWIN,'',[]);
+        {$endif}
+        {$endif}
+        FPCupManager.OnlyModules:=s;
+      end
+      else
+      begin
+        FPCupManager.OnlyModules:=_FPC+','+_LAZARUSSIMPLE;
+      end;
+      AddMessage('Detected a very old version of Lazarus !');
+      AddMessage('Switching towards old lazarus sequence !!');
     end;
-    AddMessage('Detected a very old version of Lazarus !');
-    AddMessage('Switching towards old lazarus sequence !!');
   end;
 
   AddMessage('');
@@ -4325,7 +4209,6 @@ begin
   {$ifdef RemoteLog}
   aDataClient.UpInfo.FPCVersion:=FPCTarget;
   aDataClient.UpInfo.LazarusVersion:=LazarusTarget;
-
   aDataClient.UpInfo.UpInstallDir:=FPCupManager.BaseDirectory;
   {$endif}
 
@@ -4407,6 +4290,11 @@ begin
       LazarusVersionLabel.Font.Color:=clLime;
       StatusMessage.Text:='That went well !!!';
 
+      s:=FPCupManager.FPCDesiredRevision;
+      if Length(s)>0 then AddRevision(True,False,s,'-',Now);
+      s:=FPCupManager.LazarusDesiredRevision;
+      if Length(s)>0 then AddRevision(False,True,s,'-',Now);
+
       {$ifdef RemoteLog}
       aDataClient.UpInfo.LogEntry:='Success !';
       aRecordNumber:=aDataClient.SendData;
@@ -4416,7 +4304,6 @@ begin
         //AddMessage('');
       end;
       {$endif}
-
     end;
 
     memoSummary.Lines.Append(BeginSnippet+' Done !!');
@@ -4897,7 +4784,7 @@ end;
 procedure TForm1.HandleInfo(var Msg: TLMessage);
 var
   MsgStr: PChar;
-  MsgPStr: PString;
+  //MsgPStr: PString;
   MsgPasStr: string;
 begin
   MsgStr := {%H-}PChar(Msg.lParam);
@@ -5027,19 +4914,18 @@ type
 const
   TargetDateMagic     : array[TTarget] of string = (FPCDATEMAGIC,LAZDATEMAGIC);
   TargetHashMagic     : array[TTarget] of string = (FPCHASHMAGIC,LAZHASHMAGIC);
+  TargetNameMagic     : array[TTarget] of string = (FPCNAMEMAGIC,LAZNAMEMAGIC);
 var
   aTarget             : TTarget;
   RevList             : TStringList;
   RevFile             : string;
   index               : integer;
-  date                : string;
-  hash                : string;
+  hash,revname,date   : string;
   AItem               : TListItem;
   TargetViewArray     : array[TTarget] of TListView;
 begin
-
-  TargetViewArray[TTarget.FPC]:=ListBoxFPCHistory;
-  TargetViewArray[TTarget.Lazarus]:=ListBoxLazarusHistory;
+  TargetViewArray[TTarget.FPC]:=ListBoxFPCHistoryNew;
+  TargetViewArray[TTarget.Lazarus]:=ListBoxLazarusHistoryNew;
 
   RevFile:=IncludeTrailingPathDelimiter(IniDirectory)+REVISIONSLOG;
   if FileExists(RevFile) then
@@ -5063,9 +4949,10 @@ begin
             else
               begin
                 date:=RevList[index];
-                hash:='';
                 Delete(date,1,Length(TargetDateMagic[aTarget]));
                 Inc(index);
+                hash:='';
+                revname:='';
                 while (index<RevList.Count) do
                 begin
                   if (Length(RevList[index])=0) then break;
@@ -5073,6 +4960,10 @@ begin
                   begin
                     hash:=RevList[index];
                     Delete(hash,1,Length(TargetHashMagic[aTarget]))
+                  end;
+                  if AnsiStartsText(TargetNameMagic[aTarget],RevList[index]) then
+                  begin
+                    revname:=Copy(RevList[index],Succ(Length(TargetNameMagic[aTarget])),MaxInt);
                   end;
                   Inc(index);
                 end;
@@ -5085,6 +4976,7 @@ begin
                     with TargetViewArray[aTarget].Items.Add do
                     begin
                       Caption:=hash;
+                      SubItems.Add(revname);
                       SubItems.Add(date);
                     end;
                   end;
@@ -5109,6 +5001,40 @@ begin
 
   end;
 
+end;
+
+procedure TForm1.AddRevision(TargetFPC,TargetLAZ:boolean;aHash,aName:string;aDate:TDateTime);
+type
+  TTarget             = (FPC,LAZARUS);
+var
+  aTarget             : TTarget;
+  hash                : string;
+  AItem               : TListItem;
+  TargetViewArray     : array[TTarget] of TListView;
+begin
+  TargetViewArray[TTarget.FPC]:=ListBoxFPCHistoryNew;
+  TargetViewArray[TTarget.Lazarus]:=ListBoxLazarusHistoryNew;
+  if TargetFPC then aTarget:=TTarget.FPC;
+  if TargetLAZ then aTarget:=TTarget.LAZARUS;
+  TargetViewArray[aTarget].Items.BeginUpdate;
+  try
+    hash:=aHash;
+    if ( (Length(hash)>0) AND (hash<>'failure') AND (hash<>'unknown') ) then
+    begin
+      AItem:=TargetViewArray[aTarget].FindCaption(0,hash,false,true,false);
+      if (aItem=nil) then aItem:=TargetViewArray[aTarget].Items.Add;
+      with aItem do
+      begin
+        Caption:=hash;
+        if (SubItems.Count<1) then SubItems.Add(aName) else SubItems[0]:=aName;
+        if (SubItems.Count<2) then SubItems.Add(DateTimeToStr(aDate)) else SubItems[1]:=DateTimeToStr(aDate);
+      end;
+    end;
+    if aTarget=TTarget.FPC then BitBtnFPCSetRevision.Enabled:=(TargetViewArray[aTarget].Items.Count>0);
+    if aTarget=TTarget.LAZARUS then BitBtnLazarusSetRevision.Enabled:=(TargetViewArray[aTarget].Items.Count>0);
+  finally
+    TargetViewArray[aTarget].Items.EndUpdate;
+  end;
 end;
 
 procedure TForm1.CheckForUpdates(Data: PtrInt);

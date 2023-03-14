@@ -264,7 +264,7 @@ type
     function GetCmdFontName: String;
     procedure SetCmdFontName(aValue: String);
     procedure ParseRevisions(IniDirectory:string);
-    procedure AddRevision(TargetFPC,TargetLAZ:boolean;aHash:string;aDate:TDateTime);
+    procedure AddRevision(TargetFPC,TargetLAZ:boolean;aHash,aName:string;aDate:TDateTime);
     {$ifdef EnableLanguages}
     procedure Translate(const Language: string);
     {$endif}
@@ -4290,9 +4290,9 @@ begin
       StatusMessage.Text:='That went well !!!';
 
       s:=FPCupManager.FPCDesiredRevision;
-      if Length(s)>0 then AddRevision(True,False,s,Now);
+      if Length(s)>0 then AddRevision(True,False,s,'-',Now);
       s:=FPCupManager.LazarusDesiredRevision;
-      if Length(s)>0 then AddRevision(False,True,s,Now);
+      if Length(s)>0 then AddRevision(False,True,s,'-',Now);
 
       {$ifdef RemoteLog}
       aDataClient.UpInfo.LogEntry:='Success !';
@@ -4997,7 +4997,7 @@ begin
 
 end;
 
-procedure TForm1.AddRevision(TargetFPC,TargetLAZ:boolean;aHash:string;aDate:TDateTime);
+procedure TForm1.AddRevision(TargetFPC,TargetLAZ:boolean;aHash,aName:string;aDate:TDateTime);
 type
   TTarget             = (FPC,LAZARUS);
 var
@@ -5020,14 +5020,8 @@ begin
       with aItem do
       begin
         Caption:=hash;
-        if (SubItems.Count<1) then
-          SubItems.Add('-')
-        else
-          SubItems[0]:='-';
-        if (SubItems.Count<2) then
-          SubItems.Add(DateTimeToStr(aDate))
-        else
-          SubItems[1]:=DateTimeToStr(aDate);
+        if (SubItems.Count<1) then SubItems.Add(aName) else SubItems[0]:=aName;
+        if (SubItems.Count<2) then SubItems.Add(DateTimeToStr(aDate)) else SubItems[1]:=DateTimeToStr(aDate);
       end;
     end;
     if aTarget=TTarget.FPC then BitBtnFPCSetRevision.Enabled:=(TargetViewArray[aTarget].Items.Count>0);

@@ -987,6 +987,7 @@ object Form1: TForm1
           'm68k'
           'xtensa'
           'wasm32'
+          'loongarch64'
         )
         OnSelectionChanged = radgrpTargetChanged
         ParentFont = False
@@ -1441,7 +1442,7 @@ object Form1: TForm1
         ReadOnly = True
         TabOrder = 6
       end
-      object ListBoxFPCHistory: TListView
+      object ListBoxFPCHistoryNew: TListView
         AnchorSideLeft.Control = HistorySheet
         AnchorSideTop.Control = FPCHistoryLabel
         AnchorSideTop.Side = asrBottom
@@ -1458,13 +1459,18 @@ object Form1: TForm1
         BorderSpacing.Right = 8
         Columns = <        
           item
-            AutoSize = True
             Caption = 'Hash'
-            Width = 42
+            MinWidth = 80
+            Width = 80
+          end        
+          item
+            Caption = 'Rev-name'
+            MinWidth = 100
+            Width = 100
           end        
           item
             Caption = 'Date'
-            Width = 202
+            Width = 102
           end>
         ColumnClick = False
         HideSelection = False
@@ -1473,7 +1479,7 @@ object Form1: TForm1
         TabOrder = 1
         ViewStyle = vsReport
       end
-      object ListBoxLazarusHistory: TListView
+      object ListBoxLazarusHistoryNew: TListView
         AnchorSideLeft.Control = HistorySheet
         AnchorSideTop.Control = LazarusHistoryLabel
         AnchorSideTop.Side = asrBottom
@@ -1490,13 +1496,18 @@ object Form1: TForm1
         BorderSpacing.Right = 8
         Columns = <        
           item
-            AutoSize = True
             Caption = 'Hash'
-            Width = 42
+            MinWidth = 80
+            Width = 80
+          end        
+          item
+            Caption = 'Rev-name'
+            MinWidth = 100
+            Width = 100
           end        
           item
             Caption = 'Date'
-            Width = 202
+            Width = 102
           end>
         ColumnClick = False
         HideSelection = False
@@ -1507,7 +1518,6 @@ object Form1: TForm1
       end
       object BitBtnFPCSetRevision: TButton
         AnchorSideLeft.Control = HistorySheet
-        AnchorSideTop.Control = ListBoxFPCHistory
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = HistorySheet
         AnchorSideRight.Side = asrBottom
@@ -1531,7 +1541,6 @@ object Form1: TForm1
       end
       object BitBtnLazarusSetRevision: TButton
         AnchorSideLeft.Control = HistorySheet
-        AnchorSideTop.Control = ListBoxLazarusHistory
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = HistorySheet
         AnchorSideRight.Side = asrBottom
