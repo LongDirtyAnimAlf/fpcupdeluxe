@@ -5087,6 +5087,8 @@ begin
         UpdateWarnings.Add('');
       end;
       UpdateWarnings.Add(FPCDATEMAGIC+DateTimeToStr(now));
+      if Assigned(aRepoClient) AND (aRepoClient.ClassType=FGitClient.ClassType) then
+        UpdateWarnings.Add(FPCNAMEMAGIC+aRepoClient.GetCommitName);
       if Assigned(aRepoClient) then UpdateWarnings.Add(ModuleName+' URL: '+aRepoClient.Repository);
       UpdateWarnings.Add(ModuleName+' previous rev/hash: '+PreviousRevision);
       if Length(SourceInfo.SVNRevision)>0 then

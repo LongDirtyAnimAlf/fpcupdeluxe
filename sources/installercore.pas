@@ -207,6 +207,9 @@ const
   FPCHASHMAGIC   = 'FPC new GIT hash: ';
   LAZHASHMAGIC   = 'Lazarus new GIT hash: ';
 
+  FPCNAMEMAGIC   = 'FPC symbolic name: ';
+  LAZNAMEMAGIC   = 'Lazarus symbolic name: ';
+
   FPCURLLOOKUPMAGIC            = 'fpcURL';
   FPCTAGLOOKUPMAGIC            = 'fpcTAG';
   FPCBRANCHLOOKUPMAGIC         = 'fpcBRANCH';
@@ -1588,7 +1591,9 @@ var
   InstallPath        : string;
   {$ENDIF MSWINDOWS}
   OperationSucceeded : boolean;
+  {$IFDEF LINUX}
   s1                 : string;
+  {$ENDIF}
 begin
   OperationSucceeded := true;
   localinfotext:=InitInfoText(' (DownloadBinUtils): ');
@@ -1855,6 +1860,8 @@ begin
         aAfterRevision := aClient.LocalRevision;
         if ((aModuleName=_FPC) OR (aModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
         begin
+          Output:=(aClient as TGitClient).GetCommitName;
+          if (Length(Output)>0) then Infoln(localinfotext+'Current commit name: '+Output,etInfo);
           Output:=(aClient as TGitClient).GetCommitMessage;
           if (Length(Output)>0) then Infoln(localinfotext+'Current commit message: '+Output,etInfo);
           Output:=(aClient as TGitClient).GetSVNRevision;
@@ -2377,7 +2384,6 @@ var
   Errors: integer = 0;
   DownloadSuccess:boolean;
   InstallPath:string;
-  RemotePath:string;
 begin
   localinfotext:=InitInfoText(' (DownloadBinUtils): ');
   //Parent directory of files. Needs trailing backslash.
@@ -2397,8 +2403,6 @@ begin
       end;
 
       if (FileExists(InstallPath+FUtilFiles[Counter].FileName)) then continue;
-
-      RemotePath:=FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName;
 
       //if (FUtilFiles[Counter].FileName='libiconv-2'+GetLibExt) then continue;
 
@@ -3356,7 +3360,9 @@ const
   {$ifndef FPCONLY}
   DARWINCHECKMAGIC='useride: ';
   DARWINHACKMAGIC='./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide= --ws=$(LCL_PLATFORM)';
+  {$ifdef Haiku}
   HAIKUHACKMAGIC='$(DIFF) $(TEMPNAME3) $(EXENAME)';
+  {$endif}
   {$endif}
 var
   PatchList:TStringList;
@@ -3900,7 +3906,7 @@ var
   //RevisionIncText: Text;
   RevFilePath,ConstStart: string;
   RevisionStringList:TStringList;
-  NumRevision:Longint;
+  //NumRevision:Longint;
 begin
   result:=false;
 

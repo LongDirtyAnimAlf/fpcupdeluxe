@@ -113,6 +113,8 @@ type
     procedure LocalModifications({%H-}var FileList: TStringList); virtual;
     // Checks to see if local directory is a valid repository for the repository URL given (if any)
     function LocalRepositoryExists: boolean; virtual;
+    function GetCommitMessage: string; virtual;
+    function GetCommitName: string; virtual;
     constructor Create(aParent:TObject);
     destructor Destroy; override;
   published
@@ -346,6 +348,16 @@ function TRepoClient.LocalRepositoryExists: boolean;
 begin
   result:=False;
   raise Exception.Create('TRepoClient descendants must implement LocalRepositoryExists by themselves.');
+end;
+
+function TRepoClient.GetCommitMessage: string;
+begin
+  result:='not implemented';
+end;
+
+function TRepoClient.GetCommitName: string;
+begin
+  result:='not implemented';
 end;
 
 constructor TRepoClient.Create(aParent:TObject);

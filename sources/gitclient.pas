@@ -68,7 +68,8 @@ type
     procedure Update; override;
     function GetSVNRevision: string;
     function GetGitHash: string;
-    function GetCommitMessage: string;
+    function GetCommitMessage: string; override;
+    function GetCommitName: string; override;
   end;
 
   EGitClientError = class(ERepoClientError);
@@ -859,6 +860,27 @@ begin
   end;
 end;
 
+function TGitClient.GetCommitName: string;
+const
+  TAGMAGIC = 'tags/';
+var
+  Output:string;
+  i,j:integer;
+begin
+  result:='';
 
+  if ExportOnly then exit;
+  if NOT ValidClient then exit;
+  if NOT DirectoryExists(LocalRepository) then exit;
+
+  Output:='';
+
+  i:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['name-rev','--name-only','HEAD'],LocalRepository, Output, '', Verbose);
+  Output:=Trim(Output);
+  j:=Pos(TAGMAGIC,Output);
+  if (j<1) then j:=1 else j:=j+Length(TAGMAGIC);
+
+  result:=Copy(Output,j,MaxInt)
+end;
 
 end.

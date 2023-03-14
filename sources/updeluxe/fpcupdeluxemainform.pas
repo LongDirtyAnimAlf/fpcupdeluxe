@@ -41,8 +41,7 @@ type
     chkGitlab: TCheckBox;
     imgSVN: TImage;
     imgGitlab: TImage;
-    ListBoxFPCHistory: TListView;
-    ListBoxLazarusHistory: TListView;
+    ListBoxFPCHistoryNew: TListView;
     btnCreateLazarusConfig: TButton;
     ButtonSubarchSelect: TButton;
     btnSendLog: TButton;
@@ -65,6 +64,7 @@ type
     IniPropStorageApp: TIniPropStorage;
     ListBoxFPCTarget: TListBox;
     ListBoxFPCTargetTag: TListBox;
+    ListBoxLazarusHistoryNew: TListView;
     ListBoxLazarusTarget: TListBox;
     ListBoxLazarusTargetTag: TListBox;
     listModules: TListBox;
@@ -2147,17 +2147,17 @@ begin
   valid:=false;
   if (Sender=BitBtnFPCSetRevision) then
   begin
-    if Assigned(ListBoxFPCHistory.Selected) then
+    if Assigned(ListBoxFPCHistoryNew.Selected) then
     begin
-      Form2.ForceFPCRevision:=ListBoxFPCHistory.Selected.Caption;
+      Form2.ForceFPCRevision:=ListBoxFPCHistoryNew.Selected.Caption;
       valid:=true;
     end;
   end;
   if (Sender=BitBtnLazarusSetRevision) then
   begin
-    if Assigned(ListBoxLazarusHistory.Selected) then
+    if Assigned(ListBoxLazarusHistoryNew.Selected) then
     begin
-      Form2.ForceLazarusRevision:=ListBoxLazarusHistory.Selected.Caption;
+      Form2.ForceLazarusRevision:=ListBoxLazarusHistoryNew.Selected.Caption;
       valid:=true;
     end;
   end;
@@ -4908,19 +4908,18 @@ type
 const
   TargetDateMagic     : array[TTarget] of string = (FPCDATEMAGIC,LAZDATEMAGIC);
   TargetHashMagic     : array[TTarget] of string = (FPCHASHMAGIC,LAZHASHMAGIC);
+  TargetNameMagic     : array[TTarget] of string = (FPCNAMEMAGIC,LAZNAMEMAGIC);
 var
   aTarget             : TTarget;
   RevList             : TStringList;
   RevFile             : string;
   index               : integer;
-  date                : string;
-  hash                : string;
+  hash,revname,date   : string;
   AItem               : TListItem;
   TargetViewArray     : array[TTarget] of TListView;
 begin
-
-  TargetViewArray[TTarget.FPC]:=ListBoxFPCHistory;
-  TargetViewArray[TTarget.Lazarus]:=ListBoxLazarusHistory;
+  TargetViewArray[TTarget.FPC]:=ListBoxFPCHistoryNew;
+  TargetViewArray[TTarget.Lazarus]:=ListBoxLazarusHistoryNew;
 
   RevFile:=IncludeTrailingPathDelimiter(IniDirectory)+REVISIONSLOG;
   if FileExists(RevFile) then
@@ -4944,9 +4943,10 @@ begin
             else
               begin
                 date:=RevList[index];
-                hash:='';
                 Delete(date,1,Length(TargetDateMagic[aTarget]));
                 Inc(index);
+                hash:='';
+                revname:='';
                 while (index<RevList.Count) do
                 begin
                   if (Length(RevList[index])=0) then break;
@@ -4954,6 +4954,10 @@ begin
                   begin
                     hash:=RevList[index];
                     Delete(hash,1,Length(TargetHashMagic[aTarget]))
+                  end;
+                  if AnsiStartsText(TargetNameMagic[aTarget],RevList[index]) then
+                  begin
+                    revname:=Copy(RevList[index],Succ(Length(TargetNameMagic[aTarget])),MaxInt);
                   end;
                   Inc(index);
                 end;
@@ -4966,6 +4970,7 @@ begin
                     with TargetViewArray[aTarget].Items.Add do
                     begin
                       Caption:=hash;
+                      SubItems.Add(revname);
                       SubItems.Add(date);
                     end;
                   end;
@@ -5001,8 +5006,8 @@ var
   AItem               : TListItem;
   TargetViewArray     : array[TTarget] of TListView;
 begin
-  TargetViewArray[TTarget.FPC]:=ListBoxFPCHistory;
-  TargetViewArray[TTarget.Lazarus]:=ListBoxLazarusHistory;
+  TargetViewArray[TTarget.FPC]:=ListBoxFPCHistoryNew;
+  TargetViewArray[TTarget.Lazarus]:=ListBoxLazarusHistoryNew;
   if TargetFPC then aTarget:=TTarget.FPC;
   if TargetLAZ then aTarget:=TTarget.LAZARUS;
   TargetViewArray[aTarget].Items.BeginUpdate;
@@ -5015,10 +5020,14 @@ begin
       with aItem do
       begin
         Caption:=hash;
-        if (SubItems.Count=0) then
+        if (SubItems.Count<1) then
+          SubItems.Add('-')
+        else
+          SubItems[0]:='-';
+        if (SubItems.Count<2) then
           SubItems.Add(DateTimeToStr(aDate))
         else
-          SubItems[0]:=DateTimeToStr(aDate);
+          SubItems[1]:=DateTimeToStr(aDate);
       end;
     end;
     if aTarget=TTarget.FPC then BitBtnFPCSetRevision.Enabled:=(TargetViewArray[aTarget].Items.Count>0);
