@@ -1251,7 +1251,7 @@ begin
                 ( (CrossInstaller.LibsPath<>'') OR (CrossInstaller.TargetOS=TOS.win32) OR (CrossInstaller.TargetOS=TOS.win64))
                 AND
                 //Only native compiler for these OS
-                (CrossInstaller.TargetOS in [TOS.win32,TOS.win64,TOS.linux,TOS.darwin,TOS.freebsd,TOS.openbsd,TOS.aix,TOS.haiku,TOS.solaris,TOS.dragonfly,TOS.netbsd])
+                (CrossInstaller.TargetOS in [TOS.win32,TOS.win64,TOS.linux,TOS.darwin,TOS.freebsd,TOS.openbsd,TOS.aix,TOS.haiku,TOS.solaris,TOS.dragonfly,TOS.netbsd,TOS.android])
                 )
                 then
               begin
@@ -1264,7 +1264,11 @@ begin
                 Processor.Process.Parameters.Add('compiler');
                 Processor.Process.Parameters.Add('compiler');
               end
-              else continue;
+              else
+              begin
+                Infoln(infotext+'Building native compiler for '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+' not implemented.',etInfo);
+                continue;
+              end;
             end;
             st_Start,st_Finished:
             begin

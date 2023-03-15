@@ -144,13 +144,13 @@ begin
 
     ActionNeeded:=(NOT PerformLibraryPathMagic(S));
 
-    if (NOT ActionNeeded) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(S));
+    if (NOT ActionNeeded) then AddFPCCFGSnippet('-Fl'+S);
 
     if (SubArch<>TSUBARCH.saNone) then
     begin
       AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
 
-      if ActionNeeded then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(S));
+      if ActionNeeded then AddFPCCFGSnippet('-Fl'+S);
 
       // Add SDK libs path, if any
       PresetLibPath:=GetUserDir;
@@ -198,7 +198,7 @@ begin
           AddCrossOption(S);
           S:=ConcatPaths([BasePath,CROSSLIBPATH,TargetCPUName+'-'+TargetOSName]);
           PresetLibPath:=ConcatPaths([S,SubArchName]);
-          if DirectoryExists(PresetLibPath) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(PresetLibPath));
+          if DirectoryExists(PresetLibPath) then AddFPCCFGSnippet('-Fl'+PresetLibPath);
         end;
       end;
       AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
@@ -352,14 +352,14 @@ begin
       if (FSubArch=TSUBARCH.lx6) then
       begin
         FilePath:=ConcatPaths([S,'components','esp_rom','esp32','ld']);
-        if DirectoryExists(FilePath) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FilePath));
+        if DirectoryExists(FilePath) then AddFPCCFGSnippet('-Fl'+FilePath);
         FilePath:=ConcatPaths([S,'components','esp32','ld']);
-        if DirectoryExists(FilePath) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FilePath));
+        if DirectoryExists(FilePath) then AddFPCCFGSnippet('-Fl'+FilePath);
       end;
       if (FSubArch=TSUBARCH.lx106) then
       begin
         FilePath:=ConcatPaths([S,'components','esp8266','ld']);
-        if DirectoryExists(FilePath) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FilePath));
+        if DirectoryExists(FilePath) then AddFPCCFGSnippet('-Fl'+FilePath);
       end;
     end;
 

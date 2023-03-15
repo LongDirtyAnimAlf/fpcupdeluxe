@@ -102,9 +102,9 @@ begin
   begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Xd');
-    AddFPCCFGSnippet('-Fl'+ExcludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-Fl'+LibsPath);
     if DirectoryExists(IncludeTrailingPathDelimiter(FLibsPath)+'vc4') then
-      AddFPCCFGSnippet('-Fl'+LibsPath+'vc4');
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(LibsPath)+'vc4');
   end;
 end;
 

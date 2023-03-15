@@ -187,13 +187,11 @@ begin
     // Add linker search path
     aOption:='-XR'+LibsPath;
     AddFPCCFGSnippet(aOption);
-    AddCrossOption(aOption);
 
     // Add library path to be sure ...
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr'+DirectorySeparator+'lib';
     aOption:='-Fl'+LibsPath;
     AddFPCCFGSnippet(aOption);
-    AddCrossOption(aOption);
 
     // Add library path when cross-compiling to be sure ...
     aOption:='-Fl'+FLibsPath+DirectorySeparator+'system';

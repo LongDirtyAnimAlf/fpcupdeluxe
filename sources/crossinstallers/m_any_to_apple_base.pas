@@ -228,7 +228,7 @@ begin
     s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
     s:=ExpandFileName(s);
     s:=ExcludeTrailingBackslash(s);
-    AddFPCCFGSnippet('-Fl'+LibsPath+'system'+DirectorySeparator);
+    AddFPCCFGSnippet('-Fl'+LibsPath+'system');
     AddFPCCFGSnippet('-Xd');
     AddFPCCFGSnippet('-XR'+s);
 

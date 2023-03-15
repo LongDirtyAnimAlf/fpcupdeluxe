@@ -255,7 +255,6 @@ begin
       if DirectoryExists(s) then
       begin
         FLibsPath:=s;
-        s:=s+DirectorySeparator;
         AddFPCCFGSnippet('-Fl'+s);
       end;
 
@@ -263,7 +262,6 @@ begin
       if DirectoryExists(s) then
       begin
         FLibsPath:=s;
-        s:=s+DirectorySeparator;
         AddFPCCFGSnippet('-Fl'+s);
       end;
 
@@ -271,7 +269,6 @@ begin
       if DirectoryExists(s) then
       begin
         FLibsPath:=s;
-        s:=s+DirectorySeparator;
         AddFPCCFGSnippet('-Fl'+s);
       end;
 
@@ -279,7 +276,6 @@ begin
       if DirectoryExists(s) then
       begin
         FLibsPath:=s;
-        s:=s+DirectorySeparator;
         AddFPCCFGSnippet('-Fl'+s);
       end;
     end;
@@ -338,7 +334,7 @@ begin
     begin
       s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'32';
       if DirectoryExists(s) then
-        AddFPCCFGSnippet('-Fl'+s+DirectorySeparator);
+        AddFPCCFGSnippet('-Fl'+s);
     end;
     {$endif CPU64}
     {$ifdef CPU32}
@@ -346,7 +342,7 @@ begin
     begin
       s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'64';
       if DirectoryExists(s) then
-        AddFPCCFGSnippet('-Fl'+s+DirectorySeparator);
+        AddFPCCFGSnippet('-Fl'+s);
     end;
     {$endif CPU32}
     {$ENDIF UNIX}

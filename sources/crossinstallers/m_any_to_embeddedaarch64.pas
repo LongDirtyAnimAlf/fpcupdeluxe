@@ -90,13 +90,13 @@ begin
 
     if PerformLibraryPathMagic(S) then
     begin
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(S));
+      AddFPCCFGSnippet('-Fl'+S);
     end
     else
     begin
       // If we do not have magic, add subarch to enclose
       AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(S));
+      AddFPCCFGSnippet('-Fl'+S);
       AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
     end;
   end;
