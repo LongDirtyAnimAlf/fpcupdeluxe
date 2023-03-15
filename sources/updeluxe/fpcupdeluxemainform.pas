@@ -760,10 +760,19 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) then
   begin
-
+    if (ExistWordInString(PChar(s),'fatal: no tag exactly matches')) then
+    begin
+      Handled:=true;
+    end
+    else
     if (ExistWordInString(PChar(s),'fatal: Remote branch')) then
     begin
       EchoInfo('We have had a GIT branch failure. Should be non-fatal !');
+    end
+    else
+    if (ExistWordInString(PChar(s),'fatal: HEAD does not point to a branch')) then
+    begin
+      Handled:=true;
     end
     else
     begin
@@ -1041,17 +1050,14 @@ begin
 
   *)
 
-  if ( Assigned(FPCUpManager) AND (NOT FPCUpManager.SwitchURL) ) then
+  if (ExistWordInString(PChar(s),URL_ERROR)) then
   begin
-    if (ExistWordInString(PChar(s),URL_ERROR)) then
-    begin
-      s:=
-      'Fpcupdeluxe encountered a (fatal) URL error.' + sLineBreak +
-      'Most common cause: overwtiting an existing install.' + sLineBreak +
-      'Sources with different URL cannot be installed in same directory.' + sLineBreak +
-      'Please select an new install directory when changing versions.';
-      Application.MessageBox(PChar(s), PChar('URL mismatch error'), MB_ICONSTOP);
-    end;
+    s:=
+    'Fpcupdeluxe encountered a (fatal) URL error.' + sLineBreak +
+    'Most common cause: overwtiting an existing install.' + sLineBreak +
+    'Sources with different URL cannot be installed in same directory.' + sLineBreak +
+    'Please select an new install directory when changing versions.';
+    Application.MessageBox(PChar(s), PChar('URL mismatch error'), MB_ICONSTOP);
   end;
 
   if Handled then exit;
@@ -1853,8 +1859,12 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) OR (ExistWordInString(PChar(s),'Memory warning:',[soWholeWord])) then
   begin
-    // skip git fatal messages ... they are not that fatal ... but not sure yet !
     // if (Pos('fatal: not a git repository',lowercase(s))=0) then
+    if (ExistWordInString(PChar(s),'fatal: no tag exactly matches')) OR (ExistWordInString(PChar(s),'fatal: HEAD does not point to a branch')) then
+    begin
+      // skip this: not fatal at all.
+    end
+    else
     begin
       FG      := TColor($0060FF);
       BG      := TColor($402000);
@@ -4015,8 +4025,6 @@ begin
 
   FPCupManager.UseWget:=Form2.UseWget;
 
-  FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
-
   // set custom FPC compiler by special user input through setup+
   FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTCPU(GetSourceCPU),GetTOS(GetSourceOS),TSUBARCH.saNone);
 
@@ -4395,8 +4403,6 @@ begin
       Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
       Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
 
-      Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',False);
-
       Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
 
       Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
@@ -4566,8 +4572,6 @@ begin
 
       WriteString('Patches','FPCPatches',Form2.FPCPatches);
       WriteString('Patches','LazarusPatches',Form2.LazPatches);
-
-      WriteBool('General','AutoSwitchURL',Form2.AutoSwitchURL);
 
       WriteBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 

@@ -53,14 +53,10 @@ begin
   if result then
   begin
     FLibsFound:=True;
-    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
-    //'-XR'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+
-    //'-FL/usr/libexec/ld-elf32.so.1'; {buildfaq 3.3.1: the name of the dynamic linker on the target}
-    '-k-L'+LineEnding+
-    '-k'+FLibsPath+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath); // buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries
+    AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
+    AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-k-L');
+    AddFPCCFGSnippet('-k'+LibsPath);
   end
   else ShowInfo('Searched but did not find 32bit libs in '+FLibsPath+'. Please install lib32 first !!');
 end;
@@ -98,7 +94,7 @@ begin
   begin
     FBinsFound:=true;
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
   end;
 end;
 

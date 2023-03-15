@@ -1,5 +1,5 @@
 unit m_crosswinarm64;
-{ Cross compiles from Windows x86/32 bit to Windows x64
+{ Cross compiles from Windows x86 bit to Windows arm64
 Copyright (C) 2012-2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -104,8 +104,9 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    if (Length(FBinUtilsPath)>0) then AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
+    AddFPCCFGSnippet('-O-'); // Diable optimizer for now.
   end;
 end;
 

@@ -116,7 +116,7 @@ begin
     FBinsFound:=true;
     // On Windows, Java often resides inside a directory with spaces; FPC does not like spaces, so use DOS-names.
     FBinUtilsPath:=ExtractShortPathNameUTF8(ExtractFilePath(GetJava));
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     SearchBinUtilsInfo(result);
   end
   else

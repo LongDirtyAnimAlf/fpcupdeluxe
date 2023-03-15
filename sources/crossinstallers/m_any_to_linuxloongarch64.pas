@@ -83,7 +83,7 @@ begin
   begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Xd'); // do not pass parent /lib etc dir to linker}
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-Fl'+LibsPath);
     DynLinker:='';
     if FileExists(ConcatPaths([FLibsPath,LINKER1])) then
     begin
@@ -149,7 +149,7 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
   end;
 end;

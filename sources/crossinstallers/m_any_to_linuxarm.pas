@@ -89,9 +89,7 @@ begin
   begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Xd');
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    //AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
-    //AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib32'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
+    AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     AddFPCCFGSnippet('-Xr/usr/lib');
   end
   else
@@ -294,7 +292,7 @@ begin
     //if hardfloat then ShowInfo('Found hardfloat binary utilities. Please make sure you did NOT specified -dFPC_ARMEL in your FPCOPT !',etWarning);
 
     // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
   end;
 end;

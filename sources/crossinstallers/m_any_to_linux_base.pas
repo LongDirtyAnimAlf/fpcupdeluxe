@@ -215,7 +215,7 @@ begin
   begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Xd'); // do not pass parent /lib etc dir to linker}
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); // the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-Fl'+LibsPath); // the directory to look for the target  libraries}
 
     //if CheckMultilib then
     if false then
@@ -296,7 +296,7 @@ begin
       if FBinsFound then
       begin
         s:='';
-        RunCommand(IncludeTrailingPathDelimiter(FBinUtilsPath)+FBinUtilsPrefix+'ld',['--verbose'], s,[poUsePipes, poStderrToOutPut],swoHide);
+        RunCommand(BinUtilsPath+FBinUtilsPrefix+'ld',['--verbose'], s,[poUsePipes, poStderrToOutPut],swoHide);
         repeat
           i:=Pos(SDSTARTMAGIC,s);
           if (i>0) then
@@ -315,7 +315,7 @@ begin
                   if result then
                   begin
                     FLibsFound:=True;
-                    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); // the directory to look for the target  libraries}
+                    AddFPCCFGSnippet('-Fl'+LibsPath); // the directory to look for the target  libraries}
                   end;
                 end;
               end;
@@ -581,7 +581,7 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
   end;
 end;

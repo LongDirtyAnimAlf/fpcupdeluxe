@@ -191,7 +191,7 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
   end;
 end;

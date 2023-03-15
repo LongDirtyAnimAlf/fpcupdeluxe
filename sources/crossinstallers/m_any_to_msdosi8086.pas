@@ -101,7 +101,7 @@ begin
     FLibsFound:=true;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     //todo: check if -XR is realy needed for fpc root dir Prepend <x> to all linker search paths
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     SearchLibraryInfo(result);
   end;
   if not result then
@@ -160,10 +160,10 @@ begin
       ShowInfo('This compiler requires -Wm (memory model) !',etWarning);
       {$IFDEF DARWIN}
       ShowInfo('Added -WmLarge to CROSSOPT.',etWarning);
-      FCrossOpts.Add('-WmLarge');
+      AddCrossOption('-WmLarge');
       {$ELSE}
       ShowInfo('Added -WmMedium to CROSSOPT.',etWarning);
-      FCrossOpts.Add('-WmMedium');
+      AddCrossOption('-WmMedium');
       {$ENDIF DARWIN}
     end;
 
@@ -172,16 +172,16 @@ begin
     if StringListStartsWith(FCrossOpts,'-CX')=-1 then
     begin
       ShowInfo('This compiler requires -CX (create smartlinked libraries). Added it to CROSSOPT.',etWarning);
-      FCrossOpts.Add('-CX');
+      AddCrossOption('-CX');
     end;
     if (StringListStartsWith(FCrossOpts,'-XXs')=-1) OR (StringListStartsWith(FCrossOpts,'-XX')=-1) then
     begin
       ShowInfo('This compiler requires -XX (smartlinking). Added it (and stripping) to CROSSOPT.',etWarning);
-      FCrossOpts.Add('-XX');
-      FCrossOpts.Add('-Xs');
+      AddCrossOption('-XX');
+      AddCrossOption('-Xs');
     end;
 
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));{search this directory for compiler utilities}
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);{search this directory for compiler utilities}
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);{Prepend the binutils names}
     // these are required ... see above.
     AddFPCCFGSnippet('-XX');{Smartlink}

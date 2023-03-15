@@ -231,7 +231,6 @@ type
     FSoftFloat:boolean;
     FOnlinePatching:boolean;
     FUseGitClient:boolean;
-    FSwitchURL:boolean;
     FNativeFPCBootstrapCompiler:boolean;
     FForceLocalRepoClient:boolean;
     FSequencer: TSequencer;
@@ -370,7 +369,6 @@ type
     property SoftFloat:boolean read FSoftFloat write FSoftFloat;
     property OnlinePatching:boolean read FOnlinePatching write FOnlinePatching;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
-    property SwitchURL:boolean read FSwitchURL write FSwitchURL;
     property NativeFPCBootstrapCompiler:boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
     property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
     property SolarisOI:boolean read FSolarisOI write FSolarisOI;
@@ -1588,7 +1586,6 @@ begin
 
   FSoftFloat:=true;
   FOnlinePatching:=false;
-  FSwitchURL:=false;
   FSolarisOI:=false;
   FMUSL:=false;
   FFPCUnicode:=false;
@@ -2247,7 +2244,6 @@ begin
     FInstaller.OnlinePatching:=FParent.OnlinePatching;
     FInstaller.Log:=FParent.FLog;
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
-    FInstaller.SwitchURL:=FParent.SwitchURL;
     if FParent.SolarisOI then FInstaller.SolarisOI:=true {else if FInstaller.SolarisOI then FParent.SolarisOI:=true};
     if FParent.MUSL then FInstaller.MUSL:=true {else if FInstaller.MUSL then FParent.MUSL:=true};
     FInstaller.Ultibo:=Ultibo;

@@ -40,6 +40,7 @@ uses
 const
   // Custom return codes
   FRET_LOCAL_REMOTE_URL_NOMATCH = repoclient.FRET_LOCAL_REMOTE_URL_NOMATCH;
+  FRET_LOCAL_REMOTE_TAG_NOMATCH = repoclient.FRET_LOCAL_REMOTE_TAG_NOMATCH;
   FRET_WORKING_COPY_TOO_OLD = repoclient.FRET_WORKING_COPY_TOO_OLD;
   FRET_UNKNOWN_REVISION = repoclient.FRET_UNKNOWN_REVISION;
 
@@ -49,17 +50,17 @@ type
     procedure Init;
   protected
     procedure CheckOut(UseForce:boolean=false); override;
-    function GetProxyCommand: string;
-    function GetLocalRevision: string; override;
-    function GetRepoExecutable: string; override;
-    function GetRepoExecutableName: string; override;
-    function FindRepoExecutable: string; override;
-    function GetRepositoryURL:string; override;
+    function  GetProxyCommand: string;
+    function  GetLocalRevision: string; override;
+    function  GetRepoExecutable: string; override;
+    function  GetRepoExecutableName: string; override;
+    function  FindRepoExecutable: string; override;
+    function  GetRepositoryURL:string; override;
+    procedure SetDesiredTag(AValue: string); override;
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
     function GetDiffAll: string; override;
-    procedure SwitchURL; override;
     procedure LocalModifications(var FileList: TStringList); override;
     function LocalRepositoryExists: boolean; override;
     procedure Log(var Log: TStringList); override;
@@ -91,14 +92,14 @@ begin
 end;
 
 function TGitClient.FindRepoExecutable: string;
-var
-  rv:integer;
+//var
+//  rv:integer;
 begin
   Result := FRepoExecutable;
   // Look in path
   // Windows: will also look for <gitName>.exe
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := Which(RepoExecutableName+GetExeExt);
+    FRepoExecutable := Which(RepoExecutableName);
 
   {$IFDEF MSWINDOWS}
   // Git on Windows can be a .cmd file
@@ -192,6 +193,12 @@ begin
   end;
 end;
 
+procedure TGitClient.SetDesiredTag(AValue: string);
+begin
+  inherited;
+  ExportOnly:=(Length(DesiredTag)>0);
+end;
+
 procedure TGitClient.CheckOut(UseForce:boolean=false);
 // SVN checkout is more or less equivalent to git clone
 var
@@ -206,68 +213,25 @@ begin
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
 
-  // Actual clone/checkout
-  if ExportOnly then
+  Command:=' clone --recurse-submodules';
+
+  if ExportOnly then Command:=Command+' --depth=1';
+
+  Branch:='';
+  if (DesiredBranch<>'') then
   begin
-    {
-    TargetFile := SysUtils.GetTempFileName;
-    Command := ' archive --format zip --output ' + TargetFile + ' --prefix=/ --remote=' + Repository + ' master';
-    FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Verbose);
-    FReturnCode := TInstaller(Parent).ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TargetFile,Verbose);
-    SysUtils.DeleteFile(TargetFile);
-    }
-    if DirectoryExists(IncludeTrailingPathDelimiter(LocalRepository)+'.git') then
-    begin
-      Command:=DoubleQuoteIfNeeded(FRepoExecutable) + ' fetch --all';
-      TInstaller(Parent).ExecuteCommandInDir(Command, LocalRepository, Verbose);
-      if (DesiredBranch<>'') then
-        Command:=DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard origin/'+DesiredBranch
-      else
-        Command:=DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard';
-      TInstaller(Parent).ExecuteCommandInDir(Command, LocalRepository, Verbose);
-      Command:='';
-    end
-    else
-    begin
-      // initial : very shallow clone = fast !!
-      Command := ' clone --recurse-submodules --depth 1';
-    end;
+    Branch := DesiredBranch;
   end
   else
+  if (Length(DesiredTag)>0) AND (Uppercase(trim(DesiredTag)) <> 'MAIN') AND (Uppercase(trim(DesiredTag)) <> 'MASTER') then
   begin
-    //On Haiku and alikes, always get a shallow copy of the repo
-    {$if defined(Haiku) OR defined(AROS) OR defined(Morphos) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2))}
-    Command := ' clone --recurse-submodules --depth 1';
-    {$else}
-    Command := ' clone --recurse-submodules';
-    {$endif}
+    Branch := DesiredTag;
   end;
+  if (Length(Branch)>0) then Command := Command+ ' --branch ' + Branch;
 
-  if (Command<>'') then
-  begin
-    Branch:='';
-    if (DesiredBranch<>'') then
-    begin
-      Branch := DesiredBranch;
-    end
-    else
-    if (Length(DesiredRevision)>0) AND (Uppercase(trim(DesiredRevision)) <> 'HEAD') then
-    begin
-      Branch := DesiredRevision;
-    end
-    else
-    if (Length(DesiredTag)>0) AND (Uppercase(trim(DesiredTag)) <> 'MAIN') AND (Uppercase(trim(DesiredTag)) <> 'MASTER') then
-    begin
-      Branch := DesiredTag;
-    end;
-    if (Length(Branch)>0) then Command := Command+ ' --branch ' + Branch;
+  Command := Command + ' ' +  Repository + ' ' + LocalRepository;
 
-    Command := Command + ' ' +  Repository + ' ' + LocalRepository;
-
-    FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
-    FReturnOutput := Output;
-  end
-  else FReturnCode := 0;
+  FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
 
   if (ReturnCode=AbortedExitCode) then exit;
 
@@ -304,6 +268,20 @@ begin
     TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Verbose);
   end;
 
+  (*
+
+  if (DesiredRevision<>'') then
+  begin
+    if ExportOnly then
+    begin
+      Command:= ' fetch --depth=1 origin '+ DesiredRevision;
+      FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+    end;
+
+    Command:= ' checkout '+ DesiredRevision;
+    FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+  end;
+  *)
 end;
 
 procedure TGitClient.CheckOutOrUpdate;
@@ -524,42 +502,6 @@ begin
   end;
 end;
 
-procedure TGitClient.SwitchURL;
-var
-  Command: string = '';
-  Output: string = '';
-  RetryAttempt: integer;
-begin
-  FReturnCode := 0;
-  if ExportOnly then exit;
-  if NOT ValidClient then exit;
-
-  // Actual clone/checkout
-  Command := ' remote set-url origin ' +  Repository;
-  FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
-
-  // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
-  RetryAttempt := 1;
-  if (FReturnCode <> 0) then
-  begin
-    // if we have a proxy, set it now !
-    if Length(GetProxyCommand)>0 then TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, Verbose);
-    while (FReturnCode <> 0) and (RetryAttempt < ERRORMAXRETRIES) do
-    begin
-      Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
-      RetryAttempt := RetryAttempt + 1;
-    end;
-  end;
-
-  if (FReturnCode = 0) then
-  begin
-    Command := ' fetch --tags';
-    FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
-  end;
-end;
-
-
 procedure TGitClient.LocalModifications(var FileList: TStringList);
 var
   AllFiles: TStringList;
@@ -594,7 +536,7 @@ var
 begin
   result := false;
   FReturnCode := 0;
-  if ExportOnly then exit;
+  //if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
 
@@ -654,6 +596,30 @@ begin
         Repository              := URL;
       end;
     end;
+
+    if result then
+    begin
+      if (ExportOnly AND (Length(DesiredTag)>0)) then
+      begin
+        // Check tag
+        FReturnCode:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags'],LocalRepository, Output, '', Verbose);
+        if (FReturnCode = 0) then
+        begin
+          Output:=Trim(Output);
+          if (Length(Output)>0) AND (Trim(Output)<>DesiredTag) then
+          begin
+            // There is a repository here, but with different tag
+            result         := false;
+            FLocalRevision := FRET_UNKNOWN_REVISION;
+            FReturnCode    := FRET_LOCAL_REMOTE_TAG_NOMATCH;
+            Repository     := URL;
+          end;
+
+        end;
+
+      end;
+    end;
+
   end;
 end;
 
@@ -710,12 +676,15 @@ begin
         FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--long','--always'],LocalRepository, Output, '', Verbose);
         if (FReturnCode = 0) then
         begin
-          // git describe will *always* output the most reasonable revision info,
-          // if it outputs anything at all we can just use it as it is.
           // if there are any tags in this branch it will output "<tag>-<ahead>-g<hash>"
           // and if there are no tags then it will just output "<hash>",
-          // both of these are guaranteed to be commit-ish names, usable in other git commands.
           FLocalRevision := trim(Output);
+          // Do we have this format : branchname-xxxx-gxxxx
+          if (OccurrencesOfChar(FLocalRevision,'-')>=2) then
+          begin
+            i:=RPos('-g',FLocalRevision);
+            if (i>0) then FLocalRevision:=Copy(FLocalRevision,i+2,MaxInt);
+          end;
         end
       end;
 
@@ -740,13 +709,14 @@ begin
         FReturnCode := TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--all','--long','--always'],LocalRepository, Output, '', Verbose);
         if (FReturnCode = 0) then
         begin
-          if (NOT AnsiStartsText('remotes/',Output)) then
+          i:=RPos('/',Output);
+          if (i>0) then Delete(Output,1,i);
+          FLocalRevision := trim(Output);
+          // Do we have this format : branchname-xxxx-gxxxx
+          if (OccurrencesOfChar(FLocalRevision,'-')>=2) then
           begin
-            i:=RPos('/',Output);
-            if (i>0) then Delete(Output,1,i);
-            // Do we have this format : branchname-xxxx-gxxxx
-            if (OccurrencesOfChar(Output,'-')>=2) then
-              FLocalRevision := trim(Output);
+            i:=RPos('-g',FLocalRevision);
+            if (i>0) then FLocalRevision:=Copy(FLocalRevision,i+2,MaxInt);
           end;
         end;
       end;
@@ -875,10 +845,14 @@ begin
 
   Output:='';
 
-  FReturnCode:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--exact-match','HEAD'],LocalRepository, Output, '', Verbose);
-  if (FReturnCode<>0) then
+  FReturnCode:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','HEAD'],LocalRepository, Output, '', Verbose);
+  if (FReturnCode<>0) OR (Length(Trim(Output))=0) then
+    FReturnCode:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--exact-match','HEAD'],LocalRepository, Output, '', Verbose);
+  if (FReturnCode<>0) OR (Length(Trim(Output))=0) then
+    FReturnCode:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--tags','--always','HEAD'],LocalRepository, Output, '', Verbose);
+  if (FReturnCode<>0) OR (Length(Trim(Output))=0) then
     FReturnCode:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['describe','--contains','--all','HEAD'],LocalRepository, Output, '', Verbose);
-  if (FReturnCode<>0) then
+  if (FReturnCode<>0) OR (Length(Trim(Output))=0) then
     FReturnCode:=TInstaller(Parent).ExecuteCommandInDir(FRepoExecutable,['name-rev','--name-only','HEAD'],LocalRepository, Output, '', Verbose);
 
   Output:=Trim(Output);

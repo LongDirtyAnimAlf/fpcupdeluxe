@@ -134,6 +134,8 @@ type
   { TCrossInstaller }
   TCrossInstaller = class(TObject)
   private
+    function GetLibsPath:string;
+    function GetBinutilsPath:string;
     function GetCrossModuleName:string;
     function GetSourceCPUName:string;
     function GetSourceOSName:string;
@@ -177,7 +179,9 @@ type
     // Note: the libraries should be presumably under the basepath using the Lazarus naming convention??
     function GetLibsLCL({%H-}LCL_Platform:string; {%H-}Basepath:string):boolean;virtual;
     {$endif}
-    procedure AddFPCCFGSnippet(aSnip: string);
+    procedure AddFPCCFGSnippet(aSnip: string; AddToCrossOptions:boolean=true);
+    procedure AddCrossOption(aOption: string);
+
     procedure ReplaceFPCCFGSnippet(aOldSnip,aNewSnip: string);
     procedure SetFPCVersion(aVersion: string);
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
@@ -202,9 +206,9 @@ type
     // Does not include the #IFDEF CPU<x> and #ENDIF parts where the target cpu is filled in
     property FPCCFGSnippet: string read FFPCCFGSnippet;
     // Path where libraries used for target systems are. May be empty if not needed.
-    property LibsPath:string read FLibsPath;
+    property LibsPath:string read GetLibsPath;
     // Path where binutils used for target systems are. May be empty if not used.
-    property BinUtilsPath:string read FBinUtilsPath;
+    property BinUtilsPath:string read GetBinutilsPath;
     // Indicates if binutils directory is used as the last entry in PATH when cross compiling.
     // Can be useful if make scripts forget to include the complete path to the binutils path
     // (e.g. some versions of the DOS crosscompiler)
@@ -248,7 +252,7 @@ procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
 {$endif LCL}
 
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
-function GetExeExt: string;
+function GetExeExt(const aOS:TOS=TOS.osNone): string;
 
 var
   //FPCTargetValid:TFPCTargetValid;
@@ -491,13 +495,23 @@ begin
   result:=true;
 end;
 
-function GetExeExt: string;
+function GetExeExt(const aOS:TOS=TOS.osNone): string;
 begin
-  {$IFDEF WINDOWS}
-  Result:='.exe';
-  {$ELSE}
-  Result:='';
-  {$ENDIF}
+  if (aOS=TOS.osNone) then
+  begin
+    {$IFDEF WINDOWS}
+    result:='.exe';
+    {$ELSE}
+    result:='';
+    {$ENDIF}
+  end
+  else
+  begin
+    if aOS in [TOS.win32,TOS.win64,TOS.wince] then
+      result:='.exe'
+    else
+      result:='';
+  end;
 end;
 
 { TCrossInstaller }
@@ -506,6 +520,16 @@ begin
   if not assigned(CrossInstallers) then
     CrossInstallers:=TStringList.Create;
   CrossInstallers.AddObject(Platform,TObject(aCrossInstaller));
+end;
+
+function TCrossInstaller.GetLibsPath:string;
+begin
+  result:=ExcludeTrailingPathDelimiter(FLibsPath);
+end;
+
+function TCrossInstaller.GetBinutilsPath:string;
+begin
+  result:=ExcludeTrailingPathDelimiter(FBinUtilsPath);
 end;
 
 function TCrossInstaller.GetCrossModuleName:string;
@@ -533,7 +557,7 @@ begin
   result:=GetABI(ABI);
 end;
 
-procedure TCrossInstaller.AddFPCCFGSnippet(aSnip: string);
+procedure TCrossInstaller.AddFPCCFGSnippet(aSnip: string; AddToCrossOptions:boolean);
 var
   aSnippd:string;
 begin
@@ -561,6 +585,26 @@ begin
   end
   else FFPCCFGSnippet:=aSnippd;
 
+  if AddToCrossOptions then AddCrossOption(aSnip);
+
+end;
+
+procedure TCrossInstaller.AddCrossOption(aOption: string);
+var
+  index:integer;
+  compileroption,compilerswitch:string;
+begin
+  compileroption:=Trim(aOption);
+  if (Length(compileroption)<3) then exit;
+  if compileroption[1]='-' then
+  begin
+    compilerswitch:=Copy(compileroption,1,3);
+    index:=StringListStartsWith(FCrossOpts,compilerswitch,0,True);
+    if (index<>-1) then
+      FCrossOpts.Strings[index]:=compileroption
+    else
+      FCrossOpts.Add(compileroption);
+  end;
 end;
 
 procedure TCrossInstaller.ReplaceFPCCFGSnippet(aOldSnip,aNewSnip: string);

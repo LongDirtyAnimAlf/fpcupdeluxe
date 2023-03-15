@@ -69,10 +69,8 @@ Const
 
   MAXCONNECTIONRETRIES=2;
   {$ifdef Windows}
-  GetExeExt='.exe';
   GetLibExt='.dll';
   {$else}
-  GetExeExt='';
   GetLibExt='.so';
   {$endif}
 

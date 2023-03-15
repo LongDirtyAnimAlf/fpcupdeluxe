@@ -172,7 +172,7 @@ begin
       begin
         S:='-Fl'+ExtractFilePath(S);
         AddFPCCFGSnippet(S);
-        FCrossOpts.Add(S+' ');
+        AddCrossOption(S);
       end;
 
       // Check tools deployment version
@@ -194,8 +194,8 @@ begin
         if (Length(S)<>0) then
         begin
           S:='-WP'+S;
-          FCrossOpts.Add(S+' ');
           AddFPCCFGSnippet(S);
+          AddCrossOption(S);
           S:=ConcatPaths([BasePath,CROSSLIBPATH,TargetCPUName+'-'+TargetOSName]);
           PresetLibPath:=ConcatPaths([S,SubArchName]);
           if DirectoryExists(PresetLibPath) then AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(PresetLibPath));
@@ -290,7 +290,7 @@ begin
     if (FSubArch<>TSUBARCH.saNone) then AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
 
     // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
 
     if (FSubArch=TSUBARCH.lx6) then AddFPCCFGSnippet('-Wpesp32');

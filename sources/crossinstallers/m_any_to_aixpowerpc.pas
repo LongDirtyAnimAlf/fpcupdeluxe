@@ -97,12 +97,12 @@ begin
     FLibsFound:=true;
 
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     // http://wiki.freepascal.org/FPC_AIX_Port#Cross-compiling
-    AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-XR'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
 
-    FCrossOpts.Add('-XR'+ExcludeTrailingPathDelimiter(FLibsPath)+' ');
+    AddCrossOption('-XR'+LibsPath);
 
     SearchLibraryInfo(result);
   end
@@ -161,7 +161,7 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
+    AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names}
   end;
 end;

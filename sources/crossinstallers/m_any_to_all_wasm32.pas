@@ -72,7 +72,7 @@ begin
   if result then
   begin
     FLibsFound:=True;
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-Fl'+LibsPath);
   end
   else
   begin
@@ -179,7 +179,7 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
     {$ifdef UNIX}
     //AddFPCCFGSnippet('-Cg-'; {Disable PIC code};

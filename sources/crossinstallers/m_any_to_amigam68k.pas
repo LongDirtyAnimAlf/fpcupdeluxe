@@ -77,7 +77,7 @@ begin
   if result then
   begin
     FLibsFound:=True;
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-Fl'+LibsPath);
     AddFPCCFGSnippet('-Xr/usr/lib');
   end;
 
@@ -128,7 +128,7 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
   end;
 end;

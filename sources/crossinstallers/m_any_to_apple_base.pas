@@ -223,13 +223,13 @@ begin
   if result then
   begin
     FLibsFound:=True;
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-Fl'+LibsPath);
 
     s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
     s:=ExpandFileName(s);
     s:=ExcludeTrailingBackslash(s);
 
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
+    AddFPCCFGSnippet('-Fl'+LibsPath+'system'+DirectorySeparator);
     AddFPCCFGSnippet('-k-framework -kAppKit');
     AddFPCCFGSnippet('-k-framework -kFoundation');
     AddFPCCFGSnippet('-k-framework -kCoreFoundation');
@@ -435,7 +435,7 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
+    AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
     AddFPCCFGSnippet('-XX');
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
   end;

@@ -100,7 +100,7 @@ begin
     AddFPCCFGSnippet('-Xd');
     AddFPCCFGSnippet('-Fl'+ExcludeTrailingPathDelimiter(FLibsPath));
     if DirectoryExists(IncludeTrailingPathDelimiter(FLibsPath)+'vc4') then
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'vc4');
+      AddFPCCFGSnippet('-Fl'+LibsPath+'vc4');
   end;
 end;
 
@@ -211,7 +211,7 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
   end;
 end;

@@ -74,8 +74,8 @@ begin
   begin
     FLibsFound:=true;
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    //AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    //AddFPCCFGSnippet('-XR'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     AddFPCCFGSnippet('-k"-rpath=/usr/X11R6/lib"');
     AddFPCCFGSnippet('-k"-rpath=/usr/X11R7/lib"');
     AddFPCCFGSnippet('-k"-rpath=/usr/pkg/lib"');
@@ -129,7 +129,7 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
+    AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names}
   end;
 end;

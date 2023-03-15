@@ -104,7 +104,7 @@ begin
   if result then
   begin
     FLibsFound:=True;
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-Fl'+LibsPath);
     AddFPCCFGSnippet('-Xr/usr/lib');
   end;
 
@@ -182,7 +182,7 @@ begin
   begin
     FBinsFound:=true;
 
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
 
     (*
@@ -204,7 +204,7 @@ begin
     if i=-1 then
     begin
       aOption:='-Caelfv2';
-      FCrossOpts.Add(aOption+' ');
+      AddCrossOption(aOption);
       ShowInfo('Did not find any -Ca ABI parameter; using '+aOption+'.',etInfo);
     end else aOption:=Trim(FCrossOpts[i]);
     AddFPCCFGSnippet(aOption);
@@ -214,7 +214,7 @@ begin
     if i=-1 then
     begin
       aOption:='-Cb-';
-      FCrossOpts.Add(aOption+' ');
+      AddCrossOption(aOption);
       ShowInfo('Did not find any -Cb endianess parameter; using '+aOption+' (little endian).',etInfo);
     end
     else aOption:=Trim(FCrossOpts[i]);

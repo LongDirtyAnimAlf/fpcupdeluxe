@@ -1354,7 +1354,7 @@ begin
             end;
           end;
 
-          if (CrossInstaller.TargetCPU=TCPU.wasm32) then
+          if ((CrossInstaller.TargetCPU=TCPU.wasm32) OR ((CrossInstaller.TargetCPU=TCPU.aarch64) AND (CrossInstaller.TargetOS=TOS.win64))) then
           begin
             // wasm only works with -O-
             i:=pos('-O',Options);
@@ -1371,6 +1371,10 @@ begin
             begin
               Options:=Options+' -O-';
             end;
+          end;
+
+          if (CrossInstaller.TargetCPU=TCPU.wasm32) then
+          begin
             // wasm: remove debugging settings
             i:=pos('-g',Options);
             while (i<>0) do
@@ -1419,53 +1423,19 @@ begin
           {$endif}
 
           CrossOptions:='';
-
-          for i:=0 to CrossInstaller.CrossOpt.Count-1 do
-            CrossOptions:=CrossOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
-          CrossOptions:=TrimRight(CrossOptions);
-
-          if UseLibc then CrossOptions:=CrossOptions+' -dFPC_USE_LIBC';
-
-          if ((CrossInstaller.TargetCPU=TCPU.mipsel) AND (CrossInstaller.TargetOS=TOS.embedded)) then
-          begin
-            // prevents the addition of .module nomips16 pseudo-op : not all assemblers can handle this
-            CrossOptions:=CrossOptions+' -a5';
-          end;
-
-          if CrossInstaller.BinUtilsPrefix<>'' then
-          begin
-            // Earlier, we used regular OPT; using CROSSOPT is apparently more precise
-            CrossOptions:=CrossOptions+' -XP'+CrossInstaller.BinUtilsPrefix;
-            Processor.Process.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
-          end;
-
-          // ALF
-          // This needs to be investigated, if its necessary or may be transported towards the cross-installers themselves
-          if CrossInstaller.LibsPath<>''then
-          begin
-            {$ifndef Darwin}
-            CrossOptions:=CrossOptions+' -Xd';
-            CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
-            {$endif}
-          end;
-
           {$ifndef crosssimple}
-          if (MakeCycle=st_NativeCompiler) then
-          begin
-            // Only build with debug info
-            //CrossOptions:='-O1 -g -gl';
-            //CrossOptions:='-O1';
-            //Do not add cross-options when building native compiler
-            //Correct options will be taken from fpc.cfg
-            CrossOptions:='';
-          end;
+          if (MakeCycle<>st_NativeCompiler) then
           {$endif}
-
+          begin
+            for i:=0 to CrossInstaller.CrossOpt.Count-1 do
+              CrossOptions:=CrossOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
+            CrossOptions:=TrimRight(CrossOptions);
+            if UseLibc then CrossOptions:=CrossOptions+' -dFPC_USE_LIBC';
+          end;
           CrossOptions:=Trim(CrossOptions);
-
           if (Length(CrossOptions)>0) then
           begin
-            Processor.Process.Parameters.Add('CROSSOPT='+CrossOptions);
+            Processor.Process.Parameters.Add('CROSSOPT='+{MaybeQuotedSpacesOnly}(CrossOptions));
           end;
 
           {$ifdef Darwin}
@@ -1635,12 +1605,15 @@ begin
           if (ModuleName=_NATIVECROSSFPC) then
           begin
             s1:=GetCompilerName(CrossInstaller.TargetCPU);
+            s1:=ChangeFileExt(s1,m_crossinstaller.GetExeExt(CrossInstaller.TargetOS));
             s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
             if FileExists(s2) then
             begin
               s1:=ConcatPaths([FFPCCompilerBinPath,'native_'+GetFPCTarget(false)+'_'+GetCompilerName(CrossInstaller.TargetCPU)]);
+              s1:=ChangeFileExt(s1,m_crossinstaller.GetExeExt(CrossInstaller.TargetOS));
               SysUtils.DeleteFile(s1);
-              SysUtils.RenameFile(s2,s1);
+              FileCopy(s2,s1);
+              //SysUtils.DeleteFile(s2);
             end;
           end;
 
@@ -4418,7 +4391,7 @@ begin
         // Adding this won't hurt on Windows.
         // Adjust for that
         PlainBinPath:=SafeExpandFileName(SafeExpandFileName(FFPCCompilerBinPath+'..'+DirectorySeparator+'..'));
-        s:='-FD'+IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+';'+IncludeTrailingPathDelimiter(PlainBinPath);
+        s:='-FD'+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+';'+ExcludeTrailingPathDelimiter(PlainBinPath);
         ConfigText.Append(s);
         {$IFDEF UNIX}
         // Need to add appropriate library search path

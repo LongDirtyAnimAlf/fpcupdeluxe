@@ -17,7 +17,7 @@ object Form2: TForm2
     Left = 8
     Height = 124
     Top = 8
-    Width = 449
+    Width = 389
     Anchors = [akTop, akLeft, akRight]
     AutoSize = True
     BorderSpacing.Left = 8
@@ -27,7 +27,7 @@ object Form2: TForm2
     BorderSpacing.InnerBorder = 4
     Caption = 'Proxy settings'
     ClientHeight = 104
-    ClientWidth = 445
+    ClientWidth = 385
     ParentFont = False
     TabOrder = 0
     object Label1: TLabel
@@ -51,7 +51,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 23
-      Width = 336
+      Width = 276
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -65,7 +65,7 @@ object Form2: TForm2
       AnchorSideTop.Control = Label1
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 352
+      Left = 292
       Height = 15
       Top = 4
       Width = 89
@@ -80,7 +80,7 @@ object Form2: TForm2
       AnchorSideTop.Control = EditHTTPProxyHost
       AnchorSideRight.Control = Label2
       AnchorSideRight.Side = asrBottom
-      Left = 352
+      Left = 292
       Height = 23
       Top = 23
       Width = 89
@@ -122,7 +122,7 @@ object Form2: TForm2
       AnchorSideTop.Control = Label3
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 324
+      Left = 264
       Height = 15
       Top = 54
       Width = 117
@@ -136,7 +136,7 @@ object Form2: TForm2
       AnchorSideTop.Control = EditHTTPProxyUser
       AnchorSideRight.Control = Label4
       AnchorSideRight.Side = asrBottom
-      Left = 324
+      Left = 264
       Height = 23
       Top = 73
       Width = 117
@@ -585,10 +585,10 @@ object Form2: TForm2
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 634
+    Left = 574
     Height = 124
     Top = 8
-    Width = 200
+    Width = 260
     Anchors = [akTop, akRight]
     AutoSize = True
     BorderSpacing.Left = 8
@@ -598,7 +598,8 @@ object Form2: TForm2
     BorderSpacing.InnerBorder = 4
     Caption = 'Branch and revision'
     ClientHeight = 104
-    ClientWidth = 196
+    ClientWidth = 256
+    Constraints.MinWidth = 260
     ParentFont = False
     TabOrder = 2
     object EditFPCBranch: TEdit
@@ -609,7 +610,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 23
-      Width = 88
+      Width = 148
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -624,10 +625,10 @@ object Form2: TForm2
       Left = 8
       Height = 15
       Top = 4
-      Width = 61
+      Width = 83
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
-      Caption = 'FPC branch'
+      Caption = 'FPC branch/tag'
       ParentFont = False
     end
     object EditFPCRevision: TEdit
@@ -636,7 +637,7 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = GroupBoxFPCLazBranchRevision
       AnchorSideRight.Side = asrBottom
-      Left = 100
+      Left = 160
       Height = 23
       Top = 23
       Width = 92
@@ -650,11 +651,11 @@ object Form2: TForm2
     object LabelFPCRevision: TLabel
       AnchorSideLeft.Control = EditFPCRevision
       AnchorSideTop.Control = LabelFPCbranch
-      Left = 100
+      Left = 160
       Height = 15
       Top = 4
-      Width = 71
-      Caption = 'FPC hash/tag'
+      Width = 49
+      Caption = 'FPC hash'
       ParentFont = False
     end
     object LabelLazarusbranch: TLabel
@@ -664,9 +665,9 @@ object Form2: TForm2
       Left = 4
       Height = 15
       Top = 54
-      Width = 60
+      Width = 82
       BorderSpacing.Top = 8
-      Caption = 'Laz. branch'
+      Caption = 'Laz. branch/tag'
       ParentFont = False
     end
     object EditLazarusBranch: TEdit
@@ -677,7 +678,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 73
-      Width = 88
+      Width = 148
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -689,11 +690,11 @@ object Form2: TForm2
     object LabelLazarusRevision: TLabel
       AnchorSideLeft.Control = EditLazarusRevision
       AnchorSideTop.Control = LabelLazarusbranch
-      Left = 100
+      Left = 160
       Height = 15
       Top = 54
-      Width = 70
-      Caption = 'Laz. hash/tag'
+      Width = 48
+      Caption = 'Laz. hash'
       ParentFont = False
     end
     object EditLazarusRevision: TEdit
@@ -702,7 +703,7 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = GroupBoxFPCLazBranchRevision
       AnchorSideRight.Side = asrBottom
-      Left = 100
+      Left = 160
       Height = 23
       Top = 73
       Width = 92
@@ -719,7 +720,7 @@ object Form2: TForm2
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = GroupBoxFPCLazBranchRevision
-    Left = 465
+    Left = 405
     Height = 124
     Top = 8
     Width = 161

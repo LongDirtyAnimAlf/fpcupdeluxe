@@ -72,7 +72,6 @@ type
     //Revision number of local repository - the repository wide revision number regardless of what branch we are in
     property LocalRevisionWholeRepo: string read GetLocalRevisionWholeRepo;
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
-    procedure SwitchURL; override;
     procedure Revert; override;
     function CheckURL: boolean;
     // Run SVN log command for repository and put results into Log
@@ -153,7 +152,7 @@ begin
     // Look in path
     // Windows: will also look for <SVNName>.exe
     if not FileExists(FRepoExecutable) then
-      FRepoExecutable := Which(RepoExecutableName+GetExeExt);
+      FRepoExecutable := Which(RepoExecutableName);
 
     break;
   end;
@@ -751,64 +750,6 @@ begin
     end;
   finally
     AllFilesRaw.Free;
-  end;
-end;
-
-procedure TSVNClient.SwitchURL;
-var
-  Command: string;
-  Output: string = '';
-  ProxyCommand: string;
-  RetryAttempt: integer;
-begin
-  if ExportOnly then
-  begin
-    FReturnCode := 0;
-    exit;
-  end;
-
-  ProxyCommand:=GetProxyCommand;
-
-  // Invalidate our revision number cache
-  FLocalRevision := FRET_UNKNOWN_REVISION;
-  FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
-
-  Command := '';
-
-  if Length(UserName)>0 then
-  begin
-    // svn quirk : even if no password is needed, it needs an empty password.
-    // to prevent deleting this empty string, we fill it here with a special placeholder: emptystring, that gets replaced later, inside ExecuteCommand
-    if Length(Password)=0 then Password:='emptystring';
-    Command := ' --username ' + UserName + ' --password ' + Password;
-  end;
-
-  if (DesiredRevision = '') or (Uppercase(trim(DesiredRevision)) = 'HEAD') then
-    Command := ' switch ' + ProxyCommand + Command + ' --force --quiet --non-interactive --trust-server-cert -r HEAD ' + Repository + ' ' + DoubleQuoteIfNeeded(LocalRepository)
-  else
-    Command := ' switch ' + ProxyCommand + Command + ' --force --quiet --non-interactive --trust-server-cert -r ' + DesiredRevision + ' ' + Repository + ' ' + DoubleQuoteIfNeeded(LocalRepository);
-
-  // always perform a cleaup before doing anything else ... just to be sure !
-  FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose);
-  if (ReturnCode=AbortedExitCode) then exit;
-
-  FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
-  FReturnOutput := Output;
-  if (ReturnCode=AbortedExitCode) then exit;
-
-  // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
-  RetryAttempt := 1;
-  if (ReturnCode <> 0) then
-  begin
-    while (ReturnCode <> 0) and (RetryAttempt < ERRORMAXRETRIES) do
-    begin
-      //TInstaller(Parent).ExecuteCommandCompat(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + DoubleQuoteIfNeeded(LocalRepository), Verbose); //attempt again
-      //relax ... ;-)
-      Sleep(500);
-      FReturnCode := TInstaller(Parent).ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
-      FReturnOutput := Output;
-      RetryAttempt := RetryAttempt + 1;
-    end;
   end;
 end;
 

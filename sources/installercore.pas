@@ -460,7 +460,6 @@ type
     //FGit: string;
     FExternalTool: TExternalTool;
     FExternalToolResult: integer;
-    FSwitchURL: boolean;
     FSolarisOI: boolean;
     FMUSL: boolean;
     FFPCUnicode: boolean;
@@ -573,8 +572,6 @@ type
     property KeepLocalChanges: boolean write FKeepLocalChanges;
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
-    // auto switchover SVN URL
-    property SwitchURL: boolean write FSwitchURL;
     // do we have OpenIndiana instead of plain Solaris
     property SolarisOI: boolean write FSolarisOI;
     // do we have musl instead of libc
@@ -1796,35 +1793,11 @@ begin
 
   Output:=localinfotext+'Running '+UpperCase(aClient.RepoExecutableName)+' checkout or update';
   ReturnCode:=Length(aClient.DesiredRevision);
-  if (ReturnCode>0) then
-  begin
-    Output:=Output+' of revision '+aClient.DesiredRevision;
-    if ( ((aModuleName=_FPC) OR (aModuleName=_LAZARUS) OR (aModuleName=_LAZBUILD)) AND (aClient is TGitClient) ) then
-    begin
-      // A normal (short) githash is 7 or longer
-      if (ReturnCode<7) then
-      begin
-        s:=(aClient as TGitClient).GetGitHash;
-        if (Length(s)>0) then
-        begin
-          Output:=Output+' with GIT hash '+s;
-          aClient.DesiredTag := '';
-          aClient.DesiredBranch := s;
-          aClient.DesiredRevision:='';
-        end;
-      end
-      else
-      // A short githash is 7 or 8 or 10
-      // A long githash is 40
-      if ((ReturnCode=7) OR (ReturnCode=8) OR (ReturnCode=10) OR (ReturnCode=40)) then
-      begin
-        aClient.DesiredTag := '';
-        aClient.DesiredBranch := FDesiredRevision;
-        aClient.DesiredRevision:='';
-      end;
-
-    end;
-  end;
+  if (ReturnCode>0) then Output:=Output+' of revision '+aClient.DesiredRevision;
+  ReturnCode:=Length(aClient.DesiredBranch);
+  if (ReturnCode>0) then Output:=Output+' of branch '+aClient.DesiredBranch;
+  ReturnCode:=Length(aClient.DesiredTag);
+  if (ReturnCode>0) then Output:=Output+' of tag '+aClient.DesiredTag;
   Output:=Output+'.';
   Infoln(Output,etInfo);
 
@@ -3275,7 +3248,6 @@ end;
 function TInstaller.CheckModule(ModuleName: string): boolean;
 var
   aRepoClient:TRepoClient;
-  aEvent:TEventType;
 begin
   result:=true;
 
@@ -3284,11 +3256,6 @@ begin
 
   if NOT DirectoryExists(FSourceDirectory) then exit;
   if FExportOnly then exit;
-
-  if FSwitchURL then
-    aEvent:=etWarning
-  else
-    aEvent:=etError;
 
   aRepoClient:=GetSuitableRepoClient;
 
@@ -3316,7 +3283,9 @@ begin
   aRepoClient.ModuleName       := ModuleName;
   aRepoClient.LocalRepository  := FSourceDirectory;
   aRepoClient.Repository       := FURL;
-
+  aRepoClient.DesiredTag       := FTAG;
+  aRepoClient.DesiredBranch    := FBranch;
+  aRepoClient.DesiredRevision  := FDesiredRevision;
 
   if (NOT DirectoryExists(aRepoClient.LocalRepository)) OR (DirectoryIsEmpty(aRepoClient.LocalRepository)) then
   begin
@@ -3324,34 +3293,29 @@ begin
     exit;
   end;
 
-  aRepoClient.LocalRepositoryExists;
-  result:=(aRepoClient.ReturnCode<>FRET_LOCAL_REMOTE_URL_NOMATCH);
+  result:=aRepoClient.LocalRepositoryExists;
 
-  if result then
-    Infoln(infotext+'Sources ok.',etDebug)
-  else
+  if (NOT result) then
   begin
-    Infoln(infotext+URL_ERROR+'.',aEvent);
-    Infoln(infotext+'Desired URL='+FURL,aEvent);
-    Infoln(infotext+'Source URL='+aRepoClient.Repository,aEvent);
 
-    if ((FSwitchURL) AND (NOT result)) then
+    if (aRepoClient is TGitClient) then
     begin
-      result:=true;
+      if (aRepoClient.ReturnCode=FRET_LOCAL_REMOTE_TAG_NOMATCH) then
+      begin
+        Infoln(infotext+'Repo tag and desired tag do not match'+'.',etError);
+        Infoln(infotext+'The desired '+aRepoClient.DesiredTag+' is different from local repository-tag.',etError);
+      end;
+    end;
 
-      Infoln(infotext+'Switching source URL',etInfo);
-
-      aRepoClient.Verbose:=FVerbose;
-      aRepoClient.ExportOnly:=FExportOnly;
-      aRepoClient.ModuleName:=ModuleName;
-      aRepoClient.LocalRepository:=FSourceDirectory;
-      aRepoClient.Repository:=FURL;
-
-      aRepoClient.SwitchURL;
-
-      result:=true;
+    if (aRepoClient.ReturnCode=FRET_LOCAL_REMOTE_URL_NOMATCH) then
+    begin
+      Infoln(infotext+URL_ERROR+'.',etError);
+      Infoln(infotext+'Desired URL='+FURL,etError);
+      Infoln(infotext+'Source URL='+aRepoClient.Repository,etError);
     end;
   end;
+
+  if result then Infoln(infotext+'Sources in repo ok.',etDebug)
 end;
 
 function TInstaller.PatchModule(ModuleName: string): boolean;

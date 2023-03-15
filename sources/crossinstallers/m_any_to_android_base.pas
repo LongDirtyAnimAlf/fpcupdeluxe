@@ -290,7 +290,7 @@ begin
   begin
     FLibsFound:=true;
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     //if using the llvm sysroot (NDK version >= 22), also add the base directory for static libs
     s:=DirectorySeparator+ConcatPaths(['sysroot','usr','lib']);
     if ( (Pos('llvm',FLibsPath)>0) AND (Pos(s,FLibsPath)>0) ) then
@@ -509,7 +509,7 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names};
   end
   else

@@ -1042,17 +1042,14 @@ begin
 
   *)
 
-  if ( Assigned(FPCUpManager) AND (NOT FPCUpManager.SwitchURL) ) then
+  if (ExistWordInString(PChar(s),URL_ERROR)) then
   begin
-    if (ExistWordInString(PChar(s),URL_ERROR)) then
-    begin
-      s:=
-      'Fpcupdeluxe encountered a (fatal) URL error.' + sLineBreak +
-      'Most common cause: overwtiting an existing install.' + sLineBreak +
-      'Sources with different URL cannot be installed in same directory.' + sLineBreak +
-      'Please select an new install directory when changing versions.';
-      Application.MessageBox(PChar(s), PChar('URL mismatch error'), MB_ICONSTOP);
-    end;
+    s:=
+    'Fpcupdeluxe encountered a (fatal) URL error.' + sLineBreak +
+    'Most common cause: overwtiting an existing install.' + sLineBreak +
+    'Sources with different URL cannot be installed in same directory.' + sLineBreak +
+    'Please select an new install directory when changing versions.';
+    Application.MessageBox(PChar(s), PChar('URL mismatch error'), MB_ICONSTOP);
   end;
 
   if Handled then exit;
@@ -4016,8 +4013,6 @@ begin
 
   FPCupManager.UseWget:=Form2.UseWget;
 
-  FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
-
   // set custom FPC compiler by special user input through setup+
   FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTCPU(GetSourceCPU),GetTOS(GetSourceOS),TSUBARCH.saNone);
 
@@ -4396,8 +4391,6 @@ begin
       Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
       Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
 
-      Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',False);
-
       Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
 
       Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
@@ -4567,8 +4560,6 @@ begin
 
       WriteString('Patches','FPCPatches',Form2.FPCPatches);
       WriteString('Patches','LazarusPatches',Form2.LazPatches);
-
-      WriteBool('General','AutoSwitchURL',Form2.AutoSwitchURL);
 
       WriteBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 

@@ -89,7 +89,7 @@ begin
     FLibsFound:=true;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
+    '-Fl'+LibsPath {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
     ShowInfo('Found libspath '+FLibsPath,etInfo);
   end;
   if not result then
@@ -139,16 +139,9 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    ShowInfo('Found binutils '+FBinUtilsPath,etInfo);
     // Configuration snippet for FPC
-    //http://wiki.freepascal.org/Setup_Cross_Compile_For_ARM#Make_FPC_able_to_cross_compile_for_arm-wince
-    //adjusted by
-    //http://wiki.freepascal.org/arm-wince
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
-    '-darm'+LineEnding+ {pass arm to linker}
-    '-Twince'; {target operating system}
+    AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names}
   end else FAlreadyWarned:=true;
 end;
 

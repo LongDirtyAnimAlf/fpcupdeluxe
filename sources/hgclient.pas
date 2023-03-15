@@ -93,7 +93,7 @@ begin
   // Look in path
   // Windows: will also look for <hgName>.exe
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := Which(RepoExecutableName+GetExeExt);
+    FRepoExecutable := Which(RepoExecutableName);
 
 {$IFDEF MSWINDOWS}
   // Some popular locations for Tortoisehg:

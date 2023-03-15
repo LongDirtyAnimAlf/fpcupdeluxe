@@ -180,24 +180,24 @@ begin
     begin
       aOption:='-Xd';
       AddFPCCFGSnippet(aOption);
-      FCrossOpts.Add(aOption+' ');
+      AddCrossOption(aOption);
     end;
     }
 
     // Add linker search path
-    aOption:='-XR'+ExcludeTrailingPathDelimiter(FLibsPath);
+    aOption:='-XR'+LibsPath;
     AddFPCCFGSnippet(aOption);
-    FCrossOpts.Add(aOption+' ');
+    AddCrossOption(aOption);
 
     // Add library path to be sure ...
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr'+DirectorySeparator+'lib';
-    aOption:='-Fl'+IncludeTrailingPathDelimiter(FLibsPath);
+    aOption:='-Fl'+LibsPath;
     AddFPCCFGSnippet(aOption);
-    FCrossOpts.Add(aOption+' ');
+    AddCrossOption(aOption);
 
     // Add library path when cross-compiling to be sure ...
     aOption:='-Fl'+FLibsPath+DirectorySeparator+'system';
-    FCrossOpts.Add(aOption+' ');
+    AddCrossOption(aOption);
 
   end else FLibsPath:='';
 
@@ -213,7 +213,7 @@ begin
         aOption:='6.0';
       end;
       AddFPCCFGSnippet('-WP'+aOption);
-      FCrossOpts.Add('-WP'+aOption+' ');
+      AddCrossOption('-WP'+aOption);
     end;
   end;
 
@@ -228,7 +228,7 @@ begin
         aOption:='8.1';
       end;
       AddFPCCFGSnippet('-WP'+aOption);
-      FCrossOpts.Add('-WP'+aOption+' ');
+      AddCrossOption('-WP'+aOption);
     end;
   end;
 
@@ -242,7 +242,7 @@ begin
         aOption:='10.8';
       end;
       AddFPCCFGSnippet('-WM'+aOption);
-      FCrossOpts.Add('-WM'+aOption+' ');
+      AddCrossOption('-WM'+aOption);
     end;
   end;
 
@@ -338,13 +338,10 @@ begin
 
   if FBinsFound then
   begin
-
     SearchBinUtilsInfo(true);
-
     // Set this directory for compiler utilities
-    AddFPCCFGSnippet('-FD'+FBinUtilsPath);
-    FCrossOpts.Add('-FD'+FBinUtilsPath+' ');
-
+    AddFPCCFGSnippet('-FD'+BinUtilsPath);
+    AddCrossOption('-FD'+BinUtilsPath);
   end else FBinUtilsPath:='';
 
   // Never fail

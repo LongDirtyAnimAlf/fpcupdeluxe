@@ -159,9 +159,6 @@ type
     function GetExtraVerbose:boolean;
     procedure SetExtraVerbose(value:boolean);
 
-    function GetAutoSwitchURL:boolean;
-    procedure SetAutoSwitchURL(value:boolean);
-
     function GetSendInfo:boolean;
     procedure SetSendInfo(value:boolean);
 
@@ -272,7 +269,6 @@ type
     property UseWget:boolean read GetUseWget write SetUseWget;
     property MakeJobs:boolean read GetMakeJobs write SetMakeJobs;
     property ExtraVerbose:boolean read GetExtraVerbose write SetExtraVerbose;
-    property AutoSwitchURL:boolean read GetAutoSwitchURL write SetAutoSwitchURL;
     property SendInfo:boolean read GetSendInfo write SetSendInfo;
     property FpcupBootstrappersOnly:boolean read GetFpcupBootstrappersOnly write SetFpcupBootstrappersOnly;
     property ForceLocalRepoClient:boolean read GetForceLocalRepoClient write SetForceLocalRepoClient;
@@ -353,9 +349,6 @@ resourcestring
 
   HintCheckExtraVerbose = '';
   CaptionCheckExtraVerbose = 'Be extra verbose.';
-
-  HintCheckAutoSwitchURL = '';
-  CaptionCheckAutoSwitchURL = 'Auto-switch repo URL.';
 
   HintCheckSendInfo = 'Location and install info will be send to public central fpcupdeluxe server.';
   CaptionCheckSendInfo = 'Send location and install info.';
@@ -621,7 +614,6 @@ begin
     Append(CaptionCheckUseWget);
     Append(CaptionCheckUseMakeJobs);
     Append(CaptionCheckExtraVerbose);
-    Append(CaptionCheckAutoSwitchURL);
     Append(CaptionCheckSendInfo);
     Append(CaptionCheckFpcupBootstrappersOnly);
     Append(CaptionCheckForceLocalRepoClient);
@@ -1401,15 +1393,6 @@ end;
 procedure TForm2.SetExtraVerbose(value:boolean);
 begin
   SetCheckState(CaptionCheckExtraVerbose,value);
-end;
-
-function TForm2.GetAutoSwitchURL:boolean;
-begin
-  result:=GetCheckState(CaptionCheckAutoSwitchURL);
-end;
-procedure TForm2.SetAutoSwitchURL(value:boolean);
-begin
-  SetCheckState(CaptionCheckAutoSwitchURL,value);
 end;
 
 function TForm2.GetSendInfo:boolean;
