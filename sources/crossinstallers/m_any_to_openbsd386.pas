@@ -95,13 +95,14 @@ begin
     FLibsFound:=true;
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    AddFPCCFGSnippet('-k--allow-shlib-undefined');
-    AddFPCCFGSnippet('-k--allow-multiple-definition');
+    AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+    AddFPCCFGSnippet('-k--allow-shlib-undefined',false);
+    AddFPCCFGSnippet('-k--allow-multiple-definition',false);
     // AddFPCCFGSnippet('-XR'+LibsPath);
     // -XR does not always work !!
     // So use a direct linker command !!
-    AddFPCCFGSnippet('-k--library-path='+IncludeTrailingPathDelimiter(FLibsPath)); // help the linker in finding the correct libs
-    AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+    // This helps the linker in finding the correct libs
+    AddFPCCFGSnippet('-k--library-path='+IncludeTrailingPathDelimiter(LibsPath),false);
   end;
 end;
 

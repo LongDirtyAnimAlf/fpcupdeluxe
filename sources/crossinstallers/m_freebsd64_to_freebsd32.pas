@@ -55,8 +55,8 @@ begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    AddFPCCFGSnippet('-k-L');
-    AddFPCCFGSnippet('-k'+LibsPath);
+    AddFPCCFGSnippet('-k-L',false);
+    AddFPCCFGSnippet('-k'+IncludeTrailingPathDelimiter(LibsPath),false);
   end
   else ShowInfo('Searched but did not find 32bit libs in '+FLibsPath+'. Please install lib32 first !!');
 end;

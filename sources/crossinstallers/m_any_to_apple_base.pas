@@ -228,22 +228,34 @@ begin
     s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
     s:=ExpandFileName(s);
     s:=ExcludeTrailingBackslash(s);
-
     AddFPCCFGSnippet('-Fl'+LibsPath+'system'+DirectorySeparator);
-    AddFPCCFGSnippet('-k-framework -kAppKit');
-    AddFPCCFGSnippet('-k-framework -kFoundation');
-    AddFPCCFGSnippet('-k-framework -kCoreFoundation');
     AddFPCCFGSnippet('-Xd');
     AddFPCCFGSnippet('-XR'+s);
 
+    AddFPCCFGSnippet('-k-framework',false);
+    AddFPCCFGSnippet('-kAppKit',false);
+    AddFPCCFGSnippet('-k-framework',false);
+    AddFPCCFGSnippet('-kFoundation',false);
+    AddFPCCFGSnippet('-k-framework',false);
+    AddFPCCFGSnippet('-kCoreFoundation',false);
+
+
     if ((TargetCPU=TCPU.powerpc) OR (TargetCPU=TCPU.powerpc64)) then
     begin
-      AddFPCCFGSnippet('-k-framework -kApplicationServices');
-      AddFPCCFGSnippet('-k-syslibroot -k'+s);
+      AddFPCCFGSnippet('-k-framework',false);
+      AddFPCCFGSnippet('-kApplicationServices',false);
+      AddFPCCFGSnippet('-k-syslibroot',false);
+      AddFPCCFGSnippet('-k'+s,false);
       if TargetCPU=TCPU.powerpc64 then
-        AddFPCCFGSnippet('-k-arch -kppc64');
+      begin
+        AddFPCCFGSnippet('-k-arch',false);
+        AddFPCCFGSnippet('-kppc64',false);
+      end;
       if TargetCPU=TCPU.powerpc then
-        AddFPCCFGSnippet('-k-arch -kppc');
+      begin
+        AddFPCCFGSnippet('-k-arch',false);
+        AddFPCCFGSnippet('-kppc',false);
+      end;
     end;
 
   end

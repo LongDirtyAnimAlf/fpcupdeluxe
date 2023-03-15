@@ -76,9 +76,9 @@ begin
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     //AddFPCCFGSnippet('-XR'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    AddFPCCFGSnippet('-k"-rpath=/usr/X11R6/lib"');
-    AddFPCCFGSnippet('-k"-rpath=/usr/X11R7/lib"');
-    AddFPCCFGSnippet('-k"-rpath=/usr/pkg/lib"');
+    AddFPCCFGSnippet('-k"-rpath=/usr/X11R6/lib"',false);
+    AddFPCCFGSnippet('-k"-rpath=/usr/X11R7/lib"',false);
+    AddFPCCFGSnippet('-k"-rpath=/usr/pkg/lib"',false);
     //AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
   end;
   {
