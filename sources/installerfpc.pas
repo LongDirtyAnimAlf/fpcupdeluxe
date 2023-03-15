@@ -131,6 +131,7 @@ type
     function GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
     function CleanExtra(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone):boolean;
   protected
+    LibsAvailable,BinsAvailable:boolean;
     function GetUnitsInstallDirectory(WithMagic:boolean):string;
     function GetVersionFromUrl(aUrl: string): string;override;
     function GetVersionFromSource: string;override;
@@ -164,16 +165,14 @@ type
     function GetModule(ModuleName:string): boolean; override;
     // Perform some checks on the sources
     function CheckModule(ModuleName: string): boolean; override;
+    function UnInstallModule(ModuleName:string): boolean; override;
     // If yes, an override option will be passed to make (OVERRIDEVERSIONCHECK=1)
     // If no, the FPC make script enforces that the latest stable FPC bootstrap compiler is used.
     // This is required information for setting make file options
     property BootstrapCompilerOverrideVersionCheck: boolean read FBootstrapCompilerOverrideVersionCheck;
     //Indicate to use FPC bootstrappers from FTP server
     property NativeFPCBootstrapCompiler: boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
-
     property TargetCompilerName: string read FTargetCompilerName;
-
-    function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -645,7 +644,6 @@ var
   TxtFile:Text;
   s1,s2:string;
   UnitSearchPath:string;
-  LibsAvailable,BinsAvailable:boolean;
   MakeCycle:TSTEPS;
   //ARMArch:TARMARCH;
   SupportedList:TStringList;
@@ -658,7 +656,7 @@ begin
 
   if Assigned(CrossInstaller) then
   begin
-    CrossInstaller.Reset;
+    //CrossInstaller.Reset;
 
     {$ifdef win32}
     // Skip cross-builing towards win64 for old versions of FPC
@@ -675,43 +673,13 @@ begin
     if CrossInstaller.TargetCPU=TCPU.jvm then DownloadJasmin;
 
     CrossInstaller.SetFPCVersion(SourceVersionStr);
-    CrossInstaller.SetCrossOpt(CrossOPT);
-    CrossInstaller.SetSubArch(CrossOS_SubArch);
-    CrossInstaller.SetABI(CrossOS_ABI);
-
-    Infoln(infotext+'Looking for crosstools and crosslibs on system. Please wait.',etInfo);
-
-    // first, get/set cross binary utils !!
-    BinsAvailable:=false;
-    CrossInstaller.SearchModeUsed:=DEFAULTSEARCHSETTING;
-    if Length(CrossToolsDirectory)>0 then
-    begin
-      // we have a crosstools setting
-      if (CrossToolsDirectory=FPCUP_AUTO_MAGIC)
-         then CrossInstaller.SearchModeUsed:=TSearchSetting.ssAuto
-         else CrossInstaller.SearchModeUsed:=TSearchSetting.ssCustom;
-    end;
-    if CrossInstaller.SearchModeUsed=TSearchSetting.ssCustom
-       then BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
-       else BinsAvailable:=CrossInstaller.GetBinUtils(BaseDirectory);
-    if (not BinsAvailable) then Infoln('Failed to get crossbinutils', etError);
-
-    // second, get/set cross libraries !!
-    LibsAvailable:=false;
-    CrossInstaller.SearchModeUsed:=DEFAULTSEARCHSETTING;
-    if Length(CrossLibraryDirectory)>0 then
-    begin
-      // we have a crosslibrary setting
-      if (CrossLibraryDirectory=FPCUP_AUTO_MAGIC)
-         then CrossInstaller.SearchModeUsed:=TSearchSetting.ssAuto
-         else CrossInstaller.SearchModeUsed:=TSearchSetting.ssCustom;
-    end;
-    if CrossInstaller.SearchModeUsed=TSearchSetting.ssCustom
-      then LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory)
-      else LibsAvailable:=CrossInstaller.GetLibs(BaseDirectory);
-    if (not LibsAvailable) then Infoln('Failed to get crosslibrary', etError);
+    //CrossInstaller.SetCrossOpt(CrossOPT);
+    //CrossInstaller.SetSubArch(CrossOS_SubArch);
+    //CrossInstaller.SetABI(CrossOS_ABI);
 
     result:=(BinsAvailable AND LibsAvailable);
+
+    if (NOT result) then Infoln(infotext+'Missing cross tools and/or libs', etError);
 
     if result then
     begin
@@ -1189,8 +1157,10 @@ begin
           {$ENDIF}
           // Tell make where to find the target binutils if cross-compiling:
           // Not strictly necessary: the cross-options have this already:
-          if CrossInstaller.BinUtilsPath<>'' then
-             Processor.Process.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
+          if (CrossInstaller.BinUtilsPath<>'') then
+             Processor.Process.Parameters.Add('CROSSBINDIR='+CrossInstaller.BinUtilsPath);
+          if (CrossInstaller.BinUtilsPrefix<>'') then
+             Processor.Process.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
 
           Options:=FCompilerOptions;
 
@@ -3110,6 +3080,9 @@ begin
 
   if (InitDone) AND (aBootstrapVersion='') then exit;
 
+  LibsAvailable:=false;
+  BinsAvailable:=false;
+
   localinfotext:=InitInfoText(' (InitModule): ');
 
   result:=CheckAndGetTools;
@@ -4656,12 +4629,14 @@ begin
 
   result:=InitModule;
 
-  if not result then exit;
+  if (NOT result) then exit;
 
-  CrossCompiling:=(Self is TFPCCrossInstaller);
+  CrossCompiling:=((Self is TFPCCrossInstaller) AND Assigned(CrossInstaller));
 
   if CrossCompiling then
   begin
+    CrossInstaller.Reset;
+
     CPUOS_Signature:=GetFPCTarget(false);
     // Delete any existing buildstamp file
     Sysutils.DeleteFile(IncludeTrailingPathDelimiter(SourceDirectory)+'build-stamp.'+CPUOS_Signature);
@@ -4670,7 +4645,48 @@ begin
     CrossInstaller.SetCrossOpt(CrossOPT);
     CrossInstaller.SetSubArch(CrossOS_SubArch);
     CrossInstaller.SetABI(CrossOS_ABI);
+
+    Infoln(infotext+'Looking for crosstools and crosslibs on system. Please wait.',etInfo);
+
+    // first, get/set cross binary utils !!
+    if (NOT BinsAvailable) then
+    begin
+      CrossInstaller.SearchModeUsed:=DEFAULTSEARCHSETTING;
+      if Length(CrossToolsDirectory)>0 then
+      begin
+        // we have a crosstools setting
+        if (CrossToolsDirectory=FPCUP_AUTO_MAGIC)
+           then CrossInstaller.SearchModeUsed:=TSearchSetting.ssAuto
+           else CrossInstaller.SearchModeUsed:=TSearchSetting.ssCustom;
+      end;
+      if CrossInstaller.SearchModeUsed=TSearchSetting.ssCustom
+         then BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
+         else BinsAvailable:=CrossInstaller.GetBinUtils(BaseDirectory);
+      if (not BinsAvailable) then Infoln('Failed to get crossbinutils', etError);
+    end;
+
+    // second, get/set cross libraries !!
+    if (NOT LibsAvailable) then
+    begin
+      CrossInstaller.SearchModeUsed:=DEFAULTSEARCHSETTING;
+      if Length(CrossLibraryDirectory)>0 then
+      begin
+        // we have a crosslibrary setting
+        if (CrossLibraryDirectory=FPCUP_AUTO_MAGIC)
+           then CrossInstaller.SearchModeUsed:=TSearchSetting.ssAuto
+           else CrossInstaller.SearchModeUsed:=TSearchSetting.ssCustom;
+      end;
+      if CrossInstaller.SearchModeUsed=TSearchSetting.ssCustom
+        then LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory)
+        else LibsAvailable:=CrossInstaller.GetLibs(BaseDirectory);
+      if (not LibsAvailable) then Infoln('Failed to get crosslibrary', etError);
+    end;
+
+    result:=(BinsAvailable AND LibsAvailable);
+
   end else CPUOS_Signature:=GetFPCTarget(true);
+
+  if (NOT result) then exit;
 
   {$IFDEF MSWINDOWS}
   // Remove all fpmakes
