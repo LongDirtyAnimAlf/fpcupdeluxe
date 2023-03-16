@@ -638,9 +638,9 @@ type
   {$endif}
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
-  CrossOptions:String;
+  NativeCompilerOptions:String;
+  CrossCompilerOptions:String;
   i,j:integer;
-  Options:String;
   TxtFile:Text;
   s1,s2:string;
   UnitSearchPath:string;
@@ -1162,8 +1162,6 @@ begin
           if (CrossInstaller.BinUtilsPrefix<>'') then
              Processor.Process.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
 
-          Options:=FCompilerOptions;
-
           //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
           //Todo: to be investigated
           Processor.Process.Parameters.Add('FPCFPMAKE='+FCompiler);
@@ -1316,14 +1314,17 @@ begin
           //Processor.Process.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
           Processor.Process.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
 
+
+          NativeCompilerOptions:=FCompilerOptions;
+
           // Error checking for some known problems with cross compilers
           //todo: this really should go to the cross compiler unit itself but would require a rewrite
           if (CrossInstaller.TargetCPU=TCPU.i8086) and
             (CrossInstaller.TargetOS=TOS.msdos) then
           begin
-            if (pos('-g',Options)>0) then
+            if (pos('-g',NativeCompilerOptions)>0) then
             begin
-              Infoln(infotext+'Specified debugging FPC options: '+Options+'... However, this cross compiler does not support debug symbols. Aborting.',etError);
+              Infoln(infotext+'Specified debugging FPC options: '+NativeCompilerOptions+'... However, this cross compiler does not support debug symbols. Aborting.',etError);
               exit(false);
             end;
           end;
@@ -1331,41 +1332,41 @@ begin
           if ((CrossInstaller.TargetCPU=TCPU.wasm32) OR ((CrossInstaller.TargetCPU=TCPU.aarch64) AND (CrossInstaller.TargetOS=TOS.win64))) then
           begin
             // wasm only works with -O-
-            i:=pos('-O',Options);
+            i:=pos('-O',NativeCompilerOptions);
             if (i>0) then
             begin
-              s2:=Copy(Options,i,3);
+              s2:=Copy(NativeCompilerOptions,i,3);
               if s2[3]<>'-' then
               begin
                 Infoln(infotext+'Specified optimization: '+s2+'. Must be -O- for this target. Replacing.',etInfo);
-                Options[i+2]:='-';
+                NativeCompilerOptions[i+2]:='-';
               end;
             end
             else
             begin
-              Options:=Options+' -O-';
+              NativeCompilerOptions:=NativeCompilerOptions+' -O-';
             end;
           end;
 
           if (CrossInstaller.TargetCPU=TCPU.wasm32) then
           begin
             // wasm: remove debugging settings
-            i:=pos('-g',Options);
+            i:=pos('-g',NativeCompilerOptions);
             while (i<>0) do
             begin
-              s2:=Trim(Copy(Options,i,3));
+              s2:=Trim(Copy(NativeCompilerOptions,i,3));
               Infoln(infotext+'Specified debug option: '+s2+'. Removing for this target.',etInfo);
-              Delete(Options,i,3);
-              i:=pos('-g',Options);
+              Delete(NativeCompilerOptions,i,3);
+              i:=pos('-g',NativeCompilerOptions);
             end;
             // wasm: remove assembler file settings
-            i:=pos('-a',Options);
+            i:=pos('-a',NativeCompilerOptions);
             while (i<>0) do
             begin
-              s2:=Trim(Copy(Options,i,3));
+              s2:=Trim(Copy(NativeCompilerOptions,i,3));
               Infoln(infotext+'Specified assembler option: '+s2+'. Removing for this target.',etInfo);
-              Delete(Options,i,3);
-              i:=pos('-a',Options);
+              Delete(NativeCompilerOptions,i,3);
+              i:=pos('-a',NativeCompilerOptions);
             end;
           end;
 
@@ -1385,35 +1386,19 @@ begin
           //To be checked
           //Intel only. See: https://wiki.lazarus.freepascal.org/Lazarus_on_Solaris#A_note_on_gld_.28Intel_architecture_only.29
           if (MakeCycle in [st_Compiler,st_CompilerInstall]) then
-            Options:=Options+' -Xn';
+            NativeCompilerOptions:=NativeCompilerOptions+' -Xn';
           {$endif}
           {$endif}
 
           {$ifdef linux}
           if FMUSL then
           begin
-            //if FileExists(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+FMUSLLinker) then Options:=Options+' -FL'+FMUSLLinker;
+            //if FileExists(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+FMUSLLinker) then NativeCompilerOptions:=NativeCompilerOptions+' -FL'+FMUSLLinker;
           end;
           {$endif}
-
-          CrossOptions:='';
-          {$ifndef crosssimple}
-          if (MakeCycle<>st_NativeCompiler) then
-          {$endif}
-          begin
-            for i:=0 to CrossInstaller.CrossOpt.Count-1 do
-              CrossOptions:=CrossOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
-            CrossOptions:=TrimRight(CrossOptions);
-            if UseLibc then CrossOptions:=CrossOptions+' -dFPC_USE_LIBC';
-          end;
-          CrossOptions:=Trim(CrossOptions);
-          if (Length(CrossOptions)>0) then
-          begin
-            Processor.Process.Parameters.Add('CROSSOPT='+{MaybeQuotedSpacesOnly}(CrossOptions));
-          end;
 
           {$ifdef Darwin}
-          Options:=Options+' -ap';
+          NativeCompilerOptions:=NativeCompilerOptions+' -ap';
           {$endif}
 
           {$ifndef FPC_HAS_TYPE_EXTENDED}
@@ -1426,23 +1411,23 @@ begin
               begin
                 Infoln(infotext+'Adding -d'+DEFINE_FPC_SOFT_FPUX80+' to compiler options to enable 80bit (soft)float support.',etInfo);
                 Infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
-                Options:=Options+' -d'+DEFINE_FPC_SOFT_FPUX80;
+                NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_FPC_SOFT_FPUX80;
               end;
             end;
           end;
           {$endif}
 
-          while Pos('  ',Options)>0 do
+          while Pos('  ',NativeCompilerOptions)>0 do
           begin
-            Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
+            NativeCompilerOptions:=StringReplace(NativeCompilerOptions,'  ',' ',[rfReplaceAll]);
           end;
-          Options:=Trim(Options);
+          NativeCompilerOptions:=Trim(NativeCompilerOptions);
 
-          s1:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+Options;
+          NativeCompilerOptions:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+NativeCompilerOptions;
 
           {$ifdef DEBUG}
-          //s:=s+' -g -gl -dEXTDEBUG'; //-va+
-          //s:=s+' -dEXTDEBUG'; //-va+
+          //NativeCompilerOptions:=NativeCompilerOptions+' -g -gl -dEXTDEBUG'; //-va+
+          //NativeCompilerOptions:=NativeCompilerOptions+' -dEXTDEBUG'; //-va+
           {$endif}
 
           {$ifdef DARWIN}
@@ -1455,8 +1440,8 @@ begin
               s2:=GetDarwinSDKLocation;
               if Length(s2)>0 then
               begin
-                s1:='-XR'+s2+' '+s1;
-                s1:='-Fl'+s2+'/usr/lib '+s1;
+                NativeCompilerOptions:='-XR'+s2+' '+NativeCompilerOptions;
+                NativeCompilerOptions:='-Fl'+s2+'/usr/lib '+NativeCompilerOptions;
               end;
             end;
           end;
@@ -1466,19 +1451,34 @@ begin
           if (MakeCycle=st_NativeCompiler) then
           begin
             UnitSearchPath:=GetUnitsInstallDirectory(false);
-            //s1:=s1+' -Fu'+UnitSearchPath;
-            //s1:=s1+' -Fu'+UnitSearchPath+DirectorySeparator+'rtl';
+            //NativeCompilerOptions:=NativeCompilerOptions+' -Fu'+UnitSearchPath;
+            //NativeCompilerOptions:=NativeCompilerOptions+' -Fu'+UnitSearchPath+DirectorySeparator+'rtl';
             {$ifdef DEBUG}
-            //s1:=s1+' -gw3 -gl';
+            //NativeCompilerOptions:=NativeCompilerOptions+' -gw3 -gl';
             {$endif}
           end;
           {$endif}
 
-          Processor.Process.Parameters.Add('OPT='+s1);
+          CrossCompilerOptions:='';
+          {$ifndef crosssimple}
+          if (MakeCycle<>st_NativeCompiler) then
+          {$endif}
+          begin
+            for i:=0 to CrossInstaller.CrossOpt.Count-1 do
+              CrossCompilerOptions:=CrossCompilerOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
+            CrossCompilerOptions:=TrimRight(CrossCompilerOptions);
+            if UseLibc then CrossCompilerOptions:=CrossCompilerOptions+' -dFPC_USE_LIBC';
+          end;
+
+          NativeCompilerOptions:=Trim(NativeCompilerOptions);
+          if (Length(NativeCompilerOptions)>0) then Processor.Process.Parameters.Add('OPT='+{MaybeQuotedSpacesOnly}(NativeCompilerOptions));
+
+          CrossCompilerOptions:=Trim(CrossCompilerOptions);
+          if (Length(CrossCompilerOptions)>0) then Processor.Process.Parameters.Add('CROSSOPT='+{MaybeQuotedSpacesOnly}(CrossCompilerOptions));
 
           try
             s1:=infotext+'Running make ['+UnCamel(GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle)))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')';
-            if (Length(CrossOptions)>0) then s1:=s1+' with CROSSOPT: '+CrossOptions;
+            if (Length(CrossCompilerOptions)>0) then s1:=s1+' with CROSSOPT: '+CrossCompilerOptions;
             Infoln(s1,etInfo);
 
             Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
@@ -1521,8 +1521,8 @@ begin
                   // copy over / rename the cross-compiler towards the FPC bin-directory, with the right compilername.
                   Infoln(infotext+'Copy cross-compiler ('+s1+') into: '+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath),etInfo);
                   s1:=FFPCCompilerBinPath+CrossCompilerName;
-                  //FileCopy(s2,s1);
                   SysUtils.DeleteFile(s1);
+                  //FileCopy(s2,s1);
                   SysUtils.RenameFile(s2,s1);
                   fpChmod(s1,&755);
                 end;

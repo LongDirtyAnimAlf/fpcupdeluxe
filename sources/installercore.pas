@@ -1837,6 +1837,10 @@ begin
           if (Length(Output)>0) then Infoln(localinfotext+'Current commit name: '+Output,etInfo);
           Output:=(aClient as TGitClient).GetCommitMessage;
           if (Length(Output)>0) then Infoln(localinfotext+'Current commit message: '+Output,etInfo);
+
+          // Process SVN inof or settings, if any
+          // Bit tricky
+          // To be removed
           Output:=(aClient as TGitClient).GetSVNRevision;
           SVNRevision:=StrToIntDef(Output,0);
           if (SVNRevision=0) then Output:='';
@@ -1857,6 +1861,7 @@ begin
             Output:=(aClient as TGitClient).GetSVNRevision;
             if (Length(Output)>0) then aAfterRevision:=Output;
           end;
+
         end;
       end;
 

@@ -199,6 +199,8 @@ begin
   ExportOnly:=(Length(DesiredTag)>0);
 end;
 
+
+
 procedure TGitClient.CheckOut(UseForce:boolean=false);
 // SVN checkout is more or less equivalent to git clone
 var
@@ -313,7 +315,6 @@ function TGitClient.Commit(Message: string): boolean;
 begin
   result:=false;
   FReturnCode := 0;
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
   inherited Commit(Message);
   FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message='+Message, LocalRepository, Verbose);
@@ -325,7 +326,6 @@ function TGitClient.GetDiffAll: string;
 begin
   result:='';
   FReturnCode := 0;
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
   //FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
   //FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --no-prefix -p ', LocalRepository, Result, Verbose);
@@ -338,7 +338,6 @@ var
 begin
   FReturnCode := 0;
   Log.Text := s;
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
   FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ', LocalRepository, s, Verbose);
   Log.Text := s;
@@ -347,7 +346,6 @@ end;
 procedure TGitClient.Revert;
 begin
   FReturnCode := 0;
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
   //FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --all --no-backup ', LocalRepository, Verbose);
   FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard ', LocalRepository, Verbose);
@@ -359,7 +357,6 @@ var
   Output: string = '';
 begin
   FReturnCode := 0;
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
 
   // Invalidate our revision number cache
@@ -421,7 +418,6 @@ var
   RunOnlyTwice  : boolean;
 begin
   FReturnCode := 0;
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
 
   // Invalidate our revision number cache
@@ -508,7 +504,6 @@ var
   Output: string = '';
 begin
   FReturnCode := 0;
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
   if (NOT Assigned(FileList)) then exit;
@@ -536,7 +531,6 @@ var
 begin
   result := false;
   FReturnCode := 0;
-  //if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
 
@@ -653,7 +647,6 @@ var
 begin
   Result := Output;
   FReturnCode := 0;
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
 
@@ -735,11 +728,8 @@ var
   i,j:integer;
 begin
   result:='';
-
   // As SVN revision info is not updated (anymore), disabled.
   exit;
-
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
 
@@ -784,7 +774,6 @@ var
   i,j:integer;
 begin
   result:='';
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
   if (Length(DesiredRevision)=0) OR (Uppercase(trim(DesiredRevision)) = 'HEAD') then exit;
@@ -807,8 +796,6 @@ var
   i,j:integer;
 begin
   result:='';
-
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
 
@@ -838,8 +825,6 @@ var
   i,j:integer;
 begin
   result:='';
-
-  if ExportOnly then exit;
   if NOT ValidClient then exit;
   if NOT DirectoryExists(LocalRepository) then exit;
 

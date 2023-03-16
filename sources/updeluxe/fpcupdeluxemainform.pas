@@ -760,19 +760,9 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) then
   begin
-    if (ExistWordInString(PChar(s),'fatal: no tag exactly matches')) then
-    begin
-      Handled:=true;
-    end
-    else
     if (ExistWordInString(PChar(s),'fatal: Remote branch')) then
     begin
       EchoInfo('We have had a GIT branch failure. Should be non-fatal !');
-    end
-    else
-    if (ExistWordInString(PChar(s),'fatal: HEAD does not point to a branch')) then
-    begin
-      Handled:=true;
     end
     else
     begin
@@ -1859,12 +1849,6 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) OR (ExistWordInString(PChar(s),'Memory warning:',[soWholeWord])) then
   begin
-    // if (Pos('fatal: not a git repository',lowercase(s))=0) then
-    if (ExistWordInString(PChar(s),'fatal: no tag exactly matches')) OR (ExistWordInString(PChar(s),'fatal: HEAD does not point to a branch')) then
-    begin
-      // skip this: not fatal at all.
-    end
-    else
     begin
       FG      := TColor($0060FF);
       BG      := TColor($402000);
