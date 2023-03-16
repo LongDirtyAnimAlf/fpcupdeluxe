@@ -123,7 +123,7 @@ Type
     File_Comment_Length  :  Word;
     Starting_Disk_Num    :  Word;
     Internal_Attributes  :  Word;
-    External_Attributes  :  LongWord;
+    External_Attributes  :  Longint;
     Local_Header_Offset  :  LongWord; // if zip64: 0xFFFFFFFF
   End;
 
@@ -355,7 +355,7 @@ Type
     FArchiveFileName: String; //Name of the file as it appears in the zip file list
     FUTF8FileName : UTF8String;
     FUTF8DiskFileName : UTF8String;
-    FAttributes: LongWord;
+    FAttributes: Longint;
     FDateTime: TDateTime;
     FDiskFileName: String; {Name of the file on disk (i.e. uncompressed. Can be empty if based on a stream.);
     uses local OS/filesystem directory separators}
@@ -390,7 +390,7 @@ Type
     Property Size : Int64 Read FSize Write FSize;
     Property DateTime : TDateTime Read FDateTime Write FDateTime;
     property OS: Byte read FOS write FOS;
-    property Attributes: LongWord read FAttributes write FAttributes;
+    property Attributes: Longint read FAttributes write FAttributes;
     Property CompressionLevel: TCompressionlevel read FCompressionLevel write FCompressionLevel;
   end;
 

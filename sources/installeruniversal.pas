@@ -1924,8 +1924,8 @@ begin
         UpdateWarnings:=TStringList.Create;
         try
           URL:=RemoteURL;
-          GitClient.ModuleName:=ModuleName;
-          GitClient.ExportOnly:=FExportOnly;
+          GitClient.ModuleName := ModuleName;
+          GitClient.ExportOnly := FExportOnly;
           result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
           SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(SourceDirectory)+'.git') OR FExportOnly);
           if UpdateWarnings.Count>0 then
@@ -1949,6 +1949,8 @@ begin
         UpdateWarnings:=TStringList.Create;
         try
           URL:=RemoteURL;
+          SVNClient.ModuleName := ModuleName;
+          SVNClient.ExportOnly := FExportOnly;
           SVNClient.UserName   := GetValueFromKey('UserName',PackageSettings);
           SVNClient.Password   := GetValueFromKey('Password',PackageSettings);
           result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);

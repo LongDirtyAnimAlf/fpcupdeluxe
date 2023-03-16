@@ -1745,7 +1745,6 @@ begin
   //aClient.Verbose         := FVerbose;
   aClient.LocalRepository := FSourceDirectory;
   aClient.Repository      := FURL;
-  aClient.ExportOnly      := FExportOnly;
   aClient.ModuleName      := aModuleName;
 
   //aBeforeRevision:=aClient.LocalRevision;
@@ -1790,6 +1789,10 @@ begin
   aClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
   aClient.DesiredBranch := FBranch; //We want to update to this specific branch
   aClient.DesiredTag := FTAG; //We want to update to this specific tag
+
+  // Setting a DesiredTag also set ExportOnly when using GIT.
+  // Override this setting if false with global setting
+  if (NOT aClient.ExportOnly) then aClient.ExportOnly:=FExportOnly;
 
   Output:=localinfotext+'Running '+UpperCase(aClient.RepoExecutableName)+' checkout or update';
   ReturnCode:=Length(aClient.DesiredRevision);
@@ -3260,7 +3263,6 @@ begin
   Infoln(infotext+'Entering ...',etDebug);
 
   if NOT DirectoryExists(FSourceDirectory) then exit;
-  if FExportOnly then exit;
 
   aRepoClient:=GetSuitableRepoClient;
 
@@ -3284,13 +3286,16 @@ begin
   Infoln(infotext+'Checking ' + ModuleName + ' sources with '+TrimLeft(Copy(UnCamel(aRepoClient.ClassName),2,MaxInt)),etInfo);
 
   aRepoClient.Verbose          := FVerbose;
-  aRepoClient.ExportOnly       := FExportOnly;
   aRepoClient.ModuleName       := ModuleName;
   aRepoClient.LocalRepository  := FSourceDirectory;
   aRepoClient.Repository       := FURL;
   aRepoClient.DesiredTag       := FTAG;
   aRepoClient.DesiredBranch    := FBranch;
   aRepoClient.DesiredRevision  := FDesiredRevision;
+
+  // Setting a DesiredTag also set ExportOnly when using GIT.
+  // Override this setting if false with global setting
+  if (NOT aRepoClient.ExportOnly) then aRepoClient.ExportOnly := FExportOnly;
 
   if (NOT DirectoryExists(aRepoClient.LocalRepository)) OR (DirectoryIsEmpty(aRepoClient.LocalRepository)) then
   begin

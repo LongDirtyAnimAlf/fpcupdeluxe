@@ -253,6 +253,7 @@ type
     function  PrepareRun(Sender: TObject):boolean;
     function  RealRun:boolean;
     procedure GetSystemInfo;
+    procedure InstallModule(aModule:string; UnInstall:boolean);
     function  GetFPCUPSettings(IniDirectory:string):boolean;
     function  SetFPCUPSettings(IniDirectory:string):boolean;
     procedure FillSourceListboxes;
@@ -2335,13 +2336,6 @@ begin
     aLazarusTarget:='trunk'+GITLABEXTENSION;
   end;
 
-  if Sender=mORMotBtn then
-  begin
-    s:=Format(upInstallConfimationSimple,['mORMot2']);
-    aModule:='mORMot2';
-    //aModule:='mORMot,zeos';
-  end;
-
   if Sender=UltiboBtn then
   begin
     s:=Format(upInstallConfimationSimple,['Ultibo']);
@@ -2402,6 +2396,9 @@ begin
       if Length(FPCupManager.IncludeModules)>0 then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',';
       FPCupManager.IncludeModules:=FPCupManager.IncludeModules+_LHELP;
     end;
+
+
+
 
     {$ifdef RemoteLog}
     if ((Length(aFPCTarget)>0) OR (Length(aLazarusTarget)>0)) then
@@ -2569,43 +2566,36 @@ begin
 end;
 
 procedure TForm1.btnInstallModuleClick(Sender: TObject);
+begin
+  if (Sender=btnInstallModule) OR (Sender=btnUninstallModule) then
+  begin
+    if ((listModules.SelCount=0) OR (listModules.ItemIndex=-1)) then
+    begin
+      AddMessage('Please select a module / package.');
+      exit;
+    end;
+  end;
+  DisEnable(Sender,False);
+  try
+    if (Sender=mORMotBtn) then
+      InstallModule('mORMot2',false)
+    else
+      InstallModule(listModules.Items.Strings[listModules.ItemIndex],(Sender=btnUninstallModule));
+  finally
+    DisEnable(Sender,True);
+  end;
+end;
+
+procedure TForm1.InstallModule(aModule:string; UnInstall:boolean);
 var
-  //i:integer;
   modules:string;
   s:string;
 begin
-  if listModules.SelCount=0 then
-  begin
-    AddMessage('Please select a module / package.');
-    exit;
-  end;
+  modules:=aModule;
 
-  modules:='';
-
-  //No multi-select for now
-  (*
-  for i:=0 to listModules.Count-1 do
+  if UnInstall then modules:=modules+_UNINSTALL else
   begin
-    if listModules.Selected[i] then
-    begin
-      modules:=modules+listModules.Items[i];
-      if Sender=btnUninstallModule then modules:=modules+_UNINSTALL else
-      begin
-        if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
-      end;
-      modules:=modules+',';
-    end;
-  end;
-  *)
-
-  //Single select
-  if (listModules.ItemIndex<>-1) then
-  begin
-    modules:=listModules.Items.Strings[listModules.ItemIndex];
-    if Sender=btnUninstallModule then modules:=modules+_UNINSTALL else
-    begin
-      if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
-    end;
+    if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
   end;
 
   if Length(modules)>0 then
@@ -2616,8 +2606,8 @@ begin
     s:=modules;
     s:=StringReplace(s,_UNINSTALL,'',[rfReplaceAll]);
     s:=StringReplace(s,_BUILD+_ONLY,'',[rfReplaceAll]);
-    if Sender=btnInstallModule then s:=upInstallModule+': '+s;
-    if Sender=btnUninstallModule then s:=upRemoveModule+': '+s;
+    if (NOT UnInstall) then s:=upInstallModule+': '+s;
+    if UnInstall then s:=upRemoveModule+': '+s;
     s:=s+'.'+sLineBreak;
     s:=s+upInstallDirectory+': '+Self.sInstallDir;
     s:=s+sLineBreak;
@@ -2626,7 +2616,7 @@ begin
       if (MessageDlgEx(s,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
         exit;
 
-    if Sender=btnInstallModule then
+    if (NOT UnInstall) then
     begin
       AddMessage('Limiting installation/update to '+FPCupManager.OnlyModules);
       AddMessage('');
@@ -2639,11 +2629,10 @@ begin
       sStatus:='Going to remove selected modules.';
     end;
 
-    DisEnable(Sender,False);
-    try
-      if (NOT PrepareRun(Sender)) then exit;
+    if (NOT PrepareRun(nil)) then exit;
 
-      FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
+    FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
+    try
       FPCupManager.OnlyModules:=modules;
 
       {$ifdef RemoteLog}
@@ -2651,19 +2640,17 @@ begin
       s:=StringReplace(s,_UNINSTALL,'',[rfReplaceAll]);
       s:=StringReplace(s,_BUILD+_ONLY,'',[rfReplaceAll]);
       aDataClient.AddExtraData('module[s]:',s);
-      if Sender=btnInstallModule then aDataClient.UpInfo.UpFunction:=ufInstallModule;
-      if Sender=btnUninstallModule then aDataClient.UpInfo.UpFunction:=ufUninstallModule;
+      if (NOT UnInstall) then aDataClient.UpInfo.UpFunction:=ufInstallModule;
+      if UnInstall then aDataClient.UpInfo.UpFunction:=ufUninstallModule;
       {$endif}
 
       RealRun;
 
     finally
       FPCupManager.ExportOnly:=(NOT Form2.Repo);
-      DisEnable(Sender,True);
     end;
 
   end;
-
 end;
 
 procedure TForm1.btnInstallDirSelectClick(Sender: TObject);

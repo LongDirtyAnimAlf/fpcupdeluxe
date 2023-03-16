@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 32
+  Left = 36
   Height = 832
-  Top = 78
+  Top = 27
   Width = 1226
   Anchors = []
   Caption = 'FPCUPdeluxe'
@@ -2388,7 +2388,7 @@ object Form1: TForm1
         F203ECE8E4010000000000000000000000000000000000000000000000000000
         0000000000000000000000000000000000000000000000000000
       }
-      OnClick = QuickBtnClick
+      OnClick = btnInstallModuleClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True

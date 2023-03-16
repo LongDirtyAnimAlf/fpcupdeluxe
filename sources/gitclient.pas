@@ -405,6 +405,11 @@ begin
   begin
     // Just do a simple pull
     Command := ' pull';
+  end
+  else
+  begin
+    // First do a fetch to get all the current commits
+    if (NOT ExportOnly) then TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' fetch', LocalRepository, Output, Verbose);
   end;
 
   FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, LocalRepository, Output, Verbose);
