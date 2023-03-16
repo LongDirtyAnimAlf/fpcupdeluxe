@@ -2250,12 +2250,12 @@ object Form1: TForm1
       Height = 42
       Hint = 'Get the mORMot for FPC'
       Top = 8
-      Width = 111
+      Width = 117
       AutoSize = True
       BorderSpacing.Left = 20
       BorderSpacing.Top = 2
       BorderSpacing.Around = 4
-      Caption = 'mORMot'
+      Caption = 'mORMot2'
       Glyph.Data = {
         36100000424D3610000000000000360000002800000020000000200000000100
         2000000000000010000064000000640000000000000000000000000000000000

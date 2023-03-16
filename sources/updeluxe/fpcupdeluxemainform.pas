@@ -2353,8 +2353,8 @@ begin
 
   if Sender=mORMotBtn then
   begin
-    s:=Format(upInstallConfimationSimple,['mORMot']);
-    aModule:='mORMot';
+    s:=Format(upInstallConfimationSimple,['mORMot2']);
+    aModule:='mORMot2';
     //aModule:='mORMot,zeos';
   end;
 
@@ -2438,7 +2438,8 @@ begin
     if (Sender=WioBtn) OR (Sender=PicoBtn) then
     begin
       // Due to changes in Lazarus, we need a trunk/main version of Lazarus that can be compiled with an embedded (old) FPC trunk
-      FPCupManager.LazarusDesiredRevision:='0ae37a906c942d24591917ceaafbad67d1b1b96c';
+      Form2.ForceLazarusRevision:='5b0ed449f3';
+      FPCupManager.LazarusDesiredRevision:='5b0ed449f3';
     end;
 
     success:=RealRun;
