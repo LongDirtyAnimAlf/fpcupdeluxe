@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linux64,linuxaarch64,linuxaarch64QT5,linuxaarch64QT5zip,linuxarm,linuxarmQT5,linuxarmQT5zip,linuxarmv6,linuxi386QT5,linuxx64QT5,linuxx64QT5zip,linuxppc64,freebsdx64,netbsdx64,solarisx64,dragonflyx64,openbsdx64,darwinx64,darwinarm64"/>
-    <BuildModes Active="Default"/>
+    <BuildModes Active="Debug"/>
     <Units Count="13">
       <Unit0>
         <Filename Value="up.lpr"/>
@@ -22,6 +22,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
+        <TopLine Value="3999"/>
+        <CursorPos Y="4015"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -110,120 +112,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
+        <Caret Line="2005" Column="26" TopLine="2002"/>
       </Position1>
       <Position2>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="327" Column="12" TopLine="310"/>
+        <Caret Line="379" Column="22" TopLine="353"/>
       </Position2>
       <Position3>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
+        <Caret Line="586" Column="14" TopLine="559"/>
       </Position3>
       <Position4>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="318" Column="21" TopLine="308"/>
+        <Caret Line="2024" Column="47" TopLine="1996"/>
       </Position4>
       <Position5>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="3561" Column="28" TopLine="3534"/>
+        <Caret Line="2023" Column="19" TopLine="2007"/>
       </Position5>
       <Position6>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
+        <Caret Line="85" Column="11" TopLine="67"/>
       </Position6>
       <Position7>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="87" Column="13" TopLine="81"/>
+        <Caret Line="1985" Column="18" TopLine="1968"/>
       </Position7>
       <Position8>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="2005" Column="26" TopLine="2002"/>
+        <Caret Line="1982" Column="39" TopLine="1969"/>
       </Position8>
       <Position9>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="379" Column="22" TopLine="353"/>
+        <Caret Line="164" Column="58" TopLine="150"/>
       </Position9>
       <Position10>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="586" Column="14" TopLine="559"/>
+        <Caret Line="2097" Column="31" TopLine="2081"/>
       </Position10>
       <Position11>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="2024" Column="47" TopLine="1996"/>
+        <Caret Line="2103" Column="8" TopLine="2086"/>
       </Position11>
       <Position12>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="2023" Column="19" TopLine="2007"/>
+        <Caret Line="4434" Column="16" TopLine="4406"/>
       </Position12>
       <Position13>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="85" Column="11" TopLine="67"/>
+        <Caret Line="4531" Column="32" TopLine="4503"/>
       </Position13>
       <Position14>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="1985" Column="18" TopLine="1968"/>
+        <Caret Line="263" Column="15" TopLine="239"/>
       </Position14>
       <Position15>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="1982" Column="39" TopLine="1969"/>
+        <Caret Line="2111" Column="18" TopLine="2095"/>
       </Position15>
       <Position16>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="164" Column="58" TopLine="150"/>
+        <Caret Line="1138" Column="3" TopLine="1136"/>
       </Position16>
       <Position17>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="2097" Column="31" TopLine="2081"/>
+        <Caret Line="4888" TopLine="4886"/>
       </Position17>
       <Position18>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="2103" Column="8" TopLine="2086"/>
+        <Caret Line="4889" TopLine="4887"/>
       </Position18>
       <Position19>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="4434" Column="16" TopLine="4406"/>
+        <Caret Line="4890" TopLine="4888"/>
       </Position19>
       <Position20>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="4531" Column="32" TopLine="4503"/>
+        <Caret Line="2114" Column="52" TopLine="2097"/>
       </Position20>
       <Position21>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="263" Column="15" TopLine="239"/>
+        <Caret Line="173" Column="30" TopLine="163"/>
       </Position21>
       <Position22>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="2111" Column="18" TopLine="2095"/>
+        <Caret Line="2103" Column="18" TopLine="2066"/>
       </Position22>
       <Position23>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="1138" Column="3" TopLine="1136"/>
+        <Caret Line="193" Column="14" TopLine="188"/>
       </Position23>
       <Position24>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="4888" TopLine="4886"/>
+        <Caret Line="5" Column="23"/>
       </Position24>
       <Position25>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="4889" TopLine="4887"/>
+        <Caret Line="1053" TopLine="1028"/>
       </Position25>
       <Position26>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="4890" TopLine="4888"/>
+        <Caret Line="4016" Column="16" TopLine="3999"/>
       </Position26>
       <Position27>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="2114" Column="52" TopLine="2097"/>
+        <Caret Line="5144" TopLine="5110"/>
       </Position27>
       <Position28>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="173" Column="30" TopLine="163"/>
+        <Caret Line="4568" TopLine="4552"/>
       </Position28>
       <Position29>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="2103" Column="18" TopLine="2066"/>
+        <Caret Line="4396" TopLine="4380"/>
       </Position29>
       <Position30>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <Caret Line="193" Column="14" TopLine="188"/>
+        <Caret Line="4016" TopLine="4000"/>
       </Position30>
     </JumpHistory>
     <RunParams>

@@ -559,6 +559,7 @@ end;
 procedure TCrossInstaller.AddFPCCFGSnippet(aSnip: string; AddToCrossOptions:boolean);
 var
   aSnippd:string;
+  DuplicateOk:boolean;
 begin
   aSnippd:=Trim(aSnip);
 
@@ -573,10 +574,14 @@ begin
   aSnippd:=StringReplace(aSnippd,'#ENDIF_','#ENDIF ',[rfReplaceAll]);
 
   // Check for duplicates
-  if (Pos('#IFDEF',aSnippd)=0) AND (Pos('#ENDIF',aSnippd)=0) then
+  DuplicateOk:=false;
+  if (NOT DuplicateOk) then DuplicateOk:=(Pos('#IFDEF',aSnippd)>0);
+  if (NOT DuplicateOk) then DuplicateOk:=(Pos('#ENDIF',aSnippd)>0);
+  if (NOT DuplicateOk) then DuplicateOk:=(Pos('-k',aSnippd)=1);  // allow multiple linker commands
+
+  if (NOT DuplicateOk) then
   begin
-    if (Pos(aSnippd,FFPCCFGSnippet)>0) then
-      exit;
+    if (Pos(aSnippd,FFPCCFGSnippet)>0) then exit;
   end;
 
   if Length(FPCCFGSnippet)>0 then
@@ -591,6 +596,7 @@ procedure TCrossInstaller.AddCrossOption(aOption: string);
 var
   index:integer;
   compileroption,compilerswitch:string;
+  ReplaceOption:boolean;
 begin
   compileroption:=Trim(aOption);
   if (Length(compileroption)<3) then exit;
@@ -598,7 +604,13 @@ begin
   begin
     compilerswitch:=Copy(compileroption,1,3);
     index:=StringListStartsWith(FCrossOpts,compilerswitch,0,True);
-    if (index<>-1) then
+
+    // Check for duplicates
+    ReplaceOption:=(index<>-1);
+    if ReplaceOption then ReplaceOption:=(NOT (Pos('-Fl',compileroption)=1));
+    if ReplaceOption then ReplaceOption:=(NOT (Pos('-k',compileroption)=1));
+
+    if (ReplaceOption) then
       FCrossOpts.Strings[index]:=compileroption
     else
       FCrossOpts.Add(compileroption);

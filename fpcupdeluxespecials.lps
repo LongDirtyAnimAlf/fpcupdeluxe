@@ -4,7 +4,8 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="linux64musl,freebsd11x64,solarisx64oi,darwin32carbon,darwin32cocoa,darwin64cocoa,darwin64cocoalegacy,darwin64QT5,haiku32QT5,haiku64QT5,darwinppccarbon,darwinppccocoa,darwinppc64cocoa"/>
-    <Units Count="129">
+    <BuildModes Active="darwinarm64cocoa"/>
+    <Units Count="130">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -977,8 +978,15 @@
         <CursorPos X="11" Y="125"/>
         <UsageCount Value="10"/>
       </Unit128>
+      <Unit129>
+        <Filename Value="C:\fpcupsystems\stablespecial\lazarus\lcl\interfaces\carbon\carbonbars.pp"/>
+        <UnitName Value="CarbonBars"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="2" Y="16"/>
+        <UsageCount Value="10"/>
+      </Unit129>
     </Units>
-    <JumpHistory Count="2" HistoryIndex="1">
+    <JumpHistory Count="3" HistoryIndex="2">
       <Position1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="4219" Column="22" TopLine="4212"/>
@@ -987,6 +995,9 @@
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="4217" Column="23" TopLine="4212"/>
       </Position2>
+      <Position3>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+      </Position3>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

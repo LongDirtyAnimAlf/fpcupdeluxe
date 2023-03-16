@@ -839,6 +839,7 @@ begin
           begin
             //Set basic config text
             s1:='# Dummy (blank) config just to replace dedicated settings during build of cross-compiler'+LineEnding;
+            //s1:='';
 
             //Remove dedicated settings of config snippet
             if MakeCycle=Low(TSTEPS) then

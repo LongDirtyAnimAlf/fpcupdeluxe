@@ -2343,13 +2343,6 @@ begin
     aLazarusTarget:='ultibo.git';
   end;
 
-  if Sender=OPMBtn then
-  begin
-    s:=Format(upInstallConfimationSimple,['Online Package Manager']);
-    aModule:='opm';
-    //FPCupManager.OnlyModules:='mORMot,zeos';
-  end;
-
   s:=s+sLineBreak+sLineBreak;
   s:=s+upInstallDirectory+': '+Self.sInstallDir;
   if Form2.AskConfirmation then
@@ -2577,6 +2570,9 @@ begin
   end;
   DisEnable(Sender,False);
   try
+    if (Sender=OPMBtn) then
+      InstallModule('opm',false)
+    else
     if (Sender=mORMotBtn) then
       InstallModule('mORMot2',false)
     else
