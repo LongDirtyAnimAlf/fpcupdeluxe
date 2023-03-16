@@ -223,13 +223,14 @@ begin
   if result then
   begin
     FLibsFound:=True;
-    AddFPCCFGSnippet('-Fl'+LibsPath);
 
-    s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
+    AddFPCCFGSnippet('-Xd');
+    AddFPCCFGSnippet('-Fl'+LibsPath);
+    AddFPCCFGSnippet('-Fl'+ConcatPaths([LibsPath,'system']));
+
+    s:=IncludeTrailingPathDelimiter(LibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
     s:=ExpandFileName(s);
     s:=ExcludeTrailingBackslash(s);
-    AddFPCCFGSnippet('-Fl'+LibsPath+'system');
-    AddFPCCFGSnippet('-Xd');
     AddFPCCFGSnippet('-XR'+s);
 
     AddFPCCFGSnippet('-k-framework',false);
@@ -449,7 +450,7 @@ begin
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
     AddFPCCFGSnippet('-XX');
-    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
+    AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names};
   end;
 end;
 

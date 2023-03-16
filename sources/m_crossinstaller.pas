@@ -181,7 +181,6 @@ type
     {$endif}
     procedure AddFPCCFGSnippet(aSnip: string; AddToCrossOptions:boolean=true);
     procedure AddCrossOption(aOption: string);
-
     procedure ReplaceFPCCFGSnippet(aOldSnip,aNewSnip: string);
     procedure SetFPCVersion(aVersion: string);
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
@@ -561,9 +560,11 @@ procedure TCrossInstaller.AddFPCCFGSnippet(aSnip: string; AddToCrossOptions:bool
 var
   aSnippd:string;
 begin
-  if Length(Trim(aSnip))=0 then exit;
+  aSnippd:=Trim(aSnip);
 
-  aSnippd:=aSnip;
+  if Length(aSnippd)=0 then exit;
+
+  if AddToCrossOptions then AddCrossOption(aSnippd);
 
   aSnippd:=StringReplace(aSnippd,'#IFDEF ','#IFDEF_',[rfReplaceAll]);
   aSnippd:=StringReplace(aSnippd,'#ENDIF ','#ENDIF_',[rfReplaceAll]);
@@ -584,9 +585,6 @@ begin
     FFPCCFGSnippet:=FFPCCFGSnippet+aSnippd;
   end
   else FFPCCFGSnippet:=aSnippd;
-
-  if AddToCrossOptions then AddCrossOption(aSnip);
-
 end;
 
 procedure TCrossInstaller.AddCrossOption(aOption: string);

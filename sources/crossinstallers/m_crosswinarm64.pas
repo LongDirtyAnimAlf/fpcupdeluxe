@@ -105,7 +105,7 @@ begin
   begin
     FBinsFound:=true;
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
-    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
+    AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
     AddFPCCFGSnippet('-O-'); // Diable optimizer for now.
   end;
 end;

@@ -180,7 +180,6 @@ begin
     begin
       aOption:='-Xd';
       AddFPCCFGSnippet(aOption);
-      AddCrossOption(aOption);
     end;
     }
 
@@ -211,7 +210,6 @@ begin
         aOption:='6.0';
       end;
       AddFPCCFGSnippet('-WP'+aOption);
-      AddCrossOption('-WP'+aOption);
     end;
   end;
 
@@ -226,7 +224,6 @@ begin
         aOption:='8.1';
       end;
       AddFPCCFGSnippet('-WP'+aOption);
-      AddCrossOption('-WP'+aOption);
     end;
   end;
 
@@ -240,7 +237,6 @@ begin
         aOption:='10.8';
       end;
       AddFPCCFGSnippet('-WM'+aOption);
-      AddCrossOption('-WM'+aOption);
     end;
   end;
 
@@ -339,7 +335,6 @@ begin
     SearchBinUtilsInfo(true);
     // Set this directory for compiler utilities
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
-    AddCrossOption('-FD'+BinUtilsPath);
   end else FBinUtilsPath:='';
 
   // Never fail

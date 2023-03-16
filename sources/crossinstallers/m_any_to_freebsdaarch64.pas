@@ -181,7 +181,7 @@ begin
     FBinsFound:=true;
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
-    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names}
+    AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names}
   end;
 end;
 

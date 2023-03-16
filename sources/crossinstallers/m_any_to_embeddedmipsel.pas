@@ -227,7 +227,7 @@ begin
     FBinsFound:=true;
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
-    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
+    AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names};
     AddFPCCFGSnippet('-a5'); // prevents the addition of .module nomips16 pseudo-op : not all assemblers can handle this
   end;
 end;

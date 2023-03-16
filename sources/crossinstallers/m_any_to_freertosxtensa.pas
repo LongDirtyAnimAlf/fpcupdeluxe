@@ -170,9 +170,8 @@ begin
       end;
       if (Length(S)>0) then
       begin
-        S:='-Fl'+ExtractFilePath(S);
+        S:='-Fl'+ExtractFileDir(S);
         AddFPCCFGSnippet(S);
-        AddCrossOption(S);
       end;
 
       // Check tools deployment version
@@ -195,7 +194,6 @@ begin
         begin
           S:='-WP'+S;
           AddFPCCFGSnippet(S);
-          AddCrossOption(S);
           S:=ConcatPaths([BasePath,CROSSLIBPATH,TargetCPUName+'-'+TargetOSName]);
           PresetLibPath:=ConcatPaths([S,SubArchName]);
           if DirectoryExists(PresetLibPath) then AddFPCCFGSnippet('-Fl'+PresetLibPath);

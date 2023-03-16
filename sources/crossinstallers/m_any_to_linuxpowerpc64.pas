@@ -183,7 +183,7 @@ begin
     FBinsFound:=true;
 
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
-    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
+    AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
 
     (*
     2017-10-19 FPC trunk

@@ -126,7 +126,7 @@ begin
   begin
     FBinsFound:=true;
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
-    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
+    AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
   end;
 end;
 

@@ -578,7 +578,7 @@ begin
     FBinsFound:=true;
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
-    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
+    AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
   end;
 end;
 
