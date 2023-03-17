@@ -940,6 +940,7 @@ begin
     if AnsiStartsText('fatal: No annotated tags ',line) then exit;
     if AnsiStartsText('fatal: HEAD does not ',line) then exit;
     if AnsiStartsText('fatal: no tag exactly matches',line) then exit;
+    if AnsiStartsText('fatal: unknown date format',line) then exit;
 
     if AnsiStartsText('However, ',line) then exit;
 

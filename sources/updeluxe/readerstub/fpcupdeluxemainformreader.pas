@@ -254,6 +254,7 @@ type
     function  PrepareRun(Sender: TObject):boolean;
     function  RealRun:boolean;
     procedure GetSystemInfo;
+    procedure InstallModule(aModule:string; UnInstall:boolean);
     function  GetFPCUPSettings(IniDirectory:string):boolean;
     function  SetFPCUPSettings(IniDirectory:string):boolean;
     procedure FillSourceListboxes;
@@ -761,7 +762,6 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) then
   begin
-
     if (ExistWordInString(PChar(s),'fatal: Remote branch')) then
     begin
       EchoInfo('We have had a GIT branch failure. Should be non-fatal !');
@@ -1851,8 +1851,6 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) OR (ExistWordInString(PChar(s),'Memory warning:',[soWholeWord])) then
   begin
-    // skip git fatal messages ... they are not that fatal ... but not sure yet !
-    // if (Pos('fatal: not a git repository',lowercase(s))=0) then
     begin
       FG      := TColor($0060FF);
       BG      := TColor($402000);
@@ -2339,25 +2337,11 @@ begin
     aLazarusTarget:='trunk'+GITLABEXTENSION;
   end;
 
-  if Sender=mORMotBtn then
-  begin
-    s:=Format(upInstallConfimationSimple,['mORMot']);
-    aModule:='mORMot';
-    //aModule:='mORMot,zeos';
-  end;
-
   if Sender=UltiboBtn then
   begin
     s:=Format(upInstallConfimationSimple,['Ultibo']);
     aFPCTarget:='ultibo.git';
     aLazarusTarget:='ultibo.git';
-  end;
-
-  if Sender=OPMBtn then
-  begin
-    s:=Format(upInstallConfimationSimple,['Online Package Manager']);
-    aModule:='opm';
-    //FPCupManager.OnlyModules:='mORMot,zeos';
   end;
 
   s:=s+sLineBreak+sLineBreak;
@@ -2407,6 +2391,9 @@ begin
       FPCupManager.IncludeModules:=FPCupManager.IncludeModules+_LHELP;
     end;
 
+
+
+
     {$ifdef RemoteLog}
     if ((Length(aFPCTarget)>0) OR (Length(aLazarusTarget)>0)) then
     begin
@@ -2426,7 +2413,8 @@ begin
     if (Sender=WioBtn) OR (Sender=PicoBtn) then
     begin
       // Due to changes in Lazarus, we need a trunk/main version of Lazarus that can be compiled with an embedded (old) FPC trunk
-      FPCupManager.LazarusDesiredRevision:='0ae37a906c942d24591917ceaafbad67d1b1b96c';
+      Form2.ForceLazarusRevision:='5b0ed449f3';
+      FPCupManager.LazarusDesiredRevision:='5b0ed449f3';
     end;
 
     success:=RealRun;
@@ -2572,43 +2560,39 @@ begin
 end;
 
 procedure TForm1.btnInstallModuleClick(Sender: TObject);
+begin
+  if (Sender=btnInstallModule) OR (Sender=btnUninstallModule) then
+  begin
+    if ((listModules.SelCount=0) OR (listModules.ItemIndex=-1)) then
+    begin
+      AddMessage('Please select a module / package.');
+      exit;
+    end;
+  end;
+  DisEnable(Sender,False);
+  try
+    if (Sender=OPMBtn) then
+      InstallModule('opm',false)
+    else
+    if (Sender=mORMotBtn) then
+      InstallModule('mORMot2',false)
+    else
+      InstallModule(listModules.Items.Strings[listModules.ItemIndex],(Sender=btnUninstallModule));
+  finally
+    DisEnable(Sender,True);
+  end;
+end;
+
+procedure TForm1.InstallModule(aModule:string; UnInstall:boolean);
 var
-  //i:integer;
   modules:string;
   s:string;
 begin
-  if listModules.SelCount=0 then
-  begin
-    AddMessage('Please select a module / package.');
-    exit;
-  end;
+  modules:=aModule;
 
-  modules:='';
-
-  //No multi-select for now
-  (*
-  for i:=0 to listModules.Count-1 do
+  if UnInstall then modules:=modules+_UNINSTALL else
   begin
-    if listModules.Selected[i] then
-    begin
-      modules:=modules+listModules.Items[i];
-      if Sender=btnUninstallModule then modules:=modules+_UNINSTALL else
-      begin
-        if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
-      end;
-      modules:=modules+',';
-    end;
-  end;
-  *)
-
-  //Single select
-  if (listModules.ItemIndex<>-1) then
-  begin
-    modules:=listModules.Items.Strings[listModules.ItemIndex];
-    if Sender=btnUninstallModule then modules:=modules+_UNINSTALL else
-    begin
-      if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
-    end;
+    if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
   end;
 
   if Length(modules)>0 then
@@ -2619,8 +2603,8 @@ begin
     s:=modules;
     s:=StringReplace(s,_UNINSTALL,'',[rfReplaceAll]);
     s:=StringReplace(s,_BUILD+_ONLY,'',[rfReplaceAll]);
-    if Sender=btnInstallModule then s:=upInstallModule+': '+s;
-    if Sender=btnUninstallModule then s:=upRemoveModule+': '+s;
+    if (NOT UnInstall) then s:=upInstallModule+': '+s;
+    if UnInstall then s:=upRemoveModule+': '+s;
     s:=s+'.'+sLineBreak;
     s:=s+upInstallDirectory+': '+Self.sInstallDir;
     s:=s+sLineBreak;
@@ -2629,7 +2613,7 @@ begin
       if (MessageDlgEx(s,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
         exit;
 
-    if Sender=btnInstallModule then
+    if (NOT UnInstall) then
     begin
       AddMessage('Limiting installation/update to '+FPCupManager.OnlyModules);
       AddMessage('');
@@ -2642,11 +2626,10 @@ begin
       sStatus:='Going to remove selected modules.';
     end;
 
-    DisEnable(Sender,False);
-    try
-      if (NOT PrepareRun(Sender)) then exit;
+    if (NOT PrepareRun(nil)) then exit;
 
-      FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
+    FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
+    try
       FPCupManager.OnlyModules:=modules;
 
       {$ifdef RemoteLog}
@@ -2654,19 +2637,17 @@ begin
       s:=StringReplace(s,_UNINSTALL,'',[rfReplaceAll]);
       s:=StringReplace(s,_BUILD+_ONLY,'',[rfReplaceAll]);
       aDataClient.AddExtraData('module[s]:',s);
-      if Sender=btnInstallModule then aDataClient.UpInfo.UpFunction:=ufInstallModule;
-      if Sender=btnUninstallModule then aDataClient.UpInfo.UpFunction:=ufUninstallModule;
+      if (NOT UnInstall) then aDataClient.UpInfo.UpFunction:=ufInstallModule;
+      if UnInstall then aDataClient.UpInfo.UpFunction:=ufUninstallModule;
       {$endif}
 
       RealRun;
 
     finally
       FPCupManager.ExportOnly:=(NOT Form2.Repo);
-      DisEnable(Sender,True);
     end;
 
   end;
-
 end;
 
 procedure TForm1.btnInstallDirSelectClick(Sender: TObject);

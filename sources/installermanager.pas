@@ -1225,13 +1225,17 @@ begin
 
   if GetSourceOS=GetOS(TOS.win32) then BaseBinsURL:='wincrossbins'
   else
-     if GetSourceOS=GetOS(TOS.win64) then BaseBinsURL:='wincrossbins'
+     if GetSourceOS=GetOS(TOS.win64) then
+     begin
+       BaseBinsURL:='wincrossbins';
+     end
      else
         if GetSourceOS=GetOS(TOS.linux) then
         begin
           if GetSourceCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386crossbins';
           if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64crossbins';
           if GetSourceCPU=GetCPU(TCPU.arm) then BaseBinsURL:='linuxarmcrossbins';
+          if GetSourceCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='linuxaarch64crossbins';
         end
         else
           if GetSourceOS=GetOS(TOS.freebsd) then
