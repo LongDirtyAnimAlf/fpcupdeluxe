@@ -721,7 +721,8 @@ begin
   if (localCPU=TCPU.aarch64) then
   begin
     SetResult('3.2.0',result);
-    if (localOS in [TOS.darwin,TOS.win64,TOS.embedded,TOS.freebsd]) then SetResult('3.3.1',result);
+    if (localOS in [TOS.darwin]) then SetResult('3.2.2',result);
+    if (localOS in [TOS.win64,TOS.embedded,TOS.freebsd]) then SetResult('3.3.1',result);
   end;
   if (localOS=TOS.haiku) then
   begin

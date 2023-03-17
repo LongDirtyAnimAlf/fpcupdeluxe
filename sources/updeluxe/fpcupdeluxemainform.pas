@@ -370,7 +370,9 @@ uses
   extrasettings,
   subarch,
   modulesettings,
+  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
   DPB.Forms.Sequencial,
+  {$ENDIF}
   //checkoptions,
   installerCore,
   installerUniversal,
@@ -2389,9 +2391,6 @@ begin
       if Length(FPCupManager.IncludeModules)>0 then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',';
       FPCupManager.IncludeModules:=FPCupManager.IncludeModules+_LHELP;
     end;
-
-
-
 
     {$ifdef RemoteLog}
     if ((Length(aFPCTarget)>0) OR (Length(aLazarusTarget)>0)) then

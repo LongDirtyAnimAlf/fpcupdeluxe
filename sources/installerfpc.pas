@@ -2693,6 +2693,7 @@ begin
 
   if s='3.3.1' then result:='3.2.2'
   else if s='3.2.4' then result:='3.2.2'
+  else if s='3.2.3' then result:='3.2.2'
   else if s='3.2.2' then result:='3.2.0'
   else if s='3.2.0' then result:='3.0.4'
   else if ((s='3.0.5') OR (s='3.0.4')) then result:='3.0.2'

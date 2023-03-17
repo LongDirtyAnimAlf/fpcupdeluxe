@@ -2707,9 +2707,20 @@ var
   Json                                : TJSONData;
   Release,Asset                       : TJSONObject;
   Assets                              : TJSONArray;
+  ValidTarget                         : boolean;
 begin
   result:=InitModule;
   if not result then exit;
+
+  // There are only 4 versions of the tools
+  // Windows 64bit, Linux AMD64, Darwin AMD64, Darwin ARM64
+  // This check could also be skipped, but anyhow
+  ValidTarget:=false;
+  if (NOT ValidTarget) then ValidTarget:=(GetTOS(GetSourceOS) in [TOS.win32,TOS.win64]);
+  if (NOT ValidTarget) then ValidTarget:=(GetTOS(GetSourceOS) in [TOS.linux]) AND (GetTCPU(GetSourceCPU) in [TCPU.x86_64]);
+  if (NOT ValidTarget) then ValidTarget:=(GetTOS(GetSourceOS) in [TOS.darwin]) AND (GetTCPU(GetSourceCPU) in [TCPU.x86_64,TCPU.aarch64]);
+
+  if (NOT ValidTarget) then exit;
 
   idx:=UniModuleList.IndexOf(ModuleName);
   if (idx>=0) then
