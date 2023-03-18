@@ -186,6 +186,9 @@ type
     function GetAskConfirmation:boolean;
     procedure SetAskConfirmation(value:boolean);
 
+    function GetSaveScript:boolean;
+    procedure SetSaveScript(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -278,6 +281,7 @@ type
     property ApplyLocalChanges:boolean read GetApplyLocalChanges write SetApplyLocalChanges;
     property AddContext:boolean read GetAddContext write SetAddContext;
     property AskConfirmation:boolean read GetAskConfirmation write SetAskConfirmation;
+    property SaveScript:boolean read GetSaveScript write SetSaveScript;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -377,6 +381,9 @@ resourcestring
   HintCheckAskConfirmation = 'Show a confirmation dialog with yes/no before every build.';
   CaptionCheckAskConfirmation = 'Always ask for confirmation.';
 
+  HintCheckSaveScript = 'Save the current install-settings in a fpclazup-script for later use.';
+  CaptionCheckSaveScript = 'Save settings in fpcup-script.';
+
 var
   Form2: TForm2;
 
@@ -470,6 +477,7 @@ begin
 
   UpdateCheckBoxList;
 
+  SaveScript             := False;
   AskConfirmation        := True;
   FpcupBootstrappersOnly := True;
   Repo                   := True;
@@ -496,6 +504,7 @@ begin
     GetUpdates:=ReadBool('General','GetUpdates',GetUpdates);
 
     AskConfirmation:=ReadBool('General','AskConfirmation',AskConfirmation);
+    SaveScript:=ReadBool('General','SaveScript',SaveScript);
 
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
     EditHTTPProxyPort.Text:=InttoStr(ReadInteger('ProxySettings','HTTPProxyPort',8080));
@@ -623,6 +632,7 @@ begin
     Append(CaptionCheckApplyLocalChanges);
     Append(CaptionCheckAddContext);
     Append(CaptionCheckAskConfirmation);
+    Append(CaptionCheckSaveScript);
   end;
 
   for i := 0 to MiscellaneousCheckListBox.Count-1 do
@@ -1011,6 +1021,7 @@ begin
     WriteBool('General','GetUpdates',GetUpdates);
 
     WriteBool('General','AskConfirmation',AskConfirmation);
+    WriteBool('General','SaveScript',SaveScript);
 
     WriteString('ProxySettings','HTTPProxyURL',EditHTTPProxyHost.Text);
     if TryStrToInt(EditHTTPProxyPort.Text,i) then WriteInteger('ProxySettings','HTTPProxyPort',i);
@@ -1474,6 +1485,15 @@ end;
 procedure TForm2.SetAskConfirmation(value: boolean);
 begin
   SetCheckState(CaptionCheckAskConfirmation, value);
+end;
+
+function TForm2.GetSaveScript:boolean;
+begin
+  result := GetCheckState(CaptionCheckSaveScript);
+end;
+procedure TForm2.SetSaveScript(value:boolean);
+begin
+  SetCheckState(CaptionCheckSaveScript, value);
 end;
 
 function TForm2.GetFPCOptions:string;

@@ -969,7 +969,7 @@ begin
     {$ifdef unix}
     writeln(TxtFile,'#!/bin/sh');
     {$endif unix}
-    Write(TxtFile,'fpclazup'+GetExeExt);
+    Write(TxtFile,'fpclazup-'+GetSourceCPUOS+GetExeExt);
     Write(TxtFile,' --installdir='+BaseDirectory);
     if (NOT CrossCompiling) then
     begin
@@ -978,13 +978,23 @@ begin
       Write(TxtFile,' --lazURL='+LazarusURL);
       {$endif}
       if (Length(FPCBranch)>0) then Write(TxtFile,' --fpcBranch='+FPCBranch);
+      if (Length(FPCTAG)>0) then Write(TxtFile,' --fpcTag='+FPCTAG);
+      if (Length(FPCDesiredRevision)>0) then Write(TxtFile,' --fpcRevision='+FPCDesiredRevision);
+      if (Length(FPCOPT)>0) then Write(TxtFile,' --fpcOPT='+FPCOPT);
+      if (Length(IncludeModules)>0) then Write(TxtFile,' --include='+IncludeModules);
+      if (Length(OnlyModules)>0) then Write(TxtFile,' --only='+OnlyModules);
+      if (Length(SkipModules)>0) then Write(TxtFile,' --skip='+SkipModules);
       {$ifndef FPCONLY}
       if (Length(LazarusBranch)>0) then Write(TxtFile,' --lazBranch='+LazarusBranch);
+      if (Length(LazarusTAG)>0) then Write(TxtFile,' --lazTag='+LazarusTAG);
+      if (Length(LazarusDesiredRevision)>0) then Write(TxtFile,' --lazRevision='+LazarusDesiredRevision);
       {$endif}
     end;
     if (CrossCPU_Target<>TCPU.cpuNone) then Write(TxtFile,' --cputarget='+GetCPU(CrossCPU_Target));
     if (CrossOS_Target<>TOS.osNone) then Write(TxtFile,' --ostarget='+GetOS(CrossOS_Target));
     if (FPCInstallDirectory<>FPCSourceDirectory) then Write(TxtFile,' --fpcsplit');
+    Write(TxtFile,' --noconfirm');
+    Write(TxtFile,' --autotools');
   finally
     CloseFile(TxtFile);
   end;

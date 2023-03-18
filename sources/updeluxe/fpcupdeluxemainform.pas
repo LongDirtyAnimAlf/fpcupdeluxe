@@ -4191,7 +4191,7 @@ begin
   AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
   AddMessage('');
 
-  //FPCupManager.SaveSettings;
+  if Form2.SaveScript then FPCupManager.SaveSettings;
 
   BitBtnHalt.Enabled:=true;
   try
