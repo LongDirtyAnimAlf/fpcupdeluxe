@@ -980,7 +980,7 @@ begin
       if (Length(FPCBranch)>0) then Write(TxtFile,' --fpcBranch='+FPCBranch);
       if (Length(FPCTAG)>0) then Write(TxtFile,' --fpcTag='+FPCTAG);
       if (Length(FPCDesiredRevision)>0) then Write(TxtFile,' --fpcRevision='+FPCDesiredRevision);
-      if (Length(FPCOPT)>0) then Write(TxtFile,' --fpcOPT='+FPCOPT);
+      if (Length(FPCOPT)>0) then Write(TxtFile,' --fpcOPT='+MaybeQuotedSpacesOnly(FPCOPT));
       if (Length(IncludeModules)>0) then Write(TxtFile,' --include='+IncludeModules);
       if (Length(OnlyModules)>0) then Write(TxtFile,' --only='+OnlyModules);
       if (Length(SkipModules)>0) then Write(TxtFile,' --skip='+SkipModules);
@@ -988,6 +988,7 @@ begin
       if (Length(LazarusBranch)>0) then Write(TxtFile,' --lazBranch='+LazarusBranch);
       if (Length(LazarusTAG)>0) then Write(TxtFile,' --lazTag='+LazarusTAG);
       if (Length(LazarusDesiredRevision)>0) then Write(TxtFile,' --lazRevision='+LazarusDesiredRevision);
+      if (Length(LazarusOPT)>0) then Write(TxtFile,' --lazOPT='+MaybeQuotedSpacesOnly(LazarusOPT));
       {$endif}
     end;
     if (CrossCPU_Target<>TCPU.cpuNone) then Write(TxtFile,' --cputarget='+GetCPU(CrossCPU_Target));
