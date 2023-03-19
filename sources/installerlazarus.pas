@@ -232,6 +232,7 @@ type
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName: string): boolean; virtual;
     function GetLazarusVersion: string;
+    function IsCross:boolean;override;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule: boolean;
@@ -323,15 +324,17 @@ begin
     CrossInstaller.SetSubArch(CrossOS_SubArch);
     CrossInstaller.SetABI(CrossOS_ABI);
 
-    if not CrossInstaller.GetBinUtils(BaseDirectory) then
+    if (ieBins in FErrorCodes) then
       Infoln(infotext+'Failed to get crossbinutils', etError)
-    else if not CrossInstaller.GetLibs(BaseDirectory) then
+    else
+    if(ieLibs in FErrorCodes) then
       Infoln(infotext+'Failed to get cross libraries', etError)
-    else if not CrossInstaller.GetLibsLCL(FLCL_Platform, BaseDirectory) then
+    else
+    if not CrossInstaller.GetLibsLCL(FLCL_Platform, BaseDirectory) then
       Infoln(infotext+'Failed to get LCL cross libraries', etError)
     else
-      // Cross compiling prerequisites in place. Let's compile.
     begin
+      // Cross compiling prerequisites in place. Let's compile.
       // If we're "crosscompiling" with the native compiler and binutils - "cross compiling [lite]" - use lazbuild.
       // Advantages:
       // - dependencies are taken care of
@@ -1433,6 +1436,10 @@ begin
   if result='0.0.0' then result:=GetVersionFromUrl(URL);
 end;
 
+function TLazarusInstaller.IsCross:boolean;
+begin
+  result:=(Self is TLazarusCrossInstaller);
+end;
 
 function TLazarusInstaller.InitModule: boolean;
 var
@@ -1544,9 +1551,9 @@ begin
   if (VersionSnippet<>'0.0.0') then
   begin
     // only report once
-    if (ModuleName=_LAZBUILD) OR (ModuleName=_LAZARUS) OR ((Self is TLazarusCrossInstaller) AND (ModuleName=_LCL)) then
+    if (ModuleName=_LAZBUILD) OR (ModuleName=_LAZARUS) OR (IsCross AND (ModuleName=_LCL)) then
     begin
-      if (Self is TLazarusCrossInstaller) then
+      if (IsCross) then
       begin
         s:='Lazarus '+TLazarusCrossInstaller(Self).CrossInstaller.RegisterName+' cross-builder: ';
       end
@@ -1985,7 +1992,7 @@ begin
 
   if not Result then exit;
 
-  CrossCompiling:=(Self is TLazarusCrossInstaller);
+  CrossCompiling:=(IsCross AND Assigned(CrossInstaller));
 
   if (ModuleName=_LAZARUS) then
   begin
@@ -2117,7 +2124,7 @@ begin
       _COMPONENTS:
       begin
         CleanDirectory:='components';
-        if (Self is TLazarusCrossInstaller) AND (FLCL_Platform <> '') then
+        if (IsCross) AND (FLCL_Platform <> '') then
         begin
           Processor.Process.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
         end;
@@ -2126,7 +2133,7 @@ begin
       _PACKAGER:
       begin
         CleanDirectory:='packager';
-        if (Self is TLazarusCrossInstaller) AND (FLCL_Platform <> '') then
+        if (IsCross) AND (FLCL_Platform <> '') then
         begin
           Processor.Process.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
         end;
@@ -2163,7 +2170,7 @@ begin
 
     if (NOT RunTwice) then
     begin
-      if (Self is TLazarusCrossInstaller) then
+      if (IsCross) then
         Infoln(infotext+'Running "make '+CleanCommand+'" twice inside '+CleanDirectory+' for target '+TLazarusCrossInstaller(Self).CrossInstaller.RegisterName,etInfo)
       else
         Infoln(infotext+'Running "make '+CleanCommand+'" twice inside '+CleanDirectory,etInfo);

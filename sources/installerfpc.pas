@@ -149,6 +149,7 @@ type
     function GetFPCRevision: string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
+    function IsCross:boolean;override;
     function InitModule(aBootstrapVersion:string=''):boolean;
   public
     property UseLibc: boolean read FUseLibc;
@@ -2350,7 +2351,7 @@ begin
 
     // Delete stray compilers, if any !!
     aDir:=ConcatPaths([SourceDirectory,'compiler']);
-    if (Self is TFPCCrossInstaller) then
+    if (IsCross) then
     begin
       if Assigned(CrossInstaller) then DeleteFile(aDir+DirectorySeparator+GetCrossCompilerName(CrossInstaller.TargetCPU));
     end
@@ -2428,7 +2429,7 @@ begin
   end;
   {$endif UNIX}
 
-  if (NOT (Self is TFPCCrossInstaller)) then
+  if (NOT (IsCross)) then
   begin
     result:=ConcatPaths([aDir,GetFPCTarget(True)]);
     exit;
@@ -2437,7 +2438,7 @@ begin
   result:=ConcatPaths([aDir,GetFPCTarget(False)]);
   //result:=ConcatPaths([aDir,CrossInstaller.RegisterName]);
 
-  if (Self is TFPCCrossInstaller) then with (Self as TFPCCrossInstaller) do
+  if (IsCross) then with (Self as TFPCCrossInstaller) do
   // Specials
   if (SubarchTarget) then
   begin
@@ -3059,6 +3060,11 @@ begin
   begin
     result:=CompilerRevision(testcompiler);
   end;
+end;
+
+function TFPCInstaller.IsCross:boolean;
+begin
+  result:=(Self is TFPCCrossInstaller);
 end;
 
 function TFPCInstaller.InitModule(aBootstrapVersion:string):boolean;
@@ -3729,7 +3735,7 @@ begin
   end;
 
   VersionSnippet:=SourceVersionStr;
-  if (Self is TFPCCrossInstaller) then
+  if (IsCross) then
   begin
     Compiler:=GetFPCInBinDir;
     s2:=CrossInstaller.RegisterName+' cross-builder: Detected source version FPC (source): '
@@ -3750,7 +3756,7 @@ begin
 
   // if cross-compiling, skip a lot of code
   // trust the previous work done by this code for the native installer!
-  if (NOT (Self is TFPCCrossInstaller)) then
+  if (NOT (IsCross)) then
   begin
     RequiredBootstrapVersion:='0.0.0';
 
@@ -3902,12 +3908,12 @@ begin
       end;
     end;
     {$endif}
-  end;//(NOT (Self is TFPCCrossInstaller))
+  end;//(NOT (IsCross))
 
   // Do we need to force the use of libc :
   FUseLibc:=False;
 
-  if (Self is TFPCCrossInstaller) then
+  if (IsCross) then
   begin
     if (CrossInstaller.TargetOS=TOS.dragonfly) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.freebsd) then FUseLibc:=True;
@@ -3921,7 +3927,7 @@ begin
   end;
 
   {$ifdef FORCEREVISION}
-  if (NOT(Self is TFPCCrossInstaller)) then
+  if (NOT(IsCross)) then
   begin
     FUseRevInc:=true;
     if (SourceVersionNum<>0) then if (SourceVersionNum<CalculateFullVersion(3,2,3)) then FUseRevInc:=false;
@@ -4001,7 +4007,7 @@ begin
   // only create fpc.cfg and other configs with fpcmkcfg when NOT crosscompiling !
 
   s:=ExcludetrailingPathDelimiter(FFPCCompilerBinPath);
-  if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) AND DirectoryExists(s) then
+  if (OperationSucceeded) AND (NOT (IsCross)) AND DirectoryExists(s) then
   begin
     // Find out where fpcmkcfg lives
     if (OperationSucceeded) then
@@ -4599,7 +4605,7 @@ begin
       end;
     end;
 
-    if (Self is TFPCCrossInstaller) then
+    if (IsCross) then
     begin
       if Assigned(CrossInstaller) then result:=CleanExtra(CrossInstaller.TargetCPU,CrossInstaller.TargetOS);
     end;
@@ -4634,7 +4640,7 @@ begin
 
   if (NOT result) then exit;
 
-  CrossCompiling:=((Self is TFPCCrossInstaller) AND Assigned(CrossInstaller));
+  CrossCompiling:=(IsCross AND Assigned(CrossInstaller));
 
   if CrossCompiling then
   begin
@@ -4753,7 +4759,7 @@ begin
     {$ELSE}
     Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FFPCCompilerBinPath));
     {$ENDIF}
-    if (Self is TFPCCrossInstaller) then
+    if (IsCross) then
     begin  // clean out the correct compiler
       Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName);
       Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);

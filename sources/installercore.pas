@@ -402,7 +402,6 @@ type
     function GetInstallerClass(aClassToFind:TClass):boolean;
     function IsFPCInstaller:boolean;
     function IsLazarusInstaller:boolean;
-    function IsCrossInstaller:boolean;
     function IsHelpInstaller:boolean;
     function IsUniversalInstaller:boolean;
     {$IFDEF MSWINDOWS}
@@ -522,6 +521,7 @@ type
     function GetReleaseCandidateFromSource:integer;virtual;
     function GetVersion:string;
     function InitInfoText(const ExtraInfo:string=''):string;
+    function IsCross:boolean;virtual;
   public
     InfoText: string;
     LocalInfoText: string;
@@ -669,15 +669,8 @@ type
   end;
 
   TBaseUniversalInstaller  = class(TInstaller);
-
   TBaseFPCInstaller        = class(TInstaller);
-  //TFPCInstaller            = class(TBaseFPCInstaller);
-  //TFPCCrossInstaller       = class(TFPCInstaller);
-
   TBaseLazarusInstaller    = class(TInstaller);
-  //TLazarusInstaller        = class(TBaseLazarusInstaller);
-  //TLazarusCrossInstaller   = class(TLazarusInstaller);
-
   TBaseHelpInstaller       = class(TInstaller);
   TBaseWinInstaller        = class(TInstaller);
 
@@ -3283,7 +3276,7 @@ begin
 
   // Do not check the sources when crsoss-compiling
   // They must be ok !!
-  if IsCrossInstaller then exit;
+  if IsCross then exit;
 
   aRepoClient:=GetSuitableRepoClient;
 
@@ -4163,6 +4156,11 @@ begin
   result:=s;
 end;
 
+function TInstaller.IsCross:boolean;
+begin
+  result:=false;
+end;
+
 function TInstaller.GetInstallerClass(aClassToFind:TClass):boolean;
 begin
   result:=false;
@@ -4180,13 +4178,6 @@ end;
 function TInstaller.IsLazarusInstaller:boolean;
 begin
   result:=GetInstallerClass(TBaseLazarusInstaller);
-end;
-
-function TInstaller.IsCrossInstaller:boolean;
-begin
-  //result:=(GetInstallerClass(TFPCCrossInstaller) OR GetInstallerClass(TLazarusCrossInstaller));
-  // To be improved by DON ... ;-)
-  result:=((Self.ClassName='TFPCCrossInstaller') OR (Self.ClassName='TLazarusCrossInstaller'))
 end;
 
 function TInstaller.IsHelpInstaller:boolean;
@@ -4467,8 +4458,7 @@ begin
 
   // Default: set missing libs and bins
   // Availability will be checked by cross-installer
-
-  if IsCrossInstaller then
+  if IsFPCInstaller AND IsCross then
   begin
     Include(FErrorCodes,ieBins);
     Include(FErrorCodes,ieLibs);
