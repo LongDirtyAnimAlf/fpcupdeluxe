@@ -131,7 +131,6 @@ type
     function GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
     function CleanExtra(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone):boolean;
   protected
-    LibsAvailable,BinsAvailable:boolean;
     function GetUnitsInstallDirectory(WithMagic:boolean):string;
     function GetVersionFromUrl(aUrl: string): string;override;
     function GetVersionFromSource: string;override;
@@ -677,7 +676,7 @@ begin
     //CrossInstaller.SetSubArch(CrossOS_SubArch);
     //CrossInstaller.SetABI(CrossOS_ABI);
 
-    result:=(BinsAvailable AND LibsAvailable);
+    result:=(NOT ((ieLibs in FErrorCodes) OR (ieBins in FErrorCodes)));
 
     if (NOT result) then Infoln(infotext+'Missing cross tools and/or libs', etError);
 
@@ -3086,9 +3085,6 @@ begin
 
   if (InitDone) AND (aBootstrapVersion='') then exit;
 
-  LibsAvailable:=false;
-  BinsAvailable:=false;
-
   localinfotext:=InitInfoText(' (InitModule): ');
 
   result:=CheckAndGetTools;
@@ -4619,6 +4615,7 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 // On Windows, removing fpmake.exe, see Build FAQ (Nov 2011), 2.5
 var
   CrossCompiling                         : boolean;
+  ToolAvailable                          : boolean;
   CPUOS_Signature                        : string;
   aCleanupCompiler,aCleanupCommand,aPath : string;
   aCleanupCommandList                    : TStringList;
@@ -4655,7 +4652,8 @@ begin
     Infoln(infotext+'Looking for crosstools and crosslibs on system. Please wait.',etInfo);
 
     // first, get/set cross binary utils !!
-    if (NOT BinsAvailable) then
+    ToolAvailable:=(NOT (ieBins in FErrorCodes));
+    if (NOT ToolAvailable) then
     begin
       CrossInstaller.SearchModeUsed:=DEFAULTSEARCHSETTING;
       if Length(CrossToolsDirectory)>0 then
@@ -4666,29 +4664,32 @@ begin
            else CrossInstaller.SearchModeUsed:=TSearchSetting.ssCustom;
       end;
       if CrossInstaller.SearchModeUsed=TSearchSetting.ssCustom
-         then BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
-         else BinsAvailable:=CrossInstaller.GetBinUtils(BaseDirectory);
-      if (not BinsAvailable) then Infoln('Failed to get crossbinutils', etError);
+         then ToolAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
+         else ToolAvailable:=CrossInstaller.GetBinUtils(BaseDirectory);
+      if (not ToolAvailable) then Infoln('Failed to get crossbinutils', etError);
+      if (ToolAvailable) then Exclude(FErrorCodes,ieBins);
     end;
 
     // second, get/set cross libraries !!
-    if (NOT LibsAvailable) then
+    ToolAvailable:=(NOT (ieLibs in FErrorCodes));
+    if (NOT ToolAvailable) then
     begin
       CrossInstaller.SearchModeUsed:=DEFAULTSEARCHSETTING;
       if Length(CrossLibraryDirectory)>0 then
       begin
         // we have a crosslibrary setting
-        if (CrossLibraryDirectory=FPCUP_AUTO_MAGIC)
+        if (CrossToolsDirectory=FPCUP_AUTO_MAGIC)
            then CrossInstaller.SearchModeUsed:=TSearchSetting.ssAuto
            else CrossInstaller.SearchModeUsed:=TSearchSetting.ssCustom;
       end;
       if CrossInstaller.SearchModeUsed=TSearchSetting.ssCustom
-        then LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory)
-        else LibsAvailable:=CrossInstaller.GetLibs(BaseDirectory);
-      if (not LibsAvailable) then Infoln('Failed to get crosslibrary', etError);
+        then ToolAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory)
+        else ToolAvailable:=CrossInstaller.GetLibs(BaseDirectory);
+      if (not ToolAvailable) then Infoln('Failed to get crosslibrary', etError);
+      if (ToolAvailable) then Exclude(FErrorCodes,ieLibs);
     end;
 
-    result:=(BinsAvailable AND LibsAvailable);
+    result:=(NOT ((ieLibs in FErrorCodes) OR (ieBins in FErrorCodes)));
 
   end else CPUOS_Signature:=GetFPCTarget(true);
 

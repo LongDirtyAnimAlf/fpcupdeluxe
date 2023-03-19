@@ -10,7 +10,7 @@
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <UsageCount Value="62"/>
+        <UsageCount Value="67"/>
         <Loaded Value="True"/>
       </Unit0>
     </Units>
@@ -18,5 +18,39 @@
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>
     </RunParams>
+    <HistoryLists Count="2">
+      <List0 Name="LaunchingApplication" Type="File" Count="1">
+        <Item1 Value="C:\WINDOWS\system32\cmd.exe /C ${TargetCmdLine}"/>
+      </List0>
+      <List1 Name="CommandLineParameters" Count="9">
+        <Item1 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --noconfirm --only=FPCCleanBuildOnly"/>
+        <Item2 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --noconfirm --only=_FPCCLEANBUILDONLY"/>
+        <Item3 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --only=_FPCCLEANBUILDONLY"/>
+        <Item4 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools --only=_FPCCLEANBUILDONLY"/>
+        <Item5 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools --only=FPCCleanOnly,FPCBuildOnly"/>
+        <Item6 Value=" --installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools"/>
+        <Item7 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --fpcsplit --noconfirm --autotools --verbose"/>
+        <Item8 Value="--verbose"/>
+        <Item9 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools"/>
+      </List1>
+    </HistoryLists>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="sources\up\checkoptions.pas"/>
+        <Line Value="709"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="sources\installermanager.pas"/>
+        <Line Value="2494"/>
+      </Item>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>

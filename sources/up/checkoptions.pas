@@ -42,6 +42,7 @@ var
   sAllParameters:string;
   sConfirm:string;
   bNoConfirm:boolean;
+  CrossCompiling:boolean;
   Options:TCommandLineOptions;
   sIniFile: string;
   sInstallDir: string; // Root installation directory
@@ -54,6 +55,8 @@ begin
   // In any case, we need to extract it from the resource sometime unless we
   // want to create an installer for each platform.
   SaveInisFromResource(SafeGetApplicationPath+SETTTINGSFILENAME,'settings_ini');
+
+  CrossCompiling:=false;
 
   Options:=TCommandLineOptions.Create;
   try
@@ -181,8 +184,20 @@ begin
 
       FManager.AutoTools:=Options.GetOptionNoParam('','autotools',false);
 
-      FManager.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crossbindir','')));
-      FManager.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crosslibdir','')));
+      s:=Options.GetOption('','cputarget','');
+      if (s<>'') then FManager.CrossCPU_Target:=GetTCPU(s);
+      s:=Options.GetOption('','ostarget','');
+      if (s<>'') then FManager.CrossOS_Target:=GetTOS(s);
+      FManager.CrossOS_SubArch:=GetTSubarch(Options.GetOption('','subarch',''));
+      FManager.CrossOPT:=Options.GetOption('','crossopt','');
+
+      CrossCompiling:=(FManager.CrossCPU_Target<>TCPU.cpuNone) OR (FManager.CrossOS_Target<>TOS.osNone);
+
+      if CrossCompiling then
+      begin
+        FManager.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crossbindir','')));
+        FManager.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crosslibdir','')));
+      end;
 
       sLogFile:=Options.GetOption('','logfilename','',true);
       if sLogFile='' then
@@ -203,10 +218,6 @@ begin
         end;
       end;
       FManager.ConfigFile:=Options.GetOption('','moduleconfig',SafeGetApplicationPath+installerUniversal.CONFIGFILENAME);
-      s:=Options.GetOption('','cputarget','');
-      if (s<>'') then FManager.CrossCPU_Target:=GetTCPU(s);
-      FManager.CrossOS_SubArch:=GetTSubarch(Options.GetOption('','subarch',''));
-      FManager.CrossOPT:=Options.GetOption('','crossopt','');
 
       {$ifdef LCL}
       // do not create shortcut for fpc in case of GUI !!
@@ -245,100 +256,104 @@ begin
         end;
       end;
 
-      try
-        FManager.NativeFPCBootstrapCompiler:=(NOT Options.GetOption('','onlyupbootstrappers',true));
-      except
-        on E: ECommandLineError do begin
-        // option did not have an argument
-        FManager.NativeFPCBootstrapCompiler:=(NOT Options.GetOptionNoParam('','onlyupbootstrappers'));
+      if NOT CrossCompiling then
+      begin
+        try
+          FManager.NativeFPCBootstrapCompiler:=(NOT Options.GetOption('','onlyupbootstrappers',true));
+        except
+          on E: ECommandLineError do begin
+          // option did not have an argument
+          FManager.NativeFPCBootstrapCompiler:=(NOT Options.GetOptionNoParam('','onlyupbootstrappers'));
+          end;
         end;
-      end;
 
-      try
-        FManager.KeepLocalChanges:=Options.GetOption('','keeplocalchanges',false);
-      except
-        on E: ECommandLineError do begin
-        // option did not have an argument
-        FManager.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
+        try
+          FManager.KeepLocalChanges:=Options.GetOption('','keeplocalchanges',false);
+        except
+          on E: ECommandLineError do begin
+          // option did not have an argument
+          FManager.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
+          end;
         end;
-      end;
 
-      try
-        FManager.ReApplyLocalChanges:=Options.GetOption('','reapplylocalchanges',false);
-      except
-        on E: ECommandLineError do begin
-        // option did not have an argument
-        FManager.ReApplyLocalChanges:=Options.GetOptionNoParam('','reapplylocalchanges');
+        try
+          FManager.ReApplyLocalChanges:=Options.GetOption('','reapplylocalchanges',false);
+        except
+          on E: ECommandLineError do begin
+          // option did not have an argument
+          FManager.ReApplyLocalChanges:=Options.GetOptionNoParam('','reapplylocalchanges');
+          end;
         end;
-      end;
 
-      // changes can only be reapplied (true) when they are stored in a diff when KeepLocalChanges=false
-      if FManager.KeepLocalChanges then FManager.reapplylocalchanges:=False;
-      {$ifndef FPCONLY}
-      FManager.ShortCutNameLazarus:=Options.GetOption('','lazlinkname',DirectorySeparator);
-      // Find out if the user specified --shortcutnamelazarus= to explicitly block creation of a link, or just didn't specify anything.
-      if (FManager.ShortCutNameLazarus=DirectorySeparator) then
-        if bHaveInstalldir then
-          FManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(sInstallDir)  // sInstallDir has no terminating pathdelimiter!!
-        else if UpperCase(ExtractFileName(FManager.LazarusInstallDirectory))='LAZARUS' then
-          FManager.ShortCutNameLazarus:='Lazarus_fpcup' // default installdir, default lazarus dir
+        // changes can only be reapplied (true) when they are stored in a diff when KeepLocalChanges=false
+        if FManager.KeepLocalChanges then FManager.reapplylocalchanges:=False;
+
+        if (NOT Options.GetOptionNoParam('','includehelp')) then
+        begin
+          if Length(FManager.SkipModules)>0 then FManager.SkipModules:=FManager.SkipModules+',';
+          FManager.SkipModules:=FManager.SkipModules+_HELPFPC;
+          {$ifndef FPCONLY}
+          FManager.SkipModules:=FManager.SkipModules+','+_HELPLAZARUS;
+          {$endif}
+        end
         else
-          FManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FManager.LazarusInstallDirectory);
+        begin
+          if Length(FManager.IncludeModules)>0 then FManager.IncludeModules:=FManager.IncludeModules+',';
+          FManager.IncludeModules:=FManager.IncludeModules+_LHELP;
+        end;
 
-      FManager.LazarusOPT:=Options.GetOption('','lazOPT','');
+        FManager.FPCPatches:=Options.GetOption('','fpcpatch','',false);
+        {$ifndef FPCONLY}
+        FManager.LazarusPatches:=Options.GetOption('','lazpatch','',false);
+        {$endif}
+        {$ifndef FPCONLY}
+        s:=Options.GetOption('','primary-config-path','');
+        if (s='') then
+          // If we have no input from the user, let's create a name based on the directory where
+          // Lazarus is to be installed
+          FManager.LazarusPrimaryConfigPath:=
+            IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FManager.LazarusInstallDirectory))
+        else
+          FManager.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
+        {$endif}
 
-      {$IF (defined(BSD)) and (not defined(Darwin))}
-      //todo: check for other BSDs
-      if (pos('-Fl/usr/local/lib/',FManager.LazarusOPT)=0) then
-      begin
-        //Infoln('Lazarus options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
-        //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
-        FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/local/lib';
+        {$ifndef FPCONLY}
+        FManager.ShortCutNameLazarus:=Options.GetOption('','lazlinkname',DirectorySeparator);
+        // Find out if the user specified --shortcutnamelazarus= to explicitly block creation of a link, or just didn't specify anything.
+        if (FManager.ShortCutNameLazarus=DirectorySeparator) then
+          if bHaveInstalldir then
+            FManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(sInstallDir)  // sInstallDir has no terminating pathdelimiter!!
+          else if UpperCase(ExtractFileName(FManager.LazarusInstallDirectory))='LAZARUS' then
+            FManager.ShortCutNameLazarus:='Lazarus_fpcup' // default installdir, default lazarus dir
+          else
+            FManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FManager.LazarusInstallDirectory);
+
+        FManager.LazarusOPT:=Options.GetOption('','lazOPT','');
+
+        {$if (defined(BSD)) and (not defined(Darwin))}
+        //todo: check for other BSDs
+        if (pos('-Fl/usr/local/lib/',FManager.LazarusOPT)=0) then
+        begin
+          //Infoln('Lazarus options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
+          //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
+          FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/local/lib';
+        end;
+        if (pos('-Fl/usr/X11R6/lib',FManager.LazarusOPT)=0) then
+        begin
+          //Infoln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
+          //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
+          FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/X11R6/lib -Fl/usr/X11R7/lib';
+        end;
+        {$endif}
+        FManager.LazarusBranch:=Options.GetOption('','lazBranch','');
+        FManager.LCL_Platform:=Options.GetOption('','lclplatform','');
+        {$endif FPCONLY}
       end;
-      if (pos('-Fl/usr/X11R6/lib',FManager.LazarusOPT)=0) then
-      begin
-        //Infoln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
-        //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
-        FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/X11R6/lib -Fl/usr/X11R7/lib';
-      end;
-      {$ENDIF defined(BSD) and not defined(Darwin)}
-      FManager.LazarusBranch:=Options.GetOption('','lazBranch','');
-      FManager.LCL_Platform:=Options.GetOption('','lclplatform','');
-      {$endif}
+
       FManager.IncludeModules:=Options.GetOption('','include','',false);
       FManager.SkipModules:=Options.GetOption('','skip','',false);
       FManager.OnlyModules:=Options.GetOption('','only','',false);
 
-      if (NOT Options.GetOptionNoParam('','includehelp')) then
-      begin
-        if Length(FManager.SkipModules)>0 then FManager.SkipModules:=FManager.SkipModules+',';
-        FManager.SkipModules:=FManager.SkipModules+_HELPFPC;
-        {$ifndef FPCONLY}
-        FManager.SkipModules:=FManager.SkipModules+','+_HELPLAZARUS;
-        {$endif}
-      end
-      else
-      begin
-        if Length(FManager.IncludeModules)>0 then FManager.IncludeModules:=FManager.IncludeModules+',';
-        FManager.IncludeModules:=FManager.IncludeModules+_LHELP;
-      end;
-
-      FManager.FPCPatches:=Options.GetOption('','fpcpatch','',false);
-      {$ifndef FPCONLY}
-      FManager.LazarusPatches:=Options.GetOption('','lazpatch','',false);
-      {$endif}
-      s:=Options.GetOption('','ostarget','');
-      if (s<>'') then FManager.CrossOS_Target:=GetTOS(s);
-      {$ifndef FPCONLY}
-      s:=Options.GetOption('','primary-config-path','');
-      if (s='') then
-        // If we have no input from the user, let's create a name based on the directory where
-        // Lazarus is to be installed
-        FManager.LazarusPrimaryConfigPath:=
-          IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FManager.LazarusInstallDirectory))
-      else
-        FManager.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
-      {$endif}
       FManager.Uninstall:=Options.GetOptionNoParam('','uninstall',true);
       // do not add to default options:
       FManager.Verbose:=Options.GetOptionNoParam('','verbose',false);
@@ -351,7 +366,7 @@ begin
       FManager.ExportOnly:=(Options.GetOptionNoParam('','getfilesonly'));
       if (Options.GetOptionNoParam('','rebuildonly')) then
       begin
-        FManager.OnlyModules:='FPCCleanAndBuildOnly,LazCleanAndBuildOnly';
+        FManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_LAZARUSCLEANBUILDONLY;
       end;
       FManager.NoJobs:=Options.GetOptionNoParam('','disablejobs');
       FManager.UseGitClient:=Options.GetOptionNoParam('','usegitclient',false);

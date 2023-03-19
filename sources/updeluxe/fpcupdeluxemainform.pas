@@ -3001,7 +3001,7 @@ begin
       warning:=false;
 
       s:=GetMinimumFPCVersion(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-      if (Length(s)>0) then
+      if (Length(s)>0) AND (s<>'0.0.0') then
       begin
         warning:=true;
         if warning then s:='Be forwarned: this will only work with FPC [(>='+s+')].'+sLineBreak+upQuestionContinue;
@@ -3924,11 +3924,11 @@ begin
 
   if CheckAutoClear.Checked then btnClearLog.Click;
 
-  FPCupManager.Sequencer.ResetAllExecuted;
-
   MissingCrossBins:=false;
   MissingCrossLibs:=false;
   MissingTools:=false;
+
+  FPCupManager.ResetAll;
 
   FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
 
@@ -3938,18 +3938,6 @@ begin
   FPCupManager.OnlinePatching:=Form2.OnlinePatching;
   FPCupManager.ReApplyLocalChanges:=Form2.ApplyLocalChanges;
 
-  FPCupManager.OnlyModules:='';
-  FPCupManager.IncludeModules:='';
-  FPCupManager.SkipModules:='';
-
-  FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
-  FPCupManager.CrossOS_Target:=TOS.osNone;
-  FPCupManager.CrossOS_SubArch:=TSubarch.saNone;
-
-  FPCupManager.LCL_Platform:='';
-
-  FPCupManager.SolarisOI:=false;
-  FPCupManager.MUSL:=false;
 
   FPCupManager.FPCOPT:=Form2.FPCOptions;
   if Form2.FPCDebug then
@@ -3958,28 +3946,11 @@ begin
     FPCupManager.FPCOPT:=Trim(FPCupManager.FPCOPT);
   end;
 
-  FPCupManager.CrossOPT:='';
-
-  FPCupManager.CrossLibraryDirectory:='';
-  FPCupManager.CrossToolsDirectory:='';
-
-  FPCupManager.FPCDesiredRevision:='';
-  FPCupManager.LazarusDesiredRevision:='';
-
-  FPCupManager.FPCBranch:='';
-  FPCupManager.LazarusBranch:='';
-
-  FPCupManager.FPCTag:='';
-  FPCupManager.LazarusTag:='';
-
   {$IFDEF DEBUG}
   FPCupManager.Verbose:=True;
   {$ELSE}
   FPCupManager.Verbose:=Form2.ExtraVerbose;
   {$ENDIF}
-
-  FPCupManager.FPCURL:='';
-  FPCupManager.LazarusURL:='';
 
   FPCupManager.LazarusOPT:=Form2.LazarusOptions;
   if Form2.LazarusDebug then
@@ -4211,6 +4182,10 @@ begin
     begin
       AddMessage('');
       AddMessage('');
+
+      MissingCrossBins:=(ieBins in FPCupManager.InstallerErrors);
+      MissingCrossLibs:=(ieLibs in FPCupManager.InstallerErrors);
+
       if (MissingCrossBins OR MissingCrossLibs) then
       begin
         if MissingCrossBins then AddMessage('fpcupdeluxe: ERROR: Failure due to missing cross binary tools.');
@@ -4783,12 +4758,10 @@ begin
       if (ExistWordInString(MsgStr,'failed to get crossbinutils')) then
       begin
         if (NOT MissingCrossBins) then memoSummary.Lines.Append('Missing correct cross libraries');
-        MissingCrossBins:=true;
       end
       else if (ExistWordInString(MsgStr,'failed to get crosslibrary')) then
       begin
         if (NOT MissingCrossLibs) then memoSummary.Lines.Append('Missing correct cross libraries');
-        MissingCrossLibs:=true;
       end
       else if ((ExistWordInString(MsgStr,'CheckAndGetTools')) OR (ExistWordInString(MsgStr,'Required package is not installed'))) then
       begin

@@ -76,7 +76,9 @@ uses
   SysUtils, Strings,
   FileUtil, LazFileUtils,
   synautil, // for rpos ... could also use strutil
-  installerManager, installerUniversal,
+  installerManager,
+  installerCore,
+  installerUniversal,
   checkoptions, fpcuputil,
   {$endif}
   {$ifdef LCL}
@@ -505,85 +507,92 @@ begin
         {$endif}
         if ((FPCupManager.CrossOS_Target<>TOS.osNone) OR (FPCupManager.CrossCPU_Target<>TCPU.cpuNone)) then
         begin
+          BinsOk:=(NOT (ieBins in FPCupManager.InstallerErrors));
+          LibsOk:=(NOT (ieLibs in FPCupManager.InstallerErrors));
           FPCupManager.GetCrossToolsFileName({%H-}BinsName,{%H-}LibsName);
           FPCupManager.GetCrossToolsPath({%H-}BinsPath,{%H-}LibsPath);
-          BinsOk:=FPCupManager.GetCrossBinsURL({%H-}BinsURL,BinsName);
-          if (BinsOk AND FPCupManager.AutoTools) then
+          if (NOT BinsOk) then
           begin
-            writeln('Found correct online binutils at: '+BinsURL);
-            writeln('Going to download the cross-bins. Can (will) take some time !');
-            ToolTargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+BinsName;
-            SysUtils.DeleteFile(ToolTargetFile);
-            BinsOk:=DownLoad(FPCupManager.UseWget,BinsURL,ToolTargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-            if BinsOk then
+            BinsOk:=FPCupManager.GetCrossBinsURL({%H-}BinsURL,BinsName);
+            if (BinsOk AND FPCupManager.AutoTools) then
             begin
-              writeln('Download successfull. Unpacking archive.');
-              ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
-              {$ifndef MSWINDOWS}
-              ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinsPath+DirectorySeparator;
-              {$endif}
-              ForceDirectoriesSafe(ToolTargetPath);
-              with TNormalUnzipper.Create do
+              writeln('Found correct online binutils at: '+BinsURL);
+              writeln('Going to download the cross-bins. Can (will) take some time !');
+              ToolTargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+BinsName;
+              SysUtils.DeleteFile(ToolTargetFile);
+              BinsOk:=DownLoad(FPCupManager.UseWget,BinsURL,ToolTargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+              if BinsOk then
               begin
-                try
-                  BinsOk:=DoUnZip(ToolTargetFile,ToolTargetPath,[]);
-                finally
-                  Free;
-                end;
-              end;
-              if BinsOk then SysUtils.DeleteFile(ToolTargetFile);
-            end;
-            if BinsOk then
-            begin
-              {$IFDEF UNIX}
-              aList:=FindAllFiles(ToolTargetPath);
-              try
-                if (aList.Count > 0) then
+                writeln('Download successfull. Unpacking archive.');
+                ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
+                {$ifndef MSWINDOWS}
+                ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinsPath+DirectorySeparator;
+                {$endif}
+                ForceDirectoriesSafe(ToolTargetPath);
+                with TNormalUnzipper.Create do
                 begin
-                  for i:=0 to Pred(aList.Count) do
-                  begin
-                    fpChmod(aList.Strings[i],&755);
+                  try
+                    BinsOk:=DoUnZip(ToolTargetFile,ToolTargetPath,[]);
+                  finally
+                    Free;
                   end;
                 end;
-              finally
-                aList.Free;
+                if BinsOk then SysUtils.DeleteFile(ToolTargetFile);
               end;
-              {$ENDIF}
-            end;
-          end;
-
-          LibsOk:=FPCupManager.GetCrossLibsURL({%H-}LibsURL,LibsName);
-          if (BinsOk AND FPCupManager.AutoTools) then
-          begin
-            writeln('Found correct online libraries at: '+LibsURL);
-            writeln('Going to download the cross-libs. Can (will) take some time !');
-            ToolTargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+LibsName;
-            SysUtils.DeleteFile(ToolTargetFile);
-            LibsOk:=DownLoad(FPCupManager.UseWget,LibsURL,ToolTargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-            if LibsOk then
-            begin
-              writeln('Download successfull. Unpacking archive.');
-              ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
-              //ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibsPath+DirectorySeparator;
-              ForceDirectoriesSafe(ToolTargetPath);
-              with TNormalUnzipper.Create do
+              if BinsOk then
               begin
+                {$IFDEF UNIX}
+                aList:=FindAllFiles(ToolTargetPath);
                 try
-                  LibsOk:=DoUnZip(ToolTargetFile,ToolTargetPath,[]);
+                  if (aList.Count > 0) then
+                  begin
+                    for i:=0 to Pred(aList.Count) do
+                    begin
+                      fpChmod(aList.Strings[i],&755);
+                    end;
+                  end;
                 finally
-                  Free;
+                  aList.Free;
                 end;
+                {$ENDIF}
               end;
-              if LibsOk then SysUtils.DeleteFile(ToolTargetFile);
             end;
           end;
-          // as libraries for embedded are not always needed, end with success even if the above has failed
           if (NOT LibsOk) then
           begin
-            if (FPCupManager.CrossOS_Target=TOS.embedded) then
+            LibsOk:=FPCupManager.GetCrossLibsURL({%H-}LibsURL,LibsName);
+            if (BinsOk AND FPCupManager.AutoTools) then
             begin
-              LibsURL:='';
-              LibsOk:=true;
+              writeln('Found correct online libraries at: '+LibsURL);
+              writeln('Going to download the cross-libs. Can (will) take some time !');
+              ToolTargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+LibsName;
+              SysUtils.DeleteFile(ToolTargetFile);
+              LibsOk:=DownLoad(FPCupManager.UseWget,LibsURL,ToolTargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+              if LibsOk then
+              begin
+                writeln('Download successfull. Unpacking archive.');
+                ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
+                //ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibsPath+DirectorySeparator;
+                ForceDirectoriesSafe(ToolTargetPath);
+                with TNormalUnzipper.Create do
+                begin
+                  try
+                    LibsOk:=DoUnZip(ToolTargetFile,ToolTargetPath,[]);
+                  finally
+                    Free;
+                  end;
+                end;
+                if LibsOk then SysUtils.DeleteFile(ToolTargetFile);
+              end;
+            end;
+            // as libraries for embedded are not always needed, end with success even if the above has failed
+            if (NOT LibsOk) then
+            begin
+              if (FPCupManager.CrossOS_Target=TOS.embedded) then
+              begin
+                LibsURL:='';
+                LibsOk:=true;
+              end;
             end;
           end;
         end;

@@ -66,7 +66,7 @@ end;"/>
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <DebugInfoType Value="dsDwarf3"/>
+              <DebugInfoType Value="dsDwarf2"/>
             </Debugging>
           </Linking>
           <Other>
@@ -606,13 +606,13 @@ end;"/>
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="--verbose"/>
+        <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --noconfirm --only=FPCCleanBuildOnly"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="2">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="--verbose"/>
+            <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --noconfirm --only=FPCCleanBuildOnly"/>
           </local>
         </Mode0>
         <Mode1 Name="docker">

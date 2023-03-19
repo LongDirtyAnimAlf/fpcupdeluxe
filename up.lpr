@@ -89,7 +89,9 @@ uses
   SysUtils, Strings,
   FileUtil, LazFileUtils,
   synautil, // for rpos ... could also use strutil
-  installerManager, installerUniversal,
+  installerManager,
+  installerCore,
+  installerUniversal,
   checkoptions, fpcuputil,
   {$endif}
   {$ifdef LCL}

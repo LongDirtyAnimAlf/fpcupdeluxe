@@ -327,6 +327,10 @@ const
 
   URL_ERROR                = 'sources error (URL mismatch)';
 
+type
+  TInstallerError          = (ieLibs,ieBins);
+  TInstallerErrors         = set of TInstallerError;
+
 const
   ppcSuffix : array[TCPU] of string=(
     'none','386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','68k','xtensa','wasm32','loongarch64'
@@ -398,12 +402,14 @@ type
     function GetInstallerClass(aClassToFind:TClass):boolean;
     function IsFPCInstaller:boolean;
     function IsLazarusInstaller:boolean;
-    function IshelpInstaller:boolean;
+    function IsCrossInstaller:boolean;
+    function IsHelpInstaller:boolean;
     function IsUniversalInstaller:boolean;
     {$IFDEF MSWINDOWS}
     function GetStrayShell: boolean;
     {$ENDIF MSWINDOWS}
   protected
+    FErrorCodes                : TInstallerErrors;
     FFPCInstallDir             : string;
     FFPCSourceDir              : string;
     FLazarusInstallDir         : string;
@@ -609,6 +615,9 @@ type
     {$IFDEF MSWINDOWS}
     property StrayShell: boolean read GetStrayShell;
     {$ENDIF MSWINDOWS}
+
+    property ErrorCodes : TInstallerErrors read FErrorCodes;
+
     function GetCompilerName(Cpu_Target:TCPU):string;overload;
     function GetCompilerName(Cpu_Target:string):string;overload;
     function GetCrossCompilerName(Cpu_Target:TCPU):string;
@@ -659,11 +668,18 @@ type
     destructor Destroy; override;
   end;
 
-  TBaseUniversalInstaller = class(TInstaller);
-  TBaseFPCInstaller = class(TInstaller);
-  TBaseLazarusInstaller = class(TInstaller);
-  TBaseHelpInstaller = class(TInstaller);
-  TBaseWinInstaller = class(TInstaller);
+  TBaseUniversalInstaller  = class(TInstaller);
+
+  TBaseFPCInstaller        = class(TInstaller);
+  //TFPCInstaller            = class(TBaseFPCInstaller);
+  //TFPCCrossInstaller       = class(TFPCInstaller);
+
+  TBaseLazarusInstaller    = class(TInstaller);
+  //TLazarusInstaller        = class(TBaseLazarusInstaller);
+  //TLazarusCrossInstaller   = class(TLazarusInstaller);
+
+  TBaseHelpInstaller       = class(TInstaller);
+  TBaseWinInstaller        = class(TInstaller);
 
   function GetMinimumFPCVersion(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone): string;
 
@@ -3265,6 +3281,10 @@ begin
 
   if NOT DirectoryExists(FSourceDirectory) then exit;
 
+  // Do not check the sources when crsoss-compiling
+  // They must be ok !!
+  if IsCrossInstaller then exit;
+
   aRepoClient:=GetSuitableRepoClient;
 
   // No repo client ...
@@ -4144,31 +4164,29 @@ begin
 end;
 
 function TInstaller.GetInstallerClass(aClassToFind:TClass):boolean;
-var
-  aClass:TClass;
 begin
   result:=false;
-  aClass:=Self.ClassType;
-  while aClass<>nil do
+  if (Self.InheritsFrom(aClassToFind) OR (Self.ClassName=aClassToFind.ClassName)) then
   begin
-    if aClass=aClassToFind then
-    begin
-      result:=True;
-      break;
-    end;
-    aClass:=aClass.ClassParent;
+    result:=true;
   end;
 end;
 
 function TInstaller.IsFPCInstaller:boolean;
 begin
   result:=GetInstallerClass(TBaseFPCInstaller);
-  //result:=Self.InheritsFrom(TBaseFPCInstaller);
 end;
 
 function TInstaller.IsLazarusInstaller:boolean;
 begin
   result:=GetInstallerClass(TBaseLazarusInstaller);
+end;
+
+function TInstaller.IsCrossInstaller:boolean;
+begin
+  //result:=(GetInstallerClass(TFPCCrossInstaller) OR GetInstallerClass(TLazarusCrossInstaller));
+  // To be improved by DON ... ;-)
+  result:=((Self.ClassName='TFPCCrossInstaller') OR (Self.ClassName='TLazarusCrossInstaller'))
 end;
 
 function TInstaller.IsHelpInstaller:boolean;
@@ -4444,6 +4462,17 @@ end;
 constructor TInstaller.Create;
 begin
   inherited Create;
+
+  FErrorCodes := [];
+
+  // Default: set missing libs and bins
+  // Availability will be checked by cross-installer
+
+  if IsCrossInstaller then
+  begin
+    Include(FErrorCodes,ieBins);
+    Include(FErrorCodes,ieLibs);
+  end;
 
   FCrossInstaller:=nil;
 

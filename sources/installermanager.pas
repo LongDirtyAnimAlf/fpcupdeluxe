@@ -165,6 +165,7 @@ type
 
   TFPCupManager=class(TObject)
   private
+    FInstallerErrors : TInstallerErrors;
     FHTTPProxyHost: string;
     FHTTPProxyPassword: string;
     FHTTPProxyPort: integer;
@@ -376,6 +377,7 @@ type
     property FPCUnicode:boolean read FFPCUnicode write FFPCUnicode;
     property AutoTools:boolean read FAutoTools write FAutoTools;
     property RunInfo:string read GetRunInfo write SetRunInfo;
+    property InstallerErrors : TInstallerErrors read FInstallerErrors write FInstallerErrors;
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
     function CheckValidCPUOS(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone): boolean;
@@ -385,6 +387,7 @@ type
     function GetCrossBinsURL(out BaseBinsURL:string; var BinsFileName:string):boolean;
     function GetCrossLibsURL(out BaseLibsURL:string; var LibsFileName:string):boolean;
     procedure SaveSettings;
+    procedure ResetAll;
     // Stop talking. Do it! Returns success status
     function Run: boolean;
     constructor Create;
@@ -980,25 +983,134 @@ begin
       if (Length(FPCBranch)>0) then Write(TxtFile,' --fpcBranch='+FPCBranch);
       if (Length(FPCTAG)>0) then Write(TxtFile,' --fpcTag='+FPCTAG);
       if (Length(FPCDesiredRevision)>0) then Write(TxtFile,' --fpcRevision='+FPCDesiredRevision);
-      if (Length(FPCOPT)>0) then Write(TxtFile,' --fpcOPT='+MaybeQuotedSpacesOnly(FPCOPT));
-      if (Length(IncludeModules)>0) then Write(TxtFile,' --include='+IncludeModules);
-      if (Length(OnlyModules)>0) then Write(TxtFile,' --only='+OnlyModules);
-      if (Length(SkipModules)>0) then Write(TxtFile,' --skip='+SkipModules);
       {$ifndef FPCONLY}
       if (Length(LazarusBranch)>0) then Write(TxtFile,' --lazBranch='+LazarusBranch);
       if (Length(LazarusTAG)>0) then Write(TxtFile,' --lazTag='+LazarusTAG);
       if (Length(LazarusDesiredRevision)>0) then Write(TxtFile,' --lazRevision='+LazarusDesiredRevision);
-      if (Length(LazarusOPT)>0) then Write(TxtFile,' --lazOPT='+MaybeQuotedSpacesOnly(LazarusOPT));
       {$endif}
     end;
-    if (CrossCPU_Target<>TCPU.cpuNone) then Write(TxtFile,' --cputarget='+GetCPU(CrossCPU_Target));
-    if (CrossOS_Target<>TOS.osNone) then Write(TxtFile,' --ostarget='+GetOS(CrossOS_Target));
+
+    if (CrossCompiling) then
+    begin
+      //Write(TxtFile,' --only=FPCCleanOnly,FPCBuildOnly');
+      if (CrossCPU_Target<>TCPU.cpuNone) then Write(TxtFile,' --cputarget='+GetCPU(CrossCPU_Target));
+      if (CrossOS_Target<>TOS.osNone) then Write(TxtFile,' --ostarget='+GetOS(CrossOS_Target));
+      if (CrossOS_SubArch<>TSUBARCH.saNone) then Write(TxtFile,' --subarch='+GetSubarch(CrossOS_SubArch));
+    end;
+
+    if (Length(FPCOPT)>0) then Write(TxtFile,' --fpcOPT='+MaybeQuotedSpacesOnly(FPCOPT));
+    {$ifndef FPCONLY}
+    if (Length(LazarusOPT)>0) then Write(TxtFile,' --lazOPT='+MaybeQuotedSpacesOnly(LazarusOPT));
+    {$endif}
+    if (Length(IncludeModules)>0) then Write(TxtFile,' --include='+IncludeModules);
+    if (Length(OnlyModules)>0) then Write(TxtFile,' --only='+OnlyModules);
+    if (Length(SkipModules)>0) then Write(TxtFile,' --skip='+SkipModules);
+
     if (FPCInstallDirectory<>FPCSourceDirectory) then Write(TxtFile,' --fpcsplit');
     Write(TxtFile,' --noconfirm');
     Write(TxtFile,' --autotools');
   finally
     CloseFile(TxtFile);
   end;
+end;
+
+procedure TFPCupManager.ResetAll;
+begin
+  if Assigned(Sequencer) then Sequencer.ResetAllExecuted;
+
+  UseGitClient:=false;
+
+  AutoTools:=false;
+
+  InstallerErrors:=[];
+
+  CrossOS_Target:=TOS.osNone;
+  CrossCPU_Target:=TCPU.cpuNone;
+  CrossOS_SubArch:=TSUBARCH.saNone;
+
+  {$if (defined(BSD) and not defined(DARWIN)) or (defined(Solaris))}
+  FPatchCmd:='gpatch';
+  {$else}
+  FPatchCmd:='patch'+GetExeExt;
+  {$endif}
+
+  NoJobs:=true;
+  FPCUnicode:=false;
+
+  SoftFloat:=true;
+  OnlinePatching:=false;
+  ReApplyLocalChanges:=false;
+
+  OnlyModules:='';
+  IncludeModules:='';
+  SkipModules:='';
+
+  CrossCPU_Target:=TCPU.cpuNone;
+  CrossOS_Target:=TOS.osNone;
+  CrossOS_SubArch:=TSubarch.saNone;
+
+  LCL_Platform:='';
+
+  SolarisOI:=false;
+  MUSL:=false;
+
+  FPCOPT:='';
+  LazarusOPT:='';
+
+  CrossOPT:='';
+
+  CrossLibraryDirectory:='';
+  CrossToolsDirectory:='';
+
+  FPCDesiredRevision:='';
+  LazarusDesiredRevision:='';
+
+  FPCBranch:='';
+  LazarusBranch:='';
+
+  FPCTag:='';
+  LazarusTag:='';
+
+  {$IFDEF DEBUG}
+  Verbose:=True;
+  {$ELSE}
+  Verbose:=False;
+  {$ENDIF}
+
+  FPCURL:='';
+  LazarusURL:='';
+
+  UseSystemFPC:=false;
+
+  UseWget:=false;
+
+  CompilerOverride:='';
+  BaseDirectory:='';
+
+  ShortCutNameFpcup:='';
+  ShortCutNameLazarus:='';
+
+  MakeDirectory:='';
+  BootstrapCompilerDirectory:='';
+
+  FPCInstallDirectory:='';
+  FPCSourceDirectory:='';
+
+  LazarusInstallDirectory:='';
+  LazarusSourceDirectory:='';
+
+  LazarusPrimaryConfigPath:='';
+
+  ExportOnly:=false;
+
+  FPCPatches:='';
+  LazarusPatches:='';
+
+  NativeFPCBootstrapCompiler:=true;
+  ForceLocalRepoClient:=false;
+  Context:=false;
+
+  LCL_Platform:='';
 end;
 
 procedure TFPCupManager.GetCrossToolsFileName(out BinsFileName,LibsFileName:string);
@@ -1591,37 +1703,13 @@ end;
 
 constructor TFPCupManager.Create;
 begin
-  FVerbose:=false;
-  FUseWget:=false;
-  FExportOnly:=false;
-  FNoJobs:=True;
-  FUseGitClient:=false;
-  FNativeFPCBootstrapCompiler:=true;
-  ForceLocalRepoClient:=false;
-
-  FSoftFloat:=true;
-  FOnlinePatching:=false;
-  FSolarisOI:=false;
-  FMUSL:=false;
-  FFPCUnicode:=false;
-  FAutoTools:=false;
-
-  FCrossOS_Target:=TOS.osNone;
-  FCrossCPU_Target:=TCPU.cpuNone;
-  FCrossOS_SubArch:=TSUBARCH.saNone;
-
-  {$if (defined(BSD) and not defined(DARWIN)) or (defined(Solaris))}
-  FPatchCmd:='gpatch';
-  {$else}
-  FPatchCmd:='patch'+GetExeExt;
-  {$endif}
-
   FModuleList:=TStringList.Create;
   FModuleEnabledList:=TStringList.Create;
   FModulePublishedList:=TStringList.Create;
   FSequencer:=TSequencer.Create(Self);
-  FLog:=TLogger.Create;
-  // Log filename will be set on first log write
+  FLog:=TLogger.Create; // Log filename will be set on first log write
+
+  ResetAll;
 end;
 
 destructor TFPCupManager.Destroy;
@@ -2599,6 +2687,7 @@ begin
           {$endif}
         end;
       end;
+      FParent.InstallerErrors:=FInstaller.ErrorCodes;
       FInstaller.Destroy;
       FInstaller:=nil;
     end;
