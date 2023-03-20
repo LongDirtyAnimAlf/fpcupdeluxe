@@ -606,13 +606,13 @@ end;"/>
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --noconfirm --only=FPCCleanBuildOnly"/>
+        <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=FPCCleanBuildOnly --fpcsplit --noconfirm --autotools"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="2">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --noconfirm --only=FPCCleanBuildOnly"/>
+            <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=FPCCleanBuildOnly --fpcsplit --noconfirm --autotools"/>
           </local>
         </Mode0>
         <Mode1 Name="docker">

@@ -189,15 +189,6 @@ begin
       s:=Options.GetOption('','ostarget','');
       if (s<>'') then FManager.CrossOS_Target:=GetTOS(s);
       FManager.CrossOS_SubArch:=GetTSubarch(Options.GetOption('','subarch',''));
-      FManager.CrossOPT:=Options.GetOption('','crossopt','');
-
-      CrossCompiling:=(FManager.CrossCPU_Target<>TCPU.cpuNone) OR (FManager.CrossOS_Target<>TOS.osNone);
-
-      if CrossCompiling then
-      begin
-        FManager.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crossbindir','')));
-        FManager.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crosslibdir','')));
-      end;
 
       sLogFile:=Options.GetOption('','logfilename','',true);
       if sLogFile='' then
@@ -233,7 +224,7 @@ begin
       {$endif}
 
       FManager.FPCOPT:=Options.GetOption('','fpcOPT','');
-      {$IF (defined(BSD)) and (not defined(Darwin))}
+      {$if (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
       if Pos('-Fl/usr/local/lib/',FManager.FPCOPT)=0 then
       begin
@@ -241,8 +232,26 @@ begin
         //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
         FManager.FPCOPT:=FManager.FPCOPT+' -Fl/usr/local/lib';
       end;
-      {$ENDIF defined(BSD) and not defined(Darwin)}
-      FManager.FPCBranch:=Options.GetOption('','fpcBranch','');
+      {$endif}
+
+      {$ifndef FPCONLY}
+      FManager.LazarusOPT:=Options.GetOption('','lazOPT','');
+      {$if (defined(BSD)) and (not defined(Darwin))}
+      //todo: check for other BSDs
+      if (pos('-Fl/usr/local/lib/',FManager.LazarusOPT)=0) then
+      begin
+        //Infoln('Lazarus options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
+        //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
+        FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/local/lib';
+      end;
+      if (pos('-Fl/usr/X11R6/lib',FManager.LazarusOPT)=0) then
+      begin
+        //Infoln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
+        //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
+        FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/X11R6/lib -Fl/usr/X11R7/lib';
+      end;
+      {$endif}
+      {$endif}
 
       FManager.PatchCmd:=Options.GetOption('','patchcmd','patch',false);
 
@@ -256,8 +265,33 @@ begin
         end;
       end;
 
+      CrossCompiling:=(FManager.CrossCPU_Target<>TCPU.cpuNone) OR (FManager.CrossOS_Target<>TOS.osNone);
+
+      if CrossCompiling then
+      begin
+        FManager.CrossOPT:=Options.GetOption('','crossopt','');
+
+        FManager.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crossbindir','')));
+        FManager.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crosslibdir','')));
+
+        {$ifndef FPCONLY}
+        // handle inclusion of LCL when cross-compiling
+        if (FManager.CrossOS_Target in LCL_OS) then
+        begin
+          FManager.LCL_Platform:=Options.GetOption('','lclplatform','');
+        end;
+        {$endif}
+      end;
+
       if NOT CrossCompiling then
       begin
+        FManager.FPCBranch:=Options.GetOption('','fpcBranch','');
+        FManager.FPCDesiredRevision:=Options.GetOption('','fpcRevision','',false);
+        {$ifndef FPCONLY}
+        FManager.LazarusBranch:=Options.GetOption('','lazBranch','');
+        FManager.LazarusDesiredRevision:=Options.GetOption('','lazRevision','',false);
+        {$endif}
+
         try
           FManager.NativeFPCBootstrapCompiler:=(NOT Options.GetOption('','onlyupbootstrappers',true));
         except
@@ -303,10 +337,9 @@ begin
         end;
 
         FManager.FPCPatches:=Options.GetOption('','fpcpatch','',false);
+
         {$ifndef FPCONLY}
         FManager.LazarusPatches:=Options.GetOption('','lazpatch','',false);
-        {$endif}
-        {$ifndef FPCONLY}
         s:=Options.GetOption('','primary-config-path','');
         if (s='') then
           // If we have no input from the user, let's create a name based on the directory where
@@ -315,9 +348,7 @@ begin
             IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FManager.LazarusInstallDirectory))
         else
           FManager.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
-        {$endif}
 
-        {$ifndef FPCONLY}
         FManager.ShortCutNameLazarus:=Options.GetOption('','lazlinkname',DirectorySeparator);
         // Find out if the user specified --shortcutnamelazarus= to explicitly block creation of a link, or just didn't specify anything.
         if (FManager.ShortCutNameLazarus=DirectorySeparator) then
@@ -327,27 +358,16 @@ begin
             FManager.ShortCutNameLazarus:='Lazarus_fpcup' // default installdir, default lazarus dir
           else
             FManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FManager.LazarusInstallDirectory);
-
-        FManager.LazarusOPT:=Options.GetOption('','lazOPT','');
-
-        {$if (defined(BSD)) and (not defined(Darwin))}
-        //todo: check for other BSDs
-        if (pos('-Fl/usr/local/lib/',FManager.LazarusOPT)=0) then
-        begin
-          //Infoln('Lazarus options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
-          //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
-          FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/local/lib';
-        end;
-        if (pos('-Fl/usr/X11R6/lib',FManager.LazarusOPT)=0) then
-        begin
-          //Infoln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
-          //  'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
-          FManager.LazarusOpt:=FManager.LazarusOPT+' -Fl/usr/X11R6/lib -Fl/usr/X11R7/lib';
-        end;
         {$endif}
-        FManager.LazarusBranch:=Options.GetOption('','lazBranch','');
-        FManager.LCL_Platform:=Options.GetOption('','lclplatform','');
-        {$endif FPCONLY}
+
+        // getfullrepo is a depreciated option ... left here for compatibility only
+        Options.GetOptionNoParam('','getfullrepo',false);
+        FManager.ExportOnly:=(Options.GetOptionNoParam('','getfilesonly'));
+
+        if (Options.GetOptionNoParam('','rebuildonly')) then
+        begin
+          FManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_LAZARUSCLEANBUILDONLY;
+        end;
       end;
 
       FManager.IncludeModules:=Options.GetOption('','include','',false);
@@ -360,14 +380,6 @@ begin
       {$ifdef DEBUG}
       //FInstaller.Verbose:=True;
       {$endif}
-
-      // getfullrepo is a depreciated option ... left here for compatibility only
-      Options.GetOptionNoParam('','getfullrepo',false);
-      FManager.ExportOnly:=(Options.GetOptionNoParam('','getfilesonly'));
-      if (Options.GetOptionNoParam('','rebuildonly')) then
-      begin
-        FManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_LAZARUSCLEANBUILDONLY;
-      end;
       FManager.NoJobs:=Options.GetOptionNoParam('','disablejobs');
       FManager.UseGitClient:=Options.GetOptionNoParam('','usegitclient',false);
       FManager.UseWget:=Options.GetOptionNoParam('','usewget');
@@ -389,68 +401,69 @@ begin
     FManager.LoadFPCUPConfig;
     //load URLs after LoadFPCUPConfig so we're sure we have loaded/parsed the URL aliases
 
-    try
-      s:=Options.GetOption('','fpcVersion','');
-      if (Length(s)>0) then
-      begin
-        if AnsiEndsText(GITLABEXTENSION,s) then
-          FManager.FPCTag:=s
-        else
-          FManager.FPCURL:=s;
-      end
-      else
-      begin
-        s:=Options.GetOption('','fpcURL','');
+    if (NOT CrossCompiling) then
+    begin
+      try
+        s:=Options.GetOption('','fpcVersion','');
         if (Length(s)>0) then
-          FManager.FPCURL:=s
+        begin
+          if AnsiEndsText(GITLABEXTENSION,s) then
+            FManager.FPCTag:=s
+          else
+            FManager.FPCURL:=s;
+        end
         else
         begin
-          s:='stable.gitlab';
-          FManager.FPCTag:=s;
-          Options.PersistentOptions:=trim(Options.PersistentOptions+' --fpcVersion="'+s+'"')
+          s:=Options.GetOption('','fpcURL','');
+          if (Length(s)>0) then
+            FManager.FPCURL:=s
+          else
+          begin
+            s:='stable.gitlab';
+            FManager.FPCTag:=s;
+
+            Options.PersistentOptions:=trim(Options.PersistentOptions+' --fpcVersion='+MaybeQuotedSpacesOnly(s));
+          end;
         end;
-      end;
-      if (Pos('github.com/LongDirtyAnimAlf',FManager.FPCURL)>0) then FManager.FPCBranch:='master';
+        if (Pos('github.com/LongDirtyAnimAlf',FManager.FPCURL)>0) then FManager.FPCBranch:='master';
 
-      FManager.FPCDesiredRevision:=Options.GetOption('','fpcRevision','',false);
-
-      {$ifndef FPCONLY}
-      s:=Options.GetOption('','lazVersion','');
-      if (Length(s)>0) then
-      begin
-        if AnsiEndsText(GITLABEXTENSION,s) then
-          FManager.LazarusTag:=s
-        else
-          FManager.LazarusURL:=s;
-      end
-      else
-      begin
-        s:=Options.GetOption('','lazURL','');
+        {$ifndef FPCONLY}
+        s:=Options.GetOption('','lazVersion','');
         if (Length(s)>0) then
-          FManager.LazarusURL:=s
+        begin
+          if AnsiEndsText(GITLABEXTENSION,s) then
+            FManager.LazarusTag:=s
+          else
+            FManager.LazarusURL:=s;
+        end
         else
         begin
-          s:='stable.gitlab';
-          FManager.LazarusTag:=s;
-          Options.PersistentOptions:=trim(Options.PersistentOptions+' --lazVersion="'+s+'"')
+          s:=Options.GetOption('','lazURL','');
+          if (Length(s)>0) then
+            FManager.LazarusURL:=s
+          else
+          begin
+            s:='stable.gitlab';
+            FManager.LazarusTag:=s;
+            Options.PersistentOptions:=trim(Options.PersistentOptions+' --lazVersion='+MaybeQuotedSpacesOnly(s));
+          end;
         end;
-      end;
-      if (Pos('github.com/LongDirtyAnimAlf',FManager.LazarusURL)>0) then FManager.LazarusBranch:='upstream';
-      if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FManager.LazarusURL)>0) then FManager.LazarusBranch:='master';
-
-      FManager.LazarusDesiredRevision:=Options.GetOption('','lazRevision','',false);
-      {$endif}
-
-    except
-      on E:Exception do
-      begin
-        {$ifndef LCL}
-        writeln('Error: wrong command line options given: '+E.Message);
+        if (Pos('github.com/LongDirtyAnimAlf',FManager.LazarusURL)>0) then FManager.LazarusBranch:='upstream';
+        if (Pos('github.com/LongDirtyAnimAlf/lazarussource',FManager.LazarusURL)>0) then FManager.LazarusBranch:='master';
         {$endif}
-        result:=ERROR_WRONG_OPTIONS; //Quit with error resultcode
-        exit;
+
+      except
+        on E:Exception do
+        begin
+          {$ifndef LCL}
+          writeln('Error: wrong command line options given: '+E.Message);
+          {$endif}
+          result:=ERROR_WRONG_OPTIONS; //Quit with error resultcode
+          exit;
+        end;
       end;
     end;
+
 
     // HTTP proxy settings, including support for environment variables
     // Environment variables like:

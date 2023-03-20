@@ -4458,7 +4458,7 @@ begin
 
   // Default: set missing libs and bins
   // Availability will be checked by cross-installer
-  if IsFPCInstaller AND IsCross then
+  if (IsFPCInstaller AND IsCross) then
   begin
     Include(FErrorCodes,ieBins);
     Include(FErrorCodes,ieLibs);

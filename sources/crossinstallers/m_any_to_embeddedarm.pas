@@ -103,7 +103,7 @@ begin
 
     if PerformLibraryPathMagic(S) then
     begin
-      AddFPCCFGSnippet('-Fl'+S);
+      AddFPCCFGSnippet('-Fl'+S,false);
     end
     else
     begin

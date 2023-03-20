@@ -144,7 +144,7 @@ begin
 
     ActionNeeded:=(NOT PerformLibraryPathMagic(S));
 
-    if (NOT ActionNeeded) then AddFPCCFGSnippet('-Fl'+S);
+    if (NOT ActionNeeded) then AddFPCCFGSnippet('-Fl'+S,false);
 
     if (SubArch<>TSUBARCH.saNone) then
     begin
