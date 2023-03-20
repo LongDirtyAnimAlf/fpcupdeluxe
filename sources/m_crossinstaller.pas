@@ -632,7 +632,7 @@ procedure TCrossInstaller.SearchLibraryInfo(found:boolean; const extrainfo:strin
 begin
   if found then
   begin
-    ThreadLog('fpcupdeluxe: '+CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo);
+    ThreadLog(BeginSnippet+' '+CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo);
     //Infoln(CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo)
   end;
   if (NOT found) then
@@ -647,7 +647,7 @@ procedure TCrossInstaller.SearchBinUtilsInfo(found:boolean; const extrainfo:stri
 begin
   if found then
   begin
-    ThreadLog('fpcupdeluxe: '+CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo);
+    ThreadLog(BeginSnippet+' '+CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo);
     //Infoln(CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo)
   end;
   if (NOT found) then

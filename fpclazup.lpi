@@ -27,7 +27,7 @@
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="nogui"/>
     </MacroValues>
-    <BuildModes Count="15">
+    <BuildModes Count="16">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
         <MacroValues Count="1">
@@ -443,33 +443,22 @@ end;"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpclazup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <IncludeAssertionCode Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
           <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-            <VerifyObjMethodCallValidity Value="True"/>
             <TargetCPU Value="aarch64"/>
             <TargetOS Value="darwin"/>
             <Optimizations>
-              <OptimizationLevel Value="0"/>
+              <OptimizationLevel Value="2"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
+              <GenerateDebugInfo Value="False"/>
               <DebugInfoType Value="dsDwarf3"/>
+              <UseLineInfoUnit Value="False"/>
             </Debugging>
           </Linking>
           <Other>
             <WriteFPCLogo Value="False"/>
-            <CustomOptions Value="-dDEBUG"/>
             <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
@@ -597,8 +586,47 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item15>
+      <Item16 Name="openbsdi386">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="upbin\fpclazup-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
+            <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpclazup\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="openbsd"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <WriteFPCLogo Value="False"/>
+            <ExecuteBefore>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item16>
       <SharedMatrixOptions Count="1">
-        <Item1 ID="233755810855" Modes="Default,Debug,win32,win64,linuxi386,linux64,linuxaarch64,freebsdi386,freebsdx64,linuxppc64,darwinx64,darwinarm64,darwini386,win64arm,openbsdx64" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
+        <Item1 ID="233755810855" Modes="Default,Debug,win32,win64,linuxi386,linux64,linuxaarch64,freebsdi386,freebsdx64,linuxppc64,darwinx64,darwinarm64,darwini386,win64arm,openbsdx64,openbsdi386" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
@@ -606,13 +634,13 @@ end;"/>
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=FPCCleanBuildOnly --fpcsplit --noconfirm --autotools"/>
+        <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=&quot;FPCCleanOnly,FPCBuildOnly&quot; --fpcsplit --noconfirm --autotools"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="2">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=FPCCleanBuildOnly --fpcsplit --noconfirm --autotools"/>
+            <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=&quot;FPCCleanOnly,FPCBuildOnly&quot; --fpcsplit --noconfirm --autotools"/>
           </local>
         </Mode0>
         <Mode1 Name="docker">

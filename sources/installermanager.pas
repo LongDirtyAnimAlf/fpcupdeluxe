@@ -992,7 +992,6 @@ begin
 
     if (CrossCompiling) then
     begin
-      //Write(TxtFile,' --only=FPCCleanOnly,FPCBuildOnly');
       if (CrossCPU_Target<>TCPU.cpuNone) then Write(TxtFile,' --cputarget='+GetCPU(CrossCPU_Target));
       if (CrossOS_Target<>TOS.osNone) then Write(TxtFile,' --ostarget='+GetOS(CrossOS_Target));
       if (CrossOS_SubArch<>TSUBARCH.saNone) then Write(TxtFile,' --subarch='+GetSubarch(CrossOS_SubArch));
@@ -1049,36 +1048,19 @@ begin
   CrossOS_Target:=TOS.osNone;
   CrossOS_SubArch:=TSubarch.saNone;
 
-  LCL_Platform:='';
-
   SolarisOI:=false;
   MUSL:=false;
-
-  FPCOPT:='';
-  LazarusOPT:='';
 
   CrossOPT:='';
 
   CrossLibraryDirectory:='';
   CrossToolsDirectory:='';
 
-  FPCDesiredRevision:='';
-  LazarusDesiredRevision:='';
-
-  FPCBranch:='';
-  LazarusBranch:='';
-
-  FPCTag:='';
-  LazarusTag:='';
-
   {$IFDEF DEBUG}
   Verbose:=True;
   {$ELSE}
   Verbose:=False;
   {$ENDIF}
-
-  FPCURL:='';
-  LazarusURL:='';
 
   UseSystemFPC:=false;
 
@@ -1088,29 +1070,37 @@ begin
   BaseDirectory:='';
 
   ShortCutNameFpcup:='';
-  ShortCutNameLazarus:='';
 
   MakeDirectory:='';
   BootstrapCompilerDirectory:='';
 
+  FPCDesiredRevision:='';
+  FPCBranch:='';
+  FPCTag:='';
+  FPCURL:='';
   FPCInstallDirectory:='';
   FPCSourceDirectory:='';
+  FPCPatches:='';
+  FPCOPT:='';
 
+  {$ifndef FPCONLY}
+  LCL_Platform:='';
+  LazarusOPT:='';
+  LazarusDesiredRevision:='';
+  LazarusBranch:='';
+  LazarusTag:='';
+  ShortCutNameLazarus:='';
+  LazarusURL:='';
   LazarusInstallDirectory:='';
   LazarusSourceDirectory:='';
-
   LazarusPrimaryConfigPath:='';
-
-  ExportOnly:=false;
-
-  FPCPatches:='';
   LazarusPatches:='';
+  Context:=false;
+  {$endif}
 
   NativeFPCBootstrapCompiler:=true;
   ForceLocalRepoClient:=false;
-  Context:=false;
-
-  LCL_Platform:='';
+  ExportOnly:=false;
 end;
 
 procedure TFPCupManager.GetCrossToolsFileName(out BinsFileName,LibsFileName:string);
@@ -2415,7 +2405,6 @@ var
   i,j:integer;
   instr:TKeyword;
   sequencename:string='';
-
   function KeyStringToKeyword(Key:string):TKeyword;
   begin
     if key=Trim(_DECLARE) then result:=SMdeclare
@@ -2437,7 +2426,6 @@ var
     else if key=Trim(_SETCPU) then result:=SMSetCPU
     else result:=SMInvalid;
   end;
-
   //remove white space and line terminator
   function NoWhite(s:string):string;
   begin
@@ -2445,63 +2433,62 @@ var
     while (s[length(s)]<=' ') or (s[length(s)]=_SEP) do delete(s,length(s),1);
     result:=s;
   end;
-
 begin
-while Sequence<>'' do
-begin
-  i:=pos(_SEP,Sequence);
-  if i>0 then
-    line:=copy(Sequence,1,i-1)
-  else
-    line:=Sequence;
-  delete(Sequence,1,length(line)+1);
-  line:=NoWhite(line);
-  if line<>'' then
+  while Sequence<>'' do
   begin
-    i:=pos(' ',line);
+    i:=pos(_SEP,Sequence);
     if i>0 then
-    begin
-      key:=copy(line,1,i-1);
-      param:=NoWhite(copy(line,i,length(line)));
-    end
+      line:=copy(Sequence,1,i-1)
     else
+      line:=Sequence;
+    delete(Sequence,1,length(line)+1);
+    line:=NoWhite(line);
+    if line<>'' then
     begin
-      key:=line;
-      param:='';
-    end;
-    key:=NoWhite(key);
-    if key<>'' then
-    begin
-      i:=Length(FStateMachine);
-      SetLength(FStateMachine,i+1);
-      instr:=KeyStringToKeyword(Trim(Key));
-      FStateMachine[i].instr:=instr;
-      if instr=SMInvalid then
-        FParent.WritelnLog('Invalid instruction '+Key+' in sequence '+sequencename);
-      FStateMachine[i].param:=param;
-      if instr in [SMdeclare,SMdeclareHidden] then
+      i:=pos(' ',line);
+      if i>0 then
       begin
-        AddToModuleList(param,i);
-        sequencename:=param;
+        key:=copy(line,1,i-1);
+        param:=NoWhite(copy(line,i,length(line)));
+      end
+      else
+      begin
+        key:=line;
+        param:='';
       end;
-      if instr = SMdeclare then
+      key:=NoWhite(key);
+      if key<>'' then
       begin
-        key:='';
-        if (Pos(_CLEAN,param)=0) AND (Pos(_UNINSTALL,param)=0) AND (Pos(_DEFAULT,param)=0) then
+        i:=Length(FStateMachine);
+        SetLength(FStateMachine,i+1);
+        instr:=KeyStringToKeyword(Trim(Key));
+        FStateMachine[i].instr:=instr;
+        if instr=SMInvalid then
+          FParent.WritelnLog('Invalid instruction '+Key+' in sequence '+sequencename);
+        FStateMachine[i].param:=param;
+        if instr in [SMdeclare,SMdeclareHidden] then
         begin
-          j:=UniModuleList.IndexOf(param);
-          if j>=0 then
-          begin
-            PackageSettings:=TStringList(UniModuleList.Objects[j]);
-            key:=StringReplace(PackageSettings.Values[installerUniversal.INIKEYWORD_DESCRIPTION],'"','',[rfReplaceAll]);;
-          end;
+          AddToModuleList(param,i);
+          sequencename:=param;
         end;
-        with FParent.FModulePublishedList do Add(Concat(param, NameValueSeparator, key));
+        if instr = SMdeclare then
+        begin
+          key:='';
+          if (Pos(_CLEAN,param)=0) AND (Pos(_UNINSTALL,param)=0) AND (Pos(_DEFAULT,param)=0) then
+          begin
+            j:=UniModuleList.IndexOf(param);
+            if j>=0 then
+            begin
+              PackageSettings:=TStringList(UniModuleList.Objects[j]);
+              key:=StringReplace(PackageSettings.Values[installerUniversal.INIKEYWORD_DESCRIPTION],'"','',[rfReplaceAll]);;
+            end;
+          end;
+          with FParent.FModulePublishedList do Add(Concat(param, NameValueSeparator, key));
+        end;
       end;
     end;
   end;
-end;
-result:=true;
+  result:=true;
 end;
 
 
@@ -2510,7 +2497,6 @@ function TSequencer.CreateOnly(OnlyModules: string): boolean;
 var
   i:integer;
   seq:string;
-
 begin
   AddToModuleList(_ONLY,Length(FStateMachine));
   while Onlymodules<>'' do
@@ -2526,7 +2512,31 @@ begin
     // Con: dependency on sequence format; double parsing
     if seq<>'' then
     begin
+      // Check if we have an old fashioned separate clean and build only for FPC
+      // Does not work anymore with the new fpcup
+      // So, replace it with the modern statement
       i:=Length(FStateMachine);
+      if (i>0) then
+      begin
+        Dec(i);
+        if (seq=_FPC+_BUILD+_ONLY) then
+        begin
+          if(FStateMachine[i].param=_FPC+_CLEAN+_ONLY) then
+          begin
+            FStateMachine[i].param:=_FPCCLEANBUILDONLY;
+            continue;
+          end;
+        end;
+        // Do it also for Lazarus, allthough not really necessary
+        if (seq=_LAZARUS+_BUILD+_ONLY) then
+        begin
+          if(FStateMachine[i].param=_LAZARUS+_CLEAN+_ONLY) then
+          begin
+            FStateMachine[i].param:=_LAZARUSCLEANBUILDONLY;
+            continue;
+          end;
+        end;
+      end;
       SetLength(FStateMachine,i+1);
       FStateMachine[i].instr:=SMdo;
       FStateMachine[i].param:=seq;

@@ -73,7 +73,7 @@ uses
   {$endif}
   Classes,
   {$ifndef LCL}
-  SysUtils, Strings,
+  SysUtils,// Strings,
   FileUtil, LazFileUtils,
   synautil, // for rpos ... could also use strutil
   installerManager,
