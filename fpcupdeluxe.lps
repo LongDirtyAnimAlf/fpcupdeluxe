@@ -19,7 +19,6 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <UsageCount Value="182"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -30,7 +29,7 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="182"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -69,7 +68,7 @@
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="182"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -86,7 +85,7 @@
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="182"/>
         <Loaded Value="True"/>
       </Unit9>
@@ -157,10 +156,12 @@
       </Unit18>
       <Unit19>
         <Filename Value="sources\m_crossinstaller.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="61"/>
-        <CursorPos X="5" Y="86"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="629"/>
+        <CursorPos Y="635"/>
         <UsageCount Value="17"/>
+        <Loaded Value="True"/>
       </Unit19>
       <Unit20>
         <Filename Value="sources\updeluxe\backup\fpcupdeluxemainform.pas"/>
@@ -2073,10 +2074,10 @@
       </Unit262>
       <Unit263>
         <Filename Value="sources\processutils.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="932"/>
-        <CursorPos X="50" Y="943"/>
+        <EditorIndex Value="2"/>
+        <CursorPos X="15" Y="16"/>
         <UsageCount Value="15"/>
+        <Loaded Value="True"/>
       </Unit263>
       <Unit264>
         <Filename Value="sources\repoclient.pas"/>
@@ -2603,7 +2604,7 @@
         <UsageCount Value="10"/>
       </Unit337>
     </Units>
-    <JumpHistory Count="5" HistoryIndex="4">
+    <JumpHistory Count="7" HistoryIndex="6">
       <Position1>
         <Filename Value="sources\updeluxe\extrasettings.pas"/>
         <Caret Line="6" Column="13"/>
@@ -2622,6 +2623,13 @@
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="3130" TopLine="3093"/>
       </Position5>
+      <Position6>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+      </Position6>
+      <Position7>
+        <Filename Value="sources\m_crossinstaller.pas"/>
+        <Caret Line="635" Column="21" TopLine="647"/>
+      </Position7>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

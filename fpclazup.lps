@@ -10,7 +10,7 @@
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <UsageCount Value="68"/>
+        <UsageCount Value="69"/>
         <Loaded Value="True"/>
       </Unit0>
     </Units>
@@ -22,17 +22,19 @@
       <List0 Name="LaunchingApplication" Type="File" Count="1">
         <Item1 Value="C:\WINDOWS\system32\cmd.exe /C ${TargetCmdLine}"/>
       </List0>
-      <List1 Name="CommandLineParameters" Count="10">
-        <Item1 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=FPCCleanBuildOnly --fpcsplit --noconfirm --autotools"/>
-        <Item2 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --noconfirm --only=FPCCleanBuildOnly"/>
-        <Item3 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --noconfirm --only=_FPCCLEANBUILDONLY"/>
-        <Item4 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --only=_FPCCLEANBUILDONLY"/>
-        <Item5 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools --only=_FPCCLEANBUILDONLY"/>
-        <Item6 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools --only=FPCCleanOnly,FPCBuildOnly"/>
-        <Item7 Value=" --installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools"/>
-        <Item8 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --fpcsplit --noconfirm --autotools --verbose"/>
-        <Item9 Value="--verbose"/>
-        <Item10 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools"/>
+      <List1 Name="CommandLineParameters" Count="12">
+        <Item1 Value="--fpcVersion=&quot;stable.gitlab&quot; --lazVersion=&quot;trunk.gitlab&quot; --installdir=lazarus --only=docker --noconfirm --verbose"/>
+        <Item2 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=&quot;FPCCleanOnly,FPCBuildOnly&quot; --fpcsplit --noconfirm --autotools"/>
+        <Item3 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=FPCCleanBuildOnly --fpcsplit --noconfirm --autotools"/>
+        <Item4 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --noconfirm --only=FPCCleanBuildOnly"/>
+        <Item5 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --noconfirm --only=_FPCCLEANBUILDONLY"/>
+        <Item6 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --autotools --only=_FPCCLEANBUILDONLY"/>
+        <Item7 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools --only=_FPCCLEANBUILDONLY"/>
+        <Item8 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools --only=FPCCleanOnly,FPCBuildOnly"/>
+        <Item9 Value=" --installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools"/>
+        <Item10 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --fpcsplit --noconfirm --autotools --verbose"/>
+        <Item11 Value="--verbose"/>
+        <Item12 Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcsplit --noconfirm --autotools"/>
       </List1>
     </HistoryLists>
   </ProjectSession>
@@ -44,13 +46,6 @@
         <WatchKind Value="wpkWrite"/>
         <Source Value="sources\up\checkoptions.pas"/>
         <Line Value="722"/>
-      </Item>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="sources\installermanager.pas"/>
-        <Line Value="2494"/>
       </Item>
     </BreakPoints>
   </Debugging>

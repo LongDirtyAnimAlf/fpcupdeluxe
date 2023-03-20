@@ -634,13 +634,13 @@ end;"/>
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=&quot;FPCCleanOnly,FPCBuildOnly&quot; --fpcsplit --noconfirm --autotools"/>
+        <CommandLineParams Value="--fpcVersion=&quot;stable.gitlab&quot; --lazVersion=&quot;trunk.gitlab&quot; --installdir=lazarus --only=docker --noconfirm --verbose"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="2">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="--installdir=C:\fpcupsystems\pico --cputarget=arm --ostarget=embedded --subarch=armv6m --fpcOPT=-dFPC_ARMHF --lazOPT=&quot;-g -gl -O1&quot; --only=&quot;FPCCleanOnly,FPCBuildOnly&quot; --fpcsplit --noconfirm --autotools"/>
+            <CommandLineParams Value="--fpcVersion=&quot;stable.gitlab&quot; --lazVersion=&quot;trunk.gitlab&quot; --installdir=lazarus --only=docker --noconfirm --verbose"/>
           </local>
         </Mode0>
         <Mode1 Name="docker">

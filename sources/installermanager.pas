@@ -2495,7 +2495,7 @@ end;
 // create the sequence corresponding with the only parameters
 function TSequencer.CreateOnly(OnlyModules: string): boolean;
 var
-  i:integer;
+  i,j:integer;
   seq:string;
 begin
   AddToModuleList(_ONLY,Length(FStateMachine));
@@ -2518,21 +2518,21 @@ begin
       i:=Length(FStateMachine);
       if (i>0) then
       begin
-        Dec(i);
+        j:=(i-1);
         if (seq=_FPC+_BUILD+_ONLY) then
         begin
-          if(FStateMachine[i].param=_FPC+_CLEAN+_ONLY) then
+          if(FStateMachine[j].param=_FPC+_CLEAN+_ONLY) then
           begin
-            FStateMachine[i].param:=_FPCCLEANBUILDONLY;
+            FStateMachine[j].param:=_FPCCLEANBUILDONLY;
             continue;
           end;
         end;
         // Do it also for Lazarus, allthough not really necessary
         if (seq=_LAZARUS+_BUILD+_ONLY) then
         begin
-          if(FStateMachine[i].param=_LAZARUS+_CLEAN+_ONLY) then
+          if(FStateMachine[j].param=_LAZARUS+_CLEAN+_ONLY) then
           begin
-            FStateMachine[i].param:=_LAZARUSCLEANBUILDONLY;
+            FStateMachine[j].param:=_LAZARUSCLEANBUILDONLY;
             continue;
           end;
         end;
