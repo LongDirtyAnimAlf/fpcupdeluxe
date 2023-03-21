@@ -83,10 +83,11 @@ begin
   if not result then
      result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
+  SearchLibraryInfo(result);
+
   if result then
   begin
     FLibsFound:=True;
-    SearchLibraryInfo(true);
 
     if PerformLibraryPathMagic(S) then
     begin

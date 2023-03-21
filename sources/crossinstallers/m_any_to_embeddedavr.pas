@@ -85,6 +85,7 @@ var
   {$ifdef unix}
   i:integer;
   {$endif}
+  S:string;
 begin
   // AVR-embedded does not need libs by default, but user can add them.
   result:=FLibsFound;
@@ -129,21 +130,25 @@ begin
   end;
   {$endif unix}
 
+  SearchLibraryInfo(result);
 
   if result then
   begin
     FLibsFound:=True;
 
-    if (FSubArch<>TSUBARCH.saNone) then
+    if PerformLibraryPathMagic(S) then
     begin
-      if (Pos(aSubarchName,FLibsPath)>0) then
-        // we have a libdir with a subarch inside: make it universal !!
-        FLibsPath:=StringReplace(FLibsPath,aSubarchName,'$FPCSUBARCH',[]);
+      AddFPCCFGSnippet('-Fl'+S,false);
+    end
+    else
+    begin
+      // If we do not have magic, add subarch to enclose
+      AddFPCCFGSnippet('#IFDEF CPU'+UpperCase(SubArchName));
+      AddFPCCFGSnippet('-Fl'+S);
+      AddFPCCFGSnippet('#ENDIF CPU'+UpperCase(SubArchName));
     end;
-
-    AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    SearchLibraryInfo(result);
   end;
+
   if not result then
   begin
     //libs path is optional; it can be empty

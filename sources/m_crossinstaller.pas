@@ -668,10 +668,13 @@ begin
 
   LibraryPath:=FLibsPath;
 
+  if (NOT (Self.TargetOS in SUBARCH_OS)) then exit;
+  if (NOT (Self.TargetCPU in SUBARCH_CPU)) then exit;
+
   // Skip for some combo's until we have structured libs
-  if (Self.TargetOS=TOS.embedded) AND (Self.TargetCPU<>TCPU.arm) then exit;
+  if (Self.TargetOS=TOS.embedded) AND (NOT (Self.TargetCPU in [TCPU.arm,TCPU.avr{,TCPU.aarch64}])) then exit;
   if (Self.TargetOS=TOS.ultibo) then exit;
-  if (Self.TargetOS=TOS.freertos) AND (Self.TargetCPU<>TCPU.arm) then exit;
+  if (Self.TargetOS=TOS.freertos) AND (NOT (Self.TargetCPU in [TCPU.arm{,TCPU.avr,TCPU.aarch64}])) then exit;
 
   aPath:=FLibsPath.Split(DirectorySeparator);
 
