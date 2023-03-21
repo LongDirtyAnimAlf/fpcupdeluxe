@@ -1247,29 +1247,34 @@ begin
     TUseWGetDownloader.WGETBinary:=FWget;
     {$endif}
 
-    // Get patch binary from default binutils URL
     OperationSucceeded:=false;
-    aFile:=ExtractFilePathSafe(FPatchCmd);
-    if (Not FileExists(aFile)) then
-      aFile:=Which(aFile);
-    if (Not FileExists(aFile)) then
-      aFile:=IncludeTrailingPathDelimiter(FMakeDir) + FPatchCmd;
+
+    // Get patch binary from default binutils URL
+    aFile:=IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe';
     if (Not FileExists(aFile)) then
     begin
-      aFile:=IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe';
-      //aURL:=FPCTRUNKBINARIES+'/install/binw32/';
-      aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
+      //aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
+      aURL:=FPCGITLABBUILDBINARIES+'/-/raw/main/install/binw32/';
       GetFile(aURL+'patch.exe',aFile);
       GetFile(aURL+'patch.exe.manifest',aFile + '.manifest');
     end;
-    if FileExists(aFile) then FPatchCmd:=aFile;
-
+    if FileExists(aFile) then FPatchCmd:=aFile else
+    begin
+      aFile:=ExtractFilePathSafe(FPatchCmd);
+      if (Not FileExists(aFile)) then
+        aFile:=Which('patch.exe');
+      if FileExists(aFile) then FPatchCmd:=aFile;
+    end;
 
     // Get pwd binary from default binutils URL. If its not there, the make clean command will fail
-    //aURL:=FPCTRUNKBINARIES+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
-    aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
-    aFile:='pwd.exe';
-    GetFile(aURL+aFile,IncludeTrailingPathDelimiter(FMakeDir)+aFile);
+    aFile:=IncludeTrailingPathDelimiter(FMakeDir) + 'pwd.exe';
+    if (Not FileExists(aFile)) then
+    begin
+      //aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
+      aURL:=FPCGITLABBUILDBINARIES+'/-/raw/main/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
+      GetFile(aURL+'pwd.exe',aFile);
+    end;
+
 
     // do not fail
     OperationSucceeded:=True;
@@ -1571,11 +1576,12 @@ begin
       // check if we have make ... otherwise get it from standard URL
       if (NOT FileExists(Make)) then
       begin
-        aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
+        //aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
         //aURL:=FPCTRUNKBINARIES+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
+        aURL:=FPCGITLABBUILDBINARIES+'/-/raw/main/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
         Infoln(localinfotext+'Make binary not found. Getting it.',etInfo);
         Infoln(localinfotext+'Make binary download from: '+aURL+'.',etDebug);
-        GetFile(aURL,Make);
+        GetFile(aURL+ExtractFileName(Make),Make);
         OperationSucceeded:=FileExists(Make);
       end;
     {$ELSE}

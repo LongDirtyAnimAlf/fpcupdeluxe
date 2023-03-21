@@ -4,6 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="darwinarm64cocoa,linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,freebsdx64,linuxmuslx64,win64arm64"/>
+    <BuildModes Active="openbsdx64"/>
     <Units Count="127">
       <Unit0>
         <Filename Value="up.lpr"/>
@@ -20,7 +21,6 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <UsageCount Value="46"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -31,7 +31,7 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="46"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -740,10 +740,11 @@
       </Unit95>
       <Unit96>
         <Filename Value="sources\m_crossinstaller.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="181"/>
-        <CursorPos X="47" Y="192"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="497"/>
+        <CursorPos X="3" Y="499"/>
         <UsageCount Value="11"/>
+        <Loaded Value="True"/>
       </Unit96>
       <Unit97>
         <Filename Value="sources\installerfpc.pas"/>
@@ -756,10 +757,12 @@
       <Unit98>
         <Filename Value="sources\installermanager.pas"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2547"/>
-        <CursorPos Y="2529"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="1014"/>
+        <CursorPos X="26" Y="1033"/>
         <UsageCount Value="11"/>
+        <Loaded Value="True"/>
       </Unit98>
       <Unit99>
         <Filename Value="sources\up\fpcuplprbase.inc"/>
@@ -970,7 +973,7 @@
         <UsageCount Value="10"/>
       </Unit126>
     </Units>
-    <JumpHistory Count="27" HistoryIndex="26">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="2151" Column="34" TopLine="2117"/>
@@ -1078,6 +1081,17 @@
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="5010" Column="61" TopLine="4989"/>
       </Position27>
+      <Position28>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+      </Position28>
+      <Position29>
+        <Filename Value="sources\installermanager.pas"/>
+        <Caret Line="1033" Column="26" TopLine="1014"/>
+      </Position29>
+      <Position30>
+        <Filename Value="sources\m_crossinstaller.pas"/>
+        <Caret Line="254" Column="16" TopLine="235"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

@@ -346,7 +346,7 @@ type
     // List of modules that must be processed in addition to the default ones
     property IncludeModules:string read FIncludeModules write FIncludeModules;
     // Patch utility to use. Defaults to '(g)patch'
-    property PatchCmd:string read FPatchCmd write FPatchCmd;
+    property PatchCmd:string read FPatchCmd;
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean read FReApplyLocalChanges write FReApplyLocalChanges;
     // List of modules that must not be processed
@@ -1027,12 +1027,6 @@ begin
   CrossCPU_Target:=TCPU.cpuNone;
   CrossOS_SubArch:=TSUBARCH.saNone;
 
-  {$if (defined(BSD) and not defined(DARWIN)) or (defined(Solaris))}
-  FPatchCmd:='gpatch';
-  {$else}
-  FPatchCmd:='patch'+GetExeExt;
-  {$endif}
-
   NoJobs:=true;
   FPCUnicode:=false;
 
@@ -1698,6 +1692,12 @@ begin
   FModulePublishedList:=TStringList.Create;
   FSequencer:=TSequencer.Create(Self);
   FLog:=TLogger.Create; // Log filename will be set on first log write
+
+  FPatchCmd:='patch'+GetExeExt;
+  {$if (defined(BSD) and not defined(DARWIN)) or (defined(Solaris))}
+  FPatchCmd:=Which('gpatch');
+  {$endif}
+  if (Length(FPatchCmd)=0) OR (NOT FileExists(FPatchCmd)) then FPatchCmd:=Which('patch');
 
   ResetAll;
 end;

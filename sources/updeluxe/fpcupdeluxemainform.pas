@@ -27,7 +27,6 @@ uses
 //{$endif}
 {$define EnableLanguages}
 
-
 const
   WM_THREADINFO = LM_USER + 2010;
 
