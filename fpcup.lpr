@@ -526,7 +526,7 @@ begin
                 writeln('Download successfull. Unpacking archive.');
                 ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
                 {$ifndef MSWINDOWS}
-                ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinsPath+DirectorySeparator;
+                ToolTargetPath:=ConcatPaths([FPCupManager.BaseDirectory,BinsPath])+DirectorySeparator;
                 {$endif}
                 ForceDirectoriesSafe(ToolTargetPath);
                 with TNormalUnzipper.Create do
@@ -538,23 +538,6 @@ begin
                   end;
                 end;
                 if BinsOk then SysUtils.DeleteFile(ToolTargetFile);
-              end;
-              if BinsOk then
-              begin
-                {$IFDEF UNIX}
-                aList:=FindAllFiles(ToolTargetPath);
-                try
-                  if (aList.Count > 0) then
-                  begin
-                    for i:=0 to Pred(aList.Count) do
-                    begin
-                      fpChmod(aList.Strings[i],&755);
-                    end;
-                  end;
-                finally
-                  aList.Free;
-                end;
-                {$ENDIF}
               end;
             end;
           end;
@@ -602,7 +585,7 @@ begin
           if FPCupManager.AutoTools then
           begin
             writeln('Got cross-tools. Retry cross-install.');
-            FPCupManager.Sequencer.ResetAllExecuted;
+            if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
             UpOk:=FPCupManager.Run;
           end
           else

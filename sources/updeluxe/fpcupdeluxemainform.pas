@@ -189,7 +189,7 @@ type
     procedure btnInstallDirSelectClick({%H-}Sender: TObject);
     procedure btnSetupPlusClick({%H-}Sender: TObject);
     procedure btnLogClick({%H-}Sender: TObject);
-    function  ButtonProcessCrossCompiler(Sender: TObject):boolean;
+    procedure ButtonProcessCrossCompiler(Sender: TObject);
     procedure ButtonAutoUpdateCrossCompiler(Sender: TObject);
     procedure FormClose({%H-}Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate({%H-}Sender: TObject);
@@ -245,6 +245,7 @@ type
     procedure InitShortCuts;
     procedure CheckForUpdates({%H-}Data: PtrInt=0);
     function  AutoUpdateCrossCompiler(Sender: TObject):boolean;
+    function  ProcessCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable({%H-}Sender: TObject;value:boolean);
@@ -1227,7 +1228,6 @@ begin
           SnipEnd:=StringListSame(ConfigText,SnipMagicEnd,SnipEnd)
       end;
 
-
       if (SnipBegin<>-1) AND (SnipEnd<>-1) then
       begin
         s:=ConfigText.Strings[SnipBegin];
@@ -1320,8 +1320,14 @@ begin
               radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aCPU);
               radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aOS);
 
+              // Perpare !!
+              if (NOT PrepareRun(nil)) then exit;
+
+              FPCupManager.CrossCPU_Target:=aTCPU;
+              FPCupManager.CrossOS_Target:=aTOS;
+
               // Build !!
-              success:=ButtonProcessCrossCompiler(nil);
+              success:=ProcessCrossCompiler(nil);
 
               if success
                 then memoSummary.Lines.Append('Cross-compiler update ok.')
@@ -2415,7 +2421,7 @@ begin
     end;
 
     success:=RealRun;
-    //success:=true;
+    //success:=true; // for testing only
 
     if success then
     begin
@@ -2486,7 +2492,12 @@ begin
         aDataClient.UpInfo.UpFunction:=TUpFunction.ufInstallCross;
         {$endif}
 
-        success:=ButtonProcessCrossCompiler(nil);
+        if (NOT PrepareRun(nil)) then exit;
+
+        FPCupManager.CrossCPU_Target:=aCPU;
+        FPCupManager.CrossOS_Target:=aOS;
+
+        success:=ProcessCrossCompiler(nil);
 
         if success
            then memoSummary.Lines.Append('Cross-compiler install/update ok.')
@@ -2540,7 +2551,12 @@ begin
         aDataClient.UpInfo.UpFunction:=TUpFunction.ufInstallCross;
         {$endif}
 
-        success:=ButtonProcessCrossCompiler(nil);
+        if (NOT PrepareRun(nil)) then exit;
+
+        FPCupManager.CrossCPU_Target:=aCPU;
+        FPCupManager.CrossOS_Target:=aOS;
+
+        success:=ProcessCrossCompiler(nil);
 
         if success
            then memoSummary.Lines.Append('Cross-compiler install/update ok.')
@@ -2657,7 +2673,7 @@ begin
   end;
 end;
 
-function TForm1.ButtonProcessCrossCompiler(Sender: TObject):boolean;
+procedure TForm1.ButtonProcessCrossCompiler(Sender: TObject);
 procedure ShowInfo(info:string);
 begin
   if (NOT Assigned(Sender)) then
@@ -2666,17 +2682,11 @@ begin
     ShowMessage(info);
 end;
 var
-  BinsFileName,LibsFileName,BaseBinsURL,BaseLibsURL,BinPath,LibPath:string;
-  ToolTargetPath,ToolTargetFile,UnZipper,s:string;
-  warning,success,verbose:boolean;
-  IncludeLCL,ZipFile:boolean;
-  i:integer;
-  aList: TStringList;
-  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
-  frmSeq: TfrmSequencial;
-  {$ENDIF}
+  s           : string;
+  i           : integer;
+  success     : boolean;
 begin
-  result:=false;
+  success:=false;
 
   {$if defined(win64) and not defined(aarch64)}
   if (Sender<>nil) then
@@ -2884,6 +2894,23 @@ begin
       exit;
     end;
   end;
+
+  success:=ProcessCrossCompiler(Sender);
+end;
+
+function TForm1.ProcessCrossCompiler(Sender: TObject):boolean;
+var
+  BinsFileName,LibsFileName,BaseBinsURL,BaseLibsURL,BinPath,LibPath:string;
+  ToolTargetPath,ToolTargetFile,UnZipper,s:string;
+  warning,success,verbose:boolean;
+  IncludeLCL,ZipFile:boolean;
+  aList: TStringList;
+  i:integer;
+  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
+  frmSeq: TfrmSequencial;
+  {$ENDIF}
+begin
+  result:=false;
 
   // Set subarch early
   FPCupManager.CrossOS_SubArch:=GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
@@ -3381,20 +3408,6 @@ begin
                   finally
                     aList.Free;
                   end;
-                  {$IFDEF UNIX}
-                  aList:=FindAllFiles(ToolTargetPath);
-                  try
-                    if (aList.Count > 0) then
-                    begin
-                      for i:=0 to Pred(aList.Count) do
-                      begin
-                        fpChmod(aList.Strings[i],&755);
-                      end;
-                    end;
-                  finally
-                    aList.Free;
-                  end;
-                  {$ENDIF}
                   MissingCrossBins:=False;
                 end;
               end;
@@ -3534,7 +3547,7 @@ begin
             MissingCrossBins:=false;
             MissingCrossLibs:=false;
 
-            success:= RealRun;
+            success:=RealRun;
           end
           else AddMessage('No luck in getting then cross-tools ... aborting.');
         end

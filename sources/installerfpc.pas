@@ -4624,11 +4624,14 @@ var
   ToolAvailable                          : boolean;
   CPUOS_Signature                        : string;
   aCleanupCompiler,aCleanupCommand,aPath : string;
-  aCleanupCommandList                    : TStringList;
+  aStrList                               : TStringList;
   RunTwice                               : boolean;
   aCPU                                   : TCPU;
   {$IFDEF MSWINDOWS}
   DeleteList                             : TStringList;
+  {$ENDIF}
+  {$IFDEF UNIX}
+  index                                  : integer;
   {$ENDIF}
 begin
   result:=inherited;
@@ -4673,7 +4676,29 @@ begin
          then ToolAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
          else ToolAvailable:=CrossInstaller.GetBinUtils(BaseDirectory);
       if (not ToolAvailable) then Infoln('Failed to get crossbinutils', etError);
-      if (ToolAvailable) then Exclude(FErrorCodes,ieBins);
+      if (ToolAvailable) then
+      begin
+        Exclude(FErrorCodes,ieBins);
+
+        // If we have our own binutils, set bins as executable on UNIX
+        {$IFDEF UNIX}
+        if (Pos(BaseDirectory,CrossInstaller.BinUtilsPath)=1) AND  (Pos(CROSSBINPATH,CrossInstaller.BinUtilsPath)>0) then
+        begin
+          aStrList:=FindAllFiles(CrossInstaller.BinUtilsPath,'',false);
+          try
+            if (aStrList.Count > 0) then
+            begin
+              for index:=0 to Pred(aStrList.Count) do
+              begin
+                fpChmod(aStrList.Strings[index],&755);
+              end;
+            end;
+          finally
+            aStrList.Free;
+          end;
+        end;
+        {$ENDIF}
+      end;
     end;
 
     // second, get/set cross libraries !!
@@ -4771,38 +4796,38 @@ begin
       Processor.Process.Parameters.Add('OS_TARGET='+GetSourceOS);
     end;
 
-    aCleanupCommandList:=TStringList.Create;
+    aStrList:=TStringList.Create;
     try
-      aCleanupCommandList.Append('distclean');
+      aStrList.Append('distclean');
 
       if CrossCompiling then
       begin
-        aCleanupCommandList.Clear;
+        aStrList.Clear;
         if (ModuleName=_NATIVECROSSFPC) then
         begin
-          //aCleanupCommandList.Append('-C');
-          //aCleanupCommandList.Append('compiler');
-          //aCleanupCommandList.Append('clean');
-          aCleanupCommandList.Append('compiler_clean');
+          //aStrList.Append('-C');
+          //aStrList.Append('compiler');
+          //aStrList.Append('clean');
+          aStrList.Append('compiler_clean');
         end
         else
         begin
           if (Self AS TFPCCrossInstaller).CompilerUpdateNeeded then
-            aCleanupCommandList.Append('compiler_distclean')
+            aStrList.Append('compiler_distclean')
           else
             Infoln(infotext+'Skipping cross-compiler clean step: compiler seems to be up to date !!',etInfo);
-          aCleanupCommandList.Append('rtl_distclean');
-          if (Self AS TFPCCrossInstaller).PackagesNeeded then aCleanupCommandList.Append('packages_distclean');
+          aStrList.Append('rtl_distclean');
+          if (Self AS TFPCCrossInstaller).PackagesNeeded then aStrList.Append('packages_distclean');
         end;
       end;
 
-      for aCleanupCommand in aCleanupCommandList do
+      for aCleanupCommand in aStrList do
         Processor.Process.Parameters.Add(aCleanupCommand);
 
-      aCleanupCommand:=aCleanupCommandList.CommaText;
+      aCleanupCommand:=aStrList.CommaText;
 
     finally
-      aCleanupCommandList.Free;
+      aStrList.Free;
     end;
 
     for RunTwice in boolean do
