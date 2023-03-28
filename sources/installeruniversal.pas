@@ -1911,8 +1911,8 @@ begin
     if (SourceDirectory<>'') then
     begin
       // Common keywords for all repo methods
-      FDesiredRevision:=GetValueFromKey('Revision',PackageSettings);
-      FBranch:=GetValueFromKey('Branch',PackageSettings);
+      DesiredRevision:=GetValueFromKey('Revision',PackageSettings);
+      Branch:=GetValueFromKey('Branch',PackageSettings);
       TAG:=GetValueFromKey('Tag',PackageSettings);
 
       // Handle Git URLs

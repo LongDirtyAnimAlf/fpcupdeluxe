@@ -363,7 +363,6 @@ type
   TInstaller = class(TObject)
   private
     FURL                       : string;
-    FTAG                       : string;
     FUltibo                    : boolean;
     FKeepLocalChanges          : boolean;
     FReApplyLocalChanges       : boolean;
@@ -426,6 +425,7 @@ type
     FDesiredRevision: string;
     FActualRevision: string;
     FBranch: string;
+    FTAG: string;
     // Stores tprocessex exception info:
     FErrorLog: TStringList;
     FHTTPProxyHost: string;
@@ -566,6 +566,7 @@ type
     property DesiredRevision: string write FDesiredRevision;
     property ActualRevision: string read FActualRevision;
     property Branch: string write FBranch;
+    property TAG: string write FTAG;
     // If using HTTP proxy: host
     property HTTPProxyHost: string read FHTTPProxyHost write SetHTTPProxyHost;
     // If using HTTP proxy: port (optional, default 8080)
@@ -593,7 +594,6 @@ type
     property PatchCmd:string write FPatchCmd;
     // URL for download. HTTP, ftp or svn or git or hg
     property URL: string read FURL write SetURL;
-    property TAG: string read FURL write FTAG;
     // patches
     property SourcePatches: string write FSourcePatches;
     property PreInstallScriptPath: string write FPreInstallScriptPath;
