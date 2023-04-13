@@ -5620,9 +5620,16 @@ object Form1: TForm1
         OnClick = LanguageClick
       end
     end
-    object MenuItem1: TMenuItem
-      Caption = 'About'
-      OnClick = MenuItem1Click
+    object MHelp: TMenuItem
+      Caption = 'Help'
+      object MWiki: TMenuItem
+        Caption = 'Online Wiki'
+        OnClick = WikiClick
+      end
+      object MAbout: TMenuItem
+        Caption = 'About Up'
+        OnClick = AboutClick
+      end
     end
   end
   object ActionList1: TActionList

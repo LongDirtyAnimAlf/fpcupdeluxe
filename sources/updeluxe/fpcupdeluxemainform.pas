@@ -71,7 +71,8 @@ type
     Memo1: TMemo;
     MemoAddTag: TMemo;
     memoSummary: TMemo;
-    MenuItem1: TMenuItem;
+    MWiki: TMenuItem;
+    MHelp: TMenuItem;
     MenuItem2: TMenuItem;
     MEnglishlanguage: TMenuItem;
     MChineseCNlanguage: TMenuItem;
@@ -81,6 +82,7 @@ type
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
     MDutchlanguage: TMenuItem;
+    MAbout: TMenuItem;
     Separator1: TMenuItem;
     MOnlineDocs: TMenuItem;
     MUkrainianLanguage: TMenuItem;
@@ -175,6 +177,7 @@ type
       ARect: TRect; State: TOwnerDrawState);
     procedure LanguageClick(Sender: TObject);
     procedure MOnlineDocsClick({%H-}Sender: TObject);
+    procedure WikiClick(Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick({%H-}Sender: TObject);
@@ -207,7 +210,7 @@ type
       var Special: boolean; Markup: TSynSelectedColor);
     {$endif}
     procedure TargetSelectionChange(Sender: TObject; User: boolean);
-    procedure MenuItem1Click({%H-}Sender: TObject);
+    procedure AboutClick({%H-}Sender: TObject);
     procedure CommandOutputScreenMouseWheel({%H-}Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; {%H-}MousePos: TPoint; var {%H-}Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
@@ -1548,7 +1551,7 @@ begin
   end;
 end;
 
-procedure TForm1.MenuItem1Click(Sender: TObject);
+procedure TForm1.AboutClick(Sender: TObject);
 begin
   ShowAboutForm;
 end;
@@ -2121,6 +2124,11 @@ end;
 procedure TForm1.MOnlineDocsClick(Sender: TObject);
 begin
   OpenURL('https://dsiders.gitlab.io/lazdocsnext');
+end;
+
+procedure TForm1.WikiClick(Sender: TObject);
+begin
+  OpenURL('https://wiki.freepascal.org/fpcupdeluxe');
 end;
 
 procedure TForm1.radgrpTargetChanged(Sender: TObject);
