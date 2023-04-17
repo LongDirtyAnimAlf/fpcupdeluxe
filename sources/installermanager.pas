@@ -346,7 +346,7 @@ type
     // List of modules that must be processed in addition to the default ones
     property IncludeModules:string read FIncludeModules write FIncludeModules;
     // Patch utility to use. Defaults to '(g)patch'
-    property PatchCmd:string read FPatchCmd;
+    property PatchCmd:string read FPatchCmd write FPatchCmd;
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean read FReApplyLocalChanges write FReApplyLocalChanges;
     // List of modules that must not be processed

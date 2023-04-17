@@ -3964,6 +3964,7 @@ begin
   if (Length(aDir)=0) then exit;
   if (NOT DirectoryExists(aDir)) then
     result:=ForceDirectories(aDir);
+  if result then result:=DirectoryExists(aDir);
 end;
 
 //Adapted from SysUtils; Unix/Linux only

@@ -933,6 +933,8 @@ end;
 procedure TInstaller.SetBaseDirectory(value:string);
 begin
   FBaseDirectory:=value;
+  // Set default Make directory for local up-tools
+  FMakeDir:=ConcatPaths([FBaseDirectory,'fpcbootstrap']);
 end;
 
 procedure TInstaller.SetInstallDirectory(value:string);
@@ -1290,22 +1292,24 @@ begin
     Output:='7zz';
     if Not FileExists(F7zip) then F7zip := ConcatPaths([FMakeDir,'7Zip',Output+GetExeExt]);
     {$ENDIF MSWINDOWS}
-    if Not FileExists(F7zip) then
+    if (NOT FileExists(F7zip)) then
     begin
-      ForceDirectoriesSafe(ExtractFileDir(F7zip));
-      {$IFDEF DARWIN}
-      Output:=Output+'_all-apple';
-      {$ELSE}
-      Output:=Output+'_'+GetSourceCPUOS+GetExeExt;
-      {$ENDIF}
-      OperationSucceeded:=GetFile(FPCUPTOOLS+'/'+Output,F7zip);
-      if OperationSucceeded then OperationSucceeded:=FileExists(F7zip);
-      {$IFDEF UNIX}
-      if OperationSucceeded then fpChmod(F7zip,&755);
-      {$ENDIF UNIX}
-      if (NOT OperationSucceeded) then F7zip:='7za'+GetExeExt;
-      // do not fail ... perhaps there is another 7zip available in the path
-      OperationSucceeded:=True;
+      if ForceDirectoriesSafe(ExtractFileDir(F7zip)) then
+      begin
+        {$IFDEF DARWIN}
+        Output:=Output+'_all-apple';
+        {$ELSE}
+        Output:=Output+'_'+GetSourceCPUOS+GetExeExt;
+        {$ENDIF}
+        OperationSucceeded:=GetFile(FPCUPTOOLS+'/'+Output,F7zip);
+        if OperationSucceeded then OperationSucceeded:=FileExists(F7zip);
+        {$IFDEF UNIX}
+        if OperationSucceeded then fpChmod(F7zip,&755);
+        {$ENDIF UNIX}
+        if (NOT OperationSucceeded) then F7zip:='7za'+GetExeExt;
+        // do not fail ... perhaps there is another 7zip available in the path
+        OperationSucceeded:=True;
+      end;
     end;
 
     {$IFDEF MSWINDOWS}
