@@ -3997,8 +3997,8 @@ begin
 
   sInstallDir:=IncludeTrailingPathDelimiter(sInstallDir);
 
-  FPCupManager.MakeDirectory:=sInstallDir+'fpcbootstrap';
-  FPCupManager.BootstrapCompilerDirectory:=sInstallDir+'fpcbootstrap';
+  FPCupManager.MakeDirectory:=sInstallDir+DEFAULTBOOTSTRAPDIR;
+  FPCupManager.BootstrapCompilerDirectory:=sInstallDir+DEFAULTBOOTSTRAPDIR;
 
   FPCupManager.FPCInstallDirectory:=sInstallDir+'fpc';
   if Form2.SplitFPC

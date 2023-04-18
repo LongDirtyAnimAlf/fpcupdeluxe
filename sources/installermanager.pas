@@ -506,6 +506,8 @@ procedure TFPCupManager.SetBaseDirectory(AValue: string);
 begin
   FBaseDirectory:=SafeExpandFileName(AValue);
   ForceDirectoriesSafe(FBaseDirectory);
+  // Set default bootstrap directory
+  FBootstrapCompilerDirectory:=ConcatPaths([FBaseDirectory,DEFAULTBOOTSTRAPDIR]);
 end;
 
 procedure TFPCupManager.SetBootstrapCompilerDirectory(AValue: string);

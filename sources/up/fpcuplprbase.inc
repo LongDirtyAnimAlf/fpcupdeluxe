@@ -117,23 +117,20 @@ begin
   writeln('                       for the defaults when installdir is not specified.');
   writeln('                       You can also use these to override the defaults given');
   writeln('                       by installdir.');
-  writeln(' fpcdir=<dir>          Target FPC dir, default c:\development\fpc\');
-  writeln('                       or ~\fpc\');
+  writeln(' fpcdir=<dir>          Target FPC dir, default: installdir\fpc\');
   {$ifndef FPCONLY}
-  writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
-  writeln('                       or ~\lazarus\');
+  writeln(' lazdir=<dir>          Target Lazarus dir, default: installdir\lazarus\');
   {$endif}
   writeln(' fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC');
   writeln('                       sources. Specify location with this option; if no');
   writeln('                       compiler found here, FPCUp will download one there.');
   writeln('                       Make sure it is not in the fpcdir directory');
-  writeln('                       Default: c:\development\fpcbootstrap\');
-  writeln('                       or ~\fpcbootstrap\');
+  writeln('                       Default: installdir\fpcbootstrap\');
   writeln(' binutilsdir=<dir>     Windows only:');
   writeln('                       Directory where make, patch etc');
   writeln('                       (the binutils) are located. If make does not');
   writeln('                       exist, binutils will be downloaded there.');
-  writeln('                       Default c:\development\fpcbootstrap\');
+  writeln('                       Default: installdir\fpcbootstrap\');
   writeln('                       Note: the binutils are copied to the');
   writeln('                       FPC directory for use by FPC. This gives');
   writeln('                       a more standard FPC environment.');

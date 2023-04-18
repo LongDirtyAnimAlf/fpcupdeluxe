@@ -66,6 +66,9 @@ const
 
   FPCCONFIGFILENAME     = 'fpc.cfg';
 
+  DEFAULTINSTALLDIR     = 'development';
+  DEFAULTBOOTSTRAPDIR   = 'fpcbootstrap';
+
   GITLAB                = 'https://gitlab.com/freepascal.org/';
 
   FPCGITLAB             = GITLAB + 'fpc';
@@ -144,7 +147,6 @@ const
 
   SOURCEPATCHES='patches_v1.0';
   FPCUPGITREPOSOURCEPATCHESAPI=FPCUPGITREPOAPIRELEASES+'/tags/'+SOURCEPATCHES;
-
 
   FPCUP_ACKNOWLEDGE='acknowledgement_fpcup.txt';
 
@@ -933,8 +935,6 @@ end;
 procedure TInstaller.SetBaseDirectory(value:string);
 begin
   FBaseDirectory:=value;
-  // Set default Make directory for local up-tools
-  FMakeDir:=ConcatPaths([FBaseDirectory,'fpcbootstrap']);
 end;
 
 procedure TInstaller.SetInstallDirectory(value:string);
@@ -1101,6 +1101,7 @@ function TInstaller.CheckAndGetTools: boolean;
 var
   CryptoSucceeded,OperationSucceeded: boolean;
   Output: string;
+  aDir: string;
   {$ifdef MSWINDOWS}
   aURL,aFile: string;
   i:integer;
@@ -1148,7 +1149,7 @@ begin
     {$ENDIF DARWIN}
     {$ENDIF BSD}
 
-    ForceDirectoriesSafe(FMakeDir);
+    if (Length(FMakeDir)>0) then ForceDirectoriesSafe(FMakeDir);
 
     {$IFDEF MSWINDOWS}
 
@@ -1283,17 +1284,24 @@ begin
 
     {$ENDIF MSWINDOWS}
 
+    if (Length(FMakeDir)>0) then
+      aDir:=ConcatPaths([FMakeDir,'7Zip'])
+    else
+      aDir:=ConcatPaths([BaseDirectory,DEFAULTBOOTSTRAPDIR,'7Zip']);
+
     F7zip:=Which('7z');
     if Not FileExists(F7zip) then Which('7za');
     if Not FileExists(F7zip) then Which('7zz');
     Output:='7za';
-    if Not FileExists(F7zip) then F7zip := ConcatPaths([FMakeDir,'7Zip',Output+GetExeExt]);
+
+    if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,Output+GetExeExt]);
     {$IFNDEF MSWINDOWS}
     Output:='7zz';
-    if Not FileExists(F7zip) then F7zip := ConcatPaths([FMakeDir,'7Zip',Output+GetExeExt]);
+    if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,Output+GetExeExt]);
     {$ENDIF MSWINDOWS}
     if (NOT FileExists(F7zip)) then
     begin
+      Infoln(localinfotext+'Missing 7z unzipper. Trying to get it and install in '+ExtractFileDir(F7zip),etDebug);
       if ForceDirectoriesSafe(ExtractFileDir(F7zip)) then
       begin
         {$IFDEF DARWIN}

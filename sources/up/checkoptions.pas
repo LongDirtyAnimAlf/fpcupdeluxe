@@ -142,7 +142,7 @@ begin
       {$IFDEF MSWINDOWS}
       if sInstallDir='' then
       begin
-        sInstallDir:='C:\development';
+        sInstallDir:='C:\'+DEFAULTINSTALLDIR;
         bHaveInstalldir:=false;
       end
       else
@@ -150,11 +150,11 @@ begin
         sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
         bHaveInstalldir:=true;
       end;
-      FManager.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','binutilsdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
+      FManager.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','binutilsdir',IncludeTrailingPathDelimiter(sInstallDir)+DEFAULTBOOTSTRAPDIR)));
       {$ELSE} //*nix
       if sInstallDir='' then
       begin
-        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName('~/development')); //fallback default
+        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName('~/'+DEFAULTINSTALLDIR)); //fallback default
         bHaveInstalldir:=false;
       end
       else
@@ -167,7 +167,7 @@ begin
       {$ENDIF MSWINDOWS}
 
       FManager.BaseDirectory:=sInstallDir;
-      FManager.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcbootstrapdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
+      FManager.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcbootstrapdir',IncludeTrailingPathDelimiter(sInstallDir)+DEFAULTBOOTSTRAPDIR)));
       FManager.FPCInstallDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpc')));
       bFPCsplit:=Options.GetOptionNoParam('','fpcsplit');
       if bFPCsplit
