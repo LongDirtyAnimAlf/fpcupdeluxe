@@ -4000,6 +4000,9 @@ begin
   FPCupManager.MakeDirectory:=sInstallDir+DEFAULTBOOTSTRAPDIR;
   FPCupManager.BootstrapCompilerDirectory:=sInstallDir+DEFAULTBOOTSTRAPDIR;
 
+  // Set default logfile location
+  FPCupManager.LogFileName:='';
+
   FPCupManager.FPCInstallDirectory:=sInstallDir+'fpc';
   if Form2.SplitFPC
      then FPCupManager.FPCSourceDirectory:=FPCupManager.FPCInstallDirectory+'src'
@@ -4278,9 +4281,12 @@ begin
     memoSummary.Lines.Append(BeginSnippet+' Done !!');
 
   except
-    // just swallow exceptions
-    StatusMessage.Text:=BeginSnippet+' Got an unexpected exception ... don''t know what to do unfortunately.';
-    StatusMessage.Color:=clRed;
+    on E: Exception do
+    begin
+      StatusMessage.Text:='Exception: '+ E.ClassName + '. ' + E.Message;
+      //StatusMessage.Text:=BeginSnippet+' Got an unexpected exception ... don''t know what to do unfortunately.';
+      StatusMessage.Color:=clRed;
+    end;
   end;
 
   BitBtnHalt.Enabled:=false;

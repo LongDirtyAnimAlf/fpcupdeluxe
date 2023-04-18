@@ -1278,7 +1278,6 @@ begin
       GetFile(aURL+'pwd.exe',aFile);
     end;
 
-
     // do not fail
     OperationSucceeded:=True;
 
@@ -1301,7 +1300,7 @@ begin
     {$ENDIF MSWINDOWS}
     if (NOT FileExists(F7zip)) then
     begin
-      Infoln(localinfotext+'Missing 7z unzipper. Trying to get it and install in '+ExtractFileDir(F7zip),etDebug);
+      Infoln(localinfotext+'Missing 7z unzipper. Trying to get it and install in '+ExtractFileDir(F7zip),etInfo);
       if ForceDirectoriesSafe(ExtractFileDir(F7zip)) then
       begin
         {$IFDEF DARWIN}

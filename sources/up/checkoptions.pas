@@ -47,7 +47,6 @@ var
   sIniFile: string;
   sInstallDir: string; // Root installation directory
   bHaveInstalldir: boolean; //Has user explicitly specified a non-standard install dir?
-  sLogFile: string; //Filename for log
   s:string;
   LeftOverOptions: TStringList; //Options left over after processing; may contain module=0 options
 begin
@@ -190,15 +189,8 @@ begin
       if (s<>'') then FManager.CrossOS_Target:=GetTOS(s);
       FManager.CrossOS_SubArch:=GetTSubarch(Options.GetOption('','subarch',''));
 
-      sLogFile:=Options.GetOption('','logfilename','',true);
-      if sLogFile='' then
-        {$IFDEF MSWINDOWS}
-        FManager.LogFileName:='fpcup.log'
-        {$ELSE}
-        FManager.LogFileName:=SafeExpandFileName('~/fpcup.log')
-        {$ENDIF MSWINDOWS}
-      else
-        FManager.LogFileName:=sLogFile;
+      FManager.LogFileName:=Options.GetOption('','logfilename','',true);
+
       // Deal with options coming from ini (e.g. Clean=true)
       try
         FManager.Clean:=Options.GetOption('','clean',false);

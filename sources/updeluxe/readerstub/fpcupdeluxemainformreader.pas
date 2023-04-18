@@ -27,7 +27,6 @@ uses
 //{$endif}
 {$define EnableLanguages}
 
-
 const
   WM_THREADINFO = LM_USER + 2010;
 
@@ -177,6 +176,7 @@ type
       ARect: TRect; State: TOwnerDrawState);
     procedure LanguageClick(Sender: TObject);
     procedure MOnlineDocsClick({%H-}Sender: TObject);
+    procedure WikiClick(Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick({%H-}Sender: TObject);
@@ -191,7 +191,7 @@ type
     procedure btnInstallDirSelectClick({%H-}Sender: TObject);
     procedure btnSetupPlusClick({%H-}Sender: TObject);
     procedure btnLogClick({%H-}Sender: TObject);
-    function  ButtonProcessCrossCompiler(Sender: TObject):boolean;
+    procedure ButtonProcessCrossCompiler(Sender: TObject);
     procedure ButtonAutoUpdateCrossCompiler(Sender: TObject);
     procedure FormClose({%H-}Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate({%H-}Sender: TObject);
@@ -209,7 +209,7 @@ type
       var Special: boolean; Markup: TSynSelectedColor);
     {$endif}
     procedure TargetSelectionChange(Sender: TObject; User: boolean);
-    procedure MenuItem1Click({%H-}Sender: TObject);
+    procedure AboutClick({%H-}Sender: TObject);
     procedure CommandOutputScreenMouseWheel({%H-}Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; {%H-}MousePos: TPoint; var {%H-}Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
@@ -247,6 +247,7 @@ type
     procedure InitShortCuts;
     procedure CheckForUpdates({%H-}Data: PtrInt=0);
     function  AutoUpdateCrossCompiler(Sender: TObject):boolean;
+    function  ProcessCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable({%H-}Sender: TObject;value:boolean);
@@ -371,7 +372,9 @@ uses
   extrasettings,
   subarch,
   modulesettings,
+  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
   DPB.Forms.Sequencial,
+  {$ENDIF}
   //checkoptions,
   installerCore,
   installerUniversal,
@@ -1227,7 +1230,6 @@ begin
           SnipEnd:=StringListSame(ConfigText,SnipMagicEnd,SnipEnd)
       end;
 
-
       if (SnipBegin<>-1) AND (SnipEnd<>-1) then
       begin
         s:=ConfigText.Strings[SnipBegin];
@@ -1320,8 +1322,14 @@ begin
               radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aCPU);
               radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aOS);
 
+              // Perpare !!
+              if (NOT PrepareRun(nil)) then exit;
+
+              FPCupManager.CrossCPU_Target:=aTCPU;
+              FPCupManager.CrossOS_Target:=aTOS;
+
               // Build !!
-              success:=ButtonProcessCrossCompiler(nil);
+              success:=ProcessCrossCompiler(nil);
 
               if success
                 then memoSummary.Lines.Append('Cross-compiler update ok.')
@@ -1542,7 +1550,7 @@ begin
   end;
 end;
 
-procedure TForm1.MenuItem1Click(Sender: TObject);
+procedure TForm1.AboutClick(Sender: TObject);
 begin
   ShowAboutForm;
 end;
@@ -2117,6 +2125,11 @@ begin
   OpenURL('https://dsiders.gitlab.io/lazdocsnext');
 end;
 
+procedure TForm1.WikiClick(Sender: TObject);
+begin
+  OpenURL('https://wiki.freepascal.org/fpcupdeluxe');
+end;
+
 procedure TForm1.radgrpTargetChanged(Sender: TObject);
 var
   CPUType:TCPU;
@@ -2391,9 +2404,6 @@ begin
       FPCupManager.IncludeModules:=FPCupManager.IncludeModules+_LHELP;
     end;
 
-
-
-
     {$ifdef RemoteLog}
     if ((Length(aFPCTarget)>0) OR (Length(aLazarusTarget)>0)) then
     begin
@@ -2418,7 +2428,7 @@ begin
     end;
 
     success:=RealRun;
-    //success:=true;
+    //success:=true; // for testing only
 
     if success then
     begin
@@ -2489,7 +2499,12 @@ begin
         aDataClient.UpInfo.UpFunction:=TUpFunction.ufInstallCross;
         {$endif}
 
-        success:=ButtonProcessCrossCompiler(nil);
+        if (NOT PrepareRun(nil)) then exit;
+
+        FPCupManager.CrossCPU_Target:=aCPU;
+        FPCupManager.CrossOS_Target:=aOS;
+
+        success:=ProcessCrossCompiler(nil);
 
         if success
            then memoSummary.Lines.Append('Cross-compiler install/update ok.')
@@ -2543,7 +2558,12 @@ begin
         aDataClient.UpInfo.UpFunction:=TUpFunction.ufInstallCross;
         {$endif}
 
-        success:=ButtonProcessCrossCompiler(nil);
+        if (NOT PrepareRun(nil)) then exit;
+
+        FPCupManager.CrossCPU_Target:=aCPU;
+        FPCupManager.CrossOS_Target:=aOS;
+
+        success:=ProcessCrossCompiler(nil);
 
         if success
            then memoSummary.Lines.Append('Cross-compiler install/update ok.')
@@ -2660,7 +2680,7 @@ begin
   end;
 end;
 
-function TForm1.ButtonProcessCrossCompiler(Sender: TObject):boolean;
+procedure TForm1.ButtonProcessCrossCompiler(Sender: TObject);
 procedure ShowInfo(info:string);
 begin
   if (NOT Assigned(Sender)) then
@@ -2669,17 +2689,11 @@ begin
     ShowMessage(info);
 end;
 var
-  BinsFileName,LibsFileName,BaseBinsURL,BaseLibsURL,BinPath,LibPath:string;
-  ToolTargetPath,ToolTargetFile,UnZipper,s:string;
-  warning,success,verbose:boolean;
-  IncludeLCL,ZipFile:boolean;
-  i:integer;
-  aList: TStringList;
-  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
-  frmSeq: TfrmSequencial;
-  {$ENDIF}
+  s           : string;
+  i           : integer;
+  success     : boolean;
 begin
-  result:=false;
+  success:=false;
 
   {$if defined(win64) and not defined(aarch64)}
   if (Sender<>nil) then
@@ -2888,6 +2902,23 @@ begin
     end;
   end;
 
+  success:=ProcessCrossCompiler(Sender);
+end;
+
+function TForm1.ProcessCrossCompiler(Sender: TObject):boolean;
+var
+  BinsFileName,LibsFileName,BaseBinsURL,BaseLibsURL,BinPath,LibPath:string;
+  ToolTargetPath,ToolTargetFile,UnZipper,s:string;
+  warning,success,verbose:boolean;
+  IncludeLCL,ZipFile:boolean;
+  aList: TStringList;
+  i:integer;
+  {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
+  frmSeq: TfrmSequencial;
+  {$ENDIF}
+begin
+  result:=false;
+
   // Set subarch early
   FPCupManager.CrossOS_SubArch:=GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
 
@@ -3003,7 +3034,7 @@ begin
       warning:=false;
 
       s:=GetMinimumFPCVersion(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-      if (Length(s)>0) then
+      if (Length(s)>0) AND (s<>'0.0.0') then
       begin
         warning:=true;
         if warning then s:='Be forwarned: this will only work with FPC [(>='+s+')].'+sLineBreak+upQuestionContinue;
@@ -3384,20 +3415,6 @@ begin
                   finally
                     aList.Free;
                   end;
-                  {$IFDEF UNIX}
-                  aList:=FindAllFiles(ToolTargetPath);
-                  try
-                    if (aList.Count > 0) then
-                    begin
-                      for i:=0 to Pred(aList.Count) do
-                      begin
-                        fpChmod(aList.Strings[i],&755);
-                      end;
-                    end;
-                  finally
-                    aList.Free;
-                  end;
-                  {$ENDIF}
                   MissingCrossBins:=False;
                 end;
               end;
@@ -3537,7 +3554,7 @@ begin
             MissingCrossBins:=false;
             MissingCrossLibs:=false;
 
-            success:= RealRun;
+            success:=RealRun;
           end
           else AddMessage('No luck in getting then cross-tools ... aborting.');
         end
@@ -3926,11 +3943,11 @@ begin
 
   if CheckAutoClear.Checked then btnClearLog.Click;
 
-  FPCupManager.Sequencer.ResetAllExecuted;
-
   MissingCrossBins:=false;
   MissingCrossLibs:=false;
   MissingTools:=false;
+
+  FPCupManager.ResetAll;
 
   FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
 
@@ -3940,18 +3957,6 @@ begin
   FPCupManager.OnlinePatching:=Form2.OnlinePatching;
   FPCupManager.ReApplyLocalChanges:=Form2.ApplyLocalChanges;
 
-  FPCupManager.OnlyModules:='';
-  FPCupManager.IncludeModules:='';
-  FPCupManager.SkipModules:='';
-
-  FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
-  FPCupManager.CrossOS_Target:=TOS.osNone;
-  FPCupManager.CrossOS_SubArch:=TSubarch.saNone;
-
-  FPCupManager.LCL_Platform:='';
-
-  FPCupManager.SolarisOI:=false;
-  FPCupManager.MUSL:=false;
 
   FPCupManager.FPCOPT:=Form2.FPCOptions;
   if Form2.FPCDebug then
@@ -3960,28 +3965,11 @@ begin
     FPCupManager.FPCOPT:=Trim(FPCupManager.FPCOPT);
   end;
 
-  FPCupManager.CrossOPT:='';
-
-  FPCupManager.CrossLibraryDirectory:='';
-  FPCupManager.CrossToolsDirectory:='';
-
-  FPCupManager.FPCDesiredRevision:='';
-  FPCupManager.LazarusDesiredRevision:='';
-
-  FPCupManager.FPCBranch:='';
-  FPCupManager.LazarusBranch:='';
-
-  FPCupManager.FPCTag:='';
-  FPCupManager.LazarusTag:='';
-
   {$IFDEF DEBUG}
   FPCupManager.Verbose:=True;
   {$ELSE}
   FPCupManager.Verbose:=Form2.ExtraVerbose;
   {$ENDIF}
-
-  FPCupManager.FPCURL:='';
-  FPCupManager.LazarusURL:='';
 
   FPCupManager.LazarusOPT:=Form2.LazarusOptions;
   if Form2.LazarusDebug then
@@ -4010,6 +3998,9 @@ begin
 
   FPCupManager.MakeDirectory:=sInstallDir+DEFAULTBOOTSTRAPDIR;
   FPCupManager.BootstrapCompilerDirectory:=sInstallDir+DEFAULTBOOTSTRAPDIR;
+
+  // Set default logfile location
+  FPCupManager.LogFileName:='';
 
   FPCupManager.FPCInstallDirectory:=sInstallDir+'fpc';
   if Form2.SplitFPC
@@ -4213,6 +4204,10 @@ begin
     begin
       AddMessage('');
       AddMessage('');
+
+      MissingCrossBins:=(ieBins in FPCupManager.InstallerErrors);
+      MissingCrossLibs:=(ieLibs in FPCupManager.InstallerErrors);
+
       if (MissingCrossBins OR MissingCrossLibs) then
       begin
         if MissingCrossBins then AddMessage('fpcupdeluxe: ERROR: Failure due to missing cross binary tools.');
@@ -4285,9 +4280,12 @@ begin
     memoSummary.Lines.Append(BeginSnippet+' Done !!');
 
   except
-    // just swallow exceptions
-    StatusMessage.Text:=BeginSnippet+' Got an unexpected exception ... don''t know what to do unfortunately.';
-    StatusMessage.Color:=clRed;
+    on E: Exception do
+    begin
+      StatusMessage.Text:='Exception: '+ E.ClassName + '. ' + E.Message;
+      //StatusMessage.Text:=BeginSnippet+' Got an unexpected exception ... don''t know what to do unfortunately.';
+      StatusMessage.Color:=clRed;
+    end;
   end;
 
   BitBtnHalt.Enabled:=false;
@@ -4790,12 +4788,10 @@ begin
       if (ExistWordInString(MsgStr,'failed to get crossbinutils')) then
       begin
         if (NOT MissingCrossBins) then memoSummary.Lines.Append('Missing correct cross libraries');
-        MissingCrossBins:=true;
       end
       else if (ExistWordInString(MsgStr,'failed to get crosslibrary')) then
       begin
         if (NOT MissingCrossLibs) then memoSummary.Lines.Append('Missing correct cross libraries');
-        MissingCrossLibs:=true;
       end
       else if ((ExistWordInString(MsgStr,'CheckAndGetTools')) OR (ExistWordInString(MsgStr,'Required package is not installed'))) then
       begin
