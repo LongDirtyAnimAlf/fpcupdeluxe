@@ -1007,6 +1007,16 @@ begin
     if (Length(OnlyModules)>0) then Write(TxtFile,' --only='+OnlyModules);
     if (Length(SkipModules)>0) then Write(TxtFile,' --skip='+SkipModules);
 
+    if (CrossCompiling) then
+    begin
+      {$ifndef FPCONLY}
+      if ((CrossOS_Target in LCL_OS) AND (Pos(_LCL,OnlyModules)>0)) then
+      begin
+        if (Length(LCL_Platform)>0) then Write(TxtFile,' --lclplatform='+LCL_Platform);
+      end;
+      {$endif}
+    end;
+
     if (FPCInstallDirectory<>FPCSourceDirectory) then Write(TxtFile,' --fpcsplit');
     Write(TxtFile,' --noconfirm');
     Write(TxtFile,' --autotools');
