@@ -2008,12 +2008,15 @@ begin
 
   {$IFDEF UNIX}
   s1:='-Sg '+s1;
-    {$IFDEF SOLARIS}
-    {$IF defined(CPUX64) OR defined(CPUX86)}
-    //Intel only. See: https://wiki.lazarus.freepascal.org/Lazarus_on_Solaris#A_note_on_gld_.28Intel_architecture_only.29
-    s1:='-Xn '+s1;
-    {$endif}
-    {$ENDIF}
+  {$IFDEF SOLARIS}
+  {$IF defined(CPUX64) OR defined(CPUX86)}
+  //Intel only. See: https://wiki.lazarus.freepascal.org/Lazarus_on_Solaris#A_note_on_gld_.28Intel_architecture_only.29
+  s1:='-Xn '+s1;
+  {$endif}
+  {$ENDIF}
+  {$ENDIF}
+
+  {$IFDEF LINUX}
   if FMUSL then s1:='-FL'+FMUSLLinker+' '+s1;
   {$ENDIF}
 

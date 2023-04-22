@@ -233,7 +233,7 @@ begin
     if FMUSL then
     begin
       aLibName:='ld-musl-'+TargetCPUName+'.so.1';
-      AddFPCCFGSnippet('-FL/lib/'+aLibName);
+      AddFPCCFGSnippet('-FL/lib/'+aLibName,false);
     end;
   end;
 
@@ -440,7 +440,7 @@ begin
   {$ENDIF UNIX}
 
   // Now also allow for cpu-linux-gnu- binutilsprefix (e.g. codesourcery)
-  if not result then
+  if (not result) then
   begin
     BinPrefixTry:=TargetCPUName+'-linux-gnu-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;

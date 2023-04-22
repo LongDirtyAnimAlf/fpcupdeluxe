@@ -111,7 +111,7 @@ begin
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     AddFPCCFGSnippet('-Xr/usr/lib');
-    //AddFPCCFGSnippet('-FL/usr/lib/ld-linux.so.2'); {buildfaq 3.3.1: the name of the dynamic linker on the target};
+    //AddFPCCFGSnippet('-FL/usr/lib/ld-linux.so.2',false); {buildfaq 3.3.1: the name of the dynamic linker on the target};
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     ShowInfo('Found libspath '+FLibsPath,etInfo);
   end;

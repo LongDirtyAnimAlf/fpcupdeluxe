@@ -298,9 +298,9 @@ begin
       s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator;
       s:=ExpandFileName(s);
       if FileExists(s+'libc.a') then
-        AddFPCCFGSnippet('-Fl'+s);
+        AddFPCCFGSnippet('-Fl'+ExcludeTrailingPathDelimiter(s));
     end;
-    AddFPCCFGSnippet('-FLlibdl.so'); {buildfaq 3.3.1: the name of the dynamic linker on the target}
+    AddFPCCFGSnippet('-FLlibdl.so',false); {buildfaq 3.3.1: the name of the dynamic linker on the target}
   end;
 end;
 

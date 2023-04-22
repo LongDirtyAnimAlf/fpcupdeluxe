@@ -95,7 +95,7 @@ begin
       AddFPCCFGSnippet('-Xr/usr/lib64');
       DynLinker:='/usr/lib64/'+LINKER2;
     end;
-    if (Length(DynLinker)>0) then AddFPCCFGSnippet('-FL'+DynLinker);
+    if (Length(DynLinker)>0) then AddFPCCFGSnippet('-FL'+DynLinker,false);
   end;
 end;
 

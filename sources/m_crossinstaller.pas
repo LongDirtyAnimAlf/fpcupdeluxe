@@ -179,8 +179,8 @@ type
     // Note: the libraries should be presumably under the basepath using the Lazarus naming convention??
     function GetLibsLCL({%H-}LCL_Platform:string; {%H-}Basepath:string):boolean;virtual;
     {$endif}
-    procedure AddFPCCFGSnippet(aSnip: string; AddToCrossOptions:boolean=true);
-    procedure AddCrossOption(aOption: string);
+    procedure AddFPCCFGSnippet(const aSnip: string; const AddToCrossOptions:boolean=true);
+    procedure AddCrossOption(const aOption: string);
     procedure ReplaceFPCCFGSnippet(aOldSnip,aNewSnip: string);
     procedure SetFPCVersion(aVersion: string);
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
@@ -556,7 +556,7 @@ begin
   result:=GetABI(ABI);
 end;
 
-procedure TCrossInstaller.AddFPCCFGSnippet(aSnip: string; AddToCrossOptions:boolean);
+procedure TCrossInstaller.AddFPCCFGSnippet(const aSnip: string; const AddToCrossOptions:boolean);
 var
   aSnippd:string;
   DuplicateOk:boolean;
@@ -592,7 +592,7 @@ begin
   else FFPCCFGSnippet:=aSnippd;
 end;
 
-procedure TCrossInstaller.AddCrossOption(aOption: string);
+procedure TCrossInstaller.AddCrossOption(const aOption: string);
 var
   index:integer;
   compileroption,compilerswitch:string;
