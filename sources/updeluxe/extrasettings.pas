@@ -482,7 +482,6 @@ begin
   FpcupBootstrappersOnly := True;
   Repo                   := True;
   PackageRepo            := False;
-  FPCUnicode             := False;
   IncludeHelp            := False;
   IncludeLCL             := False;
   {$ifdef RemoteLog}
@@ -576,6 +575,10 @@ begin
   SetCheckEnabled(CaptionCheckSplitLazarus,False);
 
   DockedLazarus:=False;
+
+  //Disable FPC unicode by default ... still testing
+  FPCUnicode             := False;
+  SetCheckEnabled(CaptionCheckFPCUnicode,False);
 
   {$IF defined(CPUAARCH64) OR defined(CPUARM) OR defined(Haiku)}
   // disable some features
