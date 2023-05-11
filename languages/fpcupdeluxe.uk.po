@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: fpcupdeluxe\n"
 "Language-Team: Ukrainian\n"
 "Language: uk_UA\n"
-"PO-Revision-Date: 2023-03-12 16:06\n"
+"PO-Revision-Date: 2023-04-23 16:58\n"
 
 #: extrasettings.captioncheckaddcontext
 msgid "Add context for FPC and Lazarus files."
@@ -23,10 +23,6 @@ msgstr "Повторно застосувати локальні зміни пр
 #: extrasettings.captioncheckaskconfirmation
 msgid "Always ask for confirmation."
 msgstr "Завжди питати підтвердження."
-
-#: extrasettings.captioncheckautoswitchurl
-msgid "Auto-switch repo URL."
-msgstr "Автоматичне перемикання репозиторію."
 
 #: extrasettings.captioncheckdockedlazarus
 msgid "Docked Lazarus IDE."
@@ -71,6 +67,10 @@ msgstr "Отримати репозиторії пакунків."
 #: extrasettings.captioncheckrepo
 msgid "Get FPC/Laz repositories."
 msgstr "Отримати репозиторії FPC/Laz."
+
+#: extrasettings.captionchecksavescript
+msgid "Save settings in fpcup-script."
+msgstr "Зберегти налаштування в fpcup-script."
 
 #: extrasettings.captionchecksendinfo
 msgid "Send location and install info."
@@ -141,6 +141,10 @@ msgstr "Перевірка оновлень виконуваних файлів 
 msgid "Download whole repository, or only latest files."
 msgstr "Завантажити весь репозиторій або тільки останні файли."
 
+#: extrasettings.hintchecksavescript
+msgid "Save the current install-settings in a fpclazup-script for later use."
+msgstr "Зберегти поточні параметри встановлення в Fpclazup-скрипті для подальшого використання."
+
 #: extrasettings.hintchecksendinfo
 msgid "Location and install info will be send to public central fpcupdeluxe server."
 msgstr "Інформація про місцеперебування та встановлення буде передано до публічного центрального fpcupdeluxe сервера."
@@ -155,273 +159,170 @@ msgid "Enable software emulation of 80 bit floats."
 msgstr "Увімкнути програмну емуляцію 80 бітових з плаваючою крапкою."
 
 #: fpcupdeluxemainform.upadvertisetools
-msgctxt "fpcupdeluxemainform.upadvertisetools"
 msgid "FPCUPdeluxe can try to download them if available !"
-msgstr "FPCUPdeluxe може спробувати їх завантажити, якщо доступно!"
+msgstr "FPCUPdeluxe може спробувати їх завантажити, за наявності !"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilers
-msgctxt "fpcupdeluxemainform.upbuildallcrosscompilers"
 msgid "Going to auto-build all installed cross-compilers !"
-msgstr "Йде автоматична збірка усіх включених крос-компіляторів!"
+msgstr "Йде автоматична збірка усіх встановлених крос-компіляторів!"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilerscheck
-msgctxt "fpcupdeluxemainform.upbuildallcrosscompilerscheck"
 msgid "Checking FPC configfile [fpc.cfg] for cross-compilers in "
 msgstr "Перевірка файлу налаштувань FPC [fpc.cfg] для крос-компіляторів "
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersfound
-msgctxt "fpcupdeluxemainform.upbuildallcrosscompilersfound"
 msgid "Found crosscompiler for "
 msgstr "Знайдено крос-компілятор для "
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersupdate
-msgctxt "fpcupdeluxemainform.upbuildallcrosscompilersupdate"
 msgid "Going to update cross-compiler."
 msgstr "Йде оновлення крос-компілятора."
 
 #: fpcupdeluxemainform.upbuildcrosscompiler
-msgctxt "fpcupdeluxemainform.upbuildcrosscompiler"
 msgid "Going to install a cross-compiler from available sources."
 msgstr "Йде встановлення крос-компілятора з доступних джерел."
 
 #: fpcupdeluxemainform.upcheckupdate
-msgctxt "fpcupdeluxemainform.upcheckupdate"
 msgid "Please wait. Checking for updates."
-msgstr "Зачекайте, будь-ласка. Перевірка оновлень."
+msgstr "Зачекайте, будь ласка. Перевірка оновлень."
 
 #: fpcupdeluxemainform.updarwinfolderwarning1
-msgctxt "fpcupdeluxemainform.updarwinfolderwarning1"
 msgid "FPCUPdeluxe cannot be run inside the Downloads folder."
 msgstr "FPCUPdeluxe не може бути запущений у теці Завантаження."
 
 #: fpcupdeluxemainform.updarwinfolderwarning2
-msgctxt "fpcupdeluxemainform.updarwinfolderwarning2"
 msgid "This is NOT allowed by OSX security measures."
 msgstr "Це не дозволено заходами безпеки OSX."
 
 #: fpcupdeluxemainform.updarwinfolderwarning3
-msgctxt "fpcupdeluxemainform.updarwinfolderwarning3"
 msgid "Copy FPCUPdeluxe into its own directory and run from there."
 msgstr "Скопіюйте FPCUPdeluxe до власної теки та запустіть звідти."
 
 #: fpcupdeluxemainform.upfolderwarning1
-msgctxt "fpcupdeluxemainform.upfolderwarning1"
 msgid "FPCUPdeluxe could not create its necessary setting-files."
-msgstr "FPCUPdeluxe не вдалося створити свої необхідні файли параметрів."
+msgstr "FPCUPdeluxe не вдалося створити свої необхідні файли налаштувань."
 
 #: fpcupdeluxemainform.upfolderwarning2
-msgctxt "fpcupdeluxemainform.upfolderwarning2"
 msgid "Please check the folder permissions, and re-start."
 msgstr "Будь ласка, перевірте права доступу до теки й перезапустіть знову."
 
 #: fpcupdeluxemainform.upinstallconfimation
 #, object-pascal-format
-msgctxt "fpcupdeluxemainform.upinstallconfimation"
 msgid "Going to install %s and %s%s."
 msgstr "Йде встановлення %s та %s%s."
 
 #: fpcupdeluxemainform.upinstallconfimationsimple
 #, object-pascal-format
-msgctxt "fpcupdeluxemainform.upinstallconfimationsimple"
 msgid "Going to install the %s."
 msgstr "Йде встановлення %s."
 
 #: fpcupdeluxemainform.upinstallcrosscompiler
-msgctxt "fpcupdeluxemainform.upinstallcrosscompiler"
 msgid "Going to install the cross-compiler for"
 msgstr "Встановлюємо крос-компілятор для"
 
 #: fpcupdeluxemainform.upinstalldirectory
-msgctxt "fpcupdeluxemainform.upinstalldirectory"
 msgid "Install directory"
 msgstr "Тека встановлення"
 
 #: fpcupdeluxemainform.upinstalldirectorycurrent
-msgctxt "fpcupdeluxemainform.upinstalldirectorycurrent"
 msgid "Current install directory"
 msgstr "Поточна тека встановлення"
 
 #: fpcupdeluxemainform.upinstallfpc
-msgctxt "fpcupdeluxemainform.upinstallfpc"
 msgid "Going to install/update FPC."
 msgstr "Йде встановлення/оновлення FPC."
 
 #: fpcupdeluxemainform.upinstallfpclazarus
-msgctxt "fpcupdeluxemainform.upinstallfpclazarus"
 msgid "Going to install/update FPC and Lazarus."
 msgstr "Йде встановлення/оновлення FPC і Lazarus."
 
 #: fpcupdeluxemainform.upinstalllazarus
-msgctxt "fpcupdeluxemainform.upinstalllazarus"
 msgid "Going to install/update Lazarus."
 msgstr "Йде встановлення/оновлення Lazarus."
 
 #: fpcupdeluxemainform.upinstallmodule
-msgctxt "fpcupdeluxemainform.upinstallmodule"
 msgid "Going to install/update module"
 msgstr "Йде встановлення/оновлення модуля"
 
 #: fpcupdeluxemainform.upinstallsettingscurrent
-msgctxt "fpcupdeluxemainform.upinstallsettingscurrent"
 msgid "Got settings from install directory"
 msgstr "Отримано параметри з теки встановлення"
 
 #: fpcupdeluxemainform.uplookup
-msgctxt "fpcupdeluxemainform.uplookup"
 msgid "Looking for"
 msgstr "Шукаю"
 
 #: fpcupdeluxemainform.uplookupbintools
-msgctxt "fpcupdeluxemainform.uplookupbintools"
 msgid "Going to look for the right cross-bins. Can (will) take some time !"
 msgstr "Шукаю правильний крос-бінарники. Може (буде) займати деякий час!"
 
 #: fpcupdeluxemainform.uplookuplibtools
-msgctxt "fpcupdeluxemainform.uplookuplibtools"
 msgid "Going to look for the right cross-libraries. Can (will) take some time !"
 msgstr "Шукаємо правильні крос-бібліотеки. Може (буде) зайняти деякий час!"
 
 #: fpcupdeluxemainform.uplookuptools
-msgctxt "fpcupdeluxemainform.uplookuptools"
 msgid "Looking for FPCUPdeluxe cross-tools on GitHub (if any)."
-msgstr "Пошук FPCUPdeluxe крос-інструментів на GitHub (якщо є)."
+msgstr "Пошук FPCUPdeluxe крос-інструменти на GitHub (якщо такі є)."
 
 #: fpcupdeluxemainform.upmissingtools
-msgctxt "fpcupdeluxemainform.upmissingtools"
 msgid "The building of a crosscompiler failed due to missing cross-tools."
-msgstr "Збій побудови кроскомпілятора через відсутність крос-інструментів."
+msgstr "Не вдалося побудувати кроскомпілятор через відсутність крос-інструментів."
 
 #: fpcupdeluxemainform.upquestioncontinue
-msgctxt "fpcupdeluxemainform.upquestioncontinue"
 msgid "Do you want to continue ?"
 msgstr "Бажаєте продовжити?"
 
 #: fpcupdeluxemainform.upquitrequest
-msgctxt "fpcupdeluxemainform.upquitrequest"
 msgid "Please quit FPCUPdeluxe."
 msgstr "Будь ласка, вийдіть з FPCUPdeluxe."
 
 #: fpcupdeluxemainform.upremovecrosscompiler
-msgctxt "fpcupdeluxemainform.upremovecrosscompiler"
 msgid "Going to remove the cross-compiler for"
 msgstr "Збираємось видалити крос-компілятор для"
 
 #: fpcupdeluxemainform.upremovemodule
-msgctxt "fpcupdeluxemainform.upremovemodule"
 msgid "Going to remove module"
 msgstr "Йде видалення модуля"
 
 #: fpcupdeluxemainform.upselectcputarget
-msgctxt "fpcupdeluxemainform.upselectcputarget"
 msgid "Please select a CPU target first."
 msgstr "Спершу виберіть цільовий ЦП."
 
 #: fpcupdeluxemainform.upselectfpclazarustarget
-msgctxt "fpcupdeluxemainform.upselectfpclazarustarget"
 msgid "Please select a FPC and Lazarus target first"
 msgstr "Спершу виберіть цільовий FPC і Lazarus"
 
 #: fpcupdeluxemainform.upselectfpctarget
-msgctxt "fpcupdeluxemainform.upselectfpctarget"
 msgid "Please select a FPC target first"
 msgstr "Спершу виберіть цільовий FPC"
 
 #: fpcupdeluxemainform.upselectlazarustarget
-msgctxt "fpcupdeluxemainform.upselectlazarustarget"
 msgid "Please select a Lazarus target first"
 msgstr "Спершу виберіть цільовий Lazarus"
 
 #: fpcupdeluxemainform.upselectostarget
-msgctxt "fpcupdeluxemainform.upselectostarget"
 msgid "Please select an OS target first."
 msgstr "Спершу виберіть цільову ОС."
 
 #: fpcupdeluxemainform.upspacewarning
-msgctxt "fpcupdeluxemainform.upspacewarning"
 msgid "Having a space in your install path is very ill-advised !"
 msgstr "Мати пробіл в шляху встановлення є дуже необачним!"
 
 #: fpcupdeluxemainform.uptrybuildcrosscompiler
-msgctxt "fpcupdeluxemainform.uptrybuildcrosscompiler"
 msgid "Trying to build the cross-compiler for"
 msgstr "Спроба побудувати крос-компілятор для"
 
 #: fpcupdeluxemainform.upupdatecrossall
-msgctxt "fpcupdeluxemainform.upupdatecrossall"
 msgid "Going to update all crosscompilers"
 msgstr "Оновлення всіх крос-компіляторів"
 
 #: fpcupdeluxemainform.upupdatefound
-msgctxt "fpcupdeluxemainform.upupdatefound"
 msgid "New FPCUPdeluxe version available"
 msgstr "Доступна нова версія FPCUPdeluxe"
 
 #: fpcupdeluxemainform.upupdatenotfound
-msgctxt "fpcupdeluxemainform.upupdatenotfound"
 msgid "No updates found."
-msgstr "Немає оновлень."
-
-#: processutils.lisaborted
-msgid "Aborted"
-msgstr "Перервано"
-
-#: processutils.liscannotexecute
-#, object-pascal-format
-msgid "cannot execute \"%s\""
-msgstr "не вдалося виконати \"%s\""
-
-#: processutils.liscannotfindexecutable
-#, object-pascal-format
-msgid "cannot find executable \"%s\""
-msgstr "неможливо знайти виконуваний файл \"%s\""
-
-#: processutils.lisexecutableisadirectory
-#, object-pascal-format
-msgid "executable \"%s\" is a directory"
-msgstr "виконуваний файл \"%s\" є каталогом"
-
-#: processutils.lisexecutablelacksthepermissiontorun
-#, object-pascal-format
-msgid "executable \"%s\" lacks the permission to run"
-msgstr "виконуваний \"%s\" не має дозволу для запуску"
-
-#: processutils.lisexitcode
-#, object-pascal-format
-msgid "Exit code %s"
-msgstr "Код завершення %s"
-
-#: processutils.lisfreeingbufferlines
-#, object-pascal-format
-msgid "freeing buffer lines: %s"
-msgstr "звільнено рядків буфера: %s"
-
-#: processutils.lismissingdirectory
-#, object-pascal-format
-msgid "missing directory \"%s\""
-msgstr "відсутня тека \"%s\""
-
-#: processutils.lismissingexecutable
-#, object-pascal-format
-msgid "missing executable \"%s\""
-msgstr "відсутній виконуваний файл \"%s\""
-
-#: processutils.lissuccess
-msgid "Success"
-msgstr "Успішно"
-
-#: processutils.listoolhasnoexecutable
-#, object-pascal-format
-msgid "tool \"%s\" has no executable"
-msgstr "інструмент \"%s\" не має виконуваного файлу"
-
-#: processutils.lisunabletoexecute
-#, object-pascal-format
-msgid "unable to execute: %s"
-msgstr "неможливо виконати: %s"
-
-#: processutils.lisunabletoreadprocessexitstatus
-msgid "unable to read process ExitStatus"
-msgstr "неможливо прочитати ExitStatus процесу "
+msgstr "Оновлення не знайдено."
 
 #: tform1.actfileexit.caption
 msgid "E&xit"
@@ -689,25 +590,39 @@ msgctxt "tform1.lazarusversionlabel.caption"
 msgid "Lazarus version"
 msgstr "Версія Lazarus"
 
-#: tform1.listboxfpchistory.columns[0].caption
-msgctxt "tform1.listboxfpchistory.columns[0].caption"
+#: tform1.listboxfpchistorynew.columns[0].caption
+msgctxt "tform1.listboxfpchistorynew.columns[0].caption"
 msgid "Hash"
 msgstr "Хеш"
 
-#: tform1.listboxfpchistory.columns[1].caption
-msgctxt "tform1.listboxfpchistory.columns[1].caption"
+#: tform1.listboxfpchistorynew.columns[1].caption
+msgctxt "tform1.listboxfpchistorynew.columns[1].caption"
+msgid "Rev-name"
+msgstr "Назва ревізії"
+
+#: tform1.listboxfpchistorynew.columns[2].caption
+msgctxt "tform1.listboxfpchistorynew.columns[2].caption"
 msgid "Date"
 msgstr "Дата"
 
-#: tform1.listboxlazarushistory.columns[0].caption
-msgctxt "tform1.listboxlazarushistory.columns[0].caption"
+#: tform1.listboxlazarushistorynew.columns[0].caption
+msgctxt "tform1.listboxlazarushistorynew.columns[0].caption"
 msgid "Hash"
 msgstr "Хеш"
 
-#: tform1.listboxlazarushistory.columns[1].caption
-msgctxt "tform1.listboxlazarushistory.columns[1].caption"
+#: tform1.listboxlazarushistorynew.columns[1].caption
+msgctxt "tform1.listboxlazarushistorynew.columns[1].caption"
+msgid "Rev-name"
+msgstr "Назва ревізії"
+
+#: tform1.listboxlazarushistorynew.columns[2].caption
+msgctxt "tform1.listboxlazarushistorynew.columns[2].caption"
 msgid "Date"
 msgstr "Дата"
+
+#: tform1.mabout.caption
+msgid "About Up"
+msgstr "Про додаток"
 
 #: tform1.mchinesecnlanguage.caption
 msgid "Chinese (CN)"
@@ -729,10 +644,6 @@ msgstr "Англійська (EN)"
 msgid "&File"
 msgstr "&Файл"
 
-#: tform1.menuitem1.caption
-msgid "About"
-msgstr "Про"
-
 #: tform1.menuitem2.caption
 msgid "Languages"
 msgstr "Мови"
@@ -752,6 +663,10 @@ msgstr "Французька (F)"
 #: tform1.mgermanlanguage.caption
 msgid "German (D)"
 msgstr "Німецька (D)"
+
+#: tform1.mhelp.caption
+msgid "Help"
+msgstr "Допомога"
 
 #: tform1.missuesforum.caption
 msgid "Up Lazarus forum"
@@ -778,8 +693,8 @@ msgid "Online docs"
 msgstr "Онлайн документація"
 
 #: tform1.mormotbtn.caption
-msgid "mORMot"
-msgstr "mORMot"
+msgid "mORMot2"
+msgstr "mORMot2"
 
 #: tform1.mormotbtn.hint
 msgid "Get the mORMot for FPC"
@@ -788,6 +703,10 @@ msgstr "Отримати MORMot для FPC"
 #: tform1.mukrainianlanguage.caption
 msgid "Ukrainian (UK)"
 msgstr "Українська (UK)"
+
+#: tform1.mwiki.caption
+msgid "Online Wiki"
+msgstr "Онлайн Вікі"
 
 #: tform1.opmbtn.caption
 msgid "OPM"
@@ -900,7 +819,7 @@ msgid "Libraries"
 msgstr "Бібліотеки"
 
 #: tform2.caption
-msgid "Advanced settings"
+msgid "Advanced Settings"
 msgstr "Розширені налаштування"
 
 #: tform2.chkfpcdebug.caption
@@ -981,8 +900,8 @@ msgid "Cross Build Options Override (i.e. -CfSoft)"
 msgstr "Перевизначення параметрів перехресної збірки (наприклад -CfSoft)"
 
 #: tform2.labelfpcbranch.caption
-msgid "FPC branch"
-msgstr "FPC гілка"
+msgid "FPC branch/tag"
+msgstr "FPC гілка/тег"
 
 #: tform2.labelfpcoptions.caption
 msgid "FPC options"
@@ -997,12 +916,12 @@ msgid "FPC pre"
 msgstr "FPC pre"
 
 #: tform2.labelfpcrevision.caption
-msgid "FPC hash/tag"
-msgstr "FPC хеш/тег"
+msgid "FPC hash"
+msgstr "Хеш FPC"
 
 #: tform2.labellazarusbranch.caption
-msgid "Laz. branch"
-msgstr "Гілка Lazarus"
+msgid "Laz. branch/tag"
+msgstr "Laz. гілка/тег"
 
 #: tform2.labellazarusoptions.caption
 msgid "Laz. options"
@@ -1017,8 +936,8 @@ msgid "Lazarus pre"
 msgstr "Lazarus pre"
 
 #: tform2.labellazarusrevision.caption
-msgid "Laz. hash/tag"
-msgstr "Laz. hash/tag"
+msgid "Laz. hash"
+msgstr "Laz. хеш"
 
 #: tform2.labelos.caption
 msgid "Select OS"
