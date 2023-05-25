@@ -109,10 +109,10 @@ begin
   writeln('                       <dir>\installerlazwin (Windows) generated installer if');
   writeln('                                             using module installerlazwin');
   writeln('                       <dir>\lazarus\        Lazarus');
-  writeln('                       See fpcdir, lazdir, fpcbootstrapdir, binutilsdir');
+  writeln('                       See fpcdir, fpcsrcdir, lazdir, fpcbootstrapdir');
   writeln('                       primary-config-path');
   {$else}
-  writeln('                       See fpcdir, fpcbootstrapdir, binutilsdir');
+  writeln('                       See fpcdir, fpcsrcdir, fpcbootstrapdir');
   {$endif}
   writeln('                       for the defaults when installdir is not specified.');
   writeln('                       You can also use these to override the defaults given');

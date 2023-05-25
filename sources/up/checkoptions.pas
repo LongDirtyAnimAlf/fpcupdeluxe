@@ -169,9 +169,17 @@ begin
       FManager.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcbootstrapdir',IncludeTrailingPathDelimiter(sInstallDir)+DEFAULTBOOTSTRAPDIR)));
       FManager.FPCInstallDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpc')));
       bFPCsplit:=Options.GetOptionNoParam('','fpcsplit');
-      if bFPCsplit
-               then FManager.FPCSourceDirectory:=FManager.FPCInstallDirectory+'src'
-               else FManager.FPCSourceDirectory:=FManager.FPCInstallDirectory;
+      if bFPCsplit then
+      begin
+        if Options.HasOption('','fpcsrcdir') then
+          FManager.FPCSourceDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcsrcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcsrc')));
+        else
+          FManager.FPCSourceDirectory:=FManager.FPCInstallDirectory+'src';
+      end
+      else
+      begin
+        FManager.FPCSourceDirectory:=FManager.FPCInstallDirectory;
+      end;
 
       {$ifndef FPCONLY}
       FManager.LazarusInstallDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','lazdir',IncludeTrailingPathDelimiter(sInstallDir)+'lazarus')));

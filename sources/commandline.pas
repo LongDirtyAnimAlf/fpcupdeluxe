@@ -80,6 +80,7 @@ type
     property PersistentOptions:string read FPersistentOptions write FPersistentOptions;
     // Arguments left after getting all command line parameters
     property RestArguments:TStringList read FParams;
+    function HasOption(shortname, name: string): boolean;
     function GetOption(shortname,name,defaultVal:string;AppendToPersistentOptions:boolean=true):string;
     function GetOption(shortname,name:string;defaultVal:integer;AppendToPersistentOptions:boolean=true):integer;
     function GetOption(shortname,name:string;defaultVal:boolean;AppendToPersistentOptions:boolean=true):boolean;
@@ -283,6 +284,13 @@ begin
   // best we can do.
   if not(LoadIniFile) then
     raise ECommandLineError.CreateFmt('Specified ini file %s could not be read or no values present',[AValue]);
+end;
+
+function TCommandLineOptions.HasOption(shortname, name: string): boolean;
+var
+  s:string='';
+begin
+  result:=GetOption(shortname, name, s, false , true);
 end;
 
 function TCommandLineOptions.GetOption(shortname, name, defaultVal: string;
