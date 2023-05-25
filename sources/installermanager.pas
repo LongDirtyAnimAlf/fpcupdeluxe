@@ -1677,7 +1677,7 @@ begin
       //not yet
       //if Pos(_CROSSWIN,SkipModules)=0 then aSequence:=_DEFAULT+'win64';
       {$endif}
-      {$if defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
+      {$if defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
       aSequence:=_DEFAULTSIMPLE;
       {$endif}
 

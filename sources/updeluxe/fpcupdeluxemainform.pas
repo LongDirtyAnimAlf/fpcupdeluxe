@@ -3666,7 +3666,7 @@ begin
 
       if Sender=BitBtnLazarusOnly then
       begin
-        {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
+        {$IF defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
         s:=_LAZARUSSIMPLE;
         {$ELSE}
         s:=_LAZARUS;
