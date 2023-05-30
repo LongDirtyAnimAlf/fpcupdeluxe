@@ -680,7 +680,7 @@ msgstr "Issues"
 
 #: tform1.mfpcbugs.caption
 msgid "FPC bugs"
-msgstr "FPC错误"
+msgstr "FPC bugs"
 
 #: tform1.mfrenchlanguage.caption
 msgid "French (F)"
