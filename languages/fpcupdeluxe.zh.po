@@ -172,7 +172,7 @@ msgstr "将更新交叉编译器。"
 
 #: fpcupdeluxemainform.upbuildcrosscompiler
 msgid "Going to install a cross-compiler from available sources."
-msgstr "将从可获的源文件去安装一个交叉编译器。"
+msgstr "将从可获得的源文件去安装一个交叉编译器。"
 
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
@@ -762,7 +762,7 @@ msgstr "将安装/更新FPC和Lazarus的稳定的版本"
 
 #: tform1.statusmessage.text
 msgid "Sitting and waiting"
-msgstr "坐等"
+msgstr "等待中"
 
 #: tform1.tagsheet.caption
 msgid "Tags"
