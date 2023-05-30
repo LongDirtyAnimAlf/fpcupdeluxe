@@ -74,11 +74,11 @@ msgstr "发送位置和安装信息"
 
 #: extrasettings.captionchecksplitfpc
 msgid "Split FPC source and bins."
-msgstr "将FPC源文件和二进制文件分离"
+msgstr "分离FPC源文件和二进制文件"
 
 #: extrasettings.captionchecksplitlazarus
 msgid "Split Lazarus source and bins."
-msgstr "将Lazarus源文件和二进制文件分离"
+msgstr "分离Lazarus源文件和二进制文件"
 
 #: extrasettings.captionchecksystemfpc
 msgid "Use system FPC for Lazarus."
@@ -311,12 +311,12 @@ msgstr "不能执行\"%s\""
 #: processutils.liscannotfindexecutable
 #, object-pascal-format
 msgid "cannot find executable \"%s\""
-msgstr "不能找到可执行的\"%s\""
+msgstr "不能找到可执行文件\"%s\""
 
 #: processutils.lisexecutableisadirectory
 #, object-pascal-format
 msgid "executable \"%s\" is a directory"
-msgstr "可执行的\"%s\"是一个目录"
+msgstr "可执行文件\"%s\"是一个目录"
 
 #: processutils.lisexecutablelacksthepermissiontorun
 #, object-pascal-format
@@ -341,7 +341,7 @@ msgstr "缺少目录\"%s\""
 #: processutils.lismissingexecutable
 #, object-pascal-format
 msgid "missing executable \"%s\""
-msgstr "缺少可执行的\"%s\""
+msgstr "缺少可执行文件\"%s\""
 
 #: processutils.lissuccess
 msgid "Success"
@@ -626,7 +626,7 @@ msgstr "Lazarus版本"
 #: tform1.listboxfpchistory.columns[0].caption
 msgctxt "tform1.listboxfpchistory.columns[0].caption"
 msgid "Hash"
-msgstr "Hash"
+msgstr "哈希值"
 
 #: tform1.listboxfpchistory.columns[1].caption
 msgctxt "tform1.listboxfpchistory.columns[1].caption"
@@ -636,7 +636,7 @@ msgstr "日期"
 #: tform1.listboxlazarushistory.columns[0].caption
 msgctxt "tform1.listboxlazarushistory.columns[0].caption"
 msgid "Hash"
-msgstr "Hash"
+msgstr "哈希值"
 
 #: tform1.listboxlazarushistory.columns[1].caption
 msgctxt "tform1.listboxlazarushistory.columns[1].caption"
@@ -704,7 +704,7 @@ msgstr "韩语 (KR)"
 
 #: tform1.mlazarusbugs.caption
 msgid "Lazarus bugs"
-msgstr "Lazarus错误"
+msgstr "Lazarus bugs"
 
 #: tform1.modulesheet.caption
 msgid "Modules"
@@ -720,11 +720,11 @@ msgstr "为FPC安装mORMot"
 
 #: tform1.opmbtn.caption
 msgid "OPM"
-msgstr "在线软件包管理器"
+msgstr "在线包管理器"
 
 #: tform1.opmbtn.hint
 msgid "Will install/update the Online Package Manager"
-msgstr "将安装/更新在线软件包管理器"
+msgstr "将安装/更新在线包管理器"
 
 #: tform1.picobtn.caption
 msgid "Pico"
