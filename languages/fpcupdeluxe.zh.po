@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.0\n"
-"Last-Translator: 郑建平@夏宗萍 aka  robsean <robsean@126.com>\n"
+"Last-Translator: 郑建平@夏宗萍 aka  robsean <robsean@126.com> PerfBleu <lunaticstarksm@gmail.com>\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Language: zh_CN\n"
 
@@ -359,7 +359,7 @@ msgstr "不能执行:%s"
 
 #: processutils.lisunabletoreadprocessexitstatus
 msgid "unable to read process ExitStatus"
-msgstr "不能读取进程xitStatus"
+msgstr "无法读取进程的ExitStatus"
 
 #: tform1.actfileexit.caption
 msgid "E&xit"
@@ -700,7 +700,7 @@ msgstr "前往GitHub issues"
 
 #: tform1.mkoreanlanguage.caption
 msgid "Korean (KR)"
-msgstr "朝鲜语 (KR)"
+msgstr "韩语 (KR)"
 
 #: tform1.mlazarusbugs.caption
 msgid "Lazarus bugs"
@@ -891,7 +891,7 @@ msgstr "HTTP代理端口:"
 
 #: tform2.label3.caption
 msgid "HTTP proxy username:"
-msgstr "HTTP代理用户名称:"
+msgstr "HTTP代理用户名:"
 
 #: tform2.label4.caption
 msgid "HTTP proxy password:"
@@ -971,4 +971,4 @@ msgstr "CPU/操作系统"
 
 #: tform2.tssubarch.caption
 msgid "Subarch"
-msgstr ""
+msgstr "Subarch"
