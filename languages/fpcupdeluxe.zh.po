@@ -14,136 +14,136 @@ msgstr ""
 
 #: extrasettings.captioncheckaddcontext
 msgid "Add context for FPC and Lazarus files."
-msgstr "为FPC和Lazarus文件添加上下文."
+msgstr "为FPC和Lazarus文件添加上下文"
 
 #: extrasettings.captioncheckapplylocalchanges
 msgid "Re-apply local changes when updating."
-msgstr "当更新时,重新应用本地更改."
+msgstr "当更新时,重新应用本地更改"
 
 #: extrasettings.captioncheckaskconfirmation
 msgid "Always ask for confirmation."
-msgstr "始终要求确认."
+msgstr "始终要求确认"
 
 #: extrasettings.captioncheckautoswitchurl
 msgid "Auto-switch repo URL."
-msgstr "自动切换repo的URL."
+msgstr "自动切换仓库的URL"
 
 #: extrasettings.captioncheckdockedlazarus
 msgid "Docked Lazarus IDE."
-msgstr ""
+msgstr "单窗口 (停靠式) Lazarus IDE"
 
 #: extrasettings.captioncheckenableonlinepatching
 msgid "Allow patching of sources by online patches."
-msgstr "允许通过在线修补程序修补源文件."
+msgstr "允许通过在线修补程序修补源文件"
 
 #: extrasettings.captioncheckextraverbose
 msgid "Be extra verbose."
-msgstr "是额外的冗长的."
+msgstr "更加冗长的输出"
 
 #: extrasettings.captioncheckforcelocalrepoclient
 msgid "Use local repo-client."
-msgstr "使用本地repo客户端."
+msgstr "使用本地仓库客户端"
 
 #: extrasettings.captioncheckfpcupbootstrappersonly
 msgid "Only use fpcup bootstrappers."
-msgstr "仅使用fpcup bootstrappers."
+msgstr "仅使用fpcup bootstrappers"
 
 #: extrasettings.captioncheckgetupdates
 msgid "Check for fpcupdeluxe updates."
-msgstr "检查fpcupdeluxe的更新."
+msgstr "检查fpcupdeluxe的更新"
 
 #: extrasettings.captioncheckincludehelp
 msgid "Include Help."
-msgstr "包含帮助."
+msgstr "包含帮助"
 
 #: extrasettings.captioncheckincludelcl
 msgid "Include LCL with cross-compiler."
-msgstr "包括交叉/跨平台编译器使用的LCL."
+msgstr "包括交叉/跨平台编译器使用的LCL"
 
 #: extrasettings.captioncheckpackagerepo
 msgid "Get package repositories."
-msgstr "软件包存储库."
+msgstr "获取软件包仓库"
 
 #: extrasettings.captioncheckrepo
 msgid "Get FPC/Laz repositories."
-msgstr "FPC/Laz存储库."
+msgstr "获取FPC/Laz存储库"
 
 #: extrasettings.captionchecksendinfo
 msgid "Send location and install info."
-msgstr "发送位置和安装信息."
+msgstr "发送位置和安装信息"
 
 #: extrasettings.captionchecksplitfpc
 msgid "Split FPC source and bins."
-msgstr "分开FPC源文件和二进制文件."
+msgstr "将FPC源文件和二进制文件分离"
 
 #: extrasettings.captionchecksplitlazarus
 msgid "Split Lazarus source and bins."
-msgstr "分开Lazarus源文件和二进制文件."
+msgstr "将Lazarus源文件和二进制文件分离"
 
 #: extrasettings.captionchecksystemfpc
 msgid "Use system FPC for Lazarus."
-msgstr "为Lazarus准备使用系统的FPC."
+msgstr "让Lazarus使用系统上的FPC"
 
 #: extrasettings.captioncheckupdateonly
 msgid "FPC/Laz rebuild only."
-msgstr "仅重新构建FPC/Lazarus."
+msgstr "仅重新构建FPC/Lazarus"
 
 #: extrasettings.captioncheckusemakejobs
 msgid "Use jobs for GNU make."
-msgstr "使用GNU make工作."
+msgstr "为GNU make使用jobs"
 
 #: extrasettings.captioncheckusewget
 msgid "Use wget/libcurl as downloader."
-msgstr "使用wget/libcurl作为下载器."
+msgstr "使用wget/libcurl作为下载器"
 
 #: extrasettings.captionusesoftfloat80bit
 msgctxt "extrasettings.captionusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
-msgstr "启用80位浮点的软件仿真."
+msgstr "启用80位浮点的软件仿真"
 
 #: extrasettings.hintcheckaddcontext
 msgid "Double clicking on FPC and Lazarus files will open Lazarus."
-msgstr "在FPC和Lazarus文件上双击将打开Lazarus."
+msgstr "在FPC和Lazarus文件上双击将打开Lazarus"
 
 #: extrasettings.hintcheckapplylocalchanges
 msgid ""
 "Fpcupdeluxe can re-apply the local changes automagically by using local auto-"
 "patch."
-msgstr "Fpcupdeluxe可以通过使用本地自动补丁来自动地重新应用本地更改."
+msgstr "Fpcupdeluxe可以通过使用本地自动补丁来自动地重新应用本地更改"
 
 #: extrasettings.hintcheckaskconfirmation
 msgid "Show a confirmation dialog with yes/no before every build."
-msgstr "在每次构建前,显示一个带有 是/否 的确认对话框."
+msgstr "在每次构建前,显示一个带有 是/否 的确认对话框"
 
 #: extrasettings.hintcheckdockedlazarus
 msgid "Build a docked Lazarus IDE"
-msgstr ""
+msgstr "构建一个单窗口 (停靠式) 的Lazarus IDE"
 
 #: extrasettings.hintcheckenableonlinepatching
 msgid ""
 "Fpcupdeluxe can patch the sources automagically by using online patches."
-msgstr "Fpcupluxex可以使用在线修补程序来自动修补源文件."
+msgstr "Fpcupluxex可以使用在线修补程序来自动修补源文件"
 
 #: extrasettings.hintcheckforcelocalrepoclient
 msgid "Use the repo-client by fpcupdeluxe."
-msgstr "通过fpcupdluxe的回购(repo)客户端."
+msgstr "使用fpcupdeluxe的repo-client"
 
 #: extrasettings.hintcheckgetupdates
 msgid "Check for updates of fpcupdeluxe binaries."
-msgstr "检查fpcupdeluxe二进制文件的的更新."
+msgstr "检查fpcupdeluxe二进制文件的的更新"
 
 #: extrasettings.hintcheckrepo
 msgid "Download whole repository, or only latest files."
-msgstr "下载整个存储库,或者只下载最新的文件."
+msgstr "下载整个仓库,或者只下载最新的文件"
 
 #: extrasettings.hintchecksendinfo
 msgid ""
 "Location and install info will be send to public central fpcupdeluxe server."
-msgstr "位置和安装信息将发送到公共的中心fpcupdeluxe服务器."
+msgstr "位置和安装信息将发送到公共的中心fpcupdeluxe服务器"
 
 #: extrasettings.hintchecksystemfpc
 msgid "Use the system wide install of FPC to build Lazarus."
-msgstr "使用全系统范围内安装的FPC来构建Lazarus."
+msgstr "使用全系统范围内安装的FPC来构建Lazarus"
 
 #: extrasettings.hintusesoftfloat80bit
 msgctxt "extrasettings.hintusesoftfloat80bit"
@@ -152,7 +152,7 @@ msgstr "启用80位浮点的软件仿真."
 
 #: fpcupdeluxemainform.upadvertisetools
 msgid "FPCUPdeluxe can try to download them if available !"
-msgstr "FPCUPdeluxe可以尝试下载它们,如果它们可以获取的话!"
+msgstr "如果可以的话，FPCUPdeluxe会尝试下载它们！"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilers
 msgid "Going to auto-build all installed cross-compilers !"
@@ -168,15 +168,15 @@ msgstr "找到交叉编译器用于 "
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersupdate
 msgid "Going to update cross-compiler."
-msgstr "将要去更新交叉编译器."
+msgstr "将更新交叉编译器。"
 
 #: fpcupdeluxemainform.upbuildcrosscompiler
 msgid "Going to install a cross-compiler from available sources."
-msgstr "从可获的源文件去安装一个交叉编译器."
+msgstr "将从可获的源文件去安装一个交叉编译器。"
 
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
-msgstr "请等候.检查更新."
+msgstr "请稍候，正在检查更新。"
 
 #: fpcupdeluxemainform.updarwinfolderwarning1
 msgid "FPCUPdeluxe cannot be run inside the Downloads folder."
@@ -184,19 +184,19 @@ msgstr "FPCUPdeluxe不能在其下载的文件夹中运行."
 
 #: fpcupdeluxemainform.updarwinfolderwarning2
 msgid "This is NOT allowed by OSX security measures."
-msgstr ""
+msgstr "在OSX的安全措施下，这是不允许的。"
 
 #: fpcupdeluxemainform.updarwinfolderwarning3
 msgid "Copy FPCUPdeluxe into its own directory and run from there."
-msgstr "将FPCUPdeluxe复制到它自己的目录中,并从中运行."
+msgstr "将FPCUPdeluxe复制到它自己的目录中,并从中运行。"
 
 #: fpcupdeluxemainform.upfolderwarning1
 msgid "FPCUPdeluxe could not create its necessary setting-files."
-msgstr "FPCUPdeluxe不能创建其必需的设置文件."
+msgstr "FPCUPdeluxe无法创建其必需的设置文件。"
 
 #: fpcupdeluxemainform.upfolderwarning2
 msgid "Please check the folder permissions, and re-start."
-msgstr "请检查文件夹权限,并重新启动."
+msgstr "请检查文件夹权限,并重新启动。"
 
 #: fpcupdeluxemainform.upinstallcrosscompiler
 msgid "Going to install the cross-compiler for"
@@ -212,15 +212,15 @@ msgstr "当前安装目录"
 
 #: fpcupdeluxemainform.upinstallfpc
 msgid "Going to install/update FPC."
-msgstr "将安装/更新FPC."
+msgstr "将安装/更新FPC。"
 
 #: fpcupdeluxemainform.upinstallfpclazarus
 msgid "Going to install/update FPC and Lazarus."
-msgstr "将安装/更新FPC和Lazarus."
+msgstr "将安装/更新FPC和Lazarus。"
 
 #: fpcupdeluxemainform.upinstalllazarus
 msgid "Going to install/update Lazarus."
-msgstr "将安装/更新Lazarus."
+msgstr "将安装/更新Lazarus。"
 
 #: fpcupdeluxemainform.upinstallmodule
 msgid "Going to install/update module"
@@ -228,7 +228,7 @@ msgstr "将安装/更新模块"
 
 #: fpcupdeluxemainform.upinstallsettingscurrent
 msgid "Got settings from install directory"
-msgstr ""
+msgstr "从安装目录中取得了设置"
 
 #: fpcupdeluxemainform.uplookup
 msgid "Looking for"
@@ -236,16 +236,16 @@ msgstr "查找"
 
 #: fpcupdeluxemainform.uplookupbintools
 msgid "Going to look for the right cross-bins. Can (will) take some time !"
-msgstr ""
+msgstr "将要查找正确的交叉二进制文件，这可能会花费一段时间！"
 
 #: fpcupdeluxemainform.uplookuplibtools
 msgid ""
 "Going to look for the right cross-libraries. Can (will) take some time !"
-msgstr ""
+msgstr "将要查找正确的交叉库，这可能会花费一段时间！"
 
 #: fpcupdeluxemainform.uplookuptools
 msgid "Looking for FPCUPdeluxe cross-tools on GitHub (if any)."
-msgstr ""
+msgstr "正在Github上查找FPCUPdeluxe交叉工具 (如果存在)"
 
 #: fpcupdeluxemainform.upmissingtools
 msgid "The building of a crosscompiler failed due to missing cross-tools."
@@ -257,7 +257,7 @@ msgstr "你想继续吗?"
 
 #: fpcupdeluxemainform.upquitrequest
 msgid "Please quit FPCUPdeluxe."
-msgstr "请退出fpcupdeluxe."
+msgstr "请退出fpcupdeluxe。"
 
 #: fpcupdeluxemainform.upremovecrosscompiler
 msgid "Going to remove the cross-compiler for"
@@ -281,7 +281,7 @@ msgstr "请先选择一个Lazarus目标"
 
 #: fpcupdeluxemainform.upspacewarning
 msgid "Having a space in your install path is very ill-advised !"
-msgstr ""
+msgstr "在你的安装路径中包含空格是十分不明智的！"
 
 #: fpcupdeluxemainform.uptrybuildcrosscompiler
 msgid "Trying to build the cross-compiler for"
@@ -301,7 +301,7 @@ msgstr "未找到更新."
 
 #: processutils.lisaborted
 msgid "Aborted"
-msgstr "放弃"
+msgstr "中止"
 
 #: processutils.liscannotexecute
 #, object-pascal-format
@@ -321,7 +321,7 @@ msgstr "可执行的\"%s\"是一个目录"
 #: processutils.lisexecutablelacksthepermissiontorun
 #, object-pascal-format
 msgid "executable \"%s\" lacks the permission to run"
-msgstr "可执行的\"%s\"缺少权限来运行"
+msgstr "可执行文件\"%s\"缺少权限来运行"
 
 #: processutils.lisexitcode
 #, object-pascal-format
@@ -387,7 +387,7 @@ msgstr "将安装/更新FPC和Lazarus稳定版本和LAMW"
 
 #: tform1.basicsheet.caption
 msgid "Basic"
-msgstr "基础"
+msgstr "基本"
 
 #: tform1.bitbtnfpcandlazarus.caption
 msgid "Install/update FPC+Lazarus"
@@ -395,7 +395,7 @@ msgstr "将安装/更新FPC和Lazarus"
 
 #: tform1.bitbtnfpcandlazarus.hint
 msgid "Will install/update the selected version of both FPC and Lazarus."
-msgstr "将安装/更新选择的FPC和Lazarus版本."
+msgstr "将安装/更新选定的FPC和Lazarus版本。"
 
 #: tform1.bitbtnfpconly.caption
 msgid "Only FPC"
