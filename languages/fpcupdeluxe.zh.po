@@ -469,7 +469,7 @@ msgstr "创建Lazarus配置文件"
 
 #: tform1.btngetopenssl.caption
 msgid "Get OpenSSL by Browser"
-msgstr "通过浏览器OpenSSL"
+msgstr "通过浏览器获取OpenSSL"
 
 #: tform1.btninstalldirselect.caption
 msgid "Set install path"
@@ -485,11 +485,11 @@ msgstr "安装选择的模块."
 
 #: tform1.btnsendlog.caption
 msgid "Email log"
-msgstr "电子邮箱日志"
+msgstr "电邮日志"
 
 #: tform1.btnsendlog.hint
 msgid "Send email to fpcup maintainer containing Commandscreen output."
-msgstr ""
+msgstr "将命令窗口中的输出发送给fpcup维护人员。"
 
 #: tform1.btnsetupplus.caption
 msgid "Setup+"
@@ -497,7 +497,7 @@ msgstr "设置+"
 
 #: tform1.btnsetupplus.hint
 msgid "Open the extended settings form."
-msgstr "打开扩展的设置窗体."
+msgstr "打开扩展的设置窗体。"
 
 #: tform1.btnuninstallmodule.caption
 msgid "Uninstall module"
@@ -505,7 +505,7 @@ msgstr "卸载模块"
 
 #: tform1.btnuninstallmodule.hint
 msgid "Uninstall the selected module."
-msgstr "卸载选择的模块."
+msgstr "卸载选择的模块。"
 
 #: tform1.btnupdatelazarusmakefiles.caption
 msgid "Update Lazarus Makefiles"
@@ -517,7 +517,7 @@ msgstr "更新所有"
 
 #: tform1.buttonautocrossupdate.hint
 msgid "Auto-update all installed cross-compilers."
-msgstr "自动升级所有已安装的交叉编译器."
+msgstr "自动升级所有已安装的交叉编译器。"
 
 #: tform1.buttoninstallcrosscompiler.caption
 msgid "Install compiler"
@@ -525,7 +525,7 @@ msgstr "安装编译器"
 
 #: tform1.buttoninstallcrosscompiler.hint
 msgid "Install the selected CPU-OS cross-compiler."
-msgstr "安装选择的CPU和操作系统的交叉编译器."
+msgstr "安装选择的CPU和操作系统的交叉编译器。"
 
 #: tform1.buttonremovecrosscompiler.caption
 msgid "Remove compiler"
@@ -533,15 +533,15 @@ msgstr "移除编译器"
 
 #: tform1.buttonremovecrosscompiler.hint
 msgid "Remove the selected CPU-OS cross-compiler."
-msgstr "移除已选择的目标CPU和操作系统的交叉编译器."
+msgstr "移除已选择的目标CPU和操作系统的交叉编译器。"
 
 #: tform1.buttonsubarchselect.caption
 msgid "Set subarch"
-msgstr ""
+msgstr "设置subarch"
 
 #: tform1.buttonsubarchselect.hint
 msgid "Select a subarch for embedded target."
-msgstr ""
+msgstr "为嵌入式目标选择一个subarch"
 
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
@@ -645,11 +645,11 @@ msgstr "日期"
 
 #: tform1.mchinesecnlanguage.caption
 msgid "Chinese (CN)"
-msgstr "简体中文(CN)"
+msgstr "简体中文 (CN)"
 
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
-msgstr "荷兰语(NL)"
+msgstr "荷兰语 (NL)"
 #: tform1.mukrainianlanguage.caption
 msgid "Ukrainian (UK)"
 msgstr "乌克兰 (UK)"
@@ -660,11 +660,11 @@ msgstr "将显示信息和错误"
 
 #: tform1.menglishlanguage.caption
 msgid "English (EN)"
-msgstr "英语(EN)"
+msgstr "英语 (EN)"
 
 #: tform1.menufile.caption
 msgid "&File"
-msgstr "文件(&F)"
+msgstr "文件 (&F)"
 
 #: tform1.menuitem1.caption
 msgid "About"
@@ -676,7 +676,7 @@ msgstr "语言"
 
 #: tform1.menuitem3.caption
 msgid "Issues"
-msgstr "发布议题"
+msgstr "Issues"
 
 #: tform1.mfpcbugs.caption
 msgid "FPC bugs"
@@ -684,11 +684,11 @@ msgstr "FPC错误"
 
 #: tform1.mfrenchlanguage.caption
 msgid "French (F)"
-msgstr "法语(F)"
+msgstr "法语 (F)"
 
 #: tform1.mgermanlanguage.caption
 msgid "German (D)"
-msgstr "德语(D)"
+msgstr "德语 (D)"
 
 #: tform1.missuesforum.caption
 msgid "Up Lazarus forum"
@@ -696,11 +696,11 @@ msgstr "前往Lazarus论坛"
 
 #: tform1.missuesgithub.caption
 msgid "Up GitHub issues"
-msgstr "前往GitHub议题"
+msgstr "前往GitHub issues"
 
 #: tform1.mkoreanlanguage.caption
 msgid "Korean (KR)"
-msgstr "朝鲜语(KR)"
+msgstr "朝鲜语 (KR)"
 
 #: tform1.mlazarusbugs.caption
 msgid "Lazarus bugs"
@@ -963,7 +963,7 @@ msgstr "搜索选项"
 
 #: tform2.rgrpsubarch.caption
 msgid "Select subarch"
-msgstr ""
+msgstr "选择subarch"
 
 #: tform2.tscpuos.caption
 msgid "CPU/OS"
