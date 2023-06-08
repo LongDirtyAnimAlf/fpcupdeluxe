@@ -74,7 +74,7 @@ const
 type
   TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa,wasm32,loongarch64);
   TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo,wasi,atari);
-  TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,armv8,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,rv32ima,rv32im,rv32i,rv64imac,rv64ima,rv64im,rv64i,lx6,lx106);
+  TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,armv8,armv8a,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32imac,rv32ima,rv32im,rv32i,rv64imac,rv64ima,rv64im,rv64i,lx6,lx106);
   //TABI      = (default,sysv,aix,darwin,elfv2,eabi,armeb,eabihf,oldwin32gnu,aarch64ios,riscvhf,linux386_sysv,windowed,call0);
   TABI      = (default,eabi,eabihf,aarch64ios,riscvhf,windowed,call0);
   TARMARCH  = (none,armel,armeb,armhf);
@@ -87,6 +87,7 @@ const
   SUBARCH_OS         = [TOS.embedded,TOS.freertos,TOS.ultibo];
   SUBARCH_CPU        = [TCPU.arm,TCPU.aarch64,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.riscv64,TCPU.xtensa]; //for Ultibo added TCPU.aarch64
   SUBARCH_ARM        = [TSUBARCH.armv4..TSUBARCH.armv7m];
+  SUBARCH_AARCH64    = [TSUBARCH.armv8a];
   SUBARCH_AVR        = [TSUBARCH.avr1..TSUBARCH.avrxmega3];
   SUBARCH_MIPSEL     = [TSUBARCH.pic32mx];
   SUBARCH_RISCV32    = [TSUBARCH.rv32imac..TSUBARCH.rv32i];
@@ -364,6 +365,7 @@ begin
   begin
     case aCPU of
       TCPU.arm:      if (aOS<>TOS.ultibo) then result:=SUBARCH_ARM;
+      TCPU.aarch64:  if (aOS=TOS.embedded) then result:=SUBARCH_AARCH64;
       TCPU.avr:      if (aOS=TOS.embedded) then result:=SUBARCH_AVR;
       TCPU.mipsel:   if (aOS=TOS.embedded) then result:=SUBARCH_MIPSEL;
       TCPU.riscv32:  if (aOS=TOS.embedded) then result:=SUBARCH_RISCV32;

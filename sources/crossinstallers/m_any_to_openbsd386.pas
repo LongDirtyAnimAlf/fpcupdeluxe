@@ -1,6 +1,7 @@
 unit m_any_to_openbsd386;
 
-{ Cross compiles from any platform with correct binutils to openbsd i386
+{
+Cross compiles from any platform (with supported crossbin utils to OpenBSD i386
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -34,147 +35,56 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils,
-  m_crossinstaller;
+  Classes, SysUtils;
 
 implementation
 
 uses
-  fpcuputil; // for wildcard libc.so search
+  m_crossinstaller, m_any_to_openbsd_base;
 
 type
-
-{ TAny_OpenBSD386 }
-TAny_OpenBSD386 = class(TCrossInstaller)
-private
-  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-public
-  function GetLibs(Basepath:string):boolean;override;
-  {$ifndef FPCONLY}
-  function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
-  {$endif}
-  function GetBinUtils(Basepath:string):boolean;override;
-  constructor Create;
-  destructor Destroy; override;
-end;
-
-{ TAny_OpenBSD386 }
-
-function TAny_OpenBSD386.GetLibs(Basepath:string): boolean;
-const
-  LibNames : array[0..0] of string = ('libc.so.88.0');
-var
-  sd,lc:string;
-begin
-  result:=FLibsFound;
-
-  if result then exit;
-
-  for lc in LibNames do
-  begin
-    if (NOT result) then result:=SearchLibrary(Basepath,lc);
-    if (NOT result) then result:=SimpleSearchLibrary(BasePath,DirName,lc);
-    if result then break;
+  TAny_openbsd386 = class(Tany_openbsd_base)
+  public
+    function GetLibs(Basepath:string):boolean;override;
+    function GetBinUtils(Basepath:string):boolean;override;
+    constructor Create;
+    destructor Destroy; override;
   end;
 
-  if (NOT result) then
-  begin
-    // OpenBSD uses versioned libc, so also use a wildcard search
-    sd:=ConcatPaths([BasePath,CROSSLIBPATH,DirName]);
-    lc:=FindFileInDirWildCard('libc.so*',sd);
-    if FileExists(lc) then
-    begin
-      lc:=ExtractFileName(lc);
-      result:=SearchLibrary(sd,lc);
-    end;
-  end;
+{ TAny_openbsd386 }
 
-  SearchLibraryInfo(result);
-  if result then
-  begin
-    FLibsFound:=true;
-    AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
-    AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    AddFPCCFGSnippet('-k--allow-shlib-undefined',false);
-    AddFPCCFGSnippet('-k--allow-multiple-definition',false);
-    // AddFPCCFGSnippet('-XR'+LibsPath);
-    // -XR does not always work !!
-    // So use a direct linker command !!
-    // This helps the linker in finding the correct libs
-    AddFPCCFGSnippet('-k--library-path='+IncludeTrailingPathDelimiter(LibsPath),false);
-  end;
-end;
-
-{$ifndef FPCONLY}
-function TAny_OpenBSD386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
-begin
-  // todo: get gtk at least, add to FFPCCFGSnippet
-  ShowInfo('Implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etDebug);
-  result:=inherited;
-end;
-{$endif}
-
-function TAny_OpenBSD386.GetBinUtils(Basepath:string): boolean;
-var
-  AsFile: string;
-  BinPrefixTry: string;
+function TAny_openbsd386.GetLibs(Basepath:string): boolean;
 begin
   result:=inherited;
-
-  if result then exit;
-
-  // Start with any names user may have given
-  AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
-
-  result:=SearchBinUtil(BasePath,AsFile);
-  if not result then
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-  // Also allow for crossbinutils without prefix
-  if not result then
-  begin
-    BinPrefixTry:='';
-    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
-
-  SearchBinUtilsInfo(result);
-
-  if result then
-  begin
-    FBinsFound:=true;
-    // Configuration snippet for FPC
-    AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
-    AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names}
-  end;
 end;
 
-constructor TAny_OpenBSD386.Create;
+function TAny_openbsd386.GetBinUtils(Basepath:string): boolean;
+begin
+  result:=inherited;
+end;
+
+constructor TAny_openbsd386.Create;
 begin
   inherited Create;
   FTargetCPU:=TCPU.i386;
-  FTargetOS:=TOS.openbsd;
   Reset;
-  FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor TAny_OpenBSD386.Destroy;
+destructor TAny_openbsd386.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Any_OpenBSD386:TAny_OpenBSD386;
+  Any_openbsd386:TAny_openbsd386;
 
 initialization
-  Any_OpenBSD386:=TAny_OpenBSD386.Create;
-  RegisterCrossCompiler(Any_OpenBSD386.RegisterName,Any_OpenBSD386);
+  Any_openbsd386:=TAny_openbsd386.Create;
+  RegisterCrossCompiler(Any_openbsd386.RegisterName,Any_openbsd386);
 
 finalization
-  Any_OpenBSD386.Destroy;
+  Any_openbsd386.Destroy;
+
 end.
 

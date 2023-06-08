@@ -389,7 +389,7 @@ begin
 
         // Simple: new snipped to be appended
         ConfigText.Append(SnipMagicBegin+CrossInstaller.RegisterName);
-        ConfigText.Append('# Inserted by fpcup '+DateTimeToStr(Now));
+        ConfigText.Append('# Inserted by up v'+DELUXEVERSION+' on '+DateTimeToStr(Now));
         ConfigText.Append('# Cross compile settings dependent on both target OS and target CPU');
         ConfigText.Append('#IFDEF FPC_CROSSCOMPILING');
         ConfigText.Append('#IFDEF '+UpperCase(CrossInstaller.TargetOSName));

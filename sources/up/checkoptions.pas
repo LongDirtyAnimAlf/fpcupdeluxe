@@ -168,15 +168,21 @@ begin
       FManager.BaseDirectory:=sInstallDir;
       FManager.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcbootstrapdir',IncludeTrailingPathDelimiter(sInstallDir)+DEFAULTBOOTSTRAPDIR)));
       FManager.FPCInstallDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpc')));
-      bFPCsplit:=Options.GetOptionNoParam('','fpcsplit');
+
+      bFPCsplit:=Options.HasOption('','fpcsrcdir');
       if bFPCsplit then
       begin
-        if Options.HasOption('','fpcsrcdir') then
-          FManager.FPCSourceDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcsrcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcsrc')));
-        else
-          FManager.FPCSourceDirectory:=FManager.FPCInstallDirectory+'src';
-      end
-      else
+        FManager.FPCSourceDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcsrcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcsrc')));
+      end;
+      if (NOT bFPCsplit) then
+      begin
+        bFPCsplit:=Options.GetOptionNoParam('','fpcsplit');
+        if bFPCsplit then
+        begin
+           FManager.FPCSourceDirectory:=FManager.FPCInstallDirectory+'src';
+        end;
+      end;
+      if (NOT bFPCsplit) then
       begin
         FManager.FPCSourceDirectory:=FManager.FPCInstallDirectory;
       end;

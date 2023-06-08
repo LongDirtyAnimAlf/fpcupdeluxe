@@ -4,15 +4,18 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="darwinarm64cocoa,linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,freebsdx64,linuxmuslx64"/>
-    <Units Count="129">
+    <BuildModes Active="openbsdx64"/>
+    <Units Count="12">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="184"/>
-        <CursorPos X="30" Y="193"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="194"/>
+        <CursorPos Y="227"/>
         <UsageCount Value="46"/>
+        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
@@ -30,7 +33,6 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="46"/>
         <Loaded Value="True"/>
@@ -40,7 +42,7 @@
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynEditPopup"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="20"/>
       </Unit3>
       <Unit4>
         <Filename Value="sources\updeluxe\aboutfrm.pas"/>
@@ -49,7 +51,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="AboutFrm"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="20"/>
       </Unit4>
       <Unit5>
         <Filename Value="sources\updeluxe\infounit.pas"/>
@@ -57,7 +59,7 @@
         <ComponentName Value="InfoForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="20"/>
       </Unit5>
       <Unit6>
         <Filename Value="sources\updeluxe\modulesettings.pas"/>
@@ -65,29 +67,27 @@
         <ComponentName Value="Form3"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="20"/>
       </Unit6>
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="46"/>
-        <DefaultSyntaxHighlighter Value="Ini"/>
+        <UsageCount Value="20"/>
       </Unit7>
       <Unit8>
         <Filename Value="sources\settings.ini"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="46"/>
-        <DefaultSyntaxHighlighter Value="Ini"/>
+        <UsageCount Value="20"/>
       </Unit8>
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="20"/>
       </Unit9>
       <Unit10>
         <Filename Value="sources\processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="20"/>
       </Unit10>
       <Unit11>
         <Filename Value="sources\updeluxe\subarch.pas"/>
@@ -95,997 +95,103 @@
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="20"/>
       </Unit11>
-      <Unit12>
-        <Filename Value="sources\fpcuputil.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="661"/>
-        <CursorPos X="17" Y="671"/>
-        <UsageCount Value="13"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="sources\installercore.pas"/>
-        <UnitName Value="installerCore"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="499"/>
-        <CursorPos X="28" Y="519"/>
-        <UsageCount Value="13"/>
-      </Unit13>
-      <Unit14>
-        <Filename Value="C:\fpcupsystems\stablespecial\fpcsrc\rtl\inc\systemh.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="731"/>
-        <CursorPos X="3" Y="747"/>
-        <UsageCount Value="12"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\ld64\src\ld\libcodedirectory.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="18"/>
-        <CursorPos X="22" Y="37"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\include\foreign\stdio.h"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="9" Y="7"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit16>
-      <Unit17>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\as\filenames.h"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos Y="29"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit17>
-      <Unit18>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\include\foreign\dlfcn.h"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="33"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit18>
-      <Unit19>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\ld64\src\3rd\find_executable.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="34"/>
-        <CursorPos X="39" Y="28"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit19>
-      <Unit20>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\ld64\src\3rd\helper.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="257"/>
-        <CursorPos X="118" Y="278"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit20>
-      <Unit21>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\ld64\configure.ac"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="92"/>
-        <CursorPos X="30" Y="92"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="None"/>
-      </Unit21>
-      <Unit22>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\ld64\src\ld\libcodedirectory.h"/>
-        <EditorIndex Value="-1"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit22>
-      <Unit23>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\include\foreign\machine\_types.h"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="62" Y="28"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit23>
-      <Unit24>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\include\foreign\i386\_types.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="46"/>
-        <CursorPos X="42" Y="63"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit24>
-      <Unit25>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\include\foreign\sys\_types.h"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="84" Y="29"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit25>
-      <Unit26>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\libobjc2\loader.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="33"/>
-        <CursorPos Y="42"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit26>
-      <Unit27>
-        <Filename Value="C:\cygwin32\home\superdad\new\cctools-port\cctools\configure.ac"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="470"/>
-        <CursorPos X="37" Y="498"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="None"/>
-      </Unit27>
-      <Unit28>
-        <Filename Value="C:\cygwin32\usr\include\w32api\ddk\ndis.h"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="8" Y="14"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit28>
-      <Unit29>
-        <Filename Value="C:\cygwin32\usr\include\w32api\_mingw.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="572"/>
-        <CursorPos X="15" Y="589"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit29>
-      <Unit30>
-        <Filename Value="C:\msys64\home\superdad\ld64\libtapi\lib\Core\Architecture.cpp"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="40" Y="4"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit30>
-      <Unit31>
-        <Filename Value="C:\msys64\home\superdad\ld64\libtapi\lib\Core\backup\CMakeLists.txt.bak"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="3" Y="7"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="None"/>
-      </Unit31>
-      <Unit32>
-        <Filename Value="C:\msys64\home\superdad\ld64\libtapi\lib\Core\CMakeLists.txt"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="18" Y="8"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="None"/>
-      </Unit32>
-      <Unit33>
-        <Filename Value="C:\msys64\home\superdad\ld64\libtapi\tools\tapi-run\tapi-run.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="48"/>
-        <CursorPos X="66" Y="76"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit33>
-      <Unit34>
-        <Filename Value="C:\msys64\home\superdad\ld64\ld64\ld64\src\3rd\qsort_r.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="230"/>
-        <CursorPos X="3" Y="250"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit34>
-      <Unit35>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\compiler\systems.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="218"/>
-        <CursorPos X="15" Y="235"/>
-        <UsageCount Value="14"/>
-      </Unit35>
-      <Unit36>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\compiler\assemble.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2691"/>
-        <CursorPos X="40" Y="2708"/>
-        <UsageCount Value="14"/>
-      </Unit36>
-      <Unit37>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\compiler\arm\agarmgas.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="480"/>
-        <CursorPos X="16" Y="480"/>
-        <UsageCount Value="14"/>
-      </Unit37>
-      <Unit38>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\compiler\ppcgen\agppcgas.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="658"/>
-        <CursorPos X="18" Y="669"/>
-        <UsageCount Value="14"/>
-      </Unit38>
-      <Unit39>
-        <Filename Value="C:\msys64\home\superdad\cctools\cctools\as\arm\Makefile.am"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="7" Y="3"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="None"/>
-      </Unit39>
-      <Unit40>
-        <Filename Value="C:\msys64\home\superdad\cctools\cctools\as\i386\Makefile.am"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="8" Y="3"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="None"/>
-      </Unit40>
-      <Unit41>
-        <Filename Value="C:\msys64\home\superdad\cctools\cctools\as\x86_64\Makefile.in"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="333"/>
-        <CursorPos X="10" Y="350"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="None"/>
-      </Unit41>
-      <Unit42>
-        <Filename Value="C:\msys64\home\superdad\cctools\cctools\libobjc2\Makefile.am"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="121" Y="16"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="None"/>
-      </Unit42>
-      <Unit43>
-        <Filename Value="C:\msys64\home\superdad\ld64\ld64\include\foreign\i386\types.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="131"/>
-        <CursorPos X="31" Y="148"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit43>
-      <Unit44>
-        <Filename Value="C:\msys64\home\superdad\ld64\ld64\ld64\src\ld\ld.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="46"/>
-        <CursorPos X="15" Y="32"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit44>
-      <Unit45>
-        <Filename Value="C:\msys64\home\superdad\ld64\ld64\ld64\src\ld\LinkEditClassic.hpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="10"/>
-        <CursorPos X="15" Y="29"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit45>
-      <Unit46>
-        <Filename Value="C:\msys64\home\superdad\ld64\ld64\include\llvm-c\lto.h"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="15" Y="26"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit46>
-      <Unit47>
-        <Filename Value="C:\msys64\home\superdad\ld64\ld64\include\foreign\arm\types.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="59"/>
-        <CursorPos X="17" Y="76"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit47>
-      <Unit48>
-        <Filename Value="C:\msys64\home\superdad\ld64\ld64\include\foreign\machine\types.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="14"/>
-        <CursorPos X="99" Y="30"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit48>
-      <Unit49>
-        <Filename Value="C:\msys64\home\superdad\cctools\cctools\libstuff\dylib_roots.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="6"/>
-        <CursorPos X="94" Y="8"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit49>
-      <Unit50>
-        <Filename Value="C:\msys64\home\superdad\ld64\ld64\include\stuff\port.h"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="11" Y="2"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit50>
-      <Unit51>
-        <Filename Value="C:\msys64\home\superdad\cctools\cctools\ar\contents.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="90"/>
-        <CursorPos X="38" Y="107"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit51>
-      <Unit52>
-        <Filename Value="C:\msys64\home\superdad\ld64\ld64\include\stuff\execute.h"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="41" Y="28"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit52>
-      <Unit53>
-        <Filename Value="C:\msys64\home\superdad\ld64\ld64\ld64\src\ld\Options.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="6637"/>
-        <CursorPos X="33" Y="6651"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit53>
-      <Unit54>
-        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\libiberty\pex-unix.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="514"/>
-        <CursorPos X="17" Y="687"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit54>
-      <Unit55>
-        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\libiberty\pex-win32.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="950"/>
-        <CursorPos X="130" Y="957"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit55>
-      <Unit56>
-        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\libiberty\pex-common.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="353"/>
-        <CursorPos X="23" Y="367"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit56>
-      <Unit57>
-        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\libiberty\pex-common.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="97"/>
-        <CursorPos X="21" Y="116"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit57>
-      <Unit58>
-        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\libiberty\testsuite\test-pexecute.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="190"/>
-        <CursorPos X="14" Y="207"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit58>
-      <Unit59>
-        <Filename Value="sources\updatelazconfig.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="193"/>
-        <CursorPos X="59" Y="216"/>
-        <UsageCount Value="11"/>
-      </Unit59>
-      <Unit60>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\rtl\darwin\aarch64\sig_cpu.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="18"/>
-        <CursorPos X="40" Y="37"/>
-        <UsageCount Value="10"/>
-      </Unit60>
-      <Unit61>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\codetools\definetemplates.pas"/>
-        <UnitName Value="DefineTemplates"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="3933"/>
-        <CursorPos X="18" Y="3950"/>
-        <UsageCount Value="10"/>
-      </Unit61>
-      <Unit62>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\lazutils\lazfileutils.pas"/>
-        <UnitName Value="LazFileUtils"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="44"/>
-        <CursorPos X="14" Y="61"/>
-        <UsageCount Value="10"/>
-      </Unit62>
-      <Unit63>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\lazutils\lazfileutils.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="188"/>
-        <CursorPos X="29" Y="190"/>
-        <UsageCount Value="10"/>
-      </Unit63>
-      <Unit64>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\other\unwinddump.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="316"/>
-        <CursorPos X="97" Y="276"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit64>
-      <Unit65>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\Options.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="953"/>
-        <CursorPos Y="975"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit65>
-      <Unit66>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\compiler\systems\t_darwin.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="92"/>
-        <CursorPos X="44" Y="109"/>
-        <UsageCount Value="11"/>
-      </Unit66>
-      <Unit67>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\compiler\options.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="3230"/>
-        <CursorPos X="25" Y="3246"/>
-        <UsageCount Value="11"/>
-      </Unit67>
-      <Unit68>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\include\coff\scnhdr.h"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="31" Y="5"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit68>
-      <Unit69>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\include\coff\aouthdr.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="74"/>
-        <CursorPos X="24" Y="91"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit69>
-      <Unit70>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\InputFiles.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="790"/>
-        <CursorPos X="9" Y="804"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit70>
-      <Unit71>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\parsers\macho_dylib_file.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="118"/>
-        <CursorPos X="113" Y="507"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit71>
-      <Unit72>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\include\stuff\port.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="55"/>
-        <CursorPos X="20" Y="75"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit72>
-      <Unit73>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\Resolver.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="108"/>
-        <CursorPos X="139" Y="126"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit73>
-      <Unit74>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\OutputFile.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="669"/>
-        <CursorPos X="22" Y="686"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit74>
-      <Unit75>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\Options.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="517"/>
-        <CursorPos X="57" Y="534"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit75>
-      <Unit76>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\HeaderAndLoadCommands.hpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="233"/>
-        <CursorPos X="34" Y="220"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit76>
-      <Unit77>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\parsers\macho_relocatable_file.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="6560"/>
-        <CursorPos X="38" Y="6577"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit77>
-      <Unit78>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\3rd\md5.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="76"/>
-        <CursorPos X="9" Y="93"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit78>
-      <Unit79>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\3rd\sha1.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2"/>
-        <CursorPos Y="30"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit79>
-      <Unit80>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\3rd\BlocksRuntime\runtime.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="214"/>
-        <CursorPos X="42" Y="231"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit80>
-      <Unit81>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\parsers\lto_file.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="181"/>
-        <CursorPos X="9" Y="198"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit81>
-      <Unit82>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\SymbolTable.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="65"/>
-        <CursorPos X="22" Y="82"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit82>
-      <Unit83>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\passes\objc.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="350"/>
-        <CursorPos X="156" Y="370"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit83>
-      <Unit84>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\3rd\qsort_r.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="51"/>
-        <CursorPos X="17" Y="58"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit84>
-      <Unit85>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\3rd\helper.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="3"/>
-        <CursorPos X="32" Y="34"/>
-        <UsageCount Value="11"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit85>
-      <Unit86>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\passes\code_dedup.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="63"/>
-        <CursorPos X="5" Y="80"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit86>
-      <Unit87>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\other\dyldinfo.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2646"/>
-        <CursorPos X="30" Y="2663"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit87>
-      <Unit88>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\other\machochecker.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1249"/>
-        <CursorPos X="134" Y="1273"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit88>
-      <Unit89>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\other\ObjectDump.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1245"/>
-        <CursorPos X="30" Y="1262"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit89>
-      <Unit90>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\PlatformSupport.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="287"/>
-        <CursorPos X="9" Y="304"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit90>
-      <Unit91>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\parsers\archive_file.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="197"/>
-        <CursorPos X="12" Y="215"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit91>
-      <Unit92>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\passes\branch_island.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="246"/>
-        <CursorPos X="74" Y="263"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit92>
-      <Unit93>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\passes\branch_shim.cpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="55"/>
-        <CursorPos X="74" Y="72"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit93>
-      <Unit94>
-        <Filename Value="C:\msys64\home\superdad\ld64new\ld64-msys\ld64\ld64\src\ld\ld.hpp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1149"/>
-        <CursorPos X="70" Y="1177"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit94>
-      <Unit95>
-        <Filename Value="sources\crossinstallers\m_any_to_linuxloongarch64.pas"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos Y="4"/>
-        <UsageCount Value="10"/>
-      </Unit95>
-      <Unit96>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="497"/>
-        <CursorPos X="3" Y="499"/>
-        <UsageCount Value="11"/>
-      </Unit96>
-      <Unit97>
-        <Filename Value="sources\installerfpc.pas"/>
-        <UnitName Value="installerFpc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="3567"/>
-        <CursorPos X="42" Y="3587"/>
-        <UsageCount Value="11"/>
-      </Unit97>
-      <Unit98>
-        <Filename Value="sources\installermanager.pas"/>
-        <UnitName Value="installerManager"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1014"/>
-        <CursorPos X="26" Y="1033"/>
-        <UsageCount Value="11"/>
-      </Unit98>
-      <Unit99>
-        <Filename Value="sources\up\fpcuplprbase.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="60"/>
-        <CursorPos X="40" Y="74"/>
-        <UsageCount Value="10"/>
-      </Unit99>
-      <Unit100>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="615"/>
-        <CursorPos X="83" Y="617"/>
-        <UsageCount Value="11"/>
-      </Unit100>
-      <Unit101>
-        <Filename Value="sources\repoclient.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="332"/>
-        <CursorPos X="43" Y="345"/>
-        <UsageCount Value="11"/>
-      </Unit101>
-      <Unit102>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\packages\fcl-web\examples\intercept\simpleserver.pas"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="9" Y="19"/>
-        <UsageCount Value="10"/>
-      </Unit102>
-      <Unit103>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\packages\fcl-web\examples\simpleserver\simpleserver.pas"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="163" Y="18"/>
-        <UsageCount Value="10"/>
-      </Unit103>
-      <Unit104>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\utils\pas2js\httpcompiler.pp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="300"/>
-        <CursorPos X="17" Y="321"/>
-        <UsageCount Value="10"/>
-      </Unit104>
-      <Unit105>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\simplewebservergui\simplewebsrvcontroller.pas"/>
-        <UnitName Value="SimpleWebSrvController"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1142"/>
-        <CursorPos X="41" Y="1148"/>
-        <UsageCount Value="10"/>
-      </Unit105>
-      <Unit106>
-        <Filename Value="sources\gitclient.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="592"/>
-        <CursorPos X="3" Y="594"/>
-        <UsageCount Value="10"/>
-      </Unit106>
-      <Unit107>
-        <Filename Value="sources\crossinstallers\m_darwin_to_apple_base.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="55"/>
-        <CursorPos X="7" Y="75"/>
-        <UsageCount Value="10"/>
-      </Unit107>
-      <Unit108>
-        <Filename Value="sources\hgclient.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="40"/>
-        <CursorPos Y="71"/>
-        <UsageCount Value="10"/>
-      </Unit108>
-      <Unit109>
-        <Filename Value="sources\svnclient.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="46"/>
-        <CursorPos Y="66"/>
-        <UsageCount Value="10"/>
-      </Unit109>
-      <Unit110>
-        <Filename Value="sources\crossinstallers\m_any_to_freertosarm.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="33"/>
-        <CursorPos X="20" Y="120"/>
-        <UsageCount Value="10"/>
-      </Unit110>
-      <Unit111>
-        <Filename Value="sources\crossinstallers\m_any_to_linuxm68k.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="48"/>
-        <CursorPos Y="62"/>
-        <UsageCount Value="10"/>
-      </Unit111>
-      <Unit112>
-        <Filename Value="sources\crossinstallers\m_any_to_embeddedmipsel.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="129"/>
-        <CursorPos X="24" Y="145"/>
-        <UsageCount Value="10"/>
-      </Unit112>
-      <Unit113>
-        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\gas\config\tc-aarch64.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="163"/>
-        <CursorPos X="53" Y="184"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit113>
-      <Unit114>
-        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\gas\config\tc-aarch64.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="8365"/>
-        <CursorPos X="33" Y="8383"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit114>
-      <Unit115>
-        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\gas\config\tc-aarch64.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="163"/>
-        <CursorPos X="46" Y="184"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit115>
-      <Unit116>
-        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\gas\config\tc-arm.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="147"/>
-        <CursorPos X="33" Y="168"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit116>
-      <Unit117>
-        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\gas\frags.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="221"/>
-        <CursorPos X="3" Y="243"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit117>
-      <Unit118>
-        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\gas\config\tc-arm.h"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="211"/>
-        <CursorPos X="53" Y="232"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit118>
-      <Unit119>
-        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\gas\config\tc-arm.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="10839"/>
-        <CursorPos Y="10860"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit119>
-      <Unit120>
-        <Filename Value="C:\msys64\home\superdad\binutils\binutils-2.40\gas\config\tc-arm.c"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="27503"/>
-        <CursorPos X="44" Y="27526"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
-      </Unit120>
-      <Unit121>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\debuggerintf\ideminilibc.pas"/>
-        <UnitName Value="IDEMiniLibC"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="39"/>
-        <CursorPos X="36" Y="72"/>
-        <UsageCount Value="10"/>
-      </Unit121>
-      <Unit122>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\debuggerintf\dbgintfpseudoterminal.pas"/>
-        <UnitName Value="DbgIntfPseudoTerminal"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="61"/>
-        <CursorPos Y="125"/>
-        <UsageCount Value="10"/>
-      </Unit122>
-      <Unit123>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\rtl\linux\ostypes.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="266"/>
-        <CursorPos X="5" Y="287"/>
-        <UsageCount Value="10"/>
-      </Unit123>
-      <Unit124>
-        <Filename Value="C:\fpcupsystems\trunk\lazarus\components\fpdebug\fpdbgdarwinclasses.pas"/>
-        <UnitName Value="FpDbgDarwinClasses"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="210"/>
-        <CursorPos Y="233"/>
-        <UsageCount Value="10"/>
-      </Unit124>
-      <Unit125>
-        <Filename Value="sources\installeruniversal.pas"/>
-        <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1969"/>
-        <CursorPos X="26" Y="1989"/>
-        <UsageCount Value="10"/>
-      </Unit125>
-      <Unit126>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\packages\fcl-net\fpmake.pp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="59"/>
-        <CursorPos X="15" Y="61"/>
-        <UsageCount Value="10"/>
-      </Unit126>
-      <Unit127>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\packages\fcl-net\examples\cnslookup.pp"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="10" Y="3"/>
-        <UsageCount Value="10"/>
-      </Unit127>
-      <Unit128>
-        <Filename Value="C:\fpcupsystems\trunk\fpcsrc\packages\fcl-net\src\cnetdb.pp"/>
-        <UnitName Value="cNetDB"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="88"/>
-        <UsageCount Value="10"/>
-      </Unit128>
     </Units>
-    <JumpHistory Count="26" HistoryIndex="25">
+    <JumpHistory Count="24" HistoryIndex="23">
       <Position1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4923" Column="50" TopLine="4889"/>
+        <Caret Line="4979" Column="75" TopLine="4978"/>
       </Position1>
       <Position2>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="5011" Column="50" TopLine="4977"/>
       </Position2>
       <Position3>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4923" Column="33" TopLine="4902"/>
+        <Caret Line="44" Column="22" TopLine="10"/>
       </Position3>
       <Position4>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4979" Column="75" TopLine="4978"/>
+        <Caret Line="71" Column="22" TopLine="37"/>
       </Position4>
       <Position5>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="2168" Column="34" TopLine="2127"/>
       </Position5>
       <Position6>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="44" Column="22" TopLine="10"/>
+        <Caret Line="4923" Column="50" TopLine="4889"/>
       </Position6>
       <Position7>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="71" Column="22" TopLine="37"/>
+        <Caret Line="5013" Column="50" TopLine="4979"/>
       </Position7>
       <Position8>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2168" Column="34" TopLine="2127"/>
+        <Caret Line="25" Column="29" TopLine="23"/>
       </Position8>
       <Position9>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4923" Column="50" TopLine="4889"/>
+        <Caret Line="36" Column="29" TopLine="23"/>
       </Position9>
       <Position10>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="5013" Column="50" TopLine="4979"/>
+        <Caret Line="44" Column="22" TopLine="23"/>
       </Position10>
       <Position11>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="25" Column="29" TopLine="23"/>
+        <Caret Line="115" Column="15" TopLine="82"/>
       </Position11>
       <Position12>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="36" Column="29" TopLine="23"/>
+        <Caret Line="142" Column="15" TopLine="109"/>
       </Position12>
       <Position13>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="44" Column="22" TopLine="23"/>
+        <Caret Line="2150" Column="34" TopLine="2116"/>
       </Position13>
       <Position14>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="115" Column="15" TopLine="82"/>
+        <Caret Line="2152" Column="48" TopLine="2118"/>
       </Position14>
       <Position15>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="142" Column="15" TopLine="109"/>
+        <Caret Line="4921" Column="50" TopLine="4888"/>
       </Position15>
       <Position16>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2150" Column="34" TopLine="2116"/>
+        <Caret Line="5009" TopLine="4977"/>
       </Position16>
       <Position17>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2152" Column="48" TopLine="2118"/>
+        <Caret Line="5010" TopLine="4978"/>
       </Position17>
       <Position18>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4921" Column="50" TopLine="4888"/>
+        <Caret Line="5009" TopLine="4977"/>
       </Position18>
       <Position19>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="5009" TopLine="4977"/>
+        <Caret Line="2160" Column="35" TopLine="2139"/>
       </Position19>
       <Position20>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="5010" TopLine="4978"/>
+        <Caret Line="4922" Column="61" TopLine="4901"/>
       </Position20>
       <Position21>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="5009" TopLine="4977"/>
+        <Caret Line="5010" Column="61" TopLine="4989"/>
       </Position21>
       <Position22>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2160" Column="35" TopLine="2139"/>
+        <Caret Line="5010" Column="61" TopLine="4989"/>
       </Position22>
       <Position23>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="4922" Column="61" TopLine="4901"/>
       </Position23>
       <Position24>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="5010" Column="61" TopLine="4989"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
       </Position24>
-      <Position25>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="5010" Column="61" TopLine="4989"/>
-      </Position25>
-      <Position26>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-      </Position26>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

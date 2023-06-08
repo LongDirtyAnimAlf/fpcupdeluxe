@@ -1,7 +1,7 @@
-unit m_any_to_openbsdx64;
+unit m_any_to_netbsd386;
 
 {
-Cross compiles from any platform (with supported crossbin utils to OpenBSD AMD64
+Cross compiles from any platform (with supported crossbin utils to NetBSD i386
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -40,10 +40,12 @@ uses
 implementation
 
 uses
-  m_crossinstaller, m_any_to_openbsd_base;
+  m_crossinstaller, m_any_to_netbsd_base;
 
 type
-  TAny_openbsdx64 = class(Tany_openbsd_base)
+
+{ TAny_NetBSD386 }
+  TAny_NetBSD386 = class(Tany_netbsd_base)
   public
     function GetLibs(Basepath:string):boolean;override;
     function GetBinUtils(Basepath:string):boolean;override;
@@ -51,40 +53,40 @@ type
     destructor Destroy; override;
   end;
 
-{ TAny_openbsdx64 }
+{ TAny_NetBSD386 }
 
-function TAny_openbsdx64.GetLibs(Basepath:string): boolean;
+function TAny_NetBSD386.GetLibs(Basepath:string): boolean;
 begin
   result:=inherited;
 end;
 
-function TAny_openbsdx64.GetBinUtils(Basepath:string): boolean;
+function TAny_NetBSD386.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
 end;
 
-constructor TAny_openbsdx64.Create;
+constructor TAny_NetBSD386.Create;
 begin
   inherited Create;
-  FTargetCPU:=TCPU.x86_64;
+  FTargetCPU:=TCPU.i386;
   Reset;
   ShowInfo;
 end;
 
-destructor TAny_openbsdx64.Destroy;
+destructor TAny_NetBSD386.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Any_openbsdx64:TAny_openbsdx64;
+  Any_NetBSD386:TAny_NetBSD386;
 
 initialization
-  Any_openbsdx64:=TAny_openbsdx64.Create;
-  RegisterCrossCompiler(Any_openbsdx64.RegisterName,Any_openbsdx64);
+  Any_NetBSD386:=TAny_NetBSD386.Create;
+  RegisterCrossCompiler(Any_NetBSD386.RegisterName,Any_NetBSD386);
 
 finalization
-  Any_openbsdx64.Destroy;
+  Any_NetBSD386.Destroy;
 
 end.
 
