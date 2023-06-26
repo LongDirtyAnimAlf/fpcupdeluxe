@@ -620,6 +620,9 @@ type
 
     property ErrorCodes : TInstallerErrors read FErrorCodes;
 
+    // FPC config directory
+    function GetFPCConfigPath(aCFG:string):string;
+
     function GetCompilerName(Cpu_Target:TCPU):string;overload;
     function GetCompilerName(Cpu_Target:string):string;overload;
     function GetCrossCompilerName(Cpu_Target:TCPU):string;
@@ -841,7 +844,7 @@ begin
     aOS:='';
     aArch:='';
 
-    FPCCfg:=FFPCCompilerBinPath+FPCCONFIGFILENAME;
+    FPCCfg:=GetFPCConfigPath(FPCCONFIGFILENAME);
 
     if (NOT FileExists(FPCCfg)) then exit;
 
@@ -3113,7 +3116,7 @@ end;
 function TInstaller.GetFPCInBinDir: string;
 begin
   result := FFPCCompilerBinPath+'fpc'+GetExeExt;
-  {$IFDEF UNIX}
+  {$IFDEF UNIXXXX}
   if FileExists(result + '.sh') then
     begin
     //Use our proxy if it is installed
@@ -4210,6 +4213,28 @@ function TInstaller.IsUniversalInstaller:boolean;
 begin
   result:=GetInstallerClass(TBaseUniversalInstaller);
 end;
+
+function TInstaller.GetFPCConfigPath(aCFG:string):string;
+//var
+//  version:dword;
+begin
+  result:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath);
+
+  //version:=CalculateNumericalVersion(CompilerVersion(GetFPCInBinDir));
+  //if (version>=CalculateNumericalVersion('3.3.1')) then
+  //begin
+  //end;
+
+  {$ifdef UNIX}
+  if (NOT FileExists(result+aCFG)) then
+  begin
+    result:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
+    if (NOT DirectoryExists(result)) then ForceDirectories(result);
+  end;
+  {$endif}
+  result:=result+aCFG;
+end;
+
 
 function TInstaller.GetDefaultCompilerFilename(const TargetCPU: TCPU; Cross: boolean): string;
 var

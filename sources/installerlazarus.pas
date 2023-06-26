@@ -429,7 +429,7 @@ begin
         //Always limit the search for fpc.cfg to our own fpc.cfg
         //Only needed on Windows. On Linux, we have already our own fpc.sh
         {$ifdef Windows}
-        Options := Options+' -n @'+FFPCCompilerBinPath+'fpc.cfg';
+        Options := Options+' -n @'+GetFPCConfigPath(FPCCONFIGFILENAME);
         {$endif}
 
         // Add remaining options
@@ -739,7 +739,7 @@ begin
     //Always limit the search for fpc.cfg to our own fpc.cfg
     //Only needed on Windows. On Linux, we have already our own fpc.sh
     {$ifdef MsWindows}
-    //s1:=s1+' -n @'+FFPCCompilerBinPath+'fpc.cfg';
+    //s1:=s1+' -n @'+GetFPCConfigPath(FPCCONFIGFILENAME);
     {$endif}
 
     // Add remaining options

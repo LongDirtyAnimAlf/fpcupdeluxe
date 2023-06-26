@@ -696,7 +696,7 @@ begin
       CreateBinutilsList(CrossInstaller.FPCVersion);
       {$endif MSWINDOWS}
 
-      FPCCfg := FFPCCompilerBinPath + FPCCONFIGFILENAME;
+      FPCCfg:=GetFPCConfigPath(FPCCONFIGFILENAME);
 
       begin
         // Add binutils path to path if necessary
@@ -890,7 +890,7 @@ begin
 
                 if (CrossInstaller.TargetCPU=TCPU.arm) then
                 begin
-                  s1 := FFPCCompilerBinPath + 'RPI.CFG';
+                  s1 := GetFPCConfigPath('RPI.CFG');
                   if (NOT FileExists(s1)) then
                   begin
                     //create RPI.CFG
@@ -919,7 +919,7 @@ begin
                     Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                   end;
 
-                  s1 := FFPCCompilerBinPath + 'RPI2.CFG';
+                  s1 := GetFPCConfigPath('RPI2.CFG');
                   if (NOT FileExists(s1)) then
                   begin
                     //create RPI2.CFG
@@ -948,7 +948,7 @@ begin
                     Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                   end;
 
-                  s1 := FFPCCompilerBinPath + 'RPI3.CFG';
+                  s1 := GetFPCConfigPath('RPI3.CFG');
                   if (NOT FileExists(s1)) then
                    begin
                     //create RPI3.CFG
@@ -989,7 +989,7 @@ begin
                     Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                   end;
 
-                  s1 := FFPCCompilerBinPath + 'QEMUVPB.CFG';
+                  s1 := GetFPCConfigPath('QEMUVPB.CFG');
                   if (NOT FileExists(s1)) then
                   begin
                     //create QEMUVPB.CFG
@@ -1032,7 +1032,7 @@ begin
 
                 if ((CrossInstaller.TargetCPU=TCPU.arm) OR (CrossInstaller.TargetCPU=TCPU.aarch64)) then
                 begin
-                  s1 := FFPCCompilerBinPath + 'RPI4.CFG';
+                  s1 := GetFPCConfigPath('RPI4.CFG');
                   if (NOT FileExists(s1)) then
                   begin
                     //create RPI4.CFG
@@ -1781,7 +1781,8 @@ begin
     end;
     }
 
-    FPCCfg := FFPCCompilerBinPath + FPCCONFIGFILENAME;
+    FPCCfg:=GetFPCConfigPath(FPCCONFIGFILENAME);
+
     InsertFPCCFGSnippet(FPCCfg,'');
 
     aDir:=IncludeTrailingPathDelimiter(InstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(false);
@@ -1950,7 +1951,7 @@ begin
   {$IFDEF MSWINDOWS}
   if (ModuleName<>_FPC) then
   begin
-    s1:=FFPCCompilerBinPath+FPCCONFIGFILENAME;
+    s1:=GetFPCConfigPath(FPCCONFIGFILENAME);
     if FileExists(s1) then
     begin
       //Processor.Process.Parameters.Add('CFGFILE=' + s1);
@@ -2814,7 +2815,7 @@ var
 {$ENDIF UNIX}
 begin
   result:=true;
-  {$IFDEF UNIX}
+  {$IFDEF UNIXXXX}
   localinfotext:=InitInfoText(' (CreateFPCScript): ');
   FPCCompiler := FFPCCompilerBinPath+'fpc'+GetExeExt;
 
@@ -4048,7 +4049,7 @@ begin
       end;
     end;
 
-    FPCCfg := FFPCCompilerBinPath + FPCCONFIGFILENAME;
+    FPCCfg:=GetFPCConfigPath(FPCCONFIGFILENAME);
 
     if (OperationSucceeded) then
     begin
@@ -4597,7 +4598,7 @@ begin
     begin
       Infoln(infotext+'Building FPC Unicode RTL.',etInfo);
 
-      s:=ExtractFilePath(FCompiler)+'fpc-unicodertl.cfg';
+      s:=GetFPCConfigPath('fpc-unicodertl.cfg');
       if FileExists(s) then
       begin
         Infoln(localinfotext+'Unicode config already exists ('+s+'); trying to overwrite it.',etInfo);
@@ -4887,8 +4888,12 @@ begin
         //DeleteFile(ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
         {$IFDEF UNIX}
         // Delete any fpc.sh shell scripts
-        Infoln(infotext+'Deleting fpc.sh script.', etInfo);
-        Sysutils.DeleteFile(FFPCCompilerBinPath+'fpc.sh');
+        aPath:=FFPCCompilerBinPath+'fpc.sh';
+        if FileExists(aPath) then
+        begin
+          Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' script.', etInfo);
+          Sysutils.DeleteFile(aPath);
+        end;
         {$ENDIF UNIX}
         {$ifdef FORCEREVISION}
         //Infoln(infotext+'Deleting '+REVINCFILENAME, etInfo);
