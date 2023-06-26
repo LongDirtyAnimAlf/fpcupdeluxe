@@ -980,10 +980,9 @@ begin
   FTargetOS:=TOS.osNone;
 
   FBinUtilsPrefix:='Error: cross compiler extension must set FBinUtilsPrefix: can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it';
-
   FCrossModuleNamePrefix:='TAny';
-
   FBinUtilsDirectoryID:='none';
+  FRegisterName:='unknown';
 end;
 
 destructor TCrossInstaller.Destroy;

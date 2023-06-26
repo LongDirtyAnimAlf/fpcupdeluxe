@@ -350,6 +350,7 @@ begin
             else
             if (FLazarusMajorVer=1) then
             begin
+              // See EnvOptsVersion in \lazarus\ide\packages\ideconfig\environmentopts.pp
               case FLazarusMinor of
                 0 : Version := '107'; //for version 1.0
                 1 : Version := '107'; //for version 1.0,1.1

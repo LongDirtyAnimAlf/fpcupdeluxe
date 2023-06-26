@@ -4109,16 +4109,20 @@ end;
 
 function TInstaller.GetFullVersionString:string;
 begin
-  if ((Self.FMajorVersion=-1) OR (Self.FMinorVersion=-1) OR (Self.FReleaseVersion=-1)) then
+  if ((Self.FMajorVersion=-1) OR (Self.FMinorVersion=-1){ OR (Self.FReleaseVersion=-1)}) then
     raise Exception.Create('Fatal: wrong version number(s) !!');
-  result:=InttoStr(Self.FMajorVersion)+'.'+InttoStr(Self.FMinorVersion)+'.'+InttoStr(Self.FReleaseVersion);
+  result:=InttoStr(Self.FMajorVersion)+'.'+InttoStr(Self.FMinorVersion);
+  if (Self.FReleaseVersion<>-1) then result:=result+'.'+InttoStr(Self.FReleaseVersion)
 end;
 
 function TInstaller.GetFullVersion:dword;
 begin
-  if ((Self.FMajorVersion=-1) OR (Self.FMinorVersion=-1) OR (Self.FReleaseVersion=-1)) then
+  if ((Self.FMajorVersion=-1) OR (Self.FMinorVersion=-1){ OR (Self.FReleaseVersion=-1)}) then
     raise Exception.Create('Fatal: wrong version number(s) !!');
-  result:=CalculateFullVersion(Self.FMajorVersion,Self.FMinorVersion,Self.FReleaseVersion);
+  if (Self.FReleaseVersion<>-1) then
+    result:=CalculateFullVersion(Self.FMajorVersion,Self.FMinorVersion,Self.FReleaseVersion)
+  else
+    result:=CalculateFullVersion(Self.FMajorVersion,Self.FMinorVersion,0);
 end;
 
 function TInstaller.GetSanityCheck:boolean;

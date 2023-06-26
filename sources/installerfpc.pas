@@ -3103,9 +3103,19 @@ begin
   WritelnLog(localinfotext+'FPC URL:            ' + URL, false);
   WritelnLog(localinfotext+'FPC options:        ' + FCompilerOptions, false);
 
+  if (aBootstrapVersion<>'') then
+  begin
+    // Check if we have an override compiler !!
+    if FileExists(FCompiler) then
+    begin
+      FBootstrapCompiler:=FCompiler;
+      FCompiler:='';
+    end;
+  end;
+
   // set standard bootstrap compilername
-  FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetSourceCPUOS+'-'+GetCompilerName(GetSourceCPU);
-  if NOT FileExists(FBootstrapCompiler) then FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetSourceCPU);
+  if (NOT FileExists(FBootstrapCompiler)) then FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetSourceCPUOS+'-'+GetCompilerName(GetSourceCPU);
+  if (NOT FileExists(FBootstrapCompiler)) then FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetSourceCPU);
 
   {$IFDEF Darwin}
     {$IFDEF CPU32}
@@ -4917,7 +4927,10 @@ begin
     end;
 
     // Final cleansing of source directory
-    CleanExtra;
+    if CrossCompiling then
+      CleanExtra(CrossInstaller.TargetCPU,CrossInstaller.TargetOS)
+    else
+      CleanExtra;
   end;
 
 end;

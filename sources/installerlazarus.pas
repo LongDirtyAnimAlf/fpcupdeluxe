@@ -1193,21 +1193,44 @@ var
 begin
   result:='0.0.0';
 
-  aFileName:=IncludeTrailingPathDelimiter(SourceDirectory) + 'ide' + DirectorySeparator + 'version.inc';
-  if FileExists(aFileName) then
+  if result='0.0.0' then
   begin
-    AssignFile(TxtFile,aFileName);
-    Reset(TxtFile);
-    Readln(TxtFile,s);
-    // remove quotes from string
-    //VersionSnippet:=DelChars(s, '''');
-    s:=TrimSet(s, [#39]);
-    s:=Trim(s);
-    //x:=Length(s);
-    //while (x>0) AND (NOT (s[x] in ['0'..'9','.'])) do Dec(x);
-    //if (x<Length(s)) then Delete(S,x,MaxInt);
-    if Length(s)>0 then result:=s;
-    CloseFile(TxtFile);
+    aFileName:=ConcatPaths([SourceDirectory,'ide'])+DirectorySeparator+'version.inc';
+    if FileExists(aFileName) then
+    begin
+      AssignFile(TxtFile,aFileName);
+      Reset(TxtFile);
+      Readln(TxtFile,s);
+      // remove quotes from string
+      //VersionSnippet:=DelChars(s, '''');
+      s:=TrimSet(s, [#39]);
+      s:=Trim(s);
+      //x:=Length(s);
+      //while (x>0) AND (NOT (s[x] in ['0'..'9','.'])) do Dec(x);
+      //if (x<Length(s)) then Delete(S,x,MaxInt);
+      if Length(s)>0 then result:=s;
+      CloseFile(TxtFile);
+    end;
+  end;
+
+  if result='0.0.0' then
+  begin
+    aFileName:=ConcatPaths([SourceDirectory,'ide','packages','ideconfig'])+DirectorySeparator+'version.inc';
+    if FileExists(aFileName) then
+    begin
+      AssignFile(TxtFile,aFileName);
+      Reset(TxtFile);
+      Readln(TxtFile,s);
+      // remove quotes from string
+      //VersionSnippet:=DelChars(s, '''');
+      s:=TrimSet(s, [#39]);
+      s:=Trim(s);
+      //x:=Length(s);
+      //while (x>0) AND (NOT (s[x] in ['0'..'9','.'])) do Dec(x);
+      //if (x<Length(s)) then Delete(S,x,MaxInt);
+      if Length(s)>0 then result:=s;
+      CloseFile(TxtFile);
+    end;
   end;
 
   if result='0.0.0' then
