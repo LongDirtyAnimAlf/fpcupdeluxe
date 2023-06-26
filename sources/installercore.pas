@@ -4215,23 +4215,29 @@ begin
 end;
 
 function TInstaller.GetFPCConfigPath(aCFG:string):string;
-//var
-//  version:dword;
+var
+  version:dword;
 begin
   result:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath);
 
-  //version:=CalculateNumericalVersion(CompilerVersion(GetFPCInBinDir));
-  //if (version>=CalculateNumericalVersion('3.3.1')) then
-  //begin
-  //end;
-
-  {$ifdef UNIX}
   if (NOT FileExists(result+aCFG)) then
   begin
-    result:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
-    if (NOT DirectoryExists(result)) then ForceDirectories(result);
+    version:=CalculateNumericalVersion(CompilerVersion(GetFPCInBinDir));
+    if (version>=CalculateNumericalVersion('3.3.1')) then
+    begin
+      {$ifdef UNIX}
+      result:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
+      if (NOT DirectoryExists(result)) then ForceDirectories(result);
+      {$endif}
+      {$ifdef WINDOWS}
+      //if (GetEnvironmentVariable('USERPROFILE')<>'') then
+      //begin
+      //  result:=IncludeTrailingPathDelimiter(ExpandFileName(GetEnvironmentVariable('USERPROFILE')));
+      //end;
+      {$endif}
+    end;
   end;
-  {$endif}
+
   result:=result+aCFG;
 end;
 

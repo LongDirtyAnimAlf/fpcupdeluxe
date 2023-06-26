@@ -1174,15 +1174,14 @@ begin
   //BinPath:=ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',aCPU+'-'+aOS]);
   BinPath:=ConcatPaths([sInstallDir,'fpc','bin',aCPU+'-'+aOS])+DirectorySeparator;
 
-  {$ifdef UNIX}
-  FPCCfg:=ExpandFileName(BinPath+'../etc/'+FPCCONFIGFILENAME);
-  {$else}
   FPCCfg:=BinPath+FPCCONFIGFILENAME;
+  {$ifdef UNIX}
+  if (NOT FileExists(FPCCfg)) then FPCCfg:=ExpandFileName(BinPath+'../etc/'+FPCCONFIGFILENAME);
   {$endif}
 
   result:=false;
 
-  if NOT FileExists(FPCCfg) then
+  if (NOT FileExists(FPCCfg)) then
   begin
     if (Sender<>nil) then AddMessage('FPC configfile ['+FPCCONFIGFILENAME+'] not found in ' + ExtractFilePath(FPCCfg));
     exit;

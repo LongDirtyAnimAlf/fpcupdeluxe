@@ -2815,6 +2815,13 @@ var
 {$ENDIF UNIX}
 begin
   result:=true;
+
+  if FileExists(FFPCCompilerBinPath+FPCCONFIGFILENAME) then
+  begin
+    result:=true;
+  end;
+
+
   {$IFDEF UNIXXXX}
   localinfotext:=InitInfoText(' (CreateFPCScript): ');
   FPCCompiler := FFPCCompilerBinPath+'fpc'+GetExeExt;
