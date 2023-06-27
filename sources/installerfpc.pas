@@ -1949,14 +1949,6 @@ begin
   //Processor.Process.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
 
   {$IFDEF MSWINDOWS}
-  if (ModuleName<>_FPC) then
-  begin
-    s1:=GetFPCConfigPath(FPCCONFIGFILENAME);
-    if FileExists(s1) then
-    begin
-      //Processor.Process.Parameters.Add('CFGFILE=' + s1);
-    end;
-  end;
   Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
 
@@ -2187,14 +2179,7 @@ begin
   if ModuleName=_FPC then
   begin
     {$IFDEF UNIX}
-    if OperationSucceeded then
-    begin
-      if FVerbose then
-        Infoln(infotext+'Creating fpc script:',etInfo)
-      else
-        Infoln(infotext+'Creating fpc script:',etDebug);
-      OperationSucceeded:=CreateFPCScript;
-    end;
+    if OperationSucceeded then OperationSucceeded:=CreateFPCScript;
     {$ENDIF UNIX}
 
     // Let everyone know of our shiny new compiler:
@@ -2807,7 +2792,7 @@ begin
 end;
 
 function TFPCInstaller.CreateFPCScript: boolean;
-{$IFDEF UNIX}
+{$IFDEF UNIXXX}
 var
   FPCScript:string;
   TxtFile:Text;
@@ -2815,15 +2800,14 @@ var
 {$ENDIF UNIX}
 begin
   result:=true;
-
-  if FileExists(FFPCCompilerBinPath+FPCCONFIGFILENAME) then
-  begin
-    result:=true;
-  end;
-
-
-  {$IFDEF UNIXXXX}
+  {$IFDEF UNIXXX}
   localinfotext:=InitInfoText(' (CreateFPCScript): ');
+
+  if FVerbose then
+    Infoln(localinfotext+'Creating fpc script:',etInfo)
+  else
+    Infoln(localinfotext+'Creating fpc script:',etDebug);
+
   FPCCompiler := FFPCCompilerBinPath+'fpc'+GetExeExt;
 
   // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
@@ -4056,6 +4040,26 @@ begin
       end;
     end;
 
+    {$ifdef UNIX}
+    // FPC trunk, starting from hash c9453164 does not like the use of fpc.sh anymore
+    // So, our trick to isolate the UNIX install has become obsolete
+    // Use configpath as a replacement
+    // See: compiler/options.pp function: check_configfile
+    // Please note: will NOT work when the environment defines a "PPC_CONFIG_PATH" !!!
+    // The installer manager will take care of this already
+    // Do this for all FPC versions from now on (so, do not check version) !!
+    // if (CalculateNumericalVersion(CompilerVersion(GetFPCInBinDir))>=CalculateNumericalVersion('3.3.1')) then
+    begin
+      // Check already done by manager
+      // s:=GetEnvironmentVariable('PPC_CONFIG_PATH');
+      // if (Length(s)=0) then
+      begin
+        s:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
+        if (NOT DirectoryExists(s)) then ForceDirectories(s);
+      end;
+    end;
+    {$endif}
+
     FPCCfg:=GetFPCConfigPath(FPCCONFIGFILENAME);
 
     if (OperationSucceeded) then
@@ -4900,6 +4904,13 @@ begin
         begin
           Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' script.', etInfo);
           Sysutils.DeleteFile(aPath);
+          // If we did delete fpc.sh, we also need to redefine the compiler path inside fpcpackageconfig
+          aPath := ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE;
+          if FileExists(aPath) then
+          begin
+            Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' FPC package compiler configuration.', etInfo);
+            Sysutils.DeleteFile(aPath);
+          end;
         end;
         {$ENDIF UNIX}
         {$ifdef FORCEREVISION}

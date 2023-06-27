@@ -386,6 +386,7 @@ type
     procedure SetFPCSourceDirectory(value:string);
     procedure SetLazarusInstallDirectory(value:string);
     procedure SetLazarusSourceDirectory(value:string);
+    procedure SetCompiler(value:string);
     function GetShell: string;
     function GetMake: string;
     procedure SetVerbosity(aValue:boolean);
@@ -552,7 +553,7 @@ type
     property LazarusPrimaryConfigPath:string write FLazarusPrimaryConfigPath;
     property TempDirectory: string write FTempDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
-    property Compiler: string {read GetCompiler} write FCompiler;
+    property Compiler: string {read GetCompiler} write SetCompiler;
     // Compiler options passed on to make as OPT= or FPCOPT=
     property CompilerOptions: string write FCompilerOptions;
     property CrossCPU_Target: TCPU read FCrossCPU_Target; //When cross-compiling: CPU, e.g. x86_64
@@ -622,7 +623,6 @@ type
 
     // FPC config directory
     function GetFPCConfigPath(aCFG:string):string;
-
     function GetCompilerName(Cpu_Target:TCPU):string;overload;
     function GetCompilerName(Cpu_Target:string):string;overload;
     function GetCrossCompilerName(Cpu_Target:TCPU):string;
@@ -976,6 +976,11 @@ begin
   FLazarusSourceDir:=value;
   if ((IsLazarusInstaller) OR (IsHelpInstaller)) then
     SetSourceDirectory(value);
+end;
+
+procedure TInstaller.SetCompiler(value:string);
+begin
+  FCompiler:=value;
 end;
 
 function TInstaller.GetMake: string;
@@ -3116,7 +3121,7 @@ end;
 function TInstaller.GetFPCInBinDir: string;
 begin
   result := FFPCCompilerBinPath+'fpc'+GetExeExt;
-  {$IFDEF UNIXXXX}
+  {$IFDEF UNIX}
   if FileExists(result + '.sh') then
     begin
     //Use our proxy if it is installed
@@ -3648,78 +3653,6 @@ begin
   end;
   {$endif}
 
-  // we will hack into FPC itself for better isolation
-  // needs more testing
-  (*
-  if FOnlinePatching then
-  begin
-    if PatchFPC then
-    begin
-      PatchList:=TStringList.Create;
-      try
-        PatchList.Clear;
-        PatchFilePath:=ConcatPaths([FSourceDirectory,'compiler','utils'])+DirectorySeparator+'fpc.pp';
-        PatchList.LoadFromFile(PatchFilePath);
-
-        // are we able to patch
-        PatchAccepted:=False;
-        for i:=0 to (PatchList.Count-1) do
-        begin
-          s:=PatchList.Strings[i];
-          if (Pos('fpcupdeluxe',s)>0) then break; // we were here already ... ;-)
-          if (Pos('call ppcXXX',s)>0) then PatchAccepted:=True;
-          if PatchAccepted then
-          begin
-            // store correct position
-            j:=i;
-            break;
-          end;
-        end;
-
-        if PatchAccepted then
-        begin
-          // do we have an array as ppccommandline
-          PatchAccepted:=False;
-          for i:=0 to (PatchList.Count-1) do
-          begin
-            s:=PatchList.Strings[i];
-            if (Pos('SetLength(ppccommandline',s)>0) then PatchAccepted:=True;
-            if PatchAccepted then break;
-          end;
-
-          if PatchAccepted then
-          begin
-            s:='ppccommandline[ppccommandlinelen+1]:=''@''+splitpath(paramstr(0))+''fpc.cfg'';';
-            PatchList.Insert(j-1,'     '+s);
-            s:='ppccommandline[ppccommandlinelen]:=''-n'';';
-            PatchList.Insert(j-1,'     '+s);
-            s:='SetLength(ppccommandline,ppccommandlinelen+2);';
-            PatchList.Insert(j-1,'     '+s);
-            s:='// Patched by fpcupdeluxe for better isolation';
-            PatchList.Insert(j-1,'     '+s);
-          end
-          else
-          begin
-            s:='''-n @''+splitpath(paramstr(0))+''fpc.cfg''';
-            PatchList.Insert(j-1,'     '+'ppccommandline:=ppccommandline+'+s+'+'' '';');
-            s:='// Patched by fpcupdeluxe for better isolation';
-            PatchList.Insert(j-1,'     '+s);
-          end;
-          PatchList.SaveToFile(PatchFilePath);
-        end;
-
-      finally
-        PatchList.Free;
-      end;
-      {
-      PatchFilePath:=IncludeTrailingPathDelimiter(PatchDirectory)+FPCPROXYPATCH;
-      if FileExists(PatchFilePath) then SysUtils.DeleteFile(PatchFilePath);
-      if NOT FileExists(PatchFilePath) then SaveInisFromResource(PatchFilePath,'FPCPROXY');
-      }
-    end;
-  end;
-  *)
-
   // we will hack into Lazarus makefile for better handling of useride
   {$ifndef FPCONLY}
   // only patch if we want to and if we do not have a release candidate
@@ -4216,31 +4149,27 @@ end;
 
 function TInstaller.GetFPCConfigPath(aCFG:string):string;
 var
+  aCfgFile:string;
   version:dword;
 begin
-  result:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath);
-
-  if (NOT FileExists(result+aCFG)) then
+  {$ifdef UNIX}
+  // Due to changes in the FPC sources (3.3.1 and newer), the FPC configs need to be created/moved into a new (local) config directory
+  result:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
+  if DirectoryExists(result) then
   begin
-    version:=CalculateNumericalVersion(CompilerVersion(GetFPCInBinDir));
-    if (version>=CalculateNumericalVersion('3.3.1')) then
+    // Copy existing configs into this new config directory and delete the old config
+    aCfgFile:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+aCFG;
+    if FileExists(aCfgFile) then
     begin
-      {$ifdef UNIX}
-      result:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
-      if (NOT DirectoryExists(result)) then ForceDirectories(result);
-      {$endif}
-      {$ifdef WINDOWS}
-      //if (GetEnvironmentVariable('USERPROFILE')<>'') then
-      //begin
-      //  result:=IncludeTrailingPathDelimiter(ExpandFileName(GetEnvironmentVariable('USERPROFILE')));
-      //end;
-      {$endif}
+      FileCopy(aCfgFile,result+aCFG);
+      SysUtils.DeleteFile(aCfgFile);
     end;
-  end;
-
+  end
+  else
+  {$endif}
+  result:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath);
   result:=result+aCFG;
 end;
-
 
 function TInstaller.GetDefaultCompilerFilename(const TargetCPU: TCPU; Cross: boolean): string;
 var

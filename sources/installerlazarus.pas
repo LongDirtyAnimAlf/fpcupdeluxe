@@ -427,7 +427,7 @@ begin
         Options := STANDARDCOMPILERVERBOSITYOPTIONS;
 
         //Always limit the search for fpc.cfg to our own fpc.cfg
-        //Only needed on Windows. On Linux, we have already our own fpc.sh
+        //Only needed on Windows. On Linux, we have already our own config dir for fpc.cfg
         {$ifdef Windows}
         Options := Options+' -n @'+GetFPCConfigPath(FPCCONFIGFILENAME);
         {$endif}
@@ -737,7 +737,7 @@ begin
     s1:=STANDARDCOMPILERVERBOSITYOPTIONS;
 
     //Always limit the search for fpc.cfg to our own fpc.cfg
-    //Only needed on Windows. On Linux, we have already our own fpc.sh
+    //Only needed on Windows. On Linux, we have already our own config dir for fpc.cfg
     {$ifdef MsWindows}
     //s1:=s1+' -n @'+GetFPCConfigPath(FPCCONFIGFILENAME);
     {$endif}
