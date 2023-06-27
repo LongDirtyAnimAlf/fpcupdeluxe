@@ -21,6 +21,9 @@
 {$define ENABLENATIVE}
 
 {.$define ENABLEEMAIL}
+{$ifdef UNIX}
+{.$define FPCWRAPPER}
+{$endif}
 
 {$ifdef Haiku}
 // synaser does not compile under Haiku

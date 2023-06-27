@@ -2,7 +2,7 @@ unit fpcupdeluxemainform;
 
 {$mode objfpc}{$H+}
 
-{$i fpcupdefines.inc}
+{$I fpcupdefines.inc}
 
 interface
 

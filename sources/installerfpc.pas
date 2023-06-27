@@ -31,7 +31,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
-{$i fpcupdefines.inc}
+{$I fpcupdefines.inc}
 
 interface
 
@@ -2792,15 +2792,15 @@ begin
 end;
 
 function TFPCInstaller.CreateFPCScript: boolean;
-{$IFDEF UNIXXX}
+{$IF (DEFINED(UNIX)) AND (DEFINED(FPCWRAPPER))}
 var
   FPCScript:string;
   TxtFile:Text;
   FPCCompiler:String;
-{$ENDIF UNIX}
+{$ENDIF}
 begin
   result:=true;
-  {$IFDEF UNIXXX}
+  {$IF (DEFINED(UNIX)) AND (DEFINED(FPCWRAPPER))}
   localinfotext:=InitInfoText(' (CreateFPCScript): ');
 
   if FVerbose then
@@ -2847,7 +2847,7 @@ begin
     begin
     Infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,etError);
     end;
-  {$ENDIF UNIX}
+  {$ENDIF}
 end;
 
 function TFPCInstaller.DownloadBootstrapCompiler: boolean;
@@ -4040,7 +4040,7 @@ begin
       end;
     end;
 
-    {$ifdef UNIX}
+    {$IF (DEFINED(UNIX)) AND (NOT DEFINED(FPCWRAPPER))}
     // FPC trunk, starting from hash c9453164 does not like the use of fpc.sh anymore
     // So, our trick to isolate the UNIX install has become obsolete
     // Use configpath as a replacement
@@ -4058,7 +4058,7 @@ begin
         if (NOT DirectoryExists(s)) then ForceDirectories(s);
       end;
     end;
-    {$endif}
+    {$ENDIF}
 
     FPCCfg:=GetFPCConfigPath(FPCCONFIGFILENAME);
 
@@ -4904,13 +4904,16 @@ begin
         begin
           Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' script.', etInfo);
           Sysutils.DeleteFile(aPath);
-          // If we did delete fpc.sh, we also need to redefine the compiler path inside fpcpackageconfig
+          {$IFNDEF FPCWRAPPER}
+          // If we did delete fpc.sh, we also need to redefine/update the compiler path inside fpcpackageconfig
+          // So, delete the config file to force creating of a new and correct one
           aPath := ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE;
           if FileExists(aPath) then
           begin
             Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' FPC package compiler configuration.', etInfo);
             Sysutils.DeleteFile(aPath);
           end;
+          {$ENDIF}
         end;
         {$ENDIF UNIX}
         {$ifdef FORCEREVISION}

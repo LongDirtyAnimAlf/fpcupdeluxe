@@ -622,7 +622,7 @@ type
     property ErrorCodes : TInstallerErrors read FErrorCodes;
 
     // FPC config directory
-    function GetFPCConfigPath(aCFG:string):string;
+    function GetFPCConfigPath(const aCFG:string):string;
     function GetCompilerName(Cpu_Target:TCPU):string;overload;
     function GetCompilerName(Cpu_Target:string):string;overload;
     function GetCrossCompilerName(Cpu_Target:TCPU):string;
@@ -4147,12 +4147,13 @@ begin
   result:=GetInstallerClass(TBaseUniversalInstaller);
 end;
 
-function TInstaller.GetFPCConfigPath(aCFG:string):string;
+function TInstaller.GetFPCConfigPath(const aCFG:string):string;
+{$IF (DEFINED(UNIX)) AND (NOT DEFINED(FPCWRAPPER))}
 var
   aCfgFile:string;
-  version:dword;
+{$ENDIF}
 begin
-  {$ifdef UNIX}
+  {$IF (DEFINED(UNIX)) AND (NOT DEFINED(FPCWRAPPER))}
   // Due to changes in the FPC sources (3.3.1 and newer), the FPC configs need to be created/moved into a new (local) config directory
   result:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
   if DirectoryExists(result) then
@@ -4166,7 +4167,7 @@ begin
     end;
   end
   else
-  {$endif}
+  {$ENDIF}
   result:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath);
   result:=result+aCFG;
 end;
