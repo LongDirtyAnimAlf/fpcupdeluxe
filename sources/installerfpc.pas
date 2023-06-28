@@ -2792,7 +2792,7 @@ begin
 end;
 
 function TFPCInstaller.CreateFPCScript: boolean;
-{$IF (DEFINED(UNIX)) AND (DEFINED(FPCWRAPPER))}
+{$IFDEF UNIX}
 var
   FPCScript:string;
   TxtFile:Text;
@@ -2800,7 +2800,10 @@ var
 {$ENDIF}
 begin
   result:=true;
-  {$IF (DEFINED(UNIX)) AND (DEFINED(FPCWRAPPER))}
+
+  {$IFDEF UNIX}
+  if (NOT UseCompilerWrapper) then exit;
+
   localinfotext:=InitInfoText(' (CreateFPCScript): ');
 
   if FVerbose then
@@ -2812,7 +2815,7 @@ begin
 
   // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
   // If this fails, Lazarus compilation will fail...
-  FPCScript := IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)) + 'fpc.sh';
+  FPCScript := FFPCCompilerBinPath + 'fpc.sh';
   if FileExists(FPCScript) then
   begin
     Infoln(localinfotext+'fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etInfo);
@@ -2828,9 +2831,10 @@ begin
       writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
       writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
       writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
+      //writeln(TxtFile,'PPC_CONFIG_PATH= '+FPCCompiler+' "$@"');
       writeln(TxtFile,FPCCompiler,' -n @',
         IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),FPCCONFIGFILENAME+' '+
-        '"$@"');
+        '$@');
       CloseFile(TxtFile);
   Result:=(FPChmod(FPCScript,&755)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
   if Result then
@@ -2838,15 +2842,15 @@ begin
     // To prevent unneccessary rebuilds of FCL, LCL and others:
     // Set fileage the same as the FPC binary itself
     Result:=(FileSetDate(FPCScript,FileAge(FPCCompiler))=0);
-    end;
-    if Result then
-    begin
-      Infoln(localinfotext+'Created launcher script for FPC:'+FPCScript,etInfo);
-    end
-    else
-    begin
+  end;
+  if Result then
+  begin
+    Infoln(localinfotext+'Created launcher script for FPC:'+FPCScript,etInfo);
+  end
+  else
+  begin
     Infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,etError);
-    end;
+  end;
   {$ENDIF}
 end;
 
@@ -4040,7 +4044,7 @@ begin
       end;
     end;
 
-    {$IF (DEFINED(UNIX)) AND (NOT DEFINED(FPCWRAPPER))}
+    {$IFDEF UNIX}
     // FPC trunk, starting from hash c9453164 does not like the use of fpc.sh anymore
     // So, our trick to isolate the UNIX install has become obsolete
     // Use configpath as a replacement
@@ -4048,14 +4052,19 @@ begin
     // Please note: will NOT work when the environment defines a "PPC_CONFIG_PATH" !!!
     // The installer manager will take care of this already
     // Do this for all FPC versions from now on (so, do not check version) !!
-    // if (CalculateNumericalVersion(CompilerVersion(GetFPCInBinDir))>=CalculateNumericalVersion('3.3.1')) then
+
+
+    if (NOT UseCompilerWrapper) then
     begin
-      // Check already done by manager
-      // s:=GetEnvironmentVariable('PPC_CONFIG_PATH');
-      // if (Length(s)=0) then
+      // if (CalculateNumericalVersion(CompilerVersion(GetFPCInBinDir))>=CalculateNumericalVersion('3.3.1')) then
       begin
-        s:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
-        if (NOT DirectoryExists(s)) then ForceDirectories(s);
+        // Check already done by manager
+        // s:=GetEnvironmentVariable('PPC_CONFIG_PATH');
+        // if (Length(s)=0) then
+        begin
+          s:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
+          if (NOT DirectoryExists(s)) then ForceDirectories(s);
+        end;
       end;
     end;
     {$ENDIF}
@@ -4904,16 +4913,17 @@ begin
         begin
           Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' script.', etInfo);
           Sysutils.DeleteFile(aPath);
-          {$IFNDEF FPCWRAPPER}
-          // If we did delete fpc.sh, we also need to redefine/update the compiler path inside fpcpackageconfig
-          // So, delete the config file to force creating of a new and correct one
-          aPath := ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE;
-          if FileExists(aPath) then
+          if (NOT UseCompilerWrapper) then
           begin
-            Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' FPC package compiler configuration.', etInfo);
-            Sysutils.DeleteFile(aPath);
+            // If we did delete fpc.sh, we also need to redefine/update the compiler path inside fpcpackageconfig
+            // So, delete the config file to force creating of a new and correct one
+            aPath := ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE;
+            if FileExists(aPath) then
+            begin
+              Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' FPC package compiler configuration.', etInfo);
+              Sysutils.DeleteFile(aPath);
+            end;
           end;
-          {$ENDIF}
         end;
         {$ENDIF UNIX}
         {$ifdef FORCEREVISION}

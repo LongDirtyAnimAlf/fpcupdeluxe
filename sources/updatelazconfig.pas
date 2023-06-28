@@ -68,14 +68,6 @@ const
   WebserverConfig='simplewebservergui.xml';
   // BuildIDE config file
   DefaultIDEMakeOptionFilename='idemake.cfg';
-  // Versions used when new config files are generated.
-  // Lazarus pre 1.0: 106
-  // We can assume Lazarus trunk can parse this version:
-  TrunkVersionNewEnvironmentConfig='110';
-  TrunkLazarusNewEnvironmentConfig='2.3.0';
-  // We use a hardcoded version for Lazarus below
-  VersionNewHelpConfig='1';
-  VersionNewPackageConfig='3';
 
 type
 
@@ -93,36 +85,6 @@ public
   procedure MovePath(OldPath, NewPath: string);
   property New:boolean read FNew;
 end;
-
-
-(*
-TConfig = class(TObject)
-private
-  bChanged: boolean;
-  FFilename: string;
-  FNew: boolean;
-  Doc: TXMLDocument;
-public
-  constructor Create(const AFilename: String); overload; // create and load
-  destructor Destroy; override;
-  // Did the config file exist before using it?
-  property New: boolean read FNew;
-  // Delete a child from a different part of the tree
-  procedure DeletePath(OldPath: string);
-  procedure DeleteValue(const APath: string);
-  function FindNode(APath: string;var AttrName:string;bCreate:boolean):TDomNode;
-  function GetValue(const APath, ADefault: String): String;
-  function GetValue(const APath: String; ADefault: Integer): Integer;
-  function GetValue(const APath: String; ADefault: Boolean): Boolean;
-  // Move a child from a different part of the tree
-  procedure MovePath(OldPath, NewPath: string);
-  // Save our changes to the config variable
-  procedure Save;
-  procedure SetValue(const APath, AValue: String);
-  procedure SetValue(const APath: String; AValue: Integer);
-  procedure SetValue(const APath: String; AValue: Boolean);
-end;
-*)
 
 
 { TUpdateLazConfig }
@@ -182,7 +144,17 @@ procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig
 implementation
 
 uses
-  fpcuputil;
+  installerCore,fpcuputil;
+
+const
+  // Versions used when new config files are generated.
+  // Lazarus pre 1.0: 106
+  // We can assume Lazarus trunk can parse this version:
+  TrunkVersionNewEnvironmentConfig='110';
+  TrunkLazarusNewEnvironmentConfig=LAZARUSTRUNKVERSION;
+  // We use a hardcoded version for Lazarus below
+  VersionNewHelpConfig='1';
+  VersionNewPackageConfig='3';
 
 procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig);
 var
@@ -329,7 +301,7 @@ begin
                 if (FLazarusRelease<>-1) then
                   Version:=Version+'.'+IntToStr(FLazarusRelease);
               end;
-              if (FLazarusPatch>0) then
+              if (FLazarusPatch<>-1) then
                 Version:=Version+'RC'+IntToStr(FLazarusPatch);
             end
             else

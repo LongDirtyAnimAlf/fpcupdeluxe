@@ -892,13 +892,13 @@ end;
 function THelpLazarusInstaller.GetModule(ModuleName: string): boolean;
 var
   LazarusConfig: TUpdateLazConfig;
-  LazVersion:string;
+  LazarusVersion:string;
 begin
   // get Lazarus version for correct version of helpfile
   LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
   try
-    LazVersion:=LazarusConfig.GetVariable(EnvironmentConfig,'EnvironmentOptions/Version/Lazarus');
-    VersionFromString(LazVersion,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
+    LazarusVersion:=LazarusConfig.GetVariable(EnvironmentConfig,'EnvironmentOptions/Version/Lazarus');
+    VersionFromString(LazarusVersion,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
   finally
     LazarusConfig.Free;
   end;

@@ -1337,7 +1337,7 @@ begin
 
   // skip random symbols to move towards next digit
   //while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
-  // skip a single random symbol to move towards next digit
+  // skip a single random symbol [dot] to move towards next digit
   if (Length(VersionSnippet)>=i) then Inc(i);
   // get minor version
   j:=0;
@@ -1352,7 +1352,7 @@ begin
 
   // skip random symbols to move towards next digit
   //while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
-  // skip a single random symbol to move towards next digit
+  // skip a single random symbol [dot] to move towards next digit
   if (Length(VersionSnippet)>=i) then Inc(i);
   // get build version
   j:=0;
@@ -1365,6 +1365,7 @@ begin
   end;
   if found then Build:=j;
 
+  // there might be an RC (release candidate)
   // skip random symbols to move towards next digit
   while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
   // skip a single random symbol to move towards next digit

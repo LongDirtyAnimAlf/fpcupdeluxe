@@ -1637,18 +1637,6 @@ begin
     end;
   end;
 
-  {$ifdef UNIX}
-  aSequence:=GetEnvironmentVariable('PPC_CONFIG_PATH');
-  if (Length(aSequence)>0) then
-  begin
-    RunInfo:='The environment of this system defines a "PPC_CONFIG_PATH" !';
-    RunInfo:='Thence, fpcupdeluxe will not work correct on this system.';
-    RunInfo:='You are welcome to report this issue on GitHub.';
-    RunInfo:='("PPC_CONFIG_PATH" points towards: '+aSequence+')';
-    exit;
-  end;
-  {$endif}
-
   //WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',true);
   //WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetSourceCPUOS+' running on '+GetDistro,true);
 

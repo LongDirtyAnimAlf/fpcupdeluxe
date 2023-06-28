@@ -1308,26 +1308,54 @@ var
 begin
   result:=-1;
 
-  aFileName:=IncludeTrailingPathDelimiter(SourceDirectory) + 'ide' + DirectorySeparator + 'version.inc';
-  if FileExists(aFileName) then
+  if result=-1 then
   begin
-    AssignFile(TxtFile,aFileName);
-    Reset(TxtFile);
-    Readln(TxtFile,s);
-    // remove quotes from string
-    //VersionSnippet:=DelChars(s, '''');
-    s:=TrimSet(s, [#39]);
-    s:=Trim(s);
-    if Length(s)>0 then
+    aFileName:=IncludeTrailingPathDelimiter(SourceDirectory) + 'ide' + DirectorySeparator + 'version.inc';
+    if FileExists(aFileName) then
     begin
-      x:=Pos('RC',s);
-      if (x>0) then
+      AssignFile(TxtFile,aFileName);
+      Reset(TxtFile);
+      Readln(TxtFile,s);
+      // remove quotes from string
+      //VersionSnippet:=DelChars(s, '''');
+      s:=TrimSet(s, [#39]);
+      s:=Trim(s);
+      if Length(s)>0 then
       begin
-        s:=Copy(s,(x+2),MaxInt);
-        result:=StrToIntDef(s,-1);
+        x:=Pos('RC',s);
+        if (x>0) then
+        begin
+          s:=Copy(s,(x+2),MaxInt);
+          result:=StrToIntDef(s,-1);
+        end;
       end;
+      CloseFile(TxtFile);
     end;
-    CloseFile(TxtFile);
+  end;
+
+  if result=-1 then
+  begin
+    aFileName:=ConcatPaths([SourceDirectory,'ide','packages','ideconfig'])+DirectorySeparator+'version.inc';
+    if FileExists(aFileName) then
+    begin
+      AssignFile(TxtFile,aFileName);
+      Reset(TxtFile);
+      Readln(TxtFile,s);
+      // remove quotes from string
+      //VersionSnippet:=DelChars(s, '''');
+      s:=TrimSet(s, [#39]);
+      s:=Trim(s);
+      if Length(s)>0 then
+      begin
+        x:=Pos('RC',s);
+        if (x>0) then
+        begin
+          s:=Copy(s,(x+2),MaxInt);
+          result:=StrToIntDef(s,-1);
+        end;
+      end;
+      CloseFile(TxtFile);
+    end;
   end;
 
   if result=-1 then

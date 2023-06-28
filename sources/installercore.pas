@@ -42,7 +42,7 @@ const
   FPCTRUNKVERSION       = '3.3.1';
   FPCTRUNKBOOTVERSION   = '3.2.2';
 
-  LAZARUSTRUNKVERSION   = '2.3.0';
+  LAZARUSTRUNKVERSION   = '3.99';
 
   DEFAULTFREEBSDVERSION = 12;
 
@@ -363,6 +363,8 @@ type
   { TInstaller }
 
   TInstaller = class(TObject)
+  strict private
+    FUseCompilerWrapper        : boolean;
   private
     FURL                       : string;
     FUltibo                    : boolean;
@@ -518,7 +520,6 @@ type
     function GetPath: string;
     function GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
     function GetSanityCheck:boolean;
-
     function GetVersionFromSource:string;virtual;
     function GetVersionFromURL({%H-}aUrl:string):string;virtual;
     function GetReleaseCandidateFromSource:integer;virtual;
@@ -620,6 +621,7 @@ type
     {$ENDIF MSWINDOWS}
 
     property ErrorCodes : TInstallerErrors read FErrorCodes;
+    property UseCompilerWrapper : boolean read FUseCompilerWrapper;
 
     // FPC config directory
     function GetFPCConfigPath(const aCFG:string):string;
@@ -3121,6 +3123,7 @@ end;
 function TInstaller.GetFPCInBinDir: string;
 begin
   result := FFPCCompilerBinPath+'fpc'+GetExeExt;
+
   {$IFDEF UNIX}
   if FileExists(result + '.sh') then
     begin
@@ -4107,8 +4110,8 @@ begin
     FReleaseVersion := -1;
     FPatchVersion := -1;
     VersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
-    FPatchVersion:=GetReleaseCandidateFromSource;
-    if FPatchVersion=-1 then FPatchVersion:=ReleaseCandidateFromUrl(FURL);
+    if (FPatchVersion=-1) then FPatchVersion:=GetReleaseCandidateFromSource;
+    if (FPatchVersion=-1) then FPatchVersion:=ReleaseCandidateFromUrl(FURL);
   end;
   result:=s;
 end;
@@ -4148,15 +4151,15 @@ begin
 end;
 
 function TInstaller.GetFPCConfigPath(const aCFG:string):string;
-{$IF (DEFINED(UNIX)) AND (NOT DEFINED(FPCWRAPPER))}
+{$IFDEF UNIX}
 var
   aCfgFile:string;
 {$ENDIF}
 begin
-  {$IF (DEFINED(UNIX)) AND (NOT DEFINED(FPCWRAPPER))}
+  {$IFDEF UNIX}
   // Due to changes in the FPC sources (3.3.1 and newer), the FPC configs need to be created/moved into a new (local) config directory
   result:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
-  if DirectoryExists(result) then
+  if (NOT UseCompilerWrapper) AND DirectoryExists(result) then
   begin
     // Copy existing configs into this new config directory and delete the old config
     aCfgFile:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+aCFG;
@@ -4168,7 +4171,10 @@ begin
   end
   else
   {$ENDIF}
-  result:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath);
+  begin
+   result:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath);
+  end;
+
   result:=result+aCFG;
 end;
 
@@ -4489,7 +4495,12 @@ begin
   if FMUSL then Infoln('Fpcupdeluxe: We have a MUSL Linux version !',etInfo);
   {$endif}
 
-  GetSanityCheck;
+  FUseCompilerWrapper:=true;
+  {$IFDEF UNIX}
+  FUseCompilerWrapper:=(Length(GetEnvironmentVariable('PPC_CONFIG_PATH'))=0);
+  {$endif}
+
+  SanityCheck;
 end;
 
 destructor TInstaller.Destroy;
