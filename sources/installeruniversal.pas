@@ -3578,15 +3578,6 @@ begin
       begin
         if (Pos(FPCURLLOOKUPMAGIC,aDictionary)=1) OR (Pos(FPCTAGLOOKUPMAGIC,aDictionary)=1) OR (Pos(FPCBRANCHLOOKUPMAGIC,aDictionary)=1) then
         begin
-          if (Pos(FPCTAGLOOKUPMAGIC,aDictionary)=1) then
-          begin
-            if AnsiEndsText(GITLABEXTENSION,aKeyWord) then
-            begin
-              // value not found, so add it into the list
-              result:=Copy(aKeyWord,1,Length(aKeyWord)-Length(GITLABEXTENSION));
-              SetAlias(aDictionary,aKeyWord,result);
-            end;
-          end;
           //if (aDictionary<>FPCURLLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcURL',   aKeyWord,'');
           //if (aDictionary=FPCTAGLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+FPCBRANCHLOOKUPMAGIC,   aKeyWord,'');
           //if (aDictionary=FPCBRANCHLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+FPCTAGLOOKUPMAGIC,aKeyWord,'');
@@ -3595,15 +3586,6 @@ begin
         else
         if (Pos(LAZARUSURLLOOKUPMAGIC,aDictionary)=1) OR (Pos(LAZARUSTAGLOOKUPMAGIC,aDictionary)=1) OR (Pos(LAZARUSBRANCHLOOKUPMAGIC,aDictionary)=1) then
         begin
-          if (Pos(LAZARUSTAGLOOKUPMAGIC,aDictionary)=1) then
-          begin
-            if AnsiEndsText(GITLABEXTENSION,aKeyWord) then
-            begin
-              // value not found, so add it into the list
-              result:=Copy(aKeyWord,1,Length(aKeyWord)-Length(GITLABEXTENSION));
-              SetAlias(aDictionary,aKeyWord,result);
-            end;
-          end;
           //if (aDictionary<>LAZARUSURLLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazURL',   aKeyWord,'');
           //if (aDictionary=LAZARUSTAGLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+LAZARUSBRANCHLOOKUPMAGIC,   aKeyWord,'');
           //if (aDictionary=LAZARUSBRANCHLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+LAZARUSTAGLOOKUPMAGIC,aKeyWord,'');

@@ -269,6 +269,7 @@ type
     procedure SetCmdFontName(aValue: String);
     procedure ParseRevisions(IniDirectory:string);
     procedure AddRevision(TargetFPC,TargetLAZ:boolean;aHash,aName:string;aDate:TDateTime);
+    procedure AddTag(Sender: TObject;aTag:string);
     {$ifdef EnableLanguages}
     procedure Translate(const Language: string);
     {$endif}
@@ -1958,12 +1959,14 @@ begin
 end;
 
 procedure TForm1.OnlyTagClick(Sender: TObject);
-var
-  aTag:string;
 begin
-  if Sender=BitBtnFPCOnlyTag then
+  AddTag(Sender,TListBox(Sender).GetSelectedText);
+end;
+
+procedure TForm1.AddTag(Sender: TObject;aTag:string);
+begin
+  if (Sender=BitBtnFPCOnlyTag) OR (Sender=ListBoxFPCTarget)  then
   begin
-    aTag:=ListBoxFPCTargetTag.GetSelectedText;
     if SetAlias(FPCTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,'list');
@@ -1972,9 +1975,8 @@ begin
       //ListBoxFPCTarget.ItemIndex:=ListBoxFPCTarget.Count-1;
     end;
   end;
-  if Sender=BitBtnLazarusOnlyTag then
+  if (Sender=BitBtnLazarusOnlyTag) OR (Sender=ListBoxLazarusTarget) then
   begin
-    aTag:=ListBoxLazarusTargetTag.GetSelectedText;
     if SetAlias(LAZARUSTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,'list');
@@ -1987,6 +1989,7 @@ begin
   FillSourceListboxes;
   ScrollToSelected;
 end;
+
 
 procedure TForm1.TagSelectionChange(Sender: TObject;User: boolean);
 begin
@@ -4657,7 +4660,14 @@ begin
     begin
       aLocalAlias:=installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,aLocalTarget);
       if (Length(aLocalAlias)=0) then aLocalAlias:=installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,aLocalTarget);
-      if (Length(aLocalAlias)=0) then aLocalTarget:='stable'+GITLABEXTENSION; // default to stable in case of lookup failure
+      if (Length(aLocalAlias)=0) then
+      begin
+        //  Store the value provided as a new tag
+        aLocalAlias:=Copy(aLocalTarget,1,Length(aLocalTarget)-Length(GITLABEXTENSION));
+        AddTag(aListBox,aLocalAlias);
+        // Default to stable in case of lookup failure
+        //aLocalTarget:='stable'+GITLABEXTENSION;
+      end;
       if (Pos('://',aLocalAlias)=0) then aLocalAlias:=FPCGITLABREPO;
     end
     else
@@ -4669,7 +4679,14 @@ begin
     begin
       aLocalAlias:=installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,aLocalTarget);
       if (Length(aLocalAlias)=0) then aLocalAlias:=installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,aLocalTarget);
-      if (Length(aLocalAlias)=0) then aLocalTarget:='stable'+GITLABEXTENSION; // default to stable in case of lookup failure
+      if (Length(aLocalAlias)=0) then
+      begin
+        //  Store the value provided as a new tag
+        aLocalAlias:=Copy(aLocalTarget,1,Length(aLocalTarget)-Length(GITLABEXTENSION));
+        AddTag(aListBox,aLocalAlias);
+        // Default to stable in case of lookup failure
+        //aLocalTarget:='stable'+GITLABEXTENSION;
+      end;
       if (Pos('://',aLocalAlias)=0) then aLocalAlias:=LAZARUSGITLABREPO;
     end
     else
