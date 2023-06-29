@@ -1051,7 +1051,6 @@ end;
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false);
 var
   OperationSucceeded: boolean;
-  ResultCode: boolean;
   XdgDesktopContent: TStringList;
   XdgMimeContent: TStringList;
   Output,XdgDesktopFile,XdgMimeFile: string;
@@ -1081,7 +1080,11 @@ begin
     if (Length(aIconFile)=0) OR (NOT FileExists(aIconFile)) then aIconFile:=ExtractFilePath(Target)+'images/icons/lazarus.ico';
     XdgDesktopContent.Add('Icon='+aIconFile);
     XdgDesktopContent.Add('Path='+ExtractFilePath(Target));
+    {$ifdef DISABLE_PPC_CONFIG_PATH}
+    XdgDesktopContent.Add('Exec=env -u PPC_CONFIG_PATH '+Target+' '+TargetArguments+' %f');
+    {$else}
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments+' %f');
+    {$endif}
     XdgDesktopContent.Add('Name='+ShortcutName);
     XdgDesktopContent.Add('GenericName=Lazarus IDE with Free Pascal Compiler');
     XdgDesktopContent.Add('Category=Application;IDE;Development;GUIDesigner;Programming;');
@@ -1219,6 +1222,9 @@ begin
     SysUtils.DeleteFile(ScriptFile); //Get rid of any existing remnants
     ScriptText.Add('#!/bin/sh');
     ScriptText.Add('# '+BeginSnippet+' home startlink script');
+    {$ifdef DISABLE_PPC_CONFIG_PATH}
+    ScriptText.Add('unset PPC_CONFIG_PATH');
+    {$endif}
     ScriptText.Add(Target+' '+TargetArguments+' "$@"');
     try
       ScriptText.SaveToFile(ScriptFile);

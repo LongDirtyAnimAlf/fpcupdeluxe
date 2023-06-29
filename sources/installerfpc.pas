@@ -2831,10 +2831,10 @@ begin
       writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
       writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
       writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-      //writeln(TxtFile,'PPC_CONFIG_PATH= '+FPCCompiler+' "$@"');
-      writeln(TxtFile,FPCCompiler,' -n @',
-        IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),FPCCONFIGFILENAME+' '+
-        '$@');
+      {$ifdef DISABLE_PPC_CONFIG_PATH}
+      writeln(TxtFile,'unset PPC_CONFIG_PATH');
+      {$endif}
+      writeln(TxtFile,FPCCompiler,' -n @',FFPCCompilerBinPath,FPCCONFIGFILENAME+' '+'"$@"');
       CloseFile(TxtFile);
   Result:=(FPChmod(FPCScript,&755)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
   if Result then
@@ -4049,22 +4049,15 @@ begin
     // So, our trick to isolate the UNIX install has become obsolete
     // Use configpath as a replacement
     // See: compiler/options.pp function: check_configfile
-    // Please note: will NOT work when the environment defines a "PPC_CONFIG_PATH" !!!
-    // The installer manager will take care of this already
+    // Please note: might NOT work when the environment defines a "PPC_CONFIG_PATH" !!!
+    // See: {$define DISABLE_PPC_CONFIG_PATH}
     // Do this for all FPC versions from now on (so, do not check version) !!
-
-
     if (NOT UseCompilerWrapper) then
     begin
       // if (CalculateNumericalVersion(CompilerVersion(GetFPCInBinDir))>=CalculateNumericalVersion('3.3.1')) then
       begin
-        // Check already done by manager
-        // s:=GetEnvironmentVariable('PPC_CONFIG_PATH');
-        // if (Length(s)=0) then
-        begin
-          s:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
-          if (NOT DirectoryExists(s)) then ForceDirectories(s);
-        end;
+        s:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
+        if (NOT DirectoryExists(s)) then ForceDirectories(s);
       end;
     end;
     {$ENDIF}

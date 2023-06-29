@@ -51,3 +51,5 @@
 {$define USEONLYCURL}
 {$endif}
 
+{.$define DISABLE_PPC_CONFIG_PATH}
+

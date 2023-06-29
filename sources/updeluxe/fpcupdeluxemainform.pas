@@ -2919,7 +2919,6 @@ var
   warning,success,verbose:boolean;
   IncludeLCL,ZipFile:boolean;
   aList: TStringList;
-  i:integer;
   {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
   frmSeq: TfrmSequencial;
   {$ENDIF}

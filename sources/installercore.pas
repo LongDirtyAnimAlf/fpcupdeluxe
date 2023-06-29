@@ -364,7 +364,9 @@ type
 
   TInstaller = class(TObject)
   strict private
+    {$IFDEF UNIX}
     FUseCompilerWrapper        : boolean;
+    {$ENDIF}
   private
     FURL                       : string;
     FUltibo                    : boolean;
@@ -619,10 +621,10 @@ type
     {$IFDEF MSWINDOWS}
     property StrayShell: boolean read GetStrayShell;
     {$ENDIF MSWINDOWS}
-
     property ErrorCodes : TInstallerErrors read FErrorCodes;
+    {$IFDEF UNIX}
     property UseCompilerWrapper : boolean read FUseCompilerWrapper;
-
+    {$ENDIF}
     // FPC config directory
     function GetFPCConfigPath(const aCFG:string):string;
     function GetCompilerName(Cpu_Target:TCPU):string;overload;
@@ -4495,9 +4497,13 @@ begin
   if FMUSL then Infoln('Fpcupdeluxe: We have a MUSL Linux version !',etInfo);
   {$endif}
 
+  {$ifdef UNIX}
+  {$ifdef DISABLE_PPC_CONFIG_PATH}
+  FUseCompilerWrapper:=false;
+  {$else}
   FUseCompilerWrapper:=true;
-  {$IFDEF UNIX}
-  FUseCompilerWrapper:=(Length(GetEnvironmentVariable('PPC_CONFIG_PATH'))=0);
+  //FUseCompilerWrapper:=(Length(GetEnvironmentVariable('PPC_CONFIG_PATH'))=0);
+  {$endif}
   {$endif}
 
   SanityCheck;
