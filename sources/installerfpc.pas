@@ -759,7 +759,7 @@ begin
               if (i<>-1) then
               begin
                 // Get the correct name of the cross-compiler in source-directory
-                s1:=ConcatPaths([SourceDirectory,'compiler','ppcross'+ppcSuffix[CrossInstaller.TargetCPU]]);
+                s1:=ConcatPaths([SourceDirectory,'compiler',GetCrossCompilerName(CrossInstaller.TargetCPU)]);
                 // Get the correct name of the cross-compiler in install-directory
                 if (NOT FileExists(s1)) then
                   s1:=FFPCCompilerBinPath+CrossCompilerName;
@@ -796,7 +796,7 @@ begin
               if (i<>-1) then
               begin
                 // Get the correct name of the cross-compiler in source-directory
-                s1:=ConcatPaths([SourceDirectory,'compiler','ppcross'+ppcSuffix[CrossInstaller.TargetCPU]]);
+                s1:=ConcatPaths([SourceDirectory,'compiler',GetCrossCompilerName(CrossInstaller.TargetCPU)]);
                 // Get the correct name of the cross-compiler in install-directory
                 if (NOT FileExists(s1)) then
                   s1:=FFPCCompilerBinPath+CrossCompilerName;
@@ -1502,7 +1502,7 @@ begin
             if (result) AND (MakeCycle=st_CompilerInstall) then
             begin
               // Get the correct name of the cross-compiler in source-directory
-              s1:='ppcross'+ppcSuffix[CrossInstaller.TargetCPU];
+              s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
               s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
               if FileExists(s2) then
               begin
@@ -1595,7 +1595,7 @@ begin
           if (ModuleName=_FPC) then
           begin
             // Get the correct name of the cross-compiler in source-directory
-            s1:='ppcross'+ppcSuffix[CrossInstaller.TargetCPU];
+            s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
             s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
             {$ifdef crosssimple}
             {$IFDEF UNIX}
@@ -4899,26 +4899,6 @@ begin
         //Infoln(infotext+'Deleting some FPC package config files.', etInfo);
         //DeleteFile(ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCONFIGFILENAME);
         //DeleteFile(ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
-        {$IFDEF UNIX}
-        // Delete any fpc.sh shell scripts
-        aPath:=FFPCCompilerBinPath+'fpc.sh';
-        if FileExists(aPath) then
-        begin
-          Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' script.', etInfo);
-          Sysutils.DeleteFile(aPath);
-          if (NOT UseCompilerWrapper) then
-          begin
-            // If we did delete fpc.sh, we also need to redefine/update the compiler path inside fpcpackageconfig
-            // So, delete the config file to force creating of a new and correct one
-            aPath := ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE;
-            if FileExists(aPath) then
-            begin
-              Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' FPC package compiler configuration.', etInfo);
-              Sysutils.DeleteFile(aPath);
-            end;
-          end;
-        end;
-        {$ENDIF UNIX}
         {$ifdef FORCEREVISION}
         //Infoln(infotext+'Deleting '+REVINCFILENAME, etInfo);
         //aPath:=ConcatPaths([SourceDirectory,'compiler']);
@@ -4927,20 +4907,64 @@ begin
 
         if DirectoryExists(FFPCCompilerBinPath) then
         begin
+          // Delete FPC binary
+          aPath:=FFPCCompilerBinPath+'fpc'+GetExeExt;
+          if FileExists(aPath) then
+          begin
+            Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' executable.', etInfo);
+            Sysutils.DeleteFile(aPath);
+          end;
+
+          // Delete any fpc.sh shell scripts
+          {$IFDEF UNIX}
+          aPath:=FFPCCompilerBinPath+'fpc.sh';
+          if FileExists(aPath) then
+          begin
+            Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' script.', etInfo);
+            Sysutils.DeleteFile(aPath);
+            if (NOT UseCompilerWrapper) then
+            begin
+              // If we did delete fpc.sh, we also need to redefine/update the compiler path inside fpcpackageconfig
+              // So, delete the config file to force creating of a new and correct one
+              aPath := ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR])+DirectorySeparator+FPCPKGCOMPILERTEMPLATE;
+              if FileExists(aPath) then
+              begin
+                Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' FPC package compiler configuration.', etInfo);
+                Sysutils.DeleteFile(aPath);
+              end;
+            end;
+          end;
+          {$ENDIF UNIX}
+
           // Delete compiler binary
           aCPU:=GetTCPU(GetSourceCPU);
           if (aCPU<>TCPU.cpuNone) then
           begin
             aPath:=ConcatPaths([FFPCCompilerBinPath,GetCompilerName(aCPU)]);
-            if FileExists(aPath) then Sysutils.DeleteFile(aPath);
+            if FileExists(aPath) then
+            begin
+              Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' compiler.', etInfo);
+              Sysutils.DeleteFile(aPath);
+            end;
           end;
+
           // Delete all [cross-]compiler binaries
+          // This is up to discussion
+          // The cross-compiler settings are still inside fpc.cfg
+          // And the cross-units are there also
+          // This will result in an error when trying to cross-compile
+          // But might be good: force update of cross-compilers by the user
           for aCPU in TCPU do
           begin
-            //if (aCPU=TCPU.cpuNone) then continue;
+            if (aCPU=TCPU.cpuNone) then continue;
             aPath:=ConcatPaths([FFPCCompilerBinPath,GetCrossCompilerName(aCPU)]);
-            if FileExists(aPath) then Sysutils.DeleteFile(aPath);
+            if FileExists(aPath) then
+            begin
+              Infoln(infotext+'Deleting '+ExtractFileName(aPath)+' cross-compiler.', etInfo);
+              Sysutils.DeleteFile(aPath);
+            end;
           end;
+
         end;
       end;
 
@@ -4951,7 +4975,10 @@ begin
       begin
         // Only allow unit directories inside our own install te be deleted
         if (Pos(BaseDirectory,aPath)=1) then
+        begin
+          Infoln(infotext+'Deleting '+aPath+' directory.', etInfo);
           DeleteDirectoryEx(aPath);
+        end;
       end;
     end;
 
