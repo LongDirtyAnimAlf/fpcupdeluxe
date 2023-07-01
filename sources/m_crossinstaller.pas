@@ -31,6 +31,29 @@ along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
+{
+About GLIBC
+NEWS for version 2.34
+=====================
+
+Major new features:
+
+* In order to support smoother in-place-upgrades and to simplify
+  the implementation of the runtime all functionality formerly
+  implemented in the libraries libpthread, libdl, libutil, libanl has
+  been integrated into libc.  New applications do not need to link with
+  -lpthread, -ldl, -lutil, -lanl anymore.  For backwards compatibility,
+  empty static archives libpthread.a, libdl.a, libutil.a, libanl.a are
+  provided, so that the linker options keep working.  Applications which
+  have been linked against glibc 2.33 or earlier continue to load the
+  corresponding shared objects (which are now empty).  The integration
+  of those libraries into libc means that additional symbols become
+  available by default.  This can cause applications that contain weak
+  references to take unexpected code paths that would only have been
+  used in previous glibc versions when e.g. preloading libpthread.so.0,
+  potentially exposing application bugs.
+}
+
 {$mode objfpc}{$H+}
 
 interface
