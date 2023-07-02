@@ -3930,6 +3930,7 @@ begin
 
   if (IsCross) then
   begin
+    if ((FLinuxLegacy) AND (CrossInstaller.TargetOS=TOS.linux)) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.dragonfly) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.freebsd) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.openbsd) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;

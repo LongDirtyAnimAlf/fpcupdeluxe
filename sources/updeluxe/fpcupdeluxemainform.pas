@@ -1152,7 +1152,7 @@ end;
 function TForm1.AutoUpdateCrossCompiler(Sender: TObject):boolean;
 var
   FPCCfg:string;
-  BinPath:string;
+  ConfigPath,BinPath,LibPath:string;
   ConfigText: TStringList;
   aCPU, aOS: string;
   aTCPU:TCPU;
@@ -1164,7 +1164,7 @@ var
   success:boolean;
   SnipBegin,SnipEnd: integer;
   i:integer;
-  s,aResultMessage:string;
+  s,dummy,aResultMessage:string;
 begin
   aOS := GetSourceOS;
   aCPU := GetSourceCPU;
@@ -1173,12 +1173,12 @@ begin
   aTOS:=TOS.osNone;
   aTSUBARCH:=TSUBARCH.saNone;
 
-  //BinPath:=ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',aCPU+'-'+aOS]);
-  BinPath:=ConcatPaths([sInstallDir,'fpc','bin',aCPU+'-'+aOS])+DirectorySeparator;
+  //ConfigPath:=ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',aCPU+'-'+aOS]);
+  ConfigPath:=ConcatPaths([sInstallDir,'fpc','bin',aCPU+'-'+aOS])+DirectorySeparator;
 
-  FPCCfg:=BinPath+FPCCONFIGFILENAME;
+  FPCCfg:=ConfigPath+FPCCONFIGFILENAME;
   {$ifdef UNIX}
-  if (NOT FileExists(FPCCfg)) then FPCCfg:=ExpandFileName(BinPath+'../etc/'+FPCCONFIGFILENAME);
+  if (NOT FileExists(FPCCfg)) then FPCCfg:=ExpandFileName(ConfigPath+'../etc/'+FPCCONFIGFILENAME);
   {$endif}
 
   result:=false;
@@ -1205,7 +1205,7 @@ begin
     CheckAutoClear.Checked:=false;
 
     memoSummary.Lines.Append(upBuildAllCrossCompilers);
-    memoSummary.Lines.Append(upBuildAllCrossCompilersCheck+' '+BinPath);
+    memoSummary.Lines.Append(upBuildAllCrossCompilersCheck+' '+ConfigPath);
     memoSummary.Lines.Append('');
 
   end
@@ -1251,10 +1251,12 @@ begin
           // try to distinguish between different Solaris versons
           if (aTOS=TOS.solaris) then
           begin
+            GetCrossToolsDir(aTCPU,aTOS,false,true,false,BinPath,dummy);
+
             for i:=SnipBegin to SnipEnd do
             begin
               s:=ConfigText.Strings[i];
-              if (Pos('-FD',s)>0) AND (Pos('-solaris-oi',s)>0) then
+              if (Pos('-FD',s)>0) AND (Pos(BinPath,s)>0) then
               begin
                 aOS:='solaris-oi';
                 break;
@@ -1265,15 +1267,19 @@ begin
           // try to distinguish between different Linux versons
           if (aTOS=TOS.linux) then
           begin
+            GetCrossToolsDir(aTCPU,aTOS,true,false,false,BinPath,dummy);
+            GetCrossToolsDir(aTCPU,aTOS,false,false,true,dummy,LibPath);
+
             for i:=SnipBegin to SnipEnd do
             begin
               s:=ConfigText.Strings[i];
-              if (Pos('-FD',s)>0) AND (Pos('-musllinux',s)>0) then
+              if (Pos('-FD',s)>0) AND (Pos(BinPath,s)>0) then
               begin
                 aOS:='linux-musl';
                 break;
               end;
-              if (Pos('-Fl',s)>0) AND (Pos('-linux-legacy',s)>0) then
+
+              if (Pos('-Fl',s)>0) AND (Pos(LibPath,s)>0) then
               begin
                 aOS:='linux-legacy';
                 break;

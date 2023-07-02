@@ -1248,6 +1248,9 @@ end;
 procedure TFPCupManager.GetCrossToolsPath(out BinPath,LibPath:string);
 begin
   GetCrossToolsDir(CrossCPU_Target,CrossOS_Target,MUSL,SolarisOI,LinuxLegacy,BinPath,LibPath);
+
+  LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSLIBPATH),LibPath]);
+  BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSBINPATH),BinPath]);
 end;
 
 function TFPCupManager.GetCrossBinsURL(out BaseBinsURL:string; var BinsFileName:string):boolean;

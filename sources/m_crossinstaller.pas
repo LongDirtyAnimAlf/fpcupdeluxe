@@ -543,9 +543,9 @@ end;
 procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI,LinuxLegacy:boolean; out BinPath,LibPath:string);
 begin
   // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
-  // Normally, we have the standard names for libs and bins paths
-  LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSLIBPATH),GetCPU(CrossCPU_Target)])+'-';
-  BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSBINPATH),GetCPU(CrossCPU_Target)])+'-';
+
+  LibPath:=GetCPU(CrossCPU_Target)+'-';
+  BinPath:=GetCPU(CrossCPU_Target)+'-';
 
   if MUSL then
   begin
@@ -555,6 +555,7 @@ begin
 
   LibPath:=LibPath+GetOS(CrossOS_Target);
   BinPath:=BinPath+GetOS(CrossOS_Target);
+
   if SolarisOI then
   begin
     LibPath:=LibPath+'-oi';
@@ -1000,21 +1001,28 @@ end;
 
 function TCrossInstaller.GetLibs(Basepath:string):boolean;
 var
-  DummyBinDir:string;
+  BinDir,LibDir:string;
 begin
   result:=FLibsFound;
-  if (NOT result) then GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,FLinuxLegacy,DummyBinDir,FUtilsDirectoryID);
+  if (NOT result) then
+  begin
+    GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,FLinuxLegacy,BinDir,LibDir);
+    FUtilsDirectoryID:=LibDir;
+  end;
 end;
 
 function TCrossInstaller.GetBinUtils(Basepath: string): boolean;
 var
   i:integer;
-  DummyLibDir:string;
+  BinDir,LibDir:string;
 begin
   result:=FBinsFound;
 
-  if (NOT result) then GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,FLinuxLegacy,FUtilsDirectoryID,DummyLibDir);
-
+  if (NOT result) then
+  begin
+    GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,FLinuxLegacy,BinDir,LibDir);
+    FUtilsDirectoryID:=BinDir;
+  end;
 
   // only add options once !
   if FCrossOptsAdded then exit;
