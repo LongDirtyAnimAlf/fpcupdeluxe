@@ -56,27 +56,16 @@ end;
 { TAny_Solarisx64 }
 
 function TAny_Solarisx64.GetLibs(Basepath:string): boolean;
-var
-  aDirName:string;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
-
-  if FSolarisOI then
-  begin
-    aDirName:=DirName+'-oi';
-  end
-  else
-  begin
-    aDirName:=DirName;
-  end;
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LIBCFILENAME);
 
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,aDirName,LIBCFILENAME);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCFILENAME);
 
   if result then
   begin
@@ -93,26 +82,16 @@ function TAny_Solarisx64.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
   BinPrefixTry: string;
-  aDirName:string;
 begin
   result:=inherited;
   if result then exit;
-
-  if FSolarisOI then
-  begin
-    aDirName:=DirName+'-oi';
-  end
-  else
-  begin
-    aDirName:=DirName;
-  end;
 
   // Start with any names user may have given
   AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
-    result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // Also allow for crossbinutils without prefix
   if not result then
@@ -120,7 +99,7 @@ begin
     BinPrefixTry:='';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 

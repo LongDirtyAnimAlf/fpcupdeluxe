@@ -105,7 +105,7 @@ end;
 
 function Tany_linuxmipsel.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // begin simple: check presence of library file in basedir

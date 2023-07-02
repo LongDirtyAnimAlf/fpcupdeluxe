@@ -89,7 +89,7 @@ const
 begin
   // DOS8086 does not need libs by default, but user can add them.
 
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // search local paths based on libraries provided for or adviced by fpc itself

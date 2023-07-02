@@ -32,7 +32,7 @@ end;
 
 function Tanyinternallinker_win386.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
   FLibsPath:='';
   result:=true;

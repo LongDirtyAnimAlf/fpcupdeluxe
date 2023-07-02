@@ -66,7 +66,7 @@ function TAny_go32v2i386.GetLibs(Basepath:string): boolean;
 const
   LibName='';
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // first search local paths based on libbraries provided for or adviced by fpc itself

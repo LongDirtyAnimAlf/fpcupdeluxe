@@ -1273,6 +1273,12 @@ begin
                 aOS:='linux-musl';
                 break;
               end;
+              if (Pos('-Fl',s)>0) AND (Pos('-linux-legacy',s)>0) then
+              begin
+                aOS:='linux-legacy';
+                break;
+              end;
+
             end;
           end;
 
@@ -2025,6 +2031,7 @@ begin
       FPCupManager.CrossOS_Target:=OSType;
       sOS:=radgrpOS.Items[radgrpOS.ItemIndex];
       if sOS='linux-musl' then FPCupManager.MUSL:=true;
+      if sOS='linux-legacy' then FPCupManager.LinuxLegacy:=true;
       if sOS='solaris-oi' then FPCupManager.SolarisOI:=true;
       FPCupManager.OnlyModules:=_NATIVECROSSFPC;
       sStatus:='Going to build native compiler for '+FPCupManager.CrossCombo_Target;
@@ -2824,6 +2831,7 @@ begin
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s='linux-musl' then FPCupManager.MUSL:=true;
+    if s='linux-legacy' then FPCupManager.LinuxLegacy:=true;
     if s='solaris-oi' then FPCupManager.SolarisOI:=true;
   end;
 
@@ -3205,6 +3213,7 @@ begin
 
       s:='fpcupdeluxe: FPC cross-builder: Building compiler for '+GetOS(FPCupManager.CrossOS_Target);
       if FPCupManager.MUSL then s:=s+'-musl';
+      if FPCupManager.LinuxLegacy then s:=s+'-legacy';
       if FPCupManager.SolarisOI then s:=s+'-openindiana';
       s:=s+'-'+GetCPU(FPCupManager.CrossCPU_Target);
       sStatus:=s;

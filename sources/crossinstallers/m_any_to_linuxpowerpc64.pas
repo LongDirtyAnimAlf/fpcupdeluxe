@@ -61,7 +61,7 @@ end;
 
 function Tany_linuxpowerpc64.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // begin simple: check presence of library file in basedir

@@ -61,7 +61,7 @@ var
   aABI:TABI;
   S:string;
 begin
-  result:=FLibsFound;
+  result:=inherited;
 
   if result then exit;
 

@@ -62,7 +62,7 @@ function TAny_LinuxXtensa.GetLibs(Basepath:string): boolean;
 begin
   // mipsel-embedded does not need libs by default, but user can add them.
 
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // begin simple: check presence of library file in basedir

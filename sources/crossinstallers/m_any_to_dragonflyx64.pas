@@ -61,7 +61,7 @@ end;
 
 function Tany_dragonflyx64.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
 
   if result then exit;
 

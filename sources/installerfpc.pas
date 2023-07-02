@@ -394,6 +394,10 @@ begin
         ConfigText.Append('#IFDEF FPC_CROSSCOMPILING');
         ConfigText.Append('#IFDEF '+UpperCase(CrossInstaller.TargetOSName));
         ConfigText.Append('#IFDEF CPU'+UpperCase(CrossInstaller.TargetCPUName));
+        //if FLinuxLegacy then
+        //  ConfigText.Append('#IFDEF LINUXLEGACY')
+        //else
+        //  ConfigText.Append('#IFNDEF LINUXLEGACY');
 
         // Just add new snipped
         if SnippetText.Count>0 then
@@ -402,6 +406,7 @@ begin
             ConfigText.Append(SnippetText.Strings[i]);
         end;
 
+        //ConfigText.Append('#ENDIF LINUXLEGACY');
         ConfigText.Append('#ENDIF CPU'+UpperCase(CrossInstaller.TargetCPUName));
         ConfigText.Append('#ENDIF '+UpperCase(CrossInstaller.TargetOSName));
         ConfigText.Append('#ENDIF FPC_CROSSCOMPILING');
@@ -3570,6 +3575,7 @@ begin
     begin
       CrossInstaller.SolarisOI:=FSolarisOI;
       CrossInstaller.MUSL:=FMUSL;
+      CrossInstaller.LinuxLegacy:=FLinuxLegacy;
     end;
   end;
 

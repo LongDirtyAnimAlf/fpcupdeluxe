@@ -54,7 +54,7 @@ end;
 
 function TWinx64.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
   FLibsPath:='';
   result:=true;

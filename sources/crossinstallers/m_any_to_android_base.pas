@@ -115,7 +115,7 @@ var
   PresetLibPath,aOption:string;
   FilesFound,FilesFoundFiltered: TStringList;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // begin simple: check presence of library file in basedir

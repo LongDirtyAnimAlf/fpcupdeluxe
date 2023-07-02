@@ -76,7 +76,7 @@ function TAny_AIXPowerPC.GetLibs(Basepath:string): boolean;
 const
   StaticLibName='libc.a';
 begin
-  result:=FLibsFound;
+  result:=inherited;
 
   if result then exit;
 

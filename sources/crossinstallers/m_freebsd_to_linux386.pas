@@ -44,7 +44,7 @@ end;
 
 function TFreeBSD_Linux386.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   FLibsPath:='/compat/linux/lib';

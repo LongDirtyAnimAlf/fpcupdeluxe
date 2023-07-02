@@ -65,7 +65,7 @@ end;
 
 function Tany_androidjvm.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   FLibsPath:='';

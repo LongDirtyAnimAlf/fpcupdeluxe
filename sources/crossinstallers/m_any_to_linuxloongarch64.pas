@@ -66,7 +66,7 @@ const
 var
   DynLinker:string;
 begin
-  result:=FLibsFound;
+  result:=inherited;
 
   if result then exit;
 

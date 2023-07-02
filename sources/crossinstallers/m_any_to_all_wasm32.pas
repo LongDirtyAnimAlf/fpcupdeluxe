@@ -57,7 +57,7 @@ function TAny_AllWasm32.GetLibs(Basepath:string): boolean;
 const
   LibName='libc.a';
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   result:=SearchLibrary(Basepath,LibName);

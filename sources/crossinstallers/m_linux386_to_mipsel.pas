@@ -98,7 +98,7 @@ function TLinux386_mipsel.GetLibs(Basepath:string): boolean;
 const
   DirName='mipsel-linux';
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // begin simple: check presence of library file in basedir

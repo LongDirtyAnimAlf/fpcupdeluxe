@@ -68,7 +68,7 @@ const
 var
   aSubarchName:string;
 begin
-  result:=FLibsFound;
+  result:=inherited;
 
   if result then exit;
 

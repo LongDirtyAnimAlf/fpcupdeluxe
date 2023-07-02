@@ -95,7 +95,7 @@ end;
 
 function TLinux386_mips.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // begin simple: check presence of library file in basedir

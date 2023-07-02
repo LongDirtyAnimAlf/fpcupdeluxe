@@ -64,7 +64,7 @@ const
 var
   sd,lc:string;
 begin
-  result:=FLibsFound;
+  result:=inherited;
 
   if result then exit;
 

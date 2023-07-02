@@ -184,32 +184,25 @@ const
   SDENDMAGIC='");';
 {$ENDIF UNIX}
 var
-  aDirName,aLibName:string;
+  aLibName:string;
   {$IFDEF UNIX}
   s,sd:string;
   i,j:integer;
   {$ENDIF UNIX}
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
-  if FMUSL then
-  begin
-    aDirName:=TargetCPUName+'-musl'+TargetOSName;
-    aLibName:='libc.musl-'+TargetCPUName+'.so.1';
-  end
-  else
-  begin
-    aDirName:=DirName;
-    aLibName:=LIBCFILENAME;
-  end;
+  aLibName:=LIBCFILENAME;
+
+  if FMUSL then aLibName:='libc.musl-'+TargetCPUName+'.so.1';
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,aLibName);
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,aDirName,aLibName);
+    result:=SimpleSearchLibrary(BasePath,DirName,aLibName);
 
   if result then
   begin
@@ -363,7 +356,6 @@ function Tany_linux.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
   BinPrefixTry: string;
-  aDirName: string;
   {$IFDEF UNIX}
   s: string;
   i: integer;
@@ -373,18 +365,13 @@ begin
 
   if result then exit;
 
-  if FMUSL then
-    aDirName:=TargetCPUName+'-musl'+TargetOSName
-  else
-    aDirName:=DirName;
-
   BinPrefixTry:=FBinUtilsPrefix;
 
   AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
-    result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
 
   if FMUSL then
@@ -395,7 +382,7 @@ begin
       AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
       if (not result) then
-        result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     end;
     if (not result) then
     begin
@@ -403,7 +390,7 @@ begin
       AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
       if (not result) then
-        result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     end;
   end;
 
@@ -413,7 +400,7 @@ begin
   begin
     for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
     begin
-      result:=SearchBinUtil(IncludeTrailingPathDelimiter(UnixBinDirs[i])+aDirName, AsFile);
+      result:=SearchBinUtil(IncludeTrailingPathDelimiter(UnixBinDirs[i])+DirName, AsFile);
       if (not result) then
         result:=SearchBinUtil(UnixBinDirs[i], AsFile);
       if result then break;
@@ -433,7 +420,7 @@ begin
       AsFile:=ASFILENAME+GetExeExt;
       result:=SearchBinUtil(s,AsFile);
       if not result then
-        result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     end;
   end;
   {$ENDIF}
@@ -446,7 +433,7 @@ begin
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if (not result) then
-      result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     {$IFDEF UNIX}
     if (not result) then
     begin
@@ -465,7 +452,7 @@ begin
         AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
         result:=SearchBinUtil(BasePath,AsFile);
         if (not result) then
-          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+          result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
         {$IFDEF UNIX}
         if (not result) then
         begin
@@ -486,7 +473,7 @@ begin
         AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
         result:=SearchBinUtil(BasePath,AsFile);
         if (not result) then
-          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+          result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
         {$IFDEF UNIX}
         if (not result) then
         begin
@@ -509,7 +496,7 @@ begin
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if (not result) then
-      result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if (not result) then
     begin
       for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
@@ -526,7 +513,7 @@ begin
         AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
         result:=SearchBinUtil(BasePath,AsFile);
         if (not result) then
-          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+          result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
         if (not result) then
         begin
           for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
@@ -545,7 +532,7 @@ begin
         AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
         result:=SearchBinUtil(BasePath,AsFile);
         if (not result) then
-          result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+          result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
         if (not result) then
         begin
           for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
@@ -566,7 +553,7 @@ begin
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if (not result) then
-      result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
 
   if result then FBinUtilsPrefix:=BinPrefixTry;

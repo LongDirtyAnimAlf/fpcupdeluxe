@@ -170,7 +170,7 @@ type
     FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
     FBinutilsPathInPath: boolean;
-    FBinUtilsDirectoryID: string; //where to find the binutils themselves
+    FUtilsDirectoryID: string; //where to find the utils (tools/libs) themselves
     FSearchMode: TSearchSetting;
     FCrossModuleNamePrefix: string; //used for identifying module to user in messages
     FCrossOpts: TStringList; //Options to be added to CROSSOPT by the calling code. XP= (binutils prefix) is already done, no need to add it
@@ -184,6 +184,7 @@ type
     FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
     FSolarisOI:boolean;
     FMUSL:boolean;
+    FLinuxLegacy:boolean;
     function PerformLibraryPathMagic(out LibraryPath:string):boolean;
     function SearchLibrary(Directory, LookFor: string): boolean;
     function SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string): boolean;
@@ -195,7 +196,7 @@ type
     function FPCUPToolsSearch(BasePath,DirName: string; LibsOrBins:boolean; const LookFor:string): boolean;
   public
     // In your descendent, implement this function: you can download libraries or check for their existence for normal cross compile libs:
-    function GetLibs(Basepath:string):boolean;virtual; abstract;
+    function GetLibs(Basepath:string):boolean;virtual;
     // In your descendent, implement this function: you can download cross compile binutils or check for their existence
     function GetBinUtils(Basepath:string):boolean;virtual;
     {$ifndef FPCONLY}
@@ -238,7 +239,7 @@ type
     property BinUtilsPathInPath: boolean read FBinutilsPathInPath;
     // Prefix used before executable names for binutils (e.g. before as.exe). May be empty.
     property BinUtilsPrefix:string read FBinUtilsPrefix;
-    property DirName:string read FBinUtilsDirectoryID;
+    property DirName:string read FUtilsDirectoryID;
     property TargetCPU:TCPU read FTargetCPU;
     property TargetOS:TOS read FTargetOS;
     property SubArch:TSUBARCH read FSubArch;
@@ -250,6 +251,7 @@ type
     property RegisterName:string read FRegisterName;
     property SolarisOI: boolean write FSolarisOI;
     property MUSL: boolean write FMUSL;
+    property LinuxLegacy: boolean write FLinuxLegacy;
 
     constructor Create;
     destructor Destroy; override;
@@ -273,7 +275,7 @@ function IsCPUOSComboValid(CPU:TCPU;OS:TOS):boolean;
 function  GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
 procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
 {$endif LCL}
-
+procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI,LinuxLegacy:boolean; out BinPath,LibPath:string);
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 function GetExeExt(const aOS:TOS=TOS.osNone): string;
 
@@ -538,13 +540,108 @@ begin
   end;
 end;
 
-{ TCrossInstaller }
+procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI,LinuxLegacy:boolean; out BinPath,LibPath:string);
+begin
+  // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
+  // Normally, we have the standard names for libs and bins paths
+  LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSLIBPATH),GetCPU(CrossCPU_Target)])+'-';
+  BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSBINPATH),GetCPU(CrossCPU_Target)])+'-';
+
+  if MUSL then
+  begin
+    LibPath:=LibPath+'musl';
+    BinPath:=BinPath+'musl';
+  end;
+
+  LibPath:=LibPath+GetOS(CrossOS_Target);
+  BinPath:=BinPath+GetOS(CrossOS_Target);
+  if SolarisOI then
+  begin
+    LibPath:=LibPath+'-oi';
+    BinPath:=BinPath+'-oi';
+  end;
+
+  if LinuxLegacy then
+  begin
+    LibPath:=LibPath+'-legacy';
+  end;
+
+  {$IF (defined(Windows)) OR (defined(Linux))}
+  // Set special Bins directory for universal tools for Darwin based on clang
+  if (
+    ((CrossOS_Target=TOS.darwin) AND (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
+    OR
+    ((CrossOS_Target=TOS.ios) AND (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]))
+    ) then
+  begin
+    BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
+    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'apple',[]);
+  end;
+
+  // Set special Bins directory for universal tools for Android based on clang
+  if CrossOS_Target=TOS.android then
+  begin
+    BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
+  end;
+  {$endif}
+
+  // Set special Bins directory for universal tools for wasm32
+  if CrossCPU_Target=TCPU.wasm32 then
+  begin
+    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'all',[]);
+  end;
+
+  if CrossOS_Target=TOS.darwin then
+  begin
+    // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
+    if (CrossCPU_Target=TCPU.i386) OR (CrossCPU_Target=TCPU.x86_64) OR (CrossCPU_Target=TCPU.aarch64) then
+    begin
+      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
+      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),'all',[]);
+    end;
+    if (CrossCPU_Target=TCPU.powerpc) OR (CrossCPU_Target=TCPU.powerpc64) then
+    begin
+      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
+      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
+    end;
+  end;
+
+  if CrossOS_Target=TOS.ios then
+  begin
+    // iOS is special: combined libs for arm and aarch64
+    if (CrossCPU_Target=TCPU.arm) OR (CrossCPU_Target=TCPU.aarch64) then
+    begin
+      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
+      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),'all',[]);
+    end;
+  end;
+
+  if CrossOS_Target=TOS.aix then
+  begin
+    // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
+    if (CrossCPU_Target=TCPU.powerpc) OR (CrossCPU_Target=TCPU.powerpc64) then
+    begin
+      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
+      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
+    end;
+  end;
+
+  //Put all windows stuff (not that much) in a single windows directory
+  if (CrossOS_Target=TOS.win32) OR (CrossOS_Target=TOS.win64) then
+  begin
+    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'windows',[]);
+    LibPath:=StringReplace(LibPath,GetOS(CrossOS_Target),'windows',[]);
+  end;
+end;
+
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 begin
   if not assigned(CrossInstallers) then
     CrossInstallers:=TStringList.Create;
   CrossInstallers.AddObject(Platform,TObject(aCrossInstaller));
 end;
+
+{ TCrossInstaller }
 
 function TCrossInstaller.GetLibsPath:string;
 begin
@@ -901,11 +998,23 @@ begin
 end;
 {$endif}
 
+function TCrossInstaller.GetLibs(Basepath:string):boolean;
+var
+  DummyBinDir:string;
+begin
+  result:=FLibsFound;
+  if (NOT result) then GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,FLinuxLegacy,DummyBinDir,FUtilsDirectoryID);
+end;
+
 function TCrossInstaller.GetBinUtils(Basepath: string): boolean;
 var
   i:integer;
+  DummyLibDir:string;
 begin
   result:=FBinsFound;
+
+  if (NOT result) then GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,FLinuxLegacy,FUtilsDirectoryID,DummyLibDir);
+
 
   // only add options once !
   if FCrossOptsAdded then exit;
@@ -976,7 +1085,7 @@ begin
   FCrossModuleNamePrefix:='T'+GetSourceCPUOS;
 
   FRegisterName:=TargetCPUName+'-'+TargetOSName;
-  FBinUtilsDirectoryID:=FRegisterName;
+  FUtilsDirectoryID:=FRegisterName;
 
   case TargetOS of
     TOS.android: FBinUtilsPrefix:=TargetCPUName+'-linux-'+TargetOSName+'-'; //standard eg in Android NDK 9
@@ -1004,7 +1113,7 @@ begin
 
   FBinUtilsPrefix:='Error: cross compiler extension must set FBinUtilsPrefix: can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it';
   FCrossModuleNamePrefix:='TAny';
-  FBinUtilsDirectoryID:='none';
+  FUtilsDirectoryID:='none';
   FRegisterName:='unknown';
 end;
 

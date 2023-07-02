@@ -88,7 +88,7 @@ var
   S:string;
 begin
   // AVR-embedded does not need libs by default, but user can add them.
-  result:=FLibsFound;
+  result:=inherited;
 
   if result then exit;
 

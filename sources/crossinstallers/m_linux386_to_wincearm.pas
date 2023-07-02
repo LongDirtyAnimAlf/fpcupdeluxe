@@ -58,7 +58,7 @@ end;
 
 function TLinux386_wincearm.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // Wince does not need libs by default, but user can add them.

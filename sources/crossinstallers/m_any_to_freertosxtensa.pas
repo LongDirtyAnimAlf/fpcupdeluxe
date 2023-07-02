@@ -69,7 +69,7 @@ var
   aABI:TABI;
   ActionNeeded:boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   StaticLibNameESP:='';

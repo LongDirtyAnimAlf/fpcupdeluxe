@@ -237,6 +237,7 @@ type
     FSequencer: TSequencer;
     FSolarisOI:boolean;
     FMUSL:boolean;
+    FLinuxLegacy:boolean;
     FFPCUnicode:boolean;
     FAutoTools:boolean;
     FRunInfo:string;
@@ -374,6 +375,7 @@ type
     property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
     property SolarisOI:boolean read FSolarisOI write FSolarisOI;
     property MUSL:boolean read FMUSL write FMUSL;
+    property LinuxLegacy:boolean read FLinuxLegacy write FLinuxLegacy;
     property FPCUnicode:boolean read FFPCUnicode write FFPCUnicode;
     property AutoTools:boolean read FAutoTools write FAutoTools;
     property RunInfo:string read GetRunInfo write SetRunInfo;
@@ -1056,6 +1058,7 @@ begin
 
   SolarisOI:=false;
   MUSL:=false;
+  LinuxLegacy:=false;
 
   CrossOPT:='';
 
@@ -1172,6 +1175,8 @@ begin
   // normally, we have the same names for libs and bins URL
   LibsFileName:=BinsFileName;
 
+  if LinuxLegacy then LibsFileName:='Legacy'+LibsFileName;
+
   {$IF (defined(Windows)) OR (defined(Linux))}
   if (
     ((CrossOS_Target=TOS.darwin) AND (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
@@ -1242,90 +1247,7 @@ end;
 
 procedure TFPCupManager.GetCrossToolsPath(out BinPath,LibPath:string);
 begin
-  // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
-  // Normally, we have the standard names for libs and bins paths
-  LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSLIBPATH),GetCPU(CrossCPU_Target)])+'-';
-  BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSBINPATH),GetCPU(CrossCPU_Target)])+'-';
-
-  if MUSL then
-  begin
-    LibPath:=LibPath+'musl';
-    BinPath:=BinPath+'musl';
-  end;
-  LibPath:=LibPath+GetOS(CrossOS_Target);
-  BinPath:=BinPath+GetOS(CrossOS_Target);
-  if SolarisOI then
-  begin
-    LibPath:=LibPath+'-oi';
-    BinPath:=BinPath+'-oi';
-  end;
-
-  {$IF (defined(Windows)) OR (defined(Linux))}
-  // Set special Bins directory for universal tools for Darwin based on clang
-  if (
-    ((CrossOS_Target=TOS.darwin) AND (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
-    OR
-    ((CrossOS_Target=TOS.ios) AND (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]))
-    ) then
-  begin
-    BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
-    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'apple',[]);
-  end;
-
-  // Set special Bins directory for universal tools for Android based on clang
-  if CrossOS_Target=TOS.android then
-  begin
-    BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
-  end;
-  {$endif}
-
-  // Set special Bins directory for universal tools for wasm32
-  if CrossCPU_Target=TCPU.wasm32 then
-  begin
-    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'all',[]);
-  end;
-
-  if CrossOS_Target=TOS.darwin then
-  begin
-    // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
-    if (CrossCPU_Target=TCPU.i386) OR (CrossCPU_Target=TCPU.x86_64) OR (CrossCPU_Target=TCPU.aarch64) then
-    begin
-      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
-      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),'all',[]);
-    end;
-    if (CrossCPU_Target=TCPU.powerpc) OR (CrossCPU_Target=TCPU.powerpc64) then
-    begin
-      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-    end;
-  end;
-
-  if CrossOS_Target=TOS.ios then
-  begin
-    // iOS is special: combined libs for arm and aarch64
-    if (CrossCPU_Target=TCPU.arm) OR (CrossCPU_Target=TCPU.aarch64) then
-    begin
-      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
-      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),'all',[]);
-    end;
-  end;
-
-  if CrossOS_Target=TOS.aix then
-  begin
-    // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
-    if (CrossCPU_Target=TCPU.powerpc) OR (CrossCPU_Target=TCPU.powerpc64) then
-    begin
-      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-    end;
-  end;
-
-  //Put all windows stuff (not that much) in a single windows directory
-  if (CrossOS_Target=TOS.win32) OR (CrossOS_Target=TOS.win64) then
-  begin
-    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'windows',[]);
-    LibPath:=StringReplace(LibPath,GetOS(CrossOS_Target),'windows',[]);
-  end;
+  GetCrossToolsDir(CrossCPU_Target,CrossOS_Target,MUSL,SolarisOI,LinuxLegacy,BinPath,LibPath);
 end;
 
 function TFPCupManager.GetCrossBinsURL(out BaseBinsURL:string; var BinsFileName:string):boolean;
@@ -2351,6 +2273,7 @@ begin
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
     if FParent.SolarisOI then FInstaller.SolarisOI:=true {else if FInstaller.SolarisOI then FParent.SolarisOI:=true};
     if FParent.MUSL then FInstaller.MUSL:=true {else if FInstaller.MUSL then FParent.MUSL:=true};
+    if FParent.LinuxLegacy then FInstaller.LinuxLegacy:=true {else if FInstaller.LinuxLegacy then FParent.LinuxLegacy:=true};
     FInstaller.Ultibo:=Ultibo;
 
     if CrossCompiling then

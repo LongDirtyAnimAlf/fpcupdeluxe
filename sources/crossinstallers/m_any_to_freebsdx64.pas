@@ -67,7 +67,7 @@ function Tany_freebsdx64.GetLibs(Basepath:string): boolean;
 var
   aVersion:integer;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // begin simple: check presence of library file in basedir

@@ -70,7 +70,7 @@ function Tany_haiku386.GetLibs(Basepath:string): boolean;
 const
   LibName='libroot.so';
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   // begin simple: check presence of library file in basedir

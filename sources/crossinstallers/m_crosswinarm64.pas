@@ -58,7 +58,7 @@ end;
 
 function TWinarm64.GetLibs(Basepath:string): boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
   FLibsPath:='';
   result:=true;
@@ -93,7 +93,7 @@ begin
 
     if not result then
     begin
-      FBinUtilsDirectoryID:=TargetCPUName+'-windows';
+      FUtilsDirectoryID:=TargetCPUName+'-windows';
       result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     end;
 

@@ -65,7 +65,7 @@ var
   S:string;
 begin
   // Arm-embedded does not need libs by default, but user can add them.
-  result:=FLibsFound;
+  result:=inherited;
 
   if result then exit;
 

@@ -75,7 +75,7 @@ var
   Major,Minor,Release:integer;
   found:boolean;
 begin
-  result:=FLibsFound;
+  result:=inherited;
 
   if result then exit;
 

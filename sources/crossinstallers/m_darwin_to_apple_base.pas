@@ -59,7 +59,7 @@ function Tdarwin_apple.GetLibs(Basepath:string): boolean;
 var
   aOption:string;
 begin
-  result:=FLibsFound;
+  result:=inherited;
   if result then exit;
 
   FLibsPath:='';
