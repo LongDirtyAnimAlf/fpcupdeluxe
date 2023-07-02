@@ -1470,10 +1470,10 @@ begin
           if (MakeCycle<>st_NativeCompiler) then
           {$endif}
           begin
+            if UseLibc then CrossInstaller.AddCrossOption('-d'+DEFINE_FPC_USE_LIBC);
             for i:=0 to CrossInstaller.CrossOpt.Count-1 do
               CrossCompilerOptions:=CrossCompilerOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
             CrossCompilerOptions:=TrimRight(CrossCompilerOptions);
-            if UseLibc then CrossCompilerOptions:=CrossCompilerOptions+' -dFPC_USE_LIBC';
           end;
 
           NativeCompilerOptions:=Trim(NativeCompilerOptions);
@@ -2091,7 +2091,7 @@ begin
     {$endif}
   {$endif}
 
-  if UseLibc then s1:=s1+' -dFPC_USE_LIBC';
+  if UseLibc then s1:=s1+' -d'+DEFINE_FPC_USE_LIBC;
 
   {$ifdef Haiku}
     s2:='';
@@ -3930,6 +3930,9 @@ begin
 
   if (IsCross) then
   begin
+    // This might also be done in the cross-compilers themselves.
+
+
     if ((FLinuxLegacy) AND (CrossInstaller.TargetOS=TOS.linux)) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.dragonfly) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.freebsd) then FUseLibc:=True;
@@ -4444,7 +4447,7 @@ begin
         ConfigText.Append(s);
         {$endif}
 
-        if UseLibc then ConfigText.Append('-dFPC_USE_LIBC');
+        if UseLibc then ConfigText.Append('-d'+DEFINE_FPC_USE_LIBC);
         {$ifdef freebsd}
         ConfigText.Append('-FD/usr/local/bin');
         {$endif}
@@ -5264,9 +5267,10 @@ begin
 
   FTargetCompilerName:=GetCompilerName(GetSourceCPU);
 
-  FCompiler  := '';
-  FUseLibc   := false;
-  FUseRevInc := false;
+  FCompiler                    := '';
+  FUseLibc                     := false;
+  FUseRevInc                   := false;
+  FNativeFPCBootstrapCompiler  := false;
 
   InitDone   := false;
 end;

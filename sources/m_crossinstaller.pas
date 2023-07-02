@@ -129,6 +129,8 @@ type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
 
 const
+  DEFINE_FPC_USE_LIBC      = 'FPC_USE_LIBC';
+
   ARMArchFPCStr : array[TARMARCH] of string = (
     '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
   );
@@ -1116,6 +1118,8 @@ constructor TCrossInstaller.Create;
 begin
   FCrossOpts:=TStringList.Create;
 
+  FFPCVersion:='Error: FPC version unknown to cross-compiler';
+
   FTargetCPU:=TCPU.cpuNone;
   FTargetOS:=TOS.osNone;
 
@@ -1323,7 +1327,7 @@ begin
         begin
           //This is already done in the FPC installer itself.
           //To be checked if that is the right choice.
-          //aCrossOptionSetting:='-dFPC_USE_LIBC ';
+          //aCrossOptionSetting:='-d'+DEFINE_FPC_USE_LIBC+' ';
         end;
 
         //Store predefined setting.

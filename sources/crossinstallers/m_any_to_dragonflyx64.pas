@@ -1,6 +1,6 @@
 unit m_any_to_dragonflyx64;
 
-{ Cross compiles from e.g. Linux 64 bit (or any other OS with relevant binutils/libs) to FreeBSD x86_64
+{ Cross compiles from e.g. Linux 64 bit (or any other OS with relevant binutils/libs) to dragonfly x86_64
 Copyright (C) 2014 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
