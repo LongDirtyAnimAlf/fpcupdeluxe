@@ -2045,8 +2045,11 @@ begin
   SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;CmdFontName;';
   {$endif}
 
+  {$ifdef Windows}
+  // For now, only Windows
   if Application.Scaled and Scaled and (Screen<>nil) and (PixelsPerInch<>Screen.PixelsPerInch) then
     AutoAdjustLayout(lapAutoAdjustForDPI, PixelsPerInch, Screen.PixelsPerInch, 0, 0);
+  {$endif}
 end;
 
 procedure TForm1.IniPropStorageAppSavingProperties(Sender: TObject);
