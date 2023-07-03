@@ -3169,10 +3169,10 @@ begin
 
             // handle specialities for achive name
             {$IFDEF Darwin}
-            // URL: ftp://ftp.freepascal.org/pub/fpc/dist/2.2.2/source/
+            // URL: ftp://downloads.freepascal.org/pub/fpc/dist/2.2.2/source/
             if aLocalBootstrapVersion='2.2.2' then aCompilerArchive:='fpc-2.2.2.universal-darwin.bootstrap.tar.bz2'; //ppcuniversal
 
-            // URL: ftp://ftp.freepascal.org/pub/fpc/dist/2.2.4/source/
+            // URL: ftp://downloads.freepascal.org/pub/fpc/dist/2.2.4/source/
             if aLocalBootstrapVersion='2.2.4' then aCompilerArchive:='fpc-2.2.4.universal-darwin.bootstrap.tar.bz2'; //ppcuniversal
 
             // URL: standard
@@ -3191,6 +3191,9 @@ begin
             {$endif}
 
             s:=FPCFTPURL+'dist/'+aLocalBootstrapVersion+'/bootstrap/';
+
+            // The boosttrappers are also listed here.
+            // https://sourceforge.net/projects/freepascal/files/Bootstrap/
 
             Infoln(localinfotext+'Looking for (online) bootstrapper '+aCompilerArchive + ' in ' + s,etDebug);
 

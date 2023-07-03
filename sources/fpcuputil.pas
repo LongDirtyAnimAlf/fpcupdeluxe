@@ -5440,7 +5440,7 @@ begin
       end
       else
       begin
-        if URI.Host='ftp.freepascal.org' then
+        if URI.Host='downloads.freepascal.org' then
         begin
           Username := 'anonymous';
           Password := 'fpc@example.com';
@@ -5509,7 +5509,7 @@ begin
       end
       else
       begin
-        if URI.Host='ftp.freepascal.org' then
+        if URI.Host='downloads.freepascal.org' then
         begin
           Username := 'anonymous';
           Password := 'fpc@example.com';
@@ -5858,7 +5858,7 @@ begin
         end
         else
         begin
-          if URI.Host='ftp.freepascal.org' then
+          if URI.Host='downloads.freepascal.org' then
           begin
             UserPass:='anonymous:fpc@example.com';
           end;
@@ -5959,7 +5959,7 @@ begin
             end
             else
             begin
-              if URI.Host='ftp.freepascal.org' then
+              if URI.Host='downloads.freepascal.org' then
               begin
                 UserPass:='anonymous:fpc@example.com';
               end;

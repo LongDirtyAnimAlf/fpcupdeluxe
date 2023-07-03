@@ -13,10 +13,6 @@ msgstr ""
 msgid "Always ask for confirmation."
 msgstr ""
 
-#: extrasettings.captioncheckautoswitchurl
-msgid "Auto-switch repo URL."
-msgstr ""
-
 #: extrasettings.captioncheckdockedlazarus
 msgid "Docked Lazarus IDE."
 msgstr ""
@@ -59,6 +55,10 @@ msgstr ""
 
 #: extrasettings.captioncheckrepo
 msgid "Get FPC/Laz repositories."
+msgstr ""
+
+#: extrasettings.captionchecksavescript
+msgid "Save settings in fpcup-script."
 msgstr ""
 
 #: extrasettings.captionchecksendinfo
@@ -128,6 +128,10 @@ msgstr ""
 
 #: extrasettings.hintcheckrepo
 msgid "Download whole repository, or only latest files."
+msgstr ""
+
+#: extrasettings.hintchecksavescript
+msgid "Save the current install-settings in a fpclazup-script for later use."
 msgstr ""
 
 #: extrasettings.hintchecksendinfo
@@ -348,68 +352,6 @@ msgstr ""
 #: fpcupdeluxemainform.upupdatenotfound
 msgctxt "fpcupdeluxemainform.upupdatenotfound"
 msgid "No updates found."
-msgstr ""
-
-#: processutils.lisaborted
-msgid "Aborted"
-msgstr ""
-
-#: processutils.liscannotexecute
-#, object-pascal-format
-msgid "cannot execute \"%s\""
-msgstr ""
-
-#: processutils.liscannotfindexecutable
-#, object-pascal-format
-msgid "cannot find executable \"%s\""
-msgstr ""
-
-#: processutils.lisexecutableisadirectory
-#, object-pascal-format
-msgid "executable \"%s\" is a directory"
-msgstr ""
-
-#: processutils.lisexecutablelacksthepermissiontorun
-#, object-pascal-format
-msgid "executable \"%s\" lacks the permission to run"
-msgstr ""
-
-#: processutils.lisexitcode
-#, object-pascal-format
-msgid "Exit code %s"
-msgstr ""
-
-#: processutils.lisfreeingbufferlines
-#, object-pascal-format
-msgid "freeing buffer lines: %s"
-msgstr ""
-
-#: processutils.lismissingdirectory
-#, object-pascal-format
-msgid "missing directory \"%s\""
-msgstr ""
-
-#: processutils.lismissingexecutable
-#, object-pascal-format
-msgid "missing executable \"%s\""
-msgstr ""
-
-#: processutils.lissuccess
-msgid "Success"
-msgstr ""
-
-#: processutils.listoolhasnoexecutable
-#, object-pascal-format
-msgid "tool \"%s\" has no executable"
-msgstr ""
-
-#: processutils.lisunabletoexecute
-#, object-pascal-format
-msgid "unable to execute: %s"
-msgstr ""
-
-#: processutils.lisunabletoreadprocessexitstatus
-msgid "unable to read process ExitStatus"
 msgstr ""
 
 #: tform1.actfileexit.caption
@@ -678,24 +620,38 @@ msgctxt "tform1.lazarusversionlabel.caption"
 msgid "Lazarus version"
 msgstr ""
 
-#: tform1.listboxfpchistory.columns[0].caption
-msgctxt "tform1.listboxfpchistory.columns[0].caption"
+#: tform1.listboxfpchistorynew.columns[0].caption
+msgctxt "tform1.listboxfpchistorynew.columns[0].caption"
 msgid "Hash"
 msgstr ""
 
-#: tform1.listboxfpchistory.columns[1].caption
-msgctxt "tform1.listboxfpchistory.columns[1].caption"
+#: tform1.listboxfpchistorynew.columns[1].caption
+msgctxt "tform1.listboxfpchistorynew.columns[1].caption"
+msgid "Rev-name"
+msgstr ""
+
+#: tform1.listboxfpchistorynew.columns[2].caption
+msgctxt "tform1.listboxfpchistorynew.columns[2].caption"
 msgid "Date"
 msgstr ""
 
-#: tform1.listboxlazarushistory.columns[0].caption
-msgctxt "tform1.listboxlazarushistory.columns[0].caption"
+#: tform1.listboxlazarushistorynew.columns[0].caption
+msgctxt "tform1.listboxlazarushistorynew.columns[0].caption"
 msgid "Hash"
 msgstr ""
 
-#: tform1.listboxlazarushistory.columns[1].caption
-msgctxt "tform1.listboxlazarushistory.columns[1].caption"
+#: tform1.listboxlazarushistorynew.columns[1].caption
+msgctxt "tform1.listboxlazarushistorynew.columns[1].caption"
+msgid "Rev-name"
+msgstr ""
+
+#: tform1.listboxlazarushistorynew.columns[2].caption
+msgctxt "tform1.listboxlazarushistorynew.columns[2].caption"
 msgid "Date"
+msgstr ""
+
+#: tform1.mabout.caption
+msgid "About Up"
 msgstr ""
 
 #: tform1.mchinesecnlanguage.caption
@@ -718,10 +674,6 @@ msgstr ""
 msgid "&File"
 msgstr ""
 
-#: tform1.menuitem1.caption
-msgid "About"
-msgstr ""
-
 #: tform1.menuitem2.caption
 msgid "Languages"
 msgstr ""
@@ -740,6 +692,10 @@ msgstr ""
 
 #: tform1.mgermanlanguage.caption
 msgid "German (D)"
+msgstr ""
+
+#: tform1.mhelp.caption
+msgid "Help"
 msgstr ""
 
 #: tform1.missuesforum.caption
@@ -767,7 +723,7 @@ msgid "Online docs"
 msgstr ""
 
 #: tform1.mormotbtn.caption
-msgid "mORMot"
+msgid "mORMot2"
 msgstr ""
 
 #: tform1.mormotbtn.hint
@@ -776,6 +732,10 @@ msgstr ""
 
 #: tform1.mukrainianlanguage.caption
 msgid "Ukrainian (UK)"
+msgstr ""
+
+#: tform1.mwiki.caption
+msgid "Online Wiki"
 msgstr ""
 
 #: tform1.opmbtn.caption
@@ -889,7 +849,7 @@ msgid "Libraries"
 msgstr ""
 
 #: tform2.caption
-msgid "Advanced settings"
+msgid "Advanced Settings"
 msgstr ""
 
 #: tform2.chkfpcdebug.caption
@@ -970,7 +930,7 @@ msgid "Cross Build Options Override (i.e. -CfSoft)"
 msgstr ""
 
 #: tform2.labelfpcbranch.caption
-msgid "FPC branch"
+msgid "FPC branch/tag"
 msgstr ""
 
 #: tform2.labelfpcoptions.caption
@@ -986,11 +946,11 @@ msgid "FPC pre"
 msgstr ""
 
 #: tform2.labelfpcrevision.caption
-msgid "FPC hash/tag"
+msgid "FPC hash"
 msgstr ""
 
 #: tform2.labellazarusbranch.caption
-msgid "Laz. branch"
+msgid "Laz. branch/tag"
 msgstr ""
 
 #: tform2.labellazarusoptions.caption
@@ -1006,7 +966,7 @@ msgid "Lazarus pre"
 msgstr ""
 
 #: tform2.labellazarusrevision.caption
-msgid "Laz. hash/tag"
+msgid "Laz. hash"
 msgstr ""
 
 #: tform2.labelos.caption

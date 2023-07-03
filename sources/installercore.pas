@@ -88,8 +88,8 @@ const
 
   SVNBASEHTTP           = 'https://svn.';
   SVNBASESVN            = 'svn://svn.';
-  FTPBASEHTTP           = 'https://ftp.';
-  FTPBASEFTP            = 'ftp://ftp.';
+  //FTPBASEFTP            = 'ftp://ftp.';
+  FTPBASEFTP            = 'ftp://downloads.';
 
   FPCBASESVNURL         = SVNBASEHTTP+'freepascal.org';
   FTPBASEURL            = FTPBASEFTP+'freepascal.org';
@@ -99,7 +99,6 @@ const
   FPCFTPSNAPSHOTURL     = FPCFTPURL+'snapshot/';
 
   LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
-
 
   PACKAGESLOCATION      = 'packages.fppkg';
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';
@@ -2946,7 +2945,7 @@ const
   JASMINVERSION = '2.4';
   TARGETNAME='jasmin.jar';
   SOURCEURL : array [0..4] of string = (
-    'ftp://ftp.freepascal.org/pub/fpc/contrib/jvm/fpcjvmutilities.zip',
+    'ftp://downloads.freepascal.org/pub/fpc/contrib/jvm/fpcjvmutilities.zip',
     'https://sourceforge.net/projects/jasmin/files/jasmin/jasmin-'+JASMINVERSION+'/jasmin-'+JASMINVERSION+'.zip/download',
     'https://github.com/davidar/jasmin/archive/'+JASMINVERSION+'.zip',
     'https://www.java2s.com/Code/JarDownload/jasmin/jasmin.jar.zip',
@@ -3213,7 +3212,6 @@ begin
 
   // Do we need FTP
   //if result=nil then if (Pos(FTPBASEFTP,LowerCase(FURL))>0) then result:=FTPClient;
-  //if result=nil then if (Pos(FTPBASEHTTP,LowerCase(FURL))>0) then result:=FTPClient;
 end;
 
 function TInstaller.GetTempFileNameExt(Prefix,Ext : String) : String;

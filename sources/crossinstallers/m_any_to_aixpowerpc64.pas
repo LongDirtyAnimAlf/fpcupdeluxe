@@ -1,5 +1,5 @@
 unit m_any_to_aixpowerpc64;
-{ Cross compiles from any platform with correct binutils to AIX on 32 bit powerpc
+{ Cross compiles from any platform with correct binutils to AIX on 64 bit powerpc
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -32,7 +32,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 Setup: currently aimed at using the crossfpc supplied binaries/libs
 See
 http://wiki.lazarus.freepascal.org/FPC_AIX_Port
-- Get Windows binutils from ftp://ftp.freepascal.org/pub/fpc/contrib/aix/fpc-2.7.1.powerpc-aix-win32.zip
+- Get Windows binutils from ftp://downloads.freepascal.org/pub/fpc/contrib/aix/fpc-2.7.1.powerpc-aix-win32.zip
 powerpc-aix-ar.exe
 powerpc-aix-as.exe
 powerpc-aix-ld.exe

@@ -1553,7 +1553,7 @@ begin
   begin
     //if (NOT FSequencer.FParent.MUSL) then
     {$ifdef Linux}
-    if (NOT (Self.MUSL AND (GetTOS(GetSourceOS)=TOS.linux))) then
+    if (NOT ((MUSL OR LinuxLegacy) AND (GetTOS(GetSourceOS)=TOS.linux))) then
     {$endif}
     begin
       RunInfo:='No crosscompiling to own target !';
