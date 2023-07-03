@@ -548,6 +548,8 @@ type
     property FPCInstallDir: string write SetFPCInstallDirectory;
     // FPC source directory
     property FPCSourceDir: string write SetFPCSourceDirectory;
+    // FPC compiler install directory
+    property FPCCompilerBinPath:string read FFPCCompilerBinPath;
     // Lazarus install directory
     property LazarusInstallDir: string write SetLazarusInstallDirectory;
     // Lazarus source directory
@@ -2962,7 +2964,7 @@ begin
 
   // for now, just put jasmin.jar in FPC bin-directory ... easy and simple and working
 
-  TargetBin:=FFPCCompilerBinPath+TARGETNAME;
+  TargetBin:=FPCCompilerBinPath+TARGETNAME;
 
   if (NOT FileExists(TargetBin)) then
   begin
@@ -3126,7 +3128,7 @@ end;
 
 function TInstaller.GetFPCInBinDir: string;
 begin
-  result := FFPCCompilerBinPath+'fpc'+GetExeExt;
+  result := FPCCompilerBinPath+'fpc'+GetExeExt;
 
   {$IFDEF UNIX}
   if FileExists(result + '.sh') then
@@ -3797,6 +3799,9 @@ begin
             Processor.Process.Parameters.Add(PatchFileCorrectedPath);
 
             //Execute patch command
+
+            // we could use [patch --dry-run] first to test for -p0 and -p1 and -p2
+
             ReturnCode:=Processor.ExecuteAndWait;
 
             if ( (ReturnCode<>0) AND (StripLevel=1) ) then
@@ -4161,11 +4166,11 @@ var
 begin
   {$IFDEF UNIX}
   // Due to changes in the FPC sources (3.3.1 and newer), the FPC configs need to be created/moved into a new (local) config directory
-  result:=ExpandFileName(FFPCCompilerBinPath+'../etc/');
+  result:=ExpandFileName(FPCCompilerBinPath+'../etc/');
   if (NOT UseCompilerWrapper) AND DirectoryExists(result) then
   begin
     // Copy existing configs into this new config directory and delete the old config
-    aCfgFile:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath)+aCFG;
+    aCfgFile:=IncludeTrailingPathDelimiter(FPCCompilerBinPath)+aCFG;
     if FileExists(aCfgFile) then
     begin
       FileCopy(aCfgFile,result+aCFG);
@@ -4175,7 +4180,7 @@ begin
   else
   {$ENDIF}
   begin
-   result:=IncludeTrailingPathDelimiter(FFPCCompilerBinPath);
+   result:=IncludeTrailingPathDelimiter(FPCCompilerBinPath);
   end;
 
   result:=result+aCFG;

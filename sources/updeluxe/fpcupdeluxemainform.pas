@@ -2841,43 +2841,22 @@ begin
     if s='solaris-oi' then FPCupManager.SolarisOI:=true;
   end;
 
-  {$ifdef Linux}
-  if FPCupManager.MUSL then
+  //{$ifdef Linux}
+  //if FPCupManager.MUSL then
   begin
-
-    {$ifdef CPUX86_64}
-    if FPCupManager.CrossCPU_Target=TCPU.x86_64 then
+    if ((FPCupManager.CrossOS_Target=GetTOS(GetSourceOS)) AND (FPCupManager.CrossCPU_Target=GetTCPU(GetSourceCPU))) then
     begin
-      if Sender<>nil then Application.MessageBox(PChar('On Linux x86_64, you cannot cross towards another Linux x86_64.'), PChar('FPC limitation'), MB_ICONERROR);
+      if Sender<>nil then
+      begin
+        s:='On '+GetSourceOS+'-'+GetSourceCPU+', you cannot cross towards another '+GetSourceOS+'-'+GetSourceCPU+'.';
+        Application.MessageBox(PChar(s), PChar('FPC limitation'), MB_ICONERROR);
+      end;
       FPCupManager.CrossOS_Target:=TOS.osNone; // cleanup
       FPCupManager.CrossCPU_Target:=TCPU.cpuNone; // cleanup
       exit;
     end;
-    {$endif}
-
-    {$ifdef CPUAARCH64}
-    if FPCupManager.CrossCPU_Target=TCPU.aarch64 then
-    begin
-      if Sender<>nil then Application.MessageBox(PChar('On Linux aarch64, you cannot cross towards another Linux aarch64.'), PChar('FPC limitation'), MB_ICONERROR);
-      FPCupManager.CrossOS_Target:=TOS.osNone; // cleanup
-      FPCupManager.CrossCPU_Target:=TCPU.cpuNone; // cleanup
-      exit;
-    end;
-    {$endif}
-
-
-    {$ifdef CPUX86}
-    if FPCupManager.CrossCPU_Target=TCPU.i386 then
-    begin
-      if Sender<>nil then Application.MessageBox(PChar('On Linux i386, you cannot cross towards another Linux i386.'), PChar('FPC limitation'), MB_ICONERROR);
-      FPCupManager.CrossOS_Target:=TOS.osNone; // cleanup
-      FPCupManager.CrossCPU_Target:=TCPU.cpuNone; // cleanup
-      exit;
-    end;
-    {$endif}
-
   end;
-  {$endif}
+  //{$endif}
 
   if (FPCupManager.CrossCPU_Target=TCPU.cpuNone) then
   begin

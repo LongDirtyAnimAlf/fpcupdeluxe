@@ -326,8 +326,8 @@ begin
     Processor.Process.Parameters.Add('FPCDIR='+ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
     //Make sure Lazarus does not pick up these tools from other installs
-    Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
-    Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
+    Processor.Process.Parameters.Add('FPCMAKE=' + FPCCompilerBinPath+'fpcmake'+GetExeExt);
+    Processor.Process.Parameters.Add('PPUMOVE=' + FPCCompilerBinPath+'ppumove'+GetExeExt);
 
     s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
     //if FileExists(s) then
@@ -556,7 +556,7 @@ begin
         else if macro='FPCDIR' then
           macro:=ExcludeTrailingPathDelimiter(FPCInstallDir)
         else if macro='FPCBINDIR' then
-            macro:=ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)
+            macro:=ExcludeTrailingPathDelimiter(FPCCompilerBinPath)
         else if macro='FPCBIN' then
             macro:=ExcludeTrailingPathDelimiter(FCompiler)
         else if macro='TOOLDIR' then
@@ -664,7 +664,7 @@ begin
     Infoln(localinfotext+'Missing required executables. Aborting.',etError);
 
   // Need to remember because we don't always use ProcessEx
-  FPath:=ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
+  FPath:=ExcludeTrailingPathDelimiter(FPCCompilerBinPath)+PathSeparator+
   {$IFDEF MSWINDOWS}
   FMakeDir+PathSeparator+
   {$ENDIF MSWINDOWS}

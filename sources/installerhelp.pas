@@ -213,7 +213,7 @@ var
 begin
   localinfotext:=InitInfoText(' (InitModule): ');
 
-  PlainBinDir := SafeExpandFileName(FFPCCompilerBinPath+'..'+DirectorySeparator+'..');
+  PlainBinDir := SafeExpandFileName(FPCCompilerBinPath+'..'+DirectorySeparator+'..');
 
   Infoln(localinfotext+'Entering ...',etDebug);
 
@@ -255,7 +255,7 @@ begin
       false,false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
-    SetPath(ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
+    SetPath(ExcludeTrailingPathDelimiter(FPCCompilerBinPath)+PathSeparator+
     {$IFDEF DARWIN}
     // pwd is located in /bin ... the makefile needs it !!
     // tools are located in /usr/bin ... the makefile needs it !!
@@ -663,7 +663,7 @@ begin
       end;
 
       // Check for proper fpdoc
-      FPDocExe:=FFPCCompilerBinPath+'fpdoc'+GetExeExt;
+      FPDocExe:=FPCCompilerBinPath+'fpdoc'+GetExeExt;
       if (CheckExecutable(FPDocExe, ['--help'], 'FPDoc')=false) then
       begin
       FPDocExe:=IncludeTrailingPathDelimiter(FFPCSourceDir)+

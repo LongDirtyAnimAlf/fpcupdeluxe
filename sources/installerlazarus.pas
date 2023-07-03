@@ -391,8 +391,8 @@ begin
         Processor.Process.Parameters.Add('FPCDIR='+ConcatPaths([FPCInstallDir,'units',GetFPCTarget(false)]));
 
         //Make sure Lazarus does not pick up these tools from other installs
-        Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
-        Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
+        Processor.Process.Parameters.Add('FPCMAKE=' + FPCCompilerBinPath+'fpcmake'+GetExeExt);
+        Processor.Process.Parameters.Add('PPUMOVE=' + FPCCompilerBinPath+'ppumove'+GetExeExt);
 
         {$ifdef MsWindows}
         Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
@@ -704,8 +704,8 @@ begin
     Processor.Process.Parameters.Add('FPCDIR='+ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
     //Make sure Lazarus does not pick up these tools from other installs
-    Processor.Process.Parameters.Add('FPCMAKE=' + FFPCCompilerBinPath+'fpcmake'+GetExeExt);
-    Processor.Process.Parameters.Add('PPUMOVE=' + FFPCCompilerBinPath+'ppumove'+GetExeExt);
+    Processor.Process.Parameters.Add('FPCMAKE=' + FPCCompilerBinPath+'fpcmake'+GetExeExt);
+    Processor.Process.Parameters.Add('PPUMOVE=' + FPCCompilerBinPath+'ppumove'+GetExeExt);
 
     {$ifdef MsWindows}
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
@@ -1505,7 +1505,7 @@ begin
 
   localinfotext:=InitInfoText(' (InitModule): ');
 
-  PlainBinDir := SafeExpandFileName(FFPCCompilerBinPath+'..'+DirectorySeparator+'..');
+  PlainBinDir := SafeExpandFileName(FPCCompilerBinPath+'..'+DirectorySeparator+'..');
 
   Infoln(localinfotext+'Entering ...',etDebug);
 
@@ -1569,7 +1569,7 @@ begin
       false, false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
-    SetPath(ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
+    SetPath(ExcludeTrailingPathDelimiter(FPCCompilerBinPath)+PathSeparator+
     {$IFDEF DARWIN}
     // pwd is located in /bin ... the makefile needs it !!
     // tools are located in /usr/bin ... the makefile needs it !!
@@ -2421,7 +2421,7 @@ begin
         end;
       end;
 
-      Processor.Executable := FFPCCompilerBinPath+'fpcmake'+GetExeExt;
+      Processor.Executable := FPCCompilerBinPath+'fpcmake'+GetExeExt;
       Processor.Process.Parameters.Clear;
 
       s:=Processor.Environment.GetVar('FPCDIR');
