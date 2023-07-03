@@ -1107,7 +1107,7 @@ begin
   Context:=false;
   {$endif}
 
-  NativeFPCBootstrapCompiler:=true;
+  NativeFPCBootstrapCompiler:=false;
   ForceLocalRepoClient:=false;
   ExportOnly:=false;
 end;

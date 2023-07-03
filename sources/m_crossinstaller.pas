@@ -718,6 +718,17 @@ begin
 end;
 
 procedure TCrossInstaller.AddCrossOption(const aOption: string);
+const
+  MULTIDEFCOMPILERSWITCHES : array [0..6] of string = (
+  '-Fi',
+  '-Fl',
+  '-Fu',
+  '-Ff',
+  '-FN',
+  '-Fo',
+  '-k'
+  );
+
 var
   index:integer;
   compileroption,compilerswitch:string;
@@ -732,8 +743,15 @@ begin
 
     // Check for duplicates
     ReplaceOption:=(index<>-1);
-    if ReplaceOption then ReplaceOption:=(NOT (Pos('-Fl',compileroption)=1));
-    if ReplaceOption then ReplaceOption:=(NOT (Pos('-k',compileroption)=1));
+
+    if ReplaceOption then
+    begin
+      for compilerswitch in MULTIDEFCOMPILERSWITCHES do
+      begin
+        ReplaceOption:=(NOT (Pos(compilerswitch,compileroption)=1));
+        if (NOT ReplaceOption) then break;
+      end;
+    end;
 
     if (ReplaceOption) then
       FCrossOpts.Strings[index]:=compileroption
