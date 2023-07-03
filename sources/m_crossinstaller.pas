@@ -296,6 +296,20 @@ uses
   processutils,// for ThreadLog
   fpcuputil;
 
+const
+  MULTIDEFCOMPILERSWITCHES : array [0..7] of string = (
+  '-Fi',
+  '-Fl',
+  '-Fu',
+  '-Ff',
+  '-FN',
+  '-Fo',
+//  '-d',
+//  '-u',
+  '-I',
+  '-k'
+  );
+
 function GetCPU(aCPU:TCPU):string;
 begin
   if (aCPU<Low(TCPU)) OR (aCPU>High(TCPU)) OR (aCPU=TCPU.cpuNone) then
@@ -684,27 +698,49 @@ end;
 procedure TCrossInstaller.AddFPCCFGSnippet(const aSnip: string; const AddToCrossOptions:boolean);
 var
   aSnippd:string;
-  DuplicateOk:boolean;
+  compilerswitch:string;
+  CheckValidOption:boolean;
 begin
   aSnippd:=Trim(aSnip);
 
   if Length(aSnippd)=0 then exit;
 
+  if (Pos('-Xr',aSnippd)=1) then
+  begin
+    // Do not add -Xr on platforms that do not support it
+    CheckValidOption:=false;
+    if (TargetOS in [TOS.linux,TOS.solaris,TOS.android,TOS.openbsd]) then CheckValidOption:=true;
+    if ((TargetOS in [TOS.haiku]) AND (TargetCPU in [TCPU.i386,TCPU.x86_64])) then CheckValidOption:=true;
+    if ((TargetOS in [TOS.amiga]) AND (TargetCPU in [TCPU.m68k])) then CheckValidOption:=true;
+    if (NOT CheckValidOption) then exit;
+  end;
+
   if AddToCrossOptions then AddCrossOption(aSnippd);
 
   aSnippd:=StringReplace(aSnippd,'#IFDEF ','#IFDEF_',[rfReplaceAll]);
+  aSnippd:=StringReplace(aSnippd,'#IFNDEF ','#IFNDEF_',[rfReplaceAll]);
   aSnippd:=StringReplace(aSnippd,'#ENDIF ','#ENDIF_',[rfReplaceAll]);
   aSnippd:=StringReplace(aSnippd,' ',LineEnding,[rfReplaceAll]);
   aSnippd:=StringReplace(aSnippd,'#IFDEF_','#IFDEF ',[rfReplaceAll]);
+  aSnippd:=StringReplace(aSnippd,'#IFNDEF_','#IFNDEF ',[rfReplaceAll]);
   aSnippd:=StringReplace(aSnippd,'#ENDIF_','#ENDIF ',[rfReplaceAll]);
 
   // Check for duplicates
-  DuplicateOk:=false;
-  if (NOT DuplicateOk) then DuplicateOk:=(Pos('#IFDEF',aSnippd)>0);
-  if (NOT DuplicateOk) then DuplicateOk:=(Pos('#ENDIF',aSnippd)>0);
-  if (NOT DuplicateOk) then DuplicateOk:=(Pos('-k',aSnippd)=1);  // allow multiple linker commands
+  CheckValidOption:=false;
+  if (NOT CheckValidOption) then CheckValidOption:=(Pos('#IFDEF',aSnippd)>0);
+  if (NOT CheckValidOption) then CheckValidOption:=(Pos('#IFNDEF',aSnippd)>0);
+  if (NOT CheckValidOption) then CheckValidOption:=(Pos('#ENDIF',aSnippd)>0);
 
-  if (NOT DuplicateOk) then
+  if (NOT CheckValidOption) then
+  begin
+    for compilerswitch in MULTIDEFCOMPILERSWITCHES do
+    begin
+      CheckValidOption:=(Pos(compilerswitch,aSnippd)=1);
+      if CheckValidOption then break;
+    end;
+  end;
+
+  if (NOT CheckValidOption) then
   begin
     if (Pos(aSnippd,FFPCCFGSnippet)>0) then exit;
   end;
@@ -718,17 +754,6 @@ begin
 end;
 
 procedure TCrossInstaller.AddCrossOption(const aOption: string);
-const
-  MULTIDEFCOMPILERSWITCHES : array [0..6] of string = (
-  '-Fi',
-  '-Fl',
-  '-Fu',
-  '-Ff',
-  '-FN',
-  '-Fo',
-  '-k'
-  );
-
 var
   index:integer;
   compileroption,compilerswitch:string;
@@ -738,7 +763,11 @@ begin
   if (Length(compileroption)<3) then exit;
   if compileroption[1]='-' then
   begin
-    compilerswitch:=Copy(compileroption,1,3);
+    if (compileroption[2] in ['d','k','u','I']) then
+      compilerswitch:=Copy(compileroption,1,2)
+    else
+      compilerswitch:=Copy(compileroption,1,3);
+
     index:=StringListStartsWith(FCrossOpts,compilerswitch,0,True);
 
     // Check for duplicates
@@ -758,6 +787,7 @@ begin
     else
       FCrossOpts.Add(compileroption);
   end;
+
 end;
 
 procedure TCrossInstaller.ReplaceFPCCFGSnippet(aOldSnip,aNewSnip: string);
