@@ -1135,6 +1135,8 @@ begin
           Processor.Process.Parameters.Add('INSTALL_SHAREDDIR='+ConcatPaths([InstallDirectory,'share']));
           Processor.Process.Parameters.Add('INSTALL_DATADIR='+ConcatPaths([InstallDirectory,'data']));
 
+          Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory(false));
+
           Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
           {$ifdef Windows}
           Processor.Process.Parameters.Add('INSTALL_BASEDIR='+ExcludeTrailingPathDelimiter(InstallDirectory));
@@ -1144,31 +1146,12 @@ begin
           Processor.Process.Parameters.Add('INSTALL_EXAMPLEDIR='+ConcatPaths([InstallDirectory,'examples']));
           {$endif}
 
-          if (SubarchTarget) then
+          if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
           begin
-            UnitSearchPath:=GetUnitsInstallDirectory(false);
-            if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
-            begin
-              if (MakeCycle=st_RtlInstall) then
-                Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath+DirectorySeparator+'rtl');
-              if (MakeCycle=st_PackagesInstall) then
-                Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath+DirectorySeparator+'packages');
-            end
-            else
-            begin
-              Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath);
-            end;
-          end
-          else
-          begin
-            //UnitSearchPath:=GetUnitsInstallDirectory(false)+DirectorySeparator+'\$$(packagename)';
-            //UnitSearchPath:=GetUnitsInstallDirectory(false)+DirectorySeparator+'\\$$$$$\\(packagename)';
-
             UnitSearchPath:=GetUnitsInstallDirectory(false);
             if (MakeCycle=st_RtlInstall) then UnitSearchPath:=UnitSearchPath+DirectorySeparator+'rtl';
             if (MakeCycle=st_PackagesInstall) then UnitSearchPath:=UnitSearchPath+DirectorySeparator+'\$$(packagename)';
-
-            Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath);
+            Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=UnitSearchPath;
           end;
 
           {$IFDEF MSWINDOWS}
@@ -1853,9 +1836,7 @@ const
   YYPARSE='yyparse.cod';
 var
   OperationSucceeded:boolean;
-  {$IFDEF MSWINDOWS}
-  FileCounter:integer;
-  {$ENDIF}
+  Index:integer;
   s1,s2:string;
   {$IFDEF UNIX}
   //s3:string;
@@ -1965,8 +1946,7 @@ begin
   Processor.Process.Parameters.Add('INSTALL_SHAREDDIR='+ConcatPaths([InstallDirectory,'share']));
   Processor.Process.Parameters.Add('INSTALL_DATADIR='+ConcatPaths([InstallDirectory,'data']));
 
-  //Processor.Process.Parameters.Add('INSTALL_UNITDIR='+ConcatPaths([GetUnitsInstallDirectory(false),'all']));
-  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory(false)+DirectorySeparator+'\$$(packagename)');
+  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory(false));
 
   Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
   {$ifdef Windows}
@@ -2174,17 +2154,12 @@ begin
   else
   if ModuleName=_UNICODEFPC then
   begin
-    //Processor.Process.Parameters.Add('clean');
-    Processor.Process.Parameters.Add('all');
-    Processor.Process.Parameters.Add('install');
     Processor.Process.Parameters.Add('SUB_TARGET=unicodertl');
+    Processor.Process.Parameters.Add('all');
   end
   else
   begin
     Processor.Process.Parameters.Add('all');
-    //If we have separate source and install, always use the install command
-    //if (InstallDirectory<>SourceDirectory) then
-    Processor.Process.Parameters.Add('install');
   end;
 
   Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
@@ -2204,8 +2179,26 @@ begin
     end;
   end;
 
-  if ModuleName=_FPC then
+  if ((ModuleName=_FPC) OR (ModuleName=_UNICODEFPC)) then
   begin
+    // Building of FPC succeeded
+    // Now install all binaries and units
+    Index:=Pred(Processor.Process.Parameters.Count);
+    if OperationSucceeded then
+    begin
+      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=GetUnitsInstallDirectory(false)+DirectorySeparator+'rtl';
+      Processor.Process.Parameters.Strings[Index]:='installbase';
+      ProcessorResult:=Processor.ExecuteAndWait;
+      OperationSucceeded:=(ProcessorResult=0);
+    end;
+    if OperationSucceeded then
+    begin
+      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=GetUnitsInstallDirectory(false)+DirectorySeparator+'\$$(packagename)';
+      Processor.Process.Parameters.Strings[Index]:='installother';
+      ProcessorResult:=Processor.ExecuteAndWait;
+      OperationSucceeded:=(ProcessorResult=0);
+    end;
+
     {$IFDEF UNIX}
     if OperationSucceeded then OperationSucceeded:=CreateFPCScript;
     {$ENDIF UNIX}
@@ -2232,11 +2225,11 @@ begin
     begin
       //Copy over binutils to new CompilerName bin directory
       try
-        for FileCounter:=low(FUtilFiles) to high(FUtilFiles) do
+        for Index:=low(FUtilFiles) to high(FUtilFiles) do
         begin
-          if FUtilFiles[FileCounter].Category=ucBinutil then
-            FileCopy(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[FileCounter].FileName,
-              FFPCCompilerBinPath+FUtilFiles[FileCounter].FileName);
+          if FUtilFiles[Index].Category=ucBinutil then
+            FileCopy(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[Index].FileName,
+              FFPCCompilerBinPath+FUtilFiles[Index].FileName);
         end;
         // Also, we can change the make/binutils path to our new environment
         // Will modify fmake as well.
