@@ -1081,6 +1081,7 @@ begin
                 end;
               end;
             end;
+            // End creating Ultibo configuration files
 
             {$ifdef UNIX}
             //Correct for some case errors on Unixes
@@ -1116,12 +1117,59 @@ begin
           }
 
           Processor.Process.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(SourceDirectory));
+
+          Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(SourceDirectory));
+
+          {$IFDEF DEBUG}
+          //To debug Makefile itself
+          //Processor.Process.Parameters.Add('-d');
+          {$ENDIF}
           Processor.Process.Parameters.Add('FPCMAKE=' + FPCCompilerBinPath+'fpcmake'+GetExeExt);
           Processor.Process.Parameters.Add('PPUMOVE=' + FPCCompilerBinPath+'ppumove'+GetExeExt);
           Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
-          Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
 
-          Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(SourceDirectory));
+          Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
+          Processor.Process.Parameters.Add('INSTALL_SOURCEDIR='+ExcludeTrailingPathDelimiter(SourceDirectory));
+
+          Processor.Process.Parameters.Add('INSTALL_LIBDIR='+ConcatPaths([InstallDirectory,'lib']));
+          Processor.Process.Parameters.Add('INSTALL_SHAREDDIR='+ConcatPaths([InstallDirectory,'share']));
+          Processor.Process.Parameters.Add('INSTALL_DATADIR='+ConcatPaths([InstallDirectory,'data']));
+
+          Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
+          {$ifdef Windows}
+          Processor.Process.Parameters.Add('INSTALL_BASEDIR='+ExcludeTrailingPathDelimiter(InstallDirectory));
+          {$else}
+          Processor.Process.Parameters.Add('INSTALL_BASEDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
+          Processor.Process.Parameters.Add('INSTALL_DOCDIR='+ConcatPaths([InstallDirectory,'doc']));
+          Processor.Process.Parameters.Add('INSTALL_EXAMPLEDIR='+ConcatPaths([InstallDirectory,'examples']));
+          {$endif}
+
+          if (SubarchTarget) then
+          begin
+            UnitSearchPath:=GetUnitsInstallDirectory(false);
+            if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
+            begin
+              if (MakeCycle=st_RtlInstall) then
+                Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath+DirectorySeparator+'rtl');
+              if (MakeCycle=st_PackagesInstall) then
+                Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath+DirectorySeparator+'packages');
+            end
+            else
+            begin
+              Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath);
+            end;
+          end
+          else
+          begin
+            //UnitSearchPath:=GetUnitsInstallDirectory(false)+DirectorySeparator+'\$$(packagename)';
+            //UnitSearchPath:=GetUnitsInstallDirectory(false)+DirectorySeparator+'\\$$$$$\\(packagename)';
+
+            UnitSearchPath:=GetUnitsInstallDirectory(false);
+            if (MakeCycle=st_RtlInstall) then UnitSearchPath:=UnitSearchPath+DirectorySeparator+'rtl';
+            if (MakeCycle=st_PackagesInstall) then UnitSearchPath:=UnitSearchPath+DirectorySeparator+'\$$(packagename)';
+
+            Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath);
+          end;
 
           {$IFDEF MSWINDOWS}
           (*
@@ -1250,9 +1298,6 @@ begin
               begin
                 Infoln(infotext+'Building native compiler for '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+'.',etInfo);
                 Processor.Process.Parameters.Add('FPC='+FCompiler);
-                //s1:=CrossCompilerName;
-                //Processor.Process.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1);
-                UnitSearchPath:=GetUnitsInstallDirectory(true);
                 Processor.Process.Parameters.Add('-C');
                 Processor.Process.Parameters.Add('compiler');
                 Processor.Process.Parameters.Add('compiler');
@@ -1270,18 +1315,6 @@ begin
           end;
 
           Processor.Process.Parameters.Add('CROSSINSTALL=1');
-
-          if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
-          begin
-            if (SubarchTarget) then
-            begin
-              UnitSearchPath:=GetUnitsInstallDirectory(false);
-              if (MakeCycle=st_RtlInstall) then
-                Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath+DirectorySeparator+'rtl');
-              if (MakeCycle=st_PackagesInstall) then
-                Processor.Process.Parameters.Add('INSTALL_UNITDIR='+UnitSearchPath+DirectorySeparator+'packages');
-            end;
-          end;
 
           if (MakeCycle in [st_Compiler,st_CompilerInstall]) then
           begin
@@ -1308,7 +1341,6 @@ begin
 
           //Processor.Process.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
           Processor.Process.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
-
 
           NativeCompilerOptions:=FCompilerOptions;
 
@@ -1492,7 +1524,7 @@ begin
               //result:=(ProcessorResult=0);
             end;
 
-            {$IFDEF UNIX}
+            {$IFDEF UNIXXX}
             if (result) AND (MakeCycle=st_CompilerInstall) then
             begin
               // Get the correct name of the cross-compiler in source-directory
@@ -1933,7 +1965,8 @@ begin
   Processor.Process.Parameters.Add('INSTALL_SHAREDDIR='+ConcatPaths([InstallDirectory,'share']));
   Processor.Process.Parameters.Add('INSTALL_DATADIR='+ConcatPaths([InstallDirectory,'data']));
 
-  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory(false));
+  //Processor.Process.Parameters.Add('INSTALL_UNITDIR='+ConcatPaths([GetUnitsInstallDirectory(false),'all']));
+  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory(false)+DirectorySeparator+'\$$(packagename)');
 
   Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
   {$ifdef Windows}
@@ -2141,7 +2174,7 @@ begin
   else
   if ModuleName=_UNICODEFPC then
   begin
-    Processor.Process.Parameters.Add('clean');
+    //Processor.Process.Parameters.Add('clean');
     Processor.Process.Parameters.Add('all');
     Processor.Process.Parameters.Add('install');
     Processor.Process.Parameters.Add('SUB_TARGET=unicodertl');
@@ -3934,7 +3967,9 @@ begin
   end;
 
   {$ifdef FORCEREVISION}
-  if ((ModuleName<>_MAKEFILECHECKFPC) AND (NOT IsCross )) then
+  //if ((ModuleName<>_MAKEFILECHECKFPC) AND (NOT IsCross )) then
+  if ((ModuleName=_FPC) AND (NOT IsCross )) then
+  //if (NOT IsCross ) then
   begin
     FUseRevInc:=true;
     if (SourceVersionNum<>0) then if (SourceVersionNum<CalculateFullVersion(3,2,3)) then FUseRevInc:=false;
@@ -4629,7 +4664,7 @@ begin
     begin
       Infoln(infotext+'Building FPC Unicode RTL.',etInfo);
 
-      s:=GetFPCConfigPath('fpc-unicodertl.cfg');
+      s:=GetFPCConfigPath(FPCCONFIGUNICODE);
       if FileExists(s) then
       begin
         Infoln(localinfotext+'Unicode config already exists ('+s+'); trying to overwrite it.',etInfo);
@@ -4863,6 +4898,9 @@ begin
           if (Self AS TFPCCrossInstaller).PackagesNeeded then aStrList.Append('packages_distclean');
         end;
       end;
+
+      if ModuleName=_UNICODEFPC then
+        aStrList.Append('SUB_TARGET=unicodertl');
 
       for aCleanupCommand in aStrList do
         Processor.Process.Parameters.Add(aCleanupCommand);

@@ -65,6 +65,7 @@ const
   FPCPKGCOMPILERTEMPLATE= 'default'; // fppkg default compiler template
 
   FPCCONFIGFILENAME     = 'fpc.cfg';
+  FPCCONFIGUNICODE      = 'fpc-unicodertl.cfg';
 
   DEFAULTINSTALLDIR     = 'development';
   DEFAULTBOOTSTRAPDIR   = 'fpcbootstrap';
