@@ -1150,7 +1150,12 @@ begin
           begin
             UnitSearchPath:=GetUnitsInstallDirectory(false);
             if (MakeCycle=st_RtlInstall) then UnitSearchPath:=UnitSearchPath+DirectorySeparator+'rtl';
-            if (MakeCycle=st_PackagesInstall) then UnitSearchPath:=UnitSearchPath+DirectorySeparator+'\$$(packagename)';
+            if (MakeCycle=st_PackagesInstall) then
+            {$ifdef Windows}
+            UnitSearchPath:=UnitSearchPath+DirectorySeparator+'\$$(packagename)';
+            {$else}
+            UnitSearchPath:=UnitSearchPath+DirectorySeparator+'\$$\(packagename\)';
+            {$endif}
             Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=UnitSearchPath;
           end;
 
@@ -2193,7 +2198,11 @@ begin
     end;
     if OperationSucceeded then
     begin
+      {$ifdef Windows}
       Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=GetUnitsInstallDirectory(false)+DirectorySeparator+'\$$(packagename)';
+      {$else}
+      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=GetUnitsInstallDirectory(false)+DirectorySeparator+'\$$\(packagename\)';
+      {$endif}
       Processor.Process.Parameters.Strings[Index]:='installother';
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
@@ -4243,8 +4252,8 @@ begin
         Processor.Process.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(InstallDirectory));
         //Processor.Process.Parameters.Add('-d');
         //Processor.Process.Parameters.Add('sharepath='+ExcludeTrailingPathDelimiter(InstallDirectory));
-        //Processor.Process.Parameters.Add('-d');
-        //Processor.Process.Parameters.Add('localbasepath='+ConcatPaths([InstallDirectory, 'user','lib','fpc',SourceVersionStr]));
+        Processor.Process.Parameters.Add('-d');
+        Processor.Process.Parameters.Add('localbasepath='+ConcatPaths([InstallDirectory,PACKAGESLOCATION,'units','$FPCTARGET'])+'/*');
         RunFPCMkCfgOption(s);
       end
       else

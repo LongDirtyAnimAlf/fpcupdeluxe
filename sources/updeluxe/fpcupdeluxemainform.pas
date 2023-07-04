@@ -4374,7 +4374,7 @@ begin
       Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
       Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
 
-      Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
+      Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 
       Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
     finally
