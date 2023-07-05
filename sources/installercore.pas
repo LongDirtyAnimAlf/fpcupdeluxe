@@ -367,6 +367,7 @@ type
     {$IFDEF UNIX}
     FUseCompilerWrapper        : boolean;
     {$ENDIF}
+    function GetDefaultCompilerFilename(const TargetCPU: TCPU; const Cross: boolean): string;
   private
     FURL                       : string;
     FUltibo                    : boolean;
@@ -403,7 +404,6 @@ type
     function GetCrossInstaller: TCrossInstaller;
     function GetFullVersionString:string;
     function GetFullVersion:dword;
-    function GetDefaultCompilerFilename(const TargetCPU: TCPU; Cross: boolean): string;
     function GetInstallerClass(aClassToFind:TClass):boolean;
     function IsFPCInstaller:boolean;
     function IsLazarusInstaller:boolean;
@@ -4074,7 +4074,7 @@ begin
   result:=result+aCFG;
 end;
 
-function TInstaller.GetDefaultCompilerFilename(const TargetCPU: TCPU; Cross: boolean): string;
+function TInstaller.GetDefaultCompilerFilename(const TargetCPU: TCPU; const Cross: boolean): string;
 var
   s:string;
 begin
@@ -4082,23 +4082,11 @@ begin
   if TargetCPU<>TCPU.cpuNone then
   begin
     if Cross then
-    begin
-      // See fpc.pp
-      {$ifndef darwin}
       s:='ppcross'+ppcSuffix[TargetCPU]
-      {$else not darwin}
-      { the mach-o format supports "fat" binaries whereby }
-      { a single executable contains machine code for     }
-      { several architectures -> it is counter-intuitive  }
-      { and non-standard to use different binary names    }
-      { for cross-compilers vs. native compilers          }
-      s:='ppc'+ppcSuffix[TargetCPU];
-      {$endif not darwin}
-    end
     else
       s:='ppc'+ppcSuffix[TargetCPU];
   end;
-  Result:=s+GetExeExt;
+  result:=s+GetExeExt;
 end;
 
 function TInstaller.GetCompilerName(Cpu_Target:TCPU):string;
@@ -4126,7 +4114,7 @@ end;
 
 function TInstaller.GetCrossCompilerName(Cpu_Target:TCPU):string;
 begin
-  if Cpu_Target<>TCPU.jvm
+  if (Cpu_Target<>TCPU.jvm)
      then result:=GetDefaultCompilerFilename(Cpu_Target,true)
      else result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;

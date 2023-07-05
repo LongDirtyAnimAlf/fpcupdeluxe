@@ -195,14 +195,17 @@ type
   { TFPCCrossInstaller }
 
   TFPCCrossInstaller = class(TFPCInstaller)
-  private
+  strict private
     FCrossCompilerName: string;
+    FFPCCrossCompilerName: string;
+  private
     {$ifndef crosssimple}
     function CompilerUpdateNeeded:boolean;
     function PackagesNeeded:boolean;
     {$endif}
     function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
     property CrossCompilerName: string read FCrossCompilerName;
+    property FPCCrossCompilerName: string read FFPCCrossCompilerName;
   protected
     function SubarchTarget:boolean;
     // Build module descendant customisation
@@ -242,6 +245,7 @@ constructor TFPCCrossInstaller.Create;
 begin
   inherited Create;
   FCrossCompilerName:='invalid';
+  FFPCCrossCompilerName:='invalid';
 end;
 
 destructor TFPCCrossInstaller.Destroy;
@@ -267,7 +271,7 @@ begin
   NativeCompiler:=GetFPCInBinDir;
   if (FileExists(NativeCompiler)) then
   begin
-    CrossCompiler:=ExtractFilePath(NativeCompiler)+CrossCompilerName;
+    CrossCompiler:=ExtractFilePath(NativeCompiler)+FPCCrossCompilerName;
     if FileExists(CrossCompiler) then
     begin
       // Look at version and revision
@@ -632,7 +636,20 @@ procedure TFPCCrossInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);
 begin
   inherited;
   if Assigned(CrossInstaller) then
+  begin
     FCrossCompilerName:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+    {$ifdef Darwin}
+    FFPCCrossCompilerName:=GetCompilerName(CrossInstaller.TargetCPU);
+    {$else}
+    FFPCCrossCompilerName:=FCrossCompilerName;
+    {$endif}
+  end
+  else
+  begin
+    FCrossCompilerName:='invalid';
+    FFPCCrossCompilerName:=FCrossCompilerName;
+    raise Exception.Create('Invalid crosscompiler name. Cause: cross-installer not assigned.');
+  end;
 end;
 
 function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
@@ -643,7 +660,7 @@ type
   {$ifdef crosssimple}
   TSTEPS = (st_Start,st_MakeAll,st_RtlInstall,st_PackagesInstall,st_NativeCompiler,st_Finished);
   {$else}
-  TSTEPS = (st_Start,st_Compiler,st_CompilerInstall,st_Rtl,st_RtlInstall,st_Packages,st_PackagesInstall,st_NativeCompiler,st_Finished);
+  TSTEPS = (st_Start,st_Compiler,st_CompilerInstall,st_RtlBuild,st_RtlInstall,st_PackagesBuild,st_PackagesInstall,st_NativeCompiler,st_Finished);
   {$endif}
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
@@ -755,7 +772,7 @@ begin
             end;
           end;
 
-          if (MakeCycle=st_Rtl) then
+          if (MakeCycle=st_RtlBuild) then
           begin
 
             if (CrossInstaller.TargetCPU=TCPU.arm) then
@@ -768,10 +785,10 @@ begin
               if (i<>-1) then
               begin
                 // Get the correct name of the cross-compiler in source-directory
-                s1:=ConcatPaths([SourceDirectory,'compiler',GetCrossCompilerName(CrossInstaller.TargetCPU)]);
+                s1:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
                 // Get the correct name of the cross-compiler in install-directory
                 if (NOT FileExists(s1)) then
-                  s1:=FPCCompilerBinPath+CrossCompilerName;
+                  s1:=FPCCompilerBinPath+FPCCrossCompilerName;
                 if FileExists(s1) then
                 begin
                   // Get compiler ABI's
@@ -805,10 +822,10 @@ begin
               if (i<>-1) then
               begin
                 // Get the correct name of the cross-compiler in source-directory
-                s1:=ConcatPaths([SourceDirectory,'compiler',GetCrossCompilerName(CrossInstaller.TargetCPU)]);
+                s1:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
                 // Get the correct name of the cross-compiler in install-directory
                 if (NOT FileExists(s1)) then
-                  s1:=FPCCompilerBinPath+CrossCompilerName;
+                  s1:=FPCCompilerBinPath+FPCCrossCompilerName;
                 if FileExists(s1) then
                 begin
                   // Get compiler FPU's
@@ -917,7 +934,7 @@ begin
                       writeln(TxtFile,'-dRPI');
                       writeln(TxtFile,'-dBCM2708');
                       s2:=GetUnitsInstallDirectory(true);
-                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv6),[]);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv6),[rfIgnoreCase]);
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
                     finally
@@ -946,7 +963,7 @@ begin
                       writeln(TxtFile,'-dRPI2');
                       writeln(TxtFile,'-dBCM2709');
                       s2:=GetUnitsInstallDirectory(true);
-                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[rfIgnoreCase]);
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
                     finally
@@ -976,7 +993,7 @@ begin
                       writeln(TxtFile,'-dRPI3');
                       writeln(TxtFile,'-dBCM2710');
                       s2:=GetUnitsInstallDirectory(true);
-                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[rfIgnoreCase]);
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
                       writeln(TxtFile,'#ENDIF');
@@ -986,7 +1003,7 @@ begin
                       writeln(TxtFile,'-dRPI3');
                       writeln(TxtFile,'-dBCM2710');
                       s2:=GetUnitsInstallDirectory(true);
-                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[rfIgnoreCase]);
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
                       writeln(TxtFile,'#ENDIF');
@@ -1016,7 +1033,7 @@ begin
                       writeln(TxtFile,'-OoFASTMATH');
                       writeln(TxtFile,'-dQEMUVPB');
                       s2:=GetUnitsInstallDirectory(true);
-                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[rfIgnoreCase]);
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
                       writeln(TxtFile,'#ENDIF');
@@ -1025,7 +1042,7 @@ begin
                       writeln(TxtFile,'-OoFASTMATH');
                       writeln(TxtFile,'-dQEMUVPB');
                       s2:=GetUnitsInstallDirectory(true);
-                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[rfIgnoreCase]);
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
                       writeln(TxtFile,'#ENDIF');
@@ -1060,7 +1077,7 @@ begin
                       writeln(TxtFile,'-dRPI4');
                       writeln(TxtFile,'-dBCM2711');
                       s2:=GetUnitsInstallDirectory(true);
-                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[]);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[rfIgnoreCase]);
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
                       writeln(TxtFile,'#ENDIF');
@@ -1070,7 +1087,7 @@ begin
                       writeln(TxtFile,'-dRPI4');
                       writeln(TxtFile,'-dBCM2711');
                       s2:=GetUnitsInstallDirectory(true);
-                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[]);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[rfIgnoreCase]);
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
                       writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
                       writeln(TxtFile,'#ENDIF');
@@ -1241,6 +1258,8 @@ begin
               if FMUSL then
               begin
                 // copy over the [cross-]compiler
+                // is this still needed ?
+                // to be investigated
                 s1:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+GetCompilerName(CrossInstaller.TargetCPU);
                 s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+CrossCompilerName;
                 if FileExists(s1) then
@@ -1255,39 +1274,35 @@ begin
               Processor.Process.Parameters.Add('FPC='+FCompiler);
               Processor.Process.Parameters.Add('compiler_install');
             end;
-            st_Rtl:
+            st_RtlBuild:
             begin
-              s1:=CrossCompilerName;
-              s2:=FPCCompilerBinPath+s1;
+              s2:=FPCCompilerBinPath+FPCCrossCompilerName;
               if (NOT FileExists(s2)) then
-                s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1;
+                s2:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
               Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('rtl_all');
             end;
             st_RtlInstall:
             begin
-              s1:=CrossCompilerName;
-              s2:=FPCCompilerBinPath+s1;
+              s2:=FPCCompilerBinPath+FPCCrossCompilerName;
               if (NOT FileExists(s2)) then
-                s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1;
+                s2:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
               Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('rtl_install');
             end;
-            st_Packages:
+            st_PackagesBuild:
             begin
-              s1:=CrossCompilerName;
-              s2:=FPCCompilerBinPath+s1;
+              s2:=FPCCompilerBinPath+FPCCrossCompilerName;
               if (NOT FileExists(s2)) then
-                s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1;
+                s2:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
               Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('packages_all');
             end;
             st_PackagesInstall:
             begin
-              s1:=CrossCompilerName;
-              s2:=FPCCompilerBinPath+s1;
+              s2:=FPCCompilerBinPath+FPCCrossCompilerName;
               if (NOT FileExists(s2)) then
-                s2:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+DirectorySeparator+s1;
+                s2:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
               Processor.Process.Parameters.Add('FPC='+s2);
               Processor.Process.Parameters.Add('packages_install');
             end;
@@ -1330,7 +1345,7 @@ begin
             end;
           end;
 
-          if (MakeCycle in [st_Packages,st_PackagesInstall{,st_NativeCompiler}]) then
+          if (MakeCycle in [st_PackagesBuild,st_PackagesInstall{,st_NativeCompiler}]) then
           begin
             if (NOT PackagesNeeded) then continue;
           end;
@@ -1512,50 +1527,6 @@ begin
             result:=(ProcessorResult=0);
 
             if ProcessorResult=AbortedExitCode then break;
-
-            {$ifndef crosssimple}
-            if ((NOT result) AND (MakeCycle=st_Packages)) then
-            begin
-              //Sometimes rerun gives good results (on AIX 32bit especially).
-              //Infoln(infotext+'Running '+Processor.Executable+' stage again ... could work !',etInfo);
-              //ProcessorResult:=Processor.ExecuteAndWait;
-              //result:=(ProcessorResult=0);
-            end;
-
-            {$IFDEF UNIXXX}
-            if (result) AND (MakeCycle=st_CompilerInstall) then
-            begin
-              // Get the correct name of the cross-compiler in source-directory
-              s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
-              if FileExists(s2) then
-              begin
-                {$ifdef Darwin}
-                if CrossCompilerName=GetCompilerName(GetSourceCPU) then
-                begin
-                  Infoln(infotext+'Cross-compiler and native compiler share the same name: '+CrossCompilerName+'.',etInfo);
-                  Infoln(infotext+'Skipping manual compiler-copy to bin-directory ! To be investigated.',etInfo);
-                  // Perhaps we need to contruct a "fat" binary
-                  // lipo -create s1 CrossCompilerName -output s1
-                  // TODO
-                  // I do not know what to do at the moment
-                end
-                else
-                {$endif Darwin}
-                begin
-                  // copy over / rename the cross-compiler towards the FPC bin-directory, with the right compilername.
-                  Infoln(infotext+'Copy cross-compiler ('+s1+') into: '+ExcludeTrailingPathDelimiter(FPCCompilerBinPath),etInfo);
-                  s1:=FPCCompilerBinPath+CrossCompilerName;
-                  SysUtils.DeleteFile(s1);
-                  //FileCopy(s2,s1);
-                  SysUtils.RenameFile(s2,s1);
-                  fpChmod(s1,&755);
-                end;
-              end;
-            end;
-            {$ENDIF UNIX}
-            {$endif crosssimple}
-
           except
             on E: Exception do
             begin
@@ -1608,6 +1579,7 @@ begin
           if (ModuleName=_NATIVECROSSFPC) then
           begin
             s1:=GetCompilerName(CrossInstaller.TargetCPU);
+            s1:=CrossCompilerName;
             s1:=ChangeFileExt(s1,m_crossinstaller.GetExeExt(CrossInstaller.TargetOS));
             s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
             if FileExists(s2) then
@@ -1622,38 +1594,35 @@ begin
 
           if (ModuleName=_FPC) then
           begin
-            // Get the correct name of the cross-compiler in source-directory
-            s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-            s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
-            {$ifdef crosssimple}
-            {$IFDEF UNIX}
-            if FileExists(s2) then
+            {$ifdef Darwin}
+            if FPCCrossCompilerName=GetCompilerName(GetSourceCPU) then
             begin
-              {$ifdef Darwin}
-              if CrossCompilerName=GetCompilerName(GetSourceCPU) then
-              begin
-                Infoln(infotext+'Cross-compiler and native compiler share the same name: '+CrossCompilerName+'.',etInfo);
-                Infoln(infotext+'Skipping manual compiler-copy to bin-directory ! To be investigated.',etInfo);
-                // Perhaps we need to contruct a "fat" binary
-                // lipo -create s1 CrossCompilerName -output s1
-                // TODO
-                // I do not know what to do at the moment
-              end
-              else
-              {$endif Darwin}
-              begin
-                // copy over / rename the cross-compiler towards the FPC bin-directory, with the right compilername.
-                Infoln(infotext+'Copy cross-compiler ('+s1+') into: '+FBinPath,etInfo);
-                s1:=ConcatPaths([FBinPath,CrossCompilerName]);
-                //FileCopy(s2,s1);
-                SysUtils.DeleteFile(s1);
-                SysUtils.RenameFile(s2,s1);
-                fpChmod(s1,&755);
-              end;
-            end;
-            {$ENDIF}
-            {$endif crosssimple}
+              Infoln(infotext+'Cross-compiler and native compiler share the same name: '+FPCCrossCompilerName+'.',etInfo);
+              Infoln(infotext+'Skipping manual compiler-rename ! To be investigated.',etInfo);
+              // Perhaps we need to contruct a "fat" binary
+              // lipo -create s1 CrossCompilerName -output s1
+              // TODO
+              // I do not know what to do at the moment
+            end
+            else
+            if (FPCCrossCompilerName<>CrossCompilerName) then
+            begin
+              // FPC itself uses a different naming scheme on Darwin
+              // So we need to rename the cross-compiler to accomodate for this
 
+              // Get the correct name of the cross-compiler in install-directory
+              s1:=FPCCompilerBinPath+FPCCrossCompilerName;
+              // Get the name of the cross-compiler in install-directory
+              s2:=FPCCompilerBinPath+CrossCompilerName;
+              // rename the cross-compiler.
+              Infoln(infotext+'Rename cross-compiler ('+CrossCompilerName+') into '+FPCCrossCompilerName,etInfo);
+              SysUtils.DeleteFile(s1);
+              SysUtils.RenameFile(s2,s1);
+              fpChmod(s1,&755);
+            end;
+            {$endif Darwin}
+            // Get the name of the cross-compiler in source-directory
+            s2:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
             // delete cross-compiler in source-directory
             SysUtils.DeleteFile(s2);
 
@@ -4041,36 +4010,6 @@ begin
   // Restore infotext
   infotext:=InitInfoText(' (BuildModule: '+ModuleName+'): ');
 
-  {$IFDEF UNIX}
-  if OperationSucceeded then
-  begin
-    // copy the freshly created compiler to the bin/$fpctarget directory so that
-    // fpc can find it
-
-    {
-    if FileExists(IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+TargetCompilerName) then
-    begin
-      Infoln(infotext+'Copy compiler ('+TargetCompilerName+') into: '+ExcludeTrailingPathDelimiter(FPCCompilerBinPath),etDebug);
-      s:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler/'+TargetCompilerName;
-      s2:=FPCCompilerBinPath+TargetCompilerName;
-      //FileCopy(s,s2);
-      SysUtils.DeleteFile(s2);
-      SysUtils.RenameFile(s,s2);
-      fpChmod(s2,&755);
-    end;
-    }
-
-    // create link 'units' below InstallDirectory to
-    // <somewhere>/lib/fpc/$fpcversion/units
-    (*
-    s:=IncludeTrailingPathDelimiter(InstallDirectory)+'units';
-    DeleteFile(s);
-    s2:=IncludeTrailingPathDelimiter(InstallDirectory)+'lib/fpc/'+SourceVersionStr+'/units';
-    fpSymlink(pchar(s2),pchar(s));
-    *)
-  end;
-  {$ENDIF UNIX}
-
   if ModuleName=_MAKEFILECHECKFPC then exit;
 
   //if ModuleName<>_FPC then exit;
@@ -4271,7 +4210,7 @@ begin
         //Processor.Process.Parameters.Add('-d');
         //Processor.Process.Parameters.Add('sharepath='+ExcludeTrailingPathDelimiter(InstallDirectory));
         Processor.Process.Parameters.Add('-d');
-        Processor.Process.Parameters.Add('localbasepath='+ConcatPaths([InstallDirectory,PACKAGESLOCATION,'units','$FPCTARGET'])+'/*');
+        Processor.Process.Parameters.Add('localbasepath='+ConcatPaths([InstallDirectory,PACKAGESLOCATION,'units',FPC_TARGET_MAGIC])+'/*');
         RunFPCMkCfgOption(s);
       end
       else
@@ -4478,7 +4417,7 @@ begin
         // Need to add appropriate library search path
         // where it is e.g /usr/lib/arm-linux-gnueabihf...
         ConfigText.Append('# library search path');
-        s:='-Fl/usr/lib/'+FPC_TARGET_MAGIC+';'+'/usr/lib/$FPCTARGET-gnu'+';'+'/lib/$FPCTARGET'+';'+'/lib/$FPCTARGET-gnu';
+        s:='-Fl/usr/lib/'+FPC_TARGET_MAGIC+';'+'/usr/lib/'+FPC_TARGET_MAGIC+'-gnu'+';'+'/lib/'+FPC_TARGET_MAGIC+';'+'/lib/'+FPC_TARGET_MAGIC+'-gnu';
         {$IFDEF cpuarm}
         {$IFDEF CPUARMHF}
         s:=s+';'+'/usr/lib/'+FPC_TARGET_MAGIC+'-gnueabihf';

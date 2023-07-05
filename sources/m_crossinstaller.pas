@@ -136,9 +136,9 @@ const
   );
   FPCUP_AUTO_MAGIC      = 'FPCUP_AUTO';
 
-  FPC_TARGET_MAGIC      = '$FPCTARGET';
-  FPC_SUBARCH_MAGIC     = '$FPCSUBARCH';
-  FPC_ABI_MAGIC         = '$FPCABI';
+  FPC_TARGET_MAGIC      = '$fpctarget';
+  FPC_SUBARCH_MAGIC     = '$fpcsubarch';
+  FPC_ABI_MAGIC         = '$fpcabi';
 
   DEFAULTSEARCHSETTING  = TSearchSetting.ssUp;
   DEFAULTARMARCH        = TARMARCH.none;
