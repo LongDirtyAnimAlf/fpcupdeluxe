@@ -131,7 +131,7 @@ type
     function GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
     function CleanExtra(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone):boolean;
   protected
-    function GetUnitsInstallDirectory(WithMagic:boolean):string;
+    function GetUnitsInstallDirectory(const WithMagic:boolean=false):string;
     function GetVersionFromUrl(aUrl: string): string;override;
     function GetVersionFromSource: string;override;
     function GetReleaseCandidateFromSource:integer;override;
@@ -197,8 +197,10 @@ type
   TFPCCrossInstaller = class(TFPCInstaller)
   private
     FCrossCompilerName: string;
+    {$ifndef crosssimple}
     function CompilerUpdateNeeded:boolean;
     function PackagesNeeded:boolean;
+    {$endif}
     function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
     property CrossCompilerName: string read FCrossCompilerName;
   protected
@@ -254,6 +256,7 @@ begin
   result:=((CrossInstaller.TargetCPU<>TCPU.cpuNone) AND (CrossInstaller.TargetOS<>TOS.osNone) AND (CrossInstaller.TargetOS in SUBARCH_OS) AND (CrossInstaller.TargetCPU in SUBARCH_CPU));
 end;
 
+{$ifndef crosssimple}
 function TFPCCrossInstaller.CompilerUpdateNeeded:boolean;
 var
   NativeVersion,CrossVersion:string;
@@ -303,6 +306,7 @@ begin
   // Safeguards
   if (CrossInstaller.TargetCPU=TCPU.xtensa) AND (CrossInstaller.TargetOS=TOS.freertos) then result:=false;
 end;
+{$endif}
 
 function TFPCCrossInstaller.InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
 // Adds snippet to fpc.cfg file or replaces if if first line of snippet is present
@@ -637,7 +641,7 @@ function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 // crosswin32-64 and crosswin64-32 steps.
 type
   {$ifdef crosssimple}
-  TSTEPS = (st_Start,st_MakeAll,st_MakeCrossInstall,st_Finished);
+  TSTEPS = (st_Start,st_MakeAll,st_RtlInstall,st_PackagesInstall,st_NativeCompiler,st_Finished);
   {$else}
   TSTEPS = (st_Start,st_Compiler,st_CompilerInstall,st_Rtl,st_RtlInstall,st_Packages,st_PackagesInstall,st_NativeCompiler,st_Finished);
   {$endif}
@@ -713,6 +717,8 @@ begin
           if ((ModuleName=_NATIVECROSSFPC) AND (MakeCycle<>st_NativeCompiler)) then continue;
           if ((ModuleName<>_NATIVECROSSFPC) AND (MakeCycle=st_NativeCompiler)) then continue;
 
+          {$ifndef crosssimple}
+
           // ARMHF crosscompiler build option
           if (MakeCycle=st_Compiler) then
           begin
@@ -720,7 +726,6 @@ begin
             begin
 
               (*
-
               // what to do ...
               // always build hardfloat for ARM ?
               // or default to softfloat for ARM ?
@@ -745,7 +750,6 @@ begin
                   FCompilerOptions:=FCompilerOptions+' '+s2;
                 end;
               end;
-
               *)
 
             end;
@@ -835,6 +839,7 @@ begin
             end;
 
           end;
+          {$endif crosssimple}
 
           // Modify fpc.cfg
           // always add this, to be able to detect which cross-compilers are installed
@@ -861,7 +866,7 @@ begin
 
               if (CrossInstaller.TargetOS=TOS.java) then
                 //s1:=s1+'-Fu'+ConcatPaths([InstallDirectory,'units',FPC_TARGET_MAGIC,'rtl','org','freepascal','rtl'])+LineEnding;
-                s1:=s1+'-Fu'+ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl'])+LineEnding;
+                s1:=s1+'-Fu'+ConcatPaths([GetUnitsInstallDirectory,'rtl','org','freepascal','rtl'])+LineEnding;
 
               if (SubarchTarget) then
               begin
@@ -876,7 +881,7 @@ begin
                   // Tricky ... :-| ... !!!
                   //{$ifdef MSWINDOWS}
                   if (CrossInstaller.TargetOS in [TOS.embedded,TOS.freertos]) then
-                    FileCreate(ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,'system.ppu']));
+                    FileCreate(ConcatPaths([GetUnitsInstallDirectory,'system.ppu']));
                   //{$endif MSWINDOWS}
                 end;
               end;
@@ -1087,7 +1092,7 @@ begin
             //Correct for some case errors on Unixes
             if (CrossInstaller.TargetOS=TOS.java) then
             begin
-              s1:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,'rtl','org','freepascal','rtl']);
+              s1:=ConcatPaths([GetUnitsInstallDirectory,'rtl','org','freepascal','rtl']);
               s2:=IncludeTrailingPathDelimiter(s1)+'System.class';
               s1:=IncludeTrailingPathDelimiter(s1)+'system.class';
               if (NOT FileExists(s1)) then FileCopy(s2,s1);
@@ -1135,7 +1140,7 @@ begin
           Processor.Process.Parameters.Add('INSTALL_SHAREDDIR='+ConcatPaths([InstallDirectory,'share']));
           Processor.Process.Parameters.Add('INSTALL_DATADIR='+ConcatPaths([InstallDirectory,'data']));
 
-          Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory(false));
+          Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory);
 
           Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
           {$ifdef Windows}
@@ -1146,20 +1151,30 @@ begin
           Processor.Process.Parameters.Add('INSTALL_EXAMPLEDIR='+ConcatPaths([InstallDirectory,'examples']));
           {$endif}
 
+          Processor.Process.Parameters.Add('CPU_SOURCE='+GetSourceCPU);
+          Processor.Process.Parameters.Add('OS_SOURCE='+GetSourceOS);
+          Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName); //cross compile for different OS...
+          Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName); // and processor.
+
+          if (CrossInstaller.SubArch<>TSubarch.saNone) then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArchName);
+
+          Processor.Process.Parameters.Add('CROSSINSTALL=1');
+
           if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
           begin
-            UnitSearchPath:=GetUnitsInstallDirectory(false);
-            if (MakeCycle=st_RtlInstall) then UnitSearchPath:=UnitSearchPath+DirectorySeparator+'rtl';
+            UnitSearchPath:=GetUnitsInstallDirectory+DirectorySeparator;
+            if (MakeCycle=st_RtlInstall) then UnitSearchPath:=UnitSearchPath+'rtl';
             if (MakeCycle=st_PackagesInstall) then
             {$ifdef Windows}
-            UnitSearchPath:=UnitSearchPath+DirectorySeparator+'\$$(packagename)';
+            UnitSearchPath:=UnitSearchPath+'\$$(packagename)';
             {$else}
-            UnitSearchPath:=UnitSearchPath+DirectorySeparator+'\$$\(packagename\)';
+            UnitSearchPath:=UnitSearchPath+'\$$\(packagename\)';
             {$endif}
             Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=UnitSearchPath;
           end;
 
           {$IFDEF MSWINDOWS}
+          Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           (*
           // do we have a stray shell in the path ...
           if StrayShell then
@@ -1173,7 +1188,6 @@ begin
             end;
           end;
           *)
-          Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
           s1:=GitClient.RepoExecutable;
@@ -1204,9 +1218,13 @@ begin
             begin
               Processor.Process.Parameters.Add('all');
             end;
-            st_MakeCrossInstall:
+            st_RtlInstall:
             begin
-              Processor.Process.Parameters.Add('crossinstall');
+              Processor.Process.Parameters.Add('installbase');
+            end;
+            st_PackagesInstall:
+            begin
+              Processor.Process.Parameters.Add('installother');
             end;
           end;
           {$else crosssimple}
@@ -1302,8 +1320,6 @@ begin
             end;
           end;
 
-          Processor.Process.Parameters.Add('CROSSINSTALL=1');
-
           if (MakeCycle in [st_Compiler,st_CompilerInstall]) then
           begin
             // Do we need a new cross-compiler ?
@@ -1320,12 +1336,6 @@ begin
           end;
 
           {$endif crosssimple}
-
-          Processor.Process.Parameters.Add('CPU_SOURCE='+GetSourceCPU);
-          Processor.Process.Parameters.Add('OS_SOURCE='+GetSourceOS);
-          Processor.Process.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName); //cross compile for different OS...
-          Processor.Process.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName); // and processor.
-          if (CrossInstaller.SubArch<>TSubarch.saNone) then Processor.Process.Parameters.Add('SUBARCH='+CrossInstaller.SubArchName);
 
           //Processor.Process.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
           Processor.Process.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
@@ -1465,7 +1475,7 @@ begin
           {$ifndef crosssimple}
           if (MakeCycle=st_NativeCompiler) then
           begin
-            UnitSearchPath:=GetUnitsInstallDirectory(false);
+            UnitSearchPath:=GetUnitsInstallDirectory;
             //NativeCompilerOptions:=NativeCompilerOptions+' -Fu'+UnitSearchPath;
             //NativeCompilerOptions:=NativeCompilerOptions+' -Fu'+UnitSearchPath+DirectorySeparator+'rtl';
             {$ifdef DEBUG}
@@ -1581,7 +1591,11 @@ begin
             Compiler := '////\\\Error trying to compile FPC\|!';
             Infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code.',etError);
             // If we were building a crosscompiler itself when the failure occured, remove all fpc.cfg settings of this target
-            if MakeCycle in [st_Compiler,st_CompilerInstall] then
+            {$ifdef crosssimple}
+            if MakeCycle in [st_MakeAll] then
+            {$else}
+            if MakeCycle in [st_Compiler] then
+            {$endif}
             begin
               Infoln(infotext+'Removing all '+GetFPCTarget(false)+' compiler settings from fpc.cfg.',etError);
               InsertFPCCFGSnippet(FPCCfg,'');
@@ -1813,7 +1827,7 @@ begin
       end;
     end;
 
-    aDir:=GetUnitsInstallDirectory(false);
+    aDir:=GetUnitsInstallDirectory;
     if DirectoryExists(aDir) then
     begin
       // Only allow unit directories inside our own install te be deleted
@@ -1829,7 +1843,7 @@ begin
 
     // Delete dummy system.ppu
     //if (CrossInstaller.TargetOS in [TOS.embedded,TOS.freertos]) then
-    //  SysUtils.DeleteFile(ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,'system.ppu']));
+    //  SysUtils.DeleteFile(ConcatPaths([GetUnitsInstallDirectory,'system.ppu']));
 
   end;
 end;
@@ -1842,6 +1856,7 @@ const
 var
   OperationSucceeded:boolean;
   Index:integer;
+  UnitSearchPath:string;
   s1,s2:string;
   {$IFDEF UNIX}
   //s3:string;
@@ -1951,7 +1966,7 @@ begin
   Processor.Process.Parameters.Add('INSTALL_SHAREDDIR='+ConcatPaths([InstallDirectory,'share']));
   Processor.Process.Parameters.Add('INSTALL_DATADIR='+ConcatPaths([InstallDirectory,'data']));
 
-  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory(false));
+  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory);
 
   Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
   {$ifdef Windows}
@@ -1961,6 +1976,12 @@ begin
   Processor.Process.Parameters.Add('INSTALL_DOCDIR='+ConcatPaths([InstallDirectory,'doc']));
   Processor.Process.Parameters.Add('INSTALL_EXAMPLEDIR='+ConcatPaths([InstallDirectory,'examples']));
   {$endif}
+
+  Processor.Process.Parameters.Add('OS_SOURCE=' + GetSourceOS);
+  Processor.Process.Parameters.Add('CPU_SOURCE=' + GetSourceCPU);
+
+  Processor.Process.Parameters.Add('OS_TARGET=' + GetSourceOS);
+  Processor.Process.Parameters.Add('CPU_TARGET=' + GetSourceCPU);
 
   {$IFDEF MSWINDOWS}
   Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
@@ -1990,10 +2011,6 @@ begin
     Processor.Process.Parameters.Add('GIT='+s1);
   end;
   {$ENDIF}
-  Processor.Process.Parameters.Add('OS_SOURCE=' + GetSourceOS);
-  Processor.Process.Parameters.Add('CPU_SOURCE=' + GetSourceCPU);
-  Processor.Process.Parameters.Add('OS_TARGET=' + GetSourceOS);
-  Processor.Process.Parameters.Add('CPU_TARGET=' + GetSourceCPU);
 
   if (SourceVersionNum<CalculateFullVersion(2,4,4)) then
     Processor.Process.Parameters.Add('DATA2INC=echo');
@@ -2189,9 +2206,10 @@ begin
     // Building of FPC succeeded
     // Now install all binaries and units
     Index:=Pred(Processor.Process.Parameters.Count);
+    UnitSearchPath:=GetUnitsInstallDirectory+DirectorySeparator;
     if OperationSucceeded then
     begin
-      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=GetUnitsInstallDirectory(false)+DirectorySeparator+'rtl';
+      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=UnitSearchPath+'rtl';
       Processor.Process.Parameters.Strings[Index]:='installbase';
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
@@ -2199,9 +2217,9 @@ begin
     if OperationSucceeded then
     begin
       {$ifdef Windows}
-      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=GetUnitsInstallDirectory(false)+DirectorySeparator+'\$$(packagename)';
+      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=UnitSearchPath+'\$$(packagename)';
       {$else}
-      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=GetUnitsInstallDirectory(false)+DirectorySeparator+'\$$\(packagename\)';
+      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=UnitSearchPath+'\$$\(packagename\)';
       {$endif}
       Processor.Process.Parameters.Strings[Index]:='installother';
       ProcessorResult:=Processor.ExecuteAndWait;
@@ -2430,7 +2448,7 @@ begin
   WritelnLog(infotext+'Update/build/config succeeded.',false);
 end;
 
-function TFPCInstaller.GetUnitsInstallDirectory(WithMagic:boolean):string;
+function TFPCInstaller.GetUnitsInstallDirectory(const WithMagic:boolean):string;
 var
   aDir:string;
   ABIMagic:string;
@@ -2470,13 +2488,13 @@ begin
 
     if (CrossInstaller.TargetOS=TOS.ultibo) then
       result:=ConcatPaths([InstallDirectory,'units',SUBARCHMagic+'-'+CrossInstaller.TargetOSName])
-      //result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic])
+      //result:=ConcatPaths([GetUnitsInstallDirectory,SUBARCHMagic])
     else
     begin
       if CrossInstaller.TargetCPU=TCPU.arm then
-        result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic,ABIMagic])
+        result:=ConcatPaths([GetUnitsInstallDirectory,SUBARCHMagic,ABIMagic])
       else
-        result:=ConcatPaths([InstallDirectory,'units',CrossInstaller.RegisterName,SUBARCHMagic]);
+        result:=ConcatPaths([GetUnitsInstallDirectory,SUBARCHMagic]);
     end;
   end;
 end;
@@ -4892,12 +4910,14 @@ begin
         end
         else
         begin
+          {$ifndef crosssimple}
           if (Self AS TFPCCrossInstaller).CompilerUpdateNeeded then
             aStrList.Append('compiler_distclean')
           else
             Infoln(infotext+'Skipping cross-compiler clean step: compiler seems to be up to date !!',etInfo);
           aStrList.Append('rtl_distclean');
           if (Self AS TFPCCrossInstaller).PackagesNeeded then aStrList.Append('packages_distclean');
+          {$endif}
         end;
       end;
 
@@ -5026,7 +5046,7 @@ begin
 
       // Delete all installed units
       // Alf: is it still needed: todo check
-      aPath:=GetUnitsInstallDirectory(false);
+      aPath:=GetUnitsInstallDirectory;
       if DirectoryExists(aPath) then
       begin
         // Only allow unit directories inside our own install te be deleted

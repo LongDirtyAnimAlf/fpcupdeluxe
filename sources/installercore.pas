@@ -401,7 +401,6 @@ type
     function DownloadFromBase(aClient:TRepoClient; aModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
-    function GetCrossCompilerPresent:boolean;
     function GetFullVersionString:string;
     function GetFullVersion:dword;
     function GetDefaultCompilerFilename(const TargetCPU: TCPU; Cross: boolean): string;
@@ -619,7 +618,6 @@ type
     property UseWget: boolean write FUseWget;
     // get cross-installer
     property CrossInstaller:TCrossInstaller read GetCrossInstaller;
-    property CrossCompilerPresent: boolean read GetCrossCompilerPresent;
     property SourceVersionStr:string read GetFullVersionString;
     property SourceVersionNum:dword read GetFullVersion;
     property SanityCheck:boolean read GetSanityCheck;
@@ -805,117 +803,6 @@ begin
       result:=FCrossInstaller;
     end;
   end;
-end;
-
-function TInstaller.GetCrossCompilerPresent:boolean;
-var
-  FPCCfg,aDir,s   : string;
-  ConfigText      : TStringList;
-  SnipBegin,i     : integer;
-  aCPU,aOS        : string;
-  {%H-}aArch           : string;
-begin
-  result:=false;
-
-  if (NOT DirectoryExists(FInstallDirectory)) then exit;
-  if CheckDirectory(FInstallDirectory) then exit;
-
-  if ((CrossCPU_Target=TCPU.cpuNone) OR (CrossOS_Target=TOS.osNone)) then exit;
-
-  //if (Self is TFPCCrossInstaller) then
-  begin
-    // check for existing cross-dirs
-    if (NOT result) then
-    begin
-      aDir:=ConcatPaths([FInstallDirectory,'bin',GetFPCTarget(false)]);
-      result:=DirectoryExists(aDir);
-    end;
-    if (NOT result) then
-    begin
-      aDir:=ConcatPaths([FInstallDirectory,'units',GetFPCTarget(false)]);
-      {$ifdef UNIX}
-      if FileIsSymlink(aDir) then
-      begin
-        try
-          aDir:=GetPhysicalFilename(aDir,pfeException);
-        except
-        end;
-      end;
-      {$endif}
-      result:=DirectoryExists(aDir);
-    end;
-
-    if result then exit;
-
-    // Check FPC config-file
-
-    aCPU:='';
-    aOS:='';
-    aArch:='';
-
-    FPCCfg:=GetFPCConfigPath(FPCCONFIGFILENAME);
-
-    if (NOT FileExists(FPCCfg)) then exit;
-
-    ConfigText:=TStringList.Create;
-    try
-      ConfigText.LoadFromFile(FPCCFG);
-      SnipBegin:=0;
-      while (SnipBegin<ConfigText.Count) do
-      begin
-        if Pos(SnipMagicBegin,ConfigText.Strings[SnipBegin])>0 then
-        begin
-          s:=ConfigText.Strings[SnipBegin];
-          Delete(s,1,Length(SnipMagicBegin));
-          i:=Pos('-',s);
-          if i>0 then
-          begin
-            aCPU:=Copy(s,1,i-1);
-            aOS:=Trim(Copy(s,i+1,MaxInt));
-            // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
-            if (UpperCase(aCPU)='ARM') AND (UpperCase(aOS)='LINUX') then
-            begin
-              for i:=SnipBegin to SnipBegin+5 do
-              begin
-                if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
-                begin
-                  s:=ConfigText.Strings[i];
-                  Delete(s,1,Length('#IFDEF CPU'));
-                  aArch:=s;
-                  break;
-                end;
-              end;
-            end;
-          end;
-        end;
-        Inc(SnipBegin);
-      end;
-
-      result:=((GetCPU(CrossCPU_Target)=aCPU) AND (GetOS(CrossOS_Target)=aOS));
-
-    finally
-      ConfigText.Free;
-    end;
-  end;
-
-  //if (Self is TLazarusCrossInstaller) then
-  begin
-    if (NOT result) then
-    begin
-      aDir:=ConcatPaths([FInstallDirectory,'lcl','units',GetFPCTarget(false)]);
-      {$ifdef UNIX}
-      if FileIsSymlink(aDir) then
-      begin
-        try
-          aDir:=GetPhysicalFilename(aDir,pfeException);
-        except
-        end;
-      end;
-      {$endif}
-      result:=DirectoryExists(aDir);
-    end;
-  end;
-
 end;
 
 procedure TInstaller.SetURL(value:string);

@@ -388,6 +388,7 @@ type
     procedure GetCrossToolsPath(out BinPath,LibPath:string);
     function GetCrossBinsURL(out BaseBinsURL:string; var BinsFileName:string):boolean;
     function GetCrossLibsURL(out BaseLibsURL:string; var LibsFileName:string):boolean;
+    function CheckCurrentFPCInstall: boolean;
     procedure SaveSettings;
     procedure ResetAll;
     // Stop talking. Do it! Returns success status
@@ -953,6 +954,22 @@ begin
   end;
 end;
 
+function TFPCupManager.CheckCurrentFPCInstall: boolean;
+var
+  LocalInstaller:TInstaller;
+begin
+  result:=false;
+  LocalInstaller:=TFPCNativeInstaller.Create;
+  try
+    LocalInstaller.BaseDirectory:=BaseDirectory;
+    LocalInstaller.FPCSourceDir:=FPCSourceDirectory;
+    LocalInstaller.FPCInstallDir:=FPCInstallDirectory;
+    result:=FileExists(LocalInstaller.GetFPCInBinDir); // check FPC compiler itself
+  finally
+    LocalInstaller.Free;
+  end;
+end;
+
 procedure TFPCupManager.SaveSettings;
 const
   {$ifdef unix}
@@ -1070,6 +1087,8 @@ begin
   {$ELSE}
   Verbose:=False;
   {$ENDIF}
+
+  FClean:=false;
 
   UseSystemFPC:=false;
 
@@ -1506,7 +1525,6 @@ begin
   end;
 
 end;
-
 
 function TFPCupManager.GetRunInfo:string;
 begin
@@ -2061,7 +2079,7 @@ begin
   //check if this is a known module:
 
   // FPC:
-  if ((ModuleName=_FPC) OR (ModuleName=_MAKEFILECHECKFPC) OR (ModuleName=_NATIVECROSSFPC)) then
+  if ((ModuleName=_FPC) OR (ModuleName=_UNICODEFPC) OR (ModuleName=_MAKEFILECHECKFPC) OR (ModuleName=_NATIVECROSSFPC)) then
   begin
     if assigned(FInstaller) then
     begin

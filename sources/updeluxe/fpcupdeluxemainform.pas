@@ -2631,6 +2631,7 @@ procedure TForm1.InstallModule(aModule:string; UnInstall:boolean);
 var
   modules:string;
   s:string;
+  success:boolean;
 begin
   modules:=aModule;
 
@@ -2670,7 +2671,15 @@ begin
       sStatus:='Going to remove selected modules.';
     end;
 
-    if (NOT PrepareRun(nil)) then exit;
+    success:=PrepareRun(nil);
+    if (NOT success) then exit;
+
+    success:=FPCupManager.CheckCurrentFPCInstall;
+    if (NOT success) then
+    begin
+      ShowMessage('No valid FPC install found. Please install FPC first.');
+      exit;
+    end;
 
     FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
     try
@@ -2685,7 +2694,7 @@ begin
       if UnInstall then aDataClient.UpInfo.UpFunction:=ufUninstallModule;
       {$endif}
 
-      RealRun;
+      success:=RealRun;
 
     finally
       FPCupManager.ExportOnly:=(NOT Form2.Repo);
@@ -2728,7 +2737,15 @@ begin
   end;
   {$endif}
 
-  if (NOT PrepareRun(nil)) then exit;
+  success:=PrepareRun(nil);
+  if (NOT success) then exit;
+
+  success:=FPCupManager.CheckCurrentFPCInstall;
+  if (NOT success) then
+  begin
+    ShowInfo('No valid FPC install found. Please install FPC first.');
+    exit;
+  end;
 
   FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
   if (radgrpCPU.ItemIndex<>-1) then
@@ -3584,6 +3601,7 @@ procedure TForm1.InstallClick(Sender: TObject);
 var
   s:string;
   FModuleList: TStringList;
+  success:boolean;
 begin
   s:='';
   if Sender=BitBtnFPCOnly then
@@ -3615,7 +3633,18 @@ begin
   DisEnable(Sender,False);
   try
 
-    if (NOT PrepareRun(Sender)) then exit;
+    success:=PrepareRun(nil);
+    if (NOT success) then exit;
+
+    if Sender=BitBtnLazarusOnly then
+    begin
+      success:=FPCupManager.CheckCurrentFPCInstall;
+      if (NOT success) then
+      begin
+        ShowMessage('No valid FPC install found. Please install FPC first.');
+        exit;
+      end;
+    end;
 
     s:='';
 

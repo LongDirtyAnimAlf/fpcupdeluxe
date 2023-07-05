@@ -563,8 +563,6 @@ begin
 
   FErrorLog.Clear;
 
-  //if (NOT CrossCompilerPresent) then exit;
-
   if assigned(CrossInstaller) AND (Length(BaseDirectory)>0) AND (NOT CheckDirectory(BaseDirectory)) then
   begin
     if ((CrossInstaller.TargetCPU=TCPU.cpuNone) OR (CrossInstaller.TargetOS=TOS.osNone)) then exit;
