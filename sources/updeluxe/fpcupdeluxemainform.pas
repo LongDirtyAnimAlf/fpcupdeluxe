@@ -2018,6 +2018,7 @@ var
   CPUType:TCPU;
   OSType:TOS;
   sOS:string;
+  success:boolean;
 begin
   CPUType:=TCPU.cpuNone;
   OSType:=TOS.osNone;
@@ -2032,7 +2033,16 @@ begin
   begin
     DisEnable(Sender,False);
     try
-      if (NOT PrepareRun(Sender)) then exit;
+      success:=PrepareRun(Sender);
+      if (NOT success) then exit;
+
+      success:=FPCupManager.CheckCurrentFPCInstall;
+      if (NOT success) then
+      begin
+        ShowMessage('No valid FPC install found. Please install FPC first.');
+        exit;
+      end;
+
       FPCupManager.CrossCPU_Target:=CPUType;
       FPCupManager.CrossOS_Target:=OSType;
       sOS:=radgrpOS.Items[radgrpOS.ItemIndex];

@@ -1579,7 +1579,6 @@ begin
           if (ModuleName=_NATIVECROSSFPC) then
           begin
             s1:=GetCompilerName(CrossInstaller.TargetCPU);
-            s1:=CrossCompilerName;
             s1:=ChangeFileExt(s1,m_crossinstaller.GetExeExt(CrossInstaller.TargetOS));
             s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
             if FileExists(s2) then
@@ -1598,11 +1597,11 @@ begin
             if FPCCrossCompilerName=GetCompilerName(GetSourceCPU) then
             begin
               Infoln(infotext+'Cross-compiler and native compiler share the same name: '+FPCCrossCompilerName+'.',etInfo);
-              Infoln(infotext+'Skipping manual compiler-rename ! To be investigated.',etInfo);
+              Infoln(infotext+'Skipping manual compiler-rename.',etInfo);
+              // Perhaps this compiler build-step needs to be skipped on Darwin if source and target CPUs are the same
               // Perhaps we need to contruct a "fat" binary
               // lipo -create s1 CrossCompilerName -output s1
               // TODO
-              // I do not know what to do at the moment
             end
             else
             if (FPCCrossCompilerName<>CrossCompilerName) then
@@ -3941,8 +3940,6 @@ begin
   if (IsCross) then
   begin
     // This might also be done in the cross-compilers themselves.
-
-
     if ((FLinuxLegacy) AND (CrossInstaller.TargetOS=TOS.linux)) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.dragonfly) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.freebsd) then FUseLibc:=True;
