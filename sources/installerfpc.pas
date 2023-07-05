@@ -2455,17 +2455,18 @@ begin
     end;
 
     if (CrossInstaller.TargetOS=TOS.ultibo) then
-      result:=ConcatPaths([InstallDirectory,'units',SUBARCHMagic+'-'+CrossInstaller.TargetOSName])
-      //result:=ConcatPaths([GetUnitsInstallDirectory,SUBARCHMagic])
+      result:=ConcatPaths([aDir,SUBARCHMagic+'-'+CrossInstaller.TargetOSName])
+      //result:=ConcatPaths([result,SUBARCHMagic])
     else
     begin
       if CrossInstaller.TargetCPU=TCPU.arm then
-        result:=ConcatPaths([GetUnitsInstallDirectory,SUBARCHMagic,ABIMagic])
+        result:=ConcatPaths([result,SUBARCHMagic,ABIMagic])
       else
-        result:=ConcatPaths([GetUnitsInstallDirectory,SUBARCHMagic]);
+        result:=ConcatPaths([result,SUBARCHMagic]);
     end;
   end;
 end;
+
 
 function TFPCInstaller.GetVersionFromUrl(aUrl: string): string;
 var
