@@ -288,7 +288,7 @@ begin
         // Look at fileage
         NativeAge:=FileAge(NativeCompiler);
         CrossAge:=FileAge(CrossCompiler);
-        if (NativeAge>=CrossAge) then result:=true
+        result:=(NativeAge>CrossAge);
       end;
     end;
   end;
