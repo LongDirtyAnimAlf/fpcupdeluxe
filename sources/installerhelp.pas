@@ -647,8 +647,8 @@ begin
             // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
             Processor.Executable := LazbuildApp;
             Processor.Process.Parameters.Clear;
-            Processor.Process.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
-            Processor.Process.Parameters.Add(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
+            Processor.SetParamData('--primary-config-path='+LazarusPrimaryConfigPath+'');
+            Processor.SetParamData(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
             Infoln(ModuleName+': compiling build_lcl_docs help compiler:',etInfo);
             WritelnLog('Building help compiler (also time consuming generation of documents) !!!!!!', true);
             ProcessorResult:=Processor.ExecuteAndWait;
@@ -703,25 +703,25 @@ begin
         // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
         // the directory that contains the fcl and rtl .xct files.
         // If those .xct files are not present, FPC 2.7.1 fpdoc will throw an exception
-        Processor.Process.Parameters.Add('--fpcdocs');
-        Processor.Process.Parameters.Add(ExcludeTrailingPathDelimiter(FTargetDirectory));
+        Processor.SetParamData('--fpcdocs');
+        Processor.SetParamData(ExcludeTrailingPathDelimiter(FTargetDirectory));
         // Let build_lcl_docs know which fpdoc application to use:
-        Processor.Process.Parameters.Add('--fpdoc');
-        Processor.Process.Parameters.Add(FPDocExe);
+        Processor.SetParamData('--fpdoc');
+        Processor.SetParamData(FPDocExe);
         // Newer versions of fpc mess up the .css file location;
         // Exception at 00441644: Exception:
         // Can't find CSS file "..\fpdoc.css".
         //
         // So specify path explicitly
         // --css-file argument available since r42283
-        Processor.Process.Parameters.Add('--css-file='+IncludeTrailingPathDelimiter(FFPCSourceDir)+
+        Processor.SetParamData('--css-file='+IncludeTrailingPathDelimiter(FFPCSourceDir)+
           'utils'+DirectorySeparator+'fpdoc'+DirectorySeparator+'fpdoc.css');
 
-        Processor.Process.Parameters.Add('--outfmt');
-        Processor.Process.Parameters.Add('chm');
+        Processor.SetParamData('--outfmt');
+        Processor.SetParamData('chm');
         { this will give a huge amount of warnings which should be fixed by
         fpdoc and/or the .chm files so are rather useless
-        Processor.Process.Parameters.Add('--warnings'); //let tool show warnings as well
+        Processor.SetParamData('--warnings'); //let tool show warnings as well
         }
         // Show application output if desired:
         Infoln(ModuleName+': compiling chm help docs:',etInfo);

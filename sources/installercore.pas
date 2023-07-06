@@ -3669,13 +3669,13 @@ begin
           s:=ExtractFileNameSafe(FPatchCmd);
           if ((s='patch'+GetExeExt) OR (s='gpatch'+GetExeExt)) then
           begin
-            Processor.Process.Parameters.Add('-t');
-            Processor.Process.Parameters.Add('-p'+InttoStr(StripLevel));
-            Processor.Process.Parameters.Add('-N');
+            Processor.SetParamData('-t');
+            Processor.SetParamData('-p'+InttoStr(StripLevel));
+            Processor.SetParamData('-N');
             {$IF not defined(BSD) or defined(DARWIN)}
-            Processor.Process.Parameters.Add('--no-backup-if-mismatch');
+            Processor.SetParamData('--no-backup-if-mismatch');
             {$endif}
-            Processor.Process.Parameters.Add('-i');
+            Processor.SetParamData('-i');
           end;
 
           // always correct for line-endings while patch is very sensitive for that
@@ -3684,7 +3684,7 @@ begin
           begin
             // revert to original file in case of file not found
             if (NOT FileExists(PatchFileCorrectedPath)) then PatchFileCorrectedPath:=PatchFilePath;
-            Processor.Process.Parameters.Add(PatchFileCorrectedPath);
+            Processor.SetParamData(PatchFileCorrectedPath);
 
             //Execute patch command
 

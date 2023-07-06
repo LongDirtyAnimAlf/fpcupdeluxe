@@ -214,14 +214,14 @@ begin
   begin
     if DirectoryExists(IncludeTrailingPathDelimiter(LocalRepository)+'.git') then
     begin
-      Processor.Process.Parameters.Add('fetch');
-      Processor.Process.Parameters.Add('--all');
+      Processor.SetParamData('fetch');
+      Processor.SetParamData('--all');
       Processor.ExecuteAndWait;
 
       Processor.Process.Parameters.Clear;
-      Processor.Process.Parameters.Add('reset');
-      Processor.Process.Parameters.Add('--hard');
-      if (DesiredBranch<>'') then Processor.Process.Parameters.Add('origin/'+DesiredBranch);
+      Processor.SetParamData('reset');
+      Processor.SetParamData('--hard');
+      if (DesiredBranch<>'') then Processor.SetParamData('origin/'+DesiredBranch);
       Processor.ExecuteAndWait;
 
       Processor.Process.Parameters.Clear;
@@ -229,20 +229,20 @@ begin
     else
     begin
       // initial : very shallow clone = fast !!
-      Processor.Process.Parameters.Add('clone');
-      Processor.Process.Parameters.Add('--recurse-submodules');
-      Processor.Process.Parameters.Add('--depth');
-      Processor.Process.Parameters.Add('1');
+      Processor.SetParamData('clone');
+      Processor.SetParamData('--recurse-submodules');
+      Processor.SetParamData('--depth');
+      Processor.SetParamData('1');
     end;
   end
   else
   begin
-    Processor.Process.Parameters.Add('clone');
-    Processor.Process.Parameters.Add('--recurse-submodules');
+    Processor.SetParamData('clone');
+    Processor.SetParamData('--recurse-submodules');
     //On Haiku and alikes, always get a shallow copy of the repo
     {$if defined(Haiku) OR defined(AROS) OR defined(Morphos) OR (defined(CPUPOWERPC64) AND defined(FPC_ABI_ELFV2))}
-    Processor.Process.Parameters.Add('--depth');
-    Processor.Process.Parameters.Add('1');
+    Processor.SetParamData('--depth');
+    Processor.SetParamData('1');
     {$endif}
   end;
 
@@ -265,11 +265,11 @@ begin
     end;
     if (Length(Branch)>0) then
     begin
-      Processor.Process.Parameters.Add('--branch');
-      Processor.Process.Parameters.Add(Branch);
+      Processor.SetParamData('--branch');
+      Processor.SetParamData(Branch);
     end;
-    Processor.Process.Parameters.Add(Repository);
-    Processor.Process.Parameters.Add(LocalRepository);
+    Processor.SetParamData(Repository);
+    Processor.SetParamData(LocalRepository);
     //EnvStore:=Processor.Environment.GetVar('GIT_SSL_NO_VERIFY');
     //Processor.Environment.SetVar('GIT_SSL_NO_VERIFY','true');
     FReturnCode:=Processor.ExecuteAndWait;
@@ -398,9 +398,9 @@ begin
 
   if ((Processor.Process.Parameters.Count=0) AND (Length(DesiredTag)>0)) then
   begin
-    Processor.Process.Parameters.Add('describe');
-    Processor.Process.Parameters.Add('--tags');
-    Processor.Process.Parameters.Add('--abbrev=0');
+    Processor.SetParamData('describe');
+    Processor.SetParamData('--tags');
+    Processor.SetParamData('--abbrev=0');
     FReturnCode:=Processor.ExecuteAndWait;
     FReturnOutput:=Trim(Processor.WorkerOutput.Text);
     Processor.Process.Parameters.Clear;
@@ -408,12 +408,12 @@ begin
     begin
       if (DesiredTag<>FReturnOutput) then
       begin
-        Processor.Process.Parameters.Add('checkout');
-        Processor.Process.Parameters.Add('--force');
-        Processor.Process.Parameters.Add(DesiredTag);
+        Processor.SetParamData('checkout');
+        Processor.SetParamData('--force');
+        Processor.SetParamData(DesiredTag);
       end
       else
-        Processor.Process.Parameters.Add('pull');
+        Processor.SetParamData('pull');
     end;
   end;
 
@@ -423,9 +423,9 @@ begin
     if (Length(DesiredRevision)>0) AND (Uppercase(trim(DesiredRevision)) <> 'HEAD') then DesiredBranch := DesiredRevision;
     if (Length(DesiredBranch)>0) then
     begin
-      Processor.Process.Parameters.Add('rev-parse');
-      Processor.Process.Parameters.Add('--abbrev-ref');
-      Processor.Process.Parameters.Add('HEAD');
+      Processor.SetParamData('rev-parse');
+      Processor.SetParamData('--abbrev-ref');
+      Processor.SetParamData('HEAD');
       FReturnCode:=Processor.ExecuteAndWait;
       FReturnOutput:=Trim(Processor.WorkerOutput.Text);
       Processor.Process.Parameters.Clear;
@@ -433,12 +433,12 @@ begin
       begin
         if (DesiredBranch<>FReturnOutput) then
         begin
-          Processor.Process.Parameters.Add('checkout');
-          Processor.Process.Parameters.Add('--force');
-          Processor.Process.Parameters.Add(DesiredTag);
+          Processor.SetParamData('checkout');
+          Processor.SetParamData('--force');
+          Processor.SetParamData(DesiredTag);
         end
         else
-          Processor.Process.Parameters.Add('pull');
+          Processor.SetParamData('pull');
       end;
     end;
   end;
@@ -450,32 +450,32 @@ begin
   end
   else
   begin
-    Processor.Process.Parameters.Add('init');
+    Processor.SetParamData('init');
     FReturnCode:=Processor.ExecuteAndWait;
     Processor.Process.Parameters.Clear;
 
-    Processor.Process.Parameters.Add('remote');
-    Processor.Process.Parameters.Add('add');
-    Processor.Process.Parameters.Add('origin');
-    Processor.Process.Parameters.Add(Repository);
+    Processor.SetParamData('remote');
+    Processor.SetParamData('add');
+    Processor.SetParamData('origin');
+    Processor.SetParamData(Repository);
     FReturnCode:=Processor.ExecuteAndWait;
     Processor.Process.Parameters.Clear;
 
-    Processor.Process.Parameters.Add('pull');
+    Processor.SetParamData('pull');
     FReturnCode:=Processor.ExecuteAndWait;
     Processor.Process.Parameters.Clear;
 
-    Processor.Process.Parameters.Add('fetch');
-    Processor.Process.Parameters.Add('--tags');
+    Processor.SetParamData('fetch');
+    Processor.SetParamData('--tags');
     FReturnCode:=Processor.ExecuteAndWait;
     Processor.Process.Parameters.Clear;
 
     if ((Length(DesiredTag)=0) AND (Length(DesiredBranch)=0)) then
     begin
-      Processor.Process.Parameters.Add('log');
-      Processor.Process.Parameters.Add('--branches');
-      Processor.Process.Parameters.Add('-1');
-      Processor.Process.Parameters.Add('--pretty=format:%H');
+      Processor.SetParamData('log');
+      Processor.SetParamData('--branches');
+      Processor.SetParamData('-1');
+      Processor.SetParamData('--pretty=format:%H');
       FReturnCode:=Processor.ExecuteAndWait;
       FReturnOutput:=Trim(Processor.WorkerOutput.Text);
       Processor.Process.Parameters.Clear;
@@ -483,9 +483,9 @@ begin
     if (Length(DesiredTag)>0) then FReturnOutput:=DesiredTag;
     if (Length(DesiredBranch)>0) then FReturnOutput:=DesiredBranch;
 
-    Processor.Process.Parameters.Add('checkout');
-    Processor.Process.Parameters.Add('--force');
-    Processor.Process.Parameters.Add(FReturnOutput);
+    Processor.SetParamData('checkout');
+    Processor.SetParamData('--force');
+    Processor.SetParamData(FReturnOutput);
     FReturnCode:=Processor.ExecuteAndWait;
     FReturnOutput:=Trim(Processor.WorkerOutput.Text);
   end;

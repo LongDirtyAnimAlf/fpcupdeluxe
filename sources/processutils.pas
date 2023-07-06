@@ -141,7 +141,9 @@ type
     property Environment:TProcessEnvironment read GetProcessEnvironment;
     Property OnUpdateEvent : TOnUpdateEvent Read FOnUpdateEvent Write FOnUpdateEvent;
 
-    procedure SetMakefilePathData(const aName,aValue:string);
+    procedure SetParamMakefilePathData(const aName,aValue:string);
+    procedure SetParamData(const aValue:string);
+
 
     // output
     property WorkerOutput: TStringList read FWorkerOutput; // the raw output
@@ -442,7 +444,7 @@ end;
 
 { TExternalTool }
 
-procedure TAbstractExternalTool.SetMakefilePathData(const aName,aValue:string);
+procedure TAbstractExternalTool.SetParamMakefilePathData(const aName,aValue:string);
 var
   aCorrectValue:string;
   i:integer;
@@ -466,6 +468,17 @@ begin
     end
     else
       Process.Parameters.Values[aName]:=aCorrectValue;
+  end;
+end;
+
+procedure TAbstractExternalTool.SetParamData(const aValue:string);
+begin
+  if Assigned(Process) then
+  begin
+    if (Length(aValue)>0) then
+    begin
+      Process.Parameters.Append(aValue);
+    end;
   end;
 end;
 

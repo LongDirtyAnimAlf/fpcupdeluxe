@@ -298,49 +298,49 @@ begin
   {$endif}
   begin
     Processor.Executable := Make;
-    Processor.Process.Parameters.Add('--directory=' + Processor.Process.CurrentDirectory);
+    Processor.SetParamData('--directory=' + Processor.Process.CurrentDirectory);
 
     {$IFDEF MSWINDOWS}
-    if Length(Shell)>0 then Processor.Process.Parameters.Add('SHELL='+Shell);
+    if Length(Shell)>0 then Processor.SetParamData('SHELL='+Shell);
     {$ENDIF}
 
     {$IF DEFINED(CPUARM) AND DEFINED(LINUX)}
-    Processor.Process.Parameters.Add('--jobs=1');
+    Processor.SetParamData('--jobs=1');
     {$ELSE}
     //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
     //if (NOT FNoJobs) then
-    //  Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+    //  Processor.SetParamData('--jobs='+IntToStr(FCPUCount));
     {$ENDIF}
 
-    Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
+    Processor.SetParamData('USESVN2REVISIONINC=0');
 
-    Processor.SetMakefilePathData('FPC',FCompiler);
-    Processor.SetMakefilePathData('PP',ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
+    Processor.SetParamMakefilePathData('FPC',FCompiler);
+    Processor.SetParamMakefilePathData('PP',ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
 
-    Processor.SetMakefilePathData('PREFIX',ExcludeTrailingPathDelimiter(LazarusInstallDir));
-    Processor.SetMakefilePathData('INSTALL_PREFIX',ExcludeTrailingPathDelimiter(LazarusInstallDir));
-    Processor.SetMakefilePathData('LAZARUS_INSTALL_DIR',IncludeTrailingPathDelimiter(LazarusInstallDir));
+    Processor.SetParamMakefilePathData('PREFIX',ExcludeTrailingPathDelimiter(LazarusInstallDir));
+    Processor.SetParamMakefilePathData('INSTALL_PREFIX',ExcludeTrailingPathDelimiter(LazarusInstallDir));
+    Processor.SetParamMakefilePathData('LAZARUS_INSTALL_DIR',IncludeTrailingPathDelimiter(LazarusInstallDir));
 
     //Make sure our FPC units can be found by Lazarus
-    //Processor.SetMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
-    //Processor.SetMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCInstallDir));
-    Processor.SetMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+    //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
+    //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCInstallDir));
+    Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
     //Make sure Lazarus does not pick up these tools from other installs
-    Processor.SetMakefilePathData('FPCMAKE',FPCCompilerBinPath+'fpcmake'+GetExeExt);
-    Processor.SetMakefilePathData('PPUMOVE',FPCCompilerBinPath+'ppumove'+GetExeExt);
+    Processor.SetParamMakefilePathData('FPCMAKE',FPCCompilerBinPath+'fpcmake'+GetExeExt);
+    Processor.SetParamMakefilePathData('PPUMOVE',FPCCompilerBinPath+'ppumove'+GetExeExt);
 
     s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
     //if FileExists(s) then
-      Processor.SetMakefilePathData('CFGFILE',s);
+      Processor.SetParamMakefilePathData('CFGFILE',s);
 
     {$IFDEF MSWINDOWS}
-    Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
+    Processor.SetParamData('UPXPROG=echo');      //Don't use UPX
     {$else}
-    //Processor.SetMakefilePathData('INSTALL_BINDIR',FBinPath);
+    //Processor.SetParamMakefilePathData('INSTALL_BINDIR',FBinPath);
     {$ENDIF MSWINDOWS}
 
-    if FLCL_Platform <> '' then Processor.Process.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
+    if FLCL_Platform <> '' then Processor.SetParamData('LCL_PLATFORM=' + FLCL_Platform);
 
     //Set options
     s := FLazarusCompilerOptions;
@@ -369,15 +369,15 @@ begin
     end;
     s:=Trim(s);
 
-    if Length(s)>0 then Processor.Process.Parameters.Add('OPT='+s);
+    if Length(s)>0 then Processor.SetParamData('OPT='+s);
 
     {$ifdef DISABLELAZBUILDJOBS}
-    Processor.Process.Parameters.Add('LAZBUILDJOBS=1');//prevent runtime 217 errors
+    Processor.SetParamData('LAZBUILDJOBS=1');//prevent runtime 217 errors
     {$else}
-    Processor.Process.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
+    Processor.SetParamData('LAZBUILDJOBS='+IntToStr(FCPUCount));
     {$endif}
 
-    Processor.Process.Parameters.Add('useride');
+    Processor.SetParamData('useride');
 
     try
       {$ifdef MSWindows}
@@ -421,29 +421,29 @@ begin
     OldPath:=Processor.Environment.GetVar('FPCDIR');
     Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
     {$IFDEF DEBUG}
-    Processor.Process.Parameters.Add('--verbose');
+    Processor.SetParamData('--verbose');
     {$ELSE}
     // See compileroptions.pp
     // Quiet:=ConsoleVerbosity<=-3;
-    Processor.Process.Parameters.Add('--quiet');
+    Processor.SetParamData('--quiet');
     {$ENDIF}
 
     {$ifdef DISABLELAZBUILDJOBS}
-    Processor.Process.Parameters.Add('--max-process-count=1');
+    Processor.SetParamData('--max-process-count=1');
     {$else}
-    Processor.Process.Parameters.Add('--max-process-count='+IntToStr(FCPUCount));
+    Processor.SetParamData('--max-process-count='+IntToStr(FCPUCount));
     {$endif}
 
-    Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(LazarusPrimaryConfigPath));
-    Processor.Process.Parameters.Add('--cpu=' + GetSourceCPU);
-    Processor.Process.Parameters.Add('--os=' + GetSourceOS);
+    Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(LazarusPrimaryConfigPath));
+    Processor.SetParamData('--cpu=' + GetSourceCPU);
+    Processor.SetParamData('--os=' + GetSourceOS);
 
     if FLCL_Platform <> '' then
-      Processor.Process.Parameters.Add('--ws=' + FLCL_Platform);
+      Processor.SetParamData('--ws=' + FLCL_Platform);
 
-    Processor.Process.Parameters.Add('--build-ide="-dKeepInstalledPackages '+FLazarusCompilerOptions+'"');
-    //Processor.Process.Parameters.Add('--build-ide="'+FLazarusCompilerOptions+'"');
-    //Processor.Process.Parameters.Add('--build-mode="Normal IDE"');
+    Processor.SetParamData('--build-ide="-dKeepInstalledPackages '+FLazarusCompilerOptions+'"');
+    //Processor.SetParamData('--build-ide="'+FLazarusCompilerOptions+'"');
+    //Processor.SetParamData('--build-mode="Normal IDE"');
 
     Infoln(infotext+'Running lazbuild to get IDE with user-specified packages', etInfo);
     try
@@ -814,7 +814,7 @@ begin
   RegisterPackageFeature:=false;
   // get lazbuild version to see if we can register packages (available from version 1.7 and up)
   Processor.Process.Parameters.Clear;
-  Processor.Process.Parameters.Add('--version');
+  Processor.SetParamData('--version');
   try
     ProcessorResult:=Processor.ExecuteAndWait;
     result := (ProcessorResult=0);
@@ -845,21 +845,21 @@ begin
     Processor.Process.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
   Processor.Process.Parameters.Clear;
   {$IFDEF DEBUG}
-  Processor.Process.Parameters.Add('--verbose');
+  Processor.SetParamData('--verbose');
   {$ELSE}
-  Processor.Process.Parameters.Add('--quiet');
+  Processor.SetParamData('--quiet');
   {$ENDIF}
 
-  Processor.Process.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
-  Processor.Process.Parameters.Add('--cpu=' + GetSourceCPU);
-  Processor.Process.Parameters.Add('--os=' + GetSourceOS);
+  Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
+  Processor.SetParamData('--cpu=' + GetSourceCPU);
+  Processor.SetParamData('--os=' + GetSourceOS);
   if FLCL_Platform <> '' then
-            Processor.Process.Parameters.Add('--ws=' + FLCL_Platform);
+            Processor.SetParamData('--ws=' + FLCL_Platform);
   if RegisterPackageFeature then
-    Processor.Process.Parameters.Add('--add-package-link')
+    Processor.SetParamData('--add-package-link')
   else
-    Processor.Process.Parameters.Add('--add-package');
-  Processor.Process.Parameters.Add(DoubleQuoteIfNeeded(PackageAbsolutePath));
+    Processor.SetParamData('--add-package');
+  Processor.SetParamData(DoubleQuoteIfNeeded(PackageAbsolutePath));
   try
     ProcessorResult:=Processor.ExecuteAndWait;
     result := (ProcessorResult=0);
@@ -1417,7 +1417,7 @@ begin
   begin
     Processor.Executable := aFileName;
     Processor.Process.Parameters.Clear;
-    Processor.Process.Parameters.Add('--version');
+    Processor.SetParamData('--version');
     try
       ProcessorResult:=Processor.ExecuteAndWait;
       if ProcessorResult = 0 then
@@ -2474,11 +2474,11 @@ begin
   Processor.Process.Parameters.Clear;
   Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
-  Processor.Process.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath);
-  Processor.Process.Parameters.Add('--recursive');
+  Processor.SetParamData('--primary-config-path='+LazarusPrimaryConfigPath);
+  Processor.SetParamData('--recursive');
 
-  Processor.Process.Parameters.Add(Workingdir+DirectorySeparator+'versionitis.lpi');
-  Processor.Process.Parameters.Add('--build-mode=default');
+  Processor.SetParamData(Workingdir+DirectorySeparator+'versionitis.lpi');
+  Processor.SetParamData('--build-mode=default');
 
   Infoln(infotext+Processor.GetExeInfo,etDebug);
   ProcessorResult:=Processor.ExecuteAndWait;
@@ -2501,7 +2501,7 @@ begin
   Processor.Process.Parameters.Clear;
   Processor.Executable := versionitis_exe;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
-  Processor.Process.Parameters.Add('-verbose');
+  Processor.SetParamData('-verbose');
 
   Infoln(infotext+Processor.GetExeInfo,etDebug);
   ProcessorResult:=Processor.ExecuteAndWait;
@@ -2512,11 +2512,11 @@ begin
   Processor.Process.Parameters.Clear;
   Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
-  Processor.Process.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath);
-  Processor.Process.Parameters.Add('--recursive');
+  Processor.SetParamData('--primary-config-path='+LazarusPrimaryConfigPath);
+  Processor.SetParamData('--recursive');
 
-  Processor.Process.Parameters.Add(Workingdir+DirectorySeparator+'awgg.lpr');
-  Processor.Process.Parameters.Add('--build-mode=default');
+  Processor.SetParamData(Workingdir+DirectorySeparator+'awgg.lpr');
+  Processor.SetParamData('--build-mode=default');
 
   Infoln(infotext+Processor.GetExeInfo,etDebug);
   ProcessorResult:=Processor.ExecuteAndWait;
@@ -2567,12 +2567,12 @@ begin
   Processor.Process.Parameters.Clear;
   Processor.Executable:=Make;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
-  Processor.SetMakefilePathData('PP',FCompiler);
-  //Processor.SetMakefilePathData('FPCDIR',IncludeTrailingPathDelimiter(Workingdir)+'compiler');
-  //Processor.SetMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+  Processor.SetParamMakefilePathData('PP',FCompiler);
+  //Processor.SetParamMakefilePathData('FPCDIR',IncludeTrailingPathDelimiter(Workingdir)+'compiler');
+  //Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
-  Processor.Process.Parameters.Add('clean');
-  Processor.Process.Parameters.Add('all');
+  Processor.SetParamData('clean');
+  Processor.SetParamData('all');
 
   Infoln(infotext+Processor.GetExeInfo,etDebug);
 
