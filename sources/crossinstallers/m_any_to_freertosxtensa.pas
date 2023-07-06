@@ -142,6 +142,8 @@ begin
   begin
     FLibsFound:=True;
 
+    AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
+
     ActionNeeded:=(NOT PerformLibraryPathMagic(S));
 
     if (NOT ActionNeeded) then AddFPCCFGSnippet('-Fl'+S,false);
@@ -291,8 +293,9 @@ begin
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
 
-    if (FSubArch=TSUBARCH.lx6) then AddFPCCFGSnippet('-Wpesp32');
-    if (FSubArch=TSUBARCH.lx106) then AddFPCCFGSnippet('-Wpesp8266');
+    // This leads to build failures on some systems, so disable for now.
+    //if (FSubArch=TSUBARCH.lx6) then AddFPCCFGSnippet('-Wpesp32');
+    //if (FSubArch=TSUBARCH.lx106) then AddFPCCFGSnippet('-Wpesp8266');
 
     ToolVersion:='';
     for S in FCrossOpts do
