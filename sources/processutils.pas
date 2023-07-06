@@ -139,8 +139,9 @@ type
     property ErrorMessage: string read FErrorMessage write FErrorMessage;
     property ReadStdOutBeforeErr: boolean read FReadStdOutBeforeErr write FReadStdOutBeforeErr;
     property Environment:TProcessEnvironment read GetProcessEnvironment;
-
     Property OnUpdateEvent : TOnUpdateEvent Read FOnUpdateEvent Write FOnUpdateEvent;
+
+    procedure SetMakefilePathData(const aName,aValue:string);
 
     // output
     property WorkerOutput: TStringList read FWorkerOutput; // the raw output
@@ -440,6 +441,33 @@ begin
 end;
 
 { TExternalTool }
+
+procedure TAbstractExternalTool.SetMakefilePathData(const aName,aValue:string);
+var
+  aCorrectValue:string;
+  i:integer;
+begin
+  if Assigned(Process) then
+  begin
+    aCorrectValue:=aValue;
+    {$ifdef Windows}
+    if (Length(aCorrectValue)>0) then
+    begin
+      if (Pos(' ',aCorrectValue)>0) then aCorrectValue:=ExtractShortPathName(aCorrectValue);
+      for i:=1 to Length(aCorrectValue) do
+        if (aCorrectValue[i]=DirectorySeparator) then
+          aCorrectValue[i]:='/';
+    end;
+    {$endif}
+    if (Length(aCorrectValue)=0) then
+    begin
+      i:=Process.Parameters.IndexOf(aName);
+      if (i<>-1) then TProcessStringList(Process.Parameters).Delete(i);
+    end
+    else
+      Process.Parameters.Values[aName]:=aCorrectValue;
+  end;
+end;
 
 procedure TExternalTool.ProcessRunning;
 begin

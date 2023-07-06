@@ -1140,32 +1140,32 @@ begin
 
           Processor.Process.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(SourceDirectory));
 
-          Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(SourceDirectory));
+          Processor.SetMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(SourceDirectory));
 
           {$IFDEF DEBUG}
           //To debug Makefile itself
           //Processor.Process.Parameters.Add('-d');
           {$ENDIF}
-          Processor.Process.Parameters.Add('FPCMAKE=' + FPCCompilerBinPath+'fpcmake'+GetExeExt);
-          Processor.Process.Parameters.Add('PPUMOVE=' + FPCCompilerBinPath+'ppumove'+GetExeExt);
-          Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
+          Processor.SetMakefilePathData('FPCMAKE',FPCCompilerBinPath+'fpcmake'+GetExeExt);
+          Processor.SetMakefilePathData('PPUMOVE',FPCCompilerBinPath+'ppumove'+GetExeExt);
+          Processor.SetMakefilePathData('PREFIX',ExcludeTrailingPathDelimiter(InstallDirectory));
 
-          Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
-          Processor.Process.Parameters.Add('INSTALL_SOURCEDIR='+ExcludeTrailingPathDelimiter(SourceDirectory));
+          Processor.SetMakefilePathData('INSTALL_PREFIX',ExcludeTrailingPathDelimiter(InstallDirectory));
+          Processor.SetMakefilePathData('INSTALL_SOURCEDIR',ExcludeTrailingPathDelimiter(SourceDirectory));
 
-          Processor.Process.Parameters.Add('INSTALL_LIBDIR='+ConcatPaths([InstallDirectory,'lib']));
-          Processor.Process.Parameters.Add('INSTALL_SHAREDDIR='+ConcatPaths([InstallDirectory,'share']));
-          Processor.Process.Parameters.Add('INSTALL_DATADIR='+ConcatPaths([InstallDirectory,'data']));
+          Processor.SetMakefilePathData('INSTALL_LIBDIR',ConcatPaths([InstallDirectory,'lib']));
+          Processor.SetMakefilePathData('INSTALL_SHAREDDIR',ConcatPaths([InstallDirectory,'share']));
+          Processor.SetMakefilePathData('INSTALL_DATADIR',ConcatPaths([InstallDirectory,'data']));
 
-          Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory);
+          Processor.SetMakefilePathData('INSTALL_UNITDIR',GetUnitsInstallDirectory);
 
-          Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
+          Processor.SetMakefilePathData('INSTALL_BINDIR',ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
           {$ifdef Windows}
-          Processor.Process.Parameters.Add('INSTALL_BASEDIR='+ExcludeTrailingPathDelimiter(InstallDirectory));
+          Processor.SetMakefilePathData('INSTALL_BASEDIR',ExcludeTrailingPathDelimiter(InstallDirectory));
           {$else}
-          Processor.Process.Parameters.Add('INSTALL_BASEDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
-          Processor.Process.Parameters.Add('INSTALL_DOCDIR='+ConcatPaths([InstallDirectory,'doc']));
-          Processor.Process.Parameters.Add('INSTALL_EXAMPLEDIR='+ConcatPaths([InstallDirectory,'examples']));
+          Processor.SetMakefilePathData('INSTALL_BASEDIR',ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
+          Processor.SetMakefilePathData('INSTALL_DOCDIR',ConcatPaths([InstallDirectory,'doc']));
+          Processor.SetMakefilePathData('INSTALL_EXAMPLEDIR',ConcatPaths([InstallDirectory,'examples']));
           {$endif}
 
           Processor.Process.Parameters.Add('CPU_SOURCE='+GetSourceCPU);
@@ -1183,11 +1183,11 @@ begin
             if (MakeCycle=st_RtlInstall) then UnitSearchPath:=UnitSearchPath+'rtl';
             if (MakeCycle=st_PackagesInstall) then
             {$ifdef Windows}
-            UnitSearchPath:=UnitSearchPath+'\$$(packagename)';
+            UnitSearchPath:=UnitSearchPath+'$$(packagename)';
             {$else}
             UnitSearchPath:=UnitSearchPath+'\$$\(packagename\)';
             {$endif}
-            Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=UnitSearchPath;
+            Processor.SetMakefilePathData('INSTALL_UNITDIR',UnitSearchPath);
           end;
 
           {$IFDEF MSWINDOWS}
@@ -1197,39 +1197,28 @@ begin
           if StrayShell then
           begin
             s1:=ExtractFilePath(Make)+'gecho.exe';
-            if FileExists(s1) then
-            begin
-              if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
-              s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
-              Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
-            end;
+            if FileExists(s1) then Processor.SetMakefilePathData('ECHOREDIR',s1);
           end;
           *)
           //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
           s1:=GitClient.RepoExecutable;
-          if (Length(s1)>0) then
-          begin
-            if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
-            // do we have a stray shell in the path ...
-            if StrayShell then
-              s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
-            Processor.Process.Parameters.Add('GIT='+s1);
-          end;
+          if (Length(s1)>0) then Processor.SetMakefilePathData('GIT',s1);
           {$ENDIF}
+
           // Tell make where to find the target binutils if cross-compiling:
           // Not strictly necessary: the cross-options have this already:
           if (CrossInstaller.BinUtilsPath<>'') then
-             Processor.Process.Parameters.Add('CROSSBINDIR='+CrossInstaller.BinUtilsPath);
+             Processor.SetMakefilePathData('CROSSBINDIR',CrossInstaller.BinUtilsPath);
           if (CrossInstaller.BinUtilsPrefix<>'') then
-             Processor.Process.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
+             Processor.SetMakefilePathData('BINUTILSPREFIX',CrossInstaller.BinUtilsPrefix);
 
           //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
           //Todo: to be investigated
-          Processor.Process.Parameters.Add('FPCFPMAKE='+FCompiler);
+          Processor.SetMakefilePathData('FPCFPMAKE',FCompiler);
 
           {$ifdef crosssimple}
-          Processor.Process.Parameters.Add('FPC='+FCompiler);
+          Processor.SetMakefilePathData('FPC',FCompiler);
           case MakeCycle of
             st_MakeAll:
             begin
@@ -1248,7 +1237,7 @@ begin
           case MakeCycle of
             st_Compiler:
             begin
-              Processor.Process.Parameters.Add('FPC='+FCompiler);
+              Processor.SetMakefilePathData('FPC',FCompiler);
               Processor.Process.Parameters.Add('compiler_cycle');
             end;
             st_CompilerInstall:
@@ -1271,7 +1260,7 @@ begin
               end;
               {$endif}
               {$endif}
-              Processor.Process.Parameters.Add('FPC='+FCompiler);
+              Processor.SetMakefilePathData('FPC',FCompiler);
               Processor.Process.Parameters.Add('compiler_install');
             end;
             st_RtlBuild:
@@ -1279,7 +1268,7 @@ begin
               s2:=FPCCompilerBinPath+FPCCrossCompilerName;
               if (NOT FileExists(s2)) then
                 s2:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
-              Processor.Process.Parameters.Add('FPC='+s2);
+              Processor.SetMakefilePathData('FPC',s2);
               Processor.Process.Parameters.Add('rtl_all');
             end;
             st_RtlInstall:
@@ -1287,7 +1276,7 @@ begin
               s2:=FPCCompilerBinPath+FPCCrossCompilerName;
               if (NOT FileExists(s2)) then
                 s2:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
-              Processor.Process.Parameters.Add('FPC='+s2);
+              Processor.SetMakefilePathData('FPC',s2);
               Processor.Process.Parameters.Add('rtl_install');
             end;
             st_PackagesBuild:
@@ -1295,7 +1284,7 @@ begin
               s2:=FPCCompilerBinPath+FPCCrossCompilerName;
               if (NOT FileExists(s2)) then
                 s2:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
-              Processor.Process.Parameters.Add('FPC='+s2);
+              Processor.SetMakefilePathData('FPC',s2);
               Processor.Process.Parameters.Add('packages_all');
             end;
             st_PackagesInstall:
@@ -1303,7 +1292,7 @@ begin
               s2:=FPCCompilerBinPath+FPCCrossCompilerName;
               if (NOT FileExists(s2)) then
                 s2:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
-              Processor.Process.Parameters.Add('FPC='+s2);
+              Processor.SetMakefilePathData('FPC',s2);
               Processor.Process.Parameters.Add('packages_install');
             end;
             st_NativeCompiler:
@@ -1318,7 +1307,7 @@ begin
                 then
               begin
                 Infoln(infotext+'Building native compiler for '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+'.',etInfo);
-                Processor.Process.Parameters.Add('FPC='+FCompiler);
+                Processor.SetMakefilePathData('FPC',FCompiler);
                 Processor.Process.Parameters.Add('-C');
                 Processor.Process.Parameters.Add('compiler');
                 Processor.Process.Parameters.Add('compiler');
@@ -1912,37 +1901,37 @@ begin
     Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
   end;
 
-  //Processor.Process.Parameters.Add('FPC='+FCompiler);
-  Processor.Process.Parameters.Add('PP='+FCompiler);
+  //Processor.SetMakefilePathData('FPC',FCompiler);
+  Processor.SetMakefilePathData('PP',FCompiler);
 
   //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
   //The paths are fixed in the FPC sources. Try to set the default path here [FPCDIR], so yylex.cod and yyparse.cod can be found.
-  Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(SourceDirectory));
+  Processor.SetMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(SourceDirectory));
 
   {$IFDEF DEBUG}
   //To debug Makefile itself
   //Processor.Process.Parameters.Add('-d');
   {$ENDIF}
-  Processor.Process.Parameters.Add('FPCMAKE=' + FPCCompilerBinPath+'fpcmake'+GetExeExt);
-  Processor.Process.Parameters.Add('PPUMOVE=' + FPCCompilerBinPath+'ppumove'+GetExeExt);
-  Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
+  Processor.SetMakefilePathData('FPCMAKE',FPCCompilerBinPath+'fpcmake'+GetExeExt);
+  Processor.SetMakefilePathData('PPUMOVE',FPCCompilerBinPath+'ppumove'+GetExeExt);
+  Processor.SetMakefilePathData('PREFIX',ExcludeTrailingPathDelimiter(InstallDirectory));
 
-  Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
-  Processor.Process.Parameters.Add('INSTALL_SOURCEDIR='+ExcludeTrailingPathDelimiter(SourceDirectory));
+  Processor.SetMakefilePathData('INSTALL_PREFIX',ExcludeTrailingPathDelimiter(InstallDirectory));
+  Processor.SetMakefilePathData('INSTALL_SOURCEDIR',ExcludeTrailingPathDelimiter(SourceDirectory));
 
-  Processor.Process.Parameters.Add('INSTALL_LIBDIR='+ConcatPaths([InstallDirectory,'lib']));
-  Processor.Process.Parameters.Add('INSTALL_SHAREDDIR='+ConcatPaths([InstallDirectory,'share']));
-  Processor.Process.Parameters.Add('INSTALL_DATADIR='+ConcatPaths([InstallDirectory,'data']));
+  Processor.SetMakefilePathData('INSTALL_LIBDIR',ConcatPaths([InstallDirectory,'lib']));
+  Processor.SetMakefilePathData('INSTALL_SHAREDDIR',ConcatPaths([InstallDirectory,'share']));
+  Processor.SetMakefilePathData('INSTALL_DATADIR',ConcatPaths([InstallDirectory,'data']));
 
-  Processor.Process.Parameters.Add('INSTALL_UNITDIR='+GetUnitsInstallDirectory);
+  Processor.SetMakefilePathData('INSTALL_UNITDIR',GetUnitsInstallDirectory);
 
-  Processor.Process.Parameters.Add('INSTALL_BINDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
+  Processor.SetMakefilePathData('INSTALL_BINDIR',ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
   {$ifdef Windows}
-  Processor.Process.Parameters.Add('INSTALL_BASEDIR='+ExcludeTrailingPathDelimiter(InstallDirectory));
+  Processor.SetMakefilePathData('INSTALL_BASEDIR',ExcludeTrailingPathDelimiter(InstallDirectory));
   {$else}
-  Processor.Process.Parameters.Add('INSTALL_BASEDIR='+ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
-  Processor.Process.Parameters.Add('INSTALL_DOCDIR='+ConcatPaths([InstallDirectory,'doc']));
-  Processor.Process.Parameters.Add('INSTALL_EXAMPLEDIR='+ConcatPaths([InstallDirectory,'examples']));
+  Processor.SetMakefilePathData('INSTALL_BASEDIR',ExcludeTrailingPathDelimiter(FPCCompilerBinPath));
+  Processor.SetMakefilePathData('INSTALL_DOCDIR',ConcatPaths([InstallDirectory,'doc']));
+  Processor.SetMakefilePathData('INSTALL_EXAMPLEDIR',ConcatPaths([InstallDirectory,'examples']));
   {$endif}
 
   Processor.Process.Parameters.Add('OS_SOURCE=' + GetSourceOS);
@@ -1955,35 +1944,15 @@ begin
   Processor.Process.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   //Processor.Process.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
 
-  (*
-  // do we have a stray shell in the path ...
-  if StrayShell then
-  begin
-    s1:=ExtractFilePath(Make)+'gecho.exe';
-    if FileExists(s1) then
-    begin
-      if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
-      s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
-      Processor.Process.Parameters.Add('ECHOREDIR=' + s1);
-    end;
-  end;
-  *)
-
   // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
   s1:=GitClient.RepoExecutable;
-  if (Length(s1)>0) then
-  begin
-    if (Pos(' ',s1)>0) then s1:=ExtractShortPathName(s1);
-    if StrayShell then
-      s1:=StringReplace(s1,'\','/',[rfReplaceAll]);
-    Processor.Process.Parameters.Add('GIT='+s1);
-  end;
+  if (Length(s1)>0) then Processor.SetMakefilePathData('GIT',s1);
   {$ENDIF}
 
   if (SourceVersionNum<CalculateFullVersion(2,4,4)) then
     Processor.Process.Parameters.Add('DATA2INC=echo');
   {else
-    Processor.Process.Parameters.Add('DATA2INC=' + FPCCompilerBinPath+'data2inc'+GetExeExt);}
+    Processor.SetMakefilePathData('DATA2INC',FPCCompilerBinPath+'data2inc'+GetExeExt);}
 
   if BootstrapCompilerOverrideVersionCheck then
   begin
@@ -2177,7 +2146,7 @@ begin
     UnitSearchPath:=GetUnitsInstallDirectory+DirectorySeparator;
     if OperationSucceeded then
     begin
-      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=UnitSearchPath+'rtl';
+      Processor.SetMakefilePathData('INSTALL_UNITDIR',UnitSearchPath+'rtl');
       Processor.Process.Parameters.Strings[Index]:='installbase';
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
@@ -2185,9 +2154,9 @@ begin
     if OperationSucceeded then
     begin
       {$ifdef Windows}
-      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=UnitSearchPath+'\$$(packagename)';
+      Processor.SetMakefilePathData('INSTALL_UNITDIR',UnitSearchPath+'$$(packagename)');
       {$else}
-      Processor.Process.Parameters.Values['INSTALL_UNITDIR']:=UnitSearchPath+'\$$\(packagename\)';
+      Processor.SetMakefilePathData('INSTALL_UNITDIR',UnitSearchPath+'\$$\(packagename\)';
       {$endif}
       Processor.Process.Parameters.Strings[Index]:='installother';
       ProcessorResult:=Processor.ExecuteAndWait;
@@ -4806,13 +4775,15 @@ begin
       {$endif win64}
       Processor.Process.Parameters.Add('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
     end;
-    Processor.Process.Parameters.Add('FPC='+aCleanupCompiler);
     Processor.Process.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(SourceDirectory));
-    Processor.Process.Parameters.Add('FPCMAKE=' + FPCCompilerBinPath+'fpcmake'+GetExeExt);
-    Processor.Process.Parameters.Add('PPUMOVE=' + FPCCompilerBinPath+'ppumove'+GetExeExt);
-    Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(SourceDirectory));
-    Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
-    Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(InstallDirectory));
+
+    Processor.SetMakefilePathData('FPC',aCleanupCompiler);
+    Processor.SetMakefilePathData('FPCMAKE',FPCCompilerBinPath+'fpcmake'+GetExeExt);
+    Processor.SetMakefilePathData('PPUMOVE',FPCCompilerBinPath+'ppumove'+GetExeExt);
+    Processor.SetMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(SourceDirectory));
+    Processor.SetMakefilePathData('PREFIX',ExcludeTrailingPathDelimiter(InstallDirectory));
+    Processor.SetMakefilePathData('INSTALL_PREFIX',ExcludeTrailingPathDelimiter(InstallDirectory));
+
     Processor.Process.Parameters.Add('CPU_SOURCE='+GetSourceCPU);
     Processor.Process.Parameters.Add('OS_SOURCE='+GetSourceOS);
     {$IFDEF MSWINDOWS}

@@ -293,9 +293,8 @@ begin
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
 
-    // This leads to build failures on some systems, so disable for now.
-    //if (FSubArch=TSUBARCH.lx6) then AddFPCCFGSnippet('-Wpesp32');
-    //if (FSubArch=TSUBARCH.lx106) then AddFPCCFGSnippet('-Wpesp8266');
+    if (FSubArch=TSUBARCH.lx6) then AddFPCCFGSnippet('-Wpesp32',false);
+    if (FSubArch=TSUBARCH.lx106) then AddFPCCFGSnippet('-Wpesp8266',false);
 
     ToolVersion:='';
     for S in FCrossOpts do

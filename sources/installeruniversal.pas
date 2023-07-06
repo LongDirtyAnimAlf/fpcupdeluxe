@@ -312,31 +312,32 @@ begin
     //  Processor.Process.Parameters.Add('--jobs='+IntToStr(FCPUCount));
     {$ENDIF}
 
-    Processor.Process.Parameters.Add('FPC=' + FCompiler);
-    Processor.Process.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
     Processor.Process.Parameters.Add('USESVN2REVISIONINC=0');
 
-    Processor.Process.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(LazarusInstallDir));
-    Processor.Process.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(LazarusInstallDir));
-    Processor.Process.Parameters.Add('LAZARUS_INSTALL_DIR='+IncludeTrailingPathDelimiter(LazarusInstallDir));
+    Processor.SetMakefilePathData('FPC',FCompiler);
+    Processor.SetMakefilePathData('PP',ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
+
+    Processor.SetMakefilePathData('PREFIX',ExcludeTrailingPathDelimiter(LazarusInstallDir));
+    Processor.SetMakefilePathData('INSTALL_PREFIX',ExcludeTrailingPathDelimiter(LazarusInstallDir));
+    Processor.SetMakefilePathData('LAZARUS_INSTALL_DIR',IncludeTrailingPathDelimiter(LazarusInstallDir));
 
     //Make sure our FPC units can be found by Lazarus
-    //Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
-    //Processor.Process.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCInstallDir));
-    Processor.Process.Parameters.Add('FPCDIR='+ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+    //Processor.SetMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
+    //Processor.SetMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCInstallDir));
+    Processor.SetMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
     //Make sure Lazarus does not pick up these tools from other installs
-    Processor.Process.Parameters.Add('FPCMAKE=' + FPCCompilerBinPath+'fpcmake'+GetExeExt);
-    Processor.Process.Parameters.Add('PPUMOVE=' + FPCCompilerBinPath+'ppumove'+GetExeExt);
+    Processor.SetMakefilePathData('FPCMAKE',FPCCompilerBinPath+'fpcmake'+GetExeExt);
+    Processor.SetMakefilePathData('PPUMOVE',FPCCompilerBinPath+'ppumove'+GetExeExt);
 
     s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
     //if FileExists(s) then
-      Processor.Process.Parameters.Add('CFGFILE=' + s);
+      Processor.SetMakefilePathData('CFGFILE',s);
 
     {$IFDEF MSWINDOWS}
     Processor.Process.Parameters.Add('UPXPROG=echo');      //Don't use UPX
     {$else}
-    //Processor.Process.Parameters.Add('INSTALL_BINDIR='+FBinPath);
+    //Processor.SetMakefilePathData('INSTALL_BINDIR',FBinPath);
     {$ENDIF MSWINDOWS}
 
     if FLCL_Platform <> '' then Processor.Process.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
@@ -2566,9 +2567,9 @@ begin
   Processor.Process.Parameters.Clear;
   Processor.Executable:=Make;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
-  Processor.Process.Parameters.Add('PP='+FCompiler);
-  //Processor.Process.Parameters.Add('FPCDIR=' + IncludeTrailingPathDelimiter(Workingdir)+'compiler');
-  //Processor.Process.Parameters.Add('FPCDIR='+ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+  Processor.SetMakefilePathData('PP',FCompiler);
+  //Processor.SetMakefilePathData('FPCDIR',IncludeTrailingPathDelimiter(Workingdir)+'compiler');
+  //Processor.SetMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
   Processor.Process.Parameters.Add('clean');
   Processor.Process.Parameters.Add('all');
