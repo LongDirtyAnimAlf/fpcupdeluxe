@@ -386,9 +386,9 @@ begin
         Processor.SetParamMakefilePathData('LAZARUS_INSTALL_DIR',IncludeTrailingPathDelimiter(InstallDirectory));
 
         //Make sure our FPC units can be found by Lazarus
-        //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
+        Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
         //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCInstallDir));
-        Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(false)]));
+        //Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(false)]));
 
         //Make sure Lazarus does not pick up these tools from other installs
         Processor.SetParamMakefilePathData('FPCMAKE',FPCCompilerBinPath+'fpcmake'+GetExeExt);
@@ -694,9 +694,9 @@ begin
     Processor.SetParamMakefilePathData('LAZARUS_INSTALL_DIR',IncludeTrailingPathDelimiter(InstallDirectory));
 
     //Make sure our FPC units can be found by Lazarus
-    //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
+    Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
     //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FFPCInstallDir));
-    Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+    //Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
     //Make sure Lazarus does not pick up these tools from other installs
     Processor.SetParamMakefilePathData('FPCMAKE',FPCCompilerBinPath+'fpcmake'+GetExeExt);
@@ -996,9 +996,9 @@ begin
       //SysUtils.GetEnvironmentVariable('FPCDIR');
       //Makefile could pickup this FPCDIR setting, so try to set it for fpcupdeluxe
       FPCDirStore:=Processor.Environment.GetVar('FPCDIR');
-      //Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
+      Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
       //Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FPCInstallDir));
-      Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+      //Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
       {$IFDEF DEBUG}
       Processor.SetParamData('--verbose');
       {$ELSE}
@@ -1074,7 +1074,7 @@ begin
           //Makefile could pickup this FPCDIR setting, so try to set it for fpcupdeluxe
           FPCDirStore:=Processor.Environment.GetVar('FPCDIR');
           Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FFPCSourceDir));
-          Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+          //Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
           {$IFDEF DEBUG}
           Processor.SetParamData('--verbose');
           {$ELSE}
@@ -2417,7 +2417,8 @@ begin
 
       s:=Processor.Environment.GetVar('FPCDIR');
       try
-        Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+        //Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+        Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCSourceDir]));
         Processor.SetParamData('-T' + GetSourceCPU + '-' + GetSourceOS);
 
         Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(SourceDirectory);

@@ -322,9 +322,9 @@ begin
     Processor.SetParamMakefilePathData('LAZARUS_INSTALL_DIR',IncludeTrailingPathDelimiter(LazarusInstallDir));
 
     //Make sure our FPC units can be found by Lazarus
-    //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
+    Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
     //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCInstallDir));
-    Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+    //Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
     //Make sure Lazarus does not pick up these tools from other installs
     Processor.SetParamMakefilePathData('FPCMAKE',FPCCompilerBinPath+'fpcmake'+GetExeExt);
@@ -419,7 +419,8 @@ begin
     Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
 
     OldPath:=Processor.Environment.GetVar('FPCDIR');
-    Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+    //Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+    Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
     {$IFDEF DEBUG}
     Processor.SetParamData('--verbose');
     {$ELSE}
@@ -2567,9 +2568,10 @@ begin
   Processor.Process.Parameters.Clear;
   Processor.Executable:=Make;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
+  //Processor.SetParamMakefilePathData('FPC',FCompiler);
   Processor.SetParamMakefilePathData('PP',FCompiler);
+  //Processor.SetParamMakefilePathData('PP',ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
   //Processor.SetParamMakefilePathData('FPCDIR',IncludeTrailingPathDelimiter(Workingdir)+'compiler');
-  //Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
   Processor.SetParamData('clean');
   Processor.SetParamData('all');
