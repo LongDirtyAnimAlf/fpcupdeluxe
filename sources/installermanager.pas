@@ -493,7 +493,7 @@ begin
     // Note: normal GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
     // XdgConfigHome normally resolves to something like ~/.config
     // which is a reasonable default if we have no Lazarus primary config path set
-    FLazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
+    FLazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
     {$ENDIF MSWINDOWS}
   end;
   result:=FLazarusPrimaryConfigPath;

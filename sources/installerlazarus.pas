@@ -376,8 +376,8 @@ begin
         Processor.SetParamMakefilePathData('LAZARUS_INSTALL_DIR',InstallDirectory);
 
         //Make sure our FPC units can be found by Lazarus
-        Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FFPCSourceDir));
-        //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FFPCInstallDir));
+        Processor.SetParamMakefilePathData('FPCDIR',FFPCSourceDir);
+        //Processor.SetParamMakefilePathData('FPCDIR',FFPCInstallDir);
         //Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(false)]));
 
         //Make sure Lazarus does not pick up these tools from other installs
@@ -684,8 +684,8 @@ begin
     Processor.SetParamMakefilePathData('LAZARUS_INSTALL_DIR',IncludeTrailingPathDelimiter(InstallDirectory));
 
     //Make sure our FPC units can be found by Lazarus
-    Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FFPCSourceDir));
-    //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FFPCInstallDir));
+    Processor.SetParamMakefilePathData('FPCDIR',FFPCSourceDir);
+    //Processor.SetParamMakefilePathData('FPCDIR',FFPCInstallDir);
     //Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true)]));
 
     //Make sure Lazarus does not pick up these tools from other installs
@@ -986,8 +986,8 @@ begin
       //SysUtils.GetEnvironmentVariable('FPCDIR');
       //Makefile could pickup this FPCDIR setting, so try to set it for fpcupdeluxe
       FPCDirStore:=Processor.Environment.GetVar('FPCDIR');
-      Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FFPCSourceDir));
-      //Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FFPCInstallDir));
+      Processor.Environment.SetVar('FPCDIR',FFPCSourceDir);
+      //Processor.Environment.SetVar('FPCDIR',FFPCInstallDir);
       //Processor.Environment.SetVar('FPCDIR',ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true)]));
       {$IFDEF DEBUG}
       Processor.SetParamData('--verbose');
@@ -1063,7 +1063,7 @@ begin
           Processor.Process.Parameters.Clear;
           //Makefile could pickup this FPCDIR setting, so try to set it for fpcupdeluxe
           FPCDirStore:=Processor.Environment.GetVar('FPCDIR');
-          Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FFPCSourceDir));
+          Processor.Environment.SetVar('FPCDIR',FFPCSourceDir);
           //Processor.Environment.SetVar('FPCDIR',ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true)]));
           {$IFDEF DEBUG}
           Processor.SetParamData('--verbose');
@@ -1642,8 +1642,7 @@ begin
   //PCPSnippet.DefaultEncoding:=TEncoding.ASCII;
   {$ENDIF}
   try
-    // Martin Friebe mailing list January 2014: no quotes allowed, no trailing blanks
-    PCPSnippet.Add('--primary-config-path=' + Trim(ExcludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)));
+    PCPSnippet.Add('--primary-config-path=' + FLazarusPrimaryConfigPath);
     aFileName:=IncludeTrailingPathDelimiter(InstallDirectory) + LAZARUSCFG;
     if (NOT FileExists(aFileName)) then PCPSnippet.SaveToFile(aFileName);
   finally
@@ -1697,12 +1696,12 @@ begin
         {$ENDIF}
         if FileExists(GDBPath) then
         begin
-          s:=ConcatPaths([FMakeDir,'gdb',GetSourceCPUOS]);
+          s:=ConcatPaths([MakeDir,'gdb',GetSourceCPUOS]);
           ForceDirectoriesSafe(s);
           s:=s+DirectorySeparator+'gdb';
           if (fpSymlink(pchar(GDBPath),pchar(s))=0) then
           begin
-            s:=ConcatPaths([FMakeDir,'gdb','$(TargetCPU)-$(TargetOS)']);
+            s:=ConcatPaths([MakeDir,'gdb','$(TargetCPU)-$(TargetOS)']);
             s:=s+DirectorySeparator+'gdb';
           end;
           GDBPath:=s;
@@ -2569,11 +2568,11 @@ begin
     Infoln(infotext+'Adding QT5 binary sources (QT5 + QT5Pas Frameworks + libqcocoa) from fpcupdeluxe.app itself.',etInfo);
 
     // copy QT5 frameworks to Lazarus source directory for future use.
-    if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(BaseDirectory)+'/Frameworks') then
+    if DirCopy(FilePath+'/Contents/Frameworks',BaseDirectory+'/Frameworks') then
     begin
-      CreateQT5Symlinks(ExcludeTrailingPathDelimiter(BaseDirectory)+'/Frameworks');
-      Infoln(infotext+'Adding QT5 Frameworks to ' + ExcludeTrailingPathDelimiter(BaseDirectory)+'/Frameworks' + ' success.',etInfo);
-    end else Infoln(infotext+'Adding QT5 Frameworks to ' + ExcludeTrailingPathDelimiter(BaseDirectory)+'/Frameworks' + ' failure.',etInfo);
+      CreateQT5Symlinks(BaseDirectory+'/Frameworks');
+      Infoln(infotext+'Adding QT5 Frameworks to ' + BaseDirectory+'/Frameworks' + ' success.',etInfo);
+    end else Infoln(infotext+'Adding QT5 Frameworks to ' + BaseDirectory+'/Frameworks' + ' failure.',etInfo);
 
     // copy QT5 frameworks to lazarus.app ... a bit redundant ... :-(
     if DirCopy(FilePath+'/Contents/Frameworks',SourceDirectory+'/lazarus.app/Contents/Frameworks') then

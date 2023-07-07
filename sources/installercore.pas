@@ -368,6 +368,7 @@ type
     FBaseDirectory:string;
     FSourceDirectory:string;
     FFPCBinDir:string;
+    FMakePath:string;
     {$IFDEF UNIX}
     FUseCompilerWrapper        : boolean;
     {$ENDIF}
@@ -391,6 +392,8 @@ type
     procedure SetFPCSourceDirectory(value:string);
     procedure SetLazarusInstallDirectory(value:string);
     procedure SetLazarusSourceDirectory(value:string);
+    procedure SetLazarusPrimaryConfigDirectory(value:string);
+    procedure SetMakeDirectory(value:string);
     procedure SetCompiler(value:string);
     function GetShell: string;
     function GetMake: string;
@@ -555,7 +558,7 @@ type
     // Lazarus source directory
     property LazarusSourceDir: string write SetLazarusSourceDirectory;
     // Lazarus primary config path
-    property LazarusPrimaryConfigPath:string write FLazarusPrimaryConfigPath;
+    property LazarusPrimaryConfigPath:string write SetLazarusPrimaryConfigDirectory;
     property TempDirectory: string write FTempDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
     property Compiler: string {read GetCompiler} write SetCompiler;
@@ -599,7 +602,9 @@ type
     property Ultibo: boolean read FUltibo write FUltibo;
     property Log: TLogger write FLog;
     // Directory where make (and the other binutils on Windows) is located
-    property MakeDirectory: string write FMakeDir;
+    property MakeDirectory: string write SetMakeDirectory;
+    // Path where make (and the other binutils on Windows) is located
+    property MakePath: string read FMakePath;
     // Patch utility to use. Defaults to 'patch'
     property PatchCmd:string write FPatchCmd;
     // URL for download. HTTP, ftp or svn or git or hg
@@ -874,6 +879,18 @@ begin
     SetSourceDirectory(FLazarusSourceDir);
 end;
 
+procedure TInstaller.SetLazarusPrimaryConfigDirectory(value:string);
+begin
+  // Martin Friebe mailing list January 2014: no quotes allowed, no trailing blanks
+  FLazarusPrimaryConfigPath:=Trim(ExcludeTrailingPathDelimiter(value));
+end;
+
+procedure TInstaller.SetMakeDirectory(value:string);
+begin
+  FMakeDir:=ExcludeTrailingPathDelimiter(value);
+  FMakePath:=FMakeDir+DirectorySeparator;
+end;
+
 procedure TInstaller.SetCompiler(value:string);
 begin
   FCompiler:=value;
@@ -890,7 +907,7 @@ begin
   if FMake = '' then
     {$IFDEF MSWINDOWS}
     //Only use our own make !!
-    FMake := IncludeTrailingPathDelimiter(FMakeDir) + GNUMake + '.exe';
+    FMake := MakePath + GNUMake + '.exe';
     {$ELSE}
     FMake:=Which(GNUMake);
     if FMake='' then
@@ -1135,12 +1152,12 @@ begin
 
     {$ifndef USEONLYCURL}
     FWget:=Which('wget'+GetExeExt);
-    if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + 'wget\wget.exe';
+    if Not FileExists(FWget) then FWget := MakePath + 'wget\wget.exe';
     {$ifdef win32}
-    if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + 'wget\wget-openssl-x86.exe';
+    if Not FileExists(FWget) then FWget := MakePath + 'wget\wget-openssl-x86.exe';
     {$endif}
     {$ifdef win64}
-    if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + 'wget\wget-openssl-x64.exe';
+    if Not FileExists(FWget) then FWget := MakePath + 'wget\wget-openssl-x64.exe';
     {$endif}
     if Not FileExists(FWget) then
     begin
@@ -1157,7 +1174,7 @@ begin
     OperationSucceeded:=false;
 
     // Get patch binary from default binutils URL
-    aFile:=IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe';
+    aFile:=MakePath + 'patch.exe';
     if (Not FileExists(aFile)) then
     begin
       //aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
@@ -1174,7 +1191,7 @@ begin
     end;
 
     // Get pwd binary from default binutils URL. If its not there, the make clean command will fail
-    aFile:=IncludeTrailingPathDelimiter(FMakeDir) + 'pwd.exe';
+    aFile:=MakePath + 'pwd.exe';
     if (Not FileExists(aFile)) then
     begin
       //aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
@@ -1229,32 +1246,32 @@ begin
     begin
       //Unrar, HG and GIT not needed for Ultibo
 
-      FUnrar := IncludeTrailingPathDelimiter(FMakeDir) + 'unrar\bin\unrar.exe';
+      FUnrar := MakePath + 'unrar\bin\unrar.exe';
       if Not FileExists(FUnrar) then
       begin
-        ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar');
-        //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
+        ForceDirectoriesSafe(MakePath+'unrar');
+        //ForceDirectoriesSafe(MakePath+'unrar\bin');
         // this version of unrar does not need installation ... so we can silently get it !!
         Output:='unrar-3.4.3-bin.zip';
-        SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+        SysUtils.DeleteFile(MakePath+'unrar\'+Output);
         aURL:=FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/';
-        OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+        OperationSucceeded:=GetFile(aURL+Output,MakePath+'unrar\'+Output);
         // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
-        if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
+        if (FileSize(MakePath+'unrar\'+Output)<50000) then
         begin
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+          SysUtils.DeleteFile(MakePath+'unrar\'+Output);
           OperationSucceeded:=false;
         end;
         if NOT OperationSucceeded then
         begin
           // try one more time
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+          SysUtils.DeleteFile(MakePath+'unrar\'+Output);
           aURL:='https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/';
-          OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+          OperationSucceeded:=GetFile(aURL+Output,MakePath+'unrar\'+Output);
           // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
-          if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
+          if (FileSize(MakePath+'unrar\'+Output)<50000) then
           begin
-            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+            SysUtils.DeleteFile(MakePath+'unrar\'+Output);
             OperationSucceeded:=false;
           end;
         end;
@@ -1263,7 +1280,7 @@ begin
           with TNormalUnzipper.Create do
           begin
             try
-              OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\',[]);
+              OperationSucceeded:=DoUnZip(MakePath+'unrar\'+Output,MakePath+'unrar\',[]);
             finally
               Free;
             end;
@@ -1271,7 +1288,7 @@ begin
 
           if OperationSucceeded then
           begin
-            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+            SysUtils.DeleteFile(MakePath+'unrar\'+Output);
             OperationSucceeded:=FileExists(FUnrar);
           end;
         end;
@@ -1283,7 +1300,7 @@ begin
       with GitClient do
       begin
         OperationSucceeded:=False;
-        aFile:=IncludeTrailingPathDelimiter(FMakeDir)+'git'+DirectorySeparator+'cmd'+DirectorySeparator+RepoExecutableName+GetExeExt;
+        aFile:=MakePath+'git'+DirectorySeparator+'cmd'+DirectorySeparator+RepoExecutableName+GetExeExt;
         // try to find systemwide GIT
         if (NOT ForceLocal) then
         begin
@@ -1302,7 +1319,7 @@ begin
           //install GIT only on Windows Vista and higher
           if CheckWin32Version(6,0) then
           begin
-            ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'git');
+            ForceDirectoriesSafe(MakePath+'git');
             {$ifdef win32}
             //Output:='git32.7z';
             Output:='git32.zip';
@@ -1330,12 +1347,12 @@ begin
             {$endif}
             Infoln(localinfotext+'GIT client not found. Downloading it',etInfo);
             Infoln(localinfotext+'GIT client download (may take time) from '+aURL,etDebug);
-            OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+            OperationSucceeded:=GetFile(aURL,MakePath+'git\'+Output);
             if NOT OperationSucceeded then
             begin
               // try one more time
-              SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-              OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+              SysUtils.DeleteFile(MakePath+'git\'+Output);
+              OperationSucceeded:=GetFile(aURL,MakePath+'git\'+Output);
             end;
             if OperationSucceeded then
             begin
@@ -1343,17 +1360,17 @@ begin
               with TNormalUnzipper.Create do
               begin
                 try
-                  OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'git\',[]);
+                  OperationSucceeded:=DoUnZip(MakePath+'git\'+Output,MakePath+'git\',[]);
                 finally
                   Free;
                 end;
               end;
               if OperationSucceeded then
               begin
-                SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+                SysUtils.DeleteFile(MakePath+'git\'+Output);
                 OperationSucceeded:=FileExists(aFile);
                 //Copy certificate ... might be necessary
-                //aURL:=IncludeTrailingPathDelimiter(FMakeDir)+'git\mingw32\';
+                //aURL:=MakePath+'git\mingw32\';
                 //if (NOT FileExists(aURL+'bin\curl-ca-bundle.crt')) then FileCopy(aURL+'ssl\certs\ca-bundle.crt',aURL+'bin\curl-ca-bundle.crt');
               end;
             end;
@@ -1370,7 +1387,7 @@ begin
       with HGClient do
       begin
         OperationSucceeded:=False;
-        aFile:=IncludeTrailingPathDelimiter(FMakeDir)+'hg'+DirectorySeparator+RepoExecutableName+GetExeExt;
+        aFile:=MakePath+'hg'+DirectorySeparator+RepoExecutableName+GetExeExt;
         // try to find systemwide HG
         if (NOT ForceLocal) then
         begin
@@ -1392,15 +1409,15 @@ begin
           Output:='hg64.zip';
           aURL:=FPCUPGITREPO+'/releases/download/windowsx64bins_v1.0/'+Output;
           {$endif}
-          ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
+          ForceDirectoriesSafe(MakePath+'hg');
           Infoln(localinfotext+'HG (mercurial) client not found. Downloading it',etInfo);
           Infoln(localinfotext+'HG (mercurial) client download (may take time) from '+aURL,etDebug);
-          OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
+          OperationSucceeded:=GetFile(aURL,MakePath+'hg\'+Output);
           if NOT OperationSucceeded then
           begin
             // try one more time
-            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
-            OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
+            SysUtils.DeleteFile(MakePath+'hg\'+Output);
+            OperationSucceeded:=GetFile(aURL,MakePath+'hg\'+Output);
           end;
           if OperationSucceeded then
           begin
@@ -1408,7 +1425,7 @@ begin
             with TNormalUnzipper.Create do
             begin
               try
-                OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'hg\',[]);
+                OperationSucceeded:=DoUnZip(MakePath+'hg\'+Output,MakePath+'hg\',[]);
               finally
                 Free;
               end;
@@ -1418,7 +1435,7 @@ begin
               OperationSucceeded:=FileExists(aFile);
             end;
           end;
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
+          SysUtils.DeleteFile(MakePath+'hg\'+Output);
           if OperationSucceeded then RepoExecutable:=aFile else RepoExecutable:=RepoExecutableName+GetExeExt;
         end;
         if RepoExecutable <> EmptyStr then
@@ -1542,7 +1559,7 @@ begin
       begin
         if FUtilFiles[i].Category in [ucBinutil,ucDebugger32,ucDebugger64] then
         begin
-          InstallPath:=IncludeTrailingPathDelimiter(FMakeDir);
+          InstallPath:=MakePath;
           if (FUtilFiles[i].Category in [ucDebugger32,ucDebugger64]) then
           begin
             if (FUtilFiles[i].Category=ucDebugger32) then InstallPath:=InstallPath+'gdb\i386-win32\';
@@ -2306,7 +2323,7 @@ begin
   begin
     if (FUtilFiles[Counter].Category in [ucBinutil,ucDebugger32,ucDebugger64]) then
     begin
-      InstallPath:=IncludeTrailingPathDelimiter(FMakeDir);
+      InstallPath:=MakePath;
       if (FUtilFiles[Counter].Category in [ucDebugger32,ucDebugger64]) then
       begin
         if (FUtilFiles[Counter].Category=ucDebugger32) then InstallPath:=InstallPath+'gdb\i386-win32\';
@@ -2391,7 +2408,7 @@ begin
     with TNormalUnzipper.Create do
     begin
       try
-        OperationSucceeded:=DoUnZip(BinsZip,IncludeTrailingPathDelimiter(FMakeDir),[]);
+        OperationSucceeded:=DoUnZip(BinsZip,MakePath,[]);
       finally
         Free;
       end;
@@ -2430,7 +2447,7 @@ begin
 
   SVNZip := GetTempFileNameExt('FPCUPTMP','zip');
 
-  SVNDir := IncludeTrailingPathDelimiter(FMakeDir)+'svn';
+  SVNDir := MakePath+'svn';
 
   if ForceDirectoriesSafe(SVNDir) then
   begin
@@ -2926,7 +2943,7 @@ var
   SVNFiles: TStringList;
   OperationSucceeded: boolean;
 begin
-  SVNDir := IncludeTrailingPathDelimiter(FMakeDir)+'svn';
+  SVNDir := MakePath+'svn';
   SVNFiles := FindAllFiles(SVNDir, SVNClient.RepoExecutableName + GetExeExt, true);
   try
     if SVNFiles.Count > 0 then
@@ -4349,6 +4366,7 @@ begin
 
   FShell        := '';
   FMakeDir      := '';
+  FMakePath     := '';
 
   FNeededExecutablesChecked:=false;
   FCleanModuleSuccess:=false;

@@ -109,19 +109,9 @@ type
     // Filters (a module's) sl stringlist and runs all <Directive> commands:
     function RunCommands(Directive:string;sl:TStringList):boolean;
   public
-    // FPC base directories
-    property TempDirectory:string read FTempDirectory;
-    // FPC base directories
-    property FPCSourceDir:string read FFPCSourceDir;
-    property FPCInstallDir:string read FFPCInstallDir;
     {$ifndef FPCONLY}
-    // Lazarus base directories
-    property LazarusSourceDir:string read FLazarusSourceDir;
-    property LazarusInstallDir:string read FLazarusInstallDir;
     // Compiler options user chose to compile Lazarus with (coming from fpcup).
     property LazarusCompilerOptions: string write FLazarusCompilerOptions;
-    // Lazarus primary config path
-    property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath;
     // LCL widget set to be built
     property LCL_Platform: string write FLCL_Platform;
     property LazarusVersion:string read FLazarusVersion;
@@ -286,7 +276,7 @@ begin
   Infoln(infotext+'Going to rebuild Lazarus.',etInfo);
 
   Processor.Process.Parameters.Clear;
-  Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusSourceDir);
+  Processor.Process.CurrentDirectory := FLazarusSourceDir;
 
   {$push}
   {$warn 6018 off}
@@ -317,20 +307,20 @@ begin
     Processor.SetParamMakefilePathData('FPC',FCompiler);
     Processor.SetParamMakefilePathData('PP',ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
 
-    Processor.SetParamMakefilePathData('PREFIX',ExcludeTrailingPathDelimiter(LazarusInstallDir));
-    Processor.SetParamMakefilePathData('INSTALL_PREFIX',ExcludeTrailingPathDelimiter(LazarusInstallDir));
-    Processor.SetParamMakefilePathData('LAZARUS_INSTALL_DIR',IncludeTrailingPathDelimiter(LazarusInstallDir));
+    Processor.SetParamMakefilePathData('PREFIX',FLazarusInstallDir);
+    Processor.SetParamMakefilePathData('INSTALL_PREFIX',FLazarusInstallDir);
+    Processor.SetParamMakefilePathData('LAZARUS_INSTALL_DIR',IncludeTrailingPathDelimiter(FLazarusInstallDir));
 
     //Make sure our FPC units can be found by Lazarus
-    Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
-    //Processor.SetParamMakefilePathData('FPCDIR',ExcludeTrailingPathDelimiter(FPCInstallDir));
-    //Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
+    Processor.SetParamMakefilePathData('FPCDIR',FFPCSourceDir);
+    //Processor.SetParamMakefilePathData('FPCDIR',FFPCInstallDir);
+    //Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true)]));
 
     //Make sure Lazarus does not pick up these tools from other installs
     Processor.SetParamMakefilePathData('FPCMAKE',FPCBinDir+DirectorySeparator+'fpcmake'+GetExeExt);
     Processor.SetParamMakefilePathData('PPUMOVE',FPCBinDir+DirectorySeparator+'ppumove'+GetExeExt);
 
-    s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
+    s:=IncludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
     //if FileExists(s) then
       Processor.SetParamMakefilePathData('CFGFILE',s);
 
@@ -352,12 +342,12 @@ begin
         {$ifdef LCLQT5}
           // Did we copy the QT5 libs ??
           // If so, add some linker help.
-          if (NOT LibWhich(LIBQT5)) AND (FileExists(IncludeTrailingPathDelimiter(LazarusInstallDir)+LIBQT5)) then
+          if (NOT LibWhich(LIBQT5)) AND (FileExists(IncludeTrailingPathDelimiter(FLazarusInstallDir)+LIBQT5)) then
           begin
             s:=s+' -k"-rpath=./"';
             s:=s+' -k"-rpath=$$ORIGIN"';
             s:=s+' -k"-rpath=\\$$$$$\\ORIGIN"';
-            s:=s+' -Fl'+ExcludeTrailingPathDelimiter(LazarusInstallDir);
+            s:=s+' -Fl'+FLazarusInstallDir;
           end;
         {$endif}
       {$endif}
@@ -416,11 +406,11 @@ begin
   end
   else
   begin
-    Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
+    Processor.Executable := IncludeTrailingPathDelimiter(FLazarusInstallDir)+LAZBUILDNAME+GetExeExt;
 
     OldPath:=Processor.Environment.GetVar('FPCDIR');
-    //Processor.Environment.SetVar('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
-    Processor.Environment.SetVar('FPCDIR',ExcludeTrailingPathDelimiter(FPCSourceDir));
+    //Processor.Environment.SetVar('FPCDIR',ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true)]));
+    Processor.Environment.SetVar('FPCDIR',FFPCSourceDir);
     {$IFDEF DEBUG}
     Processor.SetParamData('--verbose');
     {$ELSE}
@@ -435,7 +425,7 @@ begin
     Processor.SetParamData('--max-process-count='+IntToStr(FCPUCount));
     {$endif}
 
-    Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(LazarusPrimaryConfigPath));
+    Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
     Processor.SetParamData('--cpu=' + GetSourceCPU);
     Processor.SetParamData('--os=' + GetSourceOS);
 
@@ -473,7 +463,7 @@ begin
   //We now have, for certain, a miscellaneousoptions.xml file.
   //This file has been generated by lazbuild..
   //Edit it to reflect our own settings, if needed.
-  LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
+  LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
   try
     i:=LazarusConfig.GetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Count',0);
     if i>0 then
@@ -554,38 +544,38 @@ begin
         // For the directory macros, the user expects to add path separators himself in fpcup.ini,
         // so strip them out if they are there.
         if macro='BASEDIR' then
-          macro:=ExcludeTrailingPathDelimiter(BaseDirectory)
+          macro:=BaseDirectory
         else if macro='FPCDIR' then
-          macro:=ExcludeTrailingPathDelimiter(FPCInstallDir)
+          macro:=FFPCInstallDir
         else if macro='FPCBINDIR' then
             macro:=FPCBinDir
         else if macro='FPCBIN' then
-            macro:=ExcludeTrailingPathDelimiter(FCompiler)
+            macro:=FCompiler
         else if macro='TOOLDIR' then
           {$IFDEF MSWINDOWS}
           // make is a binutil and should be located in the make dir
-          macro:=ExcludeTrailingPathDelimiter(FMakeDir)
+          macro:=FMakeDir
           {$ENDIF}
           {$IFDEF UNIX}
           // Strip can be anywhere in the path
-          macro:=ExcludeTrailingPathDelimiter(ExtractFilePath(Which('make')))
+          macro:=ExtractFileDir(Which('make'))
           {$ENDIF}
         else if macro='GETEXEEXT' then
           macro:=GetExeExt
         {$ifndef FPCONLY}
         else if macro='LAZARUSDIR' then
-          macro:=ExcludeTrailingPathDelimiter(FLazarusInstallDir)
+          macro:=FLazarusInstallDir
         else if macro='LAZARUSPRIMARYCONFIGPATH' then
-          macro:=ExcludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)
+          macro:=FLazarusPrimaryConfigPath
         {$endif}
         else if macro='STRIPDIR' then
           {$IFDEF MSWINDOWS}
           // Strip is a binutil and should be located in the make dir
-          macro:=ExcludeTrailingPathDelimiter(FMakeDir)
+          macro:=FMakeDir
           {$ENDIF}
           {$IFDEF UNIX}
           // Strip can be anywhere in the path
-          macro:=ExcludeTrailingPathDelimiter(ExtractFilePath(Which('strip')))
+          macro:=ExtractFileDir(Which('strip'))
           {$ENDIF}
         else if macro='REMOVEDIRECTORY' then
         begin
@@ -676,7 +666,7 @@ begin
   // don't ask, but this is needed when fpcupdeluxe runs out of an .app package ... quirk solved this way .. ;-)
   '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
   {$ENDIF}
-  ExcludeTrailingPathDelimiter(FPCInstallDir)+PathSeparator;
+  ExcludeTrailingPathDelimiter(FFPCInstallDir)+PathSeparator;
   SetPath(FPath,true,false);
   // No need to build Lazarus IDE again right now; will
   // be changed by buildmodule/configmodule installexecute/
@@ -728,7 +718,7 @@ begin
   // all other packages will be ignored
   if (NOT FileExists(PackageAbsolutePath)) then
   begin
-    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(LazarusInstallDir)+'components', PackageName+'.lpk' , true);
+    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(FLazarusInstallDir)+'components', PackageName+'.lpk' , true);
     if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
     PackageFiles.Free;
   end;
@@ -737,7 +727,7 @@ begin
   // all other packages will be ignored
   if (NOT FileExists(PackageAbsolutePath)) then
   begin
-    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+'onlinepackagemanager'+DirectorySeparator+'packages', PackageName+'.lpk' , true);
+    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)+'onlinepackagemanager'+DirectorySeparator+'packages', PackageName+'.lpk' , true);
     if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
     PackageFiles.Free;
   end;
@@ -810,7 +800,7 @@ begin
        else WritelnLog(localinfotext+'Installing '+PackageName+' version '+lpkversion.AsString,True);
   end;
 
-  Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
+  Processor.Executable := IncludeTrailingPathDelimiter(FLazarusInstallDir)+LAZBUILDNAME+GetExeExt;
 
   RegisterPackageFeature:=false;
   // get lazbuild version to see if we can register packages (available from version 1.7 and up)
@@ -894,7 +884,7 @@ begin
   if (result) AND (lpkversion.Name<>'unknown') then
   begin
     if FVerbose then WritelnLog(localinfotext+'Checking lpl file for '+PackageName,true);
-    Path := ConcatPaths([LazarusInstallDir,'packager','globallinks'])+DirectorySeparator+LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
+    Path := ConcatPaths([FLazarusInstallDir,'packager','globallinks'])+DirectorySeparator+LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
     if NOT FileExists(Path) then
     begin
       AssignFile(TxtFile,Path);
@@ -1197,7 +1187,7 @@ begin
 
         if (LowerCase(ModuleName)='fpdebug') then
         begin
-          LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
+          LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
           try
             s2:='EnvironmentOptions/Debugger/Configs/';
             LegacyList:=LazarusConfig.IsLegacyList(EnvironmentConfig, s2);
@@ -1413,7 +1403,7 @@ var
   aFileName:string;
 begin
   result:='0.0.0';
-  aFileName:=IncludeTrailingPathDelimiter(LazarusInstallDir) + LAZBUILDNAME + GetExeExt;
+  aFileName:=IncludeTrailingPathDelimiter(FLazarusInstallDir) + LAZBUILDNAME + GetExeExt;
   if FileExists(aFileName) then
   begin
     Processor.Executable := aFileName;
@@ -1601,7 +1591,7 @@ begin
         begin
           key:='Package/Version/';
           lpkversion.GetVersion(lpkdoc,key);
-          PackageAbsolutePath := IncludeTrailingPathDelimiter(LazarusInstallDir)+
+          PackageAbsolutePath := IncludeTrailingPathDelimiter(FLazarusInstallDir)+
                                  'packager'+DirectorySeparator+
                                  'globallinks'+DirectorySeparator+
                                  LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
@@ -2471,9 +2461,9 @@ begin
   end;
 
   Processor.Process.Parameters.Clear;
-  Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
+  Processor.Executable := IncludeTrailingPathDelimiter(FLazarusInstallDir)+LAZBUILDNAME+GetExeExt;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
-  Processor.SetParamData('--primary-config-path='+LazarusPrimaryConfigPath);
+  Processor.SetParamData('--primary-config-path='+FLazarusPrimaryConfigPath);
   Processor.SetParamData('--recursive');
 
   Processor.SetParamData(Workingdir+DirectorySeparator+'versionitis.lpi');
@@ -2509,9 +2499,9 @@ begin
   if not result then exit;
 
   Processor.Process.Parameters.Clear;
-  Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
+  Processor.Executable := IncludeTrailingPathDelimiter(FLazarusInstallDir)+LAZBUILDNAME+GetExeExt;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
-  Processor.SetParamData('--primary-config-path='+LazarusPrimaryConfigPath);
+  Processor.SetParamData('--primary-config-path='+FLazarusPrimaryConfigPath);
   Processor.SetParamData('--recursive');
 
   Processor.SetParamData(Workingdir+DirectorySeparator+'awgg.lpr');
@@ -2598,7 +2588,7 @@ begin
 
   {$ifndef FPCONLY}
 
-  LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
+  LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
   try
     // set defaults for pas2js
     FilePath:=ConcatPaths([WorkingDir,'bin',GetFPCTarget(true),'pas2js'+GetExeExt]);
@@ -2641,7 +2631,7 @@ begin
   result:=InstallPackage(FilePath,WorkingDir,True);
   if not result then exit;
 
-  FilePath:=ConcatPaths([LazarusSourceDir,'components','pas2js','pas2jsdsgn.lpk']);
+  FilePath:=ConcatPaths([FLazarusSourceDir,'components','pas2js','pas2jsdsgn.lpk']);
   result:=InstallPackage(FilePath,WorkingDir,False);
   if not result then exit;
 
@@ -2937,7 +2927,7 @@ begin
           begin
             Infoln(localinfotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aBinFile+'] from '+aRemoteURL,etInfo);
             try
-              aName:=ConcatPaths([TempDirectory,aBinFile]);
+              aName:=ConcatPaths([FTempDirectory,aBinFile]);
               result:=Download(FUseWget, aBinURL, aName);
               if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
             except
@@ -2973,7 +2963,7 @@ begin
           begin
             Infoln(localinfotext+'Going to download '+aVersion+' of xtensatools4fpc ['+aLibFile+'] from '+aRemoteURL,etInfo);
             try
-              aName:=ConcatPaths([TempDirectory,aLibFile]);
+              aName:=ConcatPaths([FTempDirectory,aLibFile]);
               result:=Download(FUseWget, aLibURL, aName);
               if result then result:=( FileExists(aName) AND (FileSize(aName)>5000) );
             except

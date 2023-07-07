@@ -126,8 +126,6 @@ type
     FFPCDocDir       : string;
     FFPCExampleDir   : string;
     FFPCMessageDir   : string;
-    FSoftFloat       : boolean;
-    FUseLibc         : boolean;
     FTargetCompilerName                     : string;
     FBootstrapCompiler                      : string;
     FBootstrapCompilerDirectory             : string;
@@ -136,6 +134,8 @@ type
     FNativeFPCBootstrapCompiler             : boolean;
     InitDone                                : boolean;
   private
+    FSoftFloat       : boolean;
+    FUseLibc         : boolean;
     FUseRevInc : boolean;
     function GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
     function CleanExtra(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone):boolean;
@@ -1626,7 +1626,7 @@ begin
               begin
                 if (FUtilFiles[Counter].Category=ucDebuggerWince) then
                 begin
-                  if NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\gdb.exe') then
+                  if NOT FileExists(MakePath+'gdb\arm-wince\gdb.exe') then
                   begin
                     s1:=GetTempFileNameExt('FPCUPTMP','zip');
                     if GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,s1) then
@@ -1634,7 +1634,7 @@ begin
                       with TNormalUnzipper.Create do
                       begin
                         try
-                          if DoUnZip(s1,IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\',[]) then
+                          if DoUnZip(s1,MakePath+'gdb\arm-wince\',[]) then
                             Infoln(localinfotext+'Downloading and installing GDB debugger (' + FUtilFiles[Counter].FileName + ') for WinCE success.',etInfo);
                         finally
                           Free;
@@ -2190,12 +2190,12 @@ begin
         for Index:=low(FUtilFiles) to high(FUtilFiles) do
         begin
           if FUtilFiles[Index].Category=ucBinutil then
-            FileCopy(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[Index].FileName,
+            FileCopy(MakePath+FUtilFiles[Index].FileName,
               FPCBinDir+DirectorySeparator+FUtilFiles[Index].FileName);
         end;
         // Also, we can change the make/binutils path to our new environment
         // Will modify fmake as well.
-        FMakeDir:=FPCBinDir;
+        MakeDirectory:=FPCBinDir;
       except
         on E: Exception do
         begin
@@ -3907,9 +3907,9 @@ begin
     //sometimes, gstrip does not exist on Solaris ... just copy it to a place where it can be found ... tricky
     if (NOT FileExists('/usr/bin/gstrip')) AND (FileExists('/usr/bin/strip')) then
     begin
-      if DirectoryExists(FFPCCompilerBinPath) then
+      if DirectoryExists(FPCBinDir) then
       begin
-        s:=FFPCCompilerBinPath+'gstrip';
+        s:=FPCBinDir+DirectorySeparator+'gstrip';
         if (NOT FileExists(s)) then FileCopy('/usr/bin/strip',s);
       end
       else
