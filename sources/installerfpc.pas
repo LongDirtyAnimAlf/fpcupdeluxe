@@ -2149,6 +2149,17 @@ begin
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
     end;
+
+    {$ifdef UNIX}
+    // On Unix, the messages are now installed into a undesired directory (fpcbindir).
+    // Move them to the root dir where they are expected to be by the auto-generated fpc.cfg
+    if DirectoryExists(FPCMessageDir) then
+    begin
+      DirCopy(FPCMessageDir,InstallDirectory+DirectorySeparator+'msg');
+      if (NOT CheckDirectory(FPCMessageDir)) then DeleteDirectory(FPCMessageDir,False);
+    end;
+    {$endif}
+
     if OperationSucceeded then
     begin
       {$ifdef Windows}
@@ -2391,7 +2402,6 @@ begin
   FFPCLibraryDir:=ConcatPaths([FFPCInstallDir,'lib']);
   FFPCShareDir:=ConcatPaths([FFPCInstallDir,'share']);
   FFPCDataDir:=ConcatPaths([FFPCInstallDir,'data']);
-  FFPCMessageDir:=ConcatPaths([FFPCInstallDir,'msg']);
   {$ifdef Windows}
   FFPCBaseDir:=FFPCInstallDir;
   FFPCDocDir:='';
@@ -2401,6 +2411,7 @@ begin
   FFPCDocDir:=ConcatPaths([FFPCInstallDir,'doc']);
   FFPCExampleDir:=ConcatPaths([FFPCInstallDir,'examples']);
   {$endif}
+  FFPCMessageDir:=ConcatPaths([FFPCBaseDir,'msg']);
 end;
 
 function TFPCInstaller.GetUnitsInstallDirectory(const WithMagic:boolean):string;
@@ -4190,8 +4201,6 @@ begin
       begin
         //create fpc.cfg
         Processor.Process.Parameters.Clear;
-        Processor.SetParamData('-d');
-        Processor.SetParamData('basepath='+InstallDirectory);
         //Processor.SetParamData('-d');
         //Processor.SetParamData('sharepath='+InstallDirectory);
         Processor.SetParamData('-d');

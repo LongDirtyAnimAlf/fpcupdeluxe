@@ -1668,7 +1668,7 @@ end;
 
 function DirCopy(SourcePath, DestPath: String): Boolean;
 begin
-  result:=FileUtil.CopyDirTree(SourcePath, DestPath,[cffOverwriteFile,cffCreateDestDirectory]);
+  result:=FileUtil.CopyDirTree(SourcePath, DestPath,[cffOverwriteFile,cffCreateDestDirectory{,cffPreserveTime}]);
 end;
 
 function CheckDirectory(DirectoryName: string):boolean;
