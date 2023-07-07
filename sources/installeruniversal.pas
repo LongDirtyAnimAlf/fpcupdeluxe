@@ -327,8 +327,8 @@ begin
     //Processor.SetParamMakefilePathData('FPCDIR',ConcatPaths([FPCInstallDir,'units',GetFPCTarget(true)]));
 
     //Make sure Lazarus does not pick up these tools from other installs
-    Processor.SetParamMakefilePathData('FPCMAKE',FPCCompilerBinPath+'fpcmake'+GetExeExt);
-    Processor.SetParamMakefilePathData('PPUMOVE',FPCCompilerBinPath+'ppumove'+GetExeExt);
+    Processor.SetParamMakefilePathData('FPCMAKE',FPCBinDir+DirectorySeparator+'fpcmake'+GetExeExt);
+    Processor.SetParamMakefilePathData('PPUMOVE',FPCBinDir+DirectorySeparator+'ppumove'+GetExeExt);
 
     s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
     //if FileExists(s) then
@@ -383,7 +383,7 @@ begin
       {$ifdef MSWindows}
       //Prepend FPC binary directory to PATH to prevent pickup of strange tools
       OldPath:=Processor.Environment.GetVar(PATHVARNAME);
-      s:=ExcludeTrailingPathDelimiter(FFPCCompilerBinPath);
+      s:=FPCBinDir;
       if OldPath<>'' then
          Processor.Environment.SetVar(PATHVARNAME, s+PathSeparator+OldPath)
       else
@@ -558,7 +558,7 @@ begin
         else if macro='FPCDIR' then
           macro:=ExcludeTrailingPathDelimiter(FPCInstallDir)
         else if macro='FPCBINDIR' then
-            macro:=ExcludeTrailingPathDelimiter(FPCCompilerBinPath)
+            macro:=FPCBinDir
         else if macro='FPCBIN' then
             macro:=ExcludeTrailingPathDelimiter(FCompiler)
         else if macro='TOOLDIR' then
@@ -666,7 +666,7 @@ begin
     Infoln(localinfotext+'Missing required executables. Aborting.',etError);
 
   // Need to remember because we don't always use ProcessEx
-  FPath:=ExcludeTrailingPathDelimiter(FPCCompilerBinPath)+PathSeparator+
+  FPath:=FPCBinDir+PathSeparator+
   {$IFDEF MSWINDOWS}
   FMakeDir+PathSeparator+
   {$ENDIF MSWINDOWS}
@@ -1655,7 +1655,6 @@ begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
     SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
     SourceDirectory:=FixPath(SourceDirectory);
-    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
   end;
   result:=inherited;
   result:=InitModule;
@@ -1908,7 +1907,6 @@ begin
     WritelnLog(infotext+'Getting module '+ModuleName,True);
     SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
     SourceDirectory:=FixPath(SourceDirectory);
-    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
     if (SourceDirectory<>'') then
     begin
@@ -2011,7 +2009,7 @@ begin
       RemoteURL:=GetValueFromKey('ArchiveURL',PackageSettings);
       if (RemoteURL<>'') AND (NOT SourceOK) then
       begin
-        if (NOT DirectoryIsEmpty(ExcludeTrailingPathDelimiter(SourceDirectory))) then
+        if (NOT DirectoryIsEmpty(SourceDirectory)) then
         begin
           Infoln(localinfotext+ModuleName+' sources are already there. Using these. Skipping download.',etWarning);
           Infoln(localinfotext+ModuleName+' sources are already there.',etInfo);
@@ -2117,7 +2115,7 @@ begin
                 end;
 
              else {.tar and all others}
-                ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(SourceDirectory),FVerbose);
+                ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+SourceDirectory,FVerbose);
              end;
           if ResultCode <> 0 then
           begin
@@ -2733,7 +2731,6 @@ begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
     SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
     SourceDirectory:=FixPath(SourceDirectory);
-    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
     if (SourceDirectory<>'') then
     begin
@@ -3047,7 +3044,6 @@ begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
     SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
     SourceDirectory:=FixPath(SourceDirectory);
-    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
     if (SourceDirectory<>'') then
     begin
@@ -3110,7 +3106,6 @@ begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
     SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
     SourceDirectory:=FixPath(SourceDirectory);
-    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
     if (SourceDirectory<>'') then
     begin
@@ -3318,7 +3313,6 @@ begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
     SourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
     SourceDirectory:=FixPath(SourceDirectory);
-    SourceDirectory:=ExcludeTrailingPathDelimiter(SourceDirectory);
 
     if (SourceDirectory<>'') then
     begin

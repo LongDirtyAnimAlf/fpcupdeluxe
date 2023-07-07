@@ -364,6 +364,10 @@ type
 
   TInstaller = class(TObject)
   strict private
+    FInstallDirectory:string;
+    FBaseDirectory:string;
+    FSourceDirectory:string;
+    FFPCBinDir:string;
     {$IFDEF UNIX}
     FUseCompilerWrapper        : boolean;
     {$ENDIF}
@@ -380,14 +384,10 @@ type
     FCrossOS_ABI               : TABI; //When cross-compiling for arm: hardfloat or softfloat calling convention
     FCrossToolsDirectory       : string;
     FCrossLibraryDirectory     : string;
-    FBaseDirectory             : string; //Base directory for fpc(laz)up(deluxe) install itself
-    FSourceDirectory           : string; //Top source directory for a product (FPC, Lazarus)
-    FInstallDirectory          : string; //Top install directory for a product (FPC, Lazarus)
     procedure SetURL(value:string);
     procedure SetSourceDirectory(value:string);
     procedure SetBaseDirectory(value:string);
     procedure SetInstallDirectory(value:string);
-    procedure SetFPCInstallDirectory(value:string);
     procedure SetFPCSourceDirectory(value:string);
     procedure SetLazarusInstallDirectory(value:string);
     procedure SetLazarusSourceDirectory(value:string);
@@ -422,7 +422,6 @@ type
     FTempDirectory             : string; //For storing temp files and logs
     FCleanModuleSuccess: boolean;
     FNeededExecutablesChecked: boolean;
-    FFPCCompilerBinPath: string; //path where compiler lives
     FCompiler: string; // Compiler executable
     FCompilerOptions: string; //options passed when compiling (FPC or Lazarus currently)
     FCPUCount: integer; //logical cpu count (i.e. hyperthreading=2cpus)
@@ -478,23 +477,24 @@ type
     FMUSLLinker: string;
     property Shell: string read GetShell;
     property Make: string read GetMake;
+    procedure SetFPCInstallDirectory(value:string);virtual;
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetTools: boolean;
     // Check for existence of required binutils; if not there, get them if possible
     function CheckAndGetNeededBinUtils: boolean;
     // Get a diff of all modified files in and below the directory and save it
     procedure CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
-    // Clone/update using HG; use FSourceDirectory as local repository
+    // Clone/update using HG; use SourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromHG(aModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
-    // Clone/update using Git; use FSourceDirectory as local repository
+    // Clone/update using Git; use SourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromGit(aModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
-    // Checkout/update using SVN; use FSourceDirectory as local repository
+    // Checkout/update using SVN; use SourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromSVN(aModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
     function DownloadFromURL(ModuleName: string): boolean;
-    // Clone/update using Git; use FSourceDirectory as local repository
+    // Clone/update using Git; use SourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     {$IFDEF MSWINDOWS}
     // Make a list (in FUtilFiles) of all binutils that can be downloaded
@@ -544,12 +544,12 @@ type
     // Final install directory
     property InstallDirectory: string read FInstallDirectory write SetInstallDirectory;
     //Base directory for fpc(laz)up(deluxe) itself
-    // FPC install directory
-    property FPCInstallDir: string write SetFPCInstallDirectory;
     // FPC source directory
     property FPCSourceDir: string write SetFPCSourceDirectory;
-    // FPC compiler install directory
-    property FPCCompilerBinPath:string read FFPCCompilerBinPath;
+    // FPC install directory
+    property FPCInstallDir: string write SetFPCInstallDirectory;
+    // FPC binaries install locations
+    property FPCBinDir:string read FFPCBinDir;
     // Lazarus install directory
     property LazarusInstallDir: string write SetLazarusInstallDirectory;
     // Lazarus source directory
@@ -821,7 +821,7 @@ end;
 
 procedure TInstaller.SetSourceDirectory(value:string);
 begin
-  FSourceDirectory:=value;
+  FSourceDirectory:=ExcludeTrailingPathDelimiter(value);
   if (IsFPCInstaller OR IsLazarusInstaller) then
   begin
     FMajorVersion := -1;
@@ -833,12 +833,12 @@ end;
 
 procedure TInstaller.SetBaseDirectory(value:string);
 begin
-  FBaseDirectory:=value;
+  FBaseDirectory:=ExcludeTrailingPathDelimiter(value);
 end;
 
 procedure TInstaller.SetInstallDirectory(value:string);
 begin
-  FInstallDirectory:=value;
+  FInstallDirectory:=ExcludeTrailingPathDelimiter(value);
   if (IsFPCInstaller OR IsLazarusInstaller) then
   begin
     ForceDirectoriesSafe(FInstallDirectory);
@@ -847,31 +847,31 @@ end;
 
 procedure TInstaller.SetFPCInstallDirectory(value:string);
 begin
-  FFPCInstallDir:=value;
-  FFPCCompilerBinPath:=ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+DirectorySeparator;
+  FFPCInstallDir:=ExcludeTrailingPathDelimiter(value);
+  FFPCBinDir:=ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)]);
   if (IsFPCInstaller) then
-    SetInstallDirectory(value);
+    SetInstallDirectory(FFPCInstallDir);
 end;
 
 procedure TInstaller.SetFPCSourceDirectory(value:string);
 begin
-  FFPCSourceDir:=value;
+  FFPCSourceDir:=ExcludeTrailingPathDelimiter(value);
   if (IsFPCInstaller) then
-    SetSourceDirectory(value);
+    SetSourceDirectory(FFPCSourceDir);
 end;
 
 procedure TInstaller.SetLazarusInstallDirectory(value:string);
 begin
-  FLazarusInstallDir:=value;
+  FLazarusInstallDir:=ExcludeTrailingPathDelimiter(value);
   if ((IsLazarusInstaller) OR (IsHelpInstaller)) then
-    SetInstallDirectory(value);
+    SetInstallDirectory(FLazarusInstallDir);
 end;
 
 procedure TInstaller.SetLazarusSourceDirectory(value:string);
 begin
-  FLazarusSourceDir:=value;
+  FLazarusSourceDir:=ExcludeTrailingPathDelimiter(value);
   if ((IsLazarusInstaller) OR (IsHelpInstaller)) then
-    SetSourceDirectory(value);
+    SetSourceDirectory(FLazarusSourceDir);
 end;
 
 procedure TInstaller.SetCompiler(value:string);
@@ -1674,7 +1674,7 @@ begin
   //aBeforeRevision         := 'failure';
   aAfterRevision          := 'failure';
   //aClient.Verbose         := FVerbose;
-  aClient.LocalRepository := FSourceDirectory;
+  aClient.LocalRepository := SourceDirectory;
   aClient.Repository      := FURL;
   aClient.ModuleName      := aModuleName;
 
@@ -1707,7 +1707,7 @@ begin
         UpdateWarnings.Insert(0, {BeginSnippet+' '+}aModuleName + ': WARNING: found modified files.');
         if FKeepLocalChanges=false then
         begin
-          DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + DIFFMAGIC + aBeforeRevision + '.diff';
+          DiffFile:=IncludeTrailingPathDelimiter(SourceDirectory) + DIFFMAGIC + aBeforeRevision + '.diff';
           CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,aClient);
           UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': reverting to original before updating.');
           aClient.Revert; //Remove local changes
@@ -1827,7 +1827,7 @@ begin
              LocalPatchCmd:=Trim(FPatchCmd) + ' ';
            end;
 
-           ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
+           ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, SourceDirectory, Output, FVerbose);
 
            if (ReturnCode=0) then break;
 
@@ -1836,14 +1836,14 @@ begin
            // Try to circumvent this problem by replacing line enddings
            if Pos('different line endings',Output)>0 then
            begin
-             //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
-             //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
+             //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, SourceDirectory, FVerbose);
+             //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, SourceDirectory, FVerbose);
              DiffFileCorrectedPath:=IncludeTrailingPathDelimiter(GetTempDirName)+ExtractFileName(DiffFile);
              if FileCorrectLineEndings(DiffFile,DiffFileCorrectedPath) then
              begin
                if FileExists(DiffFileCorrectedPath) then
                begin
-                 ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFileCorrectedPath, FSourceDirectory, Output, FVerbose);
+                 ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFileCorrectedPath, SourceDirectory, Output, FVerbose);
                  DeleteFile(DiffFileCorrectedPath);
                end;
              end;
@@ -1900,7 +1900,7 @@ begin
   //aBeforeRevision             := 'failure';
   aAfterRevision              := 'failure';
   //SVNClient.Verbose           := FVerbose;
-  SVNClient.LocalRepository   := FSourceDirectory;
+  SVNClient.LocalRepository   := SourceDirectory;
   SVNClient.Repository        := FURL;
   SVNClient.ExportOnly        := FExportOnly;
   SVNClient.ModuleName        := aModuleName;
@@ -1920,7 +1920,7 @@ begin
     end;
 
     // We could insist on the repo existing, but then we wouldn't be able to checkout!!
-    WritelnLog('Directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
+    WritelnLog('Directory ' + SourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
     if not(DirectoryExists(SVNClient.LocalRepository)) then
     begin
       WritelnLog(localinfotext+'Creating directory '+SVNClient.LocalRepository+' for SVN checkout.');
@@ -1930,7 +1930,7 @@ begin
 
   if (SVNClient.LocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) and (SVNClient.Returncode=FRET_WORKING_COPY_TOO_OLD) then
   begin
-    WritelnLog(etError, localinfotext+'The working copy in ' + FSourceDirectory + ' was created with an older, incompatible version of svn.', true);
+    WritelnLog(etError, localinfotext+'The working copy in ' + SourceDirectory + ' was created with an older, incompatible version of svn.', true);
     WritelnLog(etError, localinfotext+'Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
     result := false;  //fail
     exit;
@@ -1945,7 +1945,7 @@ begin
       UpdateWarnings.Insert(0, {BeginSnippet+' '+}aModuleName + ': WARNING: found modified files.');
       if FKeepLocalChanges=false then
       begin
-        DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + DIFFMAGIC + aBeforeRevision + '.diff';
+        DiffFile:=IncludeTrailingPathDelimiter(SourceDirectory) + DIFFMAGIC + aBeforeRevision + '.diff';
         CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,FSVNClient);
         UpdateWarnings.Add({BeginSnippet+' '+}aModuleName + ': WARNING: reverting before updating.');
         SVNClient.Revert; //Remove local changes
@@ -2024,7 +2024,7 @@ begin
         if ((s='patch'+GetExeExt) OR (s='gpatch'+GetExeExt))
            then LocalPatchCmd:=FPatchCmd + ' -t -p0 -i '
            else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
-        CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
+        CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, SourceDirectory, Output, FVerbose);
 
         {$IFNDEF MSWINDOWS}
         if CheckoutOrUpdateReturnCode<>0 then
@@ -2034,7 +2034,7 @@ begin
           // Try to circumvent this problem by trick below (replacing line enddings)
           if Pos('different line endings',Output)>0 then
           begin
-            CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('unix2dos '+DiffFile, FSourceDirectory, FVerbose);
+            CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('unix2dos '+DiffFile, SourceDirectory, FVerbose);
             if CheckoutOrUpdateReturnCode<>0 then
             begin
               DiffFileSL:=TStringList.Create();
@@ -2046,8 +2046,8 @@ begin
               finally
                 DiffFileSL.Free();
               end;
-              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
-              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
+              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, SourceDirectory, FVerbose);
+              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, SourceDirectory, FVerbose);
             end;
             if CheckoutOrUpdateReturnCode=0 then
             begin
@@ -2055,7 +2055,7 @@ begin
               if ((s='patch'+GetExeExt) OR (s='gpatch'+GetExeExt))
                  then LocalPatchCmd:=FPatchCmd + ' -t -p0 --binary -i '
                  else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
-              CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
+              CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, SourceDirectory, Output, FVerbose);
             end;
           end;
         end;
@@ -2084,7 +2084,7 @@ begin
 
   if (Length(FURL)=0) then exit;
 
-  if (NOT DirectoryIsEmpty(ExcludeTrailingPathDelimiter(FSourceDirectory))) then
+  if (NOT DirectoryIsEmpty(SourceDirectory)) then
   begin
     Infoln(localinfotext+ModuleName+' sources are already there.',etWarning);
     Infoln(localinfotext+ModuleName+' sources will be replaced.',etWarning);
@@ -2105,7 +2105,7 @@ begin
   if result then
   begin
     //Delete existing files from source directory
-    //DeleteDirectory(FSourceDirectory,True);
+    //DeleteDirectory(SourceDirectory,True);
 
     with TNormalUnzipper.Create do
     begin
@@ -2162,7 +2162,7 @@ begin
     for i:=0 to (FilesList.Count-1) do
     begin
       aFile:=FilesList[i];
-      aName:=ConcatPaths([FSourceDirectory,ExtractRelativePath(IncludeTrailingPathDelimiter(FPCArchiveDir),ExtractFilePath(aFile))]);
+      aName:=ConcatPaths([SourceDirectory,ExtractRelativePath(IncludeTrailingPathDelimiter(FPCArchiveDir),ExtractFilePath(aFile))]);
       ForceDirectoriesSafe(aName);
       MoveFile(aFile,IncludeTrailingPathDelimiter(aName)+ExtractFileName(aFile));
     end;
@@ -2852,7 +2852,7 @@ begin
 
   // for now, just put jasmin.jar in FPC bin-directory ... easy and simple and working
 
-  TargetBin:=FPCCompilerBinPath+TARGETNAME;
+  TargetBin:=FPCBinDir+DirectorySeparator+TARGETNAME;
 
   if (NOT FileExists(TargetBin)) then
   begin
@@ -3016,7 +3016,7 @@ end;
 
 function TInstaller.GetFPCInBinDir: string;
 begin
-  result := FPCCompilerBinPath+'fpc'+GetExeExt;
+  result := FPCBinDir+DirectorySeparator+'fpc'+GetExeExt;
 
   {$IFDEF UNIX}
   if FileExists(result + '.sh') then
@@ -3086,11 +3086,11 @@ begin
   end;
 
   // Do we need GIT more
-  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') then result:=GitClient;
+  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(SourceDirectory)+'.git') then result:=GitClient;
   if result=nil then if ( (AnsiEndsText('.git',FURL)) OR (AnsiEndsText('.git/',FURL)) ) then result:=GitClient;
 
   // Do we need SVN
-  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.svn') then result:=SVNClient;
+  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(SourceDirectory)+'.svn') then result:=SVNClient;
   if result=nil then if (Pos(SVNBASEHTTP,LowerCase(FURL))>0) then result:=SVNClient;
   if result=nil then if (Pos('http://svn.',LowerCase(FURL))=1) then result:=SVNClient;
   if result=nil then if (Pos(SVNBASESVN,LowerCase(FURL))>0) then result:=SVNClient;
@@ -3156,14 +3156,14 @@ begin
   infotext:=InitInfoText(' (CleanModule: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 
-  if (not DirectoryExists(FSourceDirectory)) then
+  if (not DirectoryExists(SourceDirectory)) then
   begin
-    Infoln(infotext+'No '+ModuleName+' source directory ('+FSourceDirectory+') found [yet] ... nothing to be done',etDebug);
+    Infoln(infotext+'No '+ModuleName+' source directory ('+SourceDirectory+') found [yet] ... nothing to be done',etDebug);
     exit(true);
   end;
-  if DirectoryIsEmpty(FSourceDirectory) then
+  if DirectoryIsEmpty(SourceDirectory) then
   begin
-    Infoln(infotext+'No '+ModuleName+' files found in source directory ('+FSourceDirectory+') ... nothing to be done',etDebug);
+    Infoln(infotext+'No '+ModuleName+' files found in source directory ('+SourceDirectory+') ... nothing to be done',etDebug);
     exit(true);
   end;
 end;
@@ -3181,7 +3181,7 @@ begin
   infotext:=InitInfoText(' (GetModule: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 
-  ForceDirectoriesSafe(FSourceDirectory);
+  ForceDirectoriesSafe(SourceDirectory);
 end;
 
 function TInstaller.CheckModule(ModuleName: string): boolean;
@@ -3193,7 +3193,7 @@ begin
   infotext:=InitInfoText(' (CheckModule: '+ModuleName+'): ');
   Infoln(infotext+'Entering ...',etDebug);
 
-  if NOT DirectoryExists(FSourceDirectory) then exit;
+  if NOT DirectoryExists(SourceDirectory) then exit;
 
   // Do not check the sources when crsoss-compiling
   // They must be ok !!
@@ -3222,7 +3222,7 @@ begin
 
   aRepoClient.Verbose          := FVerbose;
   aRepoClient.ModuleName       := ModuleName;
-  aRepoClient.LocalRepository  := FSourceDirectory;
+  aRepoClient.LocalRepository  := SourceDirectory;
   aRepoClient.Repository       := FURL;
   aRepoClient.DesiredTag       := FTAG;
   aRepoClient.DesiredBranch    := FBranch;
@@ -3493,7 +3493,7 @@ begin
       PatchList:=TStringList.Create;
       try
         PatchList.Clear;
-        PatchFilePath:=ConcatPaths([FSourceDirectory,'rtl','inc'])+DirectorySeparator+'mathh.inc';
+        PatchFilePath:=ConcatPaths([SourceDirectory,'rtl','inc'])+DirectorySeparator+'mathh.inc';
         PatchList.LoadFromFile(PatchFilePath);
         for i:=0 to (PatchList.Count-1) do
         begin
@@ -3515,7 +3515,7 @@ begin
     PatchList:=TStringList.Create;
     try
       PatchList.Clear;
-      PatchFilePath:=ConcatPaths([FSourceDirectory,'compiler'])+DirectorySeparator+MAKEFILENAME;
+      PatchFilePath:=ConcatPaths([SourceDirectory,'compiler'])+DirectorySeparator+MAKEFILENAME;
 
       if (FileExists(PatchFilePath)) then
       begin
@@ -3560,7 +3560,7 @@ begin
       try
         PatchList.Clear;
 
-        PatchFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME;
+        PatchFilePath:=IncludeTrailingPathDelimiter(SourceDirectory)+MAKEFILENAME;
 
         if (FileExists(PatchFilePath)) then
         begin
@@ -3663,7 +3663,7 @@ begin
 
           Processor.Executable := FPatchCmd;
           Processor.Process.Parameters.Clear;
-          Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
+          Processor.Process.CurrentDirectory := SourceDirectory;
 
           // check for default values
           s:=ExtractFileNameSafe(FPatchCmd);
@@ -3759,8 +3759,8 @@ begin
   begin
     RevFilePath:='';
 
-    if (ModuleName=_LAZARUS) then RevFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide';
-    if (ModuleName=_FPC) then RevFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler';
+    if (ModuleName=_LAZARUS) then RevFilePath:=IncludeTrailingPathDelimiter(SourceDirectory)+'ide';
+    if (ModuleName=_FPC) then RevFilePath:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler';
 
     if (Length(RevFilePath)>0) then
     begin
@@ -3810,10 +3810,10 @@ begin
   // Second, try to get revision from rev file.
   if (Length(RevString)=0) then
   begin
-    if (ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) then RevFileName:=ConcatPaths([FSourceDirectory,'ide',REVINCFILENAME]);
-    if ModuleName=_FPC then RevFileName:=ConcatPaths([FSourceDirectory,'compiler',REVINCFILENAME]);
-    //if ModuleName=_LAZARUS then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+REVINCFILENAME;
-    //if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+    if (ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) then RevFileName:=ConcatPaths([SourceDirectory,'ide',REVINCFILENAME]);
+    if ModuleName=_FPC then RevFileName:=ConcatPaths([SourceDirectory,'compiler',REVINCFILENAME]);
+    //if ModuleName=_LAZARUS then RevFileName:=IncludeTrailingPathDelimiter(SourceDirectory)+'ide'+PathDelim+REVINCFILENAME;
+    //if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(SourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
 
     if FileExists(RevFileName) then
     begin
@@ -4054,11 +4054,11 @@ var
 begin
   {$IFDEF UNIX}
   // Due to changes in the FPC sources (3.3.1 and newer), the FPC configs need to be created/moved into a new (local) config directory
-  result:=ExpandFileName(FPCCompilerBinPath+'../etc/');
+  result:=ExpandFileName(FPCBinDir+'/../etc/');
   if (NOT UseCompilerWrapper) AND DirectoryExists(result) then
   begin
     // Copy existing configs into this new config directory and delete the old config
-    aCfgFile:=IncludeTrailingPathDelimiter(FPCCompilerBinPath)+aCFG;
+    aCfgFile:=FPCBinDir+DirectorySeparator+aCFG;
     if FileExists(aCfgFile) then
     begin
       FileCopy(aCfgFile,result+aCFG);
@@ -4068,7 +4068,7 @@ begin
   else
   {$ENDIF}
   begin
-   result:=IncludeTrailingPathDelimiter(FPCCompilerBinPath);
+   result:=IncludeTrailingPathDelimiter(FPCBinDir);
   end;
 
   result:=result+aCFG;

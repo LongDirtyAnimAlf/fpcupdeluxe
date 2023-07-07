@@ -175,8 +175,6 @@ public
   function ConfigModule(ModuleName:string): boolean; override;
   // Install update sources
   function GetModule(ModuleName:string): boolean; override;
-  // Configuration for Lazarus; required for configuration
-  property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath;
   // Uninstall module
   function UnInstallModule(ModuleName:string): boolean; override;
   constructor Create;
@@ -213,7 +211,7 @@ var
 begin
   localinfotext:=InitInfoText(' (InitModule): ');
 
-  PlainBinDir := SafeExpandFileName(FPCCompilerBinPath+'..'+DirectorySeparator+'..');
+  PlainBinDir := SafeExpandFileName(FPCBinDir+DirectorySeparator+'..'+DirectorySeparator+'..');
 
   Infoln(localinfotext+'Entering ...',etDebug);
 
@@ -247,15 +245,15 @@ begin
       aPath:=aPath+PathSeparator+ExtractFileDir(s);
     end;
     SetPath(
-      ExcludeTrailingPathDelimiter(FFPCCompilerBinPath)+PathSeparator+
+      FPCBinDir+PathSeparator+
       PlainBinDir+PathSeparator+
       FMakeDir+PathSeparator+PathSeparator+
-      ExcludeTrailingPathDelimiter(InstallDirectory)+
+      InstallDirectory+
       aPath,
       false,false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
-    SetPath(ExcludeTrailingPathDelimiter(FPCCompilerBinPath)+PathSeparator+
+    SetPath(FPCBinDir+PathSeparator+
     {$IFDEF DARWIN}
     // pwd is located in /bin ... the makefile needs it !!
     // tools are located in /usr/bin ... the makefile needs it !!
@@ -647,7 +645,7 @@ begin
             // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
             Processor.Executable := LazbuildApp;
             Processor.Process.Parameters.Clear;
-            Processor.SetParamData('--primary-config-path='+LazarusPrimaryConfigPath+'');
+            Processor.SetParamData('--primary-config-path='+FLazarusPrimaryConfigPath+'');
             Processor.SetParamData(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
             Infoln(ModuleName+': compiling build_lcl_docs help compiler:',etInfo);
             WritelnLog('Building help compiler (also time consuming generation of documents) !!!!!!', true);
@@ -663,7 +661,7 @@ begin
       end;
 
       // Check for proper fpdoc
-      FPDocExe:=FPCCompilerBinPath+'fpdoc'+GetExeExt;
+      FPDocExe:=FPCBinDir+DirectorySeparator+'fpdoc'+GetExeExt;
       if (CheckExecutable(FPDocExe, ['--help'], 'FPDoc')=false) then
       begin
       FPDocExe:=IncludeTrailingPathDelimiter(FFPCSourceDir)+
@@ -895,7 +893,7 @@ var
   LazarusVersion:string;
 begin
   // get Lazarus version for correct version of helpfile
-  LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
+  LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
   try
     LazarusVersion:=LazarusConfig.GetVariable(EnvironmentConfig,'EnvironmentOptions/Version/Lazarus');
     VersionFromString(LazarusVersion,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
