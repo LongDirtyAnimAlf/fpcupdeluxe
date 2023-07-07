@@ -428,7 +428,6 @@ end;
 
 procedure TForm2.FormCreate(Sender: TObject);
 var
-  i       : integer;
   CPU       :TCPU;
   OS        :TOS;
   ARMArch   :TARMARCH;
@@ -599,8 +598,8 @@ var
 begin
   if (MiscellaneousCheckListBox.Count>0) then
   begin
-    SetLength(boolstore,MiscellaneousCheckListBox.Count);
-    SetLength(boolstore2,MiscellaneousCheckListBox.Count);
+    SetLength({%H-}boolstore,MiscellaneousCheckListBox.Count);
+    SetLength({%H-}boolstore2,MiscellaneousCheckListBox.Count);
 
     for i := 0 to MiscellaneousCheckListBox.Count-1 do
     begin

@@ -1696,12 +1696,12 @@ begin
         {$ENDIF}
         if FileExists(GDBPath) then
         begin
-          s:=ConcatPaths([MakeDir,'gdb',GetSourceCPUOS]);
+          s:=ConcatPaths([FMakeDir,'gdb',GetSourceCPUOS]);
           ForceDirectoriesSafe(s);
           s:=s+DirectorySeparator+'gdb';
           if (fpSymlink(pchar(GDBPath),pchar(s))=0) then
           begin
-            s:=ConcatPaths([MakeDir,'gdb','$(TargetCPU)-$(TargetOS)']);
+            s:=ConcatPaths([FMakeDir,'gdb','$(TargetCPU)-$(TargetOS)']);
             s:=s+DirectorySeparator+'gdb';
           end;
           GDBPath:=s;

@@ -177,7 +177,7 @@ type
       ARect: TRect; State: TOwnerDrawState);
     procedure LanguageClick(Sender: TObject);
     procedure MOnlineDocsClick({%H-}Sender: TObject);
-    procedure WikiClick(Sender: TObject);
+    procedure WikiClick({%H-}Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick({%H-}Sender: TObject);
@@ -367,9 +367,6 @@ uses
   DefaultTranslator,
   //LazUTF8,
   {$endif}
-  {$ifdef UNIX}
-  BaseUnix,
-  {$endif UNIX}
   AboutFrm,
   extrasettings,
   subarch,
@@ -3414,7 +3411,7 @@ begin
                     {$endif}
                     begin
                       {$ifdef MSWINDOWS}
-                      UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                      UnZipper:=ConcatPaths([FPCupManager.MakeDirectory,'unrar','bin'])+PathSeparator+'unrar.exe';
                       {$else}
                       UnZipper := 'unrar';
                       {$endif}
@@ -3524,7 +3521,7 @@ begin
                     {$endif}
                     begin
                       {$ifdef MSWINDOWS}
-                      UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                      UnZipper:=ConcatPaths([FPCupManager.MakeDirectory,'unrar','bin'])+PathSeparator+'unrar.exe';
                       {$else}
                       UnZipper := 'unrar';
                       {$endif}
