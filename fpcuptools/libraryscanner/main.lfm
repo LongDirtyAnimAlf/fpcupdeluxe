@@ -1,0 +1,61 @@
+object Form1: TForm1
+  Left = 302
+  Height = 484
+  Top = 199
+  Width = 926
+  Caption = 'Form1'
+  ClientHeight = 484
+  ClientWidth = 926
+  LCLVersion = '3.99.0.0'
+  object btnStartScan: TButton
+    Left = 16
+    Height = 93
+    Top = 14
+    Width = 182
+    Caption = 'btnStartScan'
+    OnClick = btnStartScanClick
+    TabOrder = 0
+  end
+  object Memo1: TMemo
+    Left = 216
+    Height = 430
+    Top = 16
+    Width = 274
+    Lines.Strings = (
+      'Memo1'
+    )
+    ScrollBars = ssVertical
+    TabOrder = 1
+  end
+  object Memo2: TMemo
+    Left = 16
+    Height = 320
+    Top = 126
+    Width = 182
+    Lines.Strings = (
+      'Memo2'
+    )
+    ScrollBars = ssVertical
+    TabOrder = 2
+  end
+  object Memo3: TMemo
+    Left = 496
+    Height = 368
+    Top = 14
+    Width = 424
+    Lines.Strings = (
+      'Memo1'
+    )
+    ScrollBars = ssVertical
+    TabOrder = 3
+  end
+  object btnGetFiles: TButton
+    Left = 497
+    Height = 61
+    Top = 390
+    Width = 423
+    Caption = 'btnGetFiles'
+    OnClick = btnGetFilesClick
+    TabOrder = 4
+  end
+end

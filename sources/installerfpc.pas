@@ -2421,7 +2421,7 @@ var
   SUBARCHMagic:string;
 begin
   // Standard directory
-  aDir:=ConcatPaths([InstallDirectory,'units']);
+  aDir:=ConcatPaths([FFPCInstallDir,'units']);
 
   {$ifdef UNIX}
   if FileIsSymlink(aDir) then
