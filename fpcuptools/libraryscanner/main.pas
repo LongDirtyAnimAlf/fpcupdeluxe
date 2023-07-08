@@ -14,9 +14,12 @@ type
   TForm1 = class(TForm)
     btnStartScan: TButton;
     btnGetFiles: TButton;
-    Memo1: TMemo;
-    Memo2: TMemo;
-    Memo3: TMemo;
+    LibraryList: TMemo;
+    LibraryNotFoundList: TMemo;
+    LibraryLocationList: TMemo;
+    stLocation: TStaticText;
+    stFound: TStaticText;
+    stNotFound: TStaticText;
     procedure btnStartScanClick(Sender: TObject);
     procedure btnGetFilesClick(Sender: TObject);
   private
@@ -44,7 +47,7 @@ const
   '/usr/local/lib'
   );
 
-const FPCLIBS : array [0..35] of string = (
+const FPCLIBS : array [0..38] of string = (
   'crtbegin.o',
   'crtbeginS.o',
   'crtend.o',
@@ -59,12 +62,15 @@ const FPCLIBS : array [0..35] of string = (
   'ld-linux-x86-64.so.2',
   'libanl.so.1',
   'libcrypt.so.1',
-  'libc.so',
   'libc.so.6',
   'libc_nonshared.a',
   'libdb1.so.2',
   'libdb2.so.3',
   'libdl.so.2',
+  'libglib-2.0.so.0',
+  'libgobject-2.0.so.0',
+  'libgthread-2.0.so.0',
+  'libgmodule-2.0.so.0',
   'libm.so.6',
   'libnsl.so.1',
   'libnss_compat.so.2',
@@ -80,6 +86,19 @@ const FPCLIBS : array [0..35] of string = (
   'librt.so.1',
   'libthread_db.so.1',
   'libutil.so.1',
+  'libz.so.1'
+);
+
+const FPCLINKLIBS : array [0..9] of string = (
+  'libc.so',
+  'libdl.so',
+  'libgobject-2.0.so',
+  'libglib-2.0.so',
+  'libgthread-2.0.so',
+  'libgmodule-2.0.so',
+  'libm.so',
+  'libpthread.so',
+  'librt.so',
   'libz.so'
 );
 
@@ -105,8 +124,17 @@ const LAZLIBS : array [0..18] of string = (
   'libvulkan.so.1'
 );
 
-{ TForm1 }
+const LAZLINKLIBS : array [0..6] of string = (
+  'libgdk-x11-2.0.so',
+  'libgtk-x11-2.0.so',
+  'libX11.so',
+  'libgdk_pixbuf-2.0.so',
+  'libpango-1.0.so',
+  'libcairo.so',
+  'libatk-1.0.so'
+);
 
+{ TForm1 }
 
 function GetStartupObjects:string;
 const
@@ -398,62 +426,82 @@ const
 var
   GccDirectory:string;
   SearchLib,SearchDir:string;
-  SearchResultList:TStringList;
   FinalSearchResultList:TLookupStringList;
   Index:integer;
   //sd:string;
 procedure CheckAndAddLibrary(aLib:string);
 var
+  SearchResultList:TStringList;
   SearchResult:string;
   FileName:string;
   i,j: integer;
   sd,s:string;
 begin
-  for sd in UNIXSEARCHDIRS do
-  begin
-    FileName:=sd+DirectorySeparator+aLib;
-    if FileExists(FileName) then
+  SearchResultList:=TStringList.Create;
+  try
+    for sd in UNIXSEARCHDIRS do
     begin
-      FinalSearchResultList.Add('['+ExtractFileName(FileName)+']');
-      while FileIsSymlink(FileName) do FileName:=GetPhysicalFilename(FileName,pfeException);
-      SearchResult:='';
-      RunCommand('readelf',['-d','-W',FileName],SearchResult,[]);
-      SearchResultList.Text:=SearchResult;
-      for i:=0 to Pred(SearchResultList.Count) do
+      FileName:=sd+DirectorySeparator+aLib;
+      if FileExists(FileName) then
       begin
-        s:=SearchResultList.Strings[i];
-        if (Pos(MAGICNEEDED,s)>0) then
+        FinalSearchResultList.Add('['+ExtractFileName(FileName)+']');
+        // libc.so might be a text-file, so skip analysis
+        if ExtractFileName(FileName)='libc.so' then
         begin
-          j:=Pos(MAGICSHARED,s);
-          if (j<>-1) then
+          FileName:='';
+          break;
+        end;
+        while FileIsSymlink(FileName) do FileName:=GetPhysicalFilename(FileName,pfeException);
+        SearchResult:='';
+        RunCommand('readelf',['-d','-W',FileName],SearchResult,[]);
+        SearchResultList.Text:=SearchResult;
+        if (SearchResultList.Count=0) then continue;
+        for i:=0 to Pred(SearchResultList.Count) do
+        begin
+          s:=SearchResultList.Strings[i];
+          if (Pos(MAGICNEEDED,s)>0) then
           begin
-            s:=Trim(Copy(s,j+Length(MAGICSHARED),MaxInt));
-            FinalSearchResultList.Add(s);
+            j:=Pos(MAGICSHARED,s);
+            if (j<>-1) then
+            begin
+              s:=Trim(Copy(s,j+Length(MAGICSHARED),MaxInt));
+              if (FinalSearchResultList.Add(s)<>-1) then
+              begin
+                s:=Copy(s,2,Length(s)-2);
+                CheckAndAddLibrary(s);
+              end;
+            end;
           end;
         end;
+        FileName:='';
+        break;
       end;
-      FileName:='';
-      break;
-    end;
-  end;
-  if (Length(FileName)>0) then
-  begin
-    FileName:=GccDirectory+DirectorySeparator+aLib;
-    if FileExists(FileName) then
-    begin
-      FinalSearchResultList.Add('['+aLib+']');
-      FileName:='';
     end;
     if (Length(FileName)>0) then
     begin
-      Memo2.Lines.Append('Not found: '+aLib);
+      FileName:=GccDirectory+DirectorySeparator+aLib;
+      if FileExists(FileName) then
+      begin
+        FinalSearchResultList.Add('['+aLib+']');
+        FileName:='';
+      end;
+      if (Length(FileName)>0) then
+      begin
+        if SearchLib='libc.so' then
+        begin
+          LibraryNotFoundList.Lines.Append('Not found: '+aLib);
+        end;
+        LibraryNotFoundList.Lines.Append('Not found: '+aLib);
+      end;
     end;
+  finally
+    SearchResultList.Free;
   end;
 end;
 begin
-  Memo1.Lines.Clear;
-  Memo2.Lines.Clear;
-  Memo3.Lines.Clear;
+  LibraryList.Lines.Clear;
+  LibraryNotFoundList.Lines.Clear;
+  LibraryLocationList.Lines.Clear;
 
   //sd:=SysUtils.GetEnvironmentVariable('LIBRARY_PATH');
   //if (Length(sd)=0) then sd:=SysUtils.GetEnvironmentVariable('LD_LIBRARY_PATH');
@@ -462,10 +510,13 @@ begin
   //end;
   GccDirectory:=GetStartupObjects;
 
-  SearchResultList:=TStringList.Create;
   FinalSearchResultList:=TLookupStringList.Create;
   try
     for SearchLib in FPCLIBS do
+    begin
+      CheckAndAddLibrary(SearchLib);
+    end;
+    for SearchLib in FPCLINKLIBS do
     begin
       CheckAndAddLibrary(SearchLib);
     end;
@@ -473,8 +524,12 @@ begin
     begin
       CheckAndAddLibrary(SearchLib);
     end;
+    for SearchLib in LAZLINKLIBS do
+    begin
+      CheckAndAddLibrary(SearchLib);
+    end;
     FinalSearchResultList.Sort;
-    Memo1.Lines.Text:=FinalSearchResultList.Text;
+    LibraryList.Lines.Text:=FinalSearchResultList.Text;
 
     for Index:=0 to Pred(FinalSearchResultList.Count) do
     begin
@@ -484,7 +539,7 @@ begin
       begin
         if FileExists(SearchDir+DirectorySeparator+SearchLib) then
         begin
-          Memo3.Lines.Append(SearchDir+DirectorySeparator+SearchLib);
+          LibraryLocationList.Lines.Append(SearchDir+DirectorySeparator+SearchLib);
           SearchLib:='';
           break;
         end;
@@ -493,32 +548,51 @@ begin
       begin
         if FileExists(GccDirectory+DirectorySeparator+SearchLib) then
         begin
-          Memo3.Lines.Append(GccDirectory+DirectorySeparator+SearchLib);
+          LibraryLocationList.Lines.Append(GccDirectory+DirectorySeparator+SearchLib);
           SearchLib:='';
         end;
       end;
       if (Length(SearchLib)>0) then
       begin
-        Memo2.Lines.Append('Not found: '+SearchLib);
+        LibraryNotFoundList.Lines.Append('Copy not found: '+SearchLib);
       end;
     end;
   finally
     FinalSearchResultList.Free;
-    SearchResultList.Free;
   end;
 end;
 
 procedure TForm1.btnGetFilesClick(Sender: TObject);
 var
   Index:integer;
-  FileName,TargetFile:string;
+  FileName,TargetFile,LinkFile:string;
 begin
   ForceDirectories(Application.Location+'libs');
-  for Index:=0 to Pred(Memo3.Lines.Count) do
+  for Index:=Pred(LibraryLocationList.Lines.Count) downto 0 do
   begin
-    FileName:=Memo3.Lines.Strings[Index];
-    TargetFile:=Application.Location+'libs'+DirectorySeparator+ExtractFileName(FileName);
-    CopyFile(FileName,TargetFile);
+    FileName:=LibraryLocationList.Lines.Strings[Index];
+    TargetFile:=ExtractFileName(FileName);
+    for LinkFile in FPCLINKLIBS do
+    begin
+      if (Pos(LinkFile,TargetFile)=1) then
+      begin
+        CopyFile(FileName,Application.Location+'libs'+DirectorySeparator+LinkFile);
+        break;
+      end;
+    end;
+    for LinkFile in LAZLINKLIBS do
+    begin
+      if (Pos(LinkFile,TargetFile)=1) then
+      begin
+        CopyFile(FileName,Application.Location+'libs'+DirectorySeparator+LinkFile);
+        break;
+      end;
+    end;
+    if CopyFile(FileName,Application.Location+'libs'+DirectorySeparator+TargetFile) then
+    begin
+      LibraryLocationList.Lines.Delete(Index);
+      Application.ProcessMessages;
+    end;
   end;
 end;
 

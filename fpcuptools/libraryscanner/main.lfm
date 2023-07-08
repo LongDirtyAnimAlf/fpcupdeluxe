@@ -1,5 +1,5 @@
 object Form1: TForm1
-  Left = 302
+  Left = 354
   Height = 484
   Top = 199
   Width = 926
@@ -8,54 +8,149 @@ object Form1: TForm1
   ClientWidth = 926
   LCLVersion = '3.99.0.0'
   object btnStartScan: TButton
-    Left = 16
-    Height = 93
-    Top = 14
-    Width = 182
-    Caption = 'btnStartScan'
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 8
+    Height = 61
+    Top = 8
+    Width = 240
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 8
+    Caption = 'Start Scanner'
     OnClick = btnStartScanClick
     TabOrder = 0
   end
-  object Memo1: TMemo
-    Left = 216
-    Height = 430
-    Top = 16
-    Width = 274
-    Lines.Strings = (
-      'Memo1'
-    )
+  object LibraryList: TMemo
+    AnchorSideLeft.Control = stFound
+    AnchorSideTop.Control = stFound
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = stFound
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 264
+    Height = 428
+    Top = 48
+    Width = 220
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Top = 8
+    BorderSpacing.Bottom = 8
     ScrollBars = ssVertical
     TabOrder = 1
   end
-  object Memo2: TMemo
-    Left = 16
-    Height = 320
+  object LibraryNotFoundList: TMemo
+    AnchorSideLeft.Control = stNotFound
+    AnchorSideTop.Control = stNotFound
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = stNotFound
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 8
+    Height = 350
     Top = 126
-    Width = 182
-    Lines.Strings = (
-      'Memo2'
-    )
+    Width = 240
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Top = 8
+    BorderSpacing.Bottom = 8
     ScrollBars = ssVertical
     TabOrder = 2
   end
-  object Memo3: TMemo
-    Left = 496
-    Height = 368
-    Top = 14
-    Width = 424
-    Lines.Strings = (
-      'Memo1'
-    )
+  object LibraryLocationList: TMemo
+    AnchorSideLeft.Control = stLocation
+    AnchorSideTop.Control = stLocation
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = btnGetFiles
+    Left = 500
+    Height = 356
+    Top = 52
+    Width = 418
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 8
+    BorderSpacing.Bottom = 8
     ScrollBars = ssVertical
     TabOrder = 3
   end
   object btnGetFiles: TButton
-    Left = 497
-    Height = 61
-    Top = 390
-    Width = 423
-    Caption = 'btnGetFiles'
+    AnchorSideLeft.Control = LibraryLocationList
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 500
+    Height = 60
+    Top = 416
+    Width = 418
+    Anchors = [akLeft, akRight, akBottom]
+    BorderSpacing.Right = 8
+    BorderSpacing.Bottom = 8
+    Caption = 'Get Library Files'
     OnClick = btnGetFilesClick
     TabOrder = 4
+  end
+  object stNotFound: TStaticText
+    AnchorSideLeft.Control = btnStartScan
+    AnchorSideTop.Control = btnStartScan
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = btnStartScan
+    AnchorSideRight.Side = asrBottom
+    Left = 8
+    Height = 33
+    Top = 85
+    Width = 240
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 16
+    Caption = 'Not Found'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -19
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 5
+  end
+  object stFound: TStaticText
+    AnchorSideLeft.Control = btnStartScan
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    Left = 264
+    Height = 32
+    Top = 8
+    Width = 220
+    BorderSpacing.Left = 16
+    BorderSpacing.Top = 8
+    Caption = 'Libraries Found'
+    Constraints.MaxWidth = 220
+    Constraints.MinWidth = 220
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -19
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 6
+  end
+  object stLocation: TStaticText
+    AnchorSideLeft.Control = stFound
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 500
+    Height = 36
+    Top = 8
+    Width = 418
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 16
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 8
+    Caption = 'Libraries FileSystem Location'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -19
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 7
   end
 end
