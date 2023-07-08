@@ -552,10 +552,6 @@ begin
       end;
       if (Length(FileName)>0) then
       begin
-        if SearchLib='libc.so' then
-        begin
-          LibraryNotFoundList.Lines.Append('Not found: '+aLib);
-        end;
         LibraryNotFoundList.Lines.Append('Not found: '+aLib);
       end;
     end;
@@ -608,8 +604,18 @@ begin
     begin
       SearchLib:=FinalSearchResultList.Strings[Index];
       SearchLib:=Copy(SearchLib,2,Length(SearchLib)-2);
+
+      {$ifdef Haiku}
+      for SearchDir in HAIKUSEARCHDIRS do
+      {$else}
       for SearchDir in UNIXSEARCHDIRS do
+      {$endif}
       begin
+        {$ifdef Haiku}
+        {$ifndef CPUX86}
+        if (RightStr(SearchDir,4)='/x86') then continue;
+        {$endif}
+        {$endif}
         if FileExists(SearchDir+DirectorySeparator+SearchLib) then
         begin
           LibraryLocationList.Lines.Append(SearchDir+DirectorySeparator+SearchLib);
