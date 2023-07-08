@@ -39,15 +39,49 @@ uses
   process,FileUtil,LazFileUtils,LookupStringList;
 
 const
-  UNIXSEARCHDIRS : array [0..4] of string = (
+  UNIXSEARCHDIRS : array [0..5] of string = (
   '/lib',
-  '/lib64',
   '/usr/lib',
+  '/usr/local/lib',
+  {$ifdef CPUX86}
+  '/usr/lib/i686-linux-gnu',
+  '/usr/local/lib/i686-linux-gnu',
+  {$endif CPUX32}
+  {$ifdef CPUX86_64}
   '/usr/lib/x86_64-linux-gnu',
-  '/usr/local/lib'
+  '/usr/local/lib/x86_64-linux-gnu',
+  {$endif CPUX86_64}
+  {$ifdef CPUARM}
+  {$ifdef CPUARMHF}
+  '/usr/lib/arm-linux-gnueabihf',
+  '/usr/local/lib/arm-linux-gnueabihf',
+  {$else}
+  '/usr/lib/arm-linux-gnueabi',
+  '/usr/local/lib/arm-linux-gnueabi',
+  {$endif CPUARMHF}
+  {$endif CPUARM}
+  {$ifdef CPUAARCH64}
+  '/usr/lib/aarch64-linux-gnu',
+  '/usr/local/lib/aarch64-linux-gnu',
+  {$endif CPUAARCH64}
+  {$ifdef CPU32}
+  '/lib32'
+  {$endif CPU32}
+  {$ifdef CPU64}
+  '/lib64'
+  {$endif CPU64}
   );
 
-const FPCLIBS : array [0..38] of string = (
+  {$ifdef Haiku}
+  HAIKUSEARCHDIRS : array [0..3] of string = (
+  '/boot/system/lib/x86',
+  '/boot/system/non-packaged/lib/x86',
+  '/boot/system/lib',
+  '/boot/system/non-packaged/lib'
+  );
+  {$endif}
+
+const FPCLIBS : array [0..39] of string = (
   'crtbegin.o',
   'crtbeginS.o',
   'crtend.o',
@@ -64,6 +98,7 @@ const FPCLIBS : array [0..38] of string = (
   'libcrypt.so.1',
   'libc.so.6',
   'libc_nonshared.a',
+  'libgcc.a',
   'libdb1.so.2',
   'libdb2.so.3',
   'libdl.so.2',
@@ -89,7 +124,8 @@ const FPCLIBS : array [0..38] of string = (
   'libz.so.1'
 );
 
-const FPCLINKLIBS : array [0..9] of string = (
+const FPCLINKLIBS : array [0..10] of string = (
+  'ld.so',
   'libc.so',
   'libdl.so',
   'libgobject-2.0.so',
@@ -102,7 +138,7 @@ const FPCLINKLIBS : array [0..9] of string = (
   'libz.so'
 );
 
-const LAZLIBS : array [0..18] of string = (
+const LAZLIBS : array [0..19] of string = (
   'libgdk-x11-2.0.so.0',
   'libgtk-x11-2.0.so.0',
   'libX11.so.6',
@@ -120,6 +156,7 @@ const LAZLIBS : array [0..18] of string = (
   'libsqlite3.so.0',
   'libusb-1.0.so.0',
   'libGL.so',
+  'libGLU.so',
   'libEGL.so',
   'libvulkan.so.1'
 );
@@ -133,6 +170,26 @@ const LAZLINKLIBS : array [0..6] of string = (
   'libcairo.so',
   'libatk-1.0.so'
 );
+
+const QT5LIBS : array [0..6] of string = (
+  'libQt5Core.so.5',
+  'libQt5GUI.so.5',
+  'libQt5Network.so.5',
+  'libQt5Pas.so.1',
+  'libQt5PrintSupport.so.5',
+  'libQt5Widgets.so.5',
+  'libQt5X11Extras.so.5'
+);
+
+const QT6LIBS : array [0..5] of string = (
+  'libQt6Core.so.6',
+  'libQt6GUI.so.6',
+  'libQt6Network.so.6',
+  'libQt6Pas.so.1',
+  'libQt6PrintSupport.so.6',
+  'libQt6Widgets.so.6'
+);
+
 
 { TForm1 }
 
@@ -152,7 +209,6 @@ var
   LinkFiles     : TStringList;
   Output,s1,s2  : string;
   i,j           : integer;
-  ReturnCode    : integer;
   FoundLinkFile : boolean;
   OutputLines   : TStringList;
 begin
@@ -439,8 +495,17 @@ var
 begin
   SearchResultList:=TStringList.Create;
   try
+    {$ifdef Haiku}
+    for sd in HAIKUSEARCHDIRS do
+    {$else}
     for sd in UNIXSEARCHDIRS do
+    {$endif}
     begin
+      {$ifdef Haiku}
+      {$ifndef CPUX86}
+      if (RightStr(sd,4)='/x86') then continue;
+      {$endif}
+      {$endif}
       FileName:=sd+DirectorySeparator+aLib;
       if FileExists(FileName) then
       begin
@@ -525,6 +590,14 @@ begin
       CheckAndAddLibrary(SearchLib);
     end;
     for SearchLib in LAZLINKLIBS do
+    begin
+      CheckAndAddLibrary(SearchLib);
+    end;
+    for SearchLib in QT5LIBS do
+    begin
+      CheckAndAddLibrary(SearchLib);
+    end;
+    for SearchLib in QT6LIBS do
     begin
       CheckAndAddLibrary(SearchLib);
     end;
