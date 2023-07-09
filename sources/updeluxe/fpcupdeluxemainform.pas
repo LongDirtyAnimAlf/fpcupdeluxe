@@ -1968,13 +1968,17 @@ begin
 end;
 
 procedure TForm1.OnlyTagClick(Sender: TObject);
+var
+  aListBox:TListBox;
 begin
-  AddTag(Sender,TListBox(Sender).GetSelectedText);
+  if (Sender=BitBtnFPCOnlyTag) then aListBox:=ListBoxFPCTargetTag;
+  if (Sender=BitBtnLazarusOnlyTag) then aListBox:=ListBoxLazarusTargetTag;
+  if (aListBox.ItemIndex<>-1) then AddTag(aListBox,aListBox.GetSelectedText);
 end;
 
 procedure TForm1.AddTag(Sender: TObject;aTag:string);
 begin
-  if (Sender=BitBtnFPCOnlyTag) OR (Sender=ListBoxFPCTarget)  then
+  if (Sender=ListBoxFPCTargetTag) OR (Sender=ListBoxFPCTarget)  then
   begin
     if SetAlias(FPCTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
     begin
@@ -1984,7 +1988,7 @@ begin
       //ListBoxFPCTarget.ItemIndex:=ListBoxFPCTarget.Count-1;
     end;
   end;
-  if (Sender=BitBtnLazarusOnlyTag) OR (Sender=ListBoxLazarusTarget) then
+  if (Sender=ListBoxLazarusTargetTag) OR (Sender=ListBoxLazarusTarget) then
   begin
     if SetAlias(LAZARUSTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
     begin
