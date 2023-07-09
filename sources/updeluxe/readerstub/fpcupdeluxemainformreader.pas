@@ -71,7 +71,9 @@ type
     Memo1: TMemo;
     MemoAddTag: TMemo;
     memoSummary: TMemo;
-    MenuItem1: TMenuItem;
+    MAbout: TMenuItem;
+    MWiki: TMenuItem;
+    MHelp: TMenuItem;
     MenuItem2: TMenuItem;
     MEnglishlanguage: TMenuItem;
     MChineseCNlanguage: TMenuItem;
@@ -176,7 +178,7 @@ type
       ARect: TRect; State: TOwnerDrawState);
     procedure LanguageClick(Sender: TObject);
     procedure MOnlineDocsClick({%H-}Sender: TObject);
-    procedure WikiClick(Sender: TObject);
+    procedure WikiClick({%H-}Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
     procedure OnlyTagClick({%H-}Sender: TObject);
@@ -268,6 +270,7 @@ type
     procedure SetCmdFontName(aValue: String);
     procedure ParseRevisions(IniDirectory:string);
     procedure AddRevision(TargetFPC,TargetLAZ:boolean;aHash,aName:string;aDate:TDateTime);
+    procedure AddTag(Sender: TObject;aTag:string);
     {$ifdef EnableLanguages}
     procedure Translate(const Language: string);
     {$endif}
@@ -365,9 +368,6 @@ uses
   DefaultTranslator,
   //LazUTF8,
   {$endif}
-  {$ifdef UNIX}
-  BaseUnix,
-  {$endif UNIX}
   AboutFrm,
   extrasettings,
   subarch,
@@ -1150,7 +1150,7 @@ end;
 function TForm1.AutoUpdateCrossCompiler(Sender: TObject):boolean;
 var
   FPCCfg:string;
-  BinPath:string;
+  ConfigPath,BinPath,LibPath:string;
   ConfigText: TStringList;
   aCPU, aOS: string;
   aTCPU:TCPU;
@@ -1162,7 +1162,7 @@ var
   success:boolean;
   SnipBegin,SnipEnd: integer;
   i:integer;
-  s,aResultMessage:string;
+  s,dummy,aResultMessage:string;
 begin
   aOS := GetSourceOS;
   aCPU := GetSourceCPU;
@@ -1171,12 +1171,12 @@ begin
   aTOS:=TOS.osNone;
   aTSUBARCH:=TSUBARCH.saNone;
 
-  //BinPath:=ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',aCPU+'-'+aOS]);
-  BinPath:=ConcatPaths([sInstallDir,'fpc','bin',aCPU+'-'+aOS])+DirectorySeparator;
+  //ConfigPath:=ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',aCPU+'-'+aOS]);
+  ConfigPath:=ConcatPaths([sInstallDir,'fpc','bin',aCPU+'-'+aOS])+DirectorySeparator;
 
-  FPCCfg:=BinPath+FPCCONFIGFILENAME;
+  FPCCfg:=ConfigPath+FPCCONFIGFILENAME;
   {$ifdef UNIX}
-  if (NOT FileExists(FPCCfg)) then FPCCfg:=ExpandFileName(BinPath+'../etc/'+FPCCONFIGFILENAME);
+  if (NOT FileExists(FPCCfg)) then FPCCfg:=ExpandFileName(ConfigPath+'../etc/'+FPCCONFIGFILENAME);
   {$endif}
 
   result:=false;
@@ -1203,7 +1203,7 @@ begin
     CheckAutoClear.Checked:=false;
 
     memoSummary.Lines.Append(upBuildAllCrossCompilers);
-    memoSummary.Lines.Append(upBuildAllCrossCompilersCheck+' '+BinPath);
+    memoSummary.Lines.Append(upBuildAllCrossCompilersCheck+' '+ConfigPath);
     memoSummary.Lines.Append('');
 
   end
@@ -1249,10 +1249,12 @@ begin
           // try to distinguish between different Solaris versons
           if (aTOS=TOS.solaris) then
           begin
+            GetCrossToolsDir(aTCPU,aTOS,false,true,false,BinPath,dummy);
+
             for i:=SnipBegin to SnipEnd do
             begin
               s:=ConfigText.Strings[i];
-              if (Pos('-FD',s)>0) AND (Pos('-solaris-oi',s)>0) then
+              if (Pos('-FD',s)>0) AND (Pos(BinPath,s)>0) then
               begin
                 aOS:='solaris-oi';
                 break;
@@ -1263,14 +1265,24 @@ begin
           // try to distinguish between different Linux versons
           if (aTOS=TOS.linux) then
           begin
+            GetCrossToolsDir(aTCPU,aTOS,true,false,false,BinPath,dummy);
+            GetCrossToolsDir(aTCPU,aTOS,false,false,true,dummy,LibPath);
+
             for i:=SnipBegin to SnipEnd do
             begin
               s:=ConfigText.Strings[i];
-              if (Pos('-FD',s)>0) AND (Pos('-musllinux',s)>0) then
+              if (Pos('-FD',s)>0) AND (Pos(BinPath,s)>0) then
               begin
                 aOS:='linux-musl';
                 break;
               end;
+
+              if (Pos('-Fl',s)>0) AND (Pos(LibPath,s)>0) then
+              begin
+                aOS:='linux-legacy';
+                break;
+              end;
+
             end;
           end;
 
@@ -1958,11 +1970,17 @@ end;
 
 procedure TForm1.OnlyTagClick(Sender: TObject);
 var
-  aTag:string;
+  aListBox:TListBox;
 begin
-  if Sender=BitBtnFPCOnlyTag then
+  if (Sender=BitBtnFPCOnlyTag) then aListBox:=ListBoxFPCTargetTag;
+  if (Sender=BitBtnLazarusOnlyTag) then aListBox:=ListBoxLazarusTargetTag;
+  if (aListBox.ItemIndex<>-1) then AddTag(aListBox,aListBox.GetSelectedText);
+end;
+
+procedure TForm1.AddTag(Sender: TObject;aTag:string);
+begin
+  if (Sender=ListBoxFPCTargetTag) OR (Sender=ListBoxFPCTarget)  then
   begin
-    aTag:=ListBoxFPCTargetTag.GetSelectedText;
     if SetAlias(FPCTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,'list');
@@ -1971,9 +1989,8 @@ begin
       //ListBoxFPCTarget.ItemIndex:=ListBoxFPCTarget.Count-1;
     end;
   end;
-  if Sender=BitBtnLazarusOnlyTag then
+  if (Sender=ListBoxLazarusTargetTag) OR (Sender=ListBoxLazarusTarget) then
   begin
-    aTag:=ListBoxLazarusTargetTag.GetSelectedText;
     if SetAlias(LAZARUSTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,'list');
@@ -1986,6 +2003,7 @@ begin
   FillSourceListboxes;
   ScrollToSelected;
 end;
+
 
 procedure TForm1.TagSelectionChange(Sender: TObject;User: boolean);
 begin
@@ -2002,6 +2020,7 @@ var
   CPUType:TCPU;
   OSType:TOS;
   sOS:string;
+  success:boolean;
 begin
   CPUType:=TCPU.cpuNone;
   OSType:=TOS.osNone;
@@ -2016,11 +2035,21 @@ begin
   begin
     DisEnable(Sender,False);
     try
-      if (NOT PrepareRun(Sender)) then exit;
+      success:=PrepareRun(Sender);
+      if (NOT success) then exit;
+
+      success:=FPCupManager.CheckCurrentFPCInstall;
+      if (NOT success) then
+      begin
+        ShowMessage('No valid FPC install found. Please install FPC first.');
+        exit;
+      end;
+
       FPCupManager.CrossCPU_Target:=CPUType;
       FPCupManager.CrossOS_Target:=OSType;
       sOS:=radgrpOS.Items[radgrpOS.ItemIndex];
       if sOS='linux-musl' then FPCupManager.MUSL:=true;
+      if sOS='linux-legacy' then FPCupManager.LinuxLegacy:=true;
       if sOS='solaris-oi' then FPCupManager.SolarisOI:=true;
       FPCupManager.OnlyModules:=_NATIVECROSSFPC;
       sStatus:='Going to build native compiler for '+FPCupManager.CrossCombo_Target;
@@ -2040,8 +2069,12 @@ begin
   {$else}
   SessionProperties := 'WindowState;Width;Height;Top;Left;CmdFontSize;CmdFontName;';
   {$endif}
-  //Width := MulDiv(Width, 96, Screen.PixelsPerInch);
-  //Height := MulDiv(Height, 96, Screen.PixelsPerInch);
+
+  {$ifdef Windows}
+  // For now, only Windows
+  if Application.Scaled and Scaled and (Screen<>nil) and (PixelsPerInch<>Screen.PixelsPerInch) then
+    AutoAdjustLayout(lapAutoAdjustForDPI, PixelsPerInch, Screen.PixelsPerInch, 0, 0);
+  {$endif}
 end;
 
 procedure TForm1.IniPropStorageAppSavingProperties(Sender: TObject);
@@ -2610,6 +2643,7 @@ procedure TForm1.InstallModule(aModule:string; UnInstall:boolean);
 var
   modules:string;
   s:string;
+  success:boolean;
 begin
   modules:=aModule;
 
@@ -2649,7 +2683,15 @@ begin
       sStatus:='Going to remove selected modules.';
     end;
 
-    if (NOT PrepareRun(nil)) then exit;
+    success:=PrepareRun(nil);
+    if (NOT success) then exit;
+
+    success:=FPCupManager.CheckCurrentFPCInstall;
+    if (NOT success) then
+    begin
+      ShowMessage('No valid FPC install found. Please install FPC first.');
+      exit;
+    end;
 
     FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
     try
@@ -2664,7 +2706,7 @@ begin
       if UnInstall then aDataClient.UpInfo.UpFunction:=ufUninstallModule;
       {$endif}
 
-      RealRun;
+      success:=RealRun;
 
     finally
       FPCupManager.ExportOnly:=(NOT Form2.Repo);
@@ -2707,7 +2749,15 @@ begin
   end;
   {$endif}
 
-  if (NOT PrepareRun(nil)) then exit;
+  success:=PrepareRun(nil);
+  if (NOT success) then exit;
+
+  success:=FPCupManager.CheckCurrentFPCInstall;
+  if (NOT success) then
+  begin
+    ShowInfo('No valid FPC install found. Please install FPC first.');
+    exit;
+  end;
 
   FPCupManager.CrossCPU_Target:=TCPU.cpuNone;
   if (radgrpCPU.ItemIndex<>-1) then
@@ -2816,46 +2866,26 @@ begin
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s='linux-musl' then FPCupManager.MUSL:=true;
+    if s='linux-legacy' then FPCupManager.LinuxLegacy:=true;
     if s='solaris-oi' then FPCupManager.SolarisOI:=true;
   end;
 
-  {$ifdef Linux}
-  if FPCupManager.MUSL then
+  //{$ifdef Linux}
+  //if FPCupManager.MUSL then
   begin
-
-    {$ifdef CPUX86_64}
-    if FPCupManager.CrossCPU_Target=TCPU.x86_64 then
+    if ((FPCupManager.CrossOS_Target=GetTOS(GetSourceOS)) AND (FPCupManager.CrossCPU_Target=GetTCPU(GetSourceCPU))) then
     begin
-      if Sender<>nil then Application.MessageBox(PChar('On Linux x86_64, you cannot cross towards another Linux x86_64.'), PChar('FPC limitation'), MB_ICONERROR);
+      if Sender<>nil then
+      begin
+        s:='On '+GetSourceOS+'-'+GetSourceCPU+', you cannot cross towards another '+GetSourceOS+'-'+GetSourceCPU+'.';
+        Application.MessageBox(PChar(s), PChar('FPC limitation'), MB_ICONERROR);
+      end;
       FPCupManager.CrossOS_Target:=TOS.osNone; // cleanup
       FPCupManager.CrossCPU_Target:=TCPU.cpuNone; // cleanup
       exit;
     end;
-    {$endif}
-
-    {$ifdef CPUAARCH64}
-    if FPCupManager.CrossCPU_Target=TCPU.aarch64 then
-    begin
-      if Sender<>nil then Application.MessageBox(PChar('On Linux aarch64, you cannot cross towards another Linux aarch64.'), PChar('FPC limitation'), MB_ICONERROR);
-      FPCupManager.CrossOS_Target:=TOS.osNone; // cleanup
-      FPCupManager.CrossCPU_Target:=TCPU.cpuNone; // cleanup
-      exit;
-    end;
-    {$endif}
-
-
-    {$ifdef CPUX86}
-    if FPCupManager.CrossCPU_Target=TCPU.i386 then
-    begin
-      if Sender<>nil then Application.MessageBox(PChar('On Linux i386, you cannot cross towards another Linux i386.'), PChar('FPC limitation'), MB_ICONERROR);
-      FPCupManager.CrossOS_Target:=TOS.osNone; // cleanup
-      FPCupManager.CrossCPU_Target:=TCPU.cpuNone; // cleanup
-      exit;
-    end;
-    {$endif}
-
   end;
-  {$endif}
+  //{$endif}
 
   if (FPCupManager.CrossCPU_Target=TCPU.cpuNone) then
   begin
@@ -2915,7 +2945,6 @@ var
   warning,success,verbose:boolean;
   IncludeLCL,ZipFile:boolean;
   aList: TStringList;
-  i:integer;
   {$IF (DEFINED(WINDOWS)) OR (DEFINED(LINUX))}
   frmSeq: TfrmSequencial;
   {$ENDIF}
@@ -3198,6 +3227,7 @@ begin
 
       s:='fpcupdeluxe: FPC cross-builder: Building compiler for '+GetOS(FPCupManager.CrossOS_Target);
       if FPCupManager.MUSL then s:=s+'-musl';
+      if FPCupManager.LinuxLegacy then s:=s+'-legacy';
       if FPCupManager.SolarisOI then s:=s+'-openindiana';
       s:=s+'-'+GetCPU(FPCupManager.CrossCPU_Target);
       sStatus:=s;
@@ -3386,7 +3416,7 @@ begin
                     {$endif}
                     begin
                       {$ifdef MSWINDOWS}
-                      UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                      UnZipper:=ConcatPaths([FPCupManager.MakeDirectory,'unrar','bin'])+PathSeparator+'unrar.exe';
                       {$else}
                       UnZipper := 'unrar';
                       {$endif}
@@ -3496,7 +3526,7 @@ begin
                     {$endif}
                     begin
                       {$ifdef MSWINDOWS}
-                      UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                      UnZipper:=ConcatPaths([FPCupManager.MakeDirectory,'unrar','bin'])+PathSeparator+'unrar.exe';
                       {$else}
                       UnZipper := 'unrar';
                       {$endif}
@@ -3583,6 +3613,7 @@ procedure TForm1.InstallClick(Sender: TObject);
 var
   s:string;
   FModuleList: TStringList;
+  success:boolean;
 begin
   s:='';
   if Sender=BitBtnFPCOnly then
@@ -3614,7 +3645,18 @@ begin
   DisEnable(Sender,False);
   try
 
-    if (NOT PrepareRun(Sender)) then exit;
+    success:=PrepareRun(nil);
+    if (NOT success) then exit;
+
+    if Sender=BitBtnLazarusOnly then
+    begin
+      success:=FPCupManager.CheckCurrentFPCInstall;
+      if (NOT success) then
+      begin
+        ShowMessage('No valid FPC install found. Please install FPC first.');
+        exit;
+      end;
+    end;
 
     s:='';
 
@@ -3668,7 +3710,7 @@ begin
 
       if Sender=BitBtnLazarusOnly then
       begin
-        {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
+        {$IF defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
         s:=_LAZARUSSIMPLE;
         {$ELSE}
         s:=_LAZARUS;
@@ -4373,7 +4415,7 @@ begin
       Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
       Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
 
-      Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
+      Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 
       Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
     finally
@@ -4656,7 +4698,14 @@ begin
     begin
       aLocalAlias:=installerUniversal.GetAlias(FPCBRANCHLOOKUPMAGIC,aLocalTarget);
       if (Length(aLocalAlias)=0) then aLocalAlias:=installerUniversal.GetAlias(FPCTAGLOOKUPMAGIC,aLocalTarget);
-      if (Length(aLocalAlias)=0) then aLocalTarget:='stable'+GITLABEXTENSION; // default to stable in case of lookup failure
+      if (Length(aLocalAlias)=0) then
+      begin
+        //  Store the value provided as a new tag
+        aLocalAlias:=Copy(aLocalTarget,1,Length(aLocalTarget)-Length(GITLABEXTENSION));
+        AddTag(aListBox,aLocalAlias);
+        // Default to stable in case of lookup failure
+        //aLocalTarget:='stable'+GITLABEXTENSION;
+      end;
       if (Pos('://',aLocalAlias)=0) then aLocalAlias:=FPCGITLABREPO;
     end
     else
@@ -4668,7 +4717,14 @@ begin
     begin
       aLocalAlias:=installerUniversal.GetAlias(LAZARUSBRANCHLOOKUPMAGIC,aLocalTarget);
       if (Length(aLocalAlias)=0) then aLocalAlias:=installerUniversal.GetAlias(LAZARUSTAGLOOKUPMAGIC,aLocalTarget);
-      if (Length(aLocalAlias)=0) then aLocalTarget:='stable'+GITLABEXTENSION; // default to stable in case of lookup failure
+      if (Length(aLocalAlias)=0) then
+      begin
+        //  Store the value provided as a new tag
+        aLocalAlias:=Copy(aLocalTarget,1,Length(aLocalTarget)-Length(GITLABEXTENSION));
+        AddTag(aListBox,aLocalAlias);
+        // Default to stable in case of lookup failure
+        //aLocalTarget:='stable'+GITLABEXTENSION;
+      end;
       if (Pos('://',aLocalAlias)=0) then aLocalAlias:=LAZARUSGITLABREPO;
     end
     else

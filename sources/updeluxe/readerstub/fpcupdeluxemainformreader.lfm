@@ -1027,6 +1027,7 @@ object Form1: TForm1
         Items.Strings = (
           'windows'
           'linux'
+          'linux-legacy'
           'android'
           'darwin'
           'freebsd'
@@ -1845,9 +1846,16 @@ object Form1: TForm1
         OnClick = LanguageClick
       end
     end
-    object MenuItem1: TMenuItem
+    object MHelp: TMenuItem
       Caption = 'About'
-      OnClick = MenuItem1Click
+      object MWiki: TMenuItem
+        Caption = 'Online Wiki'
+        OnClick = WikiClick
+      end
+      object MAbout: TMenuItem
+        Caption = 'About Up'
+        OnClick = AboutClick
+      end
     end
   end
   object ActionList1: TActionList
