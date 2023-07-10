@@ -1615,7 +1615,7 @@ var
   RenameNeeded   : boolean;
   {$ENDIF DARWIN}
   LazarusConfig  : TUpdateLazConfig;
-  LegacyList     : boolean;
+  ConfigSwitch   : boolean;
   PCPSnippet     : TStringList;
   aFileName      : string;
   s,s2           : string;
@@ -1716,8 +1716,8 @@ begin
           end
           else
           begin
-            LegacyList:=LazarusConfig.IsLegacyList(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/');
-            s:='EnvironmentOptions/Debugger/Configs/'+LazarusConfig.GetListItemXPath(EnvironmentConfig,'Config',0,LegacyList,True)+'/';
+            ConfigSwitch:=LazarusConfig.IsLegacyList(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/');
+            s:='EnvironmentOptions/Debugger/Configs/'+LazarusConfig.GetListItemXPath(EnvironmentConfig,'Config',0,ConfigSwitch,True)+'/';
             LazarusConfig.SetVariable(EnvironmentConfig, s+'ConfigName', 'Standard GDB');
             LazarusConfig.SetVariable(EnvironmentConfig, s+'ConfigClass', 'TGDBMIDebugger');
             LazarusConfig.SetVariable(EnvironmentConfig, s+'DebuggerFilename',GDBPath);
@@ -1788,7 +1788,7 @@ begin
 
       // Source dir in stock Lazarus on windows is something like
       // $(LazarusDir)fpc\$(FPCVer)\source\
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/FFPCSourceDirectory/Value', FFPCSourceDir);
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/FPCSourceDirectory/Value', FFPCSourceDir);
       // Add <lazarus>\docs\xml to fpdoc editor paths
       LazDocPathAdd(IncludeTrailingPathDelimiter(InstallDirectory) + 'docs'+DirectorySeparator+'xml', LazarusConfig);
 
@@ -1887,83 +1887,66 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/ObjectInspectorDlg/Visible/Value', 'True');
       {$endif}
 
-      j:=LazarusConfig.GetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Count',0);
-      if (j=0) then
+      for ConfigSwitch in boolean do
       begin
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Count', 2);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Width/Value', 266);
+        if (NOT ConfigSwitch) then s:='Desktop1';
+        if (ConfigSwitch) then s:='Desktop2';
 
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Version', 1);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Count', 14);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button1/Name', 'NewUnit');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button2/Name', 'NewForm');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button3/Name', '---------------');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button4/Name', 'Open');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button5/Name', 'Save');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button6/Name', 'SaveAll');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button7/Name', '---------------');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button8/Name', 'Toggle between Unit and Form');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button9/Name', '---------------');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button10/Name', 'Find in files');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button11/Name', 'General environment options');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button12/Name', '---------------');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button13/Name', 'Project Inspector');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Button14/Name', 'View project options');
+        j:=LazarusConfig.GetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Count',0);
+        if (j=0) then
+        begin
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Count', 2);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Width/Value', 14*19);
 
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Version', 1);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Count', 14);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button1/Name', 'NewUnit');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button2/Name', 'NewForm');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button3/Name', '---------------');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button4/Name', 'Open');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button5/Name', 'Save');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button6/Name', 'SaveAll');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button7/Name', '---------------');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button8/Name', 'Toggle between Unit and Form');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button9/Name', '---------------');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button10/Name', 'Find in files');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button11/Name', 'General environment options');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button12/Name', '---------------');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button13/Name', 'Project Inspector');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button14/Name', 'View project options');
 
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Version', 1);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Count', 11);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Break/Value', True);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button1/Name', 'View Units');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button2/Name', 'View Forms');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button3/Name', '---------------');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button4/Name', 'Change build mode');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button5/Name', 'Run without debugging');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button6/Name', 'Run program');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button7/Name', 'Pause program');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button8/Name', 'Stop program');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button9/Name', 'Step over');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button10/Name', 'Step into');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button11/Name', 'Step out');
-      end;
+          {$ifdef Dawrin}
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Width/Value', 15*19);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Count', 15);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button15/Name', 'View project source');
+          {$endif}
 
-      j:=LazarusConfig.GetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/Count',0);
-      if (j=0) then
-      begin
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/Count', 2);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/Width/Value', 266);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Count', 2);
+          //LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Width/Value', 11*19);
 
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Version', 1);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Count', 14);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button1/Name', 'NewUnit');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button2/Name', 'NewForm');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button3/Name', '---------------');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button4/Name', 'Open');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button5/Name', 'Save');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button6/Name', 'SaveAll');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button7/Name', '---------------');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button8/Name', 'Toggle between Unit and Form');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button9/Name', '---------------');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button10/Name', 'Find in files');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button11/Name', 'General environment options');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button12/Name', '---------------');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button13/Name', 'Project Inspector');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar1/Button14/Name', 'View project options');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Version', 1);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Count', 11);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Break/Value', True);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button1/Name', 'View Units');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button2/Name', 'View Forms');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button3/Name', '---------------');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button4/Name', 'Change build mode');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button5/Name', 'Run without debugging');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button6/Name', 'Run program');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button7/Name', 'Pause program');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button8/Name', 'Stop program');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button9/Name', 'Step over');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button10/Name', 'Step into');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button11/Name', 'Step out');
 
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Version', 1);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Count', 11);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Break/Value', True);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button1/Name', 'View Units');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button2/Name', 'View Forms');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button3/Name', '---------------');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button4/Name', 'Change build mode');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button5/Name', 'Run without debugging');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button6/Name', 'Run program');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button7/Name', 'Pause program');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button8/Name', 'Stop program');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button9/Name', 'Step over');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button10/Name', 'Step into');
-        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/ToolBar2/Button11/Name', 'Step out');
+          {$ifdef Dawrin}
+          //LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Width/Value', 13*19);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Count', 13);
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button12/Name', '---------------');
+          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button13/Name', 'Clean up and build');
+          {$endif}
+
+        end;
       end;
 
       // set defaults for pas2js

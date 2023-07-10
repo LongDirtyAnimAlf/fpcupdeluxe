@@ -286,6 +286,16 @@ var
   NativeCompiler,CrossCompiler:string;
   NativeAge,CrossAge:Longint;
 begin
+  {$ifdef Darwin}
+  if CrossInstaller.TargetCPU=GetTCPU(GetSourceCPU) then
+  begin
+    // On Darwin, native compiler and cross-compiler share the same name.
+    // And also are the same (in theory at least)
+    // So, always skip the compiler when building cross
+    exit(false);
+  end;
+  {$endif}
+
   result:=true;
   NativeCompiler:=GetFPCInBinDir;
   if (FileExists(NativeCompiler)) then
@@ -1599,9 +1609,9 @@ begin
               // So we need to rename the cross-compiler to accomodate for this
 
               // Get the correct name of the cross-compiler in install-directory
-              s1:=FPCCompilerBinPath+FPCCrossCompilerName;
+              s1:=FPCBinDir+DirectorySeparator+FPCCrossCompilerName;
               // Get the name of the cross-compiler in install-directory
-              s2:=FPCCompilerBinPath+CrossCompilerName;
+              s2:=FPCBinDir+DirectorySeparator+CrossCompilerName;
               // rename the cross-compiler.
               Infoln(infotext+'Rename cross-compiler ('+CrossCompilerName+') into '+FPCCrossCompilerName,etInfo);
               SysUtils.DeleteFile(s1);

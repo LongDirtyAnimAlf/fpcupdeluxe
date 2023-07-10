@@ -369,6 +369,8 @@ type
     FSourceDirectory:string;
     FFPCBinDir:string;
     FMakePath:string;
+    FExternalTool: TExternalTool;
+    FExternalToolResult: integer;
     {$IFDEF UNIX}
     FUseCompilerWrapper        : boolean;
     {$ENDIF}
@@ -471,8 +473,6 @@ type
     FWget: string;
     FUnrar: string;
     //FGit: string;
-    FExternalTool: TExternalTool;
-    FExternalToolResult: integer;
     FSolarisOI: boolean;
     FMUSL: boolean;
     FLinuxLegacy: boolean;
@@ -540,13 +540,18 @@ type
     // Get processor for termination of running processes
     property Processor: TExternalTool read FExternalTool;
     property ProcessorResult: integer read FExternalToolResult write FExternalToolResult;
-    // Source directory for installation (fpcdir, lazdir,... option)
-    property SourceDirectory: string read FSourceDirectory write SetSourceDirectory;
-    //Base directory for fpc(laz)up(deluxe) itself
+    //Base directory for this fpc(laz)up(deluxe) install
     property BaseDirectory: string  read FBaseDirectory write SetBaseDirectory;
-    // Final install directory
+    // Generic tmp directory for this installation
+    property TempDirectory: string write FTempDirectory;
+    // Directory where make (and the other binutils on Windows) is located
+    property MakeDirectory: string write SetMakeDirectory;
+    // Path where make (and the other binutils on Windows) is located
+    property MakePath: string read FMakePath;
+    // Generic source directory for installation (fpcdir, lazdir,... option)
+    property SourceDirectory: string read FSourceDirectory write SetSourceDirectory;
+    // Generic install directory
     property InstallDirectory: string read FInstallDirectory write SetInstallDirectory;
-    //Base directory for fpc(laz)up(deluxe) itself
     // FPC source directory
     property FPCSourceDir: string write SetFPCSourceDirectory;
     // FPC install directory
@@ -559,7 +564,6 @@ type
     property LazarusSourceDir: string write SetLazarusSourceDirectory;
     // Lazarus primary config path
     property LazarusPrimaryConfigPath:string write SetLazarusPrimaryConfigDirectory;
-    property TempDirectory: string write FTempDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
     property Compiler: string {read GetCompiler} write SetCompiler;
     // Compiler options passed on to make as OPT= or FPCOPT=
@@ -601,10 +605,6 @@ type
     // Are we installing Ultibo
     property Ultibo: boolean read FUltibo write FUltibo;
     property Log: TLogger write FLog;
-    // Directory where make (and the other binutils on Windows) is located
-    property MakeDirectory: string write SetMakeDirectory;
-    // Path where make (and the other binutils on Windows) is located
-    property MakePath: string read FMakePath;
     // Patch utility to use. Defaults to 'patch'
     property PatchCmd:string write FPatchCmd;
     // URL for download. HTTP, ftp or svn or git or hg

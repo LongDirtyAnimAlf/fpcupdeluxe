@@ -483,15 +483,14 @@ var
   GccDirectory:string;
   SearchLib,SearchDir:string;
   FinalSearchResultList:TLookupStringList;
-  Index:integer;
-  //sd:string;
+  sl:string;
 procedure CheckAndAddLibrary(aLib:string);
 var
   SearchResultList:TStringList;
   SearchResult:string;
   FileName:string;
-  i,j: integer;
-  sd,s:string;
+  i: integer;
+  sd,sr,s:string;
 begin
   SearchResultList:=TStringList.Create;
   try
@@ -521,15 +520,15 @@ begin
         RunCommand('readelf',['-d','-W',FileName],SearchResult,[]);
         SearchResultList.Text:=SearchResult;
         if (SearchResultList.Count=0) then continue;
-        for i:=0 to Pred(SearchResultList.Count) do
+        for sr in SearchResultList do
         begin
-          s:=SearchResultList.Strings[i];
+          s:=sr;
           if (Pos(MAGICNEEDED,s)>0) then
           begin
-            j:=Pos(MAGICSHARED,s);
-            if (j<>-1) then
+            i:=Pos(MAGICSHARED,s);
+            if (i<>-1) then
             begin
-              s:=Trim(Copy(s,j+Length(MAGICSHARED),MaxInt));
+              s:=Trim(Copy(s,i+Length(MAGICSHARED),MaxInt));
               if (FinalSearchResultList.Add(s)<>-1) then
               begin
                 s:=Copy(s,2,Length(s)-2);
@@ -600,10 +599,9 @@ begin
     FinalSearchResultList.Sort;
     LibraryList.Lines.Text:=FinalSearchResultList.Text;
 
-    for Index:=0 to Pred(FinalSearchResultList.Count) do
+    for sl in FinalSearchResultList do
     begin
-      SearchLib:=FinalSearchResultList.Strings[Index];
-      SearchLib:=Copy(SearchLib,2,Length(SearchLib)-2);
+      SearchLib:=Copy(sl,2,Length(sl)-2);
 
       {$ifdef Haiku}
       for SearchDir in HAIKUSEARCHDIRS do
