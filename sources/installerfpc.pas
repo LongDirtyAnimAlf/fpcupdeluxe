@@ -3732,7 +3732,7 @@ var
   begin
     result:=false;
     Processor.SetParamData('-d');
-    Processor.SetParamData('basepath='+InstallDirectory);
+    Processor.SetParamData('basepath='+FFPCInstallDir);
     Processor.SetParamData('-o');
     Processor.SetParamData('' + aFile + '');
     Infoln(infotext+'Creating '+{ExtractFileName}(aFile));
@@ -4149,14 +4149,10 @@ begin
             Processor.SetParamData('CompilerConfigDir={LocalRepository}'+'config'+DirectorySeparator);
 
             Processor.SetParamData('-d');
-            Processor.SetParamData('GlobalPath='+IncludeTrailingPathDelimiter(InstallDirectory));
+            Processor.SetParamData('GlobalPath='+IncludeTrailingPathDelimiter(FFPCInstallDir));
 
             Processor.SetParamData('-d');
-            Processor.SetParamData('GlobalPrefix='+InstallDirectory);
-            //Processor.SetParamData('LocalPrefix='+InstallDirectory);
-
-            //Processor.SetParamData('-d');
-            //Processor.SetParamData('UserPathSuffix=users/');
+            Processor.SetParamData('GlobalPrefix='+FFPCInstallDir);
 
             RunFPCMkCfgOption(s);
           end;
@@ -4183,12 +4179,22 @@ begin
             Processor.Process.Parameters.Clear;
             Processor.SetParamData('-4');
 
+            (*
             Processor.SetParamData('-d');
-            Processor.SetParamData('GlobalPrefix='+InstallDirectory);
-            //Processor.SetParamData('LocalPrefix='+InstallDirectory);
+            Processor.SetParamData('GlobalPrefix='+IncludeTrailingPathDelimiter(BaseDirectory));
+            Processor.SetParamData('-d');
+            Processor.SetParamData('LocalPrefix={LocalRepository}');
+            Processor.SetParamData('-d');
+            Processor.SetParamData('GlobalInstallDir={GlobalPrefix}'+'fpc'+DirectorySeparator);
+            Processor.SetParamData('-d');
+            Processor.SetParamData('LocalInstallDir={LocalPrefix}'+'fpc'+DirectorySeparator);
+            *)
 
             Processor.SetParamData('-d');
             Processor.SetParamData('fpcbin='+FCompiler);
+
+            Processor.SetParamData('-d');
+            Processor.SetParamData('fpcversion='+GetVersion);
 
             Processor.SetParamData('-d');
             Processor.SetParamData('fpctargetos='+GetSourceOS);
@@ -4210,10 +4216,10 @@ begin
       begin
         //create fpc.cfg
         Processor.Process.Parameters.Clear;
-        //Processor.SetParamData('-d');
-        //Processor.SetParamData('sharepath='+InstallDirectory);
         Processor.SetParamData('-d');
-        Processor.SetParamData('localbasepath='+ConcatPaths([InstallDirectory,PACKAGESLOCATION,'units',FPC_TARGET_MAGIC])+'/*');
+        Processor.SetParamData('sharepath='+FPCShareDir);
+        Processor.SetParamData('-d');
+        Processor.SetParamData('localbasepath='+ConcatPaths([FFPCInstallDir,PACKAGESLOCATION,'units',FPC_TARGET_MAGIC])+'/*');
         RunFPCMkCfgOption(s);
       end
       else
