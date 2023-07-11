@@ -4125,12 +4125,10 @@ begin
         end;
       end;
 
+      // Check if we have the correct executable to gemerate the config files
       s2:= ExtractFilePath(FPCMkCfg)+FPCPKGFILENAME+GetExeExt;
       if FileExists(s2) then
       begin
-
-        s2:=ConcatPaths([BaseDirectory,PACKAGESLOCATION]);
-        ForceDirectoriesSafe(s2);
 
         s2 := ConcatPaths([BaseDirectory,PACKAGESCONFIGDIR]);
         ForceDirectoriesSafe(s2);
@@ -4148,24 +4146,17 @@ begin
             Processor.SetParamData('LocalRepository='+ConcatPaths([BaseDirectory,PACKAGESLOCATION])+DirectorySeparator);
 
             Processor.SetParamData('-d');
-            Processor.SetParamData('CompilerConfigDir='+IncludeTrailingPathDelimiter(s2));
+            Processor.SetParamData('CompilerConfigDir={LocalRepository}'+'config'+DirectorySeparator);
 
             Processor.SetParamData('-d');
-            {$ifdef MSWINDOWS}
             Processor.SetParamData('GlobalPath='+IncludeTrailingPathDelimiter(InstallDirectory));
-            {$ELSE}
-            Processor.SetParamData('GlobalPath='+ConcatPaths([InstallDirectory,'lib','fpc'])+DirectorySeparator+'{CompilerVersion}'+DirectorySeparator);
-            {$ENDIF}
-
-            //FLocalInstallDir:='{LocalPrefix}'+'lib'+PathDelim+'fpc'+PathDelim+'{CompilerVersion}'+PathDelim;
-            //FGlobalInstallDir:='{GlobalPrefix}'+'lib'+PathDelim+'fpc'+PathDelim+'{CompilerVersion}'+PathDelim;
 
             Processor.SetParamData('-d');
             Processor.SetParamData('GlobalPrefix='+InstallDirectory);
             //Processor.SetParamData('LocalPrefix='+InstallDirectory);
 
-            Processor.SetParamData('-d');
-            Processor.SetParamData('UserPathSuffix=users');
+            //Processor.SetParamData('-d');
+            //Processor.SetParamData('UserPathSuffix=users/');
 
             RunFPCMkCfgOption(s);
           end;
@@ -4174,6 +4165,14 @@ begin
         begin
           Infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s));
         end;
+
+        // Make packages directory
+        s2:=ConcatPaths([BaseDirectory,PACKAGESLOCATION]);
+        ForceDirectoriesSafe(s2);
+
+        //Make config directory for compiler defaults
+        s2:=ConcatPaths([BaseDirectory,PACKAGESLOCATION,'config']);
+        ForceDirectoriesSafe(s2);
 
         s := IncludeTrailingPathDelimiter(s2)+FPCPKGCOMPILERTEMPLATE;
         if (NOT FileExists(s)) then

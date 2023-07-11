@@ -1915,14 +1915,11 @@ begin
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button13/Name', 'Project Inspector');
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button14/Name', 'View project options');
 
-          {$ifdef Dawrin}
+          {$ifdef Darwin}
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Width/Value', 15*19);
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Count', 15);
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar1/Button15/Name', 'View project source');
           {$endif}
-
-          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Count', 2);
-          //LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Width/Value', 11*19);
 
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Version', 1);
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Count', 11);
@@ -1939,8 +1936,7 @@ begin
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button10/Name', 'Step into');
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button11/Name', 'Step out');
 
-          {$ifdef Dawrin}
-          //LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/Width/Value', 13*19);
+          {$ifdef Darwin}
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Count', 13);
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button12/Name', '---------------');
           LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/'+s+'/IDECoolBarOptions/ToolBar2/Button13/Name', 'Clean up and build');
