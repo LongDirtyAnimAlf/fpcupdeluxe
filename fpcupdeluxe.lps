@@ -4,14 +4,14 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linux64,linuxaarch64,linuxaarch64QT5,linuxaarch64QT5zip,linuxarm,linuxarmQT5,linuxarmQT5zip,linuxarmv6,linuxi386QT5,linuxx64QT5,linuxx64QT5zip,linuxppc64,freebsdi386,freebsdx64,solarisx64,dragonflyx64,netbsdx64,netbsdi386"/>
-    <BuildModes Active="Default"/>
+    <BuildModes Active="linuxx64QT5zip"/>
     <Units Count="14">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
-        <TopLine Value="179"/>
-        <CursorPos X="38" Y="204"/>
+        <TopLine Value="198"/>
+        <CursorPos Y="227"/>
         <UsageCount Value="192"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -34,7 +34,8 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="5"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="192"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -85,8 +86,7 @@
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit9>
@@ -109,23 +109,21 @@
       </Unit11>
       <Unit12>
         <Filename Value="sources\fpcuputil.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="4296"/>
         <CursorPos Y="4321"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit12>
       <Unit13>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\rtl-objpas\src\inc\strutils.pp"/>
         <UnitName Value="StrUtils"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="160"/>
         <CursorPos X="10" Y="175"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit13>
     </Units>
-    <JumpHistory Count="17" HistoryIndex="16">
+    <JumpHistory Count="16" HistoryIndex="15">
       <Position1>
         <Filename Value="sources\updeluxe\extrasettings.pas"/>
         <Caret Line="581" Column="41" TopLine="571"/>
@@ -185,13 +183,8 @@
         <Caret Line="151" Column="47" TopLine="136"/>
       </Position15>
       <Position16>
-        <Filename Value="sources\fpcuputil.pas"/>
-        <Caret Line="4416" Column="16" TopLine="4404"/>
+        <Filename Value="sources\revision.inc"/>
       </Position16>
-      <Position17>
-        <Filename Value="sources\fpcuputil.pas"/>
-        <Caret Line="4427" Column="38" TopLine="4404"/>
-      </Position17>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

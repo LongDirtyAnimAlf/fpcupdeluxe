@@ -39,28 +39,33 @@ uses
   StrUtils,process,FileUtil,LazFileUtils,LookupStringList;
 
 const
-  UNIXSEARCHDIRS : array [0..5] of string = (
+  UNIXSEARCHDIRS : array [0..6] of string = (
   '/lib',
   '/usr/lib',
   '/usr/local/lib',
   {$ifdef CPUX86}
+  '/lib/i686-linux-gnu',
   '/usr/lib/i686-linux-gnu',
   '/usr/local/lib/i686-linux-gnu',
   {$endif CPUX32}
   {$ifdef CPUX86_64}
+  '/lib/x86_64-linux-gnu',
   '/usr/lib/x86_64-linux-gnu',
   '/usr/local/lib/x86_64-linux-gnu',
   {$endif CPUX86_64}
   {$ifdef CPUARM}
   {$ifdef CPUARMHF}
+  '/lib/arm-linux-gnueabihf',
   '/usr/lib/arm-linux-gnueabihf',
   '/usr/local/lib/arm-linux-gnueabihf',
   {$else}
+  '/lib/arm-linux-gnueabi',
   '/usr/lib/arm-linux-gnueabi',
   '/usr/local/lib/arm-linux-gnueabi',
   {$endif CPUARMHF}
   {$endif CPUARM}
   {$ifdef CPUAARCH64}
+  '/lib/aarch64-linux-gnu',
   '/usr/lib/aarch64-linux-gnu',
   '/usr/local/lib/aarch64-linux-gnu',
   {$endif CPUAARCH64}
@@ -81,7 +86,7 @@ const
   );
   {$endif}
 
-const FPCLIBS : array [0..39] of string = (
+const FPCLIBS : array [0..42] of string = (
   'crtbegin.o',
   'crtbeginS.o',
   'crtend.o',
@@ -107,6 +112,8 @@ const FPCLIBS : array [0..39] of string = (
   'libgthread-2.0.so.0',
   'libgmodule-2.0.so.0',
   'libm.so.6',
+  'libmvec_nonshared.a',
+  'libmvec.so.1',
   'libnsl.so.1',
   'libnss_compat.so.2',
   'libnss_dns6.so.2',
@@ -117,6 +124,7 @@ const FPCLIBS : array [0..39] of string = (
   'libnss_nisplus.so.2',
   'libnss_nis.so.2',
   'libpthread.so.0',
+  'libpthread_nonshared.a',
   'libresolv.so.2',
   'librt.so.1',
   'libthread_db.so.1',
@@ -171,30 +179,22 @@ const LAZLINKLIBS : array [0..6] of string = (
   'libatk-1.0.so'
 );
 
-(*
-const QT5LIBS : array [0..6] of string = (
+const QTLIBS : array [0..14] of string = (
+  'libQt5Pas.so.1',
   'libQt5Core.so.5',
   'libQt5GUI.so.5',
   'libQt5Network.so.5',
   'libQt5Pas.so.1',
   'libQt5PrintSupport.so.5',
   'libQt5Widgets.so.5',
-  'libQt5X11Extras.so.5'
-);
-
-const QT6LIBS : array [0..5] of string = (
+  'libQt5X11Extras.so.5',
+  'libQt6Pas.so.6',
   'libQt6Core.so.6',
+  'libQt6DBus.so.6',
   'libQt6GUI.so.6',
-  'libQt6Network.so.6',
-  'libQt6Pas.so.1',
+  'libQt6Pas.so.6',
   'libQt6PrintSupport.so.6',
   'libQt6Widgets.so.6'
-);
-*)
-
-const QTLIBS : array [0..1] of string = (
-  'libQt5Pas.so.1',
-  'libQt6Pas.so.6'
 );
 
 const QTLINKLIBS : array [0..1] of string = (
@@ -620,27 +620,6 @@ begin
   result:=t;
 end;
 
-function GetFreeBSDVersion:byte;
-var
-  s:string;
-  i,j:integer;
-begin
-  result:=0;
-  s:=GetDistro('VERSION');
-  if Length(s)>0 then
-  begin
-    i:=1;
-    while (Length(s)>=i) AND (NOT (s[i] in ['0'..'9'])) do Inc(i);
-    j:=0;
-    while (Length(s)>=i) AND (s[i] in ['0'..'9']) do
-    begin
-      j:=j*10+Ord(s[i])-$30;
-      Inc(i);
-    end;
-    result:=j;
-  end;
-end;
-
 { TForm1 }
 
 procedure TForm1.btnStartScanClick(Sender: TObject);
@@ -680,6 +659,12 @@ begin
         FinalSearchResultList.Add('['+ExtractFileName(FileName)+']');
         // libc.so might be a text-file, so skip analysis
         if ExtractFileName(FileName)='libc.so' then
+        begin
+          FileName:='';
+          break;
+        end;
+        // Skip static files from analysis
+        if ExtractFileExt(FileName)='.a' then
         begin
           FileName:='';
           break;
