@@ -36,7 +36,7 @@ implementation
 {$R *.lfm}
 
 uses
-  process,FileUtil,LazFileUtils,LookupStringList;
+  StrUtils,process,FileUtil,LazFileUtils,LookupStringList;
 
 const
   UNIXSEARCHDIRS : array [0..5] of string = (
@@ -171,6 +171,7 @@ const LAZLINKLIBS : array [0..6] of string = (
   'libatk-1.0.so'
 );
 
+(*
 const QT5LIBS : array [0..6] of string = (
   'libQt5Core.so.5',
   'libQt5GUI.so.5',
@@ -189,9 +190,32 @@ const QT6LIBS : array [0..5] of string = (
   'libQt6PrintSupport.so.6',
   'libQt6Widgets.so.6'
 );
+*)
 
+const QTLIBS : array [0..1] of string = (
+  'libQt5Pas.so.1',
+  'libQt6Pas.so.6'
+);
 
-{ TForm1 }
+const QTLINKLIBS : array [0..1] of string = (
+  'libQt5Pas.so',
+  'libQt6Pas.so'
+);
+
+function GetSourceCPU:string;
+begin
+  result:=lowercase({$i %FPCTARGETCPU%});
+end;
+
+function GetSourceOS:string;
+begin
+  result:=lowercase({$i %FPCTARGETOS%});
+end;
+
+function GetSourceCPUOS:string;
+begin
+  result:=GetSourceCPU+'-'+GetSourceOS;
+end;
 
 function GetStartupObjects:string;
 const
@@ -469,10 +493,155 @@ begin
       end;
     end;
   end;
-
 end;
 
+function GetDistro(const aID:string=''):string;
+var
+  {$if defined(Darwin) OR defined(MSWindows)}
+  Major,Minor,Build,Patch: Integer;
+  {$endif}
+  i,j: Integer;
+  AllOutput : TStringList;
+  s,t:ansistring;
+  success:boolean;
+begin
+  t:='unknown';
+  success:=false;
+  {$ifdef Unix}
+    {$ifndef Darwin}
+      s:='';
+      if RunCommand('cat',['/etc/os-release'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
+      begin
+        if Pos('No such file or directory',s)=0 then
+        begin
+          AllOutput:=TStringList.Create;
+          try
+            AllOutput.Text:=s;
+            s:='';
+            if Length(aID)>0 then
+            begin
+              s:=AllOutput.Values[aID];
+            end
+            else
+            begin
+              s:=AllOutput.Values['NAME'];
+              if Length(s)=0 then s := AllOutput.Values['ID_LIKE'];
+              if Length(s)=0 then s := AllOutput.Values['DISTRIB_ID'];
+              if Length(s)=0 then s := AllOutput.Values['ID'];
+            end;
+            success:=(Length(s)>0);
+          finally
+            AllOutput.Free;
+          end;
+        end;
+      end;
+      if (NOT success) then
+      begin
+        s:='';
+        if RunCommand('cat',['/etc/system-release'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
+        begin
+          if Pos('No such file or directory',s)=0 then
+          begin
+            AllOutput:=TStringList.Create;
+            try
+              AllOutput.Text:=s;
+              s:='';
+              s:=AllOutput.Values['NAME'];
+              if Length(s)=0 then s := AllOutput.Values['ID_LIKE'];
+              if Length(s)=0 then s := AllOutput.Values['DISTRIB_ID'];
+              if Length(s)=0 then s := AllOutput.Values['ID'];
+              success:=(Length(s)>0);
+            finally
+              AllOutput.Free;
+            end;
+          end;
+        end;
+      end;
+      if (NOT success) then
+      begin
+        s:='';
+        if RunCommand('hostnamectl',[],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
+        begin
+          AllOutput:=TStringList.Create;
+          try
+            AllOutput.NameValueSeparator:=':';
+            AllOutput.Delimiter:=#10;
+            AllOutput.StrictDelimiter:=true;
+            AllOutput.DelimitedText:=s;
+            s:='';
+            for i:=0 to  AllOutput.Count-1 do
+            begin
+              j:=Pos('Operating System',AllOutput.Strings[i]);
+              if j>0 then s:=s+Trim(AllOutput.Values[AllOutput.Names[i]]);
+              j:=Pos('Kernel',AllOutput.Strings[i]);
+              if j>0 then s:=s+' '+Trim(AllOutput.Values[AllOutput.Names[i]]);
+            end;
+            success:=(Length(s)>0);
+          finally
+            AllOutput.Free;
+          end;
+        end;
+      end;
+      if (NOT success) then t:='unknown' else
+      begin
+        s:=DelChars(s,'"');
+        t:=Trim(s);
+      end;
+      {$ifdef BSD}
+      if (t='unknown') then
+      begin
+        if RunCommand('uname',['-r'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF})
+           then t := GetSourceOS+' '+lowercase(Trim(s));
+      end;
+      {$endif}
 
+      if (t='unknown') then t := GetSourceOS;
+
+      if (NOT success) then if RunCommand('uname',['-r'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF})
+         then t := t+' '+lowercase(Trim(s));
+
+    {$else Darwin}
+      if RunCommand('sw_vers',['-productName'], s) then
+      begin
+        if Length(s)>0 then t:=Trim(s);
+      end;
+      if Length(s)=0 then t:=GetSourceOS;
+      if RunCommand('sw_vers',['-productVersion'], s) then
+      begin
+        if Length(s)>0 then
+        begin
+          VersionFromString(s,Major,Minor,Build,Patch);
+          t:=t+' '+InttoStr(Major)+'.'+InttoStr(Minor)+'.'+InttoStr(Build);
+        end;
+      end;
+    {$endif Darwin}
+  {$endif Unix}
+
+  result:=t;
+end;
+
+function GetFreeBSDVersion:byte;
+var
+  s:string;
+  i,j:integer;
+begin
+  result:=0;
+  s:=GetDistro('VERSION');
+  if Length(s)>0 then
+  begin
+    i:=1;
+    while (Length(s)>=i) AND (NOT (s[i] in ['0'..'9'])) do Inc(i);
+    j:=0;
+    while (Length(s)>=i) AND (s[i] in ['0'..'9']) do
+    begin
+      j:=j*10+Ord(s[i])-$30;
+      Inc(i);
+    end;
+    result:=j;
+  end;
+end;
+
+{ TForm1 }
 
 procedure TForm1.btnStartScanClick(Sender: TObject);
 const
@@ -588,11 +757,11 @@ begin
     begin
       CheckAndAddLibrary(SearchLib);
     end;
-    for SearchLib in QT5LIBS do
+    for SearchLib in QTLIBS do
     begin
       CheckAndAddLibrary(SearchLib);
     end;
-    for SearchLib in QT6LIBS do
+    for SearchLib in QTLINKLIBS do
     begin
       CheckAndAddLibrary(SearchLib);
     end;
@@ -643,8 +812,18 @@ procedure TForm1.btnGetFilesClick(Sender: TObject);
 var
   Index:integer;
   FileName,TargetFile,LinkFile:string;
+  aList:TStringList;
 begin
   ForceDirectories(Application.Location+'libs');
+
+  aList:=TStringList.Create;
+  try
+    aList.Add('These libraries were sourced from: '+GetDistro+' version '+GetDistro('VERSION'));
+    aList.SaveToFile(Application.Location+'libs'+DirectorySeparator+'actual_library_version_fpcup.txt');
+  finally
+    aList.Free;
+  end;
+
   for Index:=Pred(LibraryLocationList.Lines.Count) downto 0 do
   begin
     FileName:=LibraryLocationList.Lines.Strings[Index];
@@ -658,6 +837,14 @@ begin
       end;
     end;
     for LinkFile in LAZLINKLIBS do
+    begin
+      if (Pos(LinkFile,TargetFile)=1) then
+      begin
+        CopyFile(FileName,Application.Location+'libs'+DirectorySeparator+LinkFile);
+        break;
+      end;
+    end;
+    for LinkFile in QTLINKLIBS do
     begin
       if (Pos(LinkFile,TargetFile)=1) then
       begin

@@ -28,3 +28,8 @@ sudo apt-get install -y qtbase5-dev
 sudo apt-get install -y qtbase5-dev-tools
 sudo apt-get install -y qtdeclarative5-dev
 sudo apt-get install -y libqt5x11extras5-dev
+
+sudo apt-get install -y qt6-base-dev
+sudo apt-get install -y qt6-base-dev-tools
+
+
