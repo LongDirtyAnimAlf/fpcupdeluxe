@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="12"/>
-    <ManyBuildModesSelection Value="darwinarm64cocoa,linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,freebsdx64,linuxmuslx64,linuxx64QT6,linuxx64QT6zip"/>
+    <ManyBuildModesSelection Value="darwinarm64cocoa,linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,freebsdx64,linuxx64QT6,linuxx64QT6zip"/>
     <Units Count="16">
       <Unit0>
         <Filename Value="up.lpr"/>

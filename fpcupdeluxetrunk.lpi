@@ -37,7 +37,7 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="12">
+    <BuildModes Count="11">
       <Item1 Name="default" Default="True"/>
       <Item2 Name="debug">
         <CompilerOptions>
@@ -256,38 +256,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Linking>
         </CompilerOptions>
       </Item8>
-      <Item9 Name="linuxmuslx64">
-        <MacroValues Count="1">
-          <Macro2 Name="LCLWidgetType" Value="gtk2"/>
-        </MacroValues>
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-musl"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxetrunk\$(TargetCPU)-$(TargetOS)-musl"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="linux"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item9>
-      <Item10 Name="win64arm64">
+      <Item9 Name="win64arm64">
         <MacroValues Count="1">
           <Macro3 Name="LCLWidgetType" Value="win32"/>
         </MacroValues>
@@ -328,8 +297,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-dDisableRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item10>
-      <Item11 Name="linuxx64QT6">
+      </Item9>
+      <Item10 Name="linuxx64QT6">
         <MacroValues Count="1">
           <Macro4 Name="LCLWidgetType" Value="qt6"/>
         </MacroValues>
@@ -362,8 +331,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item11>
-      <Item12 Name="linuxx64QT6zip">
+      </Item10>
+      <Item11 Name="linuxx64QT6zip">
         <MacroValues Count="1">
           <Macro4 Name="LCLWidgetType" Value="qt6"/>
         </MacroValues>
@@ -396,10 +365,10 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item12>
+      </Item11>
       <SharedMatrixOptions Count="4">
         <Item1 ID="322994045052" Modes="darwinarm64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
-        <Item2 ID="369111111759" Modes="linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,freebsdx64,linuxmuslx64" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
+        <Item2 ID="369111111759" Modes="linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,freebsdx64" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
         <Item3 ID="636969686655" Modes="win64arm64" Type="IDEMacro" MacroName="LCLWidgetType" Value="win32"/>
         <Item4 ID="457001635124" Modes="linuxx64QT6,linuxx64QT6zip" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt6"/>
       </SharedMatrixOptions>
