@@ -49,7 +49,7 @@ type
   private
     procedure Init;
   protected
-    procedure CheckOut(UseForce:boolean=false); override;
+    procedure CheckOut({%H-}UseForce:boolean=false); override;
     function  GetProxyCommand: string;
     function  GetLocalRevision: string; override;
     function  GetRepoExecutable: string; override;

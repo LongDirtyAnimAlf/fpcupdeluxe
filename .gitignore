@@ -85,3 +85,4 @@ lib/
 lib*/
 !/fpcuptools/*
 !/libQt5Pas*
+!/libQt6Pas*
