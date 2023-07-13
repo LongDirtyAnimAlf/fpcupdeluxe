@@ -39,7 +39,7 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="30">
+    <BuildModes Count="31">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="DefaultQT">
         <MacroValues Count="1">
@@ -291,7 +291,72 @@
           </Linking>
         </CompilerOptions>
       </Item8>
-      <Item9 Name="linux64">
+      <Item9 Name="linuxi386QT5">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="qt5"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+          </Other>
+        </CompilerOptions>
+      </Item9>
+      <Item10 Name="linuxi386QT5zip">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\linuxqt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+          </Other>
+        </CompilerOptions>
+      </Item10>
+      <Item11 Name="linux64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -318,8 +383,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item9>
-      <Item10 Name="linuxaarch64">
+      </Item11>
+      <Item12 Name="linuxaarch64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -344,104 +409,9 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
-        </CompilerOptions>
-      </Item10>
-      <Item11 Name="linuxaarch64QT5">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="qt5"/>
-        </MacroValues>
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="aarch64"/>
-            <TargetOS Value="linux"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
-          </Other>
-        </CompilerOptions>
-      </Item11>
-      <Item12 Name="linuxaarch64QT5zip">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="qt5"/>
-        </MacroValues>
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\linuxqt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="aarch64"/>
-            <TargetOS Value="linux"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
-          </Other>
         </CompilerOptions>
       </Item12>
-      <Item13 Name="linuxarm">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="arm"/>
-            <TargetOS Value="linux"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item13>
-      <Item14 Name="linuxarmQT5">
+      <Item13 Name="linuxaarch64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -457,7 +427,7 @@
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
-            <TargetCPU Value="arm"/>
+            <TargetCPU Value="aarch64"/>
             <TargetOS Value="linux"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
@@ -466,13 +436,15 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+          </Other>
         </CompilerOptions>
-      </Item14>
-      <Item15 Name="linuxarmQT5zip">
+      </Item13>
+      <Item14 Name="linuxaarch64QT5zip">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -486,6 +458,37 @@
             <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="aarch64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+          </Other>
+        </CompilerOptions>
+      </Item14>
+      <Item15 Name="linuxarm">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="arm"/>
@@ -503,7 +506,69 @@
           </Linking>
         </CompilerOptions>
       </Item15>
-      <Item16 Name="linuxarmv6">
+      <Item16 Name="linuxarmQT5">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="qt5"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="arm"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item16>
+      <Item17 Name="linuxarmQT5zip">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="qt5"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\linuxqt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="arm"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item17>
+      <Item18 Name="linuxarmv6">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -534,41 +599,8 @@
             <CustomOptions Value="-CpARMV6"/>
           </Other>
         </CompilerOptions>
-      </Item16>
-      <Item17 Name="linuxi386QT5">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="qt5"/>
-        </MacroValues>
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxe\$(TargetCPU)-$(TargetOS)-qt5"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="i386"/>
-            <TargetOS Value="linux"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
-          </Other>
-        </CompilerOptions>
-      </Item17>
-      <Item18 Name="linuxx64QT5">
+      </Item18>
+      <Item19 Name="linuxx64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -601,8 +633,8 @@
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item18>
-      <Item19 Name="linuxx64QT5zip">
+      </Item19>
+      <Item20 Name="linuxx64QT5zip">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -635,8 +667,8 @@
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item19>
-      <Item20 Name="linuxppc64">
+      </Item20>
+      <Item21 Name="linuxppc64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -663,8 +695,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item20>
-      <Item21 Name="freebsdi386">
+      </Item21>
+      <Item22 Name="freebsdi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -691,8 +723,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item21>
-      <Item22 Name="freebsdx64">
+      </Item22>
+      <Item23 Name="freebsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -719,8 +751,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item22>
-      <Item23 Name="freebsdaarch64">
+      </Item23>
+      <Item24 Name="freebsdaarch64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -747,8 +779,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item23>
-      <Item24 Name="solarisx64">
+      </Item24>
+      <Item25 Name="solarisx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -775,8 +807,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item24>
-      <Item25 Name="dragonflyx64">
+      </Item25>
+      <Item26 Name="dragonflyx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -806,8 +838,8 @@
             <CustomOptions Value="-dDisableRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item25>
-      <Item26 Name="linux64gtk3">
+      </Item26>
+      <Item27 Name="linux64gtk3">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
@@ -837,8 +869,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item26>
-      <Item27 Name="solarisxi386">
+      </Item27>
+      <Item28 Name="solarisxi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -865,8 +897,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item27>
-      <Item28 Name="openbsdx64">
+      </Item28>
+      <Item29 Name="openbsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -893,8 +925,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item28>
-      <Item29 Name="netbsdx64">
+      </Item29>
+      <Item30 Name="netbsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -921,8 +953,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item29>
-      <Item30 Name="netbsdi386">
+      </Item30>
+      <Item31 Name="netbsdi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -949,7 +981,7 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item30>
+      </Item31>
       <SharedMatrixOptions Count="2">
         <Item1 ID="784204643275" Modes="DefaultQT,linuxx64QT5,linuxi386QT5,linuxaarch64QT5,linuxarmQT5,linuxaarch64QT5zip,linuxarmQT5zip,linuxx64QT5zip" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item2 ID="591091371099" Modes="linux64gtk3" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>

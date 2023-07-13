@@ -23,6 +23,12 @@ sudo apt-get install -y libx11-dev
 sudo apt-get install -y libxft2
 sudo apt-get install -y libfontconfig1
 
+sudo apt-get install -y libsdl2-dev
+sudo apt-get install -y libsdl2-image-dev
+sudo apt-get install -y libsdl2-mixer-dev
+sudo apt-get install -y libsdl2-net-dev
+sudo apt-get install -y libsdl2-ttf-dev
+
 sudo apt-get install -y qt5-qmake
 sudo apt-get install -y qtbase5-dev
 sudo apt-get install -y qtbase5-dev-tools

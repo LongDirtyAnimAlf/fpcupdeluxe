@@ -14,6 +14,7 @@ type
   TForm1 = class(TForm)
     btnStartScan: TButton;
     btnGetFiles: TButton;
+    chkQT: TCheckBox;
     LibraryList: TMemo;
     LibraryNotFoundList: TMemo;
     LibraryLocationList: TMemo;
@@ -39,15 +40,22 @@ uses
   StrUtils,process,FileUtil,LazFileUtils,LookupStringList;
 
 const
+  {$ifdef CPUX86}
+  UNIXSEARCHDIRS : array [0..9] of string = (
+  {$else}
   UNIXSEARCHDIRS : array [0..6] of string = (
+  {$endif CPUX86}
   '/lib',
   '/usr/lib',
   '/usr/local/lib',
   {$ifdef CPUX86}
+  '/lib/i386-linux-gnu',
+  '/usr/lib/i386-linux-gnu',
+  '/usr/local/lib/i386-linux-gnu',
   '/lib/i686-linux-gnu',
   '/usr/lib/i686-linux-gnu',
   '/usr/local/lib/i686-linux-gnu',
-  {$endif CPUX32}
+  {$endif CPUX86}
   {$ifdef CPUX86_64}
   '/lib/x86_64-linux-gnu',
   '/usr/lib/x86_64-linux-gnu',
@@ -86,7 +94,35 @@ const
   );
   {$endif}
 
-const FPCLIBS : array [0..42] of string = (
+  {$ifdef CPUX86}
+  DYNLINKV1='ld-linux.so.1';
+  DYNLINKV2='ld-linux.so.2';
+  DYNLINKV3='ld-linux.so.3';
+  {$endif CPUX86}
+  {$ifdef CPUX86_64}
+  DYNLINKV1='ld-linux-x86-64.so.1';
+  DYNLINKV2='ld-linux-x86-64.so.2';
+  DYNLINKV3='ld-linux-x86-64.so.3';
+  {$endif CPUX86_64}
+  {$ifdef CPUARM}
+    {$ifdef CPUARMHF}
+    DYNLINKV1='ld-linux-armhf.so.1';
+    DYNLINKV2='ld-linux-armhf.so.2';
+    DYNLINKV3='ld-linux-armhf.so.3';
+    {$else}
+    DYNLINKV1='ld-linux.so.1';
+    DYNLINKV2='ld-linux.so.2';
+    DYNLINKV3='ld-linux.so.3';
+    {$endif CPUARMHF}
+  {$endif CPUARM}
+  {$ifdef CPUAARCH64}
+  DYNLINKV1='ld-linux-aarch64.so.1';
+  DYNLINKV2='ld-linux-aarch64.so.2';
+  DYNLINKV3='ld-linux-aarch64.so.3';
+  {$endif CPUAARCH64}
+
+
+const FPCLIBS : array [0..45] of string = (
   'crtbegin.o',
   'crtbeginS.o',
   'crtend.o',
@@ -97,15 +133,18 @@ const FPCLIBS : array [0..42] of string = (
   'Mcrt1.o',
   'Scrt1.o',
   'grcrt1.o',
-  'ld-linux.so.2',
-  'ld-linux-x86-64.so.2',
+  DYNLINKV1,
+  DYNLINKV2,
+  DYNLINKV3,
   'libanl.so.1',
   'libcrypt.so.1',
   'libc.so.6',
+  'libc.so.7',
   'libc_nonshared.a',
   'libgcc.a',
   'libdb1.so.2',
   'libdb2.so.3',
+  'libdl.so.1',
   'libdl.so.2',
   'libglib-2.0.so.0',
   'libgobject-2.0.so.0',
@@ -146,7 +185,47 @@ const FPCLINKLIBS : array [0..10] of string = (
   'libz.so'
 );
 
-const LAZLIBS : array [0..19] of string = (
+const FPCEXTRALIBS : array [0..36] of string = (
+  'liba52.so',
+  'libaspell.so',
+  'libdts.so',
+  'libfreetype.so',
+  'libgmp.so',
+  'libgtkhtml-2.so',
+  'libglade-2.0.so',
+  'libfontconfig.so',
+  'libnettle.so',
+  'libhogweed.so',
+  'librsvg-2.so',
+  'libsee.so',
+  'libusb-1.0.so',
+  'libmad.so',
+  'libmatroska.so',
+  'libmodplug.so',
+  'libogg.so',
+  'libvorbis.so',
+  'libvorbisfile.so',
+  'libvorbisenc.so',
+  'libopenal.so',
+  'libOpenCL.so',
+  'libSDL2.so',
+  'libSDL2_image.so',
+  'libSDL2_mixer.so',
+  'libSDL2_net.so',
+  'libSDL2_ttf.so',
+  'libsmpeg.so',
+  'libwasmtime.so',
+  'libmysqlclient.so',
+  'libmysqlclient.so.21',
+  'libmysqlclient.so.20',
+  'libmysqlclient.so.18',
+  'libmysqlclient.so.16',
+  'libmysqlclient.so.15',
+  'libmysqlclient.so.14',
+  'libmysqlclient.so.12'
+);
+
+const LAZLIBS : array [0..18] of string = (
   'libgdk-x11-2.0.so.0',
   'libgtk-x11-2.0.so.0',
   'libX11.so.6',
@@ -162,7 +241,6 @@ const LAZLIBS : array [0..19] of string = (
   'libicui18n.so',
   'libgtk-3.so.0',
   'libsqlite3.so.0',
-  'libusb-1.0.so.0',
   'libGL.so',
   'libGLU.so',
   'libEGL.so',
@@ -734,6 +812,10 @@ begin
     begin
       CheckAndAddLibrary(SearchLib);
     end;
+    for SearchLib in FPCEXTRALIBS do
+    begin
+      CheckAndAddLibrary(SearchLib);
+    end;
     for SearchLib in LAZLIBS do
     begin
       CheckAndAddLibrary(SearchLib);
@@ -742,13 +824,16 @@ begin
     begin
       CheckAndAddLibrary(SearchLib);
     end;
-    for SearchLib in QTLIBS do
+    if chkQT.Checked then
     begin
-      CheckAndAddLibrary(SearchLib);
-    end;
-    for SearchLib in QTLINKLIBS do
-    begin
-      CheckAndAddLibrary(SearchLib);
+      for SearchLib in QTLIBS do
+      begin
+        CheckAndAddLibrary(SearchLib);
+      end;
+      for SearchLib in QTLINKLIBS do
+      begin
+        CheckAndAddLibrary(SearchLib);
+      end;
     end;
     FinalSearchResultList.Sort;
     LibraryList.Lines.Text:=FinalSearchResultList.Text;
@@ -821,6 +906,14 @@ begin
         break;
       end;
     end;
+    for LinkFile in FPCEXTRALIBS do
+    begin
+      if (Pos(LinkFile,TargetFile)=1) then
+      begin
+        CopyFile(FileName,Application.Location+'libs'+DirectorySeparator+LinkFile);
+        break;
+      end;
+    end;
     for LinkFile in LAZLINKLIBS do
     begin
       if (Pos(LinkFile,TargetFile)=1) then
@@ -829,14 +922,19 @@ begin
         break;
       end;
     end;
-    for LinkFile in QTLINKLIBS do
+
+    if chkQT.Checked then
     begin
-      if (Pos(LinkFile,TargetFile)=1) then
+      for LinkFile in QTLINKLIBS do
       begin
-        CopyFile(FileName,Application.Location+'libs'+DirectorySeparator+LinkFile);
-        break;
+        if (Pos(LinkFile,TargetFile)=1) then
+        begin
+          CopyFile(FileName,Application.Location+'libs'+DirectorySeparator+LinkFile);
+          break;
+        end;
       end;
     end;
+
     if CopyFile(FileName,Application.Location+'libs'+DirectorySeparator+TargetFile) then
     begin
       LibraryLocationList.Lines.Delete(Index);
