@@ -20,7 +20,7 @@ object Form1: TForm1
     OnClick = btnStartScanClick
     TabOrder = 0
   end
-  object LibraryList: TMemo
+  object LibraryMemo: TMemo
     AnchorSideLeft.Control = stFound
     AnchorSideTop.Control = stFound
     AnchorSideTop.Side = asrBottom
@@ -38,7 +38,7 @@ object Form1: TForm1
     ScrollBars = ssVertical
     TabOrder = 1
   end
-  object LibraryNotFoundList: TMemo
+  object LibraryNotFoundMemo: TMemo
     AnchorSideLeft.Control = stNotFound
     AnchorSideTop.Control = stNotFound
     AnchorSideTop.Side = asrBottom
@@ -56,15 +56,16 @@ object Form1: TForm1
     ScrollBars = ssVertical
     TabOrder = 2
   end
-  object LibraryLocationList: TMemo
+  object LibraryLocationMemo: TMemo
     AnchorSideLeft.Control = stLocation
     AnchorSideTop.Control = stLocation
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = btnGetFiles
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
     Left = 500
-    Height = 356
+    Height = 424
     Top = 52
     Width = 418
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -73,23 +74,6 @@ object Form1: TForm1
     BorderSpacing.Bottom = 8
     ScrollBars = ssVertical
     TabOrder = 3
-  end
-  object btnGetFiles: TButton
-    AnchorSideLeft.Control = LibraryLocationList
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = Owner
-    AnchorSideBottom.Side = asrBottom
-    Left = 500
-    Height = 60
-    Top = 416
-    Width = 418
-    Anchors = [akLeft, akRight, akBottom]
-    BorderSpacing.Right = 8
-    BorderSpacing.Bottom = 8
-    Caption = 'Get Library Files'
-    OnClick = btnGetFilesClick
-    TabOrder = 4
   end
   object stNotFound: TStaticText
     AnchorSideLeft.Control = btnStartScan
@@ -109,7 +93,7 @@ object Form1: TForm1
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     ParentFont = False
-    TabOrder = 5
+    TabOrder = 4
   end
   object stFound: TStaticText
     AnchorSideLeft.Control = btnStartScan
@@ -129,7 +113,7 @@ object Form1: TForm1
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     ParentFont = False
-    TabOrder = 6
+    TabOrder = 5
   end
   object stLocation: TStaticText
     AnchorSideLeft.Control = stFound
@@ -151,7 +135,7 @@ object Form1: TForm1
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     ParentFont = False
-    TabOrder = 7
+    TabOrder = 6
   end
   object chkQT: TCheckBox
     AnchorSideLeft.Control = Owner
@@ -166,6 +150,6 @@ object Form1: TForm1
     Caption = 'With QT libs'
     Checked = True
     State = cbChecked
-    TabOrder = 8
+    TabOrder = 7
   end
 end

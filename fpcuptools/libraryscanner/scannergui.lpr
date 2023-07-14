@@ -1,4 +1,4 @@
-program libscanner;
+program scannergui;
 
 {$mode objfpc}{$H+}
 

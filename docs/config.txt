@@ -1,0 +1,67 @@
+[all]
+kernel=vmlinuz
+cmdline=cmdline.txt
+initramfs initrd.img followkernel
+
+[pi4]
+max_framebuffers=2
+arm_boost=1
+
+[all]
+# Enable the audio output, I2C and SPI interfaces on the GPIO header. As these
+# parameters related to the base device-tree they must appear *before* any
+# other dtoverlay= specification
+dtparam=audio=on
+dtparam=i2c_arm=on
+dtparam=spi=on
+
+# Comment out the following line if the edges of the desktop appear outside
+# the edges of your display
+# disable_overscan=1
+
+# If you have issues with audio, you may try uncommenting the following line
+# which forces the HDMI output into HDMI mode instead of DVI (which doesn't
+# support audio output)
+hdmi_drive=2
+config_hdmi_boost=4
+
+hdmi_force_hotplug=1
+
+hdmi_group=2
+hdmi_mode=1
+hdmi_mode=87
+hdmi_cvt=1024 600 60 6 0 0 0
+#hdmi_drive=1
+
+gpu_mem_1024=256  
+hdmi_ignore_cec_init=1  
+disable_overscan=1
+start_x=1  
+disable_splash=1
+hdmi_pixel_encoding=2  
+gpu_mem_256=112  
+sdtv_aspect=1  
+gpu_mem_512=144  
+sdtv_mode=2  
+max_usb_current=1
+
+[cm4]
+# Enable the USB2 outputs on the IO board (assuming your CM4 is plugged into
+# such a board)
+dtoverlay=dwc2,dr_mode=host
+
+[all]
+
+# Enable the KMS ("full" KMS) graphics overlay, leaving GPU memory as the
+# default (the kernel is in control of graphics memory with full KMS)
+# dtoverlay=vc4-kms-v3d
+# dtoverlay=vc4-fkms-v3d
+# dtoverlay=vc4-fkms-v3d
+
+# Autoload overlays for any recognized cameras or displays that are attached
+# to the CSI/DSI ports. Please note this is for libcamera support, *not* for
+# the legacy camera stack
+# camera_auto_detect=1
+# display_auto_detect=1
+
+
