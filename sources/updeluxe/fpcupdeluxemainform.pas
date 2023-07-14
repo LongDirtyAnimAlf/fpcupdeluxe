@@ -3322,6 +3322,7 @@ begin
             FPCupManager.GetCrossToolsFileName(BinsFileName,LibsFileName);
             FPCupManager.GetCrossToolsPath(BinPath,LibPath);
 
+
             // bit tricky ... if bins and/or libs are already there exit this retry ... ;-)
             if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath)) then MissingCrossBins:=false;
 
@@ -3500,7 +3501,12 @@ begin
                 begin
                   ZipFile:=(ExtractFileExt(ToolTargetFile)='.zip');
                   ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
-                  //ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath+DirectorySeparator;
+                  // Check if we have the new libs
+                  if (Pos(NEWLIBSTAG,BaseLibsURL)>0) then
+                  begin
+                    ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath+DirectorySeparator;
+                  end;
+
                   ForceDirectoriesSafe(ToolTargetPath);
 
                   AddMessage('Going to extract archive into '+ToolTargetPath);

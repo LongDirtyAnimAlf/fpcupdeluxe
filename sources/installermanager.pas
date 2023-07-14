@@ -1262,6 +1262,20 @@ begin
   {$else}
   BinsFileName:='CrossBins'+BinsFileName;
   {$endif MSWINDOWS}
+
+  // Check for the new libs !!
+  if (CrossOS_Target=TOS.linux) then
+  begin
+    s:='';
+    if (CrossCPU_Target=TCPU.arm) then s:='LinuxARMHF_Raspbian_09.zip';
+    if (CrossCPU_Target=TCPU.x86_64) then s:='LinuxAMD64_Ubuntu_1804.zip';
+    if (CrossCPU_Target=TCPU.i386) then s:='Linuxi386_Ubuntu_1804.zip';
+    if (Length(s)>0) then
+    begin
+      LibsFileName:=s;
+    end;
+  end;
+
 end;
 
 procedure TFPCupManager.GetCrossToolsPath(out BinPath,LibPath:string);
@@ -1450,7 +1464,7 @@ var
 begin
   result:=false;
 
-  BaseLibsURL:='crosslibs';
+  BaseLibsURL:='notfound';
 
   s:=GetURLDataFromCache(FPCUPGITREPOAPIRELEASES+'?per_page=100');
   success:=(Length(s)>0);
@@ -1475,33 +1489,58 @@ begin
 
       success:=false;
       FileURL:='';
-      for i:=0 to Pred(Json.Count) do
+
+      // First, look for new libs
+
+      if (NOT success) then
       begin
-        Item := TJSONObject(Json.Items[i]);
-        TagName:=Item{%H-}.Get('tag_name');
-        if (Pos(BaseLibsURL,TagName)<>1) then continue;
-        Assets:=Item.Get('assets',TJSONArray(nil));
-        // Search zip
-        for iassets:=0 to Pred(Assets.Count) do
+        BaseLibsURL:=NEWLIBSTAG;
+        for i:=0 to Pred(Json.Count) do
         begin
-          Asset := TJSONObject(Assets[iassets]);
-          FileName:=Asset{%H-}.Get('name');
-          if AnsiStartsText(LibsFileName+'.zip',FileName) then
-          begin
-            LibsFileName:=FileName;
-            FileURL:=Asset{%H-}.Get('browser_download_url');
-          end;
-          success:=(Length(FileURL)>0);
+          Item := TJSONObject(Json.Items[i]);
+          TagName:=Item{%H-}.Get('tag_name');
+          success:=(BaseLibsURL=TagName);
           if success then break;
         end;
-        if (NOT success) then
+        if success then
         begin
-          // Search any
+          success:=false;
+          Assets:=Item.Get('assets',TJSONArray(nil));
+          // Search zip
           for iassets:=0 to Pred(Assets.Count) do
           begin
             Asset := TJSONObject(Assets[iassets]);
             FileName:=Asset{%H-}.Get('name');
-            if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(LibsFileName,FileName)) then
+            if (FileName=LibsFileName) then
+            begin
+              FileURL:=Asset{%H-}.Get('browser_download_url');
+            end;
+            success:=(Length(FileURL)>0);
+            if success then
+            begin
+              BaseLibsURL:=FileURL;
+              result:=true;
+              break;
+            end;
+          end;
+        end;
+      end;
+
+      if (NOT success) then
+      begin
+        BaseLibsURL:=OLDLIBSTAG;
+        for i:=0 to Pred(Json.Count) do
+        begin
+          Item := TJSONObject(Json.Items[i]);
+          TagName:=Item{%H-}.Get('tag_name');
+          if (Pos(BaseLibsURL,TagName)<>1) then continue;
+          Assets:=Item.Get('assets',TJSONArray(nil));
+          // Search zip
+          for iassets:=0 to Pred(Assets.Count) do
+          begin
+            Asset := TJSONObject(Assets[iassets]);
+            FileName:=Asset{%H-}.Get('name');
+            if AnsiStartsText(LibsFileName+'.zip',FileName) then
             begin
               LibsFileName:=FileName;
               FileURL:=Asset{%H-}.Get('browser_download_url');
@@ -1509,13 +1548,29 @@ begin
             success:=(Length(FileURL)>0);
             if success then break;
           end;
-        end;
-        if success then
-        begin
-          BaseLibsURL:=FileURL;
-          LibsFileName:=FileName;
-          result:=true;
-          break;
+          if (NOT success) then
+          begin
+            // Search any
+            for iassets:=0 to Pred(Assets.Count) do
+            begin
+              Asset := TJSONObject(Assets[iassets]);
+              FileName:=Asset{%H-}.Get('name');
+              if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(LibsFileName,FileName)) then
+              begin
+                LibsFileName:=FileName;
+                FileURL:=Asset{%H-}.Get('browser_download_url');
+              end;
+              success:=(Length(FileURL)>0);
+              if success then break;
+            end;
+          end;
+          if success then
+          begin
+            BaseLibsURL:=FileURL;
+            LibsFileName:=FileName;
+            result:=true;
+            break;
+          end;
         end;
       end;
 

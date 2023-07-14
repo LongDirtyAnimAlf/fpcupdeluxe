@@ -224,6 +224,9 @@ const
 
   DIFFMAGIC                    = 'revhash_';
 
+  NEWLIBSTAG                   = 'crosslibs_all';
+  OLDLIBSTAG                   = 'crosslibs';
+
   //Sequence contants for statemachine
 
   _SEP                     = ';';
