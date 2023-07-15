@@ -1,11 +1,12 @@
 object Form1: TForm1
-  Left = 354
+  Left = 511
   Height = 484
-  Top = 199
+  Top = 214
   Width = 926
   Caption = 'Form1'
   ClientHeight = 484
   ClientWidth = 926
+  OnCreate = FormCreate
   LCLVersion = '2.3.0.0'
   object btnStartScan: TButton
     AnchorSideLeft.Control = Owner
@@ -47,8 +48,8 @@ object Form1: TForm1
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 8
-    Height = 323
-    Top = 153
+    Height = 231
+    Top = 245
     Width = 240
     Anchors = [akTop, akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
@@ -83,7 +84,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 33
-    Top = 112
+    Top = 204
     Width = 240
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 16
@@ -143,13 +144,54 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 19
-    Top = 77
+    Top = 169
     Width = 82
     BorderSpacing.Left = 8
-    BorderSpacing.Top = 8
+    BorderSpacing.Top = 100
     Caption = 'With QT libs'
     Checked = True
     State = cbChecked
     TabOrder = 7
+  end
+  object Edit1: TEdit
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = btnStartScan
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = btnStartScan
+    AnchorSideRight.Side = asrBottom
+    Left = 8
+    Height = 23
+    Top = 73
+    Width = 240
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 4
+    OnClick = Edit1Click
+    ReadOnly = True
+    TabOrder = 8
+  end
+  object Edit2: TEdit
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Edit1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = btnStartScan
+    AnchorSideRight.Side = asrBottom
+    Left = 8
+    Height = 23
+    Top = 100
+    Width = 240
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 4
+    OnClick = Edit2Click
+    TabOrder = 9
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 323
+    Top = 127
+  end
+  object SelectDirectoryDialog1: TSelectDirectoryDialog
+    Left = 318
+    Top = 189
   end
 end

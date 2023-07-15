@@ -10,6 +10,10 @@ uses
 type
   TScannerCore = class
   private
+    FReadelfBinary: string;
+    {$ifdef Windows}
+    FLibraryLocation: string;
+    {$endif}
     FLibraryList: TStringList;
     FLibraryNotFoundList: TStringList;
     FLibraryLocationList: TStringList;
@@ -24,6 +28,10 @@ type
     property LibraryList: TStringList read FLibraryList;
     property LibraryNotFoundList: TStringList read FLibraryNotFoundList;
     property LibraryLocationList: TStringList read FLibraryLocationList;
+    property ReadelfBinary: string write FReadelfBinary;
+    {$ifdef Windows}
+    property LibraryLocation: string write FLibraryLocation;
+    {$endif}
   end;
 
 implementation
@@ -87,6 +95,13 @@ const
   '/boot/system/non-packaged/lib'
   );
   {$endif}
+
+  {$ifdef Windows}
+  WINDOWSSEARCHDIRS : array [0..0] of string = (
+  'dummy'
+  );
+  {$endif}
+
 
   {$ifdef CPUX86}
   DYNLINKV1='ld-linux.so.1';
@@ -280,8 +295,10 @@ const
 
   var
   ErrorMsg: String;
+  {$ifndef Windows}
   GccDirectory:string;
-  SearchLib,SearchDir:string;
+  {$endif}
+  SearchLib,SearchDir,SearchLibPath:string;
   FinalSearchResultList:TLookupStringList;
   sl:string;
   Index:integer;
@@ -303,6 +320,7 @@ begin
   result:=GetSourceCPU+'-'+GetSourceOS;
 end;
 
+{$ifndef Windows}
 function GetStartupObjects:string;
 const
   LINKFILE='crtbegin.o';
@@ -580,6 +598,7 @@ begin
     end;
   end;
 end;
+{$endif Windows}
 
 function GetDistro(const aID:string=''):string;
 var
@@ -721,10 +740,14 @@ var
 begin
   SearchResultList:=TStringList.Create;
   try
+    {$ifdef Windows}
+    for sd in WINDOWSSEARCHDIRS do
+    {$else}
     {$ifdef Haiku}
     for sd in HAIKUSEARCHDIRS do
     {$else}
-    for sd in UNIXSEARCHDIRS do
+     for sd in UNIXSEARCHDIRS do
+    {$endif}
     {$endif}
     begin
       {$ifdef Haiku}
@@ -733,6 +756,9 @@ begin
       {$endif}
       {$endif}
       FileName:=sd+DirectorySeparator+aLib;
+      {$ifdef Windows}
+      FileName:=StringReplace(FileName,'dummy',FLibraryLocation,[]);
+      {$endif}
       if FileExists(FileName) then
       begin
         StoreLibrary('['+ExtractFileName(FileName)+']');
@@ -750,7 +776,7 @@ begin
         end;
         while FileIsSymlink(FileName) do FileName:=GetPhysicalFilename(FileName,pfeException);
         SearchResult:='';
-        RunCommand('readelf',['-d','-W',FileName],SearchResult,[]);
+        RunCommand(FReadelfBinary,['-d','-W',FileName],SearchResult,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
         SearchResultList.Text:=SearchResult;
         if (SearchResultList.Count=0) then continue;
         for sr in SearchResultList do
@@ -774,6 +800,7 @@ begin
         break;
       end;
     end;
+    {$ifndef Windows}
     if (Length(FileName)>0) then
     begin
       FileName:=GccDirectory+DirectorySeparator+aLib;
@@ -787,6 +814,7 @@ begin
         FLibraryNotFoundList.Append('Not found: '+aLib);
       end;
     end;
+    {$endif}
   finally
     SearchResultList.Free;
   end;
@@ -803,7 +831,9 @@ begin
   //if ((Length(sd)>0) AND (DirectoryExists(sd))) then
   //begin
   //end;
+  {$ifndef Windows}
   GccDirectory:=GetStartupObjects;
+  {$endif}
 
   FinalSearchResultList:=TLookupStringList.Create;
   try
@@ -844,11 +874,14 @@ begin
     for sl in FinalSearchResultList do
     begin
       SearchLib:=Copy(sl,2,Length(sl)-2);
-
+      {$ifdef Windows}
+      for SearchDir in WINDOWSSEARCHDIRS do
+      {$else}
       {$ifdef Haiku}
       for SearchDir in HAIKUSEARCHDIRS do
       {$else}
-      for SearchDir in UNIXSEARCHDIRS do
+       for SearchDir in UNIXSEARCHDIRS do
+      {$endif}
       {$endif}
       begin
         {$ifdef Haiku}
@@ -856,21 +889,28 @@ begin
         if (RightStr(SearchDir,4)='/x86') then continue;
         {$endif}
         {$endif}
-        if FileExists(SearchDir+DirectorySeparator+SearchLib) then
+        SearchLibPath:=SearchDir+DirectorySeparator+SearchLib;
+        {$ifdef Windows}
+        SearchLibPath:=StringReplace(SearchLibPath,'dummy',FLibraryLocation,[]);
+        {$endif}
+        if FileExists(SearchLibPath) then
         begin
-          FLibraryLocationList.Append(SearchDir+DirectorySeparator+SearchLib);
+          FLibraryLocationList.Append(SearchLibPath);
           SearchLib:='';
           break;
         end;
       end;
+      {$ifndef Windows}
       if (Length(SearchLib)>0) then
       begin
-        if FileExists(GccDirectory+DirectorySeparator+SearchLib) then
+        SearchLibPath:=GccDirectory+DirectorySeparator+SearchLib;
+        if FileExists(SearchLibPath) then
         begin
-          FLibraryLocationList.Append(GccDirectory+DirectorySeparator+SearchLib);
+          FLibraryLocationList.Append(SearchLibPath);
           SearchLib:='';
         end;
       end;
+      {$endif}
       if (Length(SearchLib)>0) then
       begin
         FLibraryNotFoundList.Append('Copy not found: '+SearchLib);
@@ -955,6 +995,10 @@ begin
   FLibraryNotFoundList:=TStringList.Create;
   FLibraryLocationList:=TStringList.Create;
   chkQT:=True;
+  FReadelfBinary:='readelf';
+  {$ifdef Windows}
+  FLibraryLocation:='c:\fpcupdeluxe';
+  {$endif}
 end;
 
 destructor TScannerCore.Destroy;

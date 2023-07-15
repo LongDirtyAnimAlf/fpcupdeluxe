@@ -1264,52 +1264,41 @@ begin
   {$endif MSWINDOWS}
 
   // Check for the new libs !!
+  s:='';
   if (CrossOS_Target=TOS.linux) then
   begin
-    s:='';
     if (CrossCPU_Target=TCPU.aarch64) then s:='LinuxAArch64_Ubuntu_1804.zip';
     if (CrossCPU_Target=TCPU.arm) then s:='LinuxARMHF_Ubuntu_1804.zip';
     if (CrossCPU_Target=TCPU.x86_64) then s:='LinuxAMD64_Ubuntu_1804.zip';
     if (CrossCPU_Target=TCPU.i386) then s:='Linuxi386_Ubuntu_1804.zip';
-    if (Length(s)>0) then
-    begin
-      LibsFileName:=s;
-    end;
   end;
   if (CrossOS_Target=TOS.android) then
   begin
-    s:='';
     if (CrossCPU_Target=TCPU.aarch64) then s:='AndroidAArch64_API_21.zip';
     if (CrossCPU_Target=TCPU.x86_64) then s:='AndroidAMD64_API_21.zip';
     if (CrossCPU_Target=TCPU.arm) then s:='AndroidARMEL_API_18.zip';
     if (CrossCPU_Target=TCPU.i386) then s:='Androidi386_API_21.zip';
     if (CrossCPU_Target=TCPU.mipsel) then s:='AndroidMipsel_API_18.zip';
-    if (Length(s)>0) then
-    begin
-      LibsFileName:=s;
-    end;
   end;
-
   if (CrossOS_Target=TOS.darwin) then
   begin
-    s:='';
     if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='DarwinAll.zip';
     if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='DarwinPPC.zip';
-    if (Length(s)>0) then
-    begin
-      LibsFileName:=s;
-    end;
   end;
-
   if (CrossOS_Target=TOS.ios) then
   begin
-    s:='';
     if (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]) then s:='IOSAll.zip';
-    if (Length(s)>0) then
-    begin
-      LibsFileName:=s;
-    end;
   end;
+  if (CrossOS_Target=TOS.solaris) then
+  begin
+    if (CrossCPU_Target=TCPU.x86_64) then s:='SolarisAMD64_Oracle_1104.zip';
+  end;
+
+  if (Length(s)>0) then
+  begin
+    LibsFileName:=s;
+  end;
+
 
 
 end;
