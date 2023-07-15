@@ -1271,6 +1271,7 @@ begin
     if (CrossCPU_Target=TCPU.arm) then s:='LinuxARMHF_Ubuntu_1804.zip';
     if (CrossCPU_Target=TCPU.x86_64) then s:='LinuxAMD64_Ubuntu_1804.zip';
     if (CrossCPU_Target=TCPU.i386) then s:='Linuxi386_Ubuntu_1804.zip';
+    if (CrossCPU_Target=TCPU.loongarch64) then s:='LinuxLoongarch64_Deepin_0803.zip';
   end;
   if (CrossOS_Target=TOS.android) then
   begin
@@ -1298,8 +1299,6 @@ begin
   begin
     LibsFileName:=s;
   end;
-
-
 
 end;
 

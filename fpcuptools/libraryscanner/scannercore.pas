@@ -74,6 +74,11 @@ const
   '/usr/local/lib/aarch64-linux-gnu',
   '/lib/aarch64-linux-gnu',
   {$endif CPUAARCH64}
+  {$ifdef CPULOONGARCH}
+  '/usr/lib/loongarch-linux-gnu',
+  '/usr/local/lib/loongarch-linux-gnu',
+  '/lib/loongarch-linux-gnu',
+  {$endif CPULOONGARCH}
   '/usr/lib',
   '/usr/local/lib',
   '/lib',
@@ -102,7 +107,11 @@ const
   );
   {$endif}
 
-
+  {$ifdef Windows}
+  DYNLINKV1='ld-*.so.1';
+  DYNLINKV2='ld-*.so.2';
+  DYNLINKV3='ld-*.so.3';
+  {$else}
   {$ifdef CPUX86}
   DYNLINKV1='ld-linux.so.1';
   DYNLINKV2='ld-linux.so.2';
@@ -129,9 +138,14 @@ const
   DYNLINKV2='ld-linux-aarch64.so.2';
   DYNLINKV3='ld-linux-aarch64.so.3';
   {$endif CPUAARCH64}
+  {$ifdef CPULOONGARCH}
+  DYNLINKV1='ld-linux-loongarch-lp64d.so.1';
+  DYNLINKV2='ld-linux-loongarch-lp64d.so.2';
+  DYNLINKV3='ld-linux-loongarch-lp64d.so.3';
+  {$endif CPULOONGARCH}
+  {$endif}
 
-
-const FPCLIBS : array [0..45] of string = (
+const FPCLIBS : array [0..48] of string = (
   'crtbegin.o',
   'crtbeginS.o',
   'crtend.o',
@@ -142,6 +156,9 @@ const FPCLIBS : array [0..45] of string = (
   'Mcrt1.o',
   'Scrt1.o',
   'grcrt1.o',
+  'ld.so.1',
+  'ld.so.2',
+  'ld.so.3',
   DYNLINKV1,
   DYNLINKV2,
   DYNLINKV3,
@@ -758,6 +775,21 @@ begin
       FileName:=sd+DirectorySeparator+aLib;
       {$ifdef Windows}
       FileName:=StringReplace(FileName,'dummy',FLibraryLocation,[]);
+      // Do we have a wildcard ?
+      if (Pos('*',aLib)>0) then
+      begin
+        SearchResultList.Clear;
+        FindAllFiles(SearchResultList,ExtractFileDir(FileName),aLib,false);
+        if (SearchResultList.Count>0) then
+        begin
+          for sr in SearchResultList do
+          begin
+            StoreLibrary('['+ExtractFileName(sr)+']');
+          end;
+        end;
+        FileName:='';
+        break;
+      end;
       {$endif}
       if FileExists(FileName) then
       begin
