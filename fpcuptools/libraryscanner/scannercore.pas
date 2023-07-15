@@ -14,6 +14,7 @@ type
     FLibraryNotFoundList: TStringList;
     FLibraryLocationList: TStringList;
     chkQT:boolean;
+    function StoreLibrary(aLib:string):boolean;
     procedure CheckAndAddLibrary(aLib:string);
   public
     procedure GetAndSaveLibs(Location:string);
@@ -32,46 +33,48 @@ uses
 
 const
   {$ifdef CPUX86}
-  UNIXSEARCHDIRS : array [0..9] of string = (
+  UNIXSEARCHDIRS : array [0..10] of string = (
   {$else}
-  UNIXSEARCHDIRS : array [0..6] of string = (
+  UNIXSEARCHDIRS : array [0..7] of string = (
   {$endif CPUX86}
-  '/lib',
-  '/usr/lib',
-  '/usr/local/lib',
   {$ifdef CPUX86}
-  '/lib/i386-linux-gnu',
   '/usr/lib/i386-linux-gnu',
   '/usr/local/lib/i386-linux-gnu',
-  '/lib/i686-linux-gnu',
+  '/lib/i386-linux-gnu',
   '/usr/lib/i686-linux-gnu',
   '/usr/local/lib/i686-linux-gnu',
+  '/lib/i686-linux-gnu',
   {$endif CPUX86}
   {$ifdef CPUX86_64}
-  '/lib/x86_64-linux-gnu',
   '/usr/lib/x86_64-linux-gnu',
   '/usr/local/lib/x86_64-linux-gnu',
+  '/lib/x86_64-linux-gnu',
   {$endif CPUX86_64}
   {$ifdef CPUARM}
   {$ifdef CPUARMHF}
-  '/lib/arm-linux-gnueabihf',
   '/usr/lib/arm-linux-gnueabihf',
   '/usr/local/lib/arm-linux-gnueabihf',
+  '/lib/arm-linux-gnueabihf',
   {$else}
-  '/lib/arm-linux-gnueabi',
   '/usr/lib/arm-linux-gnueabi',
   '/usr/local/lib/arm-linux-gnueabi',
+  '/lib/arm-linux-gnueabi',
   {$endif CPUARMHF}
   {$endif CPUARM}
   {$ifdef CPUAARCH64}
-  '/lib/aarch64-linux-gnu',
   '/usr/lib/aarch64-linux-gnu',
   '/usr/local/lib/aarch64-linux-gnu',
+  '/lib/aarch64-linux-gnu',
   {$endif CPUAARCH64}
+  '/usr/lib',
+  '/usr/local/lib',
+  '/lib',
   {$ifdef CPU32}
+  '/usr/lib32',
   '/lib32'
   {$endif CPU32}
   {$ifdef CPU64}
+  '/usr/lib64',
   '/lib64'
   {$endif CPU64}
   );
@@ -165,13 +168,13 @@ const FPCLIBS : array [0..45] of string = (
 const FPCLINKLIBS : array [0..10] of string = (
   'ld.so',
   'libc.so',
+  'libm.so',
+  'libpthread.so',
   'libdl.so',
   'libgobject-2.0.so',
   'libglib-2.0.so',
   'libgthread-2.0.so',
   'libgmodule-2.0.so',
-  'libm.so',
-  'libpthread.so',
   'librt.so',
   'libz.so'
 );
@@ -703,6 +706,10 @@ begin
   result:=t;
 end;
 
+function TScannerCore.StoreLibrary(aLib:string):boolean;
+begin
+  result:=(FinalSearchResultList.Add(aLib)<>-1);
+end;
 
 procedure TScannerCore.CheckAndAddLibrary(aLib:string);
 var
@@ -728,9 +735,9 @@ begin
       FileName:=sd+DirectorySeparator+aLib;
       if FileExists(FileName) then
       begin
-        FinalSearchResultList.Add('['+ExtractFileName(FileName)+']');
-        // libc.so might be a text-file, so skip analysis
-        if ExtractFileName(FileName)='libc.so' then
+        StoreLibrary('['+ExtractFileName(FileName)+']');
+        // These files might be a text-file, so skip analysis
+        if ((ExtractFileName(FileName)='libc.so') OR (ExtractFileName(FileName)='libm.so') OR (ExtractFileName(FileName)='libpthread.so')) then
         begin
           FileName:='';
           break;
@@ -755,7 +762,7 @@ begin
             if (i<>-1) then
             begin
               s:=Trim(Copy(s,i+Length(MAGICSHARED),MaxInt));
-              if (FinalSearchResultList.Add(s)<>-1) then
+              if StoreLibrary(s) then
               begin
                 s:=Copy(s,2,Length(s)-2);
                 CheckAndAddLibrary(s);
@@ -772,7 +779,7 @@ begin
       FileName:=GccDirectory+DirectorySeparator+aLib;
       if FileExists(FileName) then
       begin
-        FinalSearchResultList.Add('['+aLib+']');
+        StoreLibrary('['+aLib+']');
         FileName:='';
       end;
       if (Length(FileName)>0) then
@@ -800,11 +807,11 @@ begin
 
   FinalSearchResultList:=TLookupStringList.Create;
   try
-    for SearchLib in FPCLIBS do
+    for SearchLib in FPCLINKLIBS do
     begin
       CheckAndAddLibrary(SearchLib);
     end;
-    for SearchLib in FPCLINKLIBS do
+    for SearchLib in FPCLIBS do
     begin
       CheckAndAddLibrary(SearchLib);
     end;
@@ -831,7 +838,7 @@ begin
         CheckAndAddLibrary(SearchLib);
       end;
     end;
-    FinalSearchResultList.Sort;
+
     FLibraryList.Text:=FinalSearchResultList.Text;
 
     for sl in FinalSearchResultList do
@@ -886,15 +893,25 @@ begin
     aList.Free;
   end;
 
-  for Index:=Pred(FLibraryLocationList.Count) downto 0 do
+  // copy the libraries found
+  for Index:=0 to Pred(FLibraryLocationList.Count) do
   begin
     FileName:=FLibraryLocationList.Strings[Index];
     TargetFile:=ExtractFileName(FileName);
+    CopyFile(FileName,Location+'libs'+DirectorySeparator+TargetFile,[]);
+  end;
+
+  // if there are any linklibs not found, create them now
+  for Index:=0 to Pred(FLibraryLocationList.Count) do
+  begin
+    FileName:=FLibraryLocationList.Strings[Index];
+    TargetFile:=ExtractFileName(FileName);
+
     for LinkFile in FPCLINKLIBS do
     begin
       if (Pos(LinkFile,TargetFile)=1) then
       begin
-        CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile);
+        CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile,[]);
         break;
       end;
     end;
@@ -902,7 +919,7 @@ begin
     begin
       if (Pos(LinkFile,TargetFile)=1) then
       begin
-        CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile);
+        CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile,[]);
         break;
       end;
     end;
@@ -910,7 +927,7 @@ begin
     begin
       if (Pos(LinkFile,TargetFile)=1) then
       begin
-        CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile);
+        CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile,[]);
         break;
       end;
     end;
@@ -921,16 +938,12 @@ begin
       begin
         if (Pos(LinkFile,TargetFile)=1) then
         begin
-          CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile);
+          CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile,[]);
           break;
         end;
       end;
     end;
 
-    if CopyFile(FileName,Location+'libs'+DirectorySeparator+TargetFile) then
-    begin
-      FLibraryLocationList.Delete(Index);
-    end;
   end;
 
 end;
