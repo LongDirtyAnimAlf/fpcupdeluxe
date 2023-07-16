@@ -101,6 +101,17 @@ const
   );
   {$endif}
 
+  {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OenBSD) OR defined(DragonFly)}
+  BSDSEARCHDIRS : array [0..5] of string = (
+  '/lib',
+  '/libexec',
+  '/usr/lib',
+  '/usr/local/lib',
+  '/usr/local/lib/qt5',
+  '/usr/local/lib/qt6'
+  );
+  {$endif}
+
   {$ifdef Windows}
   WINDOWSSEARCHDIRS : array [0..0] of string = (
   'dummy'
@@ -111,6 +122,11 @@ const
   DYNLINKV1='ld-*.so.1';
   DYNLINKV2='ld-*.so.2';
   DYNLINKV3='ld-*.so.3';
+  {$else}
+  {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OenBSD) OR defined(DragonFly)}
+  DYNLINKV1='ld-elf.so.1';
+  DYNLINKV2='ld-elf.so.2';
+  DYNLINKV3='ld-elf.so.3';
   {$else}
   {$ifdef CPUX86}
   DYNLINKV1='ld-linux.so.1';
@@ -123,15 +139,15 @@ const
   DYNLINKV3='ld-linux-x86-64.so.3';
   {$endif CPUX86_64}
   {$ifdef CPUARM}
-    {$ifdef CPUARMHF}
-    DYNLINKV1='ld-linux-armhf.so.1';
-    DYNLINKV2='ld-linux-armhf.so.2';
-    DYNLINKV3='ld-linux-armhf.so.3';
-    {$else}
-    DYNLINKV1='ld-linux.so.1';
-    DYNLINKV2='ld-linux.so.2';
-    DYNLINKV3='ld-linux.so.3';
-    {$endif CPUARMHF}
+  {$ifdef CPUARMHF}
+  DYNLINKV1='ld-linux-armhf.so.1';
+  DYNLINKV2='ld-linux-armhf.so.2';
+  DYNLINKV3='ld-linux-armhf.so.3';
+  {$else}
+  DYNLINKV1='ld-linux.so.1';
+  DYNLINKV2='ld-linux.so.2';
+  DYNLINKV3='ld-linux.so.3';
+  {$endif CPUARMHF}
   {$endif CPUARM}
   {$ifdef CPUAARCH64}
   DYNLINKV1='ld-linux-aarch64.so.1';
@@ -144,8 +160,9 @@ const
   DYNLINKV3='ld-linux-loongarch-lp64d.so.3';
   {$endif CPULOONGARCH}
   {$endif}
+  {$endif}
 
-const FPCLIBS : array [0..48] of string = (
+const FPCLIBS : array [0..47] of string = (
   'crtbegin.o',
   'crtbeginS.o',
   'crtend.o',
@@ -164,8 +181,7 @@ const FPCLIBS : array [0..48] of string = (
   DYNLINKV3,
   'libanl.so.1',
   'libcrypt.so.1',
-  'libc.so.6',
-  'libc.so.7',
+  'libc.so.*',
   'libc_nonshared.a',
   'libgcc.a',
   'libdb1.so.2',
@@ -763,7 +779,11 @@ begin
     {$ifdef Haiku}
     for sd in HAIKUSEARCHDIRS do
     {$else}
-     for sd in UNIXSEARCHDIRS do
+    {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OenBSD) OR defined(DragonFly)}
+    for sd in BSDSEARCHDIRS do
+    {$else}
+    for sd in UNIXSEARCHDIRS do
+    {$endif}
     {$endif}
     {$endif}
     begin
@@ -775,6 +795,7 @@ begin
       FileName:=sd+DirectorySeparator+aLib;
       {$ifdef Windows}
       FileName:=StringReplace(FileName,'dummy',FLibraryLocation,[]);
+      {$endif}
       // Do we have a wildcard ?
       if (Pos('*',aLib)>0) then
       begin
@@ -790,7 +811,6 @@ begin
         FileName:='';
         break;
       end;
-      {$endif}
       if FileExists(FileName) then
       begin
         StoreLibrary('['+ExtractFileName(FileName)+']');
@@ -912,7 +932,11 @@ begin
       {$ifdef Haiku}
       for SearchDir in HAIKUSEARCHDIRS do
       {$else}
-       for SearchDir in UNIXSEARCHDIRS do
+      {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OenBSD) OR defined(DragonFly)}
+      for SearchDir in BSDSEARCHDIRS do
+      {$else}
+      for SearchDir in UNIXSEARCHDIRS do
+      {$endif}
       {$endif}
       {$endif}
       begin

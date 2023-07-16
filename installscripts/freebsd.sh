@@ -19,6 +19,12 @@ sudo pkg install -y liberation-fonts-ttf
 sudo pkg install -y gtkglext
 sudo pkg install -y gtk3
 
+sudo pkg install -y sdl2
+sudo pkg install -y sdl2_image
+sudo pkg install -y sdl2_mixer
+sudo pkg install -y sdl2_net
+sudo pkg install -y sdl2_ttf
+
 sudo pkg install -y qt5
 sudo pkg install -y qt5-webkit
 sudo pkg install -y qt5-x11extras
