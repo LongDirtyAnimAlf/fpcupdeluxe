@@ -162,7 +162,7 @@ const
   {$endif}
   {$endif}
 
-const FPCLIBS : array [0..47] of string = (
+const FPCLIBS : array [0..48] of string = (
   'crtbegin.o',
   'crtbeginS.o',
   'crtend.o',
@@ -183,6 +183,7 @@ const FPCLIBS : array [0..47] of string = (
   'libcrypt.so.1',
   'libc.so.*',
   'libc_nonshared.a',
+  'libssp_nonshared.a',
   'libgcc.a',
   'libdb1.so.2',
   'libdb2.so.3',
@@ -322,11 +323,7 @@ const QTLINKLIBS : array [0..1] of string = (
   'libQt6Pas.so'
 );
 
-const
-  MAGICNEEDED = '(NEEDED)';
-  MAGICSHARED = 'Shared library:';
-
-  var
+var
   ErrorMsg: String;
   {$ifndef Windows}
   GccDirectory:string;
@@ -764,6 +761,9 @@ begin
 end;
 
 procedure TScannerCore.CheckAndAddLibrary(aLib:string);
+const
+  MAGICNEEDED = 'NEEDED';
+  MAGICSHARED = 'Shared library:';
 var
   SearchResultList:TStringList;
   SearchResult:string;

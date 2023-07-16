@@ -4147,7 +4147,7 @@ begin
   if (Level<>etDebug) then
   begin
     if AnsiPos(LineEnding, Message)>0 then ThreadLog(''); //Write an empty line before multiline messagse
-    ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message+cDot[Message[Length(Message)]='.']); //we misuse this for info output
+    ThreadLog(BeginSnippet+' '+Seriousness[Level]+' '+ Message+cDot[Message[Length(Message)] in ['.','!','?']]); //we misuse this for info output
   end
   else
   begin

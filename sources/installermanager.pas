@@ -1267,32 +1267,36 @@ begin
   s:='';
   if (CrossOS_Target=TOS.linux) then
   begin
-    if (CrossCPU_Target=TCPU.aarch64) then s:='LinuxAArch64_Ubuntu_1804.zip';
-    if (CrossCPU_Target=TCPU.arm) then s:='LinuxARMHF_Ubuntu_1804.zip';
-    if (CrossCPU_Target=TCPU.x86_64) then s:='LinuxAMD64_Ubuntu_1804.zip';
-    if (CrossCPU_Target=TCPU.i386) then s:='Linuxi386_Ubuntu_1804.zip';
-    if (CrossCPU_Target=TCPU.loongarch64) then s:='LinuxLoongarch64_Deepin_0803.zip';
+    if (CrossCPU_Target=TCPU.aarch64) then s:='Linux_AArch64_Ubuntu_1804.zip';
+    if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
+    if (CrossCPU_Target=TCPU.x86_64) then s:='Linux_AMD64_Ubuntu_1804.zip';
+    if (CrossCPU_Target=TCPU.i386) then s:='Linux_i386_Ubuntu_1804.zip';
+    if (CrossCPU_Target=TCPU.loongarch64) then s:='Linux_Loongarch64_Deepin_0803.zip';
   end;
   if (CrossOS_Target=TOS.android) then
   begin
-    if (CrossCPU_Target=TCPU.aarch64) then s:='AndroidAArch64_API_21.zip';
-    if (CrossCPU_Target=TCPU.x86_64) then s:='AndroidAMD64_API_21.zip';
-    if (CrossCPU_Target=TCPU.arm) then s:='AndroidARMEL_API_18.zip';
-    if (CrossCPU_Target=TCPU.i386) then s:='Androidi386_API_21.zip';
-    if (CrossCPU_Target=TCPU.mipsel) then s:='AndroidMipsel_API_18.zip';
+    if (CrossCPU_Target=TCPU.aarch64) then s:='Android_AArch64_API_21.zip';
+    if (CrossCPU_Target=TCPU.x86_64) then s:='Android_AMD64_API_21.zip';
+    if (CrossCPU_Target=TCPU.arm) then s:='Android_ARMEL_API_18.zip';
+    if (CrossCPU_Target=TCPU.i386) then s:='Android_i386_API_21.zip';
+    if (CrossCPU_Target=TCPU.mipsel) then s:='Android_Mipsel_API_18.zip';
   end;
   if (CrossOS_Target=TOS.darwin) then
   begin
-    if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='DarwinAll.zip';
-    if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='DarwinPPC.zip';
+    if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='Darwin_All.zip';
+    if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PPC.zip';
   end;
   if (CrossOS_Target=TOS.ios) then
   begin
-    if (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]) then s:='IOSAll.zip';
+    if (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]) then s:='IOS_All.zip';
   end;
   if (CrossOS_Target=TOS.solaris) then
   begin
-    if (CrossCPU_Target=TCPU.x86_64) then s:='SolarisAMD64_Oracle_1104.zip';
+    if (CrossCPU_Target=TCPU.x86_64) then s:='Solaris_AMD64_Oracle_1104.zip';
+  end;
+  if (CrossOS_Target=TOS.freebsd) then
+  begin
+    if (CrossCPU_Target=TCPU.x86_64) then s:='FreeBSD_AMD64_FreeBSD_13.zip';
   end;
 
   if (Length(s)>0) then
