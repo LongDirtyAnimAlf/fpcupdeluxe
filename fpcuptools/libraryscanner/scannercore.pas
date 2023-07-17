@@ -162,7 +162,7 @@ const
   {$endif}
   {$endif}
 
-const FPCLIBS : array [0..48] of string = (
+const FPCLIBS : array [0..43] of string = (
   'crtbegin.o',
   'crtbeginS.o',
   'crtend.o',
@@ -182,9 +182,6 @@ const FPCLIBS : array [0..48] of string = (
   'libanl.so.1',
   'libcrypt.so.1',
   'libc.so.*',
-  'libc_nonshared.a',
-  'libssp_nonshared.a',
-  'libgcc.a',
   'libdb1.so.2',
   'libdb2.so.3',
   'libdl.so.1',
@@ -194,7 +191,6 @@ const FPCLIBS : array [0..48] of string = (
   'libgthread-2.0.so.0',
   'libgmodule-2.0.so.0',
   'libm.so.6',
-  'libmvec_nonshared.a',
   'libmvec.so.1',
   'libnsl.so.1',
   'libnss_compat.so.2',
@@ -206,12 +202,26 @@ const FPCLIBS : array [0..48] of string = (
   'libnss_nisplus.so.2',
   'libnss_nis.so.2',
   'libpthread.so.0',
-  'libpthread_nonshared.a',
   'libresolv.so.2',
   'librt.so.1',
   'libthread_db.so.1',
   'libutil.so.1',
   'libz.so.1'
+);
+
+const FPCALIBS : array [0..11] of string = (
+  'libc_nonshared.a',
+  'libssp_nonshared.a',
+  'libgcc.a',
+  'libmvec_nonshared.a',
+  'libpthread_nonshared.a',
+  'libcrypt.a',    // might be a placeholder only [musl]
+  'libdl.a',       // might be a placeholder only [musl]
+  'libm.a',        // might be a placeholder only [musl]
+  'libpthread.a',  // might be a placeholder only [musl]
+  'libresolv.a',   // might be a placeholder only [musl]
+  'librt.a',       // might be a placeholder only [musl]
+  'libutil.a'      // might be a placeholder only [musl]
 );
 
 const FPCLINKLIBS : array [0..10] of string = (
@@ -696,29 +706,33 @@ begin
       end;
       if (NOT success) then
       begin
-        s:='';
-        if RunCommand('hostnamectl',[],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
+        if FileExists('/usr/bin/hostnamectl') then
         begin
-          AllOutput:=TStringList.Create;
-          try
-            AllOutput.NameValueSeparator:=':';
-            AllOutput.Delimiter:=#10;
-            AllOutput.StrictDelimiter:=true;
-            AllOutput.DelimitedText:=s;
-            s:='';
-            for i:=0 to  AllOutput.Count-1 do
-            begin
-              j:=Pos('Operating System',AllOutput.Strings[i]);
-              if j>0 then s:=s+Trim(AllOutput.Values[AllOutput.Names[i]]);
-              j:=Pos('Kernel',AllOutput.Strings[i]);
-              if j>0 then s:=s+' '+Trim(AllOutput.Values[AllOutput.Names[i]]);
+          s:='';
+          if RunCommand('hostnamectl',[],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
+          begin
+            AllOutput:=TStringList.Create;
+            try
+              AllOutput.NameValueSeparator:=':';
+              AllOutput.Delimiter:=#10;
+              AllOutput.StrictDelimiter:=true;
+              AllOutput.DelimitedText:=s;
+              s:='';
+              for i:=0 to  AllOutput.Count-1 do
+              begin
+                j:=Pos('Operating System',AllOutput.Strings[i]);
+                if j>0 then s:=s+Trim(AllOutput.Values[AllOutput.Names[i]]);
+                j:=Pos('Kernel',AllOutput.Strings[i]);
+                if j>0 then s:=s+' '+Trim(AllOutput.Values[AllOutput.Names[i]]);
+              end;
+              success:=(Length(s)>0);
+            finally
+              AllOutput.Free;
             end;
-            success:=(Length(s)>0);
-          finally
-            AllOutput.Free;
           end;
         end;
       end;
+
       if (NOT success) then t:='unknown' else
       begin
         s:=DelChars(s,'"');
@@ -896,6 +910,10 @@ begin
       CheckAndAddLibrary(SearchLib);
     end;
     for SearchLib in FPCLIBS do
+    begin
+      CheckAndAddLibrary(SearchLib);
+    end;
+    for SearchLib in FPCALIBS do
     begin
       CheckAndAddLibrary(SearchLib);
     end;

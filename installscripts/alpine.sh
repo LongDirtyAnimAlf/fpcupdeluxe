@@ -1,3 +1,20 @@
+apk add binutils gcc g++ musl-dev make git 7zip
+
+apk add qt5-qtbase qt5-qtbase-dev qt5-qtx11extras-dev qt5-qtx11extras-dev
+
+apk add sdl2
+apk add sdl2-dev
+
+apk add sdl2_image
+apk add sdl2_mixer
+apk add sdl2_net
+apk add sdl2_ttf
+
+apk add sdl2_image-dev
+apk add sdl2_mixer-dev
+apk add sdl2_net-dev
+apk add sdl2_ttf-dev
+
 setup-xorg-base
 apk add mc xfce4 xfce4-terminal lightdm-gtk-greeter dbus
 rc-update add dbus
@@ -6,8 +23,7 @@ rc-update add lightdm
 # apk add firefox
 apk add gdk-pixbuf-xlib
 apk add gtk+2.0
-apk add binutils gcc musl-dev make git 7zip
-
+apk add gtk+3.0
 
 # Add the correct links by apk magic
 apk add libx11-dev gdk-pixbuf-dev gdk-pixbuf-xlib-dev gtk+ pango-dev gdb gtk+2.0-dev gcompat

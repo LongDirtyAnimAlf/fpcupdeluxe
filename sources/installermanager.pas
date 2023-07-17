@@ -1269,7 +1269,11 @@ begin
   begin
     if (CrossCPU_Target=TCPU.aarch64) then s:='Linux_AArch64_Ubuntu_1804.zip';
     if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
-    if (CrossCPU_Target=TCPU.x86_64) then s:='Linux_AMD64_Ubuntu_1804.zip';
+    if (CrossCPU_Target=TCPU.x86_64) then
+    begin
+      s:='Linux_AMD64_Ubuntu_1804.zip';
+      if MUSL then s:='Linux_AMD64_Alpine_0314.zip';
+    end;
     if (CrossCPU_Target=TCPU.i386) then s:='Linux_i386_Ubuntu_1804.zip';
     if (CrossCPU_Target=TCPU.loongarch64) then s:='Linux_Loongarch64_Deepin_0803.zip';
   end;
@@ -1284,7 +1288,7 @@ begin
   if (CrossOS_Target=TOS.darwin) then
   begin
     if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='Darwin_All.zip';
-    if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PPC.zip';
+    if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PPC_10_05.zip';
   end;
   if (CrossOS_Target=TOS.ios) then
   begin
@@ -1292,12 +1296,22 @@ begin
   end;
   if (CrossOS_Target=TOS.solaris) then
   begin
-    if (CrossCPU_Target=TCPU.x86_64) then s:='Solaris_AMD64_Oracle_1104.zip';
+    if (CrossCPU_Target=TCPU.x86_64) then
+    begin
+      s:='Solaris_AMD64_Oracle_1104.zip';
+      if SolarisOI then s:='Solaris_AMD64_OpenIndiana_2010.zip';
+    end;
   end;
   if (CrossOS_Target=TOS.freebsd) then
   begin
     //http://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/VM-IMAGES
     if (CrossCPU_Target=TCPU.x86_64) then s:='FreeBSD_AMD64_FreeBSD_10.zip';
+  end;
+  if (CrossOS_Target=TOS.openbsd) then
+  begin
+    if (CrossCPU_Target=TCPU.aarch64) then s:='OpenBSD_AArch64_OpenBSD_0606.zip';
+    if (CrossCPU_Target=TCPU.i386) then s:='OpenBSD_i386_OpenBSD_0600.zip';
+    if (CrossCPU_Target=TCPU.x86_64) then s:='OpenBSD_AMD64_OpenBSD_0701.zip';
   end;
 
   if (Length(s)>0) then
