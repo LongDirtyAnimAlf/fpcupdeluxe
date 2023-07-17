@@ -1272,7 +1272,7 @@ begin
     if (CrossCPU_Target=TCPU.x86_64) then
     begin
       s:='Linux_AMD64_Ubuntu_1804.zip';
-      if MUSL then s:='Linux_AMD64_Alpine_0314.zip';
+      if MUSL then s:='Linux_AMD64_Alpine_0318.zip';
     end;
     if (CrossCPU_Target=TCPU.i386) then s:='Linux_i386_Ubuntu_1804.zip';
     if (CrossCPU_Target=TCPU.loongarch64) then s:='Linux_Loongarch64_Deepin_0803.zip';

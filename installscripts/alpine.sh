@@ -1,6 +1,15 @@
-apk add binutils gcc g++ musl-dev make git 7zip
+apk add mc
+
+apk add binutils make gcc
+apk add openssl
+apk add git
+apk add g++
+apk add 7zip
+apk add musl-dev
 
 apk add qt5-qtbase qt5-qtbase-dev qt5-qtx11extras-dev qt5-qtx11extras-dev
+
+apk add qt6-qtbase qt6-qtbase-dev
 
 apk add sdl2
 apk add sdl2-dev
@@ -15,11 +24,22 @@ apk add sdl2_mixer-dev
 apk add sdl2_net-dev
 apk add sdl2_ttf-dev
 
+apk add dbus
+
 setup-xorg-base
-apk add mc xfce4 xfce4-terminal lightdm-gtk-greeter dbus
+
+apk add alpine-desktop
+
+apk add xfce4 xfce4-session
+apk add xfce4-panel xfce4-terminal
+apk add lightdm-gtk-greeter
+
+# apk add lxdm xfdesktop
+
 rc-update add dbus
 setup-devd udev
 rc-update add lightdm
+# rc-update add lxdm
 # apk add firefox
 apk add gdk-pixbuf-xlib
 apk add gtk+2.0
