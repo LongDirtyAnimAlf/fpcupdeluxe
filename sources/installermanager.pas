@@ -1296,7 +1296,8 @@ begin
   end;
   if (CrossOS_Target=TOS.freebsd) then
   begin
-    if (CrossCPU_Target=TCPU.x86_64) then s:='FreeBSD_AMD64_FreeBSD_13.zip';
+    //http://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/VM-IMAGES
+    if (CrossCPU_Target=TCPU.x86_64) then s:='FreeBSD_AMD64_FreeBSD_10.zip';
   end;
 
   if (Length(s)>0) then

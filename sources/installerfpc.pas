@@ -248,9 +248,7 @@ uses
     ,baseunix
     ,LazFileUtils
   {$ENDIF UNIX}
-  {$IFDEF BSD}
-    ,math
-  {$ENDIF}
+  ,math
   ;
 
 {$ifndef FPC_HAS_TYPE_EXTENDED}
@@ -476,17 +474,10 @@ begin
         else
         begin
           i:=StringListSame(ConfigText,'#ENDIF CPU'+CrossInstaller.TargetCPUName,j);
-          if (i=-1) then
-          begin
-            // Old versions of fpcupdeluxe used a simple 3 x #ENDIF ... check for this !!
-            i:=StringListSame(ConfigText,'#ENDIF',j);
-            if (i<>-1) then
-            begin
-              if ((i+2)>Pred(ConfigText.Count)) OR (ConfigText[i+1]<>'#ENDIF') OR (ConfigText[i+2]<>'#ENDIF') then
-                i:=-1;
-            end;
-          end;
-          if (i>SnipEnd) then i:=-1;
+          k:=StringListSame(ConfigText,'#ENDIF',j);
+          if (i=-1) then i:=k;
+          if (k=-1) then k:=i;
+          i:=Min(i,k);
           if (i=-1) then
           begin
             // This is a severe error and should never happen

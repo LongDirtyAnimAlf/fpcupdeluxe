@@ -37,7 +37,7 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="18">
+    <BuildModes Count="17">
       <Item1 Name="default" Default="True"/>
       <Item2 Name="debug">
         <CompilerOptions>
@@ -101,35 +101,7 @@ if TargetOS=&apos;openbsd&apos; then
           </Linking>
         </CompilerOptions>
       </Item3>
-      <Item4 Name="freebsd11x64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)11"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxespecials\$(TargetCPU)-$(TargetOS)11"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="freebsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item4>
-      <Item5 Name="solarisx64oi">
+      <Item4 Name="solarisx64oi">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -156,8 +128,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item5>
-      <Item6 Name="darwin32carbon">
+      </Item4>
+      <Item5 Name="darwin32carbon">
         <MacroValues Count="1">
           <Macro3 Name="LCLWidgetType" Value="carbon"/>
         </MacroValues>
@@ -187,8 +159,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item6>
-      <Item7 Name="darwin32cocoa">
+      </Item5>
+      <Item6 Name="darwin32cocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -218,8 +190,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item7>
-      <Item8 Name="darwin64cocoa">
+      </Item6>
+      <Item7 Name="darwin64cocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -248,8 +220,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item8>
-      <Item9 Name="darwin64cocoalegacy">
+      </Item7>
+      <Item8 Name="darwin64cocoalegacy">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -283,8 +255,8 @@ if TargetOS=&apos;openbsd&apos; then
 -XRC:\fpcupsystems\stablespecial\cross\lib\all-darwin\MacOSX10.13.sdk"/>
           </Other>
         </CompilerOptions>
-      </Item9>
-      <Item10 Name="darwin64QT5">
+      </Item8>
+      <Item9 Name="darwin64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -336,8 +308,8 @@ if TargetOS=&apos;openbsd&apos; then
 -kAGL"/>
           </Other>
         </CompilerOptions>
-      </Item10>
-      <Item11 Name="openbsdx64">
+      </Item9>
+      <Item10 Name="openbsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -365,8 +337,8 @@ if TargetOS=&apos;openbsd&apos; then
             <LinkSmart Value="True"/>
           </Linking>
         </CompilerOptions>
-      </Item11>
-      <Item12 Name="openbsd32">
+      </Item10>
+      <Item11 Name="openbsd32">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -394,8 +366,8 @@ if TargetOS=&apos;openbsd&apos; then
             <LinkSmart Value="True"/>
           </Linking>
         </CompilerOptions>
-      </Item12>
-      <Item13 Name="haiku32QT5">
+      </Item11>
+      <Item12 Name="haiku32QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -435,8 +407,8 @@ if TargetOS=&apos;openbsd&apos; then
 -k~/config/non-packaged/lib"/>
           </Other>
         </CompilerOptions>
-      </Item13>
-      <Item14 Name="haiku64QT5">
+      </Item12>
+      <Item13 Name="haiku64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -475,8 +447,8 @@ if TargetOS=&apos;openbsd&apos; then
 -k~/config/non-packaged/lib"/>
           </Other>
         </CompilerOptions>
-      </Item14>
-      <Item15 Name="darwinppccarbon">
+      </Item13>
+      <Item14 Name="darwinppccarbon">
         <MacroValues Count="1">
           <Macro3 Name="LCLWidgetType" Value="carbon"/>
         </MacroValues>
@@ -506,8 +478,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item15>
-      <Item16 Name="darwinppccocoa">
+      </Item14>
+      <Item15 Name="darwinppccocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -537,8 +509,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item16>
-      <Item17 Name="darwinppc64cocoa">
+      </Item15>
+      <Item16 Name="darwinppc64cocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -568,8 +540,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item17>
-      <Item18 Name="darwinarm64cocoa">
+      </Item16>
+      <Item17 Name="darwinarm64cocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -598,7 +570,7 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item18>
+      </Item17>
       <SharedMatrixOptions Count="4">
         <Item1 ID="784204643275" Modes="darwin64QT5,haiku32QT5,haiku64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item2 ID="322994045052" Modes="darwin32cocoa,darwin64cocoa,darwinppc64cocoa,darwinppccocoa,darwin64cocoalegacy,darwinarm64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>

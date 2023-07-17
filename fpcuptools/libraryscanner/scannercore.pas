@@ -18,10 +18,10 @@ type
     FLibraryNotFoundList: TStringList;
     FLibraryLocationList: TStringList;
     chkQT:boolean;
-    function StoreLibrary(aLib:string):boolean;
-    procedure CheckAndAddLibrary(aLib:string);
+    function StoreLibrary(const aLib:string):boolean;
+    procedure CheckAndAddLibrary(const aLib:string);
   public
-    procedure GetAndSaveLibs(Location:string);
+    procedure GetAndSaveLibs(const Location:string);
     constructor Create;
     destructor Destroy; override;
   published
@@ -268,7 +268,7 @@ const FPCEXTRALIBS : array [0..36] of string = (
   'libmysqlclient.so.12'
 );
 
-const LAZLIBS : array [0..18] of string = (
+const LAZLIBS : array [0..19] of string = (
   'libgdk-x11-2.0.so.0',
   'libgtk-x11-2.0.so.0',
   'libX11.so.6',
@@ -281,6 +281,7 @@ const LAZLIBS : array [0..18] of string = (
   'libpango-1.0.so.0',
   'libcairo.so.2',
   'libatk-1.0.so.0',
+  'libiconv.so.2',
   'libicui18n.so',
   'libgtk-3.so.0',
   'libsqlite3.so.0',
@@ -290,12 +291,13 @@ const LAZLIBS : array [0..18] of string = (
   'libvulkan.so.1'
 );
 
-const LAZLINKLIBS : array [0..6] of string = (
+const LAZLINKLIBS : array [0..7] of string = (
   'libgdk-x11-2.0.so',
   'libgtk-x11-2.0.so',
   'libX11.so',
   'libgdk_pixbuf-2.0.so',
   'libpango-1.0.so',
+  'libiconv.so',
   'libcairo.so',
   'libatk-1.0.so'
 );
@@ -755,12 +757,12 @@ begin
   result:=t;
 end;
 
-function TScannerCore.StoreLibrary(aLib:string):boolean;
+function TScannerCore.StoreLibrary(const aLib:string):boolean;
 begin
   result:=(FinalSearchResultList.Add(aLib)<>-1);
 end;
 
-procedure TScannerCore.CheckAndAddLibrary(aLib:string);
+procedure TScannerCore.CheckAndAddLibrary(const aLib:string);
 const
   MAGICNEEDED = 'NEEDED';
   MAGICSHARED = 'Shared library:';
@@ -872,7 +874,7 @@ begin
   end;
 end;
 
-procedure TScannerCore.GetAndSaveLibs(Location:string);
+procedure TScannerCore.GetAndSaveLibs(const Location:string);
 begin
   FLibraryList.Clear;
   FLibraryNotFoundList.Clear;
