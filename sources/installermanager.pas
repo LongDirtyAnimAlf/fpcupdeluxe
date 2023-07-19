@@ -1307,6 +1307,11 @@ begin
     //http://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/VM-IMAGES
     if (CrossCPU_Target=TCPU.x86_64) then s:='FreeBSD_AMD64_FreeBSD_10.zip';
   end;
+  if (CrossOS_Target=TOS.netbsd) then
+  begin
+    if (CrossCPU_Target=TCPU.i386) then s:='NetBSD_i386_NetBSD_0903.zip';
+    if (CrossCPU_Target=TCPU.x86_64) then s:='NetBSD_AMD64_NetBSD_0903.zip';
+  end;
   if (CrossOS_Target=TOS.openbsd) then
   begin
     if (CrossCPU_Target=TCPU.aarch64) then s:='OpenBSD_AArch64_OpenBSD_0606.zip';

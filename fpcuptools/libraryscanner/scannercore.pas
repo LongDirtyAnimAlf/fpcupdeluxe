@@ -102,13 +102,17 @@ const
   {$endif}
 
   {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OenBSD) OR defined(DragonFly)}
-  BSDSEARCHDIRS : array [0..5] of string = (
+  BSDSEARCHDIRS : array [0..9] of string = (
   '/lib',
   '/libexec',
   '/usr/lib',
+  '/usr/pkg/lib',
+  '/usr/X11R7/lib',
   '/usr/local/lib',
   '/usr/local/lib/qt5',
-  '/usr/local/lib/qt6'
+  '/usr/local/lib/qt6',
+  '/usr/pkg/qt5/lib',
+  '/usr/pkg/qt6/lib'
   );
   {$endif}
 
