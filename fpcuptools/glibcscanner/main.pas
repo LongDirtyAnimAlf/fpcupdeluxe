@@ -69,7 +69,15 @@ begin
           fh:=Trim(Copy(sh,i,j-i));
           if fh[1]<>'_' then
           begin
-            glibcfunctions.Append('name '''+fh+''';');
+            //glibcfunctions.Append('name '''+fh+''';');
+            j:=Pos('@',sh,i);
+            if (j>0) then
+            begin
+              Inc(j);
+              pf:=Copy(sh,j,MaxInt);
+              SetLength(pf,Length(pf)-3);
+              glibcfunctions.AddObject('name '''+fh+''';',TObject(StrNew(PChar(pf))));
+            end;
           end;
         end;
       end;
@@ -80,8 +88,8 @@ begin
 
   // Check for 2.2.5 or newer from .h file
 
-  fh:='cmem';
-  glibcfunctions.Append('name '''+fh+''';');
+  //fh:='cmem';
+  //glibcfunctions.Append('name '''+fh+''';');
 
   try
     FindAllFiles(PascalFiles, 'C:\fpcupsystems\trunk\fpcsrc\rtl', '*.pas;*.pp;*.p;*.inc', true); //find e.g. all pascal sourcefiles
@@ -98,9 +106,26 @@ begin
         begin
           if (Pos(sh,sl)>0) then
           begin
-            Memo1.Lines.Append(pf);
+            i:=glibcfunctions.IndexOf(sh);
+            if (i<>-1) then
+              fh:=StrPas(PChar(glibcfunctions.Objects[i]))
+            else
+              fh:='';
+
+            //Memo1.Lines.Append(pf);
             Memo1.Lines.Append(sl);
+            Memo1.Lines.Append(fh);
             Memo1.Lines.Append('');
+
+            if fh<>'GLIBC_2.2.5' then
+            begin
+              Memo3.Lines.Append(pf);
+              Memo3.Lines.Append(sl);
+              Memo3.Lines.Append(fh);
+              Memo3.Lines.Append('');
+
+            end;
+
             Application.ProcessMessages;
           end;
         end;

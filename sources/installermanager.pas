@@ -1134,6 +1134,7 @@ end;
 procedure TFPCupManager.GetCrossToolsFileName(out BinsFileName,LibsFileName:string);
 var
   s:string;
+  binversion,ostype:string;
 begin
   s:=GetCPUCase(CrossCPU_Target);
   if CrossCPU_Target=TCPU.x86_64 then s:='x64'; // Legacy support
@@ -1308,45 +1309,49 @@ begin
     LibsFileName:=s;
   end;
 
-
   // Check for the new bins !!
-  s:='';
+  binversion:='unknown';
+  ostype:=GetOSCase(CrossOS_Target);
 
+  // For Windows
   if GetTOS(GetSourceOS) in [TOS.win32,TOS.win64] then
   begin
     if (CrossOS_Target=TOS.linux) then
     begin
+      if MUSL then ostype:='MUSL';
       if (CrossCPU_Target=TCPU.x86_64) then
       begin
-        s:='Linux_V239.zip';
-        if MUSL then s:='Alpine_V240.zip';
+        binversion:='V239';
+        if MUSL then binversion:='V240';
       end;
       if (CrossCPU_Target=TCPU.aarch64) then
       begin
-        s:='Linux_V232.zip';
-        if MUSL then s:='Alpine_V228.zip';
+        binversion:='V232';
+        if MUSL then binversion:='V228';
       end;
-      if (CrossCPU_Target=TCPU.i386) then s:='Linux_V227.zip';
-      if (CrossCPU_Target=TCPU.loongarch64) then s:='Linux_V240.zip';
-      if (CrossCPU_Target=TCPU.m68k) then s:='Linux_V237.zip';
-
+      if (CrossCPU_Target=TCPU.i386) then binversion:='V227';
+      if (CrossCPU_Target=TCPU.loongarch64) then binversion:='V240';
+      if (CrossCPU_Target=TCPU.m68k) then binversion:='V237';
+      if (CrossCPU_Target=TCPU.xtensa) then binversion:='V234';
     end;
     if (CrossOS_Target=TOS.aix) then
     begin
-      if (CrossCPU_Target=TCPU.powerpc) then s:='unknown_V230.zip';
+      ostype:='unknown';
+      if (CrossCPU_Target=TCPU.powerpc) then binversion:='V230';
     end;
     if (CrossOS_Target=TOS.aros) then
     begin
-      if (CrossCPU_Target=TCPU.x86_64) then s:='unknown_V232.zip';
-      if (CrossCPU_Target=TCPU.arm) then s:='unknown_V232.zip';
-      if (CrossCPU_Target=TCPU.i386) then s:='unknown_V232.zip';
+      ostype:='unknown';
+      if (CrossCPU_Target=TCPU.x86_64) then binversion:='V232';
+      if (CrossCPU_Target=TCPU.arm) then binversion:='V232';
+      if (CrossCPU_Target=TCPU.i386) then binversion:='V232';
     end;
 
   end;
 
-  if (Length(s)>0) then
+  if (binversion<>'unknown') then
   begin
-    BinsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+s;
+    BinsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+binversion+'.zip';
   end;
 
 end;

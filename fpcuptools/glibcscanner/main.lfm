@@ -49,6 +49,7 @@ object Form1: TForm1
     Lines.Strings = (
       'Memo3'
     )
+    ScrollBars = ssVertical
     TabOrder = 3
   end
 end
