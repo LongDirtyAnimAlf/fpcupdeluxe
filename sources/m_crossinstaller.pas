@@ -260,8 +260,10 @@ type
   end;
 
 function GetCPU(aCPU:TCPU):string;
+function GetCPUCase(aCPU:TCPU):string;
 function GetTCPU(aCPU:string):TCPU;
 function GetOS(aOS:TOS):string;
+function GetOSCase(aOS:TOS):string;
 function GetTOS(aOS:string):TOS;
 function GetSubarch(aSubarch:TSUBARCH):string;
 function GetTSubarch(aSubarch:string):TSUBARCH;
@@ -317,6 +319,18 @@ begin
   result:=GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU));
 end;
 
+function GetCPUCase(aCPU:TCPU):string;
+begin
+  if aCPU=TCPU.arm then result:='ARM' else
+    if aCPU=TCPU.i386 then result:='i386' else
+      if aCPU=TCPU.x86_64 then result:='AMD64' else
+        if aCPU=TCPU.powerpc then result:='PowerPC' else
+          if aCPU=TCPU.powerpc64 then result:='PowerPC64' else
+            if aCPU=TCPU.avr then result:='AVR' else
+              if aCPU=TCPU.m68k then result:='m68k' else
+                result:=UppercaseFirstChar(GetCPU(aCPU));
+end;
+
 function GetTCPU(aCPU:string):TCPU;
 var
   xCPU:TCPU;
@@ -344,6 +358,23 @@ begin
   if (aOS<Low(TOS)) OR (aOS>High(TOS)) OR (aOS=TOS.osNone) then
     raise Exception.Create('Invalid OS for GetOS.');
   result:=GetEnumNameSimple(TypeInfo(TOS),Ord(aOS));
+end;
+
+function GetOSCase(aOS:TOS):string;
+begin
+  if aOS=TOS.morphos then result:='MorphOS' else
+    if aOS=TOS.aros then result:='ArOS' else
+      if aOS=TOS.freebsd then result:='FreeBSD' else
+        if aOS=TOS.dragonfly then result:='DragonFlyBSD' else
+          if aOS=TOS.openbsd then result:='OpenBSD' else
+            if aOS=TOS.netbsd then result:='NetBSD' else
+              if aOS=TOS.aix then result:='AIX' else
+                if aOS=TOS.msdos then result:='MSDos' else
+                  if aOS=TOS.freertos then result:='FreeRTOS' else
+                    if aOS=TOS.win32 then result:='Windows' else
+                      if aOS=TOS.win64 then result:='Windows' else
+                        if aOS=TOS.ios then result:='IOS' else
+                        result:=UppercaseFirstChar(GetOS(aOS));
 end;
 
 function GetTOS(aOS:string):TOS;
@@ -559,25 +590,21 @@ end;
 procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI,LinuxLegacy:boolean; out BinPath,LibPath:string);
 begin
   // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
-
-  LibPath:=GetCPU(CrossCPU_Target)+'-';
-  BinPath:=GetCPU(CrossCPU_Target)+'-';
-
-  if MUSL then
-  begin
-    LibPath:=LibPath+'musl';
-    BinPath:=BinPath+'musl';
-  end;
-
-  LibPath:=LibPath+GetOS(CrossOS_Target);
-  BinPath:=BinPath+GetOS(CrossOS_Target);
+  LibPath:=GetCPU(CrossCPU_Target)+'-'+GetOS(CrossOS_Target);
+  BinPath:=GetCPU(CrossCPU_Target)+'-'+GetOS(CrossOS_Target);
 
   if SolarisOI then
   begin
     LibPath:=LibPath+'-oi';
     BinPath:=BinPath+'-oi';
-  end;
-
+  end
+  else
+  if MUSL then
+  begin
+    LibPath:=LibPath+'-musl';
+    BinPath:=BinPath+'-musl';
+  end
+  else
   if LinuxLegacy then
   begin
     LibPath:=LibPath+'-legacy';

@@ -56,7 +56,6 @@ begin
 
   glibcfunctionsfromfile.LoadFromFile('glibc_2.27_x64.h');
 
-  (*
   try
     for sh in glibcfunctionsfromfile do
     begin
@@ -78,7 +77,6 @@ begin
   finally
     glibcfunctionsfromfile.Free;
   end;
-  *)
 
   // Check for 2.2.5 or newer from .h file
 
@@ -86,7 +84,7 @@ begin
   glibcfunctions.Append('name '''+fh+''';');
 
   try
-    FindAllFiles(PascalFiles, 'C:\fpcupsystems\trunk\fpcsrc', '*.pas;*.pp;*.p;*.inc', true); //find e.g. all pascal sourcefiles
+    FindAllFiles(PascalFiles, 'C:\fpcupsystems\trunk\fpcsrc\rtl', '*.pas;*.pp;*.p;*.inc', true); //find e.g. all pascal sourcefiles
 
     for pf in PascalFiles do
     begin

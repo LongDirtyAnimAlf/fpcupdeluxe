@@ -227,6 +227,9 @@ const
   NEWLIBSTAG                   = 'crosslibs_all';
   OLDLIBSTAG                   = 'crosslibs';
 
+  OLDBINSTAG                   = 'crossbins';
+  NEWBINSTAG                   = 'crossbins_all';
+
   //Sequence contants for statemachine
 
   _SEP                     = ';';

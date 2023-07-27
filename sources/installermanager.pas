@@ -1135,16 +1135,8 @@ procedure TFPCupManager.GetCrossToolsFileName(out BinsFileName,LibsFileName:stri
 var
   s:string;
 begin
-  // Setting the CPU part of the name[s] for the file to download
-  if CrossCPU_Target=TCPU.arm then s:='ARM' else
-    if CrossCPU_Target=TCPU.i386 then s:='i386' else
-      if CrossCPU_Target=TCPU.x86_64 then s:='x64' else
-        if CrossCPU_Target=TCPU.powerpc then s:='PowerPC' else
-          if CrossCPU_Target=TCPU.powerpc64 then s:='PowerPC64' else
-            if CrossCPU_Target=TCPU.avr then s:='AVR' else
-              if CrossCPU_Target=TCPU.m68k then s:='m68k' else
-                s:=UppercaseFirstChar(GetCPU(CrossCPU_Target));
-
+  s:=GetCPUCase(CrossCPU_Target);
+  if CrossCPU_Target=TCPU.x86_64 then s:='x64'; // Legacy support
   BinsFileName:=s;
 
   // Set special CPU names
@@ -1173,20 +1165,11 @@ begin
   end;
 
   // Set OS case
-  if CrossOS_Target=TOS.morphos then s:='MorphOS' else
-    if CrossOS_Target=TOS.freebsd then s:='FreeBSD' else
-      if CrossOS_Target=TOS.dragonfly then s:='DragonFlyBSD' else
-        if CrossOS_Target=TOS.openbsd then s:='OpenBSD' else
-          if CrossOS_Target=TOS.netbsd then s:='NetBSD' else
-            if CrossOS_Target=TOS.aix then s:='AIX' else
-              if CrossOS_Target=TOS.msdos then s:='MSDos' else
-                if CrossOS_Target=TOS.freertos then s:='FreeRTOS' else
-                  if CrossOS_Target=TOS.win32 then s:='Windows' else
-                    if CrossOS_Target=TOS.win64 then s:='Windows' else
-                      if CrossOS_Target=TOS.ios then s:='IOS' else
-                      s:=UppercaseFirstChar(GetOS(CrossOS_Target));
+  s:=GetOSCase(CrossOS_Target);
+  if CrossOS_Target=TOS.aros then s:='Aros'; // Legacy support
 
   if SolarisOI then s:=s+'OI';
+
   BinsFileName:=s+BinsFileName;
 
   if MUSL then BinsFileName:='MUSL'+BinsFileName;
@@ -1321,10 +1304,53 @@ begin
 
   if (Length(s)>0) then
   begin
+    //LibsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+s;
     LibsFileName:=s;
   end;
 
+
+  // Check for the new bins !!
+  s:='';
+
+  if GetTOS(GetSourceOS) in [TOS.win32,TOS.win64] then
+  begin
+    if (CrossOS_Target=TOS.linux) then
+    begin
+      if (CrossCPU_Target=TCPU.x86_64) then
+      begin
+        s:='Linux_V239.zip';
+        if MUSL then s:='Alpine_V240.zip';
+      end;
+      if (CrossCPU_Target=TCPU.aarch64) then
+      begin
+        s:='Linux_V232.zip';
+        if MUSL then s:='Alpine_V228.zip';
+      end;
+      if (CrossCPU_Target=TCPU.i386) then s:='Linux_V227.zip';
+      if (CrossCPU_Target=TCPU.loongarch64) then s:='Linux_V240.zip';
+      if (CrossCPU_Target=TCPU.m68k) then s:='Linux_V237.zip';
+
+    end;
+    if (CrossOS_Target=TOS.aix) then
+    begin
+      if (CrossCPU_Target=TCPU.powerpc) then s:='unknown_V230.zip';
+    end;
+    if (CrossOS_Target=TOS.aros) then
+    begin
+      if (CrossCPU_Target=TCPU.x86_64) then s:='unknown_V232.zip';
+      if (CrossCPU_Target=TCPU.arm) then s:='unknown_V232.zip';
+      if (CrossCPU_Target=TCPU.i386) then s:='unknown_V232.zip';
+    end;
+
+  end;
+
+  if (Length(s)>0) then
+  begin
+    BinsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+s;
+  end;
+
 end;
+
 
 procedure TFPCupManager.GetCrossToolsPath(out BinPath,LibPath:string);
 begin
@@ -1348,41 +1374,6 @@ begin
 
   BaseBinsURL:='';
 
-  if GetSourceOS=GetOS(TOS.win32) then BaseBinsURL:='wincrossbins'
-  else
-     if GetSourceOS=GetOS(TOS.win64) then
-     begin
-       BaseBinsURL:='wincrossbins';
-     end
-     else
-        if GetSourceOS=GetOS(TOS.linux) then
-        begin
-          if GetSourceCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386crossbins';
-          if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64crossbins';
-          if GetSourceCPU=GetCPU(TCPU.arm) then BaseBinsURL:='linuxarmcrossbins';
-          if GetSourceCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='linuxaarch64crossbins';
-        end
-        else
-          if GetSourceOS=GetOS(TOS.freebsd) then
-          begin
-            if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='freebsdx64crossbins';
-          end
-          else
-            if GetSourceOS=GetOS(TOS.solaris) then
-            begin
-              {if FPCupManager.SolarisOI then}
-              begin
-                if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='solarisoix64crossbins';
-              end;
-            end
-            else
-              if GetSourceOS=GetOS(TOS.darwin) then
-              begin
-                if GetSourceCPU=GetCPU(TCPU.i386) then BaseBinsURL:='darwini386crossbins';
-                if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='darwinx64crossbins';
-                if GetSourceCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='darwinarm64crossbins';
-              end;
-
   s:=GetURLDataFromCache(FPCUPGITREPOAPIRELEASES+'?per_page=100');
   success:=(Length(s)>0);
 
@@ -1395,101 +1386,139 @@ begin
       except
         Json:=nil;
       end;
-      if JSON.IsNull then success:=false;
-
-      if (NOT success) then
-      begin
-        BaseBinsURL:='';
-        exit;
-      end;
-
-      (*
-      Ss := TStringStream.Create('');
-      try
-        success:=Download(False,FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL,Ss);
-        if (NOT success) then
-        begin
-          {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}
-          Ss.Clear;
-          {$ENDIF}
-          Ss.Position:=0;
-          success:=Download(True,FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL,Ss);
-        end;
-        if success then s:=Ss.DataString;
-      finally
-        Ss.Free;
-      end;
+      if Json.IsNull then success:=false;
 
       if success then
       begin
-        if (Length(s)>0) then
-        begin
-          try
-            Json:=GetJSON(s);
-          except
-            Json:=nil;
-          end;
-          if JSON.IsNull then success:=false;
-        end;
-      end;
+        success:=false;
+        FileURL:='';
 
-      if success then
-      begin
-        for i:=Pred(Json.Count) downto 0 do
-        begin
-          Item := TJSONObject(Json.Items[i]);
-          TagName:=Item.Get('ref');
-          Delete(TagName,1,Length('refs/tags/'));
-        end;
+        // First, look for new bins
 
-      end;
-      //FPCUPGITREPOAPI+'/git/refs/tags/'+BaseBinsURL;
-      //FPCUPGITREPOAPIRELEASES+'/tags/wincrossbins_v1.0';
-      *)
-
-      success:=false;
-      FileURL:='';
-      for i:=0 to Pred(Json.Count) do
-      begin
-        Item := TJSONObject(Json.Items[i]);
-        TagName:=Item{%H-}.Get('tag_name');
-        if (Pos(BaseBinsURL,TagName)<>1) then continue;
-        Assets:=Item.Get('assets',TJSONArray(nil));
-        // Search zip
-        for iassets:=0 to Pred(Assets.Count) do
-        begin
-          Asset := TJSONObject(Assets[iassets]);
-          FileName:=Asset{%H-}.Get('name');
-          if AnsiStartsText(BinsFileName+'.zip',FileName) then
-          begin
-            BinsFileName:=FileName;
-            FileURL:=Asset{%H-}.Get('browser_download_url');
-          end;
-          success:=(Length(FileURL)>0);
-          if success then break;
-        end;
         if (NOT success) then
         begin
-          // Search any
-          for iassets:=0 to Pred(Assets.Count) do
+          BaseBinsURL:='';
+          if GetTOS(GetSourceOS) in [TOS.win32,TOS.win64] then BaseBinsURL:='windows_';
+
+          if (Length(BaseBinsURL)>0) then
           begin
-            Asset := TJSONObject(Assets[iassets]);
-            FileName:=Asset{%H-}.Get('name');
-            if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(BinsFileName,FileName)) then
+            BaseBinsURL:=BaseBinsURL+NEWBINSTAG;
+
+            for i:=0 to Pred(Json.Count) do
             begin
-              BinsFileName:=FileName;
-              FileURL:=Asset{%H-}.Get('browser_download_url');
+              Item := TJSONObject(Json.Items[i]);
+              TagName:=Item{%H-}.Get('tag_name');
+              success:=(BaseBinsURL=TagName);
+              if success then break;
             end;
-            success:=(Length(FileURL)>0);
-            if success then break;
+            if success then
+            begin
+              success:=false;
+              Assets:=Item.Get('assets',TJSONArray(nil));
+              // Search zip
+              for iassets:=0 to Pred(Assets.Count) do
+              begin
+                Asset := TJSONObject(Assets[iassets]);
+                FileName:=Asset{%H-}.Get('name');
+                if (FileName=BinsFileName) then
+                begin
+                  FileURL:=Asset{%H-}.Get('browser_download_url');
+                end;
+                success:=(Length(FileURL)>0);
+                if success then
+                begin
+                  BaseBinsURL:=FileURL;
+                  result:=true;
+                  break;
+                end;
+              end;
+            end;
           end;
         end;
-        if success then
+
+        // Second, look for original bins
+
+        if (NOT success) then
         begin
-          BaseBinsURL:=FileURL;
-          BinsFileName:=FileName;
-          result:=true;
-          break;
+          BaseBinsURL:='';
+          if GetTOS(GetSourceOS) in [TOS.win32,TOS.win64] then BaseBinsURL:='win'
+          else
+             if GetSourceOS=GetOS(TOS.linux) then
+             begin
+               if GetSourceCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386';
+               if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64';
+               if GetSourceCPU=GetCPU(TCPU.arm) then BaseBinsURL:='linuxarm';
+               if GetSourceCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='linuxaarch64';
+             end
+             else
+               if GetSourceOS=GetOS(TOS.freebsd) then
+               begin
+                 if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='freebsdx64';
+               end
+               else
+                 if GetSourceOS=GetOS(TOS.solaris) then
+                 begin
+                   {if FPCupManager.SolarisOI then}
+                   begin
+                     if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='solarisoix64';
+                   end;
+                 end
+                 else
+                   if GetSourceOS=GetOS(TOS.darwin) then
+                   begin
+                     if GetSourceCPU=GetCPU(TCPU.i386) then BaseBinsURL:='darwini386';
+                     if GetSourceCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='darwinx64';
+                     if GetSourceCPU=GetCPU(TCPU.aarch64) then BaseBinsURL:='darwinarm64';
+                   end;
+
+          if (Length(BaseBinsURL)>0) then
+          begin
+            BaseBinsURL:=BaseBinsURL+OLDBINSTAG;
+
+            for i:=0 to Pred(Json.Count) do
+            begin
+              Item := TJSONObject(Json.Items[i]);
+              TagName:=Item{%H-}.Get('tag_name');
+              if (Pos(BaseBinsURL,TagName)<>1) then continue;
+              Assets:=Item.Get('assets',TJSONArray(nil));
+              // Search zip
+              for iassets:=0 to Pred(Assets.Count) do
+              begin
+                Asset := TJSONObject(Assets[iassets]);
+                FileName:=Asset{%H-}.Get('name');
+                if AnsiStartsText(BinsFileName+'.zip',FileName) then
+                begin
+                  BinsFileName:=FileName;
+                  FileURL:=Asset{%H-}.Get('browser_download_url');
+                end;
+                success:=(Length(FileURL)>0);
+                if success then break;
+              end;
+              if (NOT success) then
+              begin
+                // Search any
+                for iassets:=0 to Pred(Assets.Count) do
+                begin
+                  Asset := TJSONObject(Assets[iassets]);
+                  FileName:=Asset{%H-}.Get('name');
+                  if ((ExtractFileExt(FileName)<>'.zip') AND AnsiStartsText(BinsFileName,FileName)) then
+                  begin
+                    BinsFileName:=FileName;
+                    FileURL:=Asset{%H-}.Get('browser_download_url');
+                  end;
+                  success:=(Length(FileURL)>0);
+                  if success then break;
+                end;
+              end;
+              if success then
+              begin
+                BaseBinsURL:=FileURL;
+                BinsFileName:=FileName;
+                result:=true;
+                break;
+              end;
+            end;
+          end;
         end;
       end;
 
@@ -1498,6 +1527,7 @@ begin
     end;
   end;
 
+  if (NOT success) then BaseBinsURL:='';
 end;
 
 function TFPCupManager.GetCrossLibsURL(out BaseLibsURL:string; var LibsFileName:string):boolean;
