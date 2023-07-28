@@ -1134,7 +1134,7 @@ end;
 procedure TFPCupManager.GetCrossToolsFileName(out BinsFileName,LibsFileName:string);
 var
   s:string;
-  binversion,ostype:string;
+  toolversion,ostype:string;
 begin
   s:=GetCPUCase(CrossCPU_Target);
   if CrossCPU_Target=TCPU.x86_64 then s:='x64'; // Legacy support
@@ -1247,71 +1247,99 @@ begin
   BinsFileName:='CrossBins'+BinsFileName;
   {$endif MSWINDOWS}
 
+
+
   // Check for the new libs !!
+  toolversion:='0';
+  ostype:=GetOSCase(CrossOS_Target);
   s:='';
+
   if (CrossOS_Target=TOS.linux) then
   begin
-    if (CrossCPU_Target=TCPU.aarch64) then s:='Linux_AArch64_Ubuntu_1804.zip';
-    if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
+    ostype:='Ubuntu';
+    if MUSL then ostype:='Alpine';
+    if (CrossCPU_Target=TCPU.aarch64) then toolversion:='1804';
+    if (CrossCPU_Target=TCPU.arm) then toolversion:='1804';
     if (CrossCPU_Target=TCPU.x86_64) then
     begin
-      s:='Linux_AMD64_Ubuntu_1804.zip';
-      if MUSL then s:='Linux_AMD64_Alpine_0318.zip';
+      toolversion:='1804';
+      if MUSL then toolversion:='0318';
     end;
-    if (CrossCPU_Target=TCPU.i386) then s:='Linux_i386_Ubuntu_1804.zip';
-    if (CrossCPU_Target=TCPU.loongarch64) then s:='Linux_Loongarch64_Deepin_0803.zip';
+    if (CrossCPU_Target=TCPU.i386) then toolversion:='1804';
+    if (CrossCPU_Target=TCPU.loongarch64) then
+    begin
+      ostype:='Deepin';
+      toolversion:='0803';
+    end;
   end;
   if (CrossOS_Target=TOS.android) then
   begin
-    if (CrossCPU_Target=TCPU.aarch64) then s:='Android_AArch64_API_21.zip';
-    if (CrossCPU_Target=TCPU.x86_64) then s:='Android_AMD64_API_21.zip';
+    ostype:='API';
+    if (CrossCPU_Target=TCPU.aarch64) then toolversion:='21';
+    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='21';
     if (CrossCPU_Target=TCPU.arm) then s:='Android_ARMEL_API_18.zip';
-    if (CrossCPU_Target=TCPU.i386) then s:='Android_i386_API_21.zip';
-    if (CrossCPU_Target=TCPU.mipsel) then s:='Android_Mipsel_API_18.zip';
+    if (CrossCPU_Target=TCPU.i386) then toolversion:='21';
+    if (CrossCPU_Target=TCPU.mipsel) then toolversion:='18';
   end;
   if (CrossOS_Target=TOS.darwin) then
   begin
-    if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='Darwin_All.zip';
-    if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PPC_10_05.zip';
+    if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='Darwin_All_OSX_1203.zip';
+    if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PPC_OSX_1005.zip';
   end;
   if (CrossOS_Target=TOS.ios) then
   begin
-    if (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]) then s:='IOS_All.zip';
+    if (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]) then s:='IOS_All_IOS_1307.zip';
   end;
   if (CrossOS_Target=TOS.solaris) then
   begin
     if (CrossCPU_Target=TCPU.x86_64) then
     begin
-      s:='Solaris_AMD64_Oracle_1104.zip';
-      if SolarisOI then s:='Solaris_AMD64_OpenIndiana_2010.zip';
+      ostype:='Oracle';
+      toolversion:='1104';
+      if SolarisOI then
+      begin
+        ostype:='OpenIndiana';
+        toolversion:='2010';
+      end;
     end;
   end;
   if (CrossOS_Target=TOS.freebsd) then
   begin
     //http://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/VM-IMAGES
-    if (CrossCPU_Target=TCPU.x86_64) then s:='FreeBSD_AMD64_FreeBSD_10.zip';
+    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='10';
   end;
   if (CrossOS_Target=TOS.netbsd) then
   begin
-    if (CrossCPU_Target=TCPU.i386) then s:='NetBSD_i386_NetBSD_0903.zip';
-    if (CrossCPU_Target=TCPU.x86_64) then s:='NetBSD_AMD64_NetBSD_0903.zip';
+    if (CrossCPU_Target=TCPU.i386) then toolversion:='0903';
+    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='0903';
   end;
   if (CrossOS_Target=TOS.openbsd) then
   begin
-    if (CrossCPU_Target=TCPU.aarch64) then s:='OpenBSD_AArch64_OpenBSD_0606.zip';
-    if (CrossCPU_Target=TCPU.i386) then s:='OpenBSD_i386_OpenBSD_0600.zip';
-    if (CrossCPU_Target=TCPU.x86_64) then s:='OpenBSD_AMD64_OpenBSD_0701.zip';
+    if (CrossCPU_Target=TCPU.aarch64) then toolversion:='0606';
+    if (CrossCPU_Target=TCPU.i386) then toolversion:='0600';
+    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='0701';
   end;
 
   if (Length(s)>0) then
   begin
-    //LibsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+s;
+    // for special names
     LibsFileName:=s;
+  end
+  else
+  begin
+    if (toolversion<>'0') then
+    begin
+      WritelnLog('Going to get the libs from '+ostype+' with version '+toolversion,true);
+      LibsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+toolversion+'.zip';
+    end;
   end;
 
+
+
   // Check for the new bins !!
-  binversion:='unknown';
+  toolversion:='0';
   ostype:=GetOSCase(CrossOS_Target);
+  s:='';
 
   // For Windows
   if GetTOS(GetSourceOS) in [TOS.win32,TOS.win64] then
@@ -1321,39 +1349,47 @@ begin
       if MUSL then ostype:='MUSL';
       if (CrossCPU_Target=TCPU.x86_64) then
       begin
-        binversion:='V239';
-        if MUSL then binversion:='V240';
+        toolversion:='V239';
+        if MUSL then toolversion:='V240';
       end;
       if (CrossCPU_Target=TCPU.aarch64) then
       begin
-        binversion:='V232';
-        if MUSL then binversion:='V228';
+        toolversion:='V232';
+        if MUSL then toolversion:='V228';
       end;
-      if (CrossCPU_Target=TCPU.i386) then binversion:='V227';
-      if (CrossCPU_Target=TCPU.loongarch64) then binversion:='V240';
-      if (CrossCPU_Target=TCPU.m68k) then binversion:='V237';
-      if (CrossCPU_Target=TCPU.xtensa) then binversion:='V234';
+      if (CrossCPU_Target=TCPU.i386) then toolversion:='V227';
+      if (CrossCPU_Target=TCPU.loongarch64) then toolversion:='V240';
+      if (CrossCPU_Target=TCPU.m68k) then toolversion:='V237';
+      if (CrossCPU_Target=TCPU.xtensa) then toolversion:='V234';
     end;
     if (CrossOS_Target=TOS.aix) then
     begin
       ostype:='unknown';
-      if (CrossCPU_Target=TCPU.powerpc) then binversion:='V230';
+      if (CrossCPU_Target=TCPU.powerpc) then toolversion:='V230';
     end;
     if (CrossOS_Target=TOS.aros) then
     begin
       ostype:='unknown';
-      if (CrossCPU_Target=TCPU.x86_64) then binversion:='V232';
-      if (CrossCPU_Target=TCPU.arm) then binversion:='V232';
-      if (CrossCPU_Target=TCPU.i386) then binversion:='V232';
+      if (CrossCPU_Target=TCPU.x86_64) then toolversion:='V232';
+      if (CrossCPU_Target=TCPU.arm) then toolversion:='V232';
+      if (CrossCPU_Target=TCPU.i386) then toolversion:='V232';
     end;
 
   end;
 
-  if (binversion<>'unknown') then
+  if (Length(s)>0) then
   begin
-    BinsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+binversion+'.zip';
+    // for special names
+    BinsFileName:=s;
+  end
+  else
+  begin
+    if (toolversion<>'0') then
+    begin
+      WritelnLog('Going to get the [GNU-]binaries for '+ostype+' with version '+toolversion,true);
+      BinsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+toolversion+'.zip';
+    end;
   end;
-
 end;
 
 
