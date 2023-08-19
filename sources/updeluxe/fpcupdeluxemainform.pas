@@ -2379,7 +2379,7 @@ begin
 
   if Sender=ESPBtn then
   begin
-    s:=Format(upInstallConfimation,['FPC trunk','Lazarus trunk',' + cross arm ESP32 (FreeRTOS) compiler + tools']);
+    s:=Format(upInstallConfimation,['FPC trunk','Lazarus trunk',' + cross xtensa ESP32 (FreeRTOS) compiler + tools']);
     aModule:='xtensatools4fpc';
     aFPCTarget:='trunk'+GITLABEXTENSION;
     aLazarusTarget:='trunk'+GITLABEXTENSION;
