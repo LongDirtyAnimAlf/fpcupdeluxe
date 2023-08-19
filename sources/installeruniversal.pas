@@ -266,7 +266,7 @@ end;
 {$ifndef FPCONLY}
 function TUniversalInstaller.RebuildLazarus:boolean;
 var
-  OldPath,s:string;
+  OldPath,s,s2:string;
   LazarusConfig: TUpdateLazConfig;
   i,j:integer;
 begin
@@ -335,20 +335,29 @@ begin
     //Set options
     s := FLazarusCompilerOptions;
 
+    // This code is copied from the native Lazarus installer.
+    // This must be improved: no code duplicated please ... ;-)
     {$ifdef Unix}
       {$ifndef Darwin}
         {$ifdef LCLQT}
         {$endif}
         {$ifdef LCLQT5}
+        if LibWhich(LIBQT5,s2) then
+        begin
+          s:=s+' -Fl'+ExcludeTrailingPathDelimiter(s2);
+        end
+        else
+        begin
           // Did we copy the QT5 libs ??
           // If so, add some linker help.
-          if (NOT LibWhich(LIBQT5)) AND (FileExists(IncludeTrailingPathDelimiter(FLazarusInstallDir)+LIBQT5)) then
+          if (FileExists(IncludeTrailingPathDelimiter(FLazarusInstallDir)+LIBQT5)) then
           begin
             s:=s+' -k"-rpath=./"';
             s:=s+' -k"-rpath=$$ORIGIN"';
             s:=s+' -k"-rpath=\\$$$$$\\ORIGIN"';
             s:=s+' -Fl'+FLazarusInstallDir;
           end;
+        end;
         {$endif}
       {$endif}
     {$endif}

@@ -1259,7 +1259,7 @@ begin
     ostype:='Ubuntu';
     if MUSL then ostype:='Alpine';
     if (CrossCPU_Target=TCPU.aarch64) then toolversion:='1804';
-    if (CrossCPU_Target=TCPU.arm) then toolversion:='1804';
+    if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
     if (CrossCPU_Target=TCPU.x86_64) then
     begin
       toolversion:='1804';
@@ -1361,6 +1361,10 @@ begin
       if (CrossCPU_Target=TCPU.loongarch64) then toolversion:='V240';
       if (CrossCPU_Target=TCPU.m68k) then toolversion:='V237';
       if (CrossCPU_Target=TCPU.xtensa) then toolversion:='V234';
+    end;
+    if (CrossOS_Target in [TOS.darwin,TOS.ios]) then
+    begin
+      if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_15.zip';
     end;
     if (CrossOS_Target=TOS.aix) then
     begin
@@ -2016,8 +2020,9 @@ function TSequencer.DoExec(FunctionName: string): boolean;
 
 
     LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so','libgdk-x11-2.0.so');
-    QTLIBS:TLibList = ('libQt4Pas.so.1','','','','');
-    QT5LIBS:TLibList = ('libQt5Pas.so.1','','','','');
+    QTLIBS:TLibList = (LIBQT4VERSION,'','','','');
+    QT5LIBS:TLibList = (LIBQT5VERSION,'','','','');
+    QT6LIBS:TLibList = (LIBQT6VERSION,'','','','');
   var
     i:integer;
     pll:^TLibList;

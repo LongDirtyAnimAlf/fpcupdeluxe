@@ -744,15 +744,21 @@ begin
         {$ifdef LCLQT}
         {$endif}
         {$ifdef LCLQT5}
-        // Did we copy the QT5 libs ??
-        // If so, add some linker help.
-
-        if (NOT LibWhich(LIBQT5)) AND (FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
+        if LibWhich(LIBQT5,s2) then
         begin
-          s1:=s1+' -k"-rpath=./"';
-          s1:=s1+' -k"-rpath=$$ORIGIN"';
-          s1:=s1+' -k"-rpath=\\$$$$$\\ORIGIN"';
-          s1:=s1+' -Fl'+InstallDirectory;
+          s1:=s1+' -Fl'+ExcludeTrailingPathDelimiter(s2);
+        end
+        else
+        begin
+          // Did we copy the QT5 libs ??
+          // If so, add some linker help.
+          if (FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
+          begin
+            s1:=s1+' -k"-rpath=./"';
+            s1:=s1+' -k"-rpath=$$ORIGIN"';
+            s1:=s1+' -k"-rpath=\\$$$$$\\ORIGIN"';
+            s1:=s1+' -Fl'+InstallDirectory;
+          end;
         end;
         {$endif}
       {$endif}
@@ -1823,7 +1829,7 @@ begin
           // Strange: running needs a .so.1 file .... but linking needs a .so file ...
           s2:=IncludeTrailingPathDelimiter(GDBPath)+LIBQT5;
           if (NOT FileExists(s2)) then FileCopy(s,s2);
-          s2:=s2+'.1';
+          s2:=IncludeTrailingPathDelimiter(GDBPath)+LIBQT5VERSION;
           if (NOT FileExists(s2)) then FileCopy(s,s2);
         end;
       end;
@@ -2620,12 +2626,12 @@ begin
       s:='/boot/system/non-packaged/lib/';
       {$endif}
       ForceDirectoriesSafe(s);
-      if FileExists(FilePath+LIBQT5+'.1') then
+      if FileExists(FilePath+LIBQT5VERSION) then
       begin
-        if (NOT FileExists(s+LIBQT5+'.1')) then
-          FileCopy(FilePath+LIBQT5+'.1',s+LIBQT5+'.1');
+        if (NOT FileExists(s+LIBQT5VERSION)) then
+          FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5VERSION);
         if (NOT FileExists(s+LIBQT5)) then
-          FileCopy(FilePath+LIBQT5+'.1',s+LIBQT5);
+          FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5);
       end;
     end;
     {$endif}
@@ -2636,12 +2642,12 @@ begin
       s:='/usr/local/lib/';
       if DirectoryExists(s) then
       begin
-        if FileExists(FilePath+LIBQT5+'.1') then
+        if FileExists(FilePath+LIBQT5VERSION) then
         begin
-          if (NOT FileExists(s+LIBQT5+'.1')) then
-            FileCopy(FilePath+LIBQT5+'.1',s+LIBQT5+'.1');
+          if (NOT FileExists(s+LIBQT5VERSION)) then
+            FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5VERSION);
           if (NOT FileExists(s+LIBQT5)) then
-            FileCopy(FilePath+LIBQT5+'.1',s+LIBQT5);
+            FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5);
         end;
       end;
     end;
@@ -2649,36 +2655,35 @@ begin
 
     if (NOT LibWhich(LIBQT5)) then
     begin
-      s:='1.2.9';
-      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='1.2.8';
-      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='1.2.7';
-      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='1.2.6';
+      s:='.1.2.13';
+      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='.1.2.9';
+      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='.1.2.8';
+      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='.1.2.7';
+      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='.1.2.6';
       if FileExists(FilePath+LIBQT5+s) then
       begin
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s)) then
           FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s);
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+'.1')) then
-          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+'.1');
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5VERSION)) then
+          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5VERSION);
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
           FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
       end;
 
       //The below can be trivial, but just in case
-      s:='.1';
-      if FileExists(FilePath+LIBQT5+s) then
+      if FileExists(FilePath+LIBQT5VERSION) then
       begin
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s)) then
-          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5VERSION)) then
+          FileCopy(FilePath+LIBQT5VERSION,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5VERSION);
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
-          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
+          FileCopy(FilePath+LIBQT5VERSION,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
       end;
-      s:='';
-      if FileExists(FilePath+LIBQT5+s) then
+      if FileExists(FilePath+LIBQT5) then
       begin
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s)) then
-          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s);
         if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
-          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
+          FileCopy(FilePath+LIBQT5,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
+          FileCopy(FilePath+LIBQT5,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
       end;
     end;
 

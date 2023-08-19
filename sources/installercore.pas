@@ -53,7 +53,12 @@ const
 
   FPCMAKECONFIG         = 'fpcmkcfg';
 
+  LIBQT4                = 'libQt4Pas.so';
+  LIBQT4VERSION         = LIBQT4+'.1';
   LIBQT5                = 'libQt5Pas.so';
+  LIBQT5VERSION         = LIBQT5+'.1';
+  LIBQT6                = 'libQt6Pas.so';
+  LIBQT6VERSION         = LIBQT6+'.6';
 
   FPCPKGFILENAME        = 'fppkg';
   FPCPKGCONFIGFILENAME  = 'fppkg.cfg';

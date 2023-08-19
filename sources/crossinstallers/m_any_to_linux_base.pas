@@ -587,6 +587,7 @@ begin
   {$IFDEF MULTILIB}
   FMultilib:=false;
   {$ENDIF MULTILIB}
+  if FMUSL then AddFPCCFGSnippet('-tmusl');
 end;
 
 destructor Tany_linux.Destroy;

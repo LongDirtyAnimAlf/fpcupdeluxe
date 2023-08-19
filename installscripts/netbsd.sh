@@ -1,5 +1,7 @@
+sudo pkgin -y install gcc10-libs
 sudo pkgin -y install gcc10 
 sudo pkgin -y install git 
+sudo pkgin -y install mozilla-rootcerts-openssl
 sudo pkgin -y install subversion 
 sudo pkgin -y install unzip 
 sudo pkgin -y install wget 
