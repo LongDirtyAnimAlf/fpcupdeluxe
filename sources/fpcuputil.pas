@@ -351,7 +351,7 @@ function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 function GetEnumValueSimple(aTypeInfo:PTypeInfo;const aEnum:string):integer;
 function ContainsDigit(const s: string): Boolean;
 //Find a library, if any
-function LibWhich(const {%H-}aLibrary: string; out {%H-}dir: string): boolean;
+function LibWhich(const {%H-}aLibrary: string; out {%H-}location: string): boolean;
 function LibWhich(const aLibrary: string): boolean;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(const Executable: string): string;
@@ -3666,7 +3666,7 @@ begin
   result := false;
 end;
 
-function LibWhich(const aLibrary: string; out dir: string): boolean;
+function LibWhich(const aLibrary: string; out location: string): boolean;
 {$ifdef Unix}
 const
   UNIXSEARCHDIRS : array [0..3] of string = (
@@ -3706,8 +3706,8 @@ begin
       result:=(Length(OutputString)>0);
       if result then
       begin
-        dir:='Found in library path: '+ExtractFileDir(OutputString);
-        ThreadLog('Library searcher found '+aLibrary+' in path @ '+OutputString,etDebug);
+        location:=ExtractFileDir(OutputString);
+        ThreadLog('Library searcher found '+aLibrary+' in path @ '+location,etDebug);
       end;
     end;
   end;
@@ -3745,7 +3745,7 @@ begin
               begin
                 aFile:=OutputLines[i];
                 if FileExists(aFile) then
-                  dir:='Found in unix dir: '+ExtractFileDir(aFile)
+                  location:=ExtractFileDir(aFile)
                 else
                   result:=false;
               end;
@@ -3770,7 +3770,7 @@ begin
               begin
                 aFile:=OutputLines[i];
                 if FileExists(aFile) then
-                  dir:='Found symlink in unix dir: '+ExtractFileDir(aFile)
+                  location:=ExtractFileDir(aFile)
                 else
                   result:=false;
               end;
@@ -3806,13 +3806,13 @@ begin
           i:=StringListContains(OutputLines,aLibrary);
           if (i<>-1) then
           begin
-            aFile:=OutputLines[i];
+            aFile:=Trim(OutputLines[i]);
             i:=Pos(' /',aFile);
             if (i>0) then
             begin
               Delete(aFile,1,i);
               if FileExists(aFile) then
-                dir:='Found with ldconfig: '+ExtractFileDir(aFile)
+                location:=ExtractFileDir(aFile)
               else
                 result:=false;
             end;

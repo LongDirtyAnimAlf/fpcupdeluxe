@@ -4483,7 +4483,7 @@ begin
 
   {$ifdef LCLQT5}
   if LibWhich(LIBQT5,QT5LibraryLocation) then
-    AddMessage('Found system wide '+LIBQT5+'. '+QT5LibraryLocation+'. And that will be used.')
+    AddMessage('Found system wide '+LIBQT5+' in '+QT5LibraryLocation+'. And that will be used.')
   else
     AddMessage('No system wide '+LIBQT5+' found. Some QT5 trickery will be used');
   {$endif}
