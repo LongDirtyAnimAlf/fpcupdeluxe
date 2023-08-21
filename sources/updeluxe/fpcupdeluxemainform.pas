@@ -3663,11 +3663,14 @@ begin
 
     if Sender=BitBtnLazarusOnly then
     begin
-      success:=FPCupManager.CheckCurrentFPCInstall;
-      if (NOT success) then
+      if (NOT Form2.SystemFPC) then
       begin
-        ShowMessage('No valid FPC install found. Please install FPC first.');
-        exit;
+        success:=FPCupManager.CheckCurrentFPCInstall;
+        if (NOT success) then
+        begin
+          ShowMessage('No valid FPC install found. Please install FPC first.');
+          exit;
+        end;
       end;
     end;
 

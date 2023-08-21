@@ -2242,7 +2242,10 @@ function TSequencer.GetInstaller(ModuleName: string): boolean;
 var
   Ultibo,CrossCompiling:boolean;
   aCompiler:string;
-  LocalFPCSourceDir:string;
+  LocalFPCLocation:string;
+  Dir:string;
+  Dirs:array[0..127] of pchar;
+  i,count:longint;
 begin
   result:=true;
 
@@ -2251,9 +2254,9 @@ begin
   CrossCompiling:=(FParent.CrossCPU_Target<>TCPU.cpuNone) OR (FParent.CrossOS_Target<>TOS.osNone);
 
   //if Ultibo then
-  //  LocalFPCSourceDir:=IncludeTrailingPathDelimiter(FParent.FPCSourceDirectory)+'source'
+  //  LocalFPCLocation:=IncludeTrailingPathDelimiter(FParent.FPCSourceDirectory)+'source'
   //else
-  LocalFPCSourceDir:=FParent.FPCSourceDirectory;
+  LocalFPCLocation:=FParent.FPCSourceDirectory;
 
   //check if this is a known module:
 
@@ -2425,7 +2428,7 @@ begin
   if assigned(FInstaller) then
   begin
     FInstaller.BaseDirectory:=FParent.BaseDirectory;
-    FInstaller.FPCSourceDir:=LocalFPCSourceDir;
+    FInstaller.FPCSourceDir:=LocalFPCLocation;
     FInstaller.FPCInstallDir:=FParent.FPCInstallDirectory;
     {$ifndef FPCONLY}
     FInstaller.LazarusSourceDir:=FParent.LazarusSourceDirectory;
@@ -2455,7 +2458,66 @@ begin
     end
     else
     begin
-      if FParent.UseSystemFPC then aCompiler:=Which('fpc');
+      if FParent.UseSystemFPC then
+      begin
+        aCompiler:=Which('fpc');
+        //if FInstaller.InheritsFrom(TLazarusNativeInstaller) then
+        begin
+          (*
+          FInstaller.Processor.Executable:=aCompiler;
+          FInstaller.Processor.Process.Parameters.Clear;
+          FInstaller.Processor.SetParamData('-PB');
+          try
+            if (FInstaller.Processor.ExecuteAndWait=0) then
+            begin
+              if FInstaller.Processor.WorkerOutput.Count>0 then
+              begin
+                LocalFPCLocation:=ExtractFileDir(FInstaller.Processor.WorkerOutput.Strings[0]);
+              end;
+            end;
+          except
+          end;
+          *)
+          LocalFPCLocation:=ExtractFileDir(aCompiler);
+          // check the logic of the install dir
+          // must fit into the logic of fpcupdeluxe
+          count:=GetDirs(LocalFPCLocation,{%H-}Dirs);
+          {$ifdef Windows}
+          if (count>1) then
+          {$else}
+          if (count>2) then
+          {$endif}
+          begin
+            repeat
+              Dec(count);
+              {$ifdef Windows}
+              Dir:=StrPas(Dirs[count]);
+              if (NOT AnsiSameText(Dir,GetSourceCPUOS)) then break;
+              Dec(count);
+              {$endif}
+              Dir:=StrPas(Dirs[count]);
+              if (NOT AnsiSameText(Dir,'bin')) then break;
+              FParent.WritelnLog('Existing FPC install look good enough, so use it for the Lazarus install !');
+              Dec(count);
+              Dir:=StrPas(PChar(LocalFPCLocation));
+              i:=0;
+              while (count>=0) do
+              begin
+                Dir:=Dir+DirectorySeparator+StrPas(Dirs[i]);
+                Inc(i);
+                Dec(count);
+              end;
+              FInstaller.FPCInstallDir:=Dir;
+              FInstaller.FPCSourceDir:='';
+            until true;
+          end;
+          if (count<>-1) then
+          begin
+            FParent.WritelnLog('Existing FPC install could not be used by fpcupdeluxe !');
+            aCompiler:='';
+          end;
+        end;
+      end;
       if (NOT FParent.UseSystemFPC) OR (Length(aCompiler)=0) then aCompiler:=FInstaller.GetFPCInBinDir; // use FPC compiler itself
     end;
     FInstaller.Compiler:=aCompiler;
