@@ -4858,6 +4858,8 @@ begin
             Infoln(infotext+'Skipping cross-compiler clean step: compiler seems to be up to date !!',etInfo);
           aStrList.Append('rtl_distclean');
           if (Self AS TFPCCrossInstaller).PackagesNeeded then aStrList.Append('packages_distclean');
+          {$else}
+          aStrList.Append('clean');
           {$endif}
         end;
       end;

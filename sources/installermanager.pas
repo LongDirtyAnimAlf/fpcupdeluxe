@@ -1352,16 +1352,16 @@ begin
       if MUSL then ostype:='MUSL';
       if (CrossCPU_Target=TCPU.x86_64) then
       begin
-        toolversion:='V239';
+        toolversion:='V241';
         if MUSL then toolversion:='V240';
       end;
       if (CrossCPU_Target=TCPU.aarch64) then
       begin
-        toolversion:='V232';
+        toolversion:='V241';
         if MUSL then toolversion:='V228';
       end;
-      if (CrossCPU_Target=TCPU.i386) then toolversion:='V227';
-      if (CrossCPU_Target=TCPU.loongarch64) then toolversion:='V240';
+      if (CrossCPU_Target=TCPU.i386) then toolversion:='V241';
+      if (CrossCPU_Target=TCPU.loongarch64) then toolversion:='V241';
       if (CrossCPU_Target=TCPU.m68k) then toolversion:='V237';
       if (CrossCPU_Target=TCPU.xtensa) then toolversion:='V234';
     end;
