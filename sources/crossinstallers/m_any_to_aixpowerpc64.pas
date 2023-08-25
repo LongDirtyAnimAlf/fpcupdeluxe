@@ -161,6 +161,18 @@ begin
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
+  // Also allow for IBM universal crossfpc bins
+  if not result then
+  begin
+    BinPrefixTry:='powerpc-ibm-'+TargetOSName+'-';
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,'powerpc-'+TargetOSName,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,'powerpc-ibm-'+TargetOSName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
   // Also allow for crossbinutils without prefix
   if not result then
   begin

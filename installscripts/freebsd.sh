@@ -1,3 +1,5 @@
+pkg install -y sudo
+
 sudo pkg install -y xterm
 sudo pkg install -y git 
 sudo pkg install -y subversion 
@@ -32,3 +34,7 @@ sudo pkg install -y qt5-qmake
 
 sudo pkg install -y qt6
 sudo pkg install -y qt6-base
+
+# sudo pkg install -y www/iridium
+# sudo sysctl kern.maxtsiz=268435456
+# sudo sysctl kern.ipc.shm_allow_removed=1

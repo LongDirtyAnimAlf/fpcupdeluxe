@@ -322,13 +322,14 @@ end;
 function GetCPUCase(aCPU:TCPU):string;
 begin
   if aCPU=TCPU.arm then result:='ARM' else
-    if aCPU=TCPU.i386 then result:='i386' else
-      if aCPU=TCPU.x86_64 then result:='AMD64' else
-        if aCPU=TCPU.powerpc then result:='PowerPC' else
-          if aCPU=TCPU.powerpc64 then result:='PowerPC64' else
-            if aCPU=TCPU.avr then result:='AVR' else
-              if aCPU=TCPU.m68k then result:='m68k' else
-                result:=UppercaseFirstChar(GetCPU(aCPU));
+    if aCPU=TCPU.aarch64 then result:='AArch64' else
+      if aCPU=TCPU.i386 then result:='i386' else
+        if aCPU=TCPU.x86_64 then result:='AMD64' else
+          if aCPU=TCPU.powerpc then result:='PowerPC' else
+            if aCPU=TCPU.powerpc64 then result:='PowerPC64' else
+              if aCPU=TCPU.avr then result:='AVR' else
+                if aCPU=TCPU.m68k then result:='m68k' else
+                  result:=UppercaseFirstChar(GetCPU(aCPU));
 end;
 
 function GetTCPU(aCPU:string):TCPU;

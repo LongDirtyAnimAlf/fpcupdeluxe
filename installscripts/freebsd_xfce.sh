@@ -2,6 +2,8 @@
 
 sudo pkg install -y xorg open-vm-tools xf86-video-vmware xf86-input-vmmouse
 sudo pkg install -y xfce
+sudo pkg install -y xfce4-desktop
+# sudo pkg install -y xfce4-session
 sudo pkg install -y xfce4-goodies
 
 sudo sysrc hald_enable="YES"

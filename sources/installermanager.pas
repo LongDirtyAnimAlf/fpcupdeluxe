@@ -1138,6 +1138,7 @@ var
 begin
   s:=GetCPUCase(CrossCPU_Target);
   if CrossCPU_Target=TCPU.x86_64 then s:='x64'; // Legacy support
+  if CrossCPU_Target=TCPU.aarch64 then s:='Aarch64'; // Legacy support
   BinsFileName:=s;
 
   // Set special CPU names
@@ -1306,7 +1307,9 @@ begin
   if (CrossOS_Target=TOS.freebsd) then
   begin
     //http://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/VM-IMAGES
+    //https://mirrors.xtom.ee/freebsd-pkg
     if (CrossCPU_Target=TCPU.x86_64) then toolversion:='10';
+    if (CrossCPU_Target=TCPU.i386) then toolversion:='10';
   end;
   if (CrossOS_Target=TOS.netbsd) then
   begin
@@ -1368,8 +1371,9 @@ begin
     end;
     if (CrossOS_Target=TOS.aix) then
     begin
-      ostype:='unknown';
-      if (CrossCPU_Target=TCPU.powerpc) then toolversion:='V230';
+      //ostype:='unknown';
+      //if (CrossCPU_Target=TCPU.powerpc) then toolversion:='V230';
+      if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='AIX_PowerPC_IBM_V241.zip';
     end;
     if (CrossOS_Target=TOS.aros) then
     begin
