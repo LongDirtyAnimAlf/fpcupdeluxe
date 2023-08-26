@@ -1350,20 +1350,28 @@ begin
     if (CrossOS_Target=TOS.linux) then
     begin
       if MUSL then ostype:='MUSL';
-      if (CrossCPU_Target=TCPU.x86_64) then
-      begin
-        toolversion:='V241';
-        if MUSL then toolversion:='V240';
+      case CrossCPU_Target of
+        TCPU.x86_64:
+        begin
+          toolversion:='V241';
+          if MUSL then toolversion:='V240';
+        end;
+        TCPU.aarch64:
+        begin
+          toolversion:='V241';
+          if MUSL then toolversion:='V228';
+        end;
+        TCPU.arm:
+        begin
+          toolversion:='V241';
+          if (CrossUtils[CrossCPU_Target,CrossOS_Target,Self.CrossOS_SubArch].CrossARMArch=TARMARCH.armhf) then s:='Linux_ARMHF_Linux_V241.zip';
+        end;
+        TCPU.powerpc64: toolversion:='V241';
+        TCPU.i386: toolversion:='V241';
+        TCPU.loongarch64: toolversion:='V241';
+        TCPU.m68k: toolversion:='V237';
+        TCPU.xtensa: toolversion:='V234';
       end;
-      if (CrossCPU_Target=TCPU.aarch64) then
-      begin
-        toolversion:='V241';
-        if MUSL then toolversion:='V228';
-      end;
-      if (CrossCPU_Target=TCPU.i386) then toolversion:='V241';
-      if (CrossCPU_Target=TCPU.loongarch64) then toolversion:='V241';
-      if (CrossCPU_Target=TCPU.m68k) then toolversion:='V237';
-      if (CrossCPU_Target=TCPU.xtensa) then toolversion:='V234';
     end;
     if (CrossOS_Target in [TOS.darwin,TOS.ios]) then
     begin

@@ -45,10 +45,10 @@ type
     FStepSize: integer;
     FTimer: TTimer;
     function ActiveLineIsURL: boolean;
-    procedure DoTimer(Sender: TObject);
+    procedure DoTimer({%H-}Sender: TObject);
     procedure SetActive(const AValue: boolean);
     procedure Init;
-    procedure DrawScrollingText(Sender: TObject);
+    procedure DrawScrollingText({%H-}Sender: TObject);
   protected
     procedure DoOnChangeBounds; override;
     procedure MouseDown(Button: TMouseButton; Shift:TShiftState; X,Y:Integer); override;
@@ -83,7 +83,7 @@ type
     VersionLabel: TLABEL;
     Notebook: TPageControl;
     CreditsPage: TTabSheet;
-    procedure AboutFormCreate(Sender:TObject);
+    procedure AboutFormCreate({%H-}Sender:TObject);
     procedure LabelMouseDown(Sender: TObject; {%H-}Button: TMouseButton;
       {%H-}Shift: TShiftState; {%H-}X, {%H-}Y: Integer);
     procedure LabelMouseEnter(Sender: TObject);

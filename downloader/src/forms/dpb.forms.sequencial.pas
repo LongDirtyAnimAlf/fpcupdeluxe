@@ -59,8 +59,8 @@ type
     pbDownloads: TProgressBar;
     lblBytes: TLabel;
     pbBytes: TProgressBar;
-    procedure FormCreate(Sender: TObject);
-    procedure FormActivate(Sender: TObject);
+    procedure FormCreate({%H-}Sender: TObject);
+    procedure FormActivate({%H-}Sender: TObject);
   private
     FDownloads: Array of TDownload;
     FSize: Int64;
@@ -72,7 +72,7 @@ type
     procedure GetSocketHandler(Sender: TObject; const UseSSL: Boolean;
       out AHandler: TSocketHandler);
 {$ENDIF}
-    procedure DataReceived(Sender : TObject; const {%H-}ContentLength, CurrentPos : Int64);
+    procedure DataReceived({%H-}Sender : TObject; const {%H-}ContentLength, CurrentPos : Int64);
 {$ENDIF}
     procedure DoDownload(const AIndex: Integer);
   public
