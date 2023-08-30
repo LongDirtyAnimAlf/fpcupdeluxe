@@ -1347,50 +1347,52 @@ begin
   // For Windows
   if GetTOS(GetSourceOS) in [TOS.win32,TOS.win64] then
   begin
-    if (CrossOS_Target=TOS.linux) then
-    begin
-      if MUSL then ostype:='MUSL';
-      case CrossCPU_Target of
-        TCPU.x86_64:
-        begin
-          toolversion:='V241';
-          if MUSL then toolversion:='V240';
+    case CrossOS_Target of
+      TOS.linux:
+      begin
+        if MUSL then ostype:='MUSL';
+        case CrossCPU_Target of
+          TCPU.x86_64:
+          begin
+            toolversion:='V241';
+            if MUSL then toolversion:='V240';
+          end;
+          TCPU.aarch64:
+          begin
+            toolversion:='V241';
+            if MUSL then toolversion:='V228';
+          end;
+          TCPU.arm:
+          begin
+            toolversion:='V241';
+            if (CrossUtils[CrossCPU_Target,CrossOS_Target,Self.CrossOS_SubArch].CrossARMArch=TARMARCH.armhf) then s:='Linux_ARMHF_Linux_V241.zip';
+          end;
+          TCPU.powerpc: toolversion:='V241';
+          TCPU.powerpc64: toolversion:='V241';
+          TCPU.i386: toolversion:='V241';
+          TCPU.loongarch64: toolversion:='V241';
+          TCPU.m68k: toolversion:='V237';
+          TCPU.xtensa: toolversion:='V234';
         end;
-        TCPU.aarch64:
-        begin
-          toolversion:='V241';
-          if MUSL then toolversion:='V228';
-        end;
-        TCPU.arm:
-        begin
-          toolversion:='V241';
-          if (CrossUtils[CrossCPU_Target,CrossOS_Target,Self.CrossOS_SubArch].CrossARMArch=TARMARCH.armhf) then s:='Linux_ARMHF_Linux_V241.zip';
-        end;
-        TCPU.powerpc64: toolversion:='V241';
-        TCPU.i386: toolversion:='V241';
-        TCPU.loongarch64: toolversion:='V241';
-        TCPU.m68k: toolversion:='V237';
-        TCPU.xtensa: toolversion:='V234';
+      end;
+      TOS.darwin,TOS.ios:
+      begin
+        if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_15.zip';
+      end;
+      TOS.aix:
+      begin
+        //ostype:='unknown';
+        //if (CrossCPU_Target=TCPU.powerpc) then toolversion:='V230';
+        if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='AIX_PowerPC_IBM_V241.zip';
+      end;
+      TOS.aros:
+      begin
+        ostype:='unknown';
+        if (CrossCPU_Target=TCPU.x86_64) then toolversion:='V232';
+        if (CrossCPU_Target=TCPU.arm) then toolversion:='V232';
+        if (CrossCPU_Target=TCPU.i386) then toolversion:='V232';
       end;
     end;
-    if (CrossOS_Target in [TOS.darwin,TOS.ios]) then
-    begin
-      if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_15.zip';
-    end;
-    if (CrossOS_Target=TOS.aix) then
-    begin
-      //ostype:='unknown';
-      //if (CrossCPU_Target=TCPU.powerpc) then toolversion:='V230';
-      if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='AIX_PowerPC_IBM_V241.zip';
-    end;
-    if (CrossOS_Target=TOS.aros) then
-    begin
-      ostype:='unknown';
-      if (CrossCPU_Target=TCPU.x86_64) then toolversion:='V232';
-      if (CrossCPU_Target=TCPU.arm) then toolversion:='V232';
-      if (CrossCPU_Target=TCPU.i386) then toolversion:='V232';
-    end;
-
   end;
 
   if (Length(s)>0) then

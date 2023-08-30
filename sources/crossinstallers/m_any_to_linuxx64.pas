@@ -15,35 +15,16 @@ uses
 type
   Tany_linux64 = class(Tany_linux)
   public
-    function GetLibs(Basepath:string):boolean;override;
-    function GetBinUtils(Basepath:string):boolean;override;
     constructor Create;
-    destructor Destroy; override;
   end;
 
 { Tany_linux64 }
-
-function Tany_linux64.GetLibs(Basepath:string): boolean;
-begin
-  result:=inherited;
-end;
-
-function Tany_linux64.GetBinUtils(Basepath:string): boolean;
-begin
-  result:=inherited;
-end;
-
 constructor Tany_linux64.Create;
 begin
   inherited Create;
   FTargetCPU:=TCPU.x86_64;
   Reset;
   ShowInfo;
-end;
-
-destructor Tany_linux64.Destroy;
-begin
-  inherited Destroy;
 end;
 
 var
