@@ -1143,7 +1143,7 @@ begin
           Processor.Executable := Make;
           Processor.Process.Parameters.Clear;
           {$IFDEF MSWINDOWS}
-          if Length(Shell)>0 then Processor.SetParamData('SHELL='+Shell);
+          if Length(Shell)>0 then Processor.SetParamNameData('SHELL',Shell);
           {$ENDIF}
           Processor.Process.CurrentDirectory:=SourceDirectory;
 
@@ -1153,12 +1153,12 @@ begin
           {
           if (NOT FNoJobs) then
           begin
-            Processor.SetParamData('--jobs='+IntToStr(FCPUCount));
-            Processor.SetParamData('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
+            Processor.SetParamNameData('--jobs',IntToStr(FCPUCount));
+            Processor.SetParamNameData('FPMAKEOPT','--threads='+IntToStr(FCPUCount));
           end;
           }
 
-          Processor.SetParamData('--directory='+ SourceDirectory);
+          Processor.SetParamNameData('--directory',SourceDirectory);
 
           Processor.SetParamMakefilePathData('FPCDIR',SourceDirectory);
 
@@ -1186,15 +1186,15 @@ begin
           Processor.SetParamMakefilePathData('INSTALL_EXAMPLEDIR',FPCExampleDir);
 
 
-          Processor.SetParamData('CPU_SOURCE='+GetSourceCPU);
-          Processor.SetParamData('OS_SOURCE='+GetSourceOS);
+          Processor.SetParamNameData('CPU_SOURCE',GetSourceCPU);
+          Processor.SetParamNameData('OS_SOURCE',GetSourceOS);
 
-          Processor.SetParamData('OS_TARGET='+CrossInstaller.TargetOSName);
-          Processor.SetParamData('CPU_TARGET='+CrossInstaller.TargetCPUName);
+          Processor.SetParamNameData('OS_TARGET',CrossInstaller.TargetOSName);
+          Processor.SetParamNameData('CPU_TARGET',CrossInstaller.TargetCPUName);
 
-          if (CrossInstaller.SubArch<>TSubarch.saNone) then Processor.SetParamData('SUBARCH='+CrossInstaller.SubArchName);
+          if (CrossInstaller.SubArch<>TSubarch.saNone) then Processor.SetParamNameData('SUBARCH',CrossInstaller.SubArchName);
 
-          Processor.SetParamData('CROSSINSTALL=1');
+          Processor.SetParamNameData('CROSSINSTALL','1');
 
           if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
           begin
@@ -1210,7 +1210,7 @@ begin
           end;
 
           {$IFDEF MSWINDOWS}
-          Processor.SetParamData('UPXPROG=echo'); //Don't use UPX
+          Processor.SetParamNameData('UPXPROG','echo'); //Don't use UPX
           (*
           // do we have a stray shell in the path ...
           if StrayShell then
@@ -1219,7 +1219,7 @@ begin
             if FileExists(s1) then Processor.SetParamMakefilePathData('ECHOREDIR',s1);
           end;
           *)
-          //Processor.SetParamData('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+          //Processor.SetParamNameData('COPYTREE','echo'); //fix for examples in Win svn, see build FAQ
           // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
           s1:=GitClient.RepoExecutable;
           if (Length(s1)>0) then Processor.SetParamMakefilePathData('GIT',s1);
@@ -1342,8 +1342,8 @@ begin
 
           {$endif crosssimple}
 
-          //Processor.SetParamData('OSTYPE='+CrossInstaller.TargetOS);
-          Processor.SetParamData('NOGDBMI=1'); // prevent building of IDE to be 100% sure
+          //Processor.SetParamNameData('OSTYPE',CrossInstaller.TargetOS);
+          Processor.SetParamNameData('NOGDBMI','1'); // prevent building of IDE to be 100% sure
 
           NativeCompilerOptions:=FCompilerOptions;
 
@@ -1405,8 +1405,8 @@ begin
           s2:=AnsiDequotedStr(s2,'''');
           if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
           begin
-            Processor.SetParamData('REVSTR='+s2);
-            Processor.SetParamData('REVINC=force');
+            Processor.SetParamNameData('REVSTR',s2);
+            Processor.SetParamNameData('REVINC','force');
           end;
           {$endif FORCEREVISION}
 
@@ -1501,10 +1501,10 @@ begin
           end;
 
           NativeCompilerOptions:=Trim(NativeCompilerOptions);
-          if (Length(NativeCompilerOptions)>0) then Processor.SetParamData('OPT='+{MaybeQuotedSpacesOnly}(NativeCompilerOptions));
+          if (Length(NativeCompilerOptions)>0) then Processor.SetParamNameData('OPT',{MaybeQuotedSpacesOnly}(NativeCompilerOptions));
 
           CrossCompilerOptions:=Trim(CrossCompilerOptions);
-          if (Length(CrossCompilerOptions)>0) then Processor.SetParamData('CROSSOPT='+{MaybeQuotedSpacesOnly}(CrossCompilerOptions));
+          if (Length(CrossCompilerOptions)>0) then Processor.SetParamNameData('CROSSOPT',{MaybeQuotedSpacesOnly}(CrossCompilerOptions));
 
           try
             s1:=infotext+'Running make ['+UnCamel(GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle)))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')';
@@ -1889,7 +1889,7 @@ begin
   Processor.Executable := Make;
   Processor.Process.Parameters.Clear;
   {$IFDEF MSWINDOWS}
-  if Length(Shell)>0 then Processor.SetParamData('SHELL='+Shell);
+  if Length(Shell)>0 then Processor.SetParamNameData('SHELL',Shell);
   {$ENDIF}
   FErrorLog.Clear;
 
@@ -1897,9 +1897,9 @@ begin
   if (NOT FNoJobs) then
   begin
     {$ifndef win64}
-    Processor.SetParamData('--jobs='+IntToStr(FCPUCount));
+    Processor.SetParamNameData('--jobs',IntToStr(FCPUCount));
     {$endif win64}
-    Processor.SetParamData('FPMAKEOPT=--threads='+IntToStr(FCPUCount));
+    Processor.SetParamNameData('FPMAKEOPT','--threads='+IntToStr(FCPUCount));
   end;
 
   //Processor.SetParamMakefilePathData('FPC',FCompiler);
@@ -1933,15 +1933,15 @@ begin
   Processor.SetParamMakefilePathData('INSTALL_EXAMPLEDIR',FPCExampleDir);
 
 
-  Processor.SetParamData('OS_SOURCE=' + GetSourceOS);
-  Processor.SetParamData('CPU_SOURCE=' + GetSourceCPU);
+  Processor.SetParamNameData('OS_SOURCE',GetSourceOS);
+  Processor.SetParamNameData('CPU_SOURCE',GetSourceCPU);
 
-  Processor.SetParamData('OS_TARGET=' + GetSourceOS);
-  Processor.SetParamData('CPU_TARGET=' + GetSourceCPU);
+  Processor.SetParamNameData('OS_TARGET',GetSourceOS);
+  Processor.SetParamNameData('CPU_TARGET',GetSourceCPU);
 
   {$IFDEF MSWINDOWS}
-  Processor.SetParamData('UPXPROG=echo'); //Don't use UPX
-  //Processor.SetParamData('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  Processor.SetParamNameData('UPXPROG','echo'); //Don't use UPX
+  //Processor.SetParamNameData('COPYTREE','echo'); //fix for examples in Win svn, see build FAQ
 
   // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
   s1:=GitClient.RepoExecutable;
@@ -1949,13 +1949,13 @@ begin
   {$ENDIF}
 
   if (SourceVersionNum<CalculateFullVersion(2,4,4)) then
-    Processor.SetParamData('DATA2INC=echo');
+    Processor.SetParamNameData('DATA2INC','echo');
   {else
     Processor.SetParamMakefilePathData('DATA2INC',FPCBinPath+'data2inc'+GetExeExt);}
 
   if BootstrapCompilerOverrideVersionCheck then
   begin
-    Processor.SetParamData('OVERRIDEVERSIONCHECK=1');
+    Processor.SetParamNameData('OVERRIDEVERSIONCHECK','1');
     if (ModuleName=_FPC) then Infoln(infotext+'Adding OVERRIDEVERSIONCHECK=1 due to wrong version of bootstrapper !!',etWarning);
   end;
   s1:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
@@ -1998,7 +1998,7 @@ begin
   end;
 
   s2:=Which('codesign');
-  if (NOT FileExists(s2)) then Processor.SetParamData('CODESIGN=/usr/bin/true');
+  if (NOT FileExists(s2)) then Processor.SetParamNameData('CODESIGN','/usr/bin/true');
 
   s2:=GetDarwinSDKLocation;
   if Length(s2)>0 then
@@ -2027,8 +2027,8 @@ begin
       s2:=AnsiDequotedStr(s2,'''');
       if ( (Length(s2)>1) AND (s2<>'failure') AND (Pos(' ',s2)=0) ) then
       begin
-        Processor.SetParamData('REVSTR='+s2);
-        Processor.SetParamData('REVINC=force');
+        Processor.SetParamNameData('REVSTR',s2);
+        Processor.SetParamNameData('REVINC','force');
       end;
     end;
   end;
@@ -2063,7 +2063,7 @@ begin
   {$endif}
 
   s1:=Trim(s1);
-  Processor.SetParamData('OPT='+s1);
+  Processor.SetParamNameData('OPT',s1);
 
   Processor.Process.CurrentDirectory:='';
   case ModuleName of
@@ -2098,7 +2098,7 @@ begin
     exit;
   end;
 
-  Processor.SetParamData('--directory='+Processor.Process.CurrentDirectory);
+  Processor.SetParamNameData('--directory',Processor.Process.CurrentDirectory);
 
   if ModuleName=_MAKEFILECHECKFPC then
   begin
@@ -2112,12 +2112,15 @@ begin
   else
   if ModuleName=_UNICODEFPC then
   begin
-    Processor.SetParamData('SUB_TARGET=unicodertl');
+    Processor.SetParamNameData('SUB_TARGET','unicodertl');
     Processor.SetParamData('all');
   end
   else
   begin
-    Processor.SetParamData('all');
+    if (True) OR (FLinuxLegacy) then
+      Processor.SetParamData('compiler_cycle')
+    else
+      Processor.SetParamData('all');
   end;
 
   Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
@@ -2137,8 +2140,42 @@ begin
     end;
   end;
 
+  // Building of FPC finished
+
   if ((ModuleName=_FPC) OR (ModuleName=_UNICODEFPC)) then
   begin
+    if (True) OR (FLinuxLegacy) then
+    begin
+      // Rebuild rtl for GLIBC
+      Index:=Pred(Processor.Process.Parameters.Count);
+
+      Processor.Process.Parameters.Strings[Index]:='rtl_clean';
+      ProcessorResult:=Processor.ExecuteAndWait;
+      OperationSucceeded:=(ProcessorResult=0);
+      Processor.Process.Parameters.Strings[Index]:='packages_clean';
+      ProcessorResult:=Processor.ExecuteAndWait;
+      OperationSucceeded:=(ProcessorResult=0);
+      Processor.Process.Parameters.Strings[Index]:='utils_clean';
+      ProcessorResult:=Processor.ExecuteAndWait;
+      OperationSucceeded:=(ProcessorResult=0);
+
+      Processor.SetParamMakefilePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
+      Processor.SetParamNameData('OPT','-XLC '+s1);
+
+      Processor.Process.Parameters.Strings[Index]:='rtl_all';
+      ProcessorResult:=Processor.ExecuteAndWait;
+      OperationSucceeded:=(ProcessorResult=0);
+      Processor.Process.Parameters.Strings[Index]:='packages_all';
+      ProcessorResult:=Processor.ExecuteAndWait;
+      OperationSucceeded:=(ProcessorResult=0);
+      Processor.Process.Parameters.Strings[Index]:='utils_all';
+      ProcessorResult:=Processor.ExecuteAndWait;
+      OperationSucceeded:=(ProcessorResult=0);
+
+      Processor.SetParamMakefilePathData('PP',FCompiler);
+      Processor.SetParamNameData('OPT',s1);
+    end;
+
     // Building of FPC succeeded
     // Now install all binaries and units
     Index:=Pred(Processor.Process.Parameters.Count);

@@ -143,6 +143,7 @@ type
 
     procedure SetParamMakefilePathData(const aName,aValue:string);
     procedure SetParamData(const aValue:string);
+    procedure SetParamNameData(const aName,aValue:string);
 
 
     // output
@@ -479,6 +480,22 @@ begin
     begin
       Process.Parameters.Append(aValue);
     end;
+  end;
+end;
+
+procedure TAbstractExternalTool.SetParamNameData(const aName,aValue:string);
+var
+  i:integer;
+begin
+  if Assigned(Process) then
+  begin
+    if (Length(aValue)=0) then
+    begin
+      i:=Process.Parameters.IndexOf(aName);
+      if (i<>-1) then TProcessStringList(Process.Parameters).Delete(i);
+    end
+    else
+      Process.Parameters.Values[aName]:=aValue;
   end;
 end;
 
