@@ -31,6 +31,7 @@ implementation
 {$R *.lfm}
 
 uses
+  StrUtils,
   FileUtil;
 
 { TForm1 }
@@ -54,7 +55,7 @@ begin
 
   glibcfunctions:=TStringList.Create;
 
-  glibcfunctionsfromfile.LoadFromFile('glibc_2.27_x64.h');
+  glibcfunctionsfromfile.LoadFromFile('glibc_2.29_x64.h');
 
   try
     for sh in glibcfunctionsfromfile do
@@ -76,7 +77,8 @@ begin
               Inc(j);
               pf:=Copy(sh,j,MaxInt);
               SetLength(pf,Length(pf)-3);
-              glibcfunctions.AddObject('name '''+fh+''';',TObject(StrNew(PChar(pf))));
+              //glibcfunctions.AddObject('name '''+fh+''';',TObject(StrNew(PChar(pf))));
+              glibcfunctions.AddObject(fh,TObject(StrNew(PChar(pf))));
             end;
           end;
         end;
@@ -85,6 +87,38 @@ begin
   finally
     glibcfunctionsfromfile.Free;
   end;
+
+
+  glibcfunctionsfromfile:=TStringList.Create;
+  try
+    for sh in glibcfunctions do
+    begin
+      sl:=sh;
+      i:=glibcfunctions.IndexOf(sh);
+      if (i<>-1) then
+        fh:=StrPas(PChar(glibcfunctions.Objects[i]))
+      else
+        fh:='';
+
+      sl:=PadRight(sh,35);
+      sl:=StringReplace(sl,' ','''',[]);
+      sl:=''''+sl;
+
+      fh:=PadRight(fh,13);
+      fh:=StringReplace(fh,' ','''',[]);
+      fh:=''''+fh;
+
+
+      glibcfunctionsfromfile.Add('(Name : '+sl+' ; Version : '+fh+'),');
+    end;
+    glibcfunctionsfromfile.SaveToFile('test.dat');
+  finally
+    glibcfunctionsfromfile.Free;
+  end;
+
+
+
+  exit;
 
   // Check for 2.2.5 or newer from .h file
 
