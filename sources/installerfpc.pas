@@ -1982,9 +1982,9 @@ begin
   {$IFDEF DARWIN}
   //Add minimum required OSX version to prevent "crti not found" errors.
   s2:=GetDarwinSDKVersion('macosx');
-  if CompareVersionStrings(s2,'10.8')>=0 then
+  if CompareVersionStrings(s2,'10.9')>=0 then
   begin
-    s2:='10.8';
+    s2:='10.9';
   end;
   if Length(s2)>0 then
   begin
@@ -2117,10 +2117,7 @@ begin
   end
   else
   begin
-    if (True) OR (FLinuxLegacy) then
-      Processor.SetParamData('compiler_cycle')
-    else
-      Processor.SetParamData('all');
+    Processor.SetParamData('all');
   end;
 
   Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
@@ -2155,9 +2152,9 @@ begin
       Processor.Process.Parameters.Strings[Index]:='packages_clean';
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
-      Processor.Process.Parameters.Strings[Index]:='utils_clean';
-      ProcessorResult:=Processor.ExecuteAndWait;
-      OperationSucceeded:=(ProcessorResult=0);
+      //Processor.Process.Parameters.Strings[Index]:='utils_clean';
+      //ProcessorResult:=Processor.ExecuteAndWait;
+      //OperationSucceeded:=(ProcessorResult=0);
 
       Processor.SetParamMakefilePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
       Processor.SetParamNameData('OPT','-XLC '+s1);
@@ -2168,9 +2165,9 @@ begin
       Processor.Process.Parameters.Strings[Index]:='packages_all';
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
-      Processor.Process.Parameters.Strings[Index]:='utils_all';
-      ProcessorResult:=Processor.ExecuteAndWait;
-      OperationSucceeded:=(ProcessorResult=0);
+      //Processor.Process.Parameters.Strings[Index]:='utils_all';
+      //ProcessorResult:=Processor.ExecuteAndWait;
+      //OperationSucceeded:=(ProcessorResult=0);
 
       Processor.SetParamMakefilePathData('PP',FCompiler);
       Processor.SetParamNameData('OPT',s1);
@@ -4531,8 +4528,8 @@ begin
           ConfigText.Append('# Prevents crti not found linking errors');
           ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
           //ConfigText.Append('#IFDEF CPU'+UpperCase(GetSourceCPU));
-          if CompareVersionStrings(s,'10.8')>=0 then
-            ConfigText.Append('-WM10.8')
+          if CompareVersionStrings(s,'10.9')>=0 then
+            ConfigText.Append('-WM10.9')
           else
             ConfigText.Append('-WM'+s);
           ConfigText.Append('#ENDIF');

@@ -232,9 +232,9 @@ begin
     aOption:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
     if Length(aOption)>0 then
     begin
-      if CompareVersionStrings(aOption,'10.8')>=0 then
+      if CompareVersionStrings(aOption,'10.9')>=0 then
       begin
-        aOption:='10.8';
+        aOption:='10.9';
       end;
       AddFPCCFGSnippet('-WM'+aOption);
     end;
