@@ -928,10 +928,17 @@ end;
 
 function TInstaller.GetLinuxLegacy:boolean;
 begin
-  if ((CrossOS_Target=TOS.linux) AND (CrossCPU_Target=TCPU.x86_64)) then
-    result:=FLinuxLegacy
+  result:=false;
+  if IsCross then
+  begin
+    if ((CrossOS_Target=TOS.linux) AND (CrossCPU_Target=TCPU.x86_64)) then
+      result:=FLinuxLegacy;
+  end
   else
-    result:=false;
+  begin
+    if ((GetSourceOS=GetOS(TOS.linux)) AND (GetSourceCPU=GetCPU(TCPU.x86_64))) then
+      result:=FLinuxLegacy;
+  end;
 end;
 
 function TInstaller.GetMake: string;
