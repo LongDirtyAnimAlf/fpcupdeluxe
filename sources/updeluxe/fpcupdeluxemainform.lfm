@@ -5523,6 +5523,22 @@ object Form1: TForm1
         OnClick = btnBuildNativeCompilerClick
         TabOrder = 7
       end
+      object btnBuildHelp: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = btnBuildNativeCompiler
+        AnchorSideTop.Side = asrBottom
+        Left = 111
+        Height = 25
+        Top = 344
+        Width = 81
+        AutoSize = True
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 16
+        Caption = 'Build Help'
+        OnClick = btnBuildHelpClick
+        TabOrder = 8
+      end
     end
   end
   object btnSendLog: TButton

@@ -41,7 +41,7 @@ index fe9a3697..9635ccc1 100644
                                          s:=Copy(more,3,length(More)-2);
                                          if not LinkLibraryAliases.AddDep(s) Then
 diff --git a/compiler/pdecsub.pas b/compiler/pdecsub.pas
-index a8a7cf9e..149a0326 100644
+index a8a7cf9e..0e8ea7a4 100644
 --- a/compiler/pdecsub.pas
 +++ b/compiler/pdecsub.pas
 @@ -108,6 +108,8 @@ implementation
@@ -70,7 +70,7 @@ index a8a7cf9e..149a0326 100644
            if (idtoken=_INDEX) then
             begin
               {After the word index follows the index number in the DLL.}
-@@ -2338,6 +2343,35 @@ begin
+@@ -2338,6 +2343,36 @@ begin
                 message(parser_e_empty_import_name);
             end;
          end;
@@ -93,6 +93,7 @@ index a8a7cf9e..149a0326 100644
 +                  begin
 +                    if sym_name=gf.Name then
 +                     begin
++                       comment(V_Warning,'Forced versioned linking of '+gf.Name+' with version '+gf.Version);
 +                       stringdispose(import_name);                       // dispose of unversioned symbol name
 +                       import_name:=stringdup(gf.Name+'@'+gf.Version);   // replace with versioned symbol name
 +                       break;

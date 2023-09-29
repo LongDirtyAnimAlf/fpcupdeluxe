@@ -35,6 +35,7 @@ type
 
   TForm1 = class(TForm)
     ActionList1: TActionList;
+    btnBuildHelp: TButton;
     btnCheckToolsLocations: TButton;
     btnBuildNativeCompiler: TButton;
     chkGitlab: TCheckBox;
@@ -166,6 +167,7 @@ type
     {$endif}
     procedure actFileSaveAccept({%H-}Sender: TObject);
     procedure BitBtnSetRevisionClick(Sender: TObject);
+    procedure btnBuildHelpClick(Sender: TObject);
     procedure btnCheckToolsLocationsClick({%H-}Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
     procedure btnBuildNativeCompilerClick(Sender: TObject);
@@ -2199,6 +2201,25 @@ begin
   end;
   if valid then
     btnSetupPlusClick(nil);
+end;
+
+procedure TForm1.btnBuildHelpClick(Sender: TObject);
+begin
+  DisEnable(Sender,False);
+  try
+    if (Sender=btnBuildHelp) then
+    begin
+      if (NOT PrepareRun(Sender)) then exit;
+      if Sender=btnBuildHelp then FPCupManager.OnlyModules:=_HELPFPC+','+_HELPLAZARUS;
+      sStatus:='Going to install help.';
+      {$ifdef RemoteLog}
+      //aDataClient.UpInfo.UpFunction:=ufCheckMakefile;
+      {$endif}
+      RealRun;
+    end;
+  finally
+    DisEnable(Sender,True);
+  end;
 end;
 
 procedure TForm1.btnCheckToolsLocationsClick(Sender: TObject);

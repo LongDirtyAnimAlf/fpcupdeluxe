@@ -191,7 +191,52 @@ uses
   {$ifndef FPCONLY}
   updatelazconfig,
   {$endif}
+  libtar,
+  bzip2stream,
   dateutils;
+
+function Decompress(SourceFile, TargetFile: string): boolean;
+var
+  InFile:TFileStream;
+  Decompressed:TDecompressBzip2Stream;
+  OutFile:TFileStream;
+  Buffer: Pointer;
+  i: integer;
+const buffersize=$2000;
+begin
+  result:=false; //fail by default
+  InFile:=TFileStream.Create(SourceFile, fmOpenRead);
+  try
+    try
+      Decompressed:=TDecompressBzip2Stream.Create(InFile);
+    except
+      // So[5mething went wrong, e.g. invalid format
+      // Now get out of function with result false
+      Decompressed.Free;
+      exit;
+    end;
+    OutFile:=TFileStream.Create(TargetFile, fmCreate);
+    try
+      //We don't have seek on the TDecompressBzip2stream, so can't use
+      //CopyFrom...
+      //Decompressed.CopyFrom(InFile, InFile.Size);
+      GetMem(Buffer,BufferSize);
+      repeat
+        i:=Decompressed.Read(buffer^,BufferSize);
+        if i>0 then
+          OutFile.WriteBuffer(buffer^,i);
+      until i<BufferSize;
+      result:=true;
+    finally
+      Freemem(Buffer,BufferSize);
+      Decompressed.Free;
+      OutFile.Free;
+    end;
+  finally
+    InFile.Free;
+  end;
+end;
+
 
 { THelpInstaller }
 
@@ -287,7 +332,7 @@ end;
 
 function THelpInstaller.GetModule(ModuleName: string): boolean;
 const
-  HELPSOURCEURL : array [0..18,0..1] of string = (
+  HELPSOURCEURL : array [0..22,0..1] of string = (
     ('0.9.28','/Old%20releases/Lazarus%200.9.28/fpc-lazarus-0.9.28-doc-chm.tar.bz2'),
     ('0.9.30','/Old%20releases/Lazarus%200.9.30/fpc-lazarus-doc-chm-0.9.30.tar.bz2'),
     ('0.9.30.4','/Old%20releases/Lazarus%200.9.30.4/fpc-lazarus-doc-chm-0.9.30.4.tar.bz2'),
@@ -306,19 +351,24 @@ const
     ('2.0.6','/Lazarus%202.0.6/doc-chm-fpc3.0.4-laz2.0.6.zip'),
     ('2.0.8','/Lazarus%202.0.8/doc-chm-fpc3.0.4-laz2.0.8.zip'),
     ('2.0.10','/Lazarus%202.0.10/doc-chm-fpc3.2.0-laz2.0.10.zip'),
-    ('2.0.12','/Lazarus%202.0.12/doc-chm-fpc3.2.0-laz2.0.12.zip')
+    ('2.0.12','/Lazarus%202.0.12/doc-chm-fpc3.2.0-laz2.0.12.zip'),
+    ('2.2.0','/Lazarus%202.2.0/doc-chm-fpc3.2.2-laz2.2.0-0.zip'),
+    ('2.2.2','/Lazarus%202.2.2/doc-chm-fpc3.2.2-laz2.2.2-0.zip'),
+    ('2.2.4','/Lazarus%202.2.4/doc-chm-fpc3.2.2-laz2.2.4-0.zip'),
+    ('2.2.6','/Lazarus%202.2.6/doc-chm-fpc3.2.2-laz2.2.6-0.zip')
   );
   HELP_URL_BASE='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation';
-  HELP_URL_BASE_ALTERNATIVE='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation';
   HELP_URL_FTP=LAZARUSFTPURL+'releases/Lazarus%20Documentation';
 
 var
-  DocsZip: string;
+  DocsZip,DocsTar: string;
   OperationSucceeded: boolean;
   i: longint;
   HelpUrl:string;
   LazarusVersion:string;
   RunTwice:boolean;
+  TA:TTarArchive;
+  DirRec:TTarDirRec;
 begin
   result:=inherited;
   result:=InitModule;
@@ -376,6 +426,8 @@ begin
 
     ForceDirectoriesSafe(ExcludeTrailingPathDelimiter(FTargetDirectory));
     DocsZip := GetTempFileNameExt('FPCUPTMP','zip');
+    DocsTar := ChangeFileExt(DocsZip,'.tar');
+
 
     for RunTwice in boolean do
     begin
@@ -394,23 +446,6 @@ begin
           // Deal with timeouts, wrong URLs etc
           OperationSucceeded:=false;
           Infoln(ModuleName+': Download documents failed. URL: '+HELP_URL_BASE+HelpUrl+LineEnding+
-            'Exception: '+E.ClassName+'/'+E.Message, etWarning);
-        end;
-      end;
-    end;
-
-    for RunTwice in boolean do
-    begin
-      if OperationSucceeded then break;
-      SysUtils.DeleteFile(DocsZip); //Get rid of temp zip
-      try
-        OperationSucceeded:=Download(FUseWget, HELP_URL_BASE_ALTERNATIVE+HelpUrl, DocsZip);
-      except
-        on E: Exception do
-        begin
-          // Deal with timeouts, wrong URLs etc
-          OperationSucceeded:=false;
-          Infoln(ModuleName+': Download documents failed. URL: '+HELP_URL_BASE_ALTERNATIVE+HelpUrl+LineEnding+
             'Exception: '+E.ClassName+'/'+E.Message, etWarning);
         end;
       end;
@@ -435,18 +470,46 @@ begin
 
     if OperationSucceeded then
     begin
-      // Extract, overwrite, flatten path/junk paths
-      // todo: test with spaces in path
 
+      // Archive might be a bzip2, so protect this zip-unzipper while it might/will fail !
       with TNormalUnzipper.Create do
       begin
-        Flat:=True;
         try
-          OperationSucceeded:=DoUnZip(DocsZip,FTargetDirectory,[]);
-        finally
+          Flat:=True;
+          try
+            OperationSucceeded:=DoUnZip(DocsZip,FTargetDirectory,[]);
+          finally
+            Free;
+          end;
+        except
           Free;
         end;
       end;
+
+      if (NOT OperationSucceeded) then
+      begin
+        // We might have an bzip2 file
+        if Decompress(DocsZip, DocsTar) then
+        begin
+          if FileExists(DocsTar) then
+          begin
+            TA:=TTarArchive.Create(DocsTar);
+            try
+              TA.Reset;
+              while TA.FindNext({%H-}DirRec) do
+              begin
+                TA.ReadFile(FTargetDirectory+DirRec.Name);
+              end;
+              OperationSucceeded:=True;
+            finally
+              TA.Free;
+            end;
+            SysUtils.DeleteFile(DocsTar); //Get rid of temp tar
+          end;
+
+        end;
+      end;
+
       if (NOT OperationSucceeded) then WritelnLog(etError, 'Download docs error: unzip failed due to unknown error.');
 
       {
