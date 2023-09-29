@@ -129,7 +129,7 @@ type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
 
 const
-  DEFINE_FPC_USE_LIBC      = 'FPC_USE_LIBC';
+  DEFINE_FPC_USE_LIBC   = 'FPC_USE_LIBC';
 
   ARMArchFPCStr : array[TARMARCH] of string = (
     '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
@@ -186,7 +186,6 @@ type
     FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
     FSolarisOI:boolean;
     FMUSL:boolean;
-    FLinuxLegacy:boolean;
     function PerformLibraryPathMagic(out LibraryPath:string):boolean;
     function SearchLibrary(Directory, LookFor: string): boolean;
     function SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string): boolean;
@@ -207,7 +206,7 @@ type
     function GetLibsLCL({%H-}LCL_Platform:string; {%H-}Basepath:string):boolean;virtual;
     {$endif}
     procedure AddFPCCFGSnippet(const aSnip: string; const AddToCrossOptions:boolean=true);
-    procedure AddCrossOption(const aOption: string);
+    function AddCrossOption(const aOption: string):boolean;
     procedure ReplaceFPCCFGSnippet(aOldSnip,aNewSnip: string);
     procedure SetFPCVersion(aVersion: string);
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
@@ -253,7 +252,6 @@ type
     property RegisterName:string read FRegisterName;
     property SolarisOI: boolean write FSolarisOI;
     property MUSL: boolean write FMUSL;
-    property LinuxLegacy: boolean write FLinuxLegacy;
 
     constructor Create;
     destructor Destroy; override;
@@ -279,7 +277,7 @@ function IsCPUOSComboValid(CPU:TCPU;OS:TOS):boolean;
 function  GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
 procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
 {$endif LCL}
-procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI,LinuxLegacy:boolean; out BinPath,LibPath:string);
+procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI:boolean; out BinPath,LibPath:string);
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 function GetExeExt(const aOS:TOS=TOS.osNone): string;
 
@@ -299,15 +297,16 @@ uses
   fpcuputil;
 
 const
-  MULTIDEFCOMPILERSWITCHES : array [0..7] of string = (
+  SINGLECOMPILERSWITCHES :set of char = ['a','A','d','I','k','M','o','T','u'];
+  MULTIDEFCOMPILERSWITCHES : array [0..9] of string = (
   '-Fi',
   '-Fl',
   '-Fu',
   '-Ff',
   '-FN',
   '-Fo',
-//  '-d',
-//  '-u',
+  '-d',
+  '-u',
   '-I',
   '-k'
   );
@@ -588,7 +587,7 @@ begin
   end;
 end;
 
-procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI,LinuxLegacy:boolean; out BinPath,LibPath:string);
+procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI:boolean; out BinPath,LibPath:string);
 begin
   // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
   LibPath:=GetCPU(CrossCPU_Target)+'-'+GetOS(CrossOS_Target);
@@ -604,11 +603,6 @@ begin
   begin
     LibPath:=LibPath+'-musl';
     BinPath:=BinPath+'-musl';
-  end
-  else
-  if LinuxLegacy then
-  begin
-    LibPath:=LibPath+'-legacy';
   end;
 
   {$IF (defined(Windows)) OR (defined(Linux))}
@@ -764,7 +758,12 @@ begin
     for compilerswitch in MULTIDEFCOMPILERSWITCHES do
     begin
       CheckValidOption:=(Pos(compilerswitch,aSnippd)=1);
-      if CheckValidOption then break;
+      if CheckValidOption then
+      begin
+        // Check for literal duplicate
+        CheckValidOption:=(Pos(aSnippd,FFPCCFGSnippet)=0);
+        break;
+      end;
     end;
   end;
 
@@ -781,24 +780,29 @@ begin
   else FFPCCFGSnippet:=aSnippd;
 end;
 
-procedure TCrossInstaller.AddCrossOption(const aOption: string);
+function TCrossInstaller.AddCrossOption(const aOption: string):boolean;
 var
   index:integer;
   compileroption,compilerswitch:string;
   ReplaceOption:boolean;
 begin
+  result:=false;
   compileroption:=Trim(aOption);
   if (Length(compileroption)<3) then exit;
+
+  // Check for literal duplicate
+  index:=StringListSame(FCrossOpts,compileroption,0,True);
+  if (index<>-1) then exit;
+
   if compileroption[1]='-' then
   begin
-    if (compileroption[2] in ['d','k','u','I']) then
+    if (compileroption[2] in SINGLECOMPILERSWITCHES) then
       compilerswitch:=Copy(compileroption,1,2)
     else
       compilerswitch:=Copy(compileroption,1,3);
 
-    index:=StringListStartsWith(FCrossOpts,compilerswitch,0,True);
-
     // Check for duplicates
+    index:=StringListStartsWith(FCrossOpts,compilerswitch,0,True);
     ReplaceOption:=(index<>-1);
 
     if ReplaceOption then
@@ -811,9 +815,13 @@ begin
     end;
 
     if (ReplaceOption) then
+    begin
       FCrossOpts.Strings[index]:=compileroption
+    end
     else
       FCrossOpts.Add(compileroption);
+
+    result:=true;
   end;
 
 end;
@@ -1084,7 +1092,7 @@ begin
   result:=FLibsFound;
   if (NOT result) then
   begin
-    GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,FLinuxLegacy,BinDir,LibDir);
+    GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,BinDir,LibDir);
     FUtilsDirectoryID:=LibDir;
   end;
 end;
@@ -1098,7 +1106,7 @@ begin
 
   if (NOT result) then
   begin
-    GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,FLinuxLegacy,BinDir,LibDir);
+    GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,BinDir,LibDir);
     FUtilsDirectoryID:=BinDir;
   end;
 

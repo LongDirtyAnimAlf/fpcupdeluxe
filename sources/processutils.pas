@@ -141,9 +141,9 @@ type
     property Environment:TProcessEnvironment read GetProcessEnvironment;
     Property OnUpdateEvent : TOnUpdateEvent Read FOnUpdateEvent Write FOnUpdateEvent;
 
-    procedure SetParamMakefilePathData(const aName,aValue:string);
+    procedure SetParamNamePathData(const aName,aValue:string);
     procedure SetParamData(const aValue:string);
-    procedure SetParamNameData(const aName,aValue:string);
+    procedure SetParamNameData(const aName,aValue:string;const CorrectPath:boolean=false);
 
 
     // output
@@ -445,7 +445,23 @@ end;
 
 { TExternalTool }
 
-procedure TAbstractExternalTool.SetParamMakefilePathData(const aName,aValue:string);
+procedure TAbstractExternalTool.SetParamNamePathData(const aName,aValue:string);
+begin
+  SetParamNameData(aName,aValue,true);
+end;
+
+procedure TAbstractExternalTool.SetParamData(const aValue:string);
+begin
+  if Assigned(Process) then
+  begin
+    if (Length(aValue)>0) then
+    begin
+      Process.Parameters.Append(aValue);
+    end;
+  end;
+end;
+
+procedure TAbstractExternalTool.SetParamNameData(const aName,aValue:string;const CorrectPath:boolean);
 var
   aCorrectValue:string;
   i:integer;
@@ -454,7 +470,7 @@ begin
   begin
     aCorrectValue:=aValue;
     {$ifdef Windows}
-    if (Length(aCorrectValue)>0) then
+    if (CorrectPath AND (Length(aCorrectValue)>0)) then
     begin
       if (Pos(' ',aCorrectValue)>0) then aCorrectValue:=ExtractShortPathName(aCorrectValue);
       for i:=1 to Length(aCorrectValue) do
@@ -469,33 +485,6 @@ begin
     end
     else
       Process.Parameters.Values[aName]:=aCorrectValue;
-  end;
-end;
-
-procedure TAbstractExternalTool.SetParamData(const aValue:string);
-begin
-  if Assigned(Process) then
-  begin
-    if (Length(aValue)>0) then
-    begin
-      Process.Parameters.Append(aValue);
-    end;
-  end;
-end;
-
-procedure TAbstractExternalTool.SetParamNameData(const aName,aValue:string);
-var
-  i:integer;
-begin
-  if Assigned(Process) then
-  begin
-    if (Length(aValue)=0) then
-    begin
-      i:=Process.Parameters.IndexOf(aName);
-      if (i<>-1) then TProcessStringList(Process.Parameters).Delete(i);
-    end
-    else
-      Process.Parameters.Values[aName]:=aValue;
   end;
 end;
 

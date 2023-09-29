@@ -198,8 +198,9 @@ const
   {$endif}
   {$endif}
 
+  LINUXLEGACYPATCH = 'glibc_compat_3_2_2.patch';
 
-  REVISIONSLOG = 'fpcuprevisions.log';
+  REVISIONSLOG     = 'fpcuprevisions.log';
 
   SnipMagicBegin = '# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd   = '# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
@@ -375,6 +376,7 @@ type
 
   TInstaller = class(TObject)
   strict private
+    FLinuxLegacy: boolean;
     FInstallDirectory:string;
     FBaseDirectory:string;
     FSourceDirectory:string;
@@ -386,6 +388,8 @@ type
     FUseCompilerWrapper        : boolean;
     {$ENDIF}
     function GetDefaultCompilerFilename(const TargetCPU: TCPU; const Cross: boolean): string;
+    procedure SetLinuxLegacy(value:boolean);
+    function  GetLinuxLegacy:boolean;
   private
     FURL                       : string;
     FUltibo                    : boolean;
@@ -486,7 +490,6 @@ type
     //FGit: string;
     FSolarisOI: boolean;
     FMUSL: boolean;
-    FLinuxLegacy: boolean;
     FFPCUnicode: boolean;
     FMUSLLinker: string;
     property Shell: string read GetShell;
@@ -610,7 +613,7 @@ type
     // do we have musl instead of libc
     property MUSL: boolean write FMUSL;
     // do we have a legacy linux as target
-    property LinuxLegacy: boolean write FLinuxLegacy;
+    property LinuxLegacy: boolean read GetLinuxLegacy write SetLinuxLegacy;
     // do we need to build the FPC Unicode version of FPC
     property FPCUnicode: boolean write FFPCUnicode;
     // Are we installing Ultibo
@@ -849,7 +852,18 @@ end;
 
 procedure TInstaller.SetBaseDirectory(value:string);
 begin
-  FBaseDirectory:=ExcludeTrailingPathDelimiter(value);
+  FBaseDirectory:=value;
+  if (Length(value)>0) then
+  begin
+    FBaseDirectory:=ExcludeTrailingPathDelimiter(value);
+    ForceDirectoriesSafe(BaseDirectory);
+    // Create default patch directories
+    ForceDirectoriesSafe(ConcatPaths([BaseDirectory,'ccr']));
+    ForceDirectoriesSafe(ConcatPaths([BaseDirectory,'patches']));
+    ForceDirectoriesSafe(ConcatPaths([BaseDirectory,'patches','patchfpc']));
+    ForceDirectoriesSafe(ConcatPaths([BaseDirectory,'patches','patchlazarus']));
+    ForceDirectoriesSafe(ConcatPaths([BaseDirectory,'patches','patchuniversal']));
+  end;
 end;
 
 procedure TInstaller.SetInstallDirectory(value:string);
@@ -905,6 +919,19 @@ end;
 procedure TInstaller.SetCompiler(value:string);
 begin
   FCompiler:=value;
+end;
+
+procedure TInstaller.SetLinuxLegacy(value:boolean);
+begin
+  FLinuxLegacy:=value;
+end;
+
+function TInstaller.GetLinuxLegacy:boolean;
+begin
+  if ((CrossOS_Target=TOS.linux) AND (CrossCPU_Target=TCPU.x86_64)) then
+    result:=FLinuxLegacy
+  else
+    result:=false;
 end;
 
 function TInstaller.GetMake: string;
@@ -3327,190 +3354,19 @@ begin
   PatchUniversal:=(PatchUniversal AND (NOT PatchLaz));
   {$endif};
 
+  TrunkVersion:=0;
   if PatchFPC then TrunkVersion:=CalculateNumericalVersion(FPCTRUNKVERSION);
   {$ifndef FPCONLY}
   if PatchLaz then TrunkVersion:=CalculateNumericalVersion(LAZARUSTRUNKVERSION);
   {$endif}
 
-  if PatchFPC then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpc';
+  if PatchFPC then PatchDirectory:=ConcatPaths([BaseDirectory,'patches','patchfpc']);
   {$ifndef FPCONLY}
-  if PatchLaz then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchlazarus';
+  if PatchLaz then PatchDirectory:=ConcatPaths([BaseDirectory,'patches','patchlazarus']);
   {$endif}
-  if PatchUniversal then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpcup';
-
-  // always remove the previous fpcupdeluxe patches when updating the source !!!
-  if (DirectoryExists(PatchDirectory)) then
-  begin
-    //DeleteDirectoryEx(PatchDirectory);
-    PatchList := FindAllFiles(PatchDirectory, '*.patch;*.diff', false);
-    try
-      if (PatchList.Count>0) then
-      begin
-        for i:=0 to (PatchList.Count-1) do
-        begin
-          PatchFilePath:=PatchList.Strings[i];
-          PatchAccepted:=false;
-          if PatchFPC then
-          begin
-            PatchAccepted:=((Pos('_FPCPATCH',PatchFilePath)>0) OR PatchAccepted);
-            PatchAccepted:=((Pos('fpcpatch_',PatchFilePath)>0) OR PatchAccepted);
-          end
-          else
-          {$ifndef FPCONLY}
-          if PatchLaz then
-          begin
-            PatchAccepted:=((Pos('_LAZPATCH',PatchFilePath)>0) OR PatchAccepted);
-            PatchAccepted:=((Pos('lazpatch_',PatchFilePath)>0) OR PatchAccepted);
-          end
-          else
-          {$endif}
-          if PatchUniversal then
-          begin
-            PatchAccepted:=((Pos('_FPCUPPATCH',PatchFilePath)>0) OR PatchAccepted);
-            PatchAccepted:=((Pos('fpcuppatch_',PatchFilePath)>0) OR PatchAccepted);
-          end;
-          if (PatchAccepted) then DeleteFile(PatchFilePath);
-        end;
-      end;
-    finally
-      PatchList.Free;
-    end;
-  end;
+  if PatchUniversal then PatchDirectory:=ConcatPaths([BaseDirectory,'patches','patchuniversal']);
 
   LocalSourcePatches:=FSourcePatches;
-
-  // only patch if we want to and if we do not have a release candidate
-  if (FOnlinePatching AND (FPatchVersion<>-1) AND (NOT PatchUniversal)) then
-  begin
-    Infoln(localinfotext+'No online patching: we have a release candidate !');
-  end;
-
-  if (FOnlinePatching AND ((FPatchVersion=-1) OR PatchUniversal)) then
-  begin
-    PatchList:=TStringList.Create;
-    try
-      PatchList.Clear;
-      try
-        GetGitHubFileList(FPCUPGITREPOSOURCEPATCHESAPI,PatchList,FUseWget,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-      except
-        on E : Exception do
-        begin
-          Infoln(localinfotext+E.ClassName+' error raised, with message : '+E.Message, etError);
-        end;
-      end;
-
-      for i:=0 to Pred(PatchList.Count) do
-      begin
-        Infoln(localinfotext+'Found online patch: '+PatchList[i],etDebug);
-
-        PatchFilePath:=PatchList[i];
-
-        PatchAccepted:=false;
-        if PatchFPC then PatchAccepted:=(Pos('fpcpatch',PatchFilePath)>0);
-        {$ifndef FPCONLY}
-        if PatchLaz then PatchAccepted:=(Pos('lazpatch',PatchFilePath)>0);
-        {$endif}
-        if PatchUniversal then
-        begin
-          PatchAccepted:=(Pos('fpcuppatch',PatchFilePath)>0);
-          if PatchAccepted then
-          begin
-            PatchAccepted:=(Pos(LowerCase(ModuleName),LowerCase(FileNameFromURL(PatchFilePath)))>0);
-          end;
-        end;
-
-        if (NOT PatchAccepted) then continue;
-
-        Infoln(infotext+'Using '+ExtractFileName(PatchFilePath)+ 'for '+ModuleName,etDebug);
-
-        if NOT PatchUniversal then
-        begin
-          s:=FileNameFromURL(PatchFilePath);
-          s:=FileNameWithoutExt(s);
-          s:=VersionFromUrl(s);
-          PatchVersion:=CalculateNumericalVersion(s);
-
-          if (s='trunk') or (PatchVersion=0) then
-          begin
-            //only patch trunk in case no version is given
-            PatchVersion:=TrunkVersion;
-          end;
-
-          s:=localinfotext+'Found online patch: '+PatchFilePath+' with version '+InttoStr(PatchVersion);
-          if Self.FVerbose then Infoln(s,etInfo) else Infoln(s,etDebug);
-
-          {$if not defined(MSWindows) and not defined(Haiku)}
-          //only patch the Haiku build process on Windows and Haiku itself
-          if (Pos('fpcpatch_haiku.patch',PatchFilePath)>0) OR (Pos('fpcpatch_haiku_',PatchFilePath)>0) then PatchAccepted:=False;
-          {$endif}
-
-          //{$ifndef Haiku}
-          ////only patch the Haiku FPU exception mask on Haiku itself
-          //this patch has been disabled: we always patch the sources to get things running on Haiku !!
-          if Pos('fpcpatch_haikufpu',PatchFilePath)>0 then PatchAccepted:=False;
-          //{$endif}
-
-          {$ifndef OpenBSD}
-          //only patch the openbsd mask on OpenBSD itself
-          if Pos('fpcpatch_openbsd',PatchFilePath)>0 then PatchAccepted:=False;
-          {$endif}
-
-          {$ifndef Darwin}
-          //only patch the packages Makefile on Darwin itself
-          if Pos('fpcpatch_darwin_makepackages_',PatchFilePath)>0 then PatchAccepted:=False;
-          {$endif}
-
-          {$ifndef FPCONLY}
-          //only patch lazarus for musl on musl itself
-          if Pos('lazpatch_musllibc',PatchFilePath)>0 then
-          begin
-            {$ifdef Linux}
-            if (NOT FMUSL) then PatchAccepted:=False;
-            {$else}
-            PatchAccepted:=False;
-            {$endif}
-          end;
-
-          //skip makefile patch lazarus ... we do it ourselves again.
-          if Pos('lazpatch_useride',PatchFilePath)>0 then
-          begin
-            PatchAccepted:=False;
-          end;
-          {$endif}
-
-          // In general, only patch trunk !
-          // This can be changed to take care of versions ... but not for now !
-          // Should be removed in future fpcup versions !!
-          if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
-          begin
-            if SourceVersionNum<>PatchVersion then PatchAccepted:=False;
-            if (PatchVersion=TrunkVersion) then
-            begin
-              // only patch trunk when HEAD is requested
-              if (FDesiredRevision <> '') AND (Uppercase(trim(FDesiredRevision)) <> 'HEAD') then
-              begin
-                PatchAccepted:=False;
-              end;
-            end;
-          end;
-        end;
-
-        if (PatchAccepted) then
-        begin
-          Infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' will be applied !',etInfo);
-          ForceDirectoriesSafe(PatchDirectory);
-          s:=FileNameFromURL(PatchFilePath);
-          GetFile(PatchFilePath,PatchDirectory+DirectorySeparator+s,true);
-        end
-        else
-        begin
-          Infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' will not be applied !',etDebug);
-        end;
-      end;
-    finally
-      PatchList.Free;
-    end;
-  end;
 
   {$ifdef Haiku}
   // we will hack into FPC itself to prevent FPU crash on Haiku
@@ -3626,7 +3482,6 @@ begin
   end;
   {$endif FPCONLY}
 
-
   if (DirectoryExists(PatchDirectory)) then
   begin
     PatchList := FindAllFiles(PatchDirectory, '*.patch;*.diff', false);
@@ -3634,16 +3489,46 @@ begin
 
       if (PatchList.Count>0) then
       begin
-        if PatchUniversal then
+        for i:=Pred(PatchList.Count) downto 0 do
         begin
-          // patches must have the same name as the module to be installed
-          for i:=Pred(PatchList.Count) downto 0 do
+          PatchAccepted:=False;
+          PatchFilePath:=SafeExpandFileName(PatchList[i]);
+
+          if PatchUniversal then
           begin
-            PatchFilePath:=SafeExpandFileName(PatchList[i]);
-            PatchFilePath:=FileNameWithoutExt(PatchFilePath);
-            PatchAccepted:=(LowerCase(ModuleName)=LowerCase(PatchFilePath));
-            if (NOT PatchAccepted) then PatchList.Delete(i);
+            // patches must have the same name as the module to be installed
+            s:=FileNameWithoutExt(PatchFilePath);
+            PatchAccepted:=(LowerCase(ModuleName)=LowerCase(s));
           end;
+
+          if (NOT PatchUniversal) then
+          begin
+            s:=FileNameFromURL(PatchFilePath);
+            s:=FileNameWithoutExt(s);
+            s:=VersionFromUrl(s);
+            PatchVersion:=CalculateNumericalVersion(s);
+
+            if (s='trunk') or (PatchVersion=0) then
+            begin
+              //only patch trunk in case no version is given
+              PatchVersion:=TrunkVersion;
+            end;
+
+            s:=localinfotext+'Found patch: '+ExtractFileName(PatchFilePath)+' with version '+InttoStr(PatchVersion);
+            if FVerbose then Infoln(s,etInfo) else Infoln(s,etDebug);
+
+            if (SourceVersionNum=PatchVersion) then PatchAccepted:=True;
+            if (PatchVersion=TrunkVersion) then
+            begin
+              // only patch trunk when HEAD is requested
+              if (FDesiredRevision<>'') AND (Uppercase(trim(FDesiredRevision))<>'HEAD') then
+              begin
+                PatchAccepted:=False;
+              end;
+            end;
+          end;
+
+          if (NOT PatchAccepted) then PatchList.Delete(i);
         end;
       end;
 
@@ -3679,7 +3564,7 @@ begin
                {$ifndef FPCONLY}
                else if PatchLaz then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+PatchList[i])
                {$endif}
-                  else PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpcup'+DirectorySeparator+PatchList[i]);
+                  else PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchuniversal'+DirectorySeparator+PatchList[i]);
           end;
         end;
 

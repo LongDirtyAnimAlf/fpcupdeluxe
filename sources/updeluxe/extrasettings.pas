@@ -189,6 +189,9 @@ type
     function GetSaveScript:boolean;
     procedure SetSaveScript(value:boolean);
 
+    function GetGLIBC:boolean;
+    procedure SetGLIBC(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -282,6 +285,7 @@ type
     property AddContext:boolean read GetAddContext write SetAddContext;
     property AskConfirmation:boolean read GetAskConfirmation write SetAskConfirmation;
     property SaveScript:boolean read GetSaveScript write SetSaveScript;
+    property ForceGLIBCLinking:boolean read GetGLIBC write SetGLIBC;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -384,6 +388,9 @@ resourcestring
   HintCheckSaveScript = 'Save the current install-settings in a fpclazup-script for later use.';
   CaptionCheckSaveScript = 'Save settings in fpcup-script.';
 
+  HintCheckGLIBCCompat = 'Force linking against lowest possible GLIBC version to (possibly) increase the compatibility with older Linux versions. Use at your own risk.';
+  CaptionCheckGLIBCCompat = 'Force linking against lowest @GLIBC-version.';
+
 var
   Form2: TForm2;
 
@@ -476,6 +483,7 @@ begin
 
   UpdateCheckBoxList;
 
+  ForceGLIBCLinking      := False;
   SaveScript             := False;
   AskConfirmation        := True;
   FpcupBootstrappersOnly := True;
@@ -613,16 +621,13 @@ begin
   with MiscellaneousCheckListBox.Items do
   begin
     Append(CaptionCheckRepo);
-    Append(CaptionCheckPackageRepo);
-    Append(CaptionCheckFPCUnicode);
     Append(CaptionCheckIncludeLCL);
     Append(CaptionCheckUpdateOnly);
-    Append(CaptionCheckSystemFPC);
     Append(CaptionCheckIncludeHelp);
     Append(CaptionCheckSplitFPC);
     Append(CaptionCheckSplitLazarus);
     Append(CaptionCheckDockedLazarus);
-    Append(CaptionCheckUseWget);
+    Append(CaptionCheckGLIBCCompat);
     Append(CaptionCheckUseMakeJobs);
     Append(CaptionCheckExtraVerbose);
     Append(CaptionCheckSendInfo);
@@ -632,9 +637,13 @@ begin
     Append(CaptionUseSoftFloat80bit);
     Append(CaptionCheckEnableOnlinePatching);
     Append(CaptionCheckApplyLocalChanges);
-    Append(CaptionCheckAddContext);
     Append(CaptionCheckAskConfirmation);
     Append(CaptionCheckSaveScript);
+    Append(CaptionCheckPackageRepo);
+    Append(CaptionCheckFPCUnicode);
+    Append(CaptionCheckSystemFPC);
+    Append(CaptionCheckUseWget);
+    Append(CaptionCheckAddContext);
   end;
 
   for i := 0 to MiscellaneousCheckListBox.Count-1 do
@@ -1498,6 +1507,15 @@ begin
   SetCheckState(CaptionCheckSaveScript, value);
 end;
 
+function TForm2.GetGLIBC:boolean;
+begin
+  result:=GetCheckState(CaptionCheckGLIBCCompat);
+end;
+procedure TForm2.SetGLIBC(value:boolean);
+begin
+  SetCheckState(CaptionCheckGLIBCCompat,value);
+end;
+
 function TForm2.GetFPCOptions:string;
 begin
   result:=EditFPCOptions.Text;
@@ -1697,7 +1715,6 @@ begin
     PatchList.Free;
   end;
 end;
-
 
 function TForm2.GetFPCPatches:string;
 begin

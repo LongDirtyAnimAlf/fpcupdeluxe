@@ -429,19 +429,12 @@ begin
         ConfigText.Append('#IFDEF FPC_CROSSCOMPILING');
         ConfigText.Append('#IFDEF '+UpperCase(CrossInstaller.TargetOSName));
         ConfigText.Append('#IFDEF CPU'+UpperCase(CrossInstaller.TargetCPUName));
-        //if FLinuxLegacy then
-        //  ConfigText.Append('#IFDEF LINUXLEGACY')
-        //else
-        //  ConfigText.Append('#IFNDEF LINUXLEGACY');
-
         // Just add new snipped
         if SnippetText.Count>0 then
         begin
           for i:=0 to (SnippetText.Count-1) do
             ConfigText.Append(SnippetText.Strings[i]);
         end;
-
-        //ConfigText.Append('#ENDIF LINUXLEGACY');
         ConfigText.Append('#ENDIF CPU'+UpperCase(CrossInstaller.TargetCPUName));
         ConfigText.Append('#ENDIF '+UpperCase(CrossInstaller.TargetOSName));
         ConfigText.Append('#ENDIF FPC_CROSSCOMPILING');
@@ -1160,30 +1153,30 @@ begin
 
           Processor.SetParamNameData('--directory',SourceDirectory);
 
-          Processor.SetParamMakefilePathData('FPCDIR',SourceDirectory);
+          Processor.SetParamNamePathData('FPCDIR',SourceDirectory);
 
           {$IFDEF DEBUG}
           //To debug Makefile itself
           //Processor.SetParamData('-d');
           {$ENDIF}
 
-          Processor.SetParamMakefilePathData('FPCMAKE',FPCBinDir+DirectorySeparator+'fpcmake'+GetExeExt);
-          Processor.SetParamMakefilePathData('PPUMOVE',FPCBinDir+DirectorySeparator+'ppumove'+GetExeExt);
-          Processor.SetParamMakefilePathData('PREFIX',InstallDirectory);
+          Processor.SetParamNamePathData('FPCMAKE',FPCBinDir+DirectorySeparator+'fpcmake'+GetExeExt);
+          Processor.SetParamNamePathData('PPUMOVE',FPCBinDir+DirectorySeparator+'ppumove'+GetExeExt);
+          Processor.SetParamNamePathData('PREFIX',InstallDirectory);
 
-          Processor.SetParamMakefilePathData('INSTALL_PREFIX',InstallDirectory);
-          Processor.SetParamMakefilePathData('INSTALL_SOURCEDIR',SourceDirectory);
+          Processor.SetParamNamePathData('INSTALL_PREFIX',InstallDirectory);
+          Processor.SetParamNamePathData('INSTALL_SOURCEDIR',SourceDirectory);
 
-          Processor.SetParamMakefilePathData('INSTALL_BASEDIR',FPCBaseDir);
+          Processor.SetParamNamePathData('INSTALL_BASEDIR',FPCBaseDir);
 
-          Processor.SetParamMakefilePathData('INSTALL_UNITDIR',GetUnitsInstallDirectory);
-          Processor.SetParamMakefilePathData('INSTALL_BINDIR',FPCBinDir);
+          Processor.SetParamNamePathData('INSTALL_UNITDIR',GetUnitsInstallDirectory);
+          Processor.SetParamNamePathData('INSTALL_BINDIR',FPCBinDir);
 
-          Processor.SetParamMakefilePathData('INSTALL_LIBDIR',FPCLibraryDir);
-          Processor.SetParamMakefilePathData('INSTALL_SHAREDDIR',FPCShareDir);
-          Processor.SetParamMakefilePathData('INSTALL_DATADIR',FPCDataDir);
-          Processor.SetParamMakefilePathData('INSTALL_DOCDIR',FPCDocDir);
-          Processor.SetParamMakefilePathData('INSTALL_EXAMPLEDIR',FPCExampleDir);
+          Processor.SetParamNamePathData('INSTALL_LIBDIR',FPCLibraryDir);
+          Processor.SetParamNamePathData('INSTALL_SHAREDDIR',FPCShareDir);
+          Processor.SetParamNamePathData('INSTALL_DATADIR',FPCDataDir);
+          Processor.SetParamNamePathData('INSTALL_DOCDIR',FPCDocDir);
+          Processor.SetParamNamePathData('INSTALL_EXAMPLEDIR',FPCExampleDir);
 
 
           Processor.SetParamNameData('CPU_SOURCE',GetSourceCPU);
@@ -1206,7 +1199,7 @@ begin
             {$else}
             UnitSearchPath:=UnitSearchPath+'\$$\(packagename\)';
             {$endif}
-            Processor.SetParamMakefilePathData('INSTALL_UNITDIR',UnitSearchPath);
+            Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath);
           end;
 
           {$IFDEF MSWINDOWS}
@@ -1216,28 +1209,28 @@ begin
           if StrayShell then
           begin
             s1:=ExtractFilePath(Make)+'gecho.exe';
-            if FileExists(s1) then Processor.SetParamMakefilePathData('ECHOREDIR',s1);
+            if FileExists(s1) then Processor.SetParamNamePathData('ECHOREDIR',s1);
           end;
           *)
           //Processor.SetParamNameData('COPYTREE','echo'); //fix for examples in Win svn, see build FAQ
           // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
           s1:=GitClient.RepoExecutable;
-          if (Length(s1)>0) then Processor.SetParamMakefilePathData('GIT',s1);
+          if (Length(s1)>0) then Processor.SetParamNamePathData('GIT',s1);
           {$ENDIF}
 
           // Tell make where to find the target binutils if cross-compiling:
           // Not strictly necessary: the cross-options have this already:
           if (CrossInstaller.BinUtilsPath<>'') then
-             Processor.SetParamMakefilePathData('CROSSBINDIR',CrossInstaller.BinUtilsPath);
+             Processor.SetParamNamePathData('CROSSBINDIR',CrossInstaller.BinUtilsPath);
           if (CrossInstaller.BinUtilsPrefix<>'') then
-             Processor.SetParamMakefilePathData('BINUTILSPREFIX',CrossInstaller.BinUtilsPrefix);
+             Processor.SetParamNamePathData('BINUTILSPREFIX',CrossInstaller.BinUtilsPrefix);
 
           //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
           //Todo: to be investigated
-          Processor.SetParamMakefilePathData('FPCFPMAKE',FCompiler);
+          Processor.SetParamNamePathData('FPCFPMAKE',FCompiler);
 
           {$ifdef crosssimple}
-          Processor.SetParamMakefilePathData('FPC',FCompiler);
+          Processor.SetParamNamePathData('FPC',FCompiler);
           case MakeCycle of
             st_MakeAll:
             begin
@@ -1256,7 +1249,7 @@ begin
           case MakeCycle of
             st_Compiler:
             begin
-              Processor.SetParamMakefilePathData('FPC',FCompiler);
+              Processor.SetParamNamePathData('FPC',FCompiler);
               Processor.SetParamData('compiler_cycle');
             end;
             st_CompilerInstall:
@@ -1279,7 +1272,7 @@ begin
               end;
               {$endif}
               {$endif}
-              Processor.SetParamMakefilePathData('FPC',FCompiler);
+              Processor.SetParamNamePathData('FPC',FCompiler);
               Processor.SetParamData('compiler_install');
             end;
             st_RtlBuild,st_RtlInstall,st_PackagesBuild,st_PackagesInstall:
@@ -1287,7 +1280,7 @@ begin
               s2:=FPCBinDir+DirectorySeparator+FPCCrossCompilerName;
               if (NOT FileExists(s2)) then
                 s2:=ConcatPaths([SourceDirectory,'compiler',CrossCompilerName]);
-              Processor.SetParamMakefilePathData('FPC',s2);
+              Processor.SetParamNamePathData('FPC',s2);
               case MakeCycle of
                 st_RtlBuild           : s2:='rtl_all';
                 st_RtlInstall         : s2:='rtl_install';
@@ -1308,7 +1301,7 @@ begin
                 then
               begin
                 Infoln(infotext+'Building native compiler for '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+'.',etInfo);
-                Processor.SetParamMakefilePathData('FPC',FCompiler);
+                Processor.SetParamNamePathData('FPC',FCompiler);
                 Processor.SetParamData('-C');
                 Processor.SetParamData('compiler');
                 Processor.SetParamData('compiler');
@@ -1494,7 +1487,11 @@ begin
           if (MakeCycle<>st_NativeCompiler) then
           {$endif}
           begin
-            if UseLibc then CrossInstaller.AddCrossOption('-d'+DEFINE_FPC_USE_LIBC);
+            if LinuxLegacy then CrossInstaller.AddFPCCFGSnippet('-XLC',True);
+            // During a native install with libc, we add this define into the fpc.cfg
+            // So, add it also as cross-config, however not 100% necessary
+            //if UseLibc then CrossInstaller.AddCrossOption('-d'+DEFINE_FPC_USE_LIBC);
+            if UseLibc then CrossInstaller.AddFPCCFGSnippet('-d'+DEFINE_FPC_USE_LIBC,True);
             for i:=0 to CrossInstaller.CrossOpt.Count-1 do
               CrossCompilerOptions:=CrossCompilerOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
             CrossCompilerOptions:=TrimRight(CrossCompilerOptions);
@@ -1902,35 +1899,35 @@ begin
     Processor.SetParamNameData('FPMAKEOPT','--threads='+IntToStr(FCPUCount));
   end;
 
-  //Processor.SetParamMakefilePathData('FPC',FCompiler);
-  Processor.SetParamMakefilePathData('PP',FCompiler);
+  //Processor.SetParamNamePathData('FPC',FCompiler);
+  Processor.SetParamNamePathData('PP',FCompiler);
 
   //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
   //The paths are fixed in the FPC sources. Try to set the default path here [FPCDIR], so yylex.cod and yyparse.cod can be found.
-  Processor.SetParamMakefilePathData('FPCDIR',SourceDirectory);
+  Processor.SetParamNamePathData('FPCDIR',SourceDirectory);
 
   {$IFDEF DEBUG}
   //To debug Makefile itself
   //Processor.SetParamData('-d');
   {$ENDIF}
 
-  Processor.SetParamMakefilePathData('FPCMAKE',FPCBinDir+DirectorySeparator+'fpcmake'+GetExeExt);
-  Processor.SetParamMakefilePathData('PPUMOVE',FPCBinDir+DirectorySeparator+'ppumove'+GetExeExt);
-  Processor.SetParamMakefilePathData('PREFIX',InstallDirectory);
+  Processor.SetParamNamePathData('FPCMAKE',FPCBinDir+DirectorySeparator+'fpcmake'+GetExeExt);
+  Processor.SetParamNamePathData('PPUMOVE',FPCBinDir+DirectorySeparator+'ppumove'+GetExeExt);
+  Processor.SetParamNamePathData('PREFIX',InstallDirectory);
 
-  Processor.SetParamMakefilePathData('INSTALL_PREFIX',InstallDirectory);
-  Processor.SetParamMakefilePathData('INSTALL_SOURCEDIR',SourceDirectory);
+  Processor.SetParamNamePathData('INSTALL_PREFIX',InstallDirectory);
+  Processor.SetParamNamePathData('INSTALL_SOURCEDIR',SourceDirectory);
 
-  Processor.SetParamMakefilePathData('INSTALL_BASEDIR',FPCBaseDir);
+  Processor.SetParamNamePathData('INSTALL_BASEDIR',FPCBaseDir);
 
-  Processor.SetParamMakefilePathData('INSTALL_UNITDIR',GetUnitsInstallDirectory);
-  Processor.SetParamMakefilePathData('INSTALL_BINDIR',FPCBinDir);
+  Processor.SetParamNamePathData('INSTALL_UNITDIR',GetUnitsInstallDirectory);
+  Processor.SetParamNamePathData('INSTALL_BINDIR',FPCBinDir);
 
-  Processor.SetParamMakefilePathData('INSTALL_LIBDIR',FPCLibraryDir);
-  Processor.SetParamMakefilePathData('INSTALL_SHAREDDIR',FPCShareDir);
-  Processor.SetParamMakefilePathData('INSTALL_DATADIR',FPCDataDir);
-  Processor.SetParamMakefilePathData('INSTALL_DOCDIR',FPCDocDir);
-  Processor.SetParamMakefilePathData('INSTALL_EXAMPLEDIR',FPCExampleDir);
+  Processor.SetParamNamePathData('INSTALL_LIBDIR',FPCLibraryDir);
+  Processor.SetParamNamePathData('INSTALL_SHAREDDIR',FPCShareDir);
+  Processor.SetParamNamePathData('INSTALL_DATADIR',FPCDataDir);
+  Processor.SetParamNamePathData('INSTALL_DOCDIR',FPCDocDir);
+  Processor.SetParamNamePathData('INSTALL_EXAMPLEDIR',FPCExampleDir);
 
 
   Processor.SetParamNameData('OS_SOURCE',GetSourceOS);
@@ -1945,13 +1942,13 @@ begin
 
   // If we have a (forced) local GIT client, set GIT to prevent picking up a stray git in the path
   s1:=GitClient.RepoExecutable;
-  if (Length(s1)>0) then Processor.SetParamMakefilePathData('GIT',s1);
+  if (Length(s1)>0) then Processor.SetParamNamePathData('GIT',s1);
   {$ENDIF}
 
   if (SourceVersionNum<CalculateFullVersion(2,4,4)) then
     Processor.SetParamNameData('DATA2INC','echo');
   {else
-    Processor.SetParamMakefilePathData('DATA2INC',FPCBinPath+'data2inc'+GetExeExt);}
+    Processor.SetParamNamePathData('DATA2INC',FPCBinPath+'data2inc'+GetExeExt);}
 
   if BootstrapCompilerOverrideVersionCheck then
   begin
@@ -2139,48 +2136,55 @@ begin
 
   // Building of FPC finished
 
-  if ((ModuleName=_FPC) OR (ModuleName=_UNICODEFPC)) then
+  if (OperationSucceeded AND ((ModuleName=_FPC) OR (ModuleName=_UNICODEFPC))) then
   begin
-    if (True) OR (FLinuxLegacy) then
-    begin
-      // Rebuild rtl for GLIBC
-      Index:=Pred(Processor.Process.Parameters.Count);
 
+    // The last command added into the parameters is the make instruction
+    // We need to change this instruction without changing anything else
+    // So get its index. Bit tricky.
+    Index:=Pred(Processor.Process.Parameters.Count);
+
+    if LinuxLegacy then
+    begin
+      Infoln(infotext+'Rebuilding RTL and Packages for legacy Linux.',etWarning);
+
+      // Cleanup rtl and packages for legacy GLIBC
       Processor.Process.Parameters.Strings[Index]:='rtl_clean';
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
       Processor.Process.Parameters.Strings[Index]:='packages_clean';
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
-      //Processor.Process.Parameters.Strings[Index]:='utils_clean';
-      //ProcessorResult:=Processor.ExecuteAndWait;
-      //OperationSucceeded:=(ProcessorResult=0);
 
-      Processor.SetParamMakefilePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
+      // Change some settings for this special legacy linking
+      Processor.SetParamNamePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
       Processor.SetParamNameData('OPT','-XLC '+s1);
+      // Switch to using libc for rtl and packages
+      FUseLibc:=True;
 
+      // Rebuild rtl and packages
       Processor.Process.Parameters.Strings[Index]:='rtl_all';
+      Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
       Processor.Process.Parameters.Strings[Index]:='packages_all';
+      Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
-      //Processor.Process.Parameters.Strings[Index]:='utils_all';
-      //ProcessorResult:=Processor.ExecuteAndWait;
-      //OperationSucceeded:=(ProcessorResult=0);
 
-      Processor.SetParamMakefilePathData('PP',FCompiler);
+      // Reset settings
+      Processor.SetParamNamePathData('PP',FCompiler);
       Processor.SetParamNameData('OPT',s1);
     end;
 
     // Building of FPC succeeded
     // Now install all binaries and units
-    Index:=Pred(Processor.Process.Parameters.Count);
     UnitSearchPath:=GetUnitsInstallDirectory+DirectorySeparator;
     if OperationSucceeded then
     begin
-      Processor.SetParamMakefilePathData('INSTALL_UNITDIR',UnitSearchPath+'rtl');
+      Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'rtl');
       Processor.Process.Parameters.Strings[Index]:='installbase';
+      Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
     end;
@@ -2198,11 +2202,12 @@ begin
     if OperationSucceeded then
     begin
       {$ifdef Windows}
-      Processor.SetParamMakefilePathData('INSTALL_UNITDIR',UnitSearchPath+'$$(packagename)');
+      Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'$$(packagename)');
       {$else}
-      Processor.SetParamMakefilePathData('INSTALL_UNITDIR',UnitSearchPath+'\$$\(packagename\)');
+      Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'\$$\(packagename\)');
       {$endif}
       Processor.Process.Parameters.Strings[Index]:='installother';
+      Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
     end;
@@ -3618,7 +3623,6 @@ begin
     begin
       CrossInstaller.SolarisOI:=FSolarisOI;
       CrossInstaller.MUSL:=FMUSL;
-      CrossInstaller.LinuxLegacy:=FLinuxLegacy;
     end;
   end;
 
@@ -3974,7 +3978,7 @@ begin
   if (IsCross) then
   begin
     // This might also be done in the cross-compilers themselves.
-    if ((FLinuxLegacy) AND (CrossInstaller.TargetOS=TOS.linux)) then FUseLibc:=True;
+    if LinuxLegacy then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.dragonfly) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.freebsd) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.openbsd) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
@@ -4471,7 +4475,11 @@ begin
 
         {$ifdef Linux}
         if FMUSL then ConfigText.Append('-FL'+FMUSLLinker);
+
+        if LinuxLegacy then ConfigText.Append('-XLC');
         {$endif}
+
+        if UseLibc then ConfigText.Append('-d'+DEFINE_FPC_USE_LIBC);
 
         {$IF (defined(BSD)) and (not defined(Darwin))}
         s:='-Fl/usr/local/lib'+';'+'/usr/pkg/lib';
@@ -4483,8 +4491,7 @@ begin
         ConfigText.Append(s);
         {$endif}
 
-        if UseLibc then ConfigText.Append('-d'+DEFINE_FPC_USE_LIBC);
-        {$ifdef freebsd}
+        {$ifdef FreeBSD}
         ConfigText.Append('-FD/usr/local/bin');
         {$endif}
 
@@ -4844,12 +4851,12 @@ begin
     end;
     Processor.SetParamData('--directory='+SourceDirectory);
 
-    Processor.SetParamMakefilePathData('FPC',aCleanupCompiler);
-    Processor.SetParamMakefilePathData('FPCMAKE',FPCBinDir+DirectorySeparator+'fpcmake'+GetExeExt);
-    Processor.SetParamMakefilePathData('PPUMOVE',FPCBinDir+DirectorySeparator+'ppumove'+GetExeExt);
-    Processor.SetParamMakefilePathData('FPCDIR',SourceDirectory);
-    Processor.SetParamMakefilePathData('PREFIX',InstallDirectory);
-    Processor.SetParamMakefilePathData('INSTALL_PREFIX',InstallDirectory);
+    Processor.SetParamNamePathData('FPC',aCleanupCompiler);
+    Processor.SetParamNamePathData('FPCMAKE',FPCBinDir+DirectorySeparator+'fpcmake'+GetExeExt);
+    Processor.SetParamNamePathData('PPUMOVE',FPCBinDir+DirectorySeparator+'ppumove'+GetExeExt);
+    Processor.SetParamNamePathData('FPCDIR',SourceDirectory);
+    Processor.SetParamNamePathData('PREFIX',InstallDirectory);
+    Processor.SetParamNamePathData('INSTALL_PREFIX',InstallDirectory);
 
     Processor.SetParamData('CPU_SOURCE='+GetSourceCPU);
     Processor.SetParamData('OS_SOURCE='+GetSourceOS);
@@ -5261,7 +5268,26 @@ begin
     CreateRevision(ModuleName,ActualRevision);
     {$endif FORCEREVISION}
 
-    if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
+    if (SourceVersion<>'0.0.0') then
+    begin
+
+      // Create the Linux Legacy patch now
+      // It will only be used for FPC 3.2.2
+      // But its there for everybody to have a look
+      if (SourceVersion='3.2.2') then
+      begin
+        s:=ConcatPaths([SourceDirectory,'compiler','glibc_2.29_x64.inc']);
+        if FileExists(s) then SysUtils.DeleteFile(s);
+        s:=ConcatPaths([BaseDirectory,'patches','patchfpc',LINUXLEGACYPATCH]);
+        if (NOT FileExists(s)) then
+        begin
+          SaveFileFromResource(s,'GLIBC_COMPAT_3_2_2');
+        end;
+      end;
+
+      // Patch the FPC sources, if there are patches available
+      PatchModule(ModuleName);
+    end;
   end
   else
   begin

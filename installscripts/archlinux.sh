@@ -7,6 +7,7 @@ sudo pacman -S --noconfirm glibc
 sudo pacman -S --noconfirm subversion
 sudo pacman -S --noconfirm git
 sudo pacman -S --noconfirm binutils
+sudo pacman -S --noconfirm patch
 
 sudo pacman -S --noconfirm zip
 sudo pacman -S --noconfirm unzip

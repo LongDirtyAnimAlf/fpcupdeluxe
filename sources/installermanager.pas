@@ -507,10 +507,14 @@ end;
 
 procedure TFPCupManager.SetBaseDirectory(AValue: string);
 begin
-  FBaseDirectory:=SafeExpandFileName(AValue);
-  ForceDirectoriesSafe(FBaseDirectory);
-  // Set default bootstrap directory
-  FBootstrapCompilerDirectory:=ConcatPaths([FBaseDirectory,DEFAULTBOOTSTRAPDIR]);
+  FBaseDirectory:=AValue;
+  if Length(AValue)>0 then
+  begin
+    FBaseDirectory:=SafeExpandFileName(AValue);
+    ForceDirectoriesSafe(BaseDirectory);
+    // Set default bootstrap directory
+    FBootstrapCompilerDirectory:=ConcatPaths([BaseDirectory,DEFAULTBOOTSTRAPDIR]);
+  end;
 end;
 
 procedure TFPCupManager.SetBootstrapCompilerDirectory(AValue: string);
@@ -811,9 +815,9 @@ end;
 
 function TFPCupManager.GetTempDirectory:string;
 begin
-  if DirectoryExists(FBaseDirectory) then
+  if DirectoryExists(BaseDirectory) then
   begin
-    result:=ConcatPaths([FBaseDirectory,'tmp']);
+    result:=ConcatPaths([BaseDirectory,'tmp']);
     ForceDirectoriesSafe(result);
   end;
 end;
@@ -1179,8 +1183,6 @@ begin
   // normally, we have the same names for libs and bins URL
   LibsFileName:=BinsFileName;
 
-  if LinuxLegacy then LibsFileName:='Legacy'+LibsFileName;
-
   {$IF (defined(Windows)) OR (defined(Linux))}
   if (
     ((CrossOS_Target=TOS.darwin) AND (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
@@ -1413,7 +1415,7 @@ end;
 
 procedure TFPCupManager.GetCrossToolsPath(out BinPath,LibPath:string);
 begin
-  GetCrossToolsDir(CrossCPU_Target,CrossOS_Target,MUSL,SolarisOI,LinuxLegacy,BinPath,LibPath);
+  GetCrossToolsDir(CrossCPU_Target,CrossOS_Target,MUSL,SolarisOI,BinPath,LibPath);
 
   LibPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSLIBPATH),LibPath]);
   BinPath:=ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}(CROSSBINPATH),BinPath]);

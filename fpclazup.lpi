@@ -16,9 +16,10 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
       <Icon Value="0"/>
-      <Resources Count="2">
+      <Resources Count="3">
         <Resource_0 FileName="sources\fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="sources\settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
+        <Resource_2 FileName="patches\patchfpc\glibc_compat_3_2_2.patch" Type="RCDATA" ResourceName="GLIBC_COMPAT_3_2_2"/>
       </Resources>
     </General>
     <i18n>

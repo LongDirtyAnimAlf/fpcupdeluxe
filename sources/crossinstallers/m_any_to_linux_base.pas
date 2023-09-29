@@ -570,15 +570,6 @@ begin
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
-
-    // To be investigated
-    // This adds the define also into fpc.cfg
-    // Might also double UseLibc
-    if FLinuxLegacy then
-    begin
-      AddFPCCFGSnippet('-d'+DEFINE_FPC_USE_LIBC);
-    end;
-
   end;
 end;
 

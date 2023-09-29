@@ -1248,7 +1248,7 @@ begin
           // try to distinguish between different Solaris versons
           if (aTOS=TOS.solaris) then
           begin
-            GetCrossToolsDir(aTCPU,aTOS,false,true,false,BinPath,dummy);
+            GetCrossToolsDir(aTCPU,aTOS,false,true,BinPath,dummy);
 
             for i:=SnipBegin to SnipEnd do
             begin
@@ -1264,8 +1264,8 @@ begin
           // try to distinguish between different Linux versons
           if (aTOS=TOS.linux) then
           begin
-            GetCrossToolsDir(aTCPU,aTOS,true,false,false,BinPath,dummy);
-            GetCrossToolsDir(aTCPU,aTOS,false,false,true,dummy,LibPath);
+            GetCrossToolsDir(aTCPU,aTOS,true,false,BinPath,dummy);
+            GetCrossToolsDir(aTCPU,aTOS,false,false,dummy,LibPath);
 
             for i:=SnipBegin to SnipEnd do
             begin
@@ -1275,13 +1275,6 @@ begin
                 aOS:='linux-musl';
                 break;
               end;
-
-              if (Pos('-Fl',s)>0) AND (Pos(LibPath,s)>0) then
-              begin
-                aOS:='linux-legacy';
-                break;
-              end;
-
             end;
           end;
 
@@ -2048,7 +2041,6 @@ begin
       FPCupManager.CrossOS_Target:=OSType;
       sOS:=radgrpOS.Items[radgrpOS.ItemIndex];
       if sOS='linux-musl' then FPCupManager.MUSL:=true;
-      if sOS='linux-legacy' then FPCupManager.LinuxLegacy:=true;
       if sOS='solaris-oi' then FPCupManager.SolarisOI:=true;
       FPCupManager.OnlyModules:=_NATIVECROSSFPC;
       sStatus:='Going to build native compiler for '+FPCupManager.CrossCombo_Target;
@@ -2865,7 +2857,6 @@ begin
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s='linux-musl' then FPCupManager.MUSL:=true;
-    if s='linux-legacy' then FPCupManager.LinuxLegacy:=true;
     if s='solaris-oi' then FPCupManager.SolarisOI:=true;
   end;
 
@@ -3226,7 +3217,6 @@ begin
 
       s:='fpcupdeluxe: FPC cross-builder: Building compiler for '+GetOS(FPCupManager.CrossOS_Target);
       if FPCupManager.MUSL then s:=s+'-musl';
-      if FPCupManager.LinuxLegacy then s:=s+'-legacy';
       if FPCupManager.SolarisOI then s:=s+'-openindiana';
       s:=s+'-'+GetCPU(FPCupManager.CrossCPU_Target);
       sStatus:=s;
@@ -4018,6 +4008,7 @@ begin
   FPCupManager.OnlinePatching:=Form2.OnlinePatching;
   FPCupManager.ReApplyLocalChanges:=Form2.ApplyLocalChanges;
 
+  FPCupManager.LinuxLegacy:=Form2.ForceGLIBCLinking;
 
   FPCupManager.FPCOPT:=Form2.FPCOptions;
   if Form2.FPCDebug then
@@ -4428,6 +4419,8 @@ begin
 
       Form2.SystemFPC:=ReadBool('General','SystemFPC',False);
 
+      Form2.ForceGLIBCLinking:=ReadBool('General','LinuxLegacy',Form2.ForceGLIBCLinking);
+
       Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
       Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
 
@@ -4588,6 +4581,8 @@ begin
       WriteBool('General','DockedLazarus',Form2.DockedLazarus);
 
       WriteBool('General','SystemFPC',Form2.SystemFPC);
+
+      WriteBool('General','LinuxLegacy',Form2.ForceGLIBCLinking);
 
       WriteBool('General','UseWget',Form2.UseWget);
       WriteBool('General','MakeJobs',Form2.MakeJobs);
