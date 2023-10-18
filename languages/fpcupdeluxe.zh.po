@@ -164,7 +164,7 @@ msgstr "检查FPC配置文件[fpc.cfg]对于交叉编译器 在 "
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersfound
 msgid "Found crosscompiler for "
-msgstr "找到交叉编译器用于 "
+msgstr "找到交叉编译器用于："
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersupdate
 msgid "Going to update cross-compiler."
@@ -306,12 +306,12 @@ msgstr "中止"
 #: processutils.liscannotexecute
 #, object-pascal-format
 msgid "cannot execute \"%s\""
-msgstr "不能执行\"%s\""
+msgstr "无法执行\"%s\""
 
 #: processutils.liscannotfindexecutable
 #, object-pascal-format
 msgid "cannot find executable \"%s\""
-msgstr "不能找到可执行文件\"%s\""
+msgstr "无法找到可执行文件\"%s\""
 
 #: processutils.lisexecutableisadirectory
 #, object-pascal-format
@@ -350,12 +350,12 @@ msgstr "成功"
 #: processutils.listoolhasnoexecutable
 #, object-pascal-format
 msgid "tool \"%s\" has no executable"
-msgstr "工具\"%s\"没有可执行文件"
+msgstr "tool \"%s\"没有可执行文件"
 
 #: processutils.lisunabletoexecute
 #, object-pascal-format
 msgid "unable to execute: %s"
-msgstr "不能执行:%s"
+msgstr "无法执行:%s"
 
 #: processutils.lisunabletoreadprocessexitstatus
 msgid "unable to read process ExitStatus"
@@ -364,6 +364,10 @@ msgstr "无法读取进程的ExitStatus"
 #: tform1.actfileexit.caption
 msgid "E&xit"
 msgstr "退出(&x)"
+
+#: tform1.actfilesave.caption
+msgid "&Save log"
+msgstr "保存日志"
 
 #: tform1.actfileexit.hint
 msgid "Exit"
@@ -391,7 +395,7 @@ msgstr "基本"
 
 #: tform1.bitbtnfpcandlazarus.caption
 msgid "Install/update FPC+Lazarus"
-msgstr "将安装/更新FPC和Lazarus"
+msgstr "安装/更新FPC和Lazarus"
 
 #: tform1.bitbtnfpcandlazarus.hint
 msgid "Will install/update the selected version of both FPC and Lazarus."
@@ -408,11 +412,11 @@ msgstr "仅安装/更新选择的FPC版本."
 #: tform1.bitbtnfpconlytag.caption
 msgctxt "tform1.bitbtnfpconlytag.caption"
 msgid "Add Tag"
-msgstr "添加标记"
+msgstr "添加标签"
 
 #: tform1.bitbtnfpconlytag.hint
 msgid "Add tag/url into FPC install list"
-msgstr "添加标记/url到FPC安装列表"
+msgstr "将标签/url添加到FPC安装列表"
 
 #: tform1.bitbtnfpcsetrevision.caption
 msgid "Set FPC hash in Setup+"
@@ -441,11 +445,11 @@ msgstr "仅安装/更新选择的Lazarus版本."
 #: tform1.bitbtnlazarusonlytag.caption
 msgctxt "tform1.bitbtnlazarusonlytag.caption"
 msgid "Add Tag"
-msgstr "添加标记"
+msgstr "添加标签"
 
 #: tform1.bitbtnlazarusonlytag.hint
 msgid "Add tag/url into Lazarus install list"
-msgstr "添加标记/url到Lazarus安装列表"
+msgstr "将标签/url添加到Lazarus安装列表"
 
 #: tform1.bitbtnlazarussetrevision.caption
 msgid "Set Lazarus hash in Setup+"
@@ -565,7 +569,7 @@ msgstr "重新创建启动脚本"
 
 #: tform1.crosssheet.caption
 msgid "Cross"
-msgstr "跨平台/交叉编译"
+msgstr "交叉"
 
 #: tform1.espbtn.caption
 msgid "ESP32"
@@ -581,7 +585,7 @@ msgstr "附加"
 
 #: tform1.fixesbtn.caption
 msgid "Fixes"
-msgstr "修正版本"
+msgstr "修复"
 
 #: tform1.fixesbtn.hint
 msgid "Will install/update current fixes versions of both FPC and Lazarus"
@@ -676,7 +680,7 @@ msgstr "语言"
 
 #: tform1.menuitem3.caption
 msgid "Issues"
-msgstr "Issues"
+msgstr "疑问"
 
 #: tform1.mfpcbugs.caption
 msgid "FPC bugs"
@@ -698,9 +702,25 @@ msgstr "前往Lazarus论坛"
 msgid "Up GitHub issues"
 msgstr "前往GitHub issues"
 
+#: tform1.monlinedocs.caption
+msgid "Online docs"
+msgstr "在线文档"
+
 #: tform1.mkoreanlanguage.caption
 msgid "Korean (KR)"
 msgstr "韩语 (KR)"
+
+#: tform1.mhelp.caption
+msgid "Help"
+msgstr "帮助"
+
+#: tform1.mwiki.caption
+msgid "Online Wiki"
+msgstr "在线wiki"
+
+#: tform1.mabout.caption
+msgid "About Up"
+msgstr "关于Up"
 
 #: tform1.mlazarusbugs.caption
 msgid "Lazarus bugs"
@@ -766,15 +786,15 @@ msgstr "等待中"
 
 #: tform1.tagsheet.caption
 msgid "Tags"
-msgstr "标记"
+msgstr "标签"
 
 #: tform1.trunkbtn.caption
 msgid "Trunk"
-msgstr "Trunk(主干)版本"
+msgstr "主干版本"
 
 #: tform1.trunkbtn.hint
 msgid "Will install/update trunk version of both FPC and Lazarus."
-msgstr "将安装/更新FPC和Lazarus的主干的(trunk)版本."
+msgstr "将安装/更新FPC和Lazarus的主干(trunk)版本."
 
 #: tform1.ultibobtn.hint
 msgid "Install baremetal Ultibo for RPi3"
@@ -810,11 +830,11 @@ msgstr "列出全部"
 
 #: tform2.btnremfpcpatch.caption
 msgid "Rem. FPC patch"
-msgstr "快速FPC修补"
+msgstr "撤销FPC补丁"
 
 #: tform2.btnremlazpatch.caption
 msgid "Rem. Laz. patch"
-msgstr "快速Lazarus修补"
+msgstr "撤销lazarus补丁"
 
 #: tform2.btnselectbindir.caption
 msgid "Tools"
@@ -875,11 +895,11 @@ msgstr "分支和修订版本"
 
 #: tform2.groupboxfpclazscripts.caption
 msgid "Pre and post install scripts"
-msgstr "预置和后置安装脚本"
+msgstr "前置和后置安装脚本"
 
 #: tform2.grppatching.caption
 msgid "Source patching"
-msgstr "源文件补丁"
+msgstr "源代码补丁"
 
 #: tform2.label1.caption
 msgid "HTTP proxy URL:"
@@ -927,7 +947,7 @@ msgstr "FPC前置脚本"
 
 #: tform2.labelfpcrevision.caption
 msgid "FPC hash/tag"
-msgstr "FPC的hash/标记"
+msgstr "FPC的hash/标签"
 
 #: tform2.labellazarusbranch.caption
 msgid "Laz. branch"
@@ -947,7 +967,7 @@ msgstr "Lazarus前置脚本"
 
 #: tform2.labellazarusrevision.caption
 msgid "Laz. hash/tag"
-msgstr "Lazarus的hash/标记"
+msgstr "Lazarus的hash/标签"
 
 #: tform2.labelos.caption
 msgid "Select OS"
@@ -955,7 +975,7 @@ msgstr "选择操作系统"
 
 #: tform2.radiogrouparmarch.caption
 msgid "ARM target"
-msgstr "ARM目标"
+msgstr "ARM target"
 
 #: tform2.rgrpsearchoptions.caption
 msgid "Search options"
