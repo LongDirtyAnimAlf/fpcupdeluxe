@@ -119,9 +119,8 @@ msgstr "在每次构建前,显示一个带有 是/否 的确认对话框"
 msgid "Build a docked Lazarus IDE"
 msgstr "构建一个单窗口 (停靠式) 的Lazarus IDE"
 
-#: extrasettings.hintcheckenableonlinepatching
-msgid ""
-"Fpcupdeluxe can patch the sources automagically by using online patches."
+#: extrasettings.hintcheckapplylocalchanges
+msgid "Fpcupdeluxe can re-apply the local changes automagically by using local auto-patch."
 msgstr "Fpcupluxex可以使用在线修补程序来自动修补源文件"
 
 #: extrasettings.hintcheckforcelocalrepoclient
@@ -137,8 +136,7 @@ msgid "Download whole repository, or only latest files."
 msgstr "下载整个仓库,或者只下载最新的文件"
 
 #: extrasettings.hintchecksendinfo
-msgid ""
-"Location and install info will be send to public central fpcupdeluxe server."
+msgid "Location and install info will be send to public central fpcupdeluxe server."
 msgstr "位置和安装信息将发送到公共的中心fpcupdeluxe服务器"
 
 #: extrasettings.hintchecksystemfpc
