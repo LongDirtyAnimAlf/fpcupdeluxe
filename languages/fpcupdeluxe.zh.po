@@ -106,9 +106,7 @@ msgid "Double clicking on FPC and Lazarus files will open Lazarus."
 msgstr "在FPC和Lazarus文件上双击将打开Lazarus"
 
 #: extrasettings.hintcheckapplylocalchanges
-msgid ""
-"Fpcupdeluxe can re-apply the local changes automagically by using local auto-"
-"patch."
+msgid "Fpcupdeluxe can re-apply the local changes automagically by using local auto-"patch."
 msgstr "Fpcupdeluxe可以通过使用本地自动补丁来自动地重新应用本地更改"
 
 #: extrasettings.hintcheckaskconfirmation
@@ -119,8 +117,8 @@ msgstr "在每次构建前,显示一个带有 是/否 的确认对话框"
 msgid "Build a docked Lazarus IDE"
 msgstr "构建一个单窗口 (停靠式) 的Lazarus IDE"
 
-#: extrasettings.hintcheckapplylocalchanges
-msgid "Fpcupdeluxe can re-apply the local changes automagically by using local auto-patch."
+#: extrasettings.hintcheckenableonlinepatching
+msgid "Fpcupdeluxe can patch the sources automagically by using online patches."
 msgstr "Fpcupluxex可以使用在线修补程序来自动修补源文件"
 
 #: extrasettings.hintcheckforcelocalrepoclient
@@ -237,8 +235,7 @@ msgid "Going to look for the right cross-bins. Can (will) take some time !"
 msgstr "将要查找正确的交叉二进制文件，这可能会花费一段时间！"
 
 #: fpcupdeluxemainform.uplookuplibtools
-msgid ""
-"Going to look for the right cross-libraries. Can (will) take some time !"
+msgid "Going to look for the right cross-libraries. Can (will) take some time !"
 msgstr "将要查找正确的交叉库，这可能会花费一段时间！"
 
 #: fpcupdeluxemainform.uplookuptools
