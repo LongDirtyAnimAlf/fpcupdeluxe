@@ -1487,6 +1487,7 @@ begin
           if (MakeCycle<>st_NativeCompiler) then
           {$endif}
           begin
+            //if LinuxLegacy then CrossInstaller.AddCrossOption('-XLC');
             if LinuxLegacy then CrossInstaller.AddFPCCFGSnippet('-XLC',True);
             // During a native install with libc, we add this define into the fpc.cfg
             // So, add it also as cross-config, however not 100% necessary

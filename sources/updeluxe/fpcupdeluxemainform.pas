@@ -84,6 +84,7 @@ type
     MenuItem6: TMenuItem;
     MDutchlanguage: TMenuItem;
     MAbout: TMenuItem;
+    DockBtn: TBitBtn;
     Separator1: TMenuItem;
     MOnlineDocs: TMenuItem;
     MUkrainianLanguage: TMenuItem;
@@ -2639,6 +2640,9 @@ begin
   end;
   DisEnable(Sender,False);
   try
+    if (Sender=DockBtn) then
+      InstallModule('anchordocking',false)
+    else
     if (Sender=OPMBtn) then
       InstallModule('opm',false)
     else

@@ -59,6 +59,8 @@
 {"hash":78282181,"name":"tform1.btnuninstallmodule.caption","sourcebytes":[85,110,105,110,115,116,97,108,108,32,109,111,100,117,108,101],"value":"Uninstall module"},
 {"hash":263125666,"name":"tform1.opmbtn.hint","sourcebytes":[87,105,108,108,32,105,110,115,116,97,108,108,47,117,112,100,97,116,101,32,116,104,101,32,79,110,108,105,110,101,32,80,97,99,107,97,103,101,32,77,97,110,97,103,101,114],"value":"Will install/update the Online Package Manager"},
 {"hash":21581,"name":"tform1.opmbtn.caption","sourcebytes":[79,80,77],"value":"OPM"},
+{"hash":263125666,"name":"tform1.dockbtn.hint","sourcebytes":[87,105,108,108,32,105,110,115,116,97,108,108,47,117,112,100,97,116,101,32,116,104,101,32,79,110,108,105,110,101,32,80,97,99,107,97,103,101,32,77,97,110,97,103,101,114],"value":"Will install/update the Online Package Manager"},
+{"hash":308635,"name":"tform1.dockbtn.caption","sourcebytes":[68,111,99,107],"value":"Dock"},
 {"hash":370659,"name":"tform1.tagsheet.caption","sourcebytes":[84,97,103,115],"value":"Tags"},
 {"hash":209902382,"name":"tform1.fpctaglabel.caption","sourcebytes":[70,80,67,32,118,101,114,115,105,111,110],"value":"FPC version"},
 {"hash":205523390,"name":"tform1.lazarustaglabel.caption","sourcebytes":[76,97,122,97,114,117,115,32,118,101,114,115,105,111,110],"value":"Lazarus version"},
