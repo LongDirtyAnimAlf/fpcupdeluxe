@@ -1259,20 +1259,31 @@ begin
 
   if (CrossOS_Target=TOS.linux) then
   begin
-    ostype:='Ubuntu';
-    if MUSL then ostype:='Alpine';
-    if (CrossCPU_Target=TCPU.aarch64) then toolversion:='1804';
-    if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
-    if (CrossCPU_Target=TCPU.x86_64) then
+    if MUSL then
     begin
-      toolversion:='1804';
-      if MUSL then toolversion:='0318';
-    end;
-    if (CrossCPU_Target=TCPU.i386) then toolversion:='1804';
-    if (CrossCPU_Target=TCPU.loongarch64) then
+      ostype:='Alpine';
+      if (CrossCPU_Target=TCPU.x86_64) then
+      begin
+        toolversion:='0318';
+      end;
+      if (CrossCPU_Target=TCPU.arm) then
+      begin
+        ostype:='OpenWrt';
+        toolversion:='2203';
+      end;
+    end
+    else
     begin
-      ostype:='Deepin';
-      toolversion:='0803';
+      ostype:='Ubuntu';
+      if (CrossCPU_Target=TCPU.aarch64) then toolversion:='1804';
+      if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
+      if (CrossCPU_Target=TCPU.x86_64) then toolversion:='1804';
+      if (CrossCPU_Target=TCPU.i386) then toolversion:='1804';
+      if (CrossCPU_Target=TCPU.loongarch64) then
+      begin
+        ostype:='Deepin';
+        toolversion:='0803';
+      end;
     end;
   end;
   if (CrossOS_Target=TOS.android) then
@@ -1339,8 +1350,6 @@ begin
     end;
   end;
 
-
-
   // Check for the new bins !!
   toolversion:='0';
   ostype:=GetOSCase(CrossOS_Target);
@@ -1362,12 +1371,19 @@ begin
           TCPU.aarch64:
           begin
             toolversion:='V241';
-            if MUSL then toolversion:='V228';
+            if MUSL then toolversion:='V240';
           end;
           TCPU.arm:
           begin
-            toolversion:='V241';
-            if (CrossUtils[CrossCPU_Target,CrossOS_Target,Self.CrossOS_SubArch].CrossARMArch=TARMARCH.armhf) then s:='Linux_ARMHF_Linux_V241.zip';
+            if MUSL then
+            begin
+              toolversion:='V240';
+            end
+            else
+            begin
+              toolversion:='V241';
+              if (CrossUtils[CrossCPU_Target,CrossOS_Target,Self.CrossOS_SubArch].CrossARMArch=TARMARCH.armhf) then s:='Linux_ARMHF_Linux_V241.zip';
+            end;
           end;
           TCPU.powerpc: toolversion:='V241';
           TCPU.powerpc64: toolversion:='V241';

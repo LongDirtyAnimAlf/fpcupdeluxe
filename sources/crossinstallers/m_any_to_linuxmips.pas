@@ -123,10 +123,10 @@ begin
 
   if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Now also allow for mips-linux-gnu- binutilsprefix (e.g. codesourcery)
+  // Now also allow for mips-linux-gnu/musl- binutilsprefix (e.g. codesourcery)
   if not result then
   begin
-    BinPrefixTry:='mips-linux-gnu-';
+    BinPrefixTry:='mips-linux-'+LINUXTYPE[FMUSL]+'-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);

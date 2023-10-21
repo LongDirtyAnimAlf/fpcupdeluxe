@@ -78,10 +78,10 @@ begin
     result:=SimpleSearchLibrary(BasePath,DirName,LIBCFILENAME);
   // also check in the gnueabi directory
   if not result then
-     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabi',LIBCFILENAME);
+     result:=SimpleSearchLibrary(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabi',LIBCFILENAME);
   // also check in the gnueabihf directory
   if not result then
-     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabihf',LIBCFILENAME);
+     result:=SimpleSearchLibrary(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabihf',LIBCFILENAME);
 
   SearchLibraryInfo(result);
 
@@ -120,6 +120,11 @@ begin
   result:=inherited;
   if result then exit;
 
+  //-linux-musleabi
+  //-linux-musleabihf
+
+  BinPrefixTry:=TargetCPUName+'-'+TargetOSName+'-'+LINUXTYPE[FMUSL]+'-';
+
   hardfloat:=false;
   requirehardfloat:=(StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1);
 
@@ -134,7 +139,7 @@ begin
   // Also allow for crossfpc naming
   if (not result) AND (NOT requirehardfloat) then
   begin
-    BinPrefixTry:='arm-linux-eabi-';
+    BinPrefixTry:=TargetCPUName+'-'+TargetOSName+'-eabi-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
@@ -149,7 +154,7 @@ begin
   // Also allow for baremetal crossfpc naming
   if (not result) AND (NOT requirehardfloat) then
   begin
-    BinPrefixTry:='arm-none-eabi-';
+    BinPrefixTry:=TargetCPUName+'-none-eabi-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
@@ -163,7 +168,7 @@ begin
 
   if (not result) AND (NOT requirehardfloat) then
   begin
-    BinPrefixTry:='arm-linux-gnueabi-';
+    BinPrefixTry:=TargetCPUName+'-'+TargetOSName+'-'+LINUXTYPE[FMUSL]+'eabi-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
@@ -172,12 +177,12 @@ begin
 
     // also check in the gnueabi directory
     if not result then
-       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabi',AsFile);
+       result:=SimpleSearchBinUtil(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabi',AsFile);
   end;
 
   if (not result) AND (NOT requirehardfloat) then
   begin
-    BinPrefixTry:='arm-none-gnueabi-';
+    BinPrefixTry:=TargetCPUName+'-none-'+LINUXTYPE[FMUSL]+'eabi-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
@@ -186,7 +191,7 @@ begin
 
     // also check in the gnueabi directory
     if not result then
-       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabi',AsFile);
+       result:=SimpleSearchBinUtil(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabi',AsFile);
   end;
 
 
@@ -194,7 +199,7 @@ begin
   if not result then
   begin
     // some special binutils, also working for RPi2 !!
-    BinPrefixTry:='armv8-rpi3-linux-gnueabihf-';
+    BinPrefixTry:='armv8-rpi3-linux-'+LINUXTYPE[FMUSL]+'eabihf-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then
@@ -224,7 +229,7 @@ begin
   // Also allow for hardfloat crossbinutils
   if not result then
   begin
-    BinPrefixTry:='arm-linux-gnueabihf-';
+    BinPrefixTry:=TargetCPUName+'-'+TargetOSName+'-'+LINUXTYPE[FMUSL]+'eabihf-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
@@ -233,14 +238,14 @@ begin
 
     // also check in the gnueabihf directory
     if not result then
-       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabihf',AsFile);
+       result:=SimpleSearchBinUtil(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabihf',AsFile);
     if result then hardfloat:=true;
   end;
 
   // baremetal
   if not result then
   begin
-    BinPrefixTry:='arm-none-gnueabihf-';
+    BinPrefixTry:=TargetCPUName+'-none-'+LINUXTYPE[FMUSL]+'eabihf-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
     result:=SearchBinUtil(BasePath,AsFile);
@@ -249,14 +254,14 @@ begin
 
     // also check in the gnueabihf directory
     if not result then
-       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabihf',AsFile);
+       result:=SimpleSearchBinUtil(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabihf',AsFile);
     if result then hardfloat:=true;
   end;
 
   // Also allow for android crossbinutils
   if not result then
   begin
-    BinPrefixTry:='arm-linux-androideabi-';//standard eg in Android NDK 9
+    BinPrefixTry:=TargetCPUName+'-'+TargetOSName+'-androideabi-';//standard eg in Android NDK 9
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
@@ -269,11 +274,11 @@ begin
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     // also check in the gnueabi directory
     if (not result) AND (NOT requirehardfloat) then
-       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabi',AsFile);
+       result:=SimpleSearchBinUtil(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabi',AsFile);
     // also check in the gnueabihf directory
     if not result then
     begin
-      result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabihf',AsFile);
+      result:=SimpleSearchBinUtil(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabihf',AsFile);
       if result then hardfloat:=true;
     end;
   end;

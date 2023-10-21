@@ -129,6 +129,8 @@ type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
 
 const
+  LINUXTYPE : array[boolean] of ansistring = ('gnu','musl');
+
   DEFINE_FPC_USE_LIBC   = 'FPC_USE_LIBC';
 
   ARMArchFPCStr : array[TARMARCH] of string = (

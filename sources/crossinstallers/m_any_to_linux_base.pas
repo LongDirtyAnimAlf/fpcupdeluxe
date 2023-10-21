@@ -93,8 +93,8 @@ uses
 function Tany_linux.GetMultilibDir:string;
 begin
   case TargetCPU of
-    TCPU.i386: result:='i386-linux-gnu';
-    TCPU.x86_64: result:='x86_64-linux-gnu';
+    TCPU.i386: result:='i386-linux-'+LINUXTYPE[FMUSL];
+    TCPU.x86_64: result:='x86_64-linux-'+LINUXTYPE[FMUSL];
   else
     result:='';
   end;
@@ -187,7 +187,7 @@ const
   SDENDMAGIC='");';
 {$ENDIF UNIX}
 var
-  aLibName:string;
+  MUSLLibcFilename:string;
   {$IFDEF UNIX}
   s,sd:string;
   i,j:integer;
@@ -196,16 +196,18 @@ begin
   result:=inherited;
   if result then exit;
 
-  aLibName:=LIBCFILENAME;
-
-  if FMUSL then aLibName:='libc.musl-'+TargetCPUName+'.so.1';
+  if FMUSL then MUSLLibcFilename:='libc.musl-'+TargetCPUName+'.so.1';
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,aLibName);
+  result:=SearchLibrary(Basepath,LIBCFILENAME);
+  if ((not result) AND (FMUSL)) then
+    result:=SearchLibrary(Basepath,MUSLLibcFilename);
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,aLibName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCFILENAME);
+  if ((not result) AND (FMUSL)) then
+    result:=SimpleSearchLibrary(BasePath,DirName,MUSLLibcFilename);
 
   if result then
   begin
@@ -228,8 +230,8 @@ begin
 
     if FMUSL then
     begin
-      aLibName:='ld-musl-'+TargetCPUName+'.so.1';
-      AddFPCCFGSnippet('-FL/lib/'+aLibName,false);
+      MUSLLibcFilename:='ld-musl-'+TargetCPUName+'.so.1';
+      AddFPCCFGSnippet('-FL/lib/'+MUSLLibcFilename,false);
     end;
 
   end;
@@ -377,18 +379,37 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-
-  if FMUSL then
+  if (not result) then
   begin
+    BinPrefixTry:=TargetCPUName+'-'+TargetOSName+'-'+LINUXTYPE[FMUSL]+'-';
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if (not result) then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    {$IFDEF UNIX}
     if (not result) then
     begin
-      BinPrefixTry:=TargetCPUName+'-unknown-linux-musl-';
-      AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
-      result:=SearchBinUtil(BasePath,AsFile);
-      if (not result) then
-        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+      begin
+        result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+        if result then break;
+      end;
     end;
+    {$ENDIF UNIX}
+  end;
+
+  if (not result) then
+  begin
+    BinPrefixTry:=TargetCPUName+'-unknown-linux-'+LINUXTYPE[FMUSL]+'-';
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
     if (not result) then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
+
+  if (not result) then
+  begin
+    if FMUSL then
     begin
       BinPrefixTry:=TargetCPUName+'-alpine-linux-musl-';
       AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
@@ -430,50 +451,32 @@ begin
   {$ENDIF}
   {$ENDIF UNIX}
 
-  // Now also allow for cpu-linux-gnu- binutilsprefix (e.g. codesourcery)
+  // Now also allow for cpu-linux-gnu/musl- binutilsprefix (e.g. codesourcery)
   if (not result) then
   begin
-    BinPrefixTry:=TargetCPUName+'-linux-gnu-';
-    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if (not result) then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    {$IFDEF UNIX}
-    if (not result) then
+    if (TargetCPU=TCPU.i386) then
     begin
-      for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+      BinPrefixTry:='i586-linux-'+LINUXTYPE[FMUSL]+'-';
+      AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
+      result:=SearchBinUtil(BasePath,AsFile);
+      if (not result) then
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      {$IFDEF UNIX}
+      if (not result) then
       begin
-        result:=SearchBinUtil(UnixBinDirs[i], AsFile);
-        if result then break;
-      end;
-    end;
-    {$ENDIF UNIX}
-    if (not result) then
-    begin
-      if (TargetCPU=TCPU.i386) then
-      begin
-        BinPrefixTry:='i586-linux-gnu-';
-        AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
-        result:=SearchBinUtil(BasePath,AsFile);
-        if (not result) then
-          result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-        {$IFDEF UNIX}
-        if (not result) then
+        for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
         begin
-          for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
-          begin
-            result:=SearchBinUtil(UnixBinDirs[i], AsFile);
-            if result then break;
-          end;
+          result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+          if result then break;
         end;
-        {$ENDIF UNIX}
       end;
+      {$ENDIF UNIX}
     end;
     if (not result) then
     begin
       if (TargetCPU=TCPU.i386) then
       begin
-        BinPrefixTry:='i686-linux-gnu-';
+        BinPrefixTry:='i686-linux-'+LINUXTYPE[FMUSL]+'-';
         AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
         result:=SearchBinUtil(BasePath,AsFile);
         if (not result) then
