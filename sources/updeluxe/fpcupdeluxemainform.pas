@@ -72,6 +72,7 @@ type
     Memo1: TMemo;
     MemoAddTag: TMemo;
     memoSummary: TMemo;
+    MPortugueseLanguage: TMenuItem;
     MWiki: TMenuItem;
     MHelp: TMenuItem;
     MenuItem2: TMenuItem;
@@ -2139,6 +2140,7 @@ begin
   if Sender=MFrenchlanguage then sLanguage:='fr';
   if Sender=MDutchlanguage then sLanguage:='nl';
   if Sender=MUkrainianLanguage then sLanguage:='uk';
+  if Sender=MPortugueseLanguage then sLanguage:='pt';
 
   TransLate(sLanguage);
 

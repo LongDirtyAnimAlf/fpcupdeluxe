@@ -2797,7 +2797,7 @@ object Form1: TForm1
     Height = 670
     Top = 35
     Width = 310
-    ActivePage = ModuleSheet
+    ActivePage = BasicSheet
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 12
     BorderSpacing.Top = 8
@@ -2805,7 +2805,7 @@ object Form1: TForm1
     Constraints.MaxWidth = 310
     Constraints.MinWidth = 220
     ParentFont = False
-    TabIndex = 2
+    TabIndex = 0
     TabOrder = 2
     OnChange = PageControl1Change
     object BasicSheet: TTabSheet
@@ -5786,6 +5786,10 @@ object Form1: TForm1
       end
       object MUkrainianLanguage: TMenuItem
         Caption = 'Ukrainian (UK)'
+        OnClick = LanguageClick
+      end
+      object MPortugueseLanguage: TMenuItem
+        Caption = 'Portuguese (PT)'
         OnClick = LanguageClick
       end
     end
