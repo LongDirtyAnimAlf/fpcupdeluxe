@@ -3669,11 +3669,13 @@ end;
 function LibWhich(const aLibrary: string; out location: string): boolean;
 {$ifdef Unix}
 const
-  UNIXSEARCHDIRS : array [0..3] of string = (
+  UNIXSEARCHDIRS : array [0..5] of string = (
   '/lib',
   '/lib64',
   '/usr/lib',
-  '/usr/local/lib'
+  '/usr/lib64',
+  '/usr/local/lib',
+  '/usr/local/lib64'
   );
   {$ifdef Haiku}
   HAIKUSEARCHDIRS : array [0..3] of string = (
