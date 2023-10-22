@@ -1,4 +1,4 @@
-program glibcscanner;
+program glibcabi;
 
 {$mode objfpc}{$H+}
 
