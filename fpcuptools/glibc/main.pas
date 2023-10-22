@@ -30,11 +30,11 @@ implementation
 {$R *.lfm}
 
 type
-  TCPU      = (cpuNone,i386,x86_64,arm,aarch64);
+  TCPU      = (cpuNone,i386,x86_64,arm,aarch64,ppc,ppc64);
 
 const
   CPUStr : array[TCPU] of string = (
-    '','i386','x86_64','arm','aarch64'
+    '','i386','x86_64','arm','aarch64','ppc','ppc64'
   );
 
   // 1on1 shameless copy from unit cutils from the fpc compiler;
@@ -111,6 +111,8 @@ begin
   StringGrid1.Cells[2,0]:=CPUStr[TCPU.x86_64];
   StringGrid1.Cells[3,0]:=CPUStr[TCPU.arm];
   StringGrid1.Cells[4,0]:=CPUStr[TCPU.aarch64];
+  StringGrid1.Cells[5,0]:=CPUStr[TCPU.ppc];
+  StringGrid1.Cells[6,0]:=CPUStr[TCPU.ppc64];
   StringGrid1.ColWidths[0]:=150;
 end;
 
@@ -137,6 +139,8 @@ begin
       2:aCPU:=TCPU.x86_64;
       3:aCPU:=TCPU.arm;
       4:aCPU:=TCPU.aarch64;
+      5:aCPU:=TCPU.ppc;
+      6:aCPU:=TCPU.ppc64;
     end;
 
     glibcfunctions:=TStringList.Create;
@@ -151,6 +155,8 @@ begin
           if (aCPU=TCPU.i386) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_i386.txt');
           if (aCPU=TCPU.arm) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_armle.txt');
           if (aCPU=TCPU.aarch64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_aarch64.txt');
+          if (aCPU=TCPU.ppc) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_ppc.txt');
+          if (aCPU=TCPU.ppc64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_ppc64le.txt');
           if datafromfile.Count>0 then
           begin
             for sh in datafromfile do
