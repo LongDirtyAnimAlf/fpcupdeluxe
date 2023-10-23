@@ -1,16 +1,16 @@
 object Form1: TForm1
   Left = 466
-  Height = 422
+  Height = 550
   Top = 197
   Width = 965
   Caption = 'Form1'
-  ClientHeight = 422
+  ClientHeight = 550
   ClientWidth = 965
   OnCreate = FormCreate
   LCLVersion = '2.3.0.0'
   object StringGrid1: TStringGrid
     Left = 0
-    Height = 422
+    Height = 486
     Top = 0
     Width = 965
     Align = alClient
@@ -30,5 +30,62 @@ object Form1: TForm1
       149
       149
     )
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 64
+    Top = 486
+    Width = 965
+    Align = alBottom
+    ClientHeight = 64
+    ClientWidth = 965
+    TabOrder = 1
+    object btnExport: TButton
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = Panel1
+      Left = 9
+      Height = 43
+      Top = 3
+      Width = 140
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 2
+      Caption = 'Export'
+      OnClick = btnExportClick
+      TabOrder = 0
+    end
+    object Memo1: TMemo
+      Left = 540
+      Height = 58
+      Top = 3
+      Width = 420
+      Align = alRight
+      BorderSpacing.Right = 2
+      BorderSpacing.Around = 2
+      Lines.Strings = (
+        'Memo1'
+      )
+      TabOrder = 1
+    end
+    object StaticText1: TStaticText
+      AnchorSideTop.Control = Panel1
+      AnchorSideRight.Control = Memo1
+      Left = 375
+      Height = 41
+      Top = 3
+      Width = 141
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Top = 2
+      BorderSpacing.Right = 24
+      Caption = 'Please wait'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clRed
+      Font.Height = -29
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 2
+      Visible = False
+    end
   end
 end

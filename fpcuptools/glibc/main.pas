@@ -5,21 +5,25 @@ unit main;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Grids;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Grids, ExtCtrls,
+  StdCtrls;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
+    btnExport: TButton;
+    Memo1: TMemo;
+    Panel1: TPanel;
+    StaticText1: TStaticText;
     StringGrid1: TStringGrid;
+    procedure btnExportClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure StringGrid1HeaderClick(Sender: TObject; IsColumn: Boolean;
       Index: Integer);
   private
-
   public
-
   end;
 
 var
@@ -29,13 +33,55 @@ implementation
 
 {$R *.lfm}
 
+uses
+  typinfo,
+  StrUtils,
+  FileUtil;
+
 type
-  TCPU      = (cpuNone,i386,x86_64,arm,aarch64,ppc,ppc64);
+  TGLIBCCPU  = (
+    cpu_no,                       { 0 }
+    cpu_i386,                     { 1 }
+    cpu_m68k,                     { 2 }
+    obsolete_cpu_alpha,           { 3 }
+    cpu_powerpc,                  { 4 }
+    cpu_sparc,                    { 5 }
+    obsolete_cpu_vm,              { 6 }
+    obsolete_cpu_ia64,            { 7 }
+    cpu_x86_64,                   { 8 }
+    cpu_mipseb,                   { 9 }
+    cpu_arm,                      { 10 }
+    cpu_powerpc64,                { 11 }
+    cpu_avr,                      { 12 }
+    cpu_mipsel,                   { 13 }
+    cpu_jvm,                      { 14 }
+    cpu_i8086,                    { 15 }
+    cpu_aarch64,                  { 16 }
+    cpu_wasm,                     { 17 }
+    cpu_sparc64                   { 18 }
+  );
+
 
 const
-  CPUStr : array[TCPU] of string = (
-    '','i386','x86_64','arm','aarch64','ppc','ppc64'
-  );
+  GLIBCCPU : set of TGLIBCCPU = [cpu_i386,cpu_powerpc,cpu_x86_64,cpu_arm,cpu_powerpc64,cpu_aarch64];
+
+function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
+begin
+  begin
+    if (aTypeInfo=nil) or (aTypeInfo^.Kind<>tkEnumeration) then
+      result := '' else
+      result := GetEnumName(aTypeInfo,aEnum);
+  end;
+end;
+
+function CPUStr(aCPU:TGLIBCCPU):string;
+var
+  s:string;
+begin
+  s:=GetEnumNameSimple(TypeInfo(TGLIBCCPU),Ord(aCPU));
+  Delete(s,1,4);
+  result:=s;
+end;
 
   // 1on1 shameless copy from unit cutils from the fpc compiler;
 function CompareVersionStrings(s1,s2: string): longint;
@@ -106,13 +152,16 @@ end;
 { TForm1 }
 
 procedure TForm1.FormCreate(Sender: TObject);
+var
+  aCPU:TGLIBCCPU;
+  i:integer;
 begin
-  StringGrid1.Cells[1,0]:=CPUStr[TCPU.i386];
-  StringGrid1.Cells[2,0]:=CPUStr[TCPU.x86_64];
-  StringGrid1.Cells[3,0]:=CPUStr[TCPU.arm];
-  StringGrid1.Cells[4,0]:=CPUStr[TCPU.aarch64];
-  StringGrid1.Cells[5,0]:=CPUStr[TCPU.ppc];
-  StringGrid1.Cells[6,0]:=CPUStr[TCPU.ppc64];
+  i:=1;
+  for aCPU in GLIBCCPU do
+  begin
+    StringGrid1.Cells[i,0]:=CPUStr(aCPU);
+    Inc(i);
+  end;
   StringGrid1.ColWidths[0]:=150;
 end;
 
@@ -122,25 +171,28 @@ const
   //ABIS : array [0..2] of string = ('libc','libm','libresolve');
   ABIS : array [0..1] of string = ('libc','libm');
 var
-  aCPU:TCPU;
+  aCPU:TGLIBCCPU;
   datafromfile:TStringList;
   glibcfunctions:TStringList;
   sh,abi:string;
   v,f,vd:string;
   i,j,k:integer;
-  vi:integer;
   fl:TStrings;
+  fa:boolean;
 begin
-  aCPU:=TCPU.cpuNone;
   if IsColumn then
   begin
+
+    StaticText1.Visible:=True;
+    Application.ProcessMessages;
+
     case Index of
-      1:aCPU:=TCPU.i386;
-      2:aCPU:=TCPU.x86_64;
-      3:aCPU:=TCPU.arm;
-      4:aCPU:=TCPU.aarch64;
-      5:aCPU:=TCPU.ppc;
-      6:aCPU:=TCPU.ppc64;
+      1:aCPU:=TGLIBCCPU.cpu_i386;
+      2:aCPU:=TGLIBCCPU.cpu_powerpc;
+      3:aCPU:=TGLIBCCPU.cpu_x86_64;
+      4:aCPU:=TGLIBCCPU.cpu_arm;
+      5:aCPU:=TGLIBCCPU.cpu_powerpc64;
+      6:aCPU:=TGLIBCCPU.cpu_aarch64;
     end;
 
     glibcfunctions:=TStringList.Create;
@@ -151,16 +203,17 @@ begin
         for abi in ABIS do
         begin
           datafromfile.Clear;
-          if (aCPU=TCPU.x86_64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_amd64.txt');
-          if (aCPU=TCPU.i386) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_i386.txt');
-          if (aCPU=TCPU.arm) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_armle.txt');
-          if (aCPU=TCPU.aarch64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_aarch64.txt');
-          if (aCPU=TCPU.ppc) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_ppc.txt');
-          if (aCPU=TCPU.ppc64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_ppc64le.txt');
+          if (aCPU=TGLIBCCPU.cpu_x86_64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_amd64.txt');
+          if (aCPU=TGLIBCCPU.cpu_i386) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_i386.txt');
+          if (aCPU=TGLIBCCPU.cpu_arm) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_armle.txt');
+          if (aCPU=TGLIBCCPU.cpu_aarch64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_aarch64.txt');
+          if (aCPU=TGLIBCCPU.cpu_powerpc) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_ppc.txt');
+          if (aCPU=TGLIBCCPU.cpu_powerpc64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_ppc64le.txt');
           if datafromfile.Count>0 then
           begin
             for sh in datafromfile do
             begin
+              fa:=true;
               i:=Pos(' ',sh);
               j:=Pos('_',sh);
               Inc(j);
@@ -170,7 +223,15 @@ begin
               f:=Copy(sh,i,j-i);
               // Now we have a version string [v] and the function itself [f]
               //while f[1]='_' do Delete(f,1,1);
-              if (f[1]='_') AND (Pos('__libc',f)<>1) then continue;
+              if (f[1]='_') then
+              begin
+                fa:=false;
+                if (f='__setfpucw') then fa:=true;
+                if (Pos('__libc_',f)=1) then fa:=true;
+                if (Pos('__cxa_',f)=1) then fa:=true;
+                if (Pos('__errno_',f)=1) then fa:=true;
+              end;
+              if (NOT fa) then continue;
               glibcfunctions.AddObject(f,TObject(StrNew(PChar(v))));
             end;
           end;
@@ -178,6 +239,13 @@ begin
       finally
         datafromfile.Free;
       end;
+
+      // Only for i386
+      if (aCPU=TGLIBCCPU.cpu_i386) then
+      begin
+        glibcfunctions.AddObject('__setfpucw',TObject(StrNew('2.0.6')));
+      end;
+
 
       glibcfunctions.Sort;
 
@@ -231,7 +299,7 @@ begin
           if j=-1 then
           begin
             k:=0;
-            if (i>0) then k:=fl.IndexOf(glibcfunctions[i-1]{,i});
+            if (i>0) then k:=fl.IndexOf(glibcfunctions[i-1]);
             Inc(k,1);
             StringGrid1.InsertColRow(false,k);
             StringGrid1.Cells[0,k]:=f;
@@ -252,7 +320,88 @@ begin
       for i:=0 to Pred(glibcfunctions.Count) do StrDispose(PChar(glibcfunctions.Objects[i]));
       glibcfunctions.Free;
     end;
+
+    StaticText1.Visible:=False;
   end;
+end;
+
+procedure TForm1.btnExportClick(Sender: TObject);
+var
+  glibcfunctionsfromfile:TStringList;
+  i,j:integer;
+  setsize:integer;
+  sl,fh,fa:string;
+  aCPU:TGLIBCCPU;
+begin
+  glibcfunctionsfromfile:=TStringList.Create;
+
+  setsize:=0;
+  fa:='';
+  // Add CPUs included
+  for aCPU in GLIBCCPU do
+  begin
+    fa:=fa+GetEnumNameSimple(TypeInfo(TGLIBCCPU),Ord(aCPU))+',';
+    Inc(setsize);
+  end;
+  // Remove last comma
+  SetLength(fa,Pred(Length(fa)));
+
+  glibcfunctionsfromfile.Add('const');
+  glibcfunctionsfromfile.Add('  GLIBCCPU : set of tsystemcpu = ['+fa+'];');
+  glibcfunctionsfromfile.Add('type');
+  glibcfunctionsfromfile.Add('  TGLIBCFUNCTION = record');
+  glibcfunctionsfromfile.Add('    Name:string;');
+  glibcfunctionsfromfile.Add('    Version: array[0..'+InttoStr(Pred(setsize))+'] of string;');
+  glibcfunctionsfromfile.Add('  end;');
+
+  glibcfunctionsfromfile.Add('const');
+  glibcfunctionsfromfile.Add('  GLIBCFUNCTIONS : array [0..'+InttoStr(Pred(StringGrid1.RowCount))+'] of TGLIBCFUNCTION = (');
+
+  try
+    for i:=0 to Pred(StringGrid1.RowCount) do
+    begin
+      if i=0 then
+        sl:='CPU_included'
+      else
+        sl:=StringGrid1.Cells[0,i];
+
+      if (Length(sl)>30) then
+        sl:=PadRight(sl,45)
+      else
+        sl:=PadRight(sl,35);
+
+      sl:=StringReplace(sl,' ','''',[]);
+      sl:=''''+sl;
+
+      fa:='';
+
+      j:=1;
+      for aCPU in GLIBCCPU do
+      begin
+        if i=0 then
+          fh:=CPUStr(aCPU)
+        else
+          fh:=StringGrid1.Cells[j,i];
+        fh:=PadRight(fh,12);
+        fh:=StringReplace(fh,' ','''',[]);
+        if (j<setsize) then fh:=StringReplace(fh,' ',',',[]);
+        fh:=''''+fh;
+        fa:=fa+fh;
+        Inc(j);
+      end;
+      if i<Pred(StringGrid1.RowCount) then
+        fa:='('+fa+')),'
+      else
+        fa:='('+fa+'))';
+      glibcfunctionsfromfile.Add('    (Name : '+sl+' ; Version : '+fa);
+    end;
+
+    glibcfunctionsfromfile.Add(' );');
+    glibcfunctionsfromfile.SaveToFile('glibc.inc');
+  finally
+    glibcfunctionsfromfile.Free;
+  end;
+
 end;
 
 end.

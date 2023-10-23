@@ -306,7 +306,7 @@ begin
               begin
                 if (NOT result) then
                 begin
-                  result:=SearchLibrary(sd,aLibName);
+                  result:=SearchLibrary(sd,LIBCFILENAME);
                   if result then
                   begin
                     FLibsFound:=True;
