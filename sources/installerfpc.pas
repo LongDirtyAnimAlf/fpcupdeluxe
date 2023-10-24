@@ -4520,7 +4520,7 @@ begin
         ConfigText.Append('-k-l:libanl.so.1');
         ConfigText.Append('-k-l:libdl.so.2');
         ConfigText.Append('-k-l:librt.so.1');
-        ConfigText.Append('-k-l:libresolve.so.2');
+        ConfigText.Append('-k-l:libresolv.so.2');
         ConfigText.Append('-k-l:libpthread.so.0');
         ConfigText.Append('-k--as-needed');
         ConfigText.Append('#ENDIF');
