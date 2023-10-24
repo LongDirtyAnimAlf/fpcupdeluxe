@@ -3,7 +3,7 @@
 {$endif}
 
 {$define FORCEREVISION}
-{.$define FORCELAZBUILD}
+{$define FORCELAZBUILD}
 {.$define DISABLELAZBUILDJOBS}
 
 {.$define crosssimple}

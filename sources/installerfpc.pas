@@ -1811,8 +1811,9 @@ const
   YYPARSE='yyparse.cod';
 var
   OperationSucceeded:boolean;
-  Index:integer;
+  i,MakeCommandIndex:integer;
   UnitSearchPath:string;
+  FPCBuildOptions:string;
   s1,s2:string;
   {$IFDEF UNIX}
   //s3:string;
@@ -1956,25 +1957,26 @@ begin
     Processor.SetParamNameData('OVERRIDEVERSIONCHECK','1');
     if (ModuleName=_FPC) then Infoln(infotext+'Adding OVERRIDEVERSIONCHECK=1 due to wrong version of bootstrapper !!',etWarning);
   end;
-  s1:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
-  while Pos('  ',s1)>0 do
+
+  FPCBuildOptions:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
+  while Pos('  ',FPCBuildOptions)>0 do
   begin
-    s1:=StringReplace(s1,'  ',' ',[rfReplaceAll]);
+    FPCBuildOptions:=StringReplace(FPCBuildOptions,'  ',' ',[rfReplaceAll]);
   end;
-  s1:=Trim(s1);
+  FPCBuildOptions:=Trim(FPCBuildOptions);
 
   {$IFDEF UNIX}
-  s1:='-Sg '+s1;
+  FPCBuildOptions:='-Sg '+FPCBuildOptions;
   {$IFDEF SOLARIS}
   {$IF defined(CPUX64) OR defined(CPUX86)}
   //Intel only. See: https://wiki.lazarus.freepascal.org/Lazarus_on_Solaris#A_note_on_gld_.28Intel_architecture_only.29
-  s1:='-Xn '+s1;
+  FPCBuildOptions:='-Xn '+FPCBuildOptions;
   {$endif}
   {$ENDIF}
   {$ENDIF}
 
   {$IFDEF LINUX}
-  if FMUSL then s1:='-FL'+FMUSLLinker+' '+s1;
+  if FMUSL then FPCBuildOptions:='-FL'+FMUSLLinker+' '+FPCBuildOptions;
   {$ENDIF}
 
   {$IFDEF DARWIN}
@@ -1986,11 +1988,11 @@ begin
   end;
   if Length(s2)>0 then
   begin
-    s1:='-WM'+s2+' '+s1;
+    FPCBuildOptions:='-WM'+s2+' '+FPCBuildOptions;
     {
     if CompareVersionStrings(s2,'10.14')>=0 then
     begin
-      s1:='-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib '+s1;
+      FPCBuildOptions:='-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib '+FPCBuildOptions;
     end;
     }
   end;
@@ -2001,13 +2003,13 @@ begin
   s2:=GetDarwinSDKLocation;
   if Length(s2)>0 then
   begin
-    s1:='-XR'+s2+' '+s1;
-    s1:='-Fl'+s2+'/usr/lib '+s1;
+    FPCBuildOptions:='-XR'+s2+' '+FPCBuildOptions;
+    FPCBuildOptions:='-Fl'+s2+'/usr/lib '+FPCBuildOptions;
   end
   else
   begin
     // always add the default library location
-    s1:='-Fl'+'/usr/lib '+s1;
+    FPCBuildOptions:='-Fl'+'/usr/lib '+FPCBuildOptions;
   end;
   {$ENDIF}
 
@@ -2017,7 +2019,7 @@ begin
     if FUseRevInc then
     begin
       s2:=ConcatPaths([SourceDirectory,'compiler'])+DirectorySeparator+REVINCFILENAME;
-      if FileExists(s2) then s1:=s1+' -dREVINC';
+      if FileExists(s2) then FPCBuildOptions:=FPCBuildOptions+' -dREVINC';
     end
     else
     begin
@@ -2039,29 +2041,29 @@ begin
     begin
       // soft 80 bit float if available
       Infoln(infotext+'Adding -d'+DEFINE_FPC_SOFT_FPUX80+' to compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
-      s1:=s1+' -d'+DEFINE_FPC_SOFT_FPUX80;
+      FPCBuildOptions:=FPCBuildOptions+' -d'+DEFINE_FPC_SOFT_FPUX80;
     end;
   end;
   {$endif}
 
   {$ifdef BSD}
     {$ifndef DARWIN}
-      s1:=s1+' -Fl/usr/pkg/lib';
+      FPCBuildOptions:=FPCBuildOptions+' -Fl/usr/pkg/lib';
     {$endif}
   {$endif}
 
-  if UseLibc then s1:=s1+' -d'+DEFINE_FPC_USE_LIBC;
+  if UseLibc then FPCBuildOptions:=FPCBuildOptions+' -d'+DEFINE_FPC_USE_LIBC;
 
   {$ifdef Haiku}
     s2:='';
     {$ifdef CPUX86}
     s2:='/x86';
     {$endif}
-    s1:=s1+' -XR/boot/system/lib'+s2+' -FD/boot/system/bin'+s2+'/ -Fl/boot/system/develop/lib'+s2;
+    FPCBuildOptions:=FPCBuildOptions+' -XR/boot/system/lib'+s2+' -FD/boot/system/bin'+s2+'/ -Fl/boot/system/develop/lib'+s2;
   {$endif}
 
-  s1:=Trim(s1);
-  Processor.SetParamNameData('OPT',s1);
+  FPCBuildOptions:=Trim(FPCBuildOptions);
+  Processor.SetParamNameData('OPT',FPCBuildOptions);
 
   Processor.Process.CurrentDirectory:='';
   case ModuleName of
@@ -2142,41 +2144,8 @@ begin
 
     // The last command added into the parameters is the make instruction
     // We need to change this instruction without changing anything else
-    // So get its index. Bit tricky.
-    Index:=Pred(Processor.Process.Parameters.Count);
-
-    if LinuxLegacy then
-    begin
-      Infoln(infotext+'Rebuilding RTL and Packages for legacy Linux.',etWarning);
-
-      // Cleanup rtl and packages for legacy GLIBC
-      Processor.Process.Parameters.Strings[Index]:='rtl_clean';
-      ProcessorResult:=Processor.ExecuteAndWait;
-      OperationSucceeded:=(ProcessorResult=0);
-      Processor.Process.Parameters.Strings[Index]:='packages_clean';
-      ProcessorResult:=Processor.ExecuteAndWait;
-      OperationSucceeded:=(ProcessorResult=0);
-
-      // Change some settings for this special legacy linking
-      Processor.SetParamNamePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
-      Processor.SetParamNameData('OPT','-XLC '+s1);
-      // Switch to using libc for rtl and packages
-      FUseLibc:=True;
-
-      // Rebuild rtl and packages
-      Processor.Process.Parameters.Strings[Index]:='rtl_all';
-      Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
-      ProcessorResult:=Processor.ExecuteAndWait;
-      OperationSucceeded:=(ProcessorResult=0);
-      Processor.Process.Parameters.Strings[Index]:='packages_all';
-      Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
-      ProcessorResult:=Processor.ExecuteAndWait;
-      OperationSucceeded:=(ProcessorResult=0);
-
-      // Reset settings
-      Processor.SetParamNamePathData('PP',FCompiler);
-      Processor.SetParamNameData('OPT',s1);
-    end;
+    // So get its MakeCommandIndex. Bit tricky.
+    MakeCommandIndex:=Pred(Processor.Process.Parameters.Count);
 
     // Building of FPC succeeded
     // Now install all binaries and units
@@ -2184,7 +2153,7 @@ begin
     if OperationSucceeded then
     begin
       Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'rtl');
-      Processor.Process.Parameters.Strings[Index]:='installbase';
+      Processor.Process.Parameters.Strings[MakeCommandIndex]:='installbase';
       Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
@@ -2207,7 +2176,7 @@ begin
       {$else}
       Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'\$$\(packagename\)');
       {$endif}
-      Processor.Process.Parameters.Strings[Index]:='installother';
+      Processor.Process.Parameters.Strings[MakeCommandIndex]:='installother';
       Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
@@ -2234,16 +2203,69 @@ begin
       Compiler:='////\\\Error trying to compile FPC\|!';
     end;
 
+    if OperationSucceeded then
+    begin
+      if LinuxLegacy then
+      begin
+        Infoln(infotext+'Rebuilding RTL and Packages for legacy Linux.',etInfo);
+
+        // Change some settings for this special legacy linking
+        Processor.SetParamNamePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
+        Processor.SetParamNameData('OPT','-XLC '+'-d'+DEFINE_FPC_USE_LIBC+' '+FPCBuildOptions);
+
+        // Cleanup rtl and packages for legacy GLIBC
+        Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_clean';
+        ProcessorResult:=Processor.ExecuteAndWait;
+        OperationSucceeded:=(ProcessorResult=0);
+        Processor.Process.Parameters.Strings[MakeCommandIndex]:='packages_clean';
+        ProcessorResult:=Processor.ExecuteAndWait;
+        OperationSucceeded:=(ProcessorResult=0);
+
+        // Rebuild rtl and packages
+        Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_all';
+        Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
+        ProcessorResult:=Processor.ExecuteAndWait;
+        OperationSucceeded:=(ProcessorResult=0);
+        Processor.Process.Parameters.Strings[MakeCommandIndex]:='packages_all';
+        Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
+        ProcessorResult:=Processor.ExecuteAndWait;
+        OperationSucceeded:=(ProcessorResult=0);
+
+        if OperationSucceeded then
+        begin
+          Infoln(infotext+'Installing RTL and Packages for legacy Linux.',etInfo);
+
+          UnitSearchPath:=GetUnitsInstallDirectory+'_legacy'+DirectorySeparator;
+
+          Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'rtl');
+          Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_install';
+          Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
+          ProcessorResult:=Processor.ExecuteAndWait;
+          OperationSucceeded:=(ProcessorResult=0);
+
+          {$ifdef Windows}
+          Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'$$(packagename)');
+          {$else}
+          Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'\$$\(packagename\)');
+          {$endif}
+          Processor.Process.Parameters.Strings[MakeCommandIndex]:='installother';
+          Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
+          ProcessorResult:=Processor.ExecuteAndWait;
+          OperationSucceeded:=(ProcessorResult=0);
+        end;
+      end;
+    end;
+
     {$IFDEF MSWINDOWS}
     if OperationSucceeded then
     begin
       //Copy over binutils to new CompilerName bin directory
       try
-        for Index:=low(FUtilFiles) to high(FUtilFiles) do
+        for i:=low(FUtilFiles) to high(FUtilFiles) do
         begin
-          if FUtilFiles[Index].Category=ucBinutil then
-            FileCopy(MakePath+FUtilFiles[Index].FileName,
-              FPCBinDir+DirectorySeparator+FUtilFiles[Index].FileName);
+          if FUtilFiles[i].Category=ucBinutil then
+            FileCopy(MakePath+FUtilFiles[i].FileName,
+              FPCBinDir+DirectorySeparator+FUtilFiles[i].FileName);
         end;
         // Also, we can change the make/binutils path to our new environment
         // Will modify fmake as well.
@@ -2848,6 +2870,7 @@ var
   FPCScript:string;
   TxtFile:Text;
   FPCCompiler:String;
+  compat:boolean;
 {$ENDIF}
 begin
   result:=true;
@@ -2864,44 +2887,54 @@ begin
 
   FPCCompiler := FPCBinDir+DirectorySeparator+'fpc'+GetExeExt;
 
-  // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
-  // If this fails, Lazarus compilation will fail...
-  FPCScript := FPCBinDir+DirectorySeparator + 'fpc.sh';
-  if FileExists(FPCScript) then
+  for compat in boolean do
   begin
-    Infoln(localinfotext+'fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etInfo);
-    if not(SysUtils.DeleteFile(FPCScript)) then
+    if (compat AND (NOT LinuxLegacy)) then continue;
+
+    // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
+    // If this fails, Lazarus compilation will fail...
+
+    if (NOT compat) then FPCScript := FPCBinDir+DirectorySeparator + 'fpc.sh';
+    if (compat) then FPCScript := FPCBinDir+DirectorySeparator + 'fpccompat.sh';
+    if FileExists(FPCScript) then
     begin
-      Infoln(localinfotext+'Error deleting existing launcher script for FPC:'+FPCScript,etError);
-      Exit(false);
+      Infoln(localinfotext+'fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etInfo);
+      if not(SysUtils.DeleteFile(FPCScript)) then
+      begin
+        Infoln(localinfotext+'Error deleting existing launcher script for FPC:'+FPCScript,etError);
+        Exit(false);
+      end;
+    end;
+      AssignFile(TxtFile,FPCScript);
+        Rewrite(TxtFile);
+        writeln(TxtFile,'#!/bin/sh');
+        writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
+        writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
+        writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
+        {$ifdef DISABLE_PPC_CONFIG_PATH}
+        writeln(TxtFile,'unset PPC_CONFIG_PATH');
+        {$endif}
+        if (NOT compat) then writeln(TxtFile,FPCCompiler,' -n @',FPCBinDir,DirectorySeparator,FPCCONFIGFILENAME+' '+'"$@"');
+        if (compat) then writeln(TxtFile,FPCCompiler,' -XLC -n @',FPCBinDir,DirectorySeparator,FPCCONFIGFILENAME+' '+'"$@"');
+        CloseFile(TxtFile);
+    Result:=(FPChmod(FPCScript,&755)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
+    if Result then
+    begin
+      // To prevent unneccessary rebuilds of FCL, LCL and others:
+      // Set fileage the same as the FPC binary itself
+      Result:=(FileSetDate(FPCScript,FileAge(FPCCompiler))=0);
+    end;
+    if Result then
+    begin
+      Infoln(localinfotext+'Created launcher script for FPC:'+FPCScript,etInfo);
+    end
+    else
+    begin
+      Infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,etError);
     end;
   end;
-    AssignFile(TxtFile,FPCScript);
-      Rewrite(TxtFile);
-      writeln(TxtFile,'#!/bin/sh');
-      writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
-      writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
-      writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-      {$ifdef DISABLE_PPC_CONFIG_PATH}
-      writeln(TxtFile,'unset PPC_CONFIG_PATH');
-      {$endif}
-      writeln(TxtFile,FPCCompiler,' -n @',FPCBinDir,DirectorySeparator,FPCCONFIGFILENAME+' '+'"$@"');
-      CloseFile(TxtFile);
-  Result:=(FPChmod(FPCScript,&755)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
-  if Result then
-  begin
-    // To prevent unneccessary rebuilds of FCL, LCL and others:
-    // Set fileage the same as the FPC binary itself
-    Result:=(FileSetDate(FPCScript,FileAge(FPCCompiler))=0);
-  end;
-  if Result then
-  begin
-    Infoln(localinfotext+'Created launcher script for FPC:'+FPCScript,etInfo);
-  end
-  else
-  begin
-    Infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,etError);
-  end;
+
+
   {$ENDIF}
 end;
 
@@ -4477,9 +4510,16 @@ begin
         {$ifdef Linux}
         if FMUSL then ConfigText.Append('-FL'+FMUSLLinker);
 
-        if LinuxLegacy then ConfigText.Append('-XLC');
+        ConfigText.Append('#IFDEF FPC_LINK_COMPAT');
+        if (NOT UseLibc) then ConfigText.Append('-d'+DEFINE_FPC_USE_LIBC);
+        s:=ConcatPaths([InstallDirectory,'units',FPC_TARGET_MAGIC])+'_legacy';
+        ConfigText.Append('-Fu'+s);
+        ConfigText.Append('-Fu'+s+DirectorySeparator+'*');
+        ConfigText.Append('-Fu'+s+DirectorySeparator+'rtl');
+        ConfigText.Append('#ENDIF');
         {$endif}
 
+        //if (NOT LinuxLegacy) then
         if UseLibc then ConfigText.Append('-d'+DEFINE_FPC_USE_LIBC);
 
         {$IF (defined(BSD)) and (not defined(Darwin))}
@@ -4978,6 +5018,8 @@ begin
 
           // Delete any fpc.sh shell scripts
           {$IFDEF UNIX}
+          aPath:=FPCBinDir+DirectorySeparator+'fpccompat.sh';
+          Sysutils.DeleteFile(aPath);
           aPath:=FPCBinDir+DirectorySeparator+'fpc.sh';
           if FileExists(aPath) then
           begin

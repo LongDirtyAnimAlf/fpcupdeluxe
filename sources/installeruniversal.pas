@@ -368,7 +368,7 @@ begin
     end;
     s:=Trim(s);
 
-    if Length(s)>0 then Processor.SetParamData('OPT='+s);
+    if Length(s)>0 then Processor.SetParamNameData('OPT',s);
 
     {$ifdef DISABLELAZBUILDJOBS}
     Processor.SetParamData('LAZBUILDJOBS=1');//prevent runtime 217 errors
@@ -429,21 +429,24 @@ begin
     {$ENDIF}
 
     {$ifdef DISABLELAZBUILDJOBS}
-    Processor.SetParamData('--max-process-count=1');
+    Processor.SetParamNameData('--max-process-count','1');
     {$else}
-    Processor.SetParamData('--max-process-count='+IntToStr(FCPUCount));
+    Processor.SetParamNameData('--max-process-count',IntToStr(FCPUCount));
     {$endif}
 
-    Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
-    Processor.SetParamData('--cpu=' + GetSourceCPU);
-    Processor.SetParamData('--os=' + GetSourceOS);
+    Processor.SetParamNameData('--pcp',DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
+    Processor.SetParamNameData('--cpu',GetSourceCPU);
+    Processor.SetParamNameData('--os',GetSourceOS);
 
     if FLCL_Platform <> '' then
-      Processor.SetParamData('--ws=' + FLCL_Platform);
+      Processor.SetParamNameData('--ws',FLCL_Platform);
 
-    Processor.SetParamData('--build-ide="-dKeepInstalledPackages '+FLazarusCompilerOptions+'"');
-    //Processor.SetParamData('--build-ide="'+FLazarusCompilerOptions+'"');
-    //Processor.SetParamData('--build-mode="Normal IDE"');
+    s:=FLazarusCompilerOptions;
+    if LinuxLegacy then Processor.SetParamNameData('--compiler',ExtractFilePath(FCompiler)+'fpccompat.sh');
+
+    Processor.SetParamNameData('--build-ide','-dKeepInstalledPackages '+s);
+    //Processor.SetParamNameData('--build-ide','"'+FLazarusCompilerOptions+'"');
+    //Processor.SetParamNameData('--build-mode','"Normal IDE"');
 
     Infoln(infotext+'Running lazbuild to get IDE with user-specified packages', etInfo);
     try

@@ -2481,6 +2481,7 @@ begin
     FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
     if Length(FParent.PatchCmd)>0 then FInstaller.PatchCmd:=FParent.PatchCmd;
     FInstaller.Verbose:=FParent.Verbose;
+    FInstaller.LinuxLegacy:=FParent.LinuxLegacy;
 
     aCompiler:='';
     if FInstaller.InheritsFrom(TFPCInstaller) then
@@ -2567,7 +2568,6 @@ begin
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
     if FParent.SolarisOI then FInstaller.SolarisOI:=true {else if FInstaller.SolarisOI then FParent.SolarisOI:=true};
     if FParent.MUSL then FInstaller.MUSL:=true {else if FInstaller.MUSL then FParent.MUSL:=true};
-    if FParent.LinuxLegacy then FInstaller.LinuxLegacy:=true {else if FInstaller.LinuxLegacy then FParent.LinuxLegacy:=true};
     FInstaller.Ultibo:=Ultibo;
 
     if CrossCompiling then

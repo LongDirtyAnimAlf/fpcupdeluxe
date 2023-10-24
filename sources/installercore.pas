@@ -3077,15 +3077,22 @@ begin
 end;
 
 function TInstaller.GetFPCInBinDir: string;
+var
+  proxy:string;
 begin
   result := FPCBinDir+DirectorySeparator+'fpc'+GetExeExt;
 
   {$IFDEF UNIX}
-  if FileExists(result + '.sh') then
-    begin
+  if LinuxLegacy then
+    proxy:=result+'compat.sh'
+  else
+    proxy:=result+'.sh';
+
+  if FileExists(proxy) then
+  begin
     //Use our proxy if it is installed
-    result := result + '.sh';
-    end;
+    result := proxy;
+  end;
   {$ENDIF UNIX}
 
   if (NOT FileExists(result)) then

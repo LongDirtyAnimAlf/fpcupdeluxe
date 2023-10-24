@@ -425,10 +425,10 @@ begin
           Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         end;
         Options:=Trim(Options);
-        if Length(Options)>0 then Processor.SetParamData('OPT='+Options);
+        if Length(Options)>0 then Processor.SetParamNameData('OPT',Options);
 
         if FLCL_Platform <> '' then
-          Processor.SetParamData('LCL_PLATFORM=' + FLCL_Platform);
+          Processor.SetParamNameData('LCL_PLATFORM',FLCL_Platform);
 
         //Processor.SetParamData('all');
 
@@ -660,17 +660,17 @@ begin
     Processor.Executable := Make;
     Processor.Process.Parameters.Clear;
     {$IFDEF MSWINDOWS}
-    if Length(Shell)>0 then Processor.SetParamData('SHELL='+Shell);
+    if Length(Shell)>0 then Processor.SetParamNameData('SHELL',Shell);
     {$ENDIF}
     Processor.Process.CurrentDirectory := SourceDirectory;
-    Processor.SetParamData('--directory='+Processor.Process.CurrentDirectory);
+    Processor.SetParamNameData('--directory',Processor.Process.CurrentDirectory);
 
     {$IF DEFINED(CPUARM) AND DEFINED(LINUX)}
-    Processor.SetParamData('--jobs=1');
+    Processor.SetParamNameData('--jobs','1');
     {$ELSE}
     //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
     //if (NOT FNoJobs) then
-    //  Processor.SetParamData('--jobs='+IntToStr(FCPUCount));
+    //  Processor.SetParamNameData('--jobs'.IntToStr(FCPUCount));
     {$ENDIF}
 
     Processor.SetParamData('USESVN2REVISIONINC=0');
@@ -711,7 +711,7 @@ begin
     //Processor.SetParamNamePathData('FPCFPMAKE',ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
 
     if FLCL_Platform <> '' then
-      Processor.SetParamData('LCL_PLATFORM=' + FLCL_Platform);
+      Processor.SetParamNameData('LCL_PLATFORM',FLCL_Platform);
 
     //Set standard options
     s1:=STANDARDCOMPILERVERBOSITYOPTIONS;
@@ -764,6 +764,8 @@ begin
       {$endif}
     {$endif}
 
+    if LinuxLegacy then s1:=s1+' -XLC';
+
     // remove double spaces
     while Pos('  ',s1)>0 do
     begin
@@ -771,23 +773,22 @@ begin
     end;
     s1:=Trim(s1);
 
-    if Length(s1)>0 then Processor.SetParamData('OPT='+s1);
+    if Length(s1)>0 then Processor.SetParamNameData('OPT',s1);
 
     case ModuleName of
       _USERIDE:
       begin
         {$ifdef DISABLELAZBUILDJOBS}
-        Processor.SetParamData('LAZBUILDJOBS=1');//prevent runtime 217 errors
+        Processor.SetParamNameData('LAZBUILDJOBS','1');//prevent runtime 217 errors
         {$else}
-        Processor.SetParamData('LAZBUILDJOBS='+IntToStr(FCPUCount));
+        Processor.SetParamNameData('LAZBUILDJOBS',IntToStr(FCPUCount));
         {$endif}
         Processor.SetParamData('useride');
 
         s1:=IncludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
 
         //if FileExists(s1) then
-          //Processor.SetParamData('CFGFILE=' + s1);
-          Processor.SetParamNamePathData('CFGFILE',s1);
+        Processor.SetParamNamePathData('CFGFILE',s1);
 
         Infoln(infotext+'Running: make useride', etInfo);
 
@@ -918,7 +919,7 @@ begin
         Result := false;
         exit;
       end;
-      if FLCL_Platform<>'' then Processor.SetParamData('LCL_PLATFORM=' + FLCL_Platform);
+      if FLCL_Platform<>'' then Processor.SetParamNameData('LCL_PLATFORM',FLCL_Platform);
     end;
 
     try
@@ -1003,19 +1004,23 @@ begin
       Processor.SetParamData('--quiet');
       {$ENDIF}
 
-      Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
-      Processor.SetParamData('--cpu=' + GetSourceCPU);
-      Processor.SetParamData('--os=' + GetSourceOS);
+      Processor.SetParamNameData('--pcp',DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
+      Processor.SetParamNameData('--cpu',GetSourceCPU);
+      Processor.SetParamNameData('--os',GetSourceOS);
 
       if FLCL_Platform <> '' then
-        Processor.SetParamData('--ws=' + FLCL_Platform);
+        Processor.SetParamNameData('--ws',FLCL_Platform);
 
       // Support keeping userdefined installed packages when building.
       // Compile with selected compiler options
       // Assume new Laz version on failure getting revision
+
+      s1:=FCompilerOptions;
+      if LinuxLegacy then Processor.SetParamNameData('--compiler',ExtractFilePath(FCompiler)+'fpccompat.sh');
+
       if StrToIntDef(ActualRevision, 38971) >= 38971 then
       begin
-        Processor.SetParamData('--build-ide="-dKeepInstalledPackages '+FCompilerOptions+'"');
+        Processor.SetParamNameData('--build-ide','-dKeepInstalledPackages '+s1);
       end
       else
       begin
@@ -1024,8 +1029,8 @@ begin
         // which could well be a stripped IDE
         // Let's see how/if CompilerOptions clashes with the settings in normal build mode
         WritelnLog(infotext+'LazBuild: building UserIDE but falling back to --build-mode="Normal IDE"', true);
-        Processor.SetParamData('--build-ide="'+FCompilerOptions+'"');
-        Processor.SetParamData('--build-mode="Normal IDE"');
+        Processor.SetParamNameData('--build-ide',s1);
+        Processor.SetParamNameData('--build-mode','"Normal IDE"');
       end;
 
       // Run first time...
