@@ -4516,6 +4516,13 @@ begin
         ConfigText.Append('-Fu'+s);
         ConfigText.Append('-Fu'+s+DirectorySeparator+'*');
         ConfigText.Append('-Fu'+s+DirectorySeparator+'rtl');
+        ConfigText.Append('-k--no-as-needed');
+        ConfigText.Append('-k-l:libanl.so.1');
+        ConfigText.Append('-k-l:libdl.so.2');
+        ConfigText.Append('-k-l:librt.so.1');
+        ConfigText.Append('-k-l:libresolve.so.2');
+        ConfigText.Append('-k-l:libpthread.so.0');
+        ConfigText.Append('-k--as-needed');
         ConfigText.Append('#ENDIF');
         {$endif}
 
