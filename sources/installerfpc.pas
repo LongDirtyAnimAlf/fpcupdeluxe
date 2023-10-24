@@ -3657,6 +3657,7 @@ begin
     begin
       CrossInstaller.SolarisOI:=FSolarisOI;
       CrossInstaller.MUSL:=FMUSL;
+      CrossInstaller.LL:=LinuxLegacy;
     end;
   end;
 
@@ -4517,11 +4518,10 @@ begin
         ConfigText.Append('-Fu'+s+DirectorySeparator+'*');
         ConfigText.Append('-Fu'+s+DirectorySeparator+'rtl');
         ConfigText.Append('-k--no-as-needed');
-        ConfigText.Append('-k-l:libanl.so.1');
-        ConfigText.Append('-k-l:libdl.so.2');
-        ConfigText.Append('-k-l:librt.so.1');
-        ConfigText.Append('-k-l:libresolv.so.2');
-        ConfigText.Append('-k-l:libpthread.so.0');
+        for s in LEGACYLIBSVERSIONED do
+        begin
+          if LibWhich(s) then ConfigText.Append('-k-l:'+s);
+        end;
         ConfigText.Append('-k--as-needed');
         ConfigText.Append('#ENDIF');
         {$endif}

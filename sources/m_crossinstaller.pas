@@ -90,6 +90,9 @@ const
   CROSSLIBPATH      = CROSSDIRNAME+DirectorySeparator+CROSSLIBDIRNAME;
   CROSSBINPATH      = CROSSDIRNAME+DirectorySeparator+CROSSBINDIRNAME;
 
+  LEGACYLIBS             :array[0..4] of string = ('libanl.so','libdl.so','librt.so','libresolv.so','libpthread.so');
+  LEGACYLIBSVERSIONED    :array[0..4] of string = ('libanl.so.1','libdl.so.2','librt.so.1','libresolv.so.2','libpthread.so.0');
+
   LIBCFILENAME   = 'libc.so';
   LDFILENAME     = 'ld';
   ASFILENAME     = 'as';
@@ -188,6 +191,7 @@ type
     FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
     FSolarisOI:boolean;
     FMUSL:boolean;
+    FLL:boolean;
     function PerformLibraryPathMagic(out LibraryPath:string):boolean;
     function SearchLibrary(Directory, LookFor: string): boolean;
     function SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string): boolean;
@@ -254,6 +258,7 @@ type
     property RegisterName:string read FRegisterName;
     property SolarisOI: boolean write FSolarisOI;
     property MUSL: boolean write FMUSL;
+    property LL: boolean write FLL;
 
     constructor Create;
     destructor Destroy; override;
@@ -1208,6 +1213,10 @@ begin
 
   FTargetCPU:=TCPU.cpuNone;
   FTargetOS:=TOS.osNone;
+
+  FSolarisOI:=false;
+  FMUSL:=false;
+  FLL:=false;
 
   FBinUtilsPrefix:='Error: cross compiler extension must set FBinUtilsPrefix: can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it';
   FCrossModuleNamePrefix:='TAny';

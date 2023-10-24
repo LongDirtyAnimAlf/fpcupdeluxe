@@ -3722,6 +3722,56 @@ begin
     for sd in UNIXSEARCHDIRS do
     {$endif}
     begin
+      {$ifdef Haiku}
+      {$ifndef CPUX86}
+      if (RightStr(sd,4)='/x86') then continue;
+      {$endif}
+      {$endif}
+      if DirectoryExists(sd) then
+      begin
+        if (NOT result) then
+        begin
+          aFile:=ConcatPaths([sd,aLibrary]);
+          result:=FileExists(aFile);
+        end;
+        if (NOT result) then
+        begin
+          aFile:=ConcatPaths([sd,GetSourceCPUOS,aLibrary]);
+          result:=FileExists(aFile);
+        end;
+        if (NOT result) then
+        begin
+          aFile:=ConcatPaths([sd,GetSourceCPUOS+'-gnu',aLibrary]);
+          result:=FileExists(aFile);
+        end;
+        if (NOT result) then
+        begin
+          aFile:=ConcatPaths([sd,GetSourceCPUOS+'-gnueabi',aLibrary]);
+          result:=FileExists(aFile);
+        end;
+        if (NOT result) then
+        begin
+          aFile:=ConcatPaths([sd,GetSourceCPUOS+'-gnueabihf',aLibrary]);
+          result:=FileExists(aFile);
+        end;
+        if result then
+        begin
+          location:=ExtractFileDir(aFile);
+          ThreadLog('Library searcher found '+aLibrary+' inside '+location+'.',etDebug);
+          break;
+        end;
+      end;
+    end;
+  end;
+
+  if (NOT result) then
+  begin
+    {$ifdef Haiku}
+    for sd in HAIKUSEARCHDIRS do
+    {$else}
+    for sd in UNIXSEARCHDIRS do
+    {$endif}
+    begin
       OutputString:='';
       {$ifdef Haiku}
       {$ifndef CPUX86}

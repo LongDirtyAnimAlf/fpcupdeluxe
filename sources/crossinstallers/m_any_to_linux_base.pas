@@ -186,8 +186,9 @@ const
 {$ENDIF UNIX}
 var
   MUSLLibcFilename:string;
+  s:string;
   {$IFDEF UNIX}
-  s,sd:string;
+  sd:string;
   i,j:integer;
   {$ENDIF UNIX}
 begin
@@ -322,8 +323,19 @@ begin
     end;
   end;
 
+  SearchLibraryInfo(result);
+
   if result then
   begin
+    if FLL then
+    begin
+      AddFPCCFGSnippet('-k--no-as-needed',false);
+      for s in LEGACYLIBSVERSIONED do
+      begin
+        if FileExists(IncludeTrailingPathDelimiter(FLibsPath)+s) then AddFPCCFGSnippet('-k-l:'+s,false);
+      end;
+      AddFPCCFGSnippet('-k--as-needed',false);
+    end;
     // Add gcc path if any
     {$IFDEF UNIX}
     {$ifdef CPU64}
@@ -344,8 +356,6 @@ begin
     {$endif CPU32}
     {$ENDIF UNIX}
   end;
-
-  SearchLibraryInfo(result);
 end;
 
 {$ifndef FPCONLY}

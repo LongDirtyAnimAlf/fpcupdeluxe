@@ -1512,6 +1512,7 @@ begin
     begin
       CrossInstaller.SolarisOI:=FSolarisOI;
       CrossInstaller.MUSL:=FMUSL;
+      CrossInstaller.LL:=LinuxLegacy;
     end;
   end;
 
