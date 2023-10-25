@@ -282,12 +282,19 @@ const FPCEXTRALIBS : array [0..36] of string = (
   'libmysqlclient.so.12'
 );
 
-const LAZLIBS : array [0..19] of string = (
+const LAZLIBS : array [0..26] of string = (
+  'libgdk-1.2.so.0',
+  'libglib-1.2.so.0',
+  'libgmodule-1.2.so.0',
+  'libgtk-1.2.so.0',
+  'libgdk_pixbuf.so.2',
+  'libgdk_pixbuf-xlib.so.2',
   'libgdk-x11-2.0.so.0',
   'libgtk-x11-2.0.so.0',
   'libX11.so.6',
   'libXtst.so.6',
   'libgdk_pixbuf-2.0.so.0',
+  'libgdk_pixbuf-xlib-2.0.so.0',
   'libgobject-2.0.so.0',
   'libglib-2.0.so.0',
   'libgthread-2.0.so.0',

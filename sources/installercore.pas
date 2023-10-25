@@ -942,7 +942,7 @@ begin
     aCPU:=GetTCPU(GetSourceCPU);
     aOS:=GetTOS(GetSourceOS);
   end;
-  if ((aOS=TOS.linux) AND (aCPU in [TCPU.i386,TCPU.x86_64,TCPU.arm,TCPU.aarch64,TCPU.powerpc,TCPU.powerpc64])) then
+  if ((aOS=TOS.linux) AND (aCPU in LEGACYCPU)) then
     result:=FLinuxLegacy;
 end;
 

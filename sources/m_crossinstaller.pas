@@ -90,9 +90,6 @@ const
   CROSSLIBPATH      = CROSSDIRNAME+DirectorySeparator+CROSSLIBDIRNAME;
   CROSSBINPATH      = CROSSDIRNAME+DirectorySeparator+CROSSBINDIRNAME;
 
-  LEGACYLIBS             :array[0..4] of string = ('libanl.so','libdl.so','librt.so','libresolv.so','libpthread.so');
-  LEGACYLIBSVERSIONED    :array[0..4] of string = ('libanl.so.1','libdl.so.2','librt.so.1','libresolv.so.2','libpthread.so.0');
-
   LIBCFILENAME   = 'libc.so';
   LDFILENAME     = 'ld';
   ASFILENAME     = 'as';
@@ -127,6 +124,14 @@ const
 
   CPUADDRSIZE_64     = [TCPU.aarch64,TCPU.powerpc64,TCPU.riscv64,TCPU.sparc64,TCPU.x86_64,TCPU.loongarch64{,TCPU.ia64]}];
   CPUADDRSIZE_32     = [TCPU.i386,TCPU.arm,TCPU.powerpc,TCPU.mips,TCPU.mipsel,TCPU.sparc,TCPU.riscv32,TCPU.m68k,TCPU.xtensa,TCPU.wasm32];
+
+  LEGACYLIBS             :array[0..4] of string = ('libanl.so','libdl.so','librt.so','libresolv.so','libpthread.so');
+  LEGACYLIBSVERSIONED    :array[0..4] of string = ('libanl.so.1','libdl.so.2','librt.so.1','libresolv.so.2','libpthread.so.0');
+  LEGACYCPU              = [TCPU.i386,TCPU.x86_64,TCPU.arm,TCPU.aarch64,TCPU.powerpc,TCPU.powerpc64];
+  TODOCPU                = [TCPU.sparc,TCPU.sparc64,TCPU.m68k];
+
+
+
 
 type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
