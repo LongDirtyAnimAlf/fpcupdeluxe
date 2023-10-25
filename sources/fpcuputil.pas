@@ -4440,6 +4440,29 @@ begin
       end;
       if (NOT success) then
       begin
+        if FileExists('/bin/lsb_release') then
+        begin
+          s:='';
+          if RunCommand('lsb_release',['-a'],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
+          begin
+            AllOutput:=TStringList.Create;
+            AllOutput.NameValueSeparator:=':';
+            try
+              AllOutput.Text:=s;
+              s:='';
+              if aID='VERSION' then
+                s:=Trim(AllOutput.Values['Release'])
+              else
+                s:=Trim(AllOutput.Values['Description']);
+              success:=(Length(s)>0);
+            finally
+              AllOutput.Free;
+            end;
+          end;
+        end;
+      end;
+      if (NOT success) then
+      begin
         s:='';
         if RunCommand('hostnamectl',[],s,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
         begin

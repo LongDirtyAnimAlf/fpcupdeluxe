@@ -1210,10 +1210,13 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="1">
+    <Exceptions Count="2">
       <Item1>
         <Name Value="EInOutError"/>
       </Item1>
+      <Item2>
+        <Name Value="ESocketError"/>
+      </Item2>
     </Exceptions>
   </Debugging>
 </CONFIG>

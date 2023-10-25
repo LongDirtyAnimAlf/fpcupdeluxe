@@ -102,9 +102,9 @@ const
   FPCFTPURL             = FTPBASEURL+'/pub/fpc/';
   LAZARUSFTPURL         = FTPBASEURL+'/pub/lazarus/';
 
-  FPCFTPSNAPSHOTURL     = FPCFTPURL+'snapshot/';
+  //FPCFTPSNAPSHOTURL     = FPCFTPURL+'snapshot/';
 
-  LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
+  //LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
 
   PACKAGESLOCATION      = 'packages.fppkg';
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';

@@ -4,14 +4,14 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linuxi386QT5,linuxi386QT5zip,linux64,linuxaarch64,linuxaarch64QT5,linuxaarch64QT5zip,linuxarm,linuxarmQT5,linuxarmQT5zip,linuxarmv6,linuxx64QT5,linuxx64QT5zip,linuxppc64,freebsdi386,freebsdx64,solarisx64,dragonflyx64,netbsdx64,netbsdi386,freebsdx64QT5,freebsdx64QT5zip"/>
-    <BuildModes Active="linux64gtk1"/>
+    <BuildModes Active="win32"/>
     <Units Count="165">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
-        <TopLine Value="188"/>
-        <CursorPos X="16" Y="217"/>
+        <TopLine Value="201"/>
+        <CursorPos Y="228"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -21,8 +21,7 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -33,7 +32,7 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -42,7 +41,7 @@
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynEditPopup"/>
-        <UsageCount Value="122"/>
+        <UsageCount Value="124"/>
       </Unit3>
       <Unit4>
         <Filename Value="sources\updeluxe\aboutfrm.pas"/>
@@ -54,7 +53,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="38"/>
         <CursorPos X="38" Y="51"/>
-        <UsageCount Value="122"/>
+        <UsageCount Value="124"/>
       </Unit4>
       <Unit5>
         <Filename Value="sources\updeluxe\infounit.pas"/>
@@ -62,7 +61,7 @@
         <ComponentName Value="InfoForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="122"/>
+        <UsageCount Value="124"/>
       </Unit5>
       <Unit6>
         <Filename Value="sources\updeluxe\modulesettings.pas"/>
@@ -70,27 +69,27 @@
         <ComponentName Value="Form3"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="122"/>
+        <UsageCount Value="124"/>
       </Unit6>
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
-        <UsageCount Value="122"/>
+        <EditorIndex Value="6"/>
+        <UsageCount Value="124"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit7>
       <Unit8>
         <Filename Value="sources\settings.ini"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="122"/>
+        <UsageCount Value="124"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit8>
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
-        <UsageCount Value="122"/>
+        <EditorIndex Value="7"/>
+        <UsageCount Value="124"/>
         <Loaded Value="True"/>
       </Unit9>
       <Unit10>
@@ -99,7 +98,7 @@
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="122"/>
+        <UsageCount Value="124"/>
       </Unit10>
       <Unit11>
         <Filename Value="sources\text.txt"/>
@@ -107,23 +106,25 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="3"/>
         <CursorPos Y="32"/>
-        <UsageCount Value="80"/>
+        <UsageCount Value="82"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit11>
       <Unit12>
         <Filename Value="sources\installercore.pas"/>
         <UnitName Value="installerCore"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="927"/>
-        <CursorPos X="45" Y="945"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="92"/>
+        <CursorPos X="5" Y="107"/>
         <UsageCount Value="45"/>
+        <Loaded Value="True"/>
       </Unit12>
       <Unit13>
         <Filename Value="sources\fpcuputil.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="3728"/>
-        <CursorPos X="17" Y="3754"/>
-        <UsageCount Value="44"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="4439"/>
+        <CursorPos X="94" Y="4448"/>
+        <UsageCount Value="45"/>
+        <Loaded Value="True"/>
       </Unit13>
       <Unit14>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\rtl-objpas\src\inc\strutils.pp"/>
@@ -151,10 +152,12 @@
       <Unit17>
         <Filename Value="sources\installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="4510"/>
-        <CursorPos X="25" Y="4529"/>
-        <UsageCount Value="46"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="4910"/>
+        <CursorPos Y="4933"/>
+        <UsageCount Value="47"/>
+        <Loaded Value="True"/>
       </Unit17>
       <Unit18>
         <Filename Value="sources\crossinstallers\m_any_to_freebsd386.pas"/>
@@ -855,7 +858,7 @@
         <TopLine Value="524"/>
         <CursorPos X="16" Y="483"/>
         <UsageCount Value="9"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
+        <DefaultSyntaxHighlighter Value="None"/>
       </Unit115>
       <Unit116>
         <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.40\ld\Makefile.am"/>
@@ -871,7 +874,7 @@
         <TopLine Value="53"/>
         <CursorPos X="25" Y="66"/>
         <UsageCount Value="9"/>
-        <DefaultSyntaxHighlighter Value="C++"/>
+        <DefaultSyntaxHighlighter Value="None"/>
       </Unit117>
       <Unit118>
         <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.40\bfd\configure.ac"/>
@@ -1216,19 +1219,115 @@
         <UsageCount Value="10"/>
       </Unit164>
     </Units>
-    <JumpHistory Count="3" HistoryIndex="2">
+    <JumpHistory Count="27" HistoryIndex="26">
       <Position1>
-        <Filename Value="up.lpr"/>
-        <Caret Line="228" TopLine="203"/>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3186" TopLine="3181"/>
       </Position1>
       <Position2>
-        <Filename Value="up.lpr"/>
-        <Caret Line="228" TopLine="203"/>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3189" TopLine="3181"/>
       </Position2>
       <Position3>
-        <Filename Value="up.lpr"/>
-        <Caret Line="228" TopLine="203"/>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3191" TopLine="3181"/>
       </Position3>
+      <Position4>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3192" TopLine="3181"/>
+      </Position4>
+      <Position5>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3197" TopLine="3181"/>
+      </Position5>
+      <Position6>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3198" Column="117" TopLine="3191"/>
+      </Position6>
+      <Position7>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3202" Column="119" TopLine="3191"/>
+      </Position7>
+      <Position8>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3363" Column="32" TopLine="3348"/>
+      </Position8>
+      <Position9>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3366" Column="31" TopLine="3348"/>
+      </Position9>
+      <Position10>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3367" Column="71" TopLine="3348"/>
+      </Position10>
+      <Position11>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3529" Column="32" TopLine="3508"/>
+      </Position11>
+      <Position12>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3533" Column="31" TopLine="3512"/>
+      </Position12>
+      <Position13>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3535" Column="82" TopLine="3514"/>
+      </Position13>
+      <Position14>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3549" Column="33" TopLine="3528"/>
+      </Position14>
+      <Position15>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3551" Column="84" TopLine="3530"/>
+      </Position15>
+      <Position16>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3563" TopLine="3542"/>
+      </Position16>
+      <Position17>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3565" TopLine="3542"/>
+      </Position17>
+      <Position18>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3186" TopLine="3173"/>
+      </Position18>
+      <Position19>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3565" TopLine="3552"/>
+      </Position19>
+      <Position20>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3567" TopLine="3552"/>
+      </Position20>
+      <Position21>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3559" Column="47" TopLine="3558"/>
+      </Position21>
+      <Position22>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3565" Column="54" TopLine="3558"/>
+      </Position22>
+      <Position23>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3575" Column="29" TopLine="3555"/>
+      </Position23>
+      <Position24>
+        <Filename Value="sources\installercore.pas"/>
+        <Caret Line="107" Column="5" TopLine="92"/>
+      </Position24>
+      <Position25>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3573" Column="28" TopLine="3561"/>
+      </Position25>
+      <Position26>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4710" Column="20" TopLine="4688"/>
+      </Position26>
+      <Position27>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4719" Column="11" TopLine="4697"/>
+      </Position27>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

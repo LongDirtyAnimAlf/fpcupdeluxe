@@ -3564,48 +3564,11 @@ begin
       begin
         if (s='0.0.0') then
         begin
-          // Panic last resort ... ;-)
-          // Try to get bootstrapper from a FPC snapshot binary
-          if NativeFPCBootstrapCompiler then
-          begin
-            aCompilerList:=TStringList.Create;
-            try
-              aCompilerList.Clear;
-              VersionFromString(aBootstrapVersion,i,j,k,{%H-}l);
-              s:=FPCFTPSNAPSHOTURL+'/v'+InttoStr(i)+InttoStr(j)+'/'+GetSourceCPUOS+'/';
-              result:=aDownLoader.getFTPFileList(s,aCompilerList);
-              if result then
-              begin
-                for i:=0 to Pred(aCompilerList.Count) do
-                begin
-                  if (Pos(GetSourceCPUOS+'-fpc-',aCompilerList[i])=1) then
-                  begin
-                    // we got a snapshot
-                    Infoln(localinfotext+'Found a official FPC snapshot achive.',etDebug);
-                    aLocalBootstrapVersion:=aBootstrapVersion;
-                    FBootstrapCompilerURL:=s+aCompilerList[i];
-                    aCompilerFound:=True;
-                    // set standard bootstrap compilername
-                    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetSourceCPU);
-                    // as we do not know exactly what we get
-                    aBootstrapVersionWrong:=true;
-                    break;
-                  end;
-                end;
-              end;
-            finally
-              aCompilerList.Free;
-            end;
-          end;
-          if NOT aCompilerFound then
-          begin
-            Infoln(localinfotext+'No bootstrapper local and online. Fatal. Stopping.',etError);
-            exit(false);
-          end;
-        end
-        else
+          Compiler:=FBootstrapCompiler;
+          s:=CompilerVersion(FCompiler);
+        end;
+        if (s<>'0.0.0') then
         begin
-          // there is a bootstrapper available: just use it !!
           Infoln(localinfotext+'No correct bootstrapper. But going to use the available one with version ' + s,etInfo);
           aBootstrapVersionWrong:=true;
           result:=true;
