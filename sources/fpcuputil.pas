@@ -3875,7 +3875,7 @@ begin
       end;
       if result then
       begin
-        ThreadLog('Library '+aLibrary+' found by ldconfig.',etInfo);
+        ThreadLog('Library '+aLibrary+' found by ldconfig.',etDebug);
       end;
     end;
   end;

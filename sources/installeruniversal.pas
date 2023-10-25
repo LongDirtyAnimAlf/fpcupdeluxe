@@ -425,7 +425,7 @@ begin
     {$ELSE}
     // See compileroptions.pp
     // Quiet:=ConsoleVerbosity<=-3;
-    Processor.SetParamData('--quiet');
+    //Processor.SetParamData('--quiet');
     {$ENDIF}
 
     {$ifdef DISABLELAZBUILDJOBS}
@@ -850,7 +850,7 @@ begin
   {$IFDEF DEBUG}
   Processor.SetParamData('--verbose');
   {$ELSE}
-  Processor.SetParamData('--quiet');
+  //Processor.SetParamData('--quiet');
   {$ENDIF}
 
   Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
@@ -1345,9 +1345,9 @@ begin
 
       //Set lazbuild options
       {$IFDEF DEBUG}
-      s:='--verbose';
+      //s:='--verbose';
       {$ELSE}
-      s:='--quiet';
+      //s:='--quiet';
       {$ENDIF}
 
       if FLCL_Platform<>'' then s:=s+' --ws=' + FLCL_Platform;

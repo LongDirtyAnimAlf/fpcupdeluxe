@@ -449,7 +449,7 @@ begin
         {$ELSE}
         // See compileroptions.pp
         // Quiet:=ConsoleVerbosity<=-3;
-        Processor.SetParamData('--quiet');
+        //Processor.SetParamData('--quiet');
         {$ENDIF}
 
         Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
@@ -1001,7 +1001,7 @@ begin
       {$ELSE}
       // See compileroptions.pp
       // Quiet:=ConsoleVerbosity<=-3;
-      Processor.SetParamData('--quiet');
+      //Processor.SetParamData('--quiet');
       {$ENDIF}
 
       Processor.SetParamNameData('--pcp',DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
@@ -1079,7 +1079,7 @@ begin
           {$IFDEF DEBUG}
           Processor.SetParamData('--verbose');
           {$ELSE}
-          Processor.SetParamData('--quiet');
+          //Processor.SetParamData('--quiet');
           {$ENDIF}
 
           Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
