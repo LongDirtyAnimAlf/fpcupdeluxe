@@ -35,6 +35,7 @@ implementation
 
 uses
   typinfo,
+  fphttpclient, openssl, opensslsockets,
   StrUtils,
   FileUtil;
 
@@ -149,6 +150,46 @@ begin
   until false;
 end;
 
+procedure DumpExceptionCallStack(E: Exception);
+var
+  I: Integer;
+  Frames: PPointer;
+  Report: string;
+begin
+  Report := 'Program exception! ' + LineEnding + 'Stacktrace:' + LineEnding + LineEnding;
+  if E <> nil then
+  begin
+    Report := Report + 'Exception class: ' + E.ClassName + LineEnding + 'Message: ' + E.Message + LineEnding;
+  end;
+  Report := Report + BackTraceStrFunc(ExceptAddr);
+  Frames := ExceptFrames;
+  for I := 0 to ExceptFrameCount - 1
+    do Report := Report + LineEnding + BackTraceStrFunc(Frames[I]);
+  //WriteLn(Report);
+  Halt;
+end;
+
+function GetUrlAs(Url: String; AsName: String): Boolean;
+begin
+  Result := False;
+  with TFPHttpClient.Create(nil) do
+  try
+        AllowRedirect := True;
+    if (ExtractFilePath(AsName) <> '') then
+      if not DirectoryExists(ExtractFilePath(AsName)) then
+        if not ForceDirectories(ExtractFilePath(AsName)) then Exit;
+    try
+      AddHeader('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0');
+      Get(Url, AsName);
+      Result := True;
+    finally
+      Free;
+    end;
+  except
+    //on E: Exception do DumpExceptionCallStack(E);
+  end;
+end;
+
 { TForm1 }
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -170,14 +211,15 @@ procedure TForm1.StringGrid1HeaderClick(Sender: TObject; IsColumn: Boolean;
 const
   //ABIS : array [0..2] of string = ('libc','libm','libresolve');
   ABIS : array [0..1] of string = ('libc','libm');
+  ONLINEABIS : array [0..13] of string = ('ld','libanl','libc','libc_malloc_debug','libcrypt','libdl','libm','libmvec','libnsl','libpthread','libresolv','librt','libthread_db','libutil');
 var
   aCPU:TGLIBCCPU;
   datafromfile:TStringList;
   glibcfunctions:TStringList;
+  fl:TStringList;
   sh,abi:string;
   v,f,vd:string;
   i,j,k:integer;
-  fl:TStrings;
   fa:boolean;
 begin
   if IsColumn then
@@ -197,18 +239,46 @@ begin
 
     glibcfunctions:=TStringList.Create;
     try
+      (*
+
+      for aCPU in GLIBCCPU do
+      begin
+        sh:=CPUStr(aCPU);
+        f:=sh;
+        if aCPU=TGLIBCCPU.cpu_x86_64 then f:=f+'/64';
+        if aCPU=TGLIBCCPU.cpu_arm then f:=f+'/le';
+        if aCPU=TGLIBCCPU.cpu_powerpc then f:='powerpc/powerpc32';
+        if aCPU=TGLIBCCPU.cpu_powerpc64 then f:='powerpc/powerpc64/le';
+        for abi in ONLINEABIS do
+        begin
+          v:='https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=sysdeps/unix/sysv/linux/'+f+'/'+abi+'.abilist';
+          Memo1.Lines.Append(v);
+          GetUrlAs(v,'abi_'+abi+'_'+sh+'.dat');
+        end;
+
+        if aCPU=TGLIBCCPU.cpu_powerpc then
+        begin
+          f:='powerpc/powerpc32/fpu';
+          for abi in ['libc','libm'] do
+          begin
+            v:='https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=sysdeps/unix/sysv/linux/'+f+'/'+abi+'.abilist';
+            Memo1.Lines.Append(v);
+            GetUrlAs(v,'abi_'+abi+'_'+sh+'.dat');
+          end;
+        end;
+      end;
+
+      exit;
+      *)
 
       datafromfile:=TStringList.Create;
       try
         for abi in ABIS do
         begin
           datafromfile.Clear;
-          if (aCPU=TGLIBCCPU.cpu_x86_64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_amd64.txt');
-          if (aCPU=TGLIBCCPU.cpu_i386) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_i386.txt');
-          if (aCPU=TGLIBCCPU.cpu_arm) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_armle.txt');
-          if (aCPU=TGLIBCCPU.cpu_aarch64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_aarch64.txt');
-          if (aCPU=TGLIBCCPU.cpu_powerpc) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_ppc.txt');
-          if (aCPU=TGLIBCCPU.cpu_powerpc64) then datafromfile.LoadFromFile('.\abilists\linux_'+abi+'_ppc64le.txt');
+          sh:=CPUStr(aCPU);
+          v:='abi_'+abi+'_'+sh+'.dat';
+          datafromfile.LoadFromFile('.'+DirectorySeparator+'abilists'+DirectorySeparator+v);
           if datafromfile.Count>0 then
           begin
             for sh in datafromfile do
@@ -249,6 +319,9 @@ begin
 
       glibcfunctions.Sort;
 
+      fl:=TStringList.Create;
+
+
       // Process duplicates in the function list
       // Use the oldest version
       for i:=Pred(glibcfunctions.Count) downto 0 do
@@ -260,21 +333,47 @@ begin
         begin
           // we have a duplicate
           // delete the newer glibc version
+          // save the older glibc version
           vd:=StrPas(PChar(glibcfunctions.Objects[k]));
           if CompareVersionStrings(v,vd)<0 then
           begin
+            j:=fl.IndexOf(glibcfunctions[i]);
+            if j=-1 then
+              fl.AddObject(glibcfunctions[i],TObject(StrNew(PChar(v))))
+            else
+            begin
+              StrDispose(PChar(fl.Objects[j]));
+              fl.Objects[j]:=TObject(StrNew(PChar(v)));
+            end;
             StrDispose(PChar(glibcfunctions.Objects[k]));
             glibcfunctions.Delete(k);
           end;
-          vd:=StrPas(PChar(glibcfunctions.Objects[k]));
           if CompareVersionStrings(v,vd)>0 then
           begin
+            j:=fl.IndexOf(glibcfunctions[k]);
+            if j=-1 then
+              fl.AddObject(glibcfunctions[k],TObject(StrNew(PChar(vd))))
+            else
+            begin
+              StrDispose(PChar(fl.Objects[j]));
+              fl.Objects[j]:=TObject(StrNew(PChar(vd)));
+            end;
             StrDispose(PChar(glibcfunctions.Objects[i]));
             glibcfunctions.Delete(i);
           end;
         end;
       end;
 
+      for i:=0 to Pred(glibcfunctions.Count) do StrDispose(PChar(glibcfunctions.Objects[i]));
+      glibcfunctions.Clear;
+      for i:=0 to Pred(fl.Count) do glibcfunctions.AddObject(fl[i],fl.Objects[i]);
+      fl.Clear;
+      fl.Free;
+
+      glibcfunctions.Sort;
+
+
+      (*
       // Just a simple speedup of first use.
       // Could be left out
       if StringGrid1.RowCount=1 then
@@ -287,6 +386,8 @@ begin
           Inc(i);
         end;
       end;
+      *)
+
 
       fl:=TStringList.Create;
       try
@@ -365,7 +466,7 @@ begin
       else
         sl:=StringGrid1.Cells[0,i];
 
-      if (Length(sl)>30) then
+      if (Length(sl)>32) then
         sl:=PadRight(sl,45)
       else
         sl:=PadRight(sl,35);

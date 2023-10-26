@@ -310,7 +310,7 @@ uses
 
 const
   SINGLECOMPILERSWITCHES :set of char = ['a','A','d','I','k','M','o','T','u'];
-  MULTIDEFCOMPILERSWITCHES : array [0..9] of string = (
+  MULTIDEFCOMPILERSWITCHES : array [0..10] of string = (
   '-Fi',
   '-Fl',
   '-Fu',
@@ -320,7 +320,8 @@ const
   '-d',
   '-u',
   '-I',
-  '-k'
+  '-k',
+  '-O'
   );
 
 function GetCPU(aCPU:TCPU):string;
