@@ -483,7 +483,9 @@ begin
 
   UpdateCheckBoxList;
 
-  ForceGLIBCLinking      := False;
+  // for testing: set true
+  ForceGLIBCLinking      := True;
+  //ForceGLIBCLinking      := False;
   SaveScript             := False;
   AskConfirmation        := True;
   FpcupBootstrappersOnly := True;
@@ -492,7 +494,7 @@ begin
   IncludeHelp            := False;
   IncludeLCL             := False;
   {$ifdef RemoteLog}
-  SendInfo        := False;
+  SendInfo               := False;
   {$endif}
 
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do

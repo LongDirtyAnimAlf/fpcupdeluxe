@@ -1278,6 +1278,8 @@ begin
       if (CrossCPU_Target=TCPU.aarch64) then toolversion:='1804';
       if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
       if (CrossCPU_Target=TCPU.x86_64) then toolversion:='1804';
+      // For testing this release candidate !!
+      if LinuxLegacy then if (CrossCPU_Target=TCPU.x86_64) then s:='Linux_AMD64_Fedora_38.zip';
       if (CrossCPU_Target=TCPU.i386) then toolversion:='1804';
       if (CrossCPU_Target=TCPU.loongarch64) then
       begin

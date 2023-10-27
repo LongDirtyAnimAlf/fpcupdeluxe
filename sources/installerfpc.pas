@@ -5287,14 +5287,17 @@ begin
       // Create the Linux Legacy patch now
       // It will only be used for FPC 3.2.2
       // But its there for everybody to have a look
-      if (SourceVersion='3.2.2') then
+      if (SourceVersion=DEFAULTFPCVERSION) then
       begin
-        s:=ConcatPaths([SourceDirectory,'compiler','glibc_2.29_x64.inc']);
-        if FileExists(s) then SysUtils.DeleteFile(s);
         s:=ConcatPaths([BaseDirectory,'patches','patchfpc',LINUXLEGACYPATCH]);
         if (NOT FileExists(s)) then
         begin
           SaveFileFromResource(s,'GLIBC_COMPAT_3_2_2');
+        end;
+        s:=ConcatPaths([SourceDirectory,'compiler','glibc.inc']);
+        if (NOT FileExists(s)) then
+        begin
+          SaveFileFromResource(s,'GLIBC');
         end;
       end;
 

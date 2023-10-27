@@ -1,0 +1,76 @@
+diff --git a/components/fpdebug/fpdbglinuxextra.pas b/components/fpdebug/fpdbglinuxextra.pas
+index f056b840c9..62120daec9 100644
+--- a/components/fpdebug/fpdbglinuxextra.pas
++++ b/components/fpdebug/fpdbglinuxextra.pas
+@@ -66,12 +66,11 @@ type
+   TSysParam  = cint32;
+ {$endif cpux86_64}
+ 
+-{$ifdef darwin}
++{$if defined(LIBC) or defined(Darwin) or defined(FPC_USE_LIBC)}
+ Function ptrace(ptrace_request: cInt; pid: TPid; addr:pointer; data:pointer): cint; cdecl; external clib name 'ptrace';
+-{$endif darwin}
++{$else}
+ {$ifdef linux}
+ function Do_SysCall(sysnr,param1,param2,param3,param4:TSysParam):TSysResult; {$ifdef cpui386}register;{$endif} external name 'FPC_SYSCALL4';
+-
+ const
+ {$ifdef cpux86_64}
+   syscall_nr_ptrace                            = 101;
+@@ -80,7 +79,7 @@ const
+ {$endif}
+ 
+ {$endif linux}
+-
++{$endif}
+ function fpPTrace(ptrace_request: cint; pid: TPid; addr: Pointer; data: pointer): PtrInt;
+ {$ifdef linux}
+ var
+@@ -88,9 +87,9 @@ var
+   ret : PtrInt;
+ {$endif linux}
+ begin
+-{$ifdef darwin}
++{$if defined(LIBC) or defined(Darwin) or defined(FPC_USE_LIBC)}
+   result := ptrace(ptrace_request, pid, addr, data);
+-{$endif}
++{$else}
+ {$ifdef linux}
+   if (ptrace_request > 0) and (ptrace_request < 4) then
+     data := @ret;
+@@ -104,6 +103,7 @@ begin
+   else
+     result := res;
+ {$endif linux}
++{$endif}
+ end;
+ 
+ end.
+diff --git a/components/lazdebuggers/lazdebuggerfp/fpdebugdebugger.pas b/components/lazdebuggers/lazdebuggerfp/fpdebugdebugger.pas
+index bbd0d3c9e5..e00eefe7c9 100644
+--- a/components/lazdebuggers/lazdebuggerfp/fpdebugdebugger.pas
++++ b/components/lazdebuggers/lazdebuggerfp/fpdebugdebugger.pas
+@@ -4763,6 +4763,9 @@ begin
+   Result:=[dcrDwarfOnly];
+   {$ENDIF}
+   Result := Result + [dcrPreferDwarf3];
++  {$if defined(LIBC) or defined(FPC_USE_LIBC)}
++  Result := Result + [dcrExternalDbgInfoOnly];
++  {$endif}
+ end;
+ 
+ class function TFpDebugDebugger.CreateProperties: TDebuggerProperties;
+diff --git a/ide/compileroptions.pp b/ide/compileroptions.pp
+index 59c12d3eaf..5189dc7c55 100644
+--- a/ide/compileroptions.pp
++++ b/ide/compileroptions.pp
+@@ -3162,6 +3162,9 @@ begin
+   LinkerOptions := '';
+   Win32GraphicApp := false;
+   ExecutableType := cetProgram;
++  {$if defined(LIBC) or defined(Darwin) or defined(FPC_USE_LIBC)}
++  UseExternalDbgSyms := true;
++  {$endif}
+ 
+   // messages
+   fShowWarn := true;

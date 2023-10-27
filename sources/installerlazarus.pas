@@ -2507,7 +2507,18 @@ begin
 
     CreateRevision(ModuleName,ActualRevision);
 
-    if (SourceVersion<>'0.0.0') then PatchModule(ModuleName);
+    if (SourceVersion<>'0.0.0') then
+    begin
+      if (SourceVersion=LAZARUSTRUNKVERSION) then
+      begin
+        s:=ConcatPaths([BaseDirectory,'patches','patchlazarus','glibc_debugger_trunk.patch']);
+        if (NOT FileExists(s)) then
+        begin
+          SaveFileFromResource(s,'GLIBC_DEBUGGER_TRUNK');
+        end;
+      end;
+      PatchModule(ModuleName);
+    end;
 
     if Ultibo OR ( (SourceVersion<>'0.0.0') AND (CompareVersionStrings(SourceVersion,'2.0.10')<=0) ) then
     begin
