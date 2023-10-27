@@ -14,11 +14,13 @@ type
 
   TForm1 = class(TForm)
     btnExport: TButton;
+    btnGetABI: TButton;
     Memo1: TMemo;
     Panel1: TPanel;
     StaticText1: TStaticText;
     StringGrid1: TStringGrid;
     procedure btnExportClick(Sender: TObject);
+    procedure btnGetABIClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure StringGrid1HeaderClick(Sender: TObject; IsColumn: Boolean;
       Index: Integer);
@@ -62,6 +64,8 @@ type
     cpu_sparc64                   { 18 }
   );
 
+  TONLINEABI  = (ld,libanl,libc,libc_malloc_debug,libcrypt,libdl,libm,libmvec,libnsl,libpthread,libresolv,librt,libthread_db,libutil);
+
 
 const
   GLIBCCPU : set of TGLIBCCPU = [cpu_i386,cpu_powerpc,cpu_x86_64,cpu_arm,cpu_powerpc64,cpu_aarch64];
@@ -83,6 +87,12 @@ begin
   Delete(s,1,4);
   result:=s;
 end;
+
+function ABIStr(aABI:TONLINEABI):string;
+begin
+  result:=GetEnumNameSimple(TypeInfo(TONLINEABI),Ord(aABI));
+end;
+
 
   // 1on1 shameless copy from unit cutils from the fpc compiler;
 function CompareVersionStrings(s1,s2: string): longint;
@@ -174,7 +184,7 @@ begin
   Result := False;
   with TFPHttpClient.Create(nil) do
   try
-        AllowRedirect := True;
+    AllowRedirect := True;
     if (ExtractFilePath(AsName) <> '') then
       if not DirectoryExists(ExtractFilePath(AsName)) then
         if not ForceDirectories(ExtractFilePath(AsName)) then Exit;
@@ -209,14 +219,13 @@ end;
 procedure TForm1.StringGrid1HeaderClick(Sender: TObject; IsColumn: Boolean;
   Index: Integer);
 const
-  //ABIS : array [0..2] of string = ('libc','libm','libresolve');
-  ABIS : array [0..1] of string = ('libc','libm');
-  ONLINEABIS : array [0..13] of string = ('ld','libanl','libc','libc_malloc_debug','libcrypt','libdl','libm','libmvec','libnsl','libpthread','libresolv','librt','libthread_db','libutil');
+  ABIS : set of TONLINEABI = [libc,libm,libdl,libpthread,libresolv];
 var
   aCPU:TGLIBCCPU;
   datafromfile:TStringList;
   glibcfunctions:TStringList;
   fl:TStringList;
+  tabi:TONLINEABI;
   sh,abi:string;
   v,f,vd:string;
   i,j,k:integer;
@@ -239,44 +248,13 @@ begin
 
     glibcfunctions:=TStringList.Create;
     try
-      (*
-
-      for aCPU in GLIBCCPU do
-      begin
-        sh:=CPUStr(aCPU);
-        f:=sh;
-        if aCPU=TGLIBCCPU.cpu_x86_64 then f:=f+'/64';
-        if aCPU=TGLIBCCPU.cpu_arm then f:=f+'/le';
-        if aCPU=TGLIBCCPU.cpu_powerpc then f:='powerpc/powerpc32';
-        if aCPU=TGLIBCCPU.cpu_powerpc64 then f:='powerpc/powerpc64/le';
-        for abi in ONLINEABIS do
-        begin
-          v:='https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=sysdeps/unix/sysv/linux/'+f+'/'+abi+'.abilist';
-          Memo1.Lines.Append(v);
-          GetUrlAs(v,'abi_'+abi+'_'+sh+'.dat');
-        end;
-
-        if aCPU=TGLIBCCPU.cpu_powerpc then
-        begin
-          f:='powerpc/powerpc32/fpu';
-          for abi in ['libc','libm'] do
-          begin
-            v:='https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=sysdeps/unix/sysv/linux/'+f+'/'+abi+'.abilist';
-            Memo1.Lines.Append(v);
-            GetUrlAs(v,'abi_'+abi+'_'+sh+'.dat');
-          end;
-        end;
-      end;
-
-      exit;
-      *)
-
       datafromfile:=TStringList.Create;
       try
-        for abi in ABIS do
+        for tabi in ABIS do
         begin
           datafromfile.Clear;
           sh:=CPUStr(aCPU);
+          abi:=ABIStr(tabi);
           v:='abi_'+abi+'_'+sh+'.dat';
           datafromfile.LoadFromFile('.'+DirectorySeparator+'abilists'+DirectorySeparator+v);
           if datafromfile.Count>0 then
@@ -337,6 +315,7 @@ begin
           vd:=StrPas(PChar(glibcfunctions.Objects[k]));
           if CompareVersionStrings(v,vd)<0 then
           begin
+            (*
             j:=fl.IndexOf(glibcfunctions[i]);
             if j=-1 then
               fl.AddObject(glibcfunctions[i],TObject(StrNew(PChar(v))))
@@ -345,11 +324,13 @@ begin
               StrDispose(PChar(fl.Objects[j]));
               fl.Objects[j]:=TObject(StrNew(PChar(v)));
             end;
+            *)
             StrDispose(PChar(glibcfunctions.Objects[k]));
             glibcfunctions.Delete(k);
           end;
           if CompareVersionStrings(v,vd)>0 then
           begin
+            (*
             j:=fl.IndexOf(glibcfunctions[k]);
             if j=-1 then
               fl.AddObject(glibcfunctions[k],TObject(StrNew(PChar(vd))))
@@ -358,36 +339,22 @@ begin
               StrDispose(PChar(fl.Objects[j]));
               fl.Objects[j]:=TObject(StrNew(PChar(vd)));
             end;
+            *)
             StrDispose(PChar(glibcfunctions.Objects[i]));
             glibcfunctions.Delete(i);
           end;
         end;
       end;
 
+      (*
       for i:=0 to Pred(glibcfunctions.Count) do StrDispose(PChar(glibcfunctions.Objects[i]));
       glibcfunctions.Clear;
       for i:=0 to Pred(fl.Count) do glibcfunctions.AddObject(fl[i],fl.Objects[i]);
       fl.Clear;
       fl.Free;
-
-      glibcfunctions.Sort;
-
-
-      (*
-      // Just a simple speedup of first use.
-      // Could be left out
-      if StringGrid1.RowCount=1 then
-      begin
-        StringGrid1.RowCount:=Succ(glibcfunctions.Count);
-        i:=1;
-        for sh in glibcfunctions do
-        begin
-          StringGrid1.Cells[0,i]:=sh;
-          Inc(i);
-        end;
-      end;
       *)
 
+      glibcfunctions.Sort;
 
       fl:=TStringList.Create;
       try
@@ -503,6 +470,45 @@ begin
     glibcfunctionsfromfile.Free;
   end;
 
+end;
+
+procedure TForm1.btnGetABIClick(Sender: TObject);
+const
+  ONLINEABIS : set of TONLINEABI = [Low(TONLINEABI) .. High(TONLINEABI)];
+var
+  aCPU:TGLIBCCPU;
+  tabi:TONLINEABI;
+  sh,abi:string;
+  v,f:string;
+begin
+  for aCPU in GLIBCCPU do
+  begin
+    sh:=CPUStr(aCPU);
+    f:=sh;
+    if aCPU=TGLIBCCPU.cpu_x86_64 then f:=f+'/64';
+    if aCPU=TGLIBCCPU.cpu_arm then f:=f+'/le';
+    if aCPU=TGLIBCCPU.cpu_powerpc then f:='powerpc/powerpc32';
+    if aCPU=TGLIBCCPU.cpu_powerpc64 then f:='powerpc/powerpc64/le';
+    for tabi in ONLINEABIS do
+    begin
+      abi:=ABIStr(tabi);
+      v:='https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=sysdeps/unix/sysv/linux/'+f+'/'+abi+'.abilist';
+      Memo1.Lines.Append(v);
+      GetUrlAs(v,'.'+DirectorySeparator+'abilists'+DirectorySeparator+'abi_'+abi+'_'+sh+'.dat');
+    end;
+
+    if aCPU=TGLIBCCPU.cpu_powerpc then
+    begin
+      f:='powerpc/powerpc32/fpu';
+      for tabi in [libc,libm] do
+      begin
+        abi:=ABIStr(tabi);
+        v:='https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=sysdeps/unix/sysv/linux/'+f+'/'+abi+'.abilist';
+        Memo1.Lines.Append(v);
+        GetUrlAs(v,'.'+DirectorySeparator+'abilists'+DirectorySeparator+'abi_'+abi+'_'+sh+'.dat');
+      end;
+    end;
+  end;
 end;
 
 end.

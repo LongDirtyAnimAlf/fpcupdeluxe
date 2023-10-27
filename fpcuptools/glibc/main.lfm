@@ -87,5 +87,14 @@ object Form1: TForm1
       TabOrder = 2
       Visible = False
     end
+    object btnGetABI: TButton
+      Left = 185
+      Height = 35
+      Top = 9
+      Width = 129
+      Caption = 'Get ABIs online'
+      OnClick = btnGetABIClick
+      TabOrder = 3
+    end
   end
 end
