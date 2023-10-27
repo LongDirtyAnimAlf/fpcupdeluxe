@@ -66,9 +66,9 @@ type
 
   TONLINEABI  = (ld,libanl,libc,libc_malloc_debug,libcrypt,libdl,libm,libmvec,libnsl,libpthread,libresolv,librt,libthread_db,libutil);
 
-
 const
-  GLIBCCPU : set of TGLIBCCPU = [cpu_i386,cpu_powerpc,cpu_x86_64,cpu_arm,cpu_powerpc64,cpu_aarch64];
+  GLIBCCPU : set of TGLIBCCPU = [cpu_i386,cpu_m68k,cpu_powerpc,cpu_sparc,cpu_x86_64,cpu_arm,cpu_powerpc64,cpu_aarch64,cpu_sparc64];
+  FILEFORMAT = 'abi_%s_%s.dat';
 
 function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 begin
@@ -92,7 +92,6 @@ function ABIStr(aABI:TONLINEABI):string;
 begin
   result:=GetEnumNameSimple(TypeInfo(TONLINEABI),Ord(aABI));
 end;
-
 
   // 1on1 shameless copy from unit cutils from the fpc compiler;
 function CompareVersionStrings(s1,s2: string): longint;
@@ -160,25 +159,6 @@ begin
   until false;
 end;
 
-procedure DumpExceptionCallStack(E: Exception);
-var
-  I: Integer;
-  Frames: PPointer;
-  Report: string;
-begin
-  Report := 'Program exception! ' + LineEnding + 'Stacktrace:' + LineEnding + LineEnding;
-  if E <> nil then
-  begin
-    Report := Report + 'Exception class: ' + E.ClassName + LineEnding + 'Message: ' + E.Message + LineEnding;
-  end;
-  Report := Report + BackTraceStrFunc(ExceptAddr);
-  Frames := ExceptFrames;
-  for I := 0 to ExceptFrameCount - 1
-    do Report := Report + LineEnding + BackTraceStrFunc(Frames[I]);
-  //WriteLn(Report);
-  Halt;
-end;
-
 function GetUrlAs(Url: String; AsName: String): Boolean;
 begin
   Result := False;
@@ -196,7 +176,6 @@ begin
       Free;
     end;
   except
-    //on E: Exception do DumpExceptionCallStack(E);
   end;
 end;
 
@@ -233,17 +212,19 @@ var
 begin
   if IsColumn then
   begin
-
     StaticText1.Visible:=True;
     Application.ProcessMessages;
 
     case Index of
       1:aCPU:=TGLIBCCPU.cpu_i386;
-      2:aCPU:=TGLIBCCPU.cpu_powerpc;
-      3:aCPU:=TGLIBCCPU.cpu_x86_64;
-      4:aCPU:=TGLIBCCPU.cpu_arm;
-      5:aCPU:=TGLIBCCPU.cpu_powerpc64;
-      6:aCPU:=TGLIBCCPU.cpu_aarch64;
+      2:aCPU:=TGLIBCCPU.cpu_m68k;
+      3:aCPU:=TGLIBCCPU.cpu_powerpc;
+      4:aCPU:=TGLIBCCPU.cpu_sparc;
+      5:aCPU:=TGLIBCCPU.cpu_x86_64;
+      6:aCPU:=TGLIBCCPU.cpu_arm;
+      7:aCPU:=TGLIBCCPU.cpu_powerpc64;
+      8:aCPU:=TGLIBCCPU.cpu_aarch64;
+      9:aCPU:=TGLIBCCPU.cpu_sparc64;
     end;
 
     glibcfunctions:=TStringList.Create;
@@ -255,7 +236,7 @@ begin
           datafromfile.Clear;
           sh:=CPUStr(aCPU);
           abi:=ABIStr(tabi);
-          v:='abi_'+abi+'_'+sh+'.dat';
+          v:=Format(FILEFORMAT,[abi,sh]);
           datafromfile.LoadFromFile('.'+DirectorySeparator+'abilists'+DirectorySeparator+v);
           if datafromfile.Count>0 then
           begin
@@ -270,7 +251,7 @@ begin
               j:=Pos(' ',sh,i);
               f:=Copy(sh,i,j-i);
               // Now we have a version string [v] and the function itself [f]
-              //while f[1]='_' do Delete(f,1,1);
+              if (f[1]='.') then fa:=false;
               if (f[1]='_') then
               begin
                 fa:=false;
@@ -293,7 +274,11 @@ begin
       begin
         glibcfunctions.AddObject('__setfpucw',TObject(StrNew('2.0.6')));
       end;
-
+      // Only for arm
+      if (aCPU=TGLIBCCPU.cpu_arm) then
+      begin
+        glibcfunctions.AddObject('__setfpucw',TObject(StrNew('2.3.6')));
+      end;
 
       glibcfunctions.Sort;
 
@@ -487,16 +472,18 @@ begin
     f:=sh;
     if aCPU=TGLIBCCPU.cpu_x86_64 then f:=f+'/64';
     if aCPU=TGLIBCCPU.cpu_arm then f:=f+'/le';
+    if aCPU=TGLIBCCPU.cpu_m68k then f:=f+'/coldfire';
     if aCPU=TGLIBCCPU.cpu_powerpc then f:='powerpc/powerpc32';
     if aCPU=TGLIBCCPU.cpu_powerpc64 then f:='powerpc/powerpc64/le';
+    if aCPU=TGLIBCCPU.cpu_sparc then f:='sparc/sparc32';
+    if aCPU=TGLIBCCPU.cpu_sparc64 then f:='sparc/sparc64';
     for tabi in ONLINEABIS do
     begin
       abi:=ABIStr(tabi);
       v:='https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=sysdeps/unix/sysv/linux/'+f+'/'+abi+'.abilist';
       Memo1.Lines.Append(v);
-      GetUrlAs(v,'.'+DirectorySeparator+'abilists'+DirectorySeparator+'abi_'+abi+'_'+sh+'.dat');
+      GetUrlAs(v,'.'+DirectorySeparator+'abilists'+DirectorySeparator+Format(FILEFORMAT,[abi,sh]));
     end;
-
     if aCPU=TGLIBCCPU.cpu_powerpc then
     begin
       f:='powerpc/powerpc32/fpu';
@@ -505,7 +492,7 @@ begin
         abi:=ABIStr(tabi);
         v:='https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=sysdeps/unix/sysv/linux/'+f+'/'+abi+'.abilist';
         Memo1.Lines.Append(v);
-        GetUrlAs(v,'.'+DirectorySeparator+'abilists'+DirectorySeparator+'abi_'+abi+'_'+sh+'.dat');
+        GetUrlAs(v,'.'+DirectorySeparator+'abilists'+DirectorySeparator+Format(FILEFORMAT,[abi,sh]));
       end;
     end;
   end;

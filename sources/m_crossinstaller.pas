@@ -131,8 +131,6 @@ const
   TODOCPU                = [TCPU.sparc,TCPU.sparc64,TCPU.m68k];
 
 
-
-
 type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
 

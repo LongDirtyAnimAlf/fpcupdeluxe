@@ -16,19 +16,22 @@ object Form1: TForm1
     Align = alClient
     AlternateColor = clBtnFace
     AutoFillColumns = True
-    ColCount = 7
+    ColCount = 10
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect, goThumbTracking, goSmoothScroll]
     RowCount = 1
     TabOrder = 0
     OnHeaderClick = StringGrid1HeaderClick
     ColWidths = (
       64
-      150
-      150
-      150
-      149
-      149
-      149
+      100
+      100
+      100
+      100
+      100
+      100
+      99
+      99
+      99
     )
   end
   object Panel1: TPanel
