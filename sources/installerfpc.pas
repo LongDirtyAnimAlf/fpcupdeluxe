@@ -5287,6 +5287,7 @@ begin
       // Create the Linux Legacy patch now
       // It will only be used for FPC 3.2.2
       // But its there for everybody to have a look
+      (*
       if (SourceVersion=DEFAULTFPCVERSION) then
       begin
         s:=ConcatPaths([BaseDirectory,'patches','patchfpc',LINUXLEGACYPATCH]);
@@ -5300,6 +5301,7 @@ begin
           SaveFileFromResource(s,'GLIBC');
         end;
       end;
+      *)
 
       // Patch the FPC sources, if there are patches available
       PatchModule(ModuleName);

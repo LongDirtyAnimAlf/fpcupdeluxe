@@ -483,9 +483,6 @@ begin
 
   UpdateCheckBoxList;
 
-  // for testing: set true
-  ForceGLIBCLinking      := True;
-  //ForceGLIBCLinking      := False;
   SaveScript             := False;
   AskConfirmation        := True;
   FpcupBootstrappersOnly := True;
@@ -594,6 +591,10 @@ begin
   UseSoftFloat:=false;
   SetCheckEnabled(CaptionUseSoftFloat80bit,False);
   {$endif}
+
+  // To be enabled in a official release.
+  ForceGLIBCLinking      := False;
+  SetCheckEnabled(CaptionCheckGLIBCCompat,False);
 
   //Disable OnlinePatching by default starting with 1.6.8p
   OnlinePatching:=false;

@@ -971,6 +971,8 @@ begin
 
     //Harmless fpmkpkg warning
     if AnsiStartsText('Could not find libgcc ',line) then exit;
+
+    if AnsiContainsText(line,'Nothing to do.') then exit;
   end;
 
   if (NOT result) then

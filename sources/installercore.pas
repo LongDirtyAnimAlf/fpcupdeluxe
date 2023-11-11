@@ -198,7 +198,7 @@ const
   {$endif}
   {$endif}
 
-  LINUXLEGACYPATCH = 'glibc_compat_3_2_2.patch';
+  //LINUXLEGACYPATCH = 'glibc_compat_3_2_2.patch';
 
   REVISIONSLOG     = 'fpcuprevisions.log';
 

@@ -2509,6 +2509,7 @@ begin
 
     if (SourceVersion<>'0.0.0') then
     begin
+      (*
       if (SourceVersion=LAZARUSTRUNKVERSION) then
       begin
         s:=ConcatPaths([BaseDirectory,'patches','patchlazarus','glibc_debugger_trunk.patch']);
@@ -2517,6 +2518,7 @@ begin
           SaveFileFromResource(s,'GLIBC_DEBUGGER_TRUNK');
         end;
       end;
+      *)
       PatchModule(ModuleName);
     end;
 

@@ -210,6 +210,7 @@ var
 
 Const
   CONFIGFILENAME='fpcup.ini';
+  DEFAULTMODULESFILENAME='defmods.ini';
   SETTTINGSFILENAME='settings.ini';
   DELUXEFILENAME='fpcupdeluxe.ini';
 
@@ -221,7 +222,7 @@ implementation
 
 uses
   StrUtils, typinfo,inifiles, process, fpjson,
-  FileUtil,
+  FileUtil, //LazFileUtils,
   fpcuputil;
 
 Const
@@ -693,6 +694,8 @@ end;
 
 {$ifndef FPCONLY}
 function TUniversalInstaller.InstallPackage(PackagePath, WorkingDir: string; RegisterOnly:boolean; Silent:boolean=false): boolean;
+const
+  PKGEXTENSION = '.lpk';
 var
   PackageName,PackageAbsolutePath: string;
   Path: String;
@@ -707,21 +710,28 @@ begin
   result:=false;
   localinfotext:=InitInfoText(' (InstallPackage): ');
 
-  PackageName:=FileNameWithoutExt(PackagePath);
+  PackageName:=ExtractFileName(PackagePath);
 
   // Convert any relative path to absolute path, if it's not just a file/package name:
-  if ExtractFileName(PackagePath)=PackagePath then
+  if PackageName=PackagePath then
+  begin
     // we have a relative path or packagename: let Lazarus handle it
-    PackageAbsolutePath:=PackagePath
+    PackageAbsolutePath:=PackagePath;
+  end
   else
+  begin
    // Just use absolute path
     PackageAbsolutePath:=SafeExpandFileName(PackagePath);
+  end;
+
+  // Delete lpk-extension, if any
+  if ExtractFileExt(PackageName)=PKGEXTENSION then Setlength(PackageName,Length(PackageName)-Length(PKGEXTENSION));
 
   // find a package component, if any
   // all other packages will be ignored
   if ( (NOT FileExists(PackageAbsolutePath)) AND (Length(WorkingDir)>0) AND DirectoryExists(WorkingDir) ) then
   begin
-    PackageFiles:=FindAllFiles(WorkingDir, PackageName+'.lpk' , true);
+    PackageFiles:=FindAllFiles(WorkingDir, PackageName+PKGEXTENSION , true);
     if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
     PackageFiles.Free;
   end;
@@ -730,7 +740,7 @@ begin
   // all other packages will be ignored
   if (NOT FileExists(PackageAbsolutePath)) then
   begin
-    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(FLazarusInstallDir)+'components', PackageName+'.lpk' , true);
+    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(FLazarusInstallDir)+'components', PackageName+PKGEXTENSION , true);
     if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
     PackageFiles.Free;
   end;
@@ -739,7 +749,7 @@ begin
   // all other packages will be ignored
   if (NOT FileExists(PackageAbsolutePath)) then
   begin
-    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)+'onlinepackagemanager'+DirectorySeparator+'packages', PackageName+'.lpk' , true);
+    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)+'onlinepackagemanager'+DirectorySeparator+'packages', PackageName+PKGEXTENSION , true);
     if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
     PackageFiles.Free;
   end;
@@ -750,7 +760,7 @@ begin
   Path:=IncludeTrailingPathDelimiter(BaseDirectory)+'ccr';
   if ( (NOT FileExists(PackageAbsolutePath)) AND DirectoryExists(Path) ) then
   begin
-    PackageFiles:=FindAllFiles(Path, PackageName+'.lpk' , true);
+    PackageFiles:=FindAllFiles(Path, PackageName+PKGEXTENSION , true);
     if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
     PackageFiles.Free;
   end;
@@ -3638,6 +3648,7 @@ var
   ini:TMemIniFile;
   i,j,maxmodules:integer;
   val,name:string;
+  DefaultModules:boolean;
 
   function LoadModule(ModuleName:string):boolean;
   var
@@ -3729,72 +3740,91 @@ var
 
 begin
   result:='';
-  ini:=TMemIniFile.Create(CurrentConfigFile);
-  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-  Ini.Options:=[ifoStripQuotes]; //let ini handle e.g. lazopt="-g -gl -O1" for us
-  {$ELSE}
-  ini.StripQuotes:=true; //let ini handle e.g. lazopt="-g -gl -O1" for us
-  {$ENDIF}
-  //ini.CaseSensitive:=false;
-  //ini.StripQuotes:=true; //helps read description lines
+  for DefaultModules in boolean do
+  begin
+    if DefaultModules then
+      ini:=TMemIniFile.Create(ExtractFilePath(CurrentConfigFile)+DEFAULTMODULESFILENAME)
+    else
+      ini:=TMemIniFile.Create(CurrentConfigFile);
+    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+    Ini.Options:=[ifoStripQuotes]; //let ini handle e.g. lazopt="-g -gl -O1" for us
+    {$ELSE}
+    ini.StripQuotes:=true; //let ini handle e.g. lazopt="-g -gl -O1" for us
+    {$ENDIF}
+    //ini.CaseSensitive:=false;
+    //ini.StripQuotes:=true; //helps read description lines
 
-  // parse inifile
-  try
-    maxmodules:=ini.ReadInteger('General','MaxSysModules',MAXSYSMODULES);
-    ini.ReadSectionRaw('General',IniGeneralSection);
-    for i:=0 to maxmodules do
-      if LoadModule('FPCUPModule'+IntToStr(i)) then
-        result:=result+CreateModuleSequence('FPCUPModule'+IntToStr(i));
-    maxmodules:=ini.ReadInteger('General','MaxUserModules',MAXUSERMODULES);
-    for i:=0 to maxmodules do
-      if LoadModule('UserModule'+IntToStr(i))then
-        result:=result+CreateModuleSequence('UserModule'+IntToStr(i));
-    for i:=0 to maxmodules do
-      if LoadModule('HiddenModule'+IntToStr(i))then
-        result:=result+CreateModuleSequence('HiddenModule'+IntToStr(i),true);
-
-    // the overrides in the [general] section
-    for i:=0 to UniModuleList.Count-1 do
+    // parse inifile
+    try
+      if DefaultModules then
       begin
-      name:=UniModuleList[i];
-      val:=ini.ReadString('General',name,'');
-      if val='1' then
-        begin //enable if not yet done
-        if UniModuleEnabledList.IndexOf(name)<0 then
-          UniModuleEnabledList.Add(name);
-        end
-      else if val='0' then
-        begin //disable if enabled
-        j:=UniModuleEnabledList.IndexOf(name);
-        if j>=0 then
-          UniModuleEnabledList.Delete(j);
+        maxmodules:=ini.ReadInteger('General','MaxDefaultModules',MAXSYSMODULES);
+        for i:=0 to maxmodules do
+          if LoadModule('DefaultModule'+IntToStr(i))then
+            result:=result+CreateModuleSequence('DefaultModule'+IntToStr(i),true);
+      end
+      else
+      begin
+        maxmodules:=ini.ReadInteger('General','MaxSysModules',MAXSYSMODULES);
+        ini.ReadSectionRaw('General',IniGeneralSection);
+
+        for i:=0 to maxmodules do
+          if LoadModule('FPCUPModule'+IntToStr(i)) then
+            result:=result+CreateModuleSequence('FPCUPModule'+IntToStr(i));
+        maxmodules:=ini.ReadInteger('General','MaxUserModules',MAXUSERMODULES);
+        for i:=0 to maxmodules do
+          if LoadModule('UserModule'+IntToStr(i))then
+            result:=result+CreateModuleSequence('UserModule'+IntToStr(i));
+        for i:=0 to maxmodules do
+          if LoadModule('HiddenModule'+IntToStr(i))then
+            result:=result+CreateModuleSequence('HiddenModule'+IntToStr(i),true);
+      end;
+
+      // the overrides in the [general] section
+      for i:=0 to UniModuleList.Count-1 do
+        begin
+        name:=UniModuleList[i];
+        val:=ini.ReadString('General',name,'');
+        if val='1' then
+          begin //enable if not yet done
+          if UniModuleEnabledList.IndexOf(name)<0 then
+            UniModuleEnabledList.Add(name);
+          end
+        else if val='0' then
+          begin //disable if enabled
+          j:=UniModuleEnabledList.IndexOf(name);
+          if j>=0 then
+            UniModuleEnabledList.Delete(j);
+          end;
         end;
-      end;
 
-    for i:=UniModuleEnabledList.Count-1 downto 0 do
-      begin
-      name:=UniModuleEnabledList[i];
-      if NOT CheckIncludeModule(name) then
-          UniModuleEnabledList.Delete(i);
-      end;
-
-    // create the sequences for default modules
-    result:=result+_DECLAREHIDDEN+_UNIVERSALDEFAULT+_SEP;
-    for i:=0 to UniModuleEnabledList.Count-1 do
-        result:=result+_DO+UniModuleEnabledList[i]+_SEP;
-    result:=result+_END;
-    result:=result+_DECLAREHIDDEN+_UNIVERSALDEFAULT+_CLEAN+_SEP;
-    for i:=0 to UniModuleEnabledList.Count-1 do
-      result:=result+_DO+UniModuleEnabledList[i]+_CLEAN+_SEP;
-    result:=result+_END;
-    result:=result+_DECLAREHIDDEN+_UNIVERSALDEFAULT+_UNINSTALL+_SEP;
-    for i:=0 to UniModuleEnabledList.Count-1 do
-      result:=result+_DO+UniModuleEnabledList[i]+_UNINSTALL+_SEP;
-    result:=result+_END;
-
-  finally
-    ini.Free;
+    finally
+      ini.Free;
+    end;
   end;
+
+
+  for i:=UniModuleEnabledList.Count-1 downto 0 do
+    begin
+    name:=UniModuleEnabledList[i];
+    if (NOT CheckIncludeModule(name)) then
+        UniModuleEnabledList.Delete(i);
+    end;
+
+  // create the sequences for default modules
+  result:=result+_DECLAREHIDDEN+_UNIVERSALDEFAULT+_SEP;
+  for i:=0 to UniModuleEnabledList.Count-1 do
+      result:=result+_DO+UniModuleEnabledList[i]+_SEP;
+  result:=result+_END;
+  result:=result+_DECLAREHIDDEN+_UNIVERSALDEFAULT+_CLEAN+_SEP;
+  for i:=0 to UniModuleEnabledList.Count-1 do
+    result:=result+_DO+UniModuleEnabledList[i]+_CLEAN+_SEP;
+  result:=result+_END;
+  result:=result+_DECLAREHIDDEN+_UNIVERSALDEFAULT+_UNINSTALL+_SEP;
+  for i:=0 to UniModuleEnabledList.Count-1 do
+    result:=result+_DO+UniModuleEnabledList[i]+_UNINSTALL+_SEP;
+  result:=result+_END;
+
 end;
 
 function CheckIncludeModule(ModuleName: string):boolean;
@@ -3969,12 +3999,61 @@ begin
 end;
 
 function SetConfigFile(aConfigFile: string):boolean;
+var
+  aConfig:string;
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+  Ini:TMemIniFile;
+  {$ELSE}
+  Ini:TIniFile;
+  {$ENDIF}
 begin
   result:=true;
   CurrentConfigFile:=aConfigFile;
+  aConfig:=SafeGetApplicationPath+CONFIGFILENAME;
   // Create fpcup.ini from resource if it doesn't exist yet
-  if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME) then
-     result:=SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
+  if (CurrentConfigFile=aConfig) then
+     result:=SaveInisFromResource(aConfig,'fpcup_ini');
+
+  aConfig:=ExtractFilePath(CurrentConfigFile)+DEFAULTMODULESFILENAME;
+  if (NOT FileExists(aConfig)) then
+  begin
+    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+    Ini:=TMemIniFile.Create(aConfig);
+    Ini.Options:=[ifoStripQuotes];
+    {$ELSE}
+    Ini:=TIniFile.Create(aConfig);
+    ini.StripQuotes:=true;
+    {$ENDIF}
+    try
+      ini.WriteInteger('General','MaxDefaultModules',MAXSYSMODULES);
+      Ini.WriteString('General','; These IDE packages will be installed by default.','');
+      Ini.WriteString('General','; Please feel free to add your own.','');
+
+      Ini.WriteString('DefaultModule0','Name','defaultmodules');
+      Ini.WriteString('DefaultModule0','Description','Your default modules to be installed');
+      Ini.WriteString('DefaultModule0','Enabled','0');
+      Ini.WriteString('DefaultModule0','Requires','OPM,todolistlaz');
+
+      Ini.WriteString('DefaultModule1','Name','defaultextras');
+      Ini.WriteString('DefaultModule1','Description','Your extra packages to be installed');
+      Ini.WriteString('DefaultModule1','Enabled','0');
+      Ini.WriteString('DefaultModule1','AddPackage1','$(lazarusdir)/components/messagecomposer/messagecomposerpkg.lpk');
+
+
+      Ini.WriteString('DefaultModule2','Name','default_indy');
+      Ini.WriteString('DefaultModule2','Description','Indy networking library for FPC and Lazarus');
+      Ini.WriteString('DefaultModule2','Installdir','$(basedir)/ccr/$(name)');
+      Ini.WriteString('DefaultModule2','Enabled','0');
+      Ini.WriteString('DefaultModule2','GITURL','https://github.com/IndySockets/Indy');
+      Ini.WriteString('DefaultModule2','AddPackage1','$(Installdir)/Lib/indylaz.lpk');
+
+      Ini.UpdateFile;
+    finally
+      Ini.Free;
+    end;
+
+  end;
+
 end;
 
 initialization

@@ -4446,7 +4446,9 @@ begin
 
       Form2.SystemFPC:=ReadBool('General','SystemFPC',False);
 
-      Form2.ForceGLIBCLinking:=ReadBool('General','LinuxLegacy',Form2.ForceGLIBCLinking);
+      // To be enabled in a official release
+      //Form2.ForceGLIBCLinking:=ReadBool('General','LinuxLegacy',Form2.ForceGLIBCLinking);
+      Form2.ForceGLIBCLinking:=false;
 
       Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
       Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
