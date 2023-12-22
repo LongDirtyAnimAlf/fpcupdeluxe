@@ -209,6 +209,11 @@ uses
   m_crosswinx64,
   m_crosswinarm64,
   {$endif win32}
+  {$ifdef windows}
+  uMetaDarkStyle,
+  uDarkStyleSchemes,
+  uDarkStyleParams,
+  {$endif Windows}
   {$else}
   m_anyinternallinker_to_win386,
   m_anyinternallinker_to_winarm64,
@@ -222,6 +227,10 @@ uses
 begin
   RequireDerivedFormResource:=True;
   Application.Scaled:=True;
+  {$ifdef windows}
+  PreferredAppMode:=pamAllowDark;
+  uMetaDarkStyle.ApplyMetaDarkStyle(DefaultDark);
+  {$endif windows}
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);
   Application.Run;
