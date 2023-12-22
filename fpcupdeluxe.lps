@@ -4,13 +4,15 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linuxi386QT5,linuxi386QT5zip,linux64,linuxaarch64,linuxaarch64QT5,linuxaarch64QT5zip,linuxarm,linuxarmQT5,linuxarmQT5zip,linuxarmv6,linuxx64QT5,linuxx64QT5zip,linuxppc64,freebsdi386,freebsdx64,solarisx64,dragonflyx64,netbsdx64,netbsdi386,freebsdx64QT5,freebsdx64QT5zip"/>
-    <BuildModes Active="win32"/>
+    <BuildModes Active="Default"/>
     <Units Count="206">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
         <IsVisibleTab Value="True"/>
+        <TopLine Value="200"/>
+        <CursorPos X="3" Y="213"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -1532,7 +1534,7 @@
         <UsageCount Value="10"/>
       </Unit205>
     </Units>
-    <JumpHistory Count="13" HistoryIndex="12">
+    <JumpHistory Count="15" HistoryIndex="14">
       <Position1>
         <Filename Value="sources\updeluxe\extrasettings.pas"/>
         <Caret Line="10" Column="28"/>
@@ -1585,6 +1587,13 @@
         <Filename Value="up.lpr"/>
         <Caret Line="228" TopLine="203"/>
       </Position13>
+      <Position14>
+        <Filename Value="up.lpr"/>
+      </Position14>
+      <Position15>
+        <Filename Value="up.lpr"/>
+        <Caret Line="213" Column="3" TopLine="200"/>
+      </Position15>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
