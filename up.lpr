@@ -210,9 +210,11 @@ uses
   m_crosswinarm64,
   {$endif win32}
   {$ifdef windows}
+  {$ifdef LCL}
   uMetaDarkStyle,
   uDarkStyleSchemes,
   uDarkStyleParams,
+  {$endif LCL}
   {$endif Windows}
   {$else}
   m_anyinternallinker_to_win386,
