@@ -14,6 +14,7 @@ sudo zypper --non-interactive install -y libXxf86vm1
 sudo zypper --non-interactive install -y glu-devel
 sudo zypper --non-interactive install -y libgthread-2_0-0
 sudo zypper --non-interactive install -y freetype2-devel
+sudo zypper --non-interactive install -y libglvnd-devel
 
 sudo zypper --non-interactive install -y gtk2-devel
 sudo zypper --non-interactive install -y gdk-pixbuf-devel
