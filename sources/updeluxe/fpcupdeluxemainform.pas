@@ -2355,26 +2355,32 @@ begin
     //aLazarusTarget:='0.9.4';
     aLazarusTarget:='0.9.16';
     By @MarkMLl
-    lazarus-0.9.24+2.2.4
-    lazarus-0.9.26+2.2.4
-    lazarus-0.9.28+2.4.0
-    lazarus-0.9.30+2.4.4
-    lazarus-1.0.0+2.4.4
-    lazarus-1.0.0+2.6.0
-    lazarus-1.0.14+2.6.4
-    lazarus-1.0.8+2.6.2
-    lazarus-1.2.6+2.6.4
-    lazarus-1.4.4+3.0.0
-    lazarus-1.6.0+3.0.0
-    lazarus-1.6.2+3.0.0
-    lazarus-1.6.4+3.0.2
-    lazarus-1.8.0+3.0.4
-    lazarus-1.8.2+3.0.4
-    lazarus-1.8.4+3.0.4
-    lazarus-2.0.10+3.2.0
-    lazarus-2.0.6+3.0.4
-    lazarus-2.0.8+3.0.4
-  end;
+    Lazarus 0.9.24  + FPC 2.2.4
+    Lazarus 0.9.26  + FPC 2.2.4
+    Lazarus 0.9.28  + FPC 2.4.0
+    Lazarus 0.9.30  + FPC 2.4.4
+    Lazarus 1.0.0   + FPC 2.4.4
+    Lazarus 1.0.0   + FPC 2.6.0
+    Lazarus 1.0.8   + FPC 2.6.2
+    Lazarus 1.0.14  + FPC 2.6.4
+    Lazarus 1.2.6   + FPC 2.6.4
+    Lazarus 1.4.4   + FPC 3.0.0
+    Lazarus 1.6.0   + FPC 3.0.0
+    Lazarus 1.6.2   + FPC 3.0.0
+    Lazarus 1.6.4   + FPC 3.0.2
+    Lazarus 1.8.0   + FPC 3.0.4
+    Lazarus 1.8.2   + FPC 3.0.4
+    Lazarus 1.8.4   + FPC 3.0.4
+    Lazarus 2.0.6   + FPC 3.0.4
+    Lazarus 2.0.8   + FPC 3.0.4
+    Lazarus 2.0.10  + FPC 3.2.0
+    Lazarus 2.0.12  + FPC 3.2.0
+    Lazarus 2.2.0   + FPC 3.2.2
+    Lazarus 2.2.2   + FPC 3.2.2
+    Lazarus 2.2.4   + FPC 3.2.2
+    Lazarus 2.2.6   + FPC 3.2.2
+    Lazarus 3.0     + FPC 3.2.2
+    end;
   }
 
   if (Sender=WioBtn) OR (Sender=PicoBtn) then

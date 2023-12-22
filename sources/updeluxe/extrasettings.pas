@@ -592,7 +592,10 @@ begin
   SetCheckEnabled(CaptionUseSoftFloat80bit,False);
   {$endif}
 
-  // To be enabled in a official release.
+  // Disable for now
+  // To be further investigated
+  // Libc versioned linking will be included in FPC sometime in 2024
+  // Implementation by the FPC devs themselves
   ForceGLIBCLinking      := False;
   SetCheckEnabled(CaptionCheckGLIBCCompat,False);
 

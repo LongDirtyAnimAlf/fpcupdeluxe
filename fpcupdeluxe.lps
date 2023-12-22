@@ -5,12 +5,14 @@
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linuxi386QT5,linuxi386QT5zip,linux64,linuxaarch64,linuxaarch64QT5,linuxaarch64QT5zip,linuxarm,linuxarmQT5,linuxarmQT5zip,linuxarmv6,linuxx64QT5,linuxx64QT5zip,linuxppc64,freebsdi386,freebsdx64,solarisx64,dragonflyx64,netbsdx64,netbsdi386,freebsdx64QT5,freebsdx64QT5zip"/>
     <BuildModes Active="Default"/>
-    <Units Count="193">
+    <Units Count="206">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
         <IsVisibleTab Value="True"/>
+        <TopLine Value="200"/>
+        <CursorPos X="3" Y="213"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -40,7 +42,7 @@
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynEditPopup"/>
-        <UsageCount Value="130"/>
+        <UsageCount Value="136"/>
       </Unit3>
       <Unit4>
         <Filename Value="sources\updeluxe\aboutfrm.pas"/>
@@ -52,7 +54,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="38"/>
         <CursorPos X="38" Y="51"/>
-        <UsageCount Value="130"/>
+        <UsageCount Value="136"/>
       </Unit4>
       <Unit5>
         <Filename Value="sources\updeluxe\infounit.pas"/>
@@ -60,7 +62,7 @@
         <ComponentName Value="InfoForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="130"/>
+        <UsageCount Value="136"/>
       </Unit5>
       <Unit6>
         <Filename Value="sources\updeluxe\modulesettings.pas"/>
@@ -68,28 +70,28 @@
         <ComponentName Value="Form3"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="130"/>
+        <UsageCount Value="136"/>
       </Unit6>
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="3"/>
-        <CursorPos X="33" Y="6"/>
-        <UsageCount Value="130"/>
+        <UsageCount Value="136"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit7>
       <Unit8>
         <Filename Value="sources\settings.ini"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="130"/>
+        <UsageCount Value="136"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit8>
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="4"/>
-        <UsageCount Value="130"/>
+        <CursorPos X="21" Y="3"/>
+        <UsageCount Value="136"/>
         <Loaded Value="True"/>
       </Unit9>
       <Unit10>
@@ -98,7 +100,7 @@
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="130"/>
+        <UsageCount Value="136"/>
       </Unit10>
       <Unit11>
         <Filename Value="sources\text.txt"/>
@@ -106,23 +108,23 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="3"/>
         <CursorPos Y="32"/>
-        <UsageCount Value="88"/>
+        <UsageCount Value="94"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit11>
       <Unit12>
         <Filename Value="sources\installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="32"/>
-        <CursorPos X="20" Y="40"/>
-        <UsageCount Value="45"/>
+        <TopLine Value="918"/>
+        <CursorPos Y="930"/>
+        <UsageCount Value="46"/>
       </Unit12>
       <Unit13>
         <Filename Value="sources\fpcuputil.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="4439"/>
-        <CursorPos X="94" Y="4448"/>
-        <UsageCount Value="45"/>
+        <TopLine Value="970"/>
+        <CursorPos Y="954"/>
+        <UsageCount Value="48"/>
       </Unit13>
       <Unit14>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\rtl-objpas\src\inc\strutils.pp"/>
@@ -130,43 +132,43 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1347"/>
         <CursorPos X="3" Y="1379"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit14>
       <Unit15>
         <Filename Value="sources\installermanager.pas"/>
         <UnitName Value="installerManager"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1269"/>
-        <CursorPos Y="1282"/>
-        <UsageCount Value="26"/>
+        <TopLine Value="396"/>
+        <CursorPos X="33" Y="410"/>
+        <UsageCount Value="27"/>
       </Unit15>
       <Unit16>
         <Filename Value="sources\NumCPULib.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="500"/>
         <CursorPos X="69" Y="515"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit16>
       <Unit17>
         <Filename Value="sources\installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="5281"/>
-        <CursorPos Y="5290"/>
-        <UsageCount Value="47"/>
+        <TopLine Value="2905"/>
+        <CursorPos X="56" Y="2918"/>
+        <UsageCount Value="46"/>
       </Unit17>
       <Unit18>
         <Filename Value="sources\crossinstallers\m_any_to_freebsd386.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="77"/>
         <CursorPos X="14" Y="91"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit18>
       <Unit19>
         <Filename Value="sources\processutils.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="419"/>
-        <CursorPos X="53" Y="448"/>
+        <TopLine Value="1100"/>
+        <CursorPos X="16" Y="965"/>
         <UsageCount Value="31"/>
       </Unit19>
       <Unit20>
@@ -175,28 +177,28 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2020"/>
         <CursorPos Y="2032"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit20>
       <Unit21>
         <Filename Value="C:\fpcupsystems\pkgtest\fpcsrc\packages\fcl-net\fpmake.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="61"/>
         <CursorPos X="81" Y="76"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit21>
       <Unit22>
         <Filename Value="sources\m_crossinstaller.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="115"/>
-        <CursorPos X="62" Y="131"/>
-        <UsageCount Value="40"/>
+        <TopLine Value="118"/>
+        <CursorPos X="40" Y="140"/>
+        <UsageCount Value="39"/>
       </Unit22>
       <Unit23>
         <Filename Value="sources\crossinstallers\m_any_to_linux_base.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="322"/>
         <CursorPos X="33" Y="332"/>
-        <UsageCount Value="14"/>
+        <UsageCount Value="13"/>
       </Unit23>
       <Unit24>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
@@ -206,78 +208,78 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1267"/>
         <CursorPos Y="1279"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit24>
       <Unit25>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\compiler\i386\aoptcpu.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="635"/>
         <CursorPos X="23" Y="657"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit25>
       <Unit26>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\compiler\x86\agx86int.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1167"/>
         <CursorPos X="28" Y="1186"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit26>
       <Unit27>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\compiler\x86\aoptx86.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2626"/>
         <CursorPos X="20" Y="2651"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit27>
       <Unit28>
         <Filename Value="..\mORMot\CrossPlatform\SynCrossPlatformREST.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2906"/>
         <CursorPos X="24" Y="2920"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit28>
       <Unit29>
         <Filename Value="sources\installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2501"/>
-        <CursorPos Y="2519"/>
-        <UsageCount Value="19"/>
+        <TopLine Value="2052"/>
+        <CursorPos X="7" Y="2050"/>
+        <UsageCount Value="18"/>
       </Unit29>
       <Unit30>
         <Filename Value="sources\installeruniversal.pas"/>
         <UnitName Value="installerUniversal"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="433"/>
-        <CursorPos X="17" Y="443"/>
-        <UsageCount Value="16"/>
+        <TopLine Value="4028"/>
+        <CursorPos Y="4048"/>
+        <UsageCount Value="19"/>
       </Unit30>
       <Unit31>
         <Filename Value="C:\fpcupsystems\trunk\lazarus\components\opengl\qlclopenglwidget.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="25" Y="26"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit31>
       <Unit32>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\objpas\sysutils\filutilh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="193"/>
         <CursorPos X="10" Y="210"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit32>
       <Unit33>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\objpas\sysutils\filutil.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="170"/>
         <CursorPos X="3" Y="175"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit33>
       <Unit34>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\objpas\sysutils\osutilsh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="41"/>
         <CursorPos X="33" Y="62"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit34>
       <Unit35>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\win\sysutils.pp"/>
@@ -285,49 +287,49 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1262"/>
         <CursorPos X="3" Y="1270"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit35>
       <Unit36>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\objpas\sysutils\finah.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="14"/>
-        <CursorPos X="14" Y="42"/>
-        <UsageCount Value="6"/>
+        <CursorPos X="23" Y="22"/>
+        <UsageCount Value="10"/>
       </Unit36>
       <Unit37>
         <Filename Value="C:\fpcupsystems\trunk\fpcsrc\packages\fpmkunit\src\fpmkunit.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="9054"/>
         <CursorPos X="42" Y="9068"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit37>
       <Unit38>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\objpas\sysutils\sysstrh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="112"/>
         <CursorPos X="10" Y="94"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit38>
       <Unit39>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\objpas\sysutils\fina.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="398"/>
-        <CursorPos X="3" Y="403"/>
-        <UsageCount Value="6"/>
+        <TopLine Value="100"/>
+        <CursorPos X="3" Y="105"/>
+        <UsageCount Value="10"/>
       </Unit39>
       <Unit40>
         <Filename Value="C:\fpcupsystems\trunk\fpcsrc\rtl\objpas\sysutils\fina.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="216"/>
         <CursorPos X="10" Y="336"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit40>
       <Unit41>
         <Filename Value="C:\fpcupsystems\trunktest\fpcsrc\rtl\aix\Makefile"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2818"/>
         <CursorPos Y="2833"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit41>
       <Unit42>
@@ -335,7 +337,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2673"/>
         <CursorPos X="15" Y="2693"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit42>
       <Unit43>
@@ -343,7 +345,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2977"/>
         <CursorPos Y="2992"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit43>
       <Unit44>
@@ -351,7 +353,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2723"/>
         <CursorPos X="9" Y="2737"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit44>
       <Unit45>
@@ -359,7 +361,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="94"/>
         <CursorPos X="16" Y="109"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit45>
       <Unit46>
@@ -367,7 +369,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2614"/>
         <CursorPos X="34" Y="2629"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit46>
       <Unit47>
@@ -375,7 +377,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2638"/>
         <CursorPos X="15" Y="2663"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit47>
       <Unit48>
@@ -383,7 +385,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2650"/>
         <CursorPos X="11" Y="2660"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit48>
       <Unit49>
@@ -391,7 +393,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2770"/>
         <CursorPos X="15" Y="2785"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit49>
       <Unit50>
@@ -399,7 +401,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2223"/>
         <CursorPos Y="2238"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit50>
       <Unit51>
@@ -407,7 +409,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="3015"/>
         <CursorPos X="11" Y="3021"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit51>
       <Unit52>
@@ -415,7 +417,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2657"/>
         <CursorPos X="15" Y="2672"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit52>
       <Unit53>
@@ -423,7 +425,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2880"/>
         <CursorPos Y="2895"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit53>
       <Unit54>
@@ -431,7 +433,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="3019"/>
         <CursorPos Y="3034"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit54>
       <Unit55>
@@ -439,34 +441,34 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="146"/>
         <CursorPos Y="175"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit55>
       <Unit56>
         <Filename Value="sources\crossinstallers\m_any_to_aixpowerpc.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="128"/>
         <CursorPos Y="139"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit56>
       <Unit57>
         <Filename Value="sources\fpcupdefines.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="2" Y="6"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="11"/>
       </Unit57>
       <Unit58>
         <Filename Value="sources\crossinstallers\m_any_to_linuxarm.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="251"/>
         <CursorPos X="50" Y="264"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit58>
       <Unit59>
         <Filename Value="sources\crossinstallers\m_any_to_android_base.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="302"/>
         <CursorPos X="22" Y="327"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit59>
       <Unit60>
         <Filename Value="downloader\src\forms\dpb.forms.sequencial.pas"/>
@@ -474,216 +476,216 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="61"/>
         <CursorPos X="33" Y="75"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit60>
       <Unit61>
         <Filename Value="sources\crossinstallers\m_any_to_linuxppc.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="43"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit61>
       <Unit62>
         <Filename Value="sources\crossinstallers\m_any_to_linuxx64.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="11"/>
         <CursorPos Y="30"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit62>
       <Unit63>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\pdecsub.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2345"/>
         <CursorPos Y="2374"/>
-        <UsageCount Value="30"/>
+        <UsageCount Value="29"/>
       </Unit63>
       <Unit64>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\unix\dl.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="83"/>
         <CursorPos Y="99"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit64>
       <Unit65>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\options.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2607"/>
-        <CursorPos X="42" Y="2623"/>
-        <UsageCount Value="5"/>
+        <TopLine Value="3716"/>
+        <CursorPos X="3" Y="3719"/>
+        <UsageCount Value="9"/>
       </Unit65>
       <Unit66>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\systems.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="224"/>
         <CursorPos X="62" Y="239"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit66>
       <Unit67>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\glibc_2.29_x64.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="5"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit67>
       <Unit68>
         <Filename Value="sources\glibc_2.29_x64.inc"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit68>
       <Unit69>
         <Filename Value="sources\gitclient.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="315"/>
         <CursorPos X="100" Y="330"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit69>
       <Unit70>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\x86_64\si_c.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="33"/>
         <CursorPos Y="52"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit70>
       <Unit71>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\symdef.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="773"/>
         <CursorPos X="21" Y="786"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit71>
       <Unit72>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\psub.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2354"/>
         <CursorPos X="20" Y="2367"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit72>
       <Unit73>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\pkgutil.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="403"/>
         <CursorPos X="61" Y="416"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit73>
       <Unit74>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\compiler\x86\cpubase.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="279"/>
         <CursorPos X="9" Y="294"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit74>
       <Unit75>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\browcol.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1231"/>
         <CursorPos X="16" Y="1246"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit75>
       <Unit76>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\symcreat.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1409"/>
         <CursorPos X="13" Y="1423"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit76>
       <Unit77>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\msgidx.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="15" Y="16"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit77>
       <Unit78>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\link.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="382"/>
         <CursorPos X="21" Y="395"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit78>
       <Unit79>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\verbose.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="77"/>
         <CursorPos X="15" Y="93"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit79>
       <Unit80>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\comphook.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="254"/>
         <CursorPos X="48" Y="274"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit80>
       <Unit81>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\globals.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="120"/>
         <CursorPos X="10" Y="135"/>
-        <UsageCount Value="29"/>
+        <UsageCount Value="28"/>
       </Unit81>
       <Unit82>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\globtype.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="191"/>
         <CursorPos X="25" Y="221"/>
-        <UsageCount Value="29"/>
+        <UsageCount Value="28"/>
       </Unit82>
       <Unit83>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\packager\registration\fcllaz.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="28" Y="7"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit83>
       <Unit84>
         <Filename Value="sources\crossinstallers\m_darwin_to_apple_base.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="212"/>
         <CursorPos X="19" Y="237"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit84>
       <Unit85>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\packages\fcl-net\src\netdb.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="41"/>
-        <CursorPos X="12" Y="56"/>
-        <UsageCount Value="8"/>
+        <CursorPos X="3" Y="56"/>
+        <UsageCount Value="9"/>
       </Unit85>
       <Unit86>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\packages\rtl-extra\src\aix\osdefs.inc"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="10" Y="25"/>
-        <UsageCount Value="27"/>
+        <CursorPos Y="25"/>
+        <UsageCount Value="26"/>
       </Unit86>
       <Unit87>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\packages\rtl-extra\src\android\unxsockh.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="10" Y="18"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit87>
       <Unit88>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\packages\rtl-extra\src\unix\ipc.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="158"/>
         <CursorPos X="47" Y="173"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit88>
       <Unit89>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\inc\systemh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1205"/>
         <CursorPos X="12" Y="1220"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit89>
       <Unit90>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\inc\astrings.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="939"/>
         <CursorPos X="3" Y="958"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit90>
       <Unit91>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\inc\system.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="385"/>
         <CursorPos X="9" Y="400"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit91>
       <Unit92>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\linux.pp"/>
@@ -691,21 +693,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="422"/>
         <CursorPos X="50" Y="434"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit92>
       <Unit93>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\pthread.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="22"/>
         <CursorPos X="21" Y="41"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit93>
       <Unit94>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\ptypes.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="375"/>
         <CursorPos X="9" Y="390"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit94>
       <Unit95>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\system.pp"/>
@@ -713,14 +715,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="432"/>
         <CursorPos X="36" Y="447"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="23"/>
       </Unit95>
       <Unit96>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\i386\stat.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="6"/>
         <CursorPos Y="16"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="23"/>
       </Unit96>
       <Unit97>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\unix\unix.pp"/>
@@ -728,55 +730,55 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1216"/>
         <CursorPos X="17" Y="1149"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="23"/>
       </Unit97>
       <Unit98>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\assemble.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="244"/>
         <CursorPos X="24" Y="259"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="23"/>
       </Unit98>
       <Unit99>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\inc\wstringh.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="10" Y="24"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit99>
       <Unit100>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\node.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="837"/>
         <CursorPos Y="852"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit100>
       <Unit101>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\pass_2.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="188"/>
         <CursorPos X="23" Y="202"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit101>
       <Unit102>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\rgobj.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1824"/>
         <CursorPos X="27" Y="1838"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit102>
       <Unit103>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\scandir.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="488"/>
         <CursorPos Y="504"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit103>
       <Unit104>
         <Filename Value="sources\installerhelp.pas"/>
         <UnitName Value="installerHelp"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="539"/>
-        <CursorPos Y="555"/>
+        <TopLine Value="333"/>
+        <CursorPos X="10" Y="359"/>
         <UsageCount Value="10"/>
       </Unit104>
       <Unit105>
@@ -785,27 +787,27 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2474"/>
         <CursorPos X="19" Y="2500"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit105>
       <Unit106>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\packages\bzip2\src\bzip2.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="88"/>
         <CursorPos X="18" Y="29"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit106>
       <Unit107>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\packages\bzip2\examples\pasbzip.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="10" Y="5"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit107>
       <Unit108>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\tests\utils\libtar.pas"/>
         <UnitName Value="LibTar"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="10"/>
-        <CursorPos X="74" Y="30"/>
+        <TopLine Value="74"/>
+        <CursorPos X="15" Y="87"/>
         <UsageCount Value="9"/>
       </Unit108>
       <Unit109>
@@ -813,35 +815,35 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="155"/>
         <CursorPos X="62" Y="170"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit109>
       <Unit110>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\inc\objpash.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="199"/>
         <CursorPos X="23" Y="215"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit110>
       <Unit111>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\inc\objpas.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="324"/>
         <CursorPos X="26" Y="331"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit111>
       <Unit112>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\inc\heaph.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="71"/>
         <CursorPos X="18" Y="89"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit112>
       <Unit113>
         <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.40\gprofng\configure.ac"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="159"/>
         <CursorPos X="30" Y="172"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit113>
       <Unit114>
@@ -849,7 +851,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="97"/>
         <CursorPos X="15" Y="122"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit114>
       <Unit115>
@@ -857,7 +859,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="524"/>
         <CursorPos X="16" Y="483"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="C++"/>
       </Unit115>
       <Unit116>
@@ -865,7 +867,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="961"/>
         <CursorPos X="13" Y="983"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit116>
       <Unit117>
@@ -873,7 +875,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="53"/>
         <CursorPos X="25" Y="66"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="C++"/>
       </Unit117>
       <Unit118>
@@ -881,7 +883,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="113"/>
         <CursorPos X="6" Y="93"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit118>
       <Unit119>
@@ -889,7 +891,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="99"/>
         <CursorPos X="55" Y="584"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit119>
       <Unit120>
@@ -897,7 +899,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1762"/>
         <CursorPos X="46" Y="1766"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit120>
       <Unit121>
@@ -905,49 +907,49 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="31"/>
         <CursorPos X="35" Y="13"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit121>
       <Unit122>
         <Filename Value="sources\crossinstallers\m_any_to_linuxloongarch64.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="77"/>
         <CursorPos X="41" Y="98"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit122>
       <Unit123>
         <Filename Value="sources\crossinstallers\m_any_to_linuxmips.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="111"/>
         <CursorPos Y="126"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit123>
       <Unit124>
         <Filename Value="sources\crossinstallers\m_any_to_linuxmipsel.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="175"/>
         <CursorPos Y="187"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit124>
       <Unit125>
         <Filename Value="sources\crossinstallers\m_any_to_linuxpowerpc64.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="140"/>
         <CursorPos X="22" Y="155"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit125>
       <Unit126>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\fcl-process\src\processbody.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="172"/>
         <CursorPos X="10" Y="185"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit126>
       <Unit127>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\Makefile"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="4771"/>
         <CursorPos X="19" Y="4784"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit127>
       <Unit128>
@@ -955,7 +957,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="163"/>
         <CursorPos X="61" Y="185"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit128>
       <Unit129>
@@ -964,7 +966,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="6094"/>
         <CursorPos X="37" Y="6107"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit129>
       <Unit130>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\buildmanager.pas"/>
@@ -972,7 +974,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2977"/>
         <CursorPos X="37" Y="2989"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit130>
       <Unit131>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\runparamsopts.pas"/>
@@ -980,61 +982,61 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="341"/>
         <CursorPos X="18" Y="354"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit131>
       <Unit132>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\fpdebug\fpdbglinuxextra.pas"/>
         <UnitName Value="FpDbgLinuxExtra"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="75"/>
-        <CursorPos X="31" Y="95"/>
-        <UsageCount Value="11"/>
+        <TopLine Value="56"/>
+        <CursorPos X="6" Y="69"/>
+        <UsageCount Value="10"/>
       </Unit132>
       <Unit133>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\x86_64\syscall.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="7"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit133>
       <Unit134>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\arm\syscall.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="122"/>
         <CursorPos X="117" Y="135"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit134>
       <Unit135>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\aarch64\syscall.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="41" Y="73"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit135>
       <Unit136>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\x86_64\syscallh.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="93" Y="29"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit136>
       <Unit137>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\fpmake.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="188"/>
         <CursorPos X="23" Y="201"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit137>
       <Unit138>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\rtl\linux\sysos.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="53"/>
         <CursorPos X="164" Y="59"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit138>
       <Unit139>
         <Filename Value="sources\updeluxe\backup\fpcupdeluxemainform.pas.bak"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="3965"/>
         <CursorPos X="112" Y="3968"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit139>
       <Unit140>
@@ -1043,35 +1045,35 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2399"/>
         <CursorPos X="16" Y="2443"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit140>
       <Unit141>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\fpmake.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="115"/>
         <CursorPos X="26" Y="126"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit141>
       <Unit142>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\systems\t_linux.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="79"/>
         <CursorPos X="71" Y="101"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit142>
       <Unit143>
         <Filename Value="sources\crossinstallers\m_any_to_apple_base.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="215"/>
         <CursorPos X="27" Y="231"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit143>
       <Unit144>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\interfaces\gtk\gtk1extra.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="384"/>
         <CursorPos X="5" Y="399"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit144>
       <Unit145>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\interfaces\gtk\gtkfontcache.pas"/>
@@ -1079,7 +1081,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="167"/>
         <CursorPos X="5" Y="181"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit145>
       <Unit146>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\interfaces\gtk\gtkwsstdctrls.pp"/>
@@ -1087,7 +1089,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="707"/>
         <CursorPos X="21" Y="720"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit146>
       <Unit147>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\interfaces\gtk\gtkwscomctrls.pp"/>
@@ -1095,35 +1097,35 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="454"/>
         <CursorPos X="20" Y="467"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit147>
       <Unit148>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\interfaces\gtk\gtkwidgetset.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1467"/>
         <CursorPos X="10" Y="1482"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit148>
       <Unit149>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\interfaces\gtk\gtkwinapi.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="5397"/>
         <CursorPos X="16" Y="5417"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit149>
       <Unit150>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\interfaces\gtk\gtkcallback.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1737"/>
         <CursorPos X="60" Y="1749"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit150>
       <Unit151>
         <Filename Value="C:\fpcupsystems\stable\lazarus\lcl\interfaces\gtk\gtkdevicecontext.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="232"/>
         <CursorPos X="36" Y="247"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit151>
       <Unit152>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\lcl\interfaces\gtk\gtk1def.pp"/>
@@ -1131,42 +1133,42 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="15"/>
         <CursorPos X="15" Y="28"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit152>
       <Unit153>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\gtk1\src\gdk\gdk.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="46"/>
         <CursorPos X="24" Y="64"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit153>
       <Unit154>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\gtk1\src\glib\glib.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="40"/>
         <CursorPos X="25" Y="58"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit154>
       <Unit155>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\lcl\interfaces\gtk\gtk1extrah.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="8"/>
         <CursorPos X="27" Y="21"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit155>
       <Unit156>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\gtk1\src\gdk\gdkpixbuf.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="46"/>
         <CursorPos X="6" Y="67"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit156>
       <Unit157>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\gtk1\src\gtk\gtk.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="49"/>
         <CursorPos X="16" Y="63"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit157>
       <Unit158>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\lcl\interfaces\gtk\gtk1int.pp"/>
@@ -1174,49 +1176,49 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="33"/>
         <CursorPos X="25" Y="46"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit158>
       <Unit159>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\lcl\interfaces\gtk\gtkproc.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="9766"/>
         <CursorPos X="2" Y="9779"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit159>
       <Unit160>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\lcl\interfaces\gtk\gtkwinapi.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="10106"/>
         <CursorPos X="6" Y="10119"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit160>
       <Unit161>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\packages\gtk1\src\gdk\gdk.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="42"/>
         <CursorPos X="8" Y="64"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit161>
       <Unit162>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\packages\gtk1\src\glib\glib.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="42"/>
         <CursorPos X="8" Y="55"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit162>
       <Unit163>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\packages\gtk1\src\gdk\gdkpixbuf.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="39"/>
         <CursorPos X="6" Y="53"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit163>
       <Unit164>
         <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\packages\gtk1\src\gtk\gtk.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="42"/>
         <CursorPos X="8" Y="63"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit164>
       <Unit165>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\fpdebug\fpdbgcommon.pas"/>
@@ -1224,7 +1226,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="48"/>
         <CursorPos X="33" Y="60"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit165>
       <Unit166>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\fpdebug\fpdbgdwarfdataclasses.pas"/>
@@ -1232,7 +1234,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="726"/>
         <CursorPos X="32" Y="738"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit166>
       <Unit167>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\fpdebug\fpdbgloader.pp"/>
@@ -1240,7 +1242,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="186"/>
         <CursorPos X="13" Y="201"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit167>
       <Unit168>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\fpdebug\fpimgreaderbase.pas"/>
@@ -1248,14 +1250,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="19"/>
         <CursorPos X="25" Y="9"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit168>
       <Unit169>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\fpdebug\app\fpd\fpd.lpr"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="45"/>
         <CursorPos X="11" Y="58"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit169>
       <Unit170>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\fpdebug\fpdbgdwarf.pas"/>
@@ -1263,7 +1265,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="3797"/>
         <CursorPos X="29" Y="3771"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit170>
       <Unit171>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\fpdebug\fpdbgdarwinclasses.pas"/>
@@ -1271,7 +1273,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="849"/>
         <CursorPos X="11" Y="852"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit171>
       <Unit172>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\fpdebug\fpdbglinuxclasses.pas"/>
@@ -1279,7 +1281,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1270"/>
         <CursorPos X="21" Y="1282"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit172>
       <Unit173>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\buildintf\compoptsintf.pas"/>
@@ -1287,15 +1289,15 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="269"/>
         <CursorPos Y="272"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit173>
       <Unit174>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\compileroptions.pp"/>
         <UnitName Value="CompilerOptions"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="3144"/>
-        <CursorPos Y="3166"/>
-        <UsageCount Value="11"/>
+        <CursorPos X="8" Y="3165"/>
+        <UsageCount Value="10"/>
       </Unit174>
       <Unit175>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\project.pp"/>
@@ -1303,7 +1305,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="7670"/>
         <CursorPos X="76" Y="7687"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit175>
       <Unit176>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\main.pp"/>
@@ -1311,14 +1313,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="7333"/>
         <CursorPos X="31" Y="7345"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit176>
       <Unit177>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\buildintf\docs\projectintf.xml"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="48"/>
         <CursorPos X="62" Y="60"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="XML"/>
       </Unit177>
       <Unit178>
@@ -1327,7 +1329,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="3668"/>
         <CursorPos X="17" Y="3681"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit178>
       <Unit179>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\projectdescriptortypes.pas"/>
@@ -1335,7 +1337,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="96"/>
         <CursorPos X="17" Y="109"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit179>
       <Unit180>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\mainbase.pas"/>
@@ -1343,7 +1345,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="766"/>
         <CursorPos X="20" Y="777"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit180>
       <Unit181>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\buildmodesmanager.pas"/>
@@ -1351,7 +1353,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="490"/>
         <CursorPos X="49" Y="504"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit181>
       <Unit182>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\buildmodediffdlg.pas"/>
@@ -1359,7 +1361,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="15"/>
         <CursorPos X="5" Y="28"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit182>
       <Unit183>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\buildintf\projectintf.pas"/>
@@ -1367,7 +1369,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1271"/>
         <CursorPos X="20" Y="1284"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit183>
       <Unit184>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\projectgroups\projectgroup.pp"/>
@@ -1375,14 +1377,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1861"/>
         <CursorPos X="46" Y="1859"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit184>
       <Unit185>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\frames\compiler_debugging_options.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="126"/>
         <CursorPos X="56" Y="144"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit185>
       <Unit186>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\lazdebuggers\lazdebuggerlldb\lldbhelper.pas"/>
@@ -1390,21 +1392,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="154"/>
         <CursorPos X="27" Y="137"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit186>
       <Unit187>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\components\compilers\delphi\delphitool.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="426"/>
         <CursorPos X="18" Y="438"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit187>
       <Unit188>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\frames\initialsetupdlgdebuggerframe.pas"/>
         <UnitName Value="InitialSetupDlgDebuggerFrame"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="27" Y="13"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit188>
       <Unit189>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\packages\ideconfig\ideoptiondefs.pas"/>
@@ -1412,7 +1414,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="398"/>
         <CursorPos X="26" Y="411"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit189>
       <Unit190>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\packages\idedebugger\idedebuggerstringconstants.pas"/>
@@ -1420,14 +1422,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="71"/>
         <CursorPos X="26" Y="84"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit190>
       <Unit191>
         <Filename Value="C:\fpcupsystems\stabletest\lazarus\ide\backup\compileroptions.pp.bak"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="3140"/>
         <CursorPos X="7" Y="3146"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit191>
       <Unit192>
@@ -1435,19 +1437,163 @@
         <UnitName Value="FpDebugDebugger"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="4748"/>
-        <CursorPos Y="4768"/>
-        <UsageCount Value="10"/>
+        <CursorPos X="27" Y="4755"/>
+        <UsageCount Value="9"/>
       </Unit192>
+      <Unit193>
+        <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\systems\i_sunos.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="30"/>
+        <CursorPos X="25" Y="43"/>
+        <UsageCount Value="9"/>
+      </Unit193>
+      <Unit194>
+        <Filename Value="C:\fpcupsystems\stabletest\fpcsrc\compiler\scanner.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="726"/>
+        <CursorPos X="11" Y="738"/>
+        <UsageCount Value="9"/>
+      </Unit194>
+      <Unit195>
+        <Filename Value="sources\up\checkoptions.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="41"/>
+        <CursorPos X="47" Y="56"/>
+        <UsageCount Value="13"/>
+      </Unit195>
+      <Unit196>
+        <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\fcl-base\src\inifiles.pp"/>
+        <UnitName Value="IniFiles"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1155"/>
+        <CursorPos X="27" Y="1177"/>
+        <UsageCount Value="11"/>
+      </Unit196>
+      <Unit197>
+        <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\objpas\classes\classesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="314"/>
+        <CursorPos X="16" Y="327"/>
+        <UsageCount Value="11"/>
+      </Unit197>
+      <Unit198>
+        <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\objpas\classes\lists.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="711"/>
+        <CursorPos X="3" Y="713"/>
+        <UsageCount Value="11"/>
+      </Unit198>
+      <Unit199>
+        <Filename Value="C:\fpcupsystems\stable\lazarus\components\lazutils\lazfileutils.pas"/>
+        <UnitName Value="LazFileUtils"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="18" Y="10"/>
+        <UsageCount Value="11"/>
+      </Unit199>
+      <Unit200>
+        <Filename Value="C:\fpcupsystems\stable\lazarus\components\lazutils\fileutil.pas"/>
+        <UnitName Value="FileUtil"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="11"/>
+      </Unit200>
+      <Unit201>
+        <Filename Value="C:\fpcupsystems\stable\lazarus\components\lazutils\winlazfileutils.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="299"/>
+        <CursorPos X="17" Y="301"/>
+        <UsageCount Value="10"/>
+      </Unit201>
+      <Unit202>
+        <Filename Value="C:\fpcupsystems\stable\lazarus\components\lazutils\lazfileutils.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="196"/>
+        <CursorPos X="10" Y="209"/>
+        <UsageCount Value="10"/>
+      </Unit202>
+      <Unit203>
+        <Filename Value="C:\fpcupsystems\trunktest\ccr\codebot\source\codebot\codebot.text.xml.linux.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="399"/>
+        <CursorPos X="30" Y="412"/>
+        <UsageCount Value="10"/>
+      </Unit203>
+      <Unit204>
+        <Filename Value="C:\fpcupsystems\trunktest\ccr\codebot\source\codebot\codebot.text.xml.pas"/>
+        <UnitName Value="Codebot.Text.Xml"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="114"/>
+        <CursorPos X="3" Y="127"/>
+        <UsageCount Value="10"/>
+      </Unit204>
+      <Unit205>
+        <Filename Value="C:\fpcupsystems\trunktest\ccr\codebot\source\codebot\codebot.networking.storage.pas"/>
+        <UnitName Value="Codebot.Networking.Storage"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1117"/>
+        <CursorPos X="5" Y="1131"/>
+        <UsageCount Value="10"/>
+      </Unit205>
     </Units>
-    <JumpHistory Count="2" HistoryIndex="1">
+    <JumpHistory Count="15" HistoryIndex="14">
       <Position1>
-        <Filename Value="up.lpr"/>
-        <Caret Line="228" TopLine="201"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="10" Column="28"/>
       </Position1>
       <Position2>
-        <Filename Value="sources\revision.inc"/>
-        <Caret Line="4"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="192" Column="22" TopLine="172"/>
       </Position2>
+      <Position3>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="193" Column="23" TopLine="173"/>
+      </Position3>
+      <Position4>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="288" Column="68" TopLine="268"/>
+      </Position4>
+      <Position5>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="353" Column="39" TopLine="331"/>
+      </Position5>
+      <Position6>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="391" Column="70" TopLine="369"/>
+      </Position6>
+      <Position7>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="392" Column="65" TopLine="370"/>
+      </Position7>
+      <Position8>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="599" TopLine="581"/>
+      </Position8>
+      <Position9>
+        <Filename Value="sources\fpcup.ini"/>
+        <Caret Line="105" Column="26" TopLine="102"/>
+      </Position9>
+      <Position10>
+        <Filename Value="sources\fpcup.ini"/>
+        <Caret Line="22" Column="23"/>
+      </Position10>
+      <Position11>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="599" TopLine="581"/>
+      </Position11>
+      <Position12>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="2382" TopLine="2364"/>
+      </Position12>
+      <Position13>
+        <Filename Value="up.lpr"/>
+        <Caret Line="228" TopLine="203"/>
+      </Position13>
+      <Position14>
+        <Filename Value="up.lpr"/>
+      </Position14>
+      <Position15>
+        <Filename Value="up.lpr"/>
+        <Caret Line="213" Column="3" TopLine="200"/>
+      </Position15>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
@@ -1468,14 +1614,14 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Line Value="2712"/>
+        <Line Value="2718"/>
       </Item>
       <Item>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Line Value="2778"/>
+        <Line Value="2784"/>
       </Item>
     </BreakPoints>
   </Debugging>

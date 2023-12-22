@@ -923,7 +923,11 @@ end;
 
 procedure TInstaller.SetLinuxLegacy(value:boolean);
 begin
-  FLinuxLegacy:=value;
+  // Disable for now
+  // To be further investigated
+  // Libc versioned linking will be included in FPC sometime in 2024
+  // Implementation by the FPC devs themselves
+  //FLinuxLegacy:=value;
 end;
 
 function TInstaller.GetLinuxLegacy:boolean;

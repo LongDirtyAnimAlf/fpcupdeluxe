@@ -2056,11 +2056,9 @@ begin
     begin
       LHelpTemp:=GetTempFileNameExt('','');
       try
-        FileCopy(
-          IncludeTrailingPathDelimiter(InstallDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,
+        FileCopy(ConcatPaths([InstallDirectory,'components','chmhelp','lhelp','lhelp'+GetExeExt]),
           LHelpTemp,[cffOverWriteFile]);
       except
-        Infoln(infotext+'Non-fatal error copying lhelp to temp file '+LHelpTemp,etInfo);
       end;
     end;
   end;
