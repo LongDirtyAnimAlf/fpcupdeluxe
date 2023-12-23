@@ -10,7 +10,6 @@
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="200"/>
         <CursorPos X="3" Y="213"/>
         <UsageCount Value="200"/>
@@ -75,7 +74,9 @@
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
+        <TopLine Value="97"/>
         <UsageCount Value="136"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>

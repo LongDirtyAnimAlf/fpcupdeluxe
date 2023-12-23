@@ -4516,7 +4516,7 @@ object Form1: TForm1
         AnchorSideBottom.Control = btnInstallModule
         Left = 205
         Height = 42
-        Hint = 'Will install/update the Online Package Manager'
+        Hint = 'Will change Lazarus into a single form docked editor.'
         Top = 559
         Width = 89
         Anchors = [akRight, akBottom]
