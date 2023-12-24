@@ -46,6 +46,8 @@ program fpcupdeluxe;
 
   Icon by Taazz
 
+  Windows Dark Theme by 0x4A4D00
+
   Contributor(s):
     Denis Grinyuk (arvur)
     Maciej Izak (hnb)

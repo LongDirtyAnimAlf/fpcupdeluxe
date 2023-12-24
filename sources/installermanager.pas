@@ -1415,6 +1415,48 @@ begin
     end;
   end;
 
+  // For Linux AMD64
+  if ((GetTOS(GetSourceOS)=TOS.linux) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then
+  begin
+    case CrossOS_Target of
+      TOS.freebsd:
+      begin
+        case CrossCPU_Target of
+          TCPU.x86_64:
+          begin
+            toolversion:='V234';
+            ostype:='FreeBSD12';
+          end;
+          TCPU.aarch64:
+          begin
+            toolversion:='V240';
+            ostype:='FreeBSD13';
+          end;
+          TCPU.i386:
+          begin
+            toolversion:='V234';
+            ostype:='FreeBSD12';
+          end;
+        end;
+      end;
+      TOS.linux:
+      begin
+        if (CrossCPU_Target=TCPU.aarch64) then toolversion:='V234';
+      end;
+      TOS.openbsd:
+      begin
+        if (CrossCPU_Target=TCPU.x86_64) then toolversion:='V217';
+        if (CrossCPU_Target=TCPU.i386) then toolversion:='V217';
+      end;
+      TOS.darwin,TOS.ios:
+      begin
+        if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_12.zip';
+      end;
+    end;
+  end;
+
+
+  // Process the results from the above search for new binary tools
   if (Length(s)>0) then
   begin
     // for special names
@@ -1428,6 +1470,7 @@ begin
       BinsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+toolversion+'.zip';
     end;
   end;
+
 end;
 
 
@@ -1478,6 +1521,7 @@ begin
         begin
           BaseBinsURL:='';
           if GetTOS(GetSourceOS) in [TOS.win32,TOS.win64] then BaseBinsURL:='windows_';
+          if ((GetTOS(GetSourceOS)=TOS.linux) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then BaseBinsURL:='linux_amd64_';
 
           if (Length(BaseBinsURL)>0) then
           begin
