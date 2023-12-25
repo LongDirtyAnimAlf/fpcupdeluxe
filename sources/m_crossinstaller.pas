@@ -316,9 +316,9 @@ const
   '-FN',
   '-Fo',
   '-d',
+  '-k',
   '-u',
   '-I',
-  '-k',
   '-O'
   );
 
@@ -771,6 +771,7 @@ begin
       CheckValidOption:=(Pos(compilerswitch,aSnippd)=1);
       if CheckValidOption then
       begin
+        if compilerswitch='-k' then break;
         // Check for literal duplicate
         CheckValidOption:=(Pos(aSnippd,FFPCCFGSnippet)=0);
         break;
