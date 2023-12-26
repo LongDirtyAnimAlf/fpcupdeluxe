@@ -151,6 +151,8 @@ begin
     FBinsFound:=true;
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix);
+    //AddFPCCFGSnippet('-ao-mbig-obj');
+    AddFPCCFGSnippet('-ao-ad');
   end;
 end;
 

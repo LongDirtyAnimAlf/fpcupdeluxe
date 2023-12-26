@@ -2617,6 +2617,9 @@ begin
 
     {$ifdef Unix}
     {$ifndef Darwin}
+
+    FilePath:=SafeGetApplicationPath;
+
     {$ifdef LCLQT5}
     // Only for Haiku
     // Get/copy Qt libs if not present yet
@@ -2631,7 +2634,6 @@ begin
     else
       Infoln(infotext+'QT5 trickery needed: adding QT5Pas library from fpcupdeluxe itself.',etInfo);
 
-    FilePath:=SafeGetApplicationPath;
 
     {$ifdef Haiku}
     if (NOT LibWhich(LIBQT5)) then
@@ -2660,10 +2662,16 @@ begin
       begin
         if FileExists(FilePath+LIBQT5VERSION) then
         begin
-          if (NOT FileExists(s+LIBQT5VERSION)) then
-            FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5VERSION);
-          if (NOT FileExists(s+LIBQT5)) then
-            FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5);
+          try
+            if (NOT FileExists(s+LIBQT5VERSION)) then
+              FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5VERSION);
+            if (NOT FileExists(s+LIBQT5)) then
+              FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5);
+            // User [might] need to run ldconfig as superuser to update the ld cache
+          except
+            // The above might/will fail due to permission issues.
+            // Just swallow exception
+          end;
         end;
       end;
     end;
@@ -2702,10 +2710,37 @@ begin
           FileCopy(FilePath+LIBQT5,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
       end;
     end;
+    {$endif LCLQT5}
 
-    {$endif}
-    {$endif}
-    {$endif}
+    {$ifdef LCLQT6}
+    if LibWhich(LIBQT6) then
+      Infoln(infotext+'System wide libQT6Pas found. No trickery needed !!',etInfo)
+    else
+      Infoln(infotext+'QT6 trickery needed: adding QT6Pas library from fpcupdeluxe itself.',etInfo);
+
+    if (NOT LibWhich(LIBQT6)) then
+    begin
+      //The below can be trivial, but just in case
+      if FileExists(FilePath+LIBQT6VERSION) then
+      begin
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6VERSION)) then
+          FileCopy(FilePath+LIBQT6VERSION,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6VERSION);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6)) then
+          FileCopy(FilePath+LIBQT6VERSION,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6);
+      end;
+      if FileExists(FilePath+LIBQT6) then
+      begin
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6)) then
+          FileCopy(FilePath+LIBQT6,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6)) then
+          FileCopy(FilePath+LIBQT6,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6);
+      end;
+    end;
+    {$endif LCLQT6}
+
+    {$endif Darwin}
+    {$endif Unix}
+
 
     (*
     Errors := 0;
