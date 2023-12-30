@@ -122,14 +122,13 @@ const
   ABI_XTENSA         = [TABI.default,TABI.windowed,TABI.call0];
   ABI_RISCV64        = [TABI.default,TABI.riscvhf];
 
-  CPUADDRSIZE_64     = [TCPU.aarch64,TCPU.powerpc64,TCPU.riscv64,TCPU.sparc64,TCPU.x86_64,TCPU.loongarch64{,TCPU.ia64]}];
-  CPUADDRSIZE_32     = [TCPU.i386,TCPU.arm,TCPU.powerpc,TCPU.mips,TCPU.mipsel,TCPU.sparc,TCPU.riscv32,TCPU.m68k,TCPU.xtensa,TCPU.wasm32];
+  CPUADDRSIZE_64     = [TCPU.aarch64,TCPU.powerpc64,TCPU.sparc64,TCPU.x86_64,TCPU.loongarch64,TCPU.riscv64{,TCPU.ia64]}];
+  CPUADDRSIZE_32     = [TCPU.i386,TCPU.arm,TCPU.powerpc,TCPU.mips,TCPU.mipsel,TCPU.sparc,TCPU.m68k,TCPU.xtensa,TCPU.wasm32,TCPU.riscv32];
 
   LEGACYLIBS             :array[0..4] of string = ('libanl.so','libdl.so','librt.so','libresolv.so','libpthread.so');
   LEGACYLIBSVERSIONED    :array[0..4] of string = ('libanl.so.1','libdl.so.2','librt.so.1','libresolv.so.2','libpthread.so.0');
   LEGACYCPU              = [TCPU.i386,TCPU.x86_64,TCPU.arm,TCPU.aarch64,TCPU.powerpc,TCPU.powerpc64];
   TODOCPU                = [TCPU.sparc,TCPU.sparc64,TCPU.m68k];
-
 
 type
   TSearchSetting = (ssUp,ssAuto,ssCustom);
@@ -137,7 +136,8 @@ type
 const
   LINUXTYPE : array[boolean] of ansistring = ('gnu','musl');
 
-  DEFINE_FPC_USE_LIBC   = 'FPC_USE_LIBC';
+  DEFINE_FPC_LIBC   = 'FPC_USE_LIBC';
+  DEFINE_FPC_DOTTED     = 'FPC_DOTTEDUNITS';
 
   ARMArchFPCStr : array[TARMARCH] of string = (
     '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
@@ -339,7 +339,9 @@ begin
             if aCPU=TCPU.powerpc64 then result:='PowerPC64' else
               if aCPU=TCPU.avr then result:='AVR' else
                 if aCPU=TCPU.m68k then result:='m68k' else
-                  result:=UppercaseFirstChar(GetCPU(aCPU));
+                  if aCPU=TCPU.riscv32 then result:='riscv32' else
+                    if aCPU=TCPU.riscv64 then result:='riscv64' else
+                      result:=UppercaseFirstChar(GetCPU(aCPU));
 end;
 
 function GetTCPU(aCPU:string):TCPU;
@@ -1427,7 +1429,7 @@ begin
         begin
           //This is already done in the FPC installer itself.
           //To be checked if that is the right choice.
-          //aCrossOptionSetting:='-d'+DEFINE_FPC_USE_LIBC+' ';
+          //aCrossOptionSetting:='-d'+DEFINE_FPC_LIBC+' ';
         end;
 
         //Store predefined setting.

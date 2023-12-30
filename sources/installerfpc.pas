@@ -1491,8 +1491,8 @@ begin
             if LinuxLegacy then CrossInstaller.AddFPCCFGSnippet('-XLC',True);
             // During a native install with libc, we add this define into the fpc.cfg
             // So, add it also as cross-config, however not 100% necessary
-            //if UseLibc then CrossInstaller.AddCrossOption('-d'+DEFINE_FPC_USE_LIBC);
-            if UseLibc then CrossInstaller.AddFPCCFGSnippet('-d'+DEFINE_FPC_USE_LIBC,True);
+            //if UseLibc then CrossInstaller.AddCrossOption('-d'+DEFINE_FPC_LIBC);
+            if UseLibc then CrossInstaller.AddFPCCFGSnippet('-d'+DEFINE_FPC_LIBC,True);
             for i:=0 to CrossInstaller.CrossOpt.Count-1 do
               CrossCompilerOptions:=CrossCompilerOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
             CrossCompilerOptions:=TrimRight(CrossCompilerOptions);
@@ -2052,7 +2052,7 @@ begin
     {$endif}
   {$endif}
 
-  if UseLibc then FPCBuildOptions:=FPCBuildOptions+' -d'+DEFINE_FPC_USE_LIBC;
+  if UseLibc then FPCBuildOptions:=FPCBuildOptions+' -d'+DEFINE_FPC_LIBC;
 
   {$ifdef Haiku}
     s2:='';
@@ -2211,7 +2211,7 @@ begin
 
         // Change some settings for this special legacy linking
         Processor.SetParamNamePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
-        Processor.SetParamNameData('OPT','-XLC '+'-d'+DEFINE_FPC_USE_LIBC+' '+FPCBuildOptions);
+        Processor.SetParamNameData('OPT','-XLC '+'-d'+DEFINE_FPC_LIBC+' '+FPCBuildOptions);
 
         // Cleanup rtl and packages for legacy GLIBC
         Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_clean';
@@ -4475,7 +4475,7 @@ begin
         if FMUSL then ConfigText.Append('-FL'+FMUSLLinker);
 
         ConfigText.Append('#IFDEF FPC_LINK_COMPAT');
-        if (NOT UseLibc) then ConfigText.Append('-d'+DEFINE_FPC_USE_LIBC);
+        if (NOT UseLibc) then ConfigText.Append('-d'+DEFINE_FPC_LIBC);
         s:=ConcatPaths([InstallDirectory,'units',FPC_TARGET_MAGIC])+'_legacy';
         ConfigText.Append('-Fu'+s);
         ConfigText.Append('-Fu'+s+DirectorySeparator+'*');
@@ -4490,7 +4490,7 @@ begin
         {$endif}
 
         //if (NOT LinuxLegacy) then
-        if UseLibc then ConfigText.Append('-d'+DEFINE_FPC_USE_LIBC);
+        if UseLibc then ConfigText.Append('-d'+DEFINE_FPC_LIBC);
 
         {$IF (defined(BSD)) and (not defined(Darwin))}
         s:='-Fl/usr/local/lib'+';'+'/usr/pkg/lib';

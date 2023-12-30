@@ -81,7 +81,9 @@ type
 implementation
 
 uses
+  {$IFDEF UNIX}
   Process,
+  {$ENDIF UNIX}
   FileUtil, fpcuputil;
 
 { Tany_linux }

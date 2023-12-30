@@ -10,6 +10,7 @@ sudo apt-get install -y binutils
 sudo apt-get install -y gdb
 sudo apt-get install -y libc6-dev
 sudo apt-get install -y libc-bin
+sudo apt-get install -y texinfo
 
 sudo apt-get install -y libglib2.0-dev
 sudo apt-get install -y libgtk2.0-0-dev

@@ -1265,6 +1265,10 @@ begin
 
     F7zip:=Which('7z');
     if Not FileExists(F7zip) then Which('7za');
+    {$IFDEF DARWIN}
+    if Not FileExists(F7zip) then Which('7zx');
+    if Not FileExists(F7zip) then Which('7zX');
+    {$ENDIF}
     if Not FileExists(F7zip) then Which('7zz');
     Output:='7za';
 
@@ -1275,21 +1279,32 @@ begin
     {$ENDIF MSWINDOWS}
     if (NOT FileExists(F7zip)) then
     begin
-      Infoln(localinfotext+'Missing 7z unzipper. Trying to get it and install in '+ExtractFileDir(F7zip),etInfo);
       if ForceDirectoriesSafe(ExtractFileDir(F7zip)) then
       begin
         {$IFDEF DARWIN}
-        Output:=Output+'_all-apple';
+        {$IFDEF CPUPOWERPC}
+        Output:='';
         {$ELSE}
+        Output:=Output+'_all-apple';
+        {$ENDIF CPUPOWERPC}
+        {$ELSE DARWIN}
+        {$IF defined(LINUX) OR defined(WINDOWS)}
         Output:=Output+'_'+GetSourceCPUOS+GetExeExt;
+        {$ELSE}
+        Output:='';
         {$ENDIF}
-        OperationSucceeded:=GetFile(FPCUPTOOLS+'/'+Output,F7zip);
-        if OperationSucceeded then OperationSucceeded:=FileExists(F7zip);
-        {$IFDEF UNIX}
-        if OperationSucceeded then fpChmod(F7zip,&755);
-        {$ENDIF UNIX}
-        if (NOT OperationSucceeded) then F7zip:='7za'+GetExeExt;
-        // do not fail ... perhaps there is another 7zip available in the path
+        {$ENDIF DARWIN}
+        if (Length(Output)>0) then
+        begin
+          Infoln(localinfotext+'Missing 7z unzipper. Trying to get it and install in '+ExtractFileDir(F7zip),etInfo);
+          OperationSucceeded:=GetFile(FPCUPTOOLS+'/'+Output,F7zip);
+          if OperationSucceeded then OperationSucceeded:=FileExists(F7zip);
+          {$IFDEF UNIX}
+          if OperationSucceeded then fpChmod(F7zip,&755);
+          {$ENDIF UNIX}
+          if (NOT OperationSucceeded) then F7zip:='7za'+GetExeExt;
+          // do not fail ... perhaps there is another 7zip available in the path
+        end;
         OperationSucceeded:=True;
       end;
     end;

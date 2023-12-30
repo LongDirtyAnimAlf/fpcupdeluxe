@@ -4,12 +4,14 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linuxi386QT5,linuxi386QT5zip,linux64,linuxaarch64,linuxaarch64QT5,linuxaarch64QT5zip,linuxarm,linuxarmQT5,linuxarmQT5zip,linuxarmv6,linuxx64QT5,linuxx64QT5zip,linuxppc64,freebsdi386,freebsdx64,solarisx64,dragonflyx64,netbsdx64,netbsdi386,freebsdx64QT5,freebsdx64QT5zip"/>
-    <BuildModes Active="Default"/>
-    <Units Count="208">
+    <BuildModes Active="win32"/>
+    <Units Count="211">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
+        <TopLine Value="106"/>
+        <CursorPos X="17" Y="119"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -20,11 +22,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="2233"/>
-        <CursorPos X="35" Y="2247"/>
+        <TopLine Value="2525"/>
+        <CursorPos X="22" Y="2539"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="sources\updeluxe\extrasettings.pas"/>
@@ -33,15 +34,16 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="2"/>
+        <TopLine Value="587"/>
+        <CursorPos Y="609"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynEditPopup"/>
-        <UsageCount Value="142"/>
+        <UsageCount Value="149"/>
       </Unit3>
       <Unit4>
         <Filename Value="sources\updeluxe\aboutfrm.pas"/>
@@ -53,7 +55,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="38"/>
         <CursorPos X="38" Y="51"/>
-        <UsageCount Value="142"/>
+        <UsageCount Value="149"/>
       </Unit4>
       <Unit5>
         <Filename Value="sources\updeluxe\infounit.pas"/>
@@ -61,7 +63,7 @@
         <ComponentName Value="InfoForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="142"/>
+        <UsageCount Value="149"/>
       </Unit5>
       <Unit6>
         <Filename Value="sources\updeluxe\modulesettings.pas"/>
@@ -69,27 +71,29 @@
         <ComponentName Value="Form3"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="142"/>
+        <UsageCount Value="149"/>
       </Unit6>
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="3"/>
-        <UsageCount Value="142"/>
+        <CursorPos X="23" Y="22"/>
+        <UsageCount Value="149"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit7>
       <Unit8>
         <Filename Value="sources\settings.ini"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="142"/>
+        <UsageCount Value="149"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit8>
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="4"/>
-        <UsageCount Value="142"/>
+        <CursorPos X="31" Y="2"/>
+        <UsageCount Value="149"/>
         <Loaded Value="True"/>
       </Unit9>
       <Unit10>
@@ -98,7 +102,7 @@
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="142"/>
+        <UsageCount Value="149"/>
       </Unit10>
       <Unit11>
         <Filename Value="sources\text.txt"/>
@@ -106,23 +110,23 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="3"/>
         <CursorPos Y="32"/>
-        <UsageCount Value="100"/>
+        <UsageCount Value="107"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit11>
       <Unit12>
         <Filename Value="sources\installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="918"/>
-        <CursorPos Y="930"/>
-        <UsageCount Value="46"/>
+        <TopLine Value="1278"/>
+        <CursorPos Y="1297"/>
+        <UsageCount Value="48"/>
       </Unit12>
       <Unit13>
         <Filename Value="sources\fpcuputil.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="970"/>
-        <CursorPos Y="954"/>
-        <UsageCount Value="48"/>
+        <TopLine Value="705"/>
+        <CursorPos X="24" Y="720"/>
+        <UsageCount Value="49"/>
       </Unit13>
       <Unit14>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\packages\rtl-objpas\src\inc\strutils.pp"/>
@@ -135,8 +139,12 @@
       <Unit15>
         <Filename Value="sources\installermanager.pas"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="-1"/>
-        <UsageCount Value="30"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="1272"/>
+        <CursorPos X="79" Y="1283"/>
+        <UsageCount Value="31"/>
+        <Loaded Value="True"/>
       </Unit15>
       <Unit16>
         <Filename Value="sources\NumCPULib.pas"/>
@@ -149,9 +157,7 @@
         <Filename Value="sources\installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2905"/>
-        <CursorPos X="56" Y="2918"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="47"/>
       </Unit17>
       <Unit18>
         <Filename Value="sources\crossinstallers\m_any_to_freebsd386.pas"/>
@@ -184,18 +190,17 @@
       </Unit21>
       <Unit22>
         <Filename Value="sources\m_crossinstaller.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="814"/>
-        <CursorPos Y="804"/>
-        <UsageCount Value="40"/>
+        <TopLine Value="148"/>
+        <CursorPos Y="174"/>
+        <UsageCount Value="42"/>
         <Loaded Value="True"/>
       </Unit22>
       <Unit23>
         <Filename Value="sources\crossinstallers\m_any_to_linux_base.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="322"/>
-        <CursorPos X="33" Y="332"/>
+        <TopLine Value="67"/>
+        <CursorPos X="42" Y="71"/>
         <UsageCount Value="13"/>
       </Unit23>
       <Unit24>
@@ -240,17 +245,17 @@
         <Filename Value="sources\installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2052"/>
-        <CursorPos X="7" Y="2050"/>
-        <UsageCount Value="18"/>
+        <TopLine Value="2705"/>
+        <CursorPos Y="2719"/>
+        <UsageCount Value="19"/>
       </Unit29>
       <Unit30>
         <Filename Value="sources\installeruniversal.pas"/>
         <UnitName Value="installerUniversal"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="4028"/>
-        <CursorPos Y="4048"/>
-        <UsageCount Value="19"/>
+        <TopLine Value="2088"/>
+        <CursorPos X="50" Y="2100"/>
+        <UsageCount Value="20"/>
       </Unit30>
       <Unit31>
         <Filename Value="C:\fpcupsystems\trunk\lazarus\components\opengl\qlclopenglwidget.pas"/>
@@ -910,9 +915,9 @@
       <Unit122>
         <Filename Value="sources\crossinstallers\m_any_to_linuxloongarch64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="77"/>
-        <CursorPos X="41" Y="98"/>
-        <UsageCount Value="8"/>
+        <TopLine Value="140"/>
+        <CursorPos X="7" Y="154"/>
+        <UsageCount Value="11"/>
       </Unit122>
       <Unit123>
         <Filename Value="sources\crossinstallers\m_any_to_linuxmips.pas"/>
@@ -1485,8 +1490,9 @@
         <Filename Value="C:\fpcupsystems\stable\lazarus\components\lazutils\lazfileutils.pas"/>
         <UnitName Value="LazFileUtils"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="18" Y="10"/>
-        <UsageCount Value="11"/>
+        <TopLine Value="138"/>
+        <CursorPos X="19" Y="151"/>
+        <UsageCount Value="12"/>
       </Unit199>
       <Unit200>
         <Filename Value="C:\fpcupsystems\stable\lazarus\components\lazutils\fileutil.pas"/>
@@ -1546,124 +1552,48 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="C++"/>
       </Unit207>
+      <Unit208>
+        <Filename Value="C:\fpcupsystems\stable\lazarus\components\lazutils\unixlazfileutils.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="92"/>
+        <CursorPos X="19" Y="77"/>
+        <UsageCount Value="11"/>
+      </Unit208>
+      <Unit209>
+        <Filename Value="sources\crossinstallers\m_any_to_linuxriscv32.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="19" Y="5"/>
+        <UsageCount Value="10"/>
+      </Unit209>
+      <Unit210>
+        <Filename Value="C:\fpcupsystems\stable\fpcsrc\compiler\options.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3465"/>
+        <CursorPos X="37" Y="3467"/>
+        <UsageCount Value="11"/>
+      </Unit210>
     </Units>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="5" HistoryIndex="4">
       <Position1>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="786" TopLine="765"/>
+        <Filename Value="sources\revision.inc"/>
+        <Caret Line="3"/>
       </Position1>
       <Position2>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="788" TopLine="767"/>
+        <Filename Value="sources\revision.inc"/>
+        <Caret Line="2" Column="31"/>
       </Position2>
       <Position3>
         <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="736" TopLine="722"/>
+        <Caret Line="341" Column="41" TopLine="331"/>
       </Position3>
       <Position4>
         <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="776" Column="20" TopLine="759"/>
+        <Caret Line="174" TopLine="148"/>
       </Position4>
       <Position5>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="788" TopLine="768"/>
+        <Filename Value="sources\installermanager.pas"/>
+        <Caret Line="1400" TopLine="1358"/>
       </Position5>
-      <Position6>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="791" TopLine="774"/>
-      </Position6>
-      <Position7>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="788" TopLine="774"/>
-      </Position7>
-      <Position8>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="791" TopLine="776"/>
-      </Position8>
-      <Position9>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="793" TopLine="776"/>
-      </Position9>
-      <Position10>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="794" TopLine="776"/>
-      </Position10>
-      <Position11>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="796" Column="14" TopLine="774"/>
-      </Position11>
-      <Position12>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="791" TopLine="774"/>
-      </Position12>
-      <Position13>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="763" TopLine="750"/>
-      </Position13>
-      <Position14>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="767" TopLine="750"/>
-      </Position14>
-      <Position15>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="780" Column="45" TopLine="765"/>
-      </Position15>
-      <Position16>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="788" TopLine="773"/>
-      </Position16>
-      <Position17>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="763" TopLine="750"/>
-      </Position17>
-      <Position18>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="767" TopLine="750"/>
-      </Position18>
-      <Position19>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="768" TopLine="750"/>
-      </Position19>
-      <Position20>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="769" TopLine="750"/>
-      </Position20>
-      <Position21>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="770" TopLine="750"/>
-      </Position21>
-      <Position22>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="772" TopLine="751"/>
-      </Position22>
-      <Position23>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="780" TopLine="765"/>
-      </Position23>
-      <Position24>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="763" TopLine="756"/>
-      </Position24>
-      <Position25>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="774" Column="30" TopLine="756"/>
-      </Position25>
-      <Position26>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="804" Column="24" TopLine="826"/>
-      </Position26>
-      <Position27>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="836" Column="49" TopLine="818"/>
-      </Position27>
-      <Position28>
-        <Filename Value="sources\revision.inc"/>
-        <Caret Line="2" Column="13"/>
-      </Position28>
-      <Position29>
-        <Filename Value="sources\m_crossinstaller.pas"/>
-        <Caret Line="761" TopLine="757"/>
-      </Position29>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

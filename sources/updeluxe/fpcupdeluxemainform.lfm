@@ -4106,6 +4106,7 @@ object Form1: TForm1
           'xtensa'
           'wasm32'
           'loongarch64'
+          'riscv32'
         )
         OnSelectionChanged = radgrpTargetChanged
         ParentFont = False

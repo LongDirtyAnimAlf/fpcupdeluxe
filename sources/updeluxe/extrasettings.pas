@@ -192,6 +192,9 @@ type
     function GetGLIBC:boolean;
     procedure SetGLIBC(value:boolean);
 
+    function GetDotted:boolean;
+    procedure SetDotted(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -286,6 +289,7 @@ type
     property AskConfirmation:boolean read GetAskConfirmation write SetAskConfirmation;
     property SaveScript:boolean read GetSaveScript write SetSaveScript;
     property ForceGLIBCLinking:boolean read GetGLIBC write SetGLIBC;
+    property Dotted:boolean read GetDotted write SetDotted;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -390,6 +394,9 @@ resourcestring
 
   HintCheckGLIBCCompat = 'Force linking against lowest possible GLIBC version to (possibly) increase the compatibility with older Linux versions. Use at your own risk.';
   CaptionCheckGLIBCCompat = 'Force linking against lowest @GLIBC-version.';
+
+  HintCheckFPCDotted = 'FPC has support for creating a "dotted RTL". This is a set of units from RTL/Packages where all unit names are namespaced (dotted).';
+  CaptionCheckFPCDotted = 'Build dotted RTL.';
 
 var
   Form2: TForm2;
@@ -599,6 +606,10 @@ begin
   ForceGLIBCLinking      := False;
   SetCheckEnabled(CaptionCheckGLIBCCompat,False);
 
+  //Disable FPC dotted by default ... still testing
+  Dotted := False;
+  SetCheckEnabled(CaptionCheckFPCDotted,False);
+
   //Disable OnlinePatching by default starting with 1.6.8p
   OnlinePatching:=false;
 end;
@@ -647,6 +658,7 @@ begin
     Append(CaptionCheckSaveScript);
     Append(CaptionCheckPackageRepo);
     Append(CaptionCheckFPCUnicode);
+    Append(CaptionCheckFPCDotted);
     Append(CaptionCheckSystemFPC);
     Append(CaptionCheckUseWget);
     Append(CaptionCheckAddContext);
@@ -1520,6 +1532,15 @@ end;
 procedure TForm2.SetGLIBC(value:boolean);
 begin
   SetCheckState(CaptionCheckGLIBCCompat,value);
+end;
+
+function TForm2.GetDotted:boolean;
+begin
+  result:=GetCheckState(CaptionCheckFPCDotted);
+end;
+procedure TForm2.SetDotted(value:boolean);
+begin
+  SetCheckState(CaptionCheckFPCDotted,value);
 end;
 
 function TForm2.GetFPCOptions:string;

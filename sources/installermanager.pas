@@ -1280,6 +1280,7 @@ begin
       if (CrossCPU_Target=TCPU.x86_64) then toolversion:='1804';
       // For testing this release candidate !!
       if LinuxLegacy then if (CrossCPU_Target=TCPU.x86_64) then s:='Linux_AMD64_Fedora_38.zip';
+      if (CrossCPU_Target=TCPU.riscv32) then s:='Linux_riscv32_glibc_225.zip';
       if (CrossCPU_Target=TCPU.i386) then toolversion:='1804';
       if (CrossCPU_Target=TCPU.loongarch64) then
       begin
@@ -1384,7 +1385,9 @@ begin
             else
             begin
               toolversion:='V241';
+              {$ifdef LCL}
               if (CrossUtils[CrossCPU_Target,CrossOS_Target,Self.CrossOS_SubArch].CrossARMArch=TARMARCH.armhf) then s:='Linux_ARMHF_Linux_V241.zip';
+              {$endif LCL}
             end;
           end;
           TCPU.powerpc: toolversion:='V241';
@@ -1393,6 +1396,7 @@ begin
           TCPU.loongarch64: toolversion:='V241';
           TCPU.m68k: toolversion:='V237';
           TCPU.xtensa: toolversion:='V234';
+          TCPU.riscv32: toolversion:='V241';
         end;
       end;
       TOS.darwin,TOS.ios:
