@@ -107,6 +107,7 @@ type
 
 const
   LCL_OS             = [TOS.win32,TOS.win64,TOS.linux,TOS.darwin,TOS.freebsd,TOS.openbsd,TOS.aix,TOS.wince,TOS.haiku,TOS.solaris,TOS.dragonfly,TOS.netbsd,TOS.morphos,TOS.aros,TOS.amiga];
+  WINDOWS_OS         = [TOS.win32,TOS.win64];
   SUBARCH_OS         = [TOS.embedded,TOS.freertos,TOS.ultibo];
   SUBARCH_CPU        = [TCPU.arm,TCPU.aarch64,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.riscv64,TCPU.xtensa]; //for Ultibo added TCPU.aarch64
   SUBARCH_ARM        = [TSUBARCH.armv4..TSUBARCH.armv7m];

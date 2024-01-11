@@ -1278,15 +1278,18 @@ begin
       if (CrossCPU_Target=TCPU.aarch64) then toolversion:='1804';
       if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
       if (CrossCPU_Target=TCPU.x86_64) then toolversion:='1804';
-      // For testing this release candidate !!
-      if LinuxLegacy then if (CrossCPU_Target=TCPU.x86_64) then s:='Linux_AMD64_Fedora_38.zip';
-      if (CrossCPU_Target=TCPU.riscv32) then s:='Linux_riscv32_glibc_225.zip';
       if (CrossCPU_Target=TCPU.i386) then toolversion:='1804';
       if (CrossCPU_Target=TCPU.loongarch64) then
       begin
         ostype:='Deepin';
         toolversion:='0803';
       end;
+      if (CrossCPU_Target=TCPU.riscv32) then// s:='Linux_riscv32_glibc_225.zip';
+      begin
+        ostype:='glibc';
+        toolversion:='225';
+      end;
+
     end;
   end;
   if (CrossOS_Target=TOS.android) then
@@ -1359,7 +1362,7 @@ begin
   s:='';
 
   // For Windows
-  if GetTOS(GetSourceOS) in [TOS.win32,TOS.win64] then
+  if GetTOS(GetSourceOS) in WINDOWS_OS then
   begin
     case CrossOS_Target of
       TOS.linux:
@@ -1387,6 +1390,8 @@ begin
               toolversion:='V241';
               {$ifdef LCL}
               if (CrossUtils[CrossCPU_Target,CrossOS_Target,Self.CrossOS_SubArch].CrossARMArch=TARMARCH.armhf) then s:='Linux_ARMHF_Linux_V241.zip';
+              {$else}
+              s:='Linux_ARMHF_Linux_V241.zip';
               {$endif LCL}
             end;
           end;
@@ -1524,7 +1529,7 @@ begin
         if (NOT success) then
         begin
           BaseBinsURL:='';
-          if GetTOS(GetSourceOS) in [TOS.win32,TOS.win64] then BaseBinsURL:='windows_';
+          if GetTOS(GetSourceOS) in WINDOWS_OS then BaseBinsURL:='windows_';
           if ((GetTOS(GetSourceOS)=TOS.linux) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then BaseBinsURL:='linux_amd64_';
 
           if (Length(BaseBinsURL)>0) then
@@ -1568,7 +1573,7 @@ begin
         if (NOT success) then
         begin
           BaseBinsURL:='';
-          if GetTOS(GetSourceOS) in [TOS.win32,TOS.win64] then BaseBinsURL:='win'
+          if GetTOS(GetSourceOS) in WINDOWS_OS then BaseBinsURL:='win'
           else
              if GetSourceOS=GetOS(TOS.linux) then
              begin

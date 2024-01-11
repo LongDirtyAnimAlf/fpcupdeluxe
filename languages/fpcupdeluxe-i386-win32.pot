@@ -29,6 +29,10 @@ msgstr ""
 msgid "Use local repo-client."
 msgstr ""
 
+#: extrasettings.captioncheckfpcdotted
+msgid "Build dotted RTL."
+msgstr ""
+
 #: extrasettings.captioncheckfpcunicode
 msgid "Build FPC unicode."
 msgstr ""
@@ -39,6 +43,10 @@ msgstr ""
 
 #: extrasettings.captioncheckgetupdates
 msgid "Check for fpcupdeluxe updates."
+msgstr ""
+
+#: extrasettings.captioncheckglibccompat
+msgid "Force linking against lowest @GLIBC-version."
 msgstr ""
 
 #: extrasettings.captioncheckincludehelp
@@ -118,12 +126,20 @@ msgstr ""
 msgid "Use the repo-client by fpcupdeluxe."
 msgstr ""
 
+#: extrasettings.hintcheckfpcdotted
+msgid "FPC has support for creating a \"dotted RTL\". This is a set of units from RTL/Packages where all unit names are namespaced (dotted)."
+msgstr ""
+
 #: extrasettings.hintcheckfpcunicode
 msgid "Build FPC unicode for better Delphi compatibility."
 msgstr ""
 
 #: extrasettings.hintcheckgetupdates
 msgid "Check for updates of fpcupdeluxe binaries."
+msgstr ""
+
+#: extrasettings.hintcheckglibccompat
+msgid "Force linking against lowest possible GLIBC version to (possibly) increase the compatibility with older Linux versions. Use at your own risk."
 msgstr ""
 
 #: extrasettings.hintcheckrepo
@@ -448,6 +464,10 @@ msgstr ""
 msgid "Set Lazarus revision"
 msgstr ""
 
+#: tform1.btnbuildhelp.caption
+msgid "Build Help"
+msgstr ""
+
 #: tform1.btnbuildnativecompiler.caption
 msgid "Build Native Compiler"
 msgstr ""
@@ -562,6 +582,15 @@ msgstr ""
 
 #: tform1.crosssheet.caption
 msgid "Cross"
+msgstr ""
+
+#: tform1.dockbtn.caption
+msgid "Dock"
+msgstr ""
+
+#: tform1.dockbtn.hint
+msgctxt "tform1.dockbtn.hint"
+msgid "Will change Lazarus into a single form docked editor."
 msgstr ""
 
 #: tform1.espbtn.caption
@@ -730,6 +759,10 @@ msgstr ""
 msgid "Get the mORMot for FPC"
 msgstr ""
 
+#: tform1.mportugueselanguage.caption
+msgid "Portuguese (PT)"
+msgstr ""
+
 #: tform1.mukrainianlanguage.caption
 msgid "Ukrainian (UK)"
 msgstr ""
@@ -743,6 +776,7 @@ msgid "OPM"
 msgstr ""
 
 #: tform1.opmbtn.hint
+msgctxt "tform1.opmbtn.hint"
 msgid "Will install/update the Online Package Manager"
 msgstr ""
 

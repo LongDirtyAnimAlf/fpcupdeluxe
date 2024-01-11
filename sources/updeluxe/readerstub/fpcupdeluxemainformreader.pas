@@ -3154,7 +3154,7 @@ begin
       if IncludeLCL then
       begin
         FPCupManager.OnlyModules:=FPCupManager.OnlyModules+','+_LCL;
-        if (FPCupManager.CrossOS_Target in [TOS.win32,TOS.win64]) then
+        if (FPCupManager.CrossOS_Target in WINDOWS_OS) then
            FPCupManager.LCL_Platform:='win32'
         else
         if (FPCupManager.CrossOS_Target=TOS.wince) then

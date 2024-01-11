@@ -2729,7 +2729,7 @@ begin
   // Windows 64bit, Linux AMD64, Darwin AMD64, Darwin ARM64
   // This check could also be skipped, but anyhow
   ValidTarget:=false;
-  if (NOT ValidTarget) then ValidTarget:=(GetTOS(GetSourceOS) in [TOS.win32,TOS.win64]);
+  if (NOT ValidTarget) then ValidTarget:=(GetTOS(GetSourceOS) in WINDOWS_OS);
   if (NOT ValidTarget) then ValidTarget:=(GetTOS(GetSourceOS) in [TOS.linux]) AND (GetTCPU(GetSourceCPU) in [TCPU.x86_64]);
   if (NOT ValidTarget) then ValidTarget:=(GetTOS(GetSourceOS) in [TOS.darwin]) AND (GetTCPU(GetSourceCPU) in [TCPU.x86_64,TCPU.aarch64]);
 

@@ -1074,12 +1074,15 @@ end;
 
 function TInstaller.CheckAndGetTools: boolean;
 var
-  CryptoSucceeded,OperationSucceeded: boolean;
+  OperationSucceeded: boolean;
   Output: string;
   aDir: string;
   {$ifdef MSWINDOWS}
   aURL,aFile: string;
   i:integer;
+  {$endif}
+  {$ifndef USEONLYCURL}
+  CryptoSucceeded: boolean;
   {$endif}
 begin
   OperationSucceeded := true;
@@ -1265,18 +1268,24 @@ begin
 
     F7zip:=Which('7z');
     if Not FileExists(F7zip) then Which('7za');
-    {$IFDEF DARWIN}
-    if Not FileExists(F7zip) then Which('7zx');
-    if Not FileExists(F7zip) then Which('7zX');
-    {$ENDIF}
+
+    if GetTOS(GetSourceOS) in [TOS.darwin] then
+    begin
+      if Not FileExists(F7zip) then Which('7zx');
+      if Not FileExists(F7zip) then Which('7zX');
+    end;
+
     if Not FileExists(F7zip) then Which('7zz');
     Output:='7za';
 
     if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,Output+GetExeExt]);
-    {$IFNDEF MSWINDOWS}
-    Output:='7zz';
-    if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,Output+GetExeExt]);
-    {$ENDIF MSWINDOWS}
+
+    if (NOT (GetTOS(GetSourceOS) in WINDOWS_OS)) then
+    begin
+      Output:='7zz';
+      if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,Output]);
+    end;
+
     if (NOT FileExists(F7zip)) then
     begin
       if ForceDirectoriesSafe(ExtractFileDir(F7zip)) then
