@@ -215,7 +215,8 @@ begin
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
 
-  Command:=' clone --recurse-submodules';
+  //Command:=' clone --recurse-submodules';
+  Command:=' clone';
 
   if ExportOnly then Command:=Command+' --depth=1';
 

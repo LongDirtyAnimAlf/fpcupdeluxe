@@ -202,6 +202,19 @@ begin
                  result:=SimpleSearchLibrary(BasePath,s,TDBLibName);
             end;
           end;
+
+          // legacy libs : also search in -legacy
+          if (not result) then
+          begin
+            if (TargetOS in [TOS.darwin]) then
+            begin
+              s:=ConcatPaths(['all-'+TargetOSName+'-legacy',OSNAME+SDKVersion+'.sdk','usr','lib']);
+              result:=SimpleSearchLibrary(BasePath,s,LibName);
+              if not result then
+                 result:=SimpleSearchLibrary(BasePath,s,TDBLibName);
+            end;
+          end;
+
           if result then found:=true;
         end;
       end;
@@ -354,6 +367,10 @@ begin
         AsFile:=StringReplace(BinUtilsPrefix,TargetOSName,TargetOSName+InttoStr(DarwinRelease),[]);
       AsFile:=AsFile+ASFILENAME+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
+
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,RegisterName,AsFile);
+
       if not result then
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
@@ -377,6 +394,16 @@ begin
         begin
           AsFile:=StringReplace(AsFile,TargetCPUName,'powerpc',[]);
           result:=SimpleSearchBinUtil(BasePath,'powerpc-'+TargetOSName,AsFile);
+        end;
+      end;
+
+      if not result then
+      begin
+        // Look in special i686-directory
+        if (TargetCPU in [TCPU.i386]) then
+        begin
+          AsFile:=StringReplace(AsFile,TargetCPUName,'i686',[]);
+          result:=SimpleSearchBinUtil(BasePath,'i686-'+TargetOSName,AsFile);
         end;
       end;
 

@@ -985,7 +985,7 @@ begin
     OR
     (ExistWordInString(PChar(s),'checkout',[soWholeWord])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord]))
     OR
-    (ExistWordInString(PChar(s),'clone',[soWholeWord])) AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord]))
+    (ExistWordInString(PChar(s),'clone',[soWholeWord])) {AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord]))}
   ) then
   begin
     EchoInfo(BeginSnippet+' '+Seriousness[etInfo]+' Performing SVN/GIT/HG/FTP/URL checkout/download. Please wait, could take some time.');
