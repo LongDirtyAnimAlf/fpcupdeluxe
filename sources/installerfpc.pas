@@ -883,9 +883,16 @@ begin
 
             //Remove dedicated settings of config snippet
             if MakeCycle=Low(TSTEPS) then
+            //if (MakeCycle=st_Start)
               Infoln(infotext+'Removing '+FPCCONFIGFILENAME+' config snippet for target '+CrossInstaller.RegisterName,etInfo);
 
             //Add config snippet
+
+            {$ifdef crosssimple}
+            //if (MakeCycle=High(TSTEPS)) then
+            {$else}
+            //if (MakeCycle=st_RtlBuild) then
+            {$endif}
             if (MakeCycle=High(TSTEPS)) then
             begin
               s1:='';

@@ -283,7 +283,7 @@ end;
 
 function Tany_apple.GetBinUtils(Basepath:string): boolean;
 var
-  AsFile: string;
+  AsFile,AsCustomFile: string;
   i,DarwinRelease:integer;
   //S,PresetBinPath: string;
 begin
@@ -312,6 +312,7 @@ begin
         end;
 
         result:=SimpleSearchBinUtil(BasePath,'all-apple',AsFile);
+
         {$ifdef MSWINDOWS}
         if (NOT result) then
         begin
@@ -392,8 +393,9 @@ begin
         // Look in special ppc-directory for universal named powerpc tools
         if (TargetCPU in [TCPU.powerpc64,TCPU.powerpc]) then
         begin
-          AsFile:=StringReplace(AsFile,TargetCPUName,'powerpc',[]);
-          result:=SimpleSearchBinUtil(BasePath,'powerpc-'+TargetOSName,AsFile);
+          AsCustomFile:=StringReplace(AsFile,TargetCPUName,'powerpc',[]);
+          result:=SimpleSearchBinUtil(BasePath,'powerpc-'+TargetOSName,AsCustomFile);
+          if result then AsFile:=AsCustomFile;
         end;
       end;
 
@@ -402,8 +404,24 @@ begin
         // Look in special i686-directory
         if (TargetCPU in [TCPU.i386]) then
         begin
-          AsFile:=StringReplace(AsFile,TargetCPUName,'i686',[]);
-          result:=SimpleSearchBinUtil(BasePath,'i686-'+TargetOSName,AsFile);
+          AsCustomFile:=StringReplace(AsFile,TargetCPUName,'i686',[]);
+          result:=SimpleSearchBinUtil(BasePath,'i686-'+TargetOSName,AsCustomFile);
+          if result then AsFile:=AsCustomFile;
+        end;
+      end;
+
+      // Look in special legacy-directory
+      if (NOT result) then
+      begin
+        result:=SimpleSearchBinUtil(BasePath,'all-darwin-legacy',AsFile);
+        if (NOT result) then
+        begin
+          if (TargetCPU in [TCPU.i386]) then
+          begin
+            AsCustomFile:=StringReplace(AsFile,TargetCPUName,'i686',[]);
+            result:=SimpleSearchBinUtil(BasePath,'all-darwin-legacy',AsCustomFile);
+            if result then AsFile:=AsCustomFile;
+          end;
         end;
       end;
 
@@ -476,7 +494,7 @@ begin
     FBinsFound:=true;
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
-    AddFPCCFGSnippet('-XX');
+    //AddFPCCFGSnippet('-XX');
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names};
   end;
 end;
