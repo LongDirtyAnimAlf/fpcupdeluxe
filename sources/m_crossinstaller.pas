@@ -67,7 +67,7 @@ const
 
   CrossWindowsSuggestion = 'Suggestion for cross binutils: the crossfpc binutils at https://gitlab.com/freepascal.org/fpc/binaries/-/tree/main/i386-win32.';
 
-  MAXDARWINVERSION=24;
+  MAXDARWINVERSION=8;
   MINDARWINVERSION=7;
 
   MAXOSVERSION=15;

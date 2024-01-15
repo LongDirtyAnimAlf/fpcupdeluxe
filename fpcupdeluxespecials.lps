@@ -4,8 +4,8 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="linux64musl,solarisx64oi,darwin32carbon,darwin32cocoa,darwin64cocoa,darwin64cocoalegacy,darwin64QT5,openbsdx64,openbsd32,haiku32QT5,haiku64QT5,darwinppccarbon,darwinppccocoa,darwinppc64cocoa,darwinarm64cocoa"/>
-    <BuildModes Active="darwinppccocoa"/>
-    <Units Count="132">
+    <BuildModes Active="darwinppccarbon"/>
+    <Units Count="133">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -21,8 +21,9 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
+        <TopLine Value="973"/>
+        <CursorPos X="56" Y="988"/>
         <UsageCount Value="51"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -72,7 +73,9 @@
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <CursorPos X="30" Y="15"/>
         <UsageCount Value="51"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -86,7 +89,7 @@
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <CursorPos X="28" Y="2"/>
         <UsageCount Value="51"/>
         <Loaded Value="True"/>
@@ -1006,12 +1009,47 @@
         <CursorPos X="25" Y="2722"/>
         <UsageCount Value="10"/>
       </Unit131>
+      <Unit132>
+        <Filename Value="sources\gitclient.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="202"/>
+        <CursorPos X="32" Y="218"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit132>
     </Units>
-    <JumpHistory Count="1">
+    <JumpHistory Count="8" HistoryIndex="7">
       <Position1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <Caret Line="3189" Column="54" TopLine="3174"/>
       </Position1>
+      <Position2>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+      </Position2>
+      <Position3>
+        <Filename Value="sources\gitclient.pas"/>
+        <Caret Line="219" Column="19" TopLine="202"/>
+      </Position3>
+      <Position4>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="988" Column="100" TopLine="973"/>
+      </Position4>
+      <Position5>
+        <Filename Value="sources\gitclient.pas"/>
+        <Caret Line="218" Column="42" TopLine="202"/>
+      </Position5>
+      <Position6>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="988" Column="56" TopLine="973"/>
+      </Position6>
+      <Position7>
+        <Filename Value="sources\gitclient.pas"/>
+        <Caret Line="218" Column="32" TopLine="202"/>
+      </Position7>
+      <Position8>
+        <Filename Value="sources\fpcup.ini"/>
+        <Caret Line="26" Column="5" TopLine="22"/>
+      </Position8>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

@@ -411,6 +411,7 @@ begin
       end;
 
       // Look in special legacy-directory
+      (*
       if (NOT result) then
       begin
         result:=SimpleSearchBinUtil(BasePath,'all-darwin-legacy',AsFile);
@@ -424,6 +425,7 @@ begin
           end;
         end;
       end;
+      *)
 
       if result then break;
     end;

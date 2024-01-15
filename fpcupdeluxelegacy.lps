@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <ManyBuildModesSelection Value="darwin32carbon,darwinppccarbon"/>
+    <Units Count="20">
+      <Unit0>
+        <Filename Value="up.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fpcupdeluxe"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="209"/>
+        <CursorPos Y="242"/>
+        <UsageCount Value="23"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <CursorPos X="22" Y="11"/>
+        <UsageCount Value="23"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form2"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UsageCount Value="23"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="sources\updeluxe\syneditpopup.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SynEditPopup"/>
+        <UsageCount Value="23"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="sources\updeluxe\aboutfrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AboutForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="AboutFrm"/>
+        <UsageCount Value="23"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="sources\updeluxe\infounit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="InfoForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UsageCount Value="23"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="sources\updeluxe\modulesettings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form3"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UsageCount Value="23"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="sources\fpcup.ini"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="23"/>
+        <DefaultSyntaxHighlighter Value="Ini"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="sources\settings.ini"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="23"/>
+        <DefaultSyntaxHighlighter Value="Ini"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="sources\revision.inc"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="23"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="sources\processutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="23"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="sources\updeluxe\subarch.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SubarchForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UsageCount Value="23"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="C:\fpcupsystems\stablelegacy\lazarus\components\lazutils\translations.pas"/>
+        <UnitName Value="Translations"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="235"/>
+        <CursorPos X="13" Y="252"/>
+        <UsageCount Value="11"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="C:\cygwin32\home\superdad\cctools-port-ppc\cctools\ld64\src\ld.cpp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2903"/>
+        <CursorPos Y="2917"/>
+        <UsageCount Value="11"/>
+        <DefaultSyntaxHighlighter Value="C_2B_2B"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="C:\msys64\home\superdad\ld64-msys\ld64\ld64\src\ld\InputFiles.cpp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="323"/>
+        <CursorPos Y="346"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C_2B_2B"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="C:\msys64\home\superdad\ld64-msys\ld64\ld64\src\ld\ResponseFiles.cpp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3"/>
+        <CursorPos Y="32"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C_2B_2B"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="C:\fpcupsystems\stablelegacy\lazarus\lcl\interfaces\cocoa\cocoagdiobjects.pas"/>
+        <UnitName Value="CocoaGDIObjects"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1896"/>
+        <CursorPos X="35" Y="1912"/>
+        <UsageCount Value="10"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="C:\fpcupsystems\stablelegacy\lazarus\lcl\interfaces\cocoa\cocoawsforms.pas"/>
+        <UnitName Value="CocoaWSForms"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="706"/>
+        <CursorPos X="59" Y="722"/>
+        <UsageCount Value="10"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="C:\fpcupsystems\stablelegacy\lazarus\lcl\interfaces\cocoa\cocoascrollers.pas"/>
+        <UnitName Value="CocoaScrollers"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="599"/>
+        <CursorPos X="161" Y="615"/>
+        <UsageCount Value="10"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="C:\fpcupsystems\stablelegacy\lazarus\lcl\interfaces\cocoa\cocoawinapi.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1742"/>
+        <CursorPos X="57" Y="1758"/>
+        <UsageCount Value="10"/>
+      </Unit19>
+    </Units>
+    <JumpHistory Count="1">
+      <Position1>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+      </Position1>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode="default"/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>
