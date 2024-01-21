@@ -4,7 +4,8 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="darwin32carbon,darwinppccarbon"/>
-    <Units Count="20">
+    <BuildModes Active="darwinppccarbon"/>
+    <Units Count="29">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -12,7 +13,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="209"/>
         <CursorPos Y="242"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
       </Unit0>
       <Unit1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
@@ -20,9 +21,8 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <CursorPos X="22" Y="11"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -32,13 +32,13 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
       </Unit2>
       <Unit3>
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynEditPopup"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
       </Unit3>
       <Unit4>
         <Filename Value="sources\updeluxe\aboutfrm.pas"/>
@@ -47,7 +47,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="AboutFrm"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
       </Unit4>
       <Unit5>
         <Filename Value="sources\updeluxe\infounit.pas"/>
@@ -55,7 +55,7 @@
         <ComponentName Value="InfoForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
       </Unit5>
       <Unit6>
         <Filename Value="sources\updeluxe\modulesettings.pas"/>
@@ -63,29 +63,29 @@
         <ComponentName Value="Form3"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
       </Unit6>
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit7>
       <Unit8>
         <Filename Value="sources\settings.ini"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit8>
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
       </Unit9>
       <Unit10>
         <Filename Value="sources\processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
       </Unit10>
       <Unit11>
         <Filename Value="sources\updeluxe\subarch.pas"/>
@@ -93,7 +93,7 @@
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
       </Unit11>
       <Unit12>
         <Filename Value="C:\fpcupsystems\stablelegacy\lazarus\components\lazutils\translations.pas"/>
@@ -106,8 +106,8 @@
       <Unit13>
         <Filename Value="C:\cygwin32\home\superdad\cctools-port-ppc\cctools\ld64\src\ld.cpp"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2903"/>
-        <CursorPos Y="2917"/>
+        <TopLine Value="498"/>
+        <CursorPos X="7" Y="515"/>
         <UsageCount Value="11"/>
         <DefaultSyntaxHighlighter Value="C_2B_2B"/>
       </Unit13>
@@ -158,11 +158,154 @@
         <CursorPos X="57" Y="1758"/>
         <UsageCount Value="10"/>
       </Unit19>
+      <Unit20>
+        <Filename Value="sources\installerfpc.pas"/>
+        <UnitName Value="installerFpc"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="4463"/>
+        <CursorPos Y="4478"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="sources\m_crossinstaller.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="813"/>
+        <CursorPos X="18" Y="837"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="C:\fpcupsystems\stablelegacy\fpcsrc\rtl\objpas\classes\classesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="700"/>
+        <CursorPos X="32" Y="720"/>
+        <UsageCount Value="10"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="C:\cygwin32\home\superdad\cctools-port-ppc\cctools\as\ppc.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="53"/>
+        <CursorPos X="22" Y="77"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C_2B_2B"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="C:\cygwin32\home\superdad\cctools-port-ppc\cctools\configure"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4278"/>
+        <CursorPos X="46" Y="4295"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="C:\cygwin32\home\superdad\cctools-port-ppc\cctools\config.log"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="323"/>
+        <CursorPos X="11" Y="340"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="C:\cygwin32\home\superdad\cctools-port-ppc\cctools\cctools-build\i686-apple-darwin8\include\config.h"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="9" Y="14"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C_2B_2B"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="C:\cygwin32\home\superdad\cctools-port-ppc\cctools\include\config.h.in"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="8" Y="13"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="C:\cygwin32\home\superdad\cctools-port-ppc\cctools\libstuff\emulated.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="97"/>
+        <CursorPos X="14" Y="32"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C_2B_2B"/>
+      </Unit28>
     </Units>
-    <JumpHistory Count="1">
+    <JumpHistory Count="19" HistoryIndex="18">
       <Position1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
       </Position1>
+      <Position2>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="10" Column="44"/>
+      </Position2>
+      <Position3>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="1998" Column="26" TopLine="1970"/>
+      </Position3>
+      <Position4>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4553" Column="21" TopLine="4525"/>
+      </Position4>
+      <Position5>
+        <Filename Value="sources\m_crossinstaller.pas"/>
+        <Caret Line="219" Column="18" TopLine="203"/>
+      </Position5>
+      <Position6>
+        <Filename Value="sources\m_crossinstaller.pas"/>
+        <Caret Line="837" Column="18" TopLine="813"/>
+      </Position6>
+      <Position7>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4477" Column="14" TopLine="4460"/>
+      </Position7>
+      <Position8>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="3731" Column="29" TopLine="3713"/>
+      </Position8>
+      <Position9>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4344" Column="22" TopLine="4325"/>
+      </Position9>
+      <Position10>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4346" Column="24" TopLine="4331"/>
+      </Position10>
+      <Position11>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4399" Column="30" TopLine="4371"/>
+      </Position11>
+      <Position12>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4665" Column="37" TopLine="4643"/>
+      </Position12>
+      <Position13>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4666" Column="44" TopLine="4643"/>
+      </Position13>
+      <Position14>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4677" Column="24" TopLine="4649"/>
+      </Position14>
+      <Position15>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4666" Column="29" TopLine="4649"/>
+      </Position15>
+      <Position16>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4665" Column="22" TopLine="4649"/>
+      </Position16>
+      <Position17>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4399" Column="15" TopLine="4362"/>
+      </Position17>
+      <Position18>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4412" Column="25" TopLine="4394"/>
+      </Position18>
+      <Position19>
+        <Filename Value="sources\installerfpc.pas"/>
+        <Caret Line="4478" TopLine="4463"/>
+      </Position19>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

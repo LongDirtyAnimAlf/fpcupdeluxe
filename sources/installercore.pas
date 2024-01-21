@@ -236,6 +236,10 @@ const
   OLDBINSTAG                   = 'crossbins';
   NEWBINSTAG                   = 'crossbins_all';
 
+  //WINDOWS_ALL_NEWBINSTAG       = 'windows_'+NEWBINSTAG;
+  //LINUXAMD64_NEWBINSTAG        = 'linux_amd64_'+NEWBINSTAG;
+  //FREEBSDAMD64_NEWBINSTAG      = 'freebsd_amd64_'+NEWBINSTAG;
+
   //Sequence contants for statemachine
 
   _SEP                     = ';';

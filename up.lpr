@@ -109,6 +109,8 @@ uses
   m_any_to_androidaarch64,
   m_any_to_androidx64,
   m_any_to_android386,
+  m_any_to_linux386,
+  m_any_to_linuxx64,
   m_any_to_linuxarm,
   m_any_to_linuxmips,
   m_any_to_linuxmipsel,
@@ -179,14 +181,10 @@ uses
   m_any_to_darwinpowerpc64,
   {$endif}
   {$if defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
-  m_freebsd_to_linux386,
   {$if defined(FREEBSD) AND defined(CPU64)}
   m_freebsd64_to_freebsd32,
   {$endif}
-  m_freebsd_to_linux64,
   {$else}
-  m_any_to_linux386,
-  m_any_to_linuxx64,
   m_any_to_netbsd386,
   m_any_to_netbsdx64,
   m_any_to_freebsdx64,

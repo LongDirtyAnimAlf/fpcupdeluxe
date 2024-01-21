@@ -325,6 +325,35 @@ begin
     end;
   end;
 
+  {$IFDEF FREEBSD}
+  if (NOT result) then
+  begin
+    sd:='/compat/linux/lib64';
+    if DirectoryExists(sd) then
+    begin
+      result:=SearchLibrary(sd,LIBCFILENAME);
+      if result then
+      begin
+        FLibsFound:=True;
+        AddFPCCFGSnippet('-Fl'+LibsPath);
+      end;
+    end;
+  end;
+  if (NOT result) then
+  begin
+    sd:='/compat/linux/lib';
+    if DirectoryExists(sd) then
+    begin
+      result:=SearchLibrary(sd,LIBCFILENAME);
+      if result then
+      begin
+        FLibsFound:=True;
+        AddFPCCFGSnippet('-Fl'+LibsPath);
+      end;
+    end;
+  end;
+  {$ENDIF FREEBSD}
+
   SearchLibraryInfo(result);
 
   if result then
@@ -562,6 +591,19 @@ begin
     end;
   end;
   {$ENDIF LINUX}
+
+  {$IFDEF FREEBSD}
+  if (NOT result) then
+  begin
+    s:='/compat/linux/bin';
+    if DirectoryExists(s) then
+    begin
+      BinPrefixTry:='';
+      AsFile:=BinPrefixTry+ASFILENAME;
+      result:=SearchBinUtil(s, AsFile);
+    end;
+  end;
+  {$ENDIF FREEBSD}
 
   // Also allow for (cross)binutils without prefix in the right directory
   if (not result) then

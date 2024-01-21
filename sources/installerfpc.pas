@@ -4469,9 +4469,14 @@ begin
         {$ENDIF CPUARMHF}
         {$ENDIF cpuarm}
         ConfigText.Append(s);
+        {$ENDIF UNIX}
 
         ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
 
+        // Add the native compiler options as given by the user, to make them permanent
+        if (Length(FCompilerOptions)>0) then ConfigText.AddDelimitedText(FCompilerOptions,' ',true);
+
+        {$IFDEF UNIX}
         s:=GetStartupObjects;
         if Length(s)>0 then
         begin
@@ -4532,8 +4537,6 @@ begin
           ConfigText.Append('-Fl/boot/system/non-packaged/lib'+s);
         {$endif}
 
-        ConfigText.Append('#ENDIF');
-
         {$ifdef solaris}
         {$IF defined(CPUX64) OR defined(CPUX86)}
         //Intel only. See: https://wiki.lazarus.freepascal.org/Lazarus_on_Solaris#A_note_on_gld_.28Intel_architecture_only.29
@@ -4543,23 +4546,29 @@ begin
 
         {$ENDIF UNIX}
 
+        ConfigText.Append('#ENDIF');
+
         {$IFDEF DARWIN}
         ConfigText.Append('');
-        ConfigText.Append('# Add some extra OSX options');
-        ConfigText.Append('#IFDEF DARWIN');
-        s:=GetDarwinSDKVersion('macosx');
-        if Length(s)>0 then
+        ConfigText.Append('# Add some extra OSX options, if any');
+
+        if (Pos('-WM',FCompilerOptions)=0) then
         begin
-          ConfigText.Append('# Prevents crti not found linking errors');
-          ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
-          //ConfigText.Append('#IFDEF CPU'+UpperCase(GetSourceCPU));
-          if CompareVersionStrings(s,'10.9')>=0 then
-            ConfigText.Append('-WM10.9')
-          else
-            ConfigText.Append('-WM'+s);
+          ConfigText.Append('#IFDEF DARWIN');
+          s:=GetDarwinSDKVersion('macosx');
+          if Length(s)>0 then
+          begin
+            ConfigText.Append('# Prevents crti not found linking errors');
+            ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
+            //ConfigText.Append('#IFDEF CPU'+UpperCase(GetSourceCPU));
+            if CompareVersionStrings(s,'10.9')>=0 then
+              ConfigText.Append('-WM10.9')
+            else
+              ConfigText.Append('-WM'+s);
+            ConfigText.Append('#ENDIF');
+          end;
           ConfigText.Append('#ENDIF');
         end;
-        ConfigText.Append('#ENDIF');
 
         s:=GetDarwinSDKVersion('macosx');
         if  (Length(s)=0) OR (CompareVersionStrings(s,'10.14')>=0) then

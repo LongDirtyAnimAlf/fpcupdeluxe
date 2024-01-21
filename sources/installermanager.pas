@@ -1135,355 +1135,6 @@ begin
   ExportOnly:=false;
 end;
 
-procedure TFPCupManager.GetCrossToolsFileName(out BinsFileName,LibsFileName:string);
-var
-  s:string;
-  toolversion,ostype:string;
-begin
-  s:=GetCPUCase(CrossCPU_Target);
-  if CrossCPU_Target=TCPU.x86_64 then s:='x64'; // Legacy support
-  if CrossCPU_Target=TCPU.aarch64 then s:='Aarch64'; // Legacy support
-  BinsFileName:=s;
-
-  // Set special CPU names
-  if CrossOS_Target=TOS.darwin then
-  begin
-    // Darwin has some universal binaries and libs
-    if CrossCPU_Target=TCPU.i386 then BinsFileName:='All';
-    if CrossCPU_Target=TCPU.x86_64 then BinsFileName:='All';
-    if CrossCPU_Target=TCPU.aarch64 then BinsFileName:='All';
-    if CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
-    if CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC';
-  end;
-
-  if CrossOS_Target=TOS.ios then
-  begin
-    // iOS has some universal binaries and libs
-    if CrossCPU_Target=TCPU.arm then BinsFileName:='All';
-    if CrossCPU_Target=TCPU.aarch64 then BinsFileName:='All';
-  end;
-
-  if CrossOS_Target=TOS.aix then
-  begin
-    // AIX has some universal binaries
-    if CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
-    if CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC';
-  end;
-
-  // Set OS case
-  s:=GetOSCase(CrossOS_Target);
-  if CrossOS_Target=TOS.aros then s:='Aros'; // Legacy support
-
-  if SolarisOI then s:=s+'OI';
-
-  BinsFileName:=s+BinsFileName;
-
-  if MUSL then BinsFileName:='MUSL'+BinsFileName;
-
-  // normally, we have the same names for libs and bins URL
-  LibsFileName:=BinsFileName;
-
-  {$IF (defined(Windows)) OR (defined(Linux))}
-  if (
-    ((CrossOS_Target=TOS.darwin) AND (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
-    OR
-    ((CrossOS_Target=TOS.ios) AND (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]))
-    ) then
-  begin
-    // Set special BinsFile for universal tools for Darwin
-    BinsFileName:='AppleAll';
-  end;
-
-  if CrossOS_Target=TOS.android then
-  begin
-    // Android has universal binaries
-    BinsFileName:='AndroidAll';
-  end;
-  {$endif}
-
-  if CrossCPU_Target=TCPU.wasm32 then
-  begin
-    // wasm has some universal binaries
-    BinsFileName:='AllWasm32';
-  end;
-
-  if CrossOS_Target=TOS.linux then
-  begin
-    // PowerPC64 is special: only little endian libs for now
-    if (CrossCPU_Target=TCPU.powerpc64) then
-    begin
-      LibsFileName:=StringReplace(LibsFileName,'PowerPC64','PowerPC64LE',[rfIgnoreCase]);
-    end;
-
-    // ARM is special: can be hard or softfloat (Windows only binutils yet)
-    {$ifdef MSWINDOWS}
-    if (CrossCPU_Target=TCPU.arm) then
-    begin
-      if (Pos('SOFT',UpperCase(CrossOPT))>0) OR (Pos('FPC_ARMEL',UpperCase(FPCOPT))>0) then
-      begin
-        // use softfloat binutils
-        BinsFileName:=StringReplace(LibsFileName,'BinsLinuxARM','BinsLinuxARMSoft',[rfIgnoreCase]);
-      end;
-    end;
-    {$endif}
-  end;
-
-  //{$IF defined(CPUAARCH64) AND defined(DARWIN)}
-  {$ifndef MSWINDOWS}
-  // For most targets, FreeRTOS is a special version of embedded, so just use the embedded tools !!
-  if CrossOS_Target=TOS.freertos then
-  begin
-    // use embedded tools for freertos:
-    if (CrossCPU_Target in SUBARCH_CPU) then
-    begin
-      BinsFileName:=StringReplace(BinsFileName,'FreeRTOS','Embedded',[]);
-    end;
-  end;
-  {$endif}
-
-  // All ready !!
-
-  LibsFileName:='CrossLibs'+LibsFileName;
-  {$ifdef MSWINDOWS}
-  BinsFileName:='WinCrossBins'+BinsFileName;
-  {$else}
-  BinsFileName:='CrossBins'+BinsFileName;
-  {$endif MSWINDOWS}
-
-
-
-  // Check for the new libs !!
-  toolversion:='0';
-  ostype:=GetOSCase(CrossOS_Target);
-  s:='';
-
-  if (CrossOS_Target=TOS.linux) then
-  begin
-    if MUSL then
-    begin
-      ostype:='Alpine';
-      if (CrossCPU_Target=TCPU.x86_64) then
-      begin
-        toolversion:='0318';
-      end;
-      if (CrossCPU_Target=TCPU.arm) then
-      begin
-        ostype:='OpenWrt';
-        toolversion:='2203';
-      end;
-    end
-    else
-    begin
-      ostype:='Ubuntu';
-      if (CrossCPU_Target=TCPU.aarch64) then toolversion:='1804';
-      if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
-      if (CrossCPU_Target=TCPU.x86_64) then toolversion:='1804';
-      if (CrossCPU_Target=TCPU.i386) then toolversion:='1804';
-      if (CrossCPU_Target=TCPU.loongarch64) then
-      begin
-        ostype:='Deepin';
-        toolversion:='0803';
-      end;
-      if (CrossCPU_Target=TCPU.riscv32) then// s:='Linux_riscv32_glibc_225.zip';
-      begin
-        ostype:='glibc';
-        toolversion:='225';
-      end;
-
-    end;
-  end;
-  if (CrossOS_Target=TOS.android) then
-  begin
-    ostype:='API';
-    if (CrossCPU_Target=TCPU.aarch64) then toolversion:='21';
-    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='21';
-    if (CrossCPU_Target=TCPU.arm) then s:='Android_ARMEL_API_18.zip';
-    if (CrossCPU_Target=TCPU.i386) then toolversion:='21';
-    if (CrossCPU_Target=TCPU.mipsel) then toolversion:='18';
-  end;
-  if (CrossOS_Target=TOS.darwin) then
-  begin
-    if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='Darwin_All_OSX_1203.zip';
-    if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PPC_OSX_1005.zip';
-  end;
-  if (CrossOS_Target=TOS.ios) then
-  begin
-    if (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]) then s:='IOS_All_IOS_1307.zip';
-  end;
-  if (CrossOS_Target=TOS.solaris) then
-  begin
-    if (CrossCPU_Target=TCPU.x86_64) then
-    begin
-      ostype:='Oracle';
-      toolversion:='1104';
-      if SolarisOI then
-      begin
-        ostype:='OpenIndiana';
-        toolversion:='2010';
-      end;
-    end;
-  end;
-  if (CrossOS_Target=TOS.freebsd) then
-  begin
-    //http://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/VM-IMAGES
-    //https://mirrors.xtom.ee/freebsd-pkg
-    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='10';
-    if (CrossCPU_Target=TCPU.i386) then toolversion:='10';
-  end;
-  if (CrossOS_Target=TOS.netbsd) then
-  begin
-    if (CrossCPU_Target=TCPU.i386) then toolversion:='0903';
-    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='0903';
-  end;
-  if (CrossOS_Target=TOS.openbsd) then
-  begin
-    if (CrossCPU_Target=TCPU.aarch64) then toolversion:='0606';
-    if (CrossCPU_Target=TCPU.i386) then toolversion:='0600';
-    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='0701';
-  end;
-
-  if (Length(s)>0) then
-  begin
-    // for special names
-    LibsFileName:=s;
-  end
-  else
-  begin
-    if (toolversion<>'0') then
-    begin
-      WritelnLog('Going to get the libs from '+ostype+' with version '+toolversion,true);
-      LibsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+toolversion+'.zip';
-    end;
-  end;
-
-  // Check for the new bins !!
-  toolversion:='0';
-  ostype:=GetOSCase(CrossOS_Target);
-  s:='';
-
-  // For Windows
-  if GetTOS(GetSourceOS) in WINDOWS_OS then
-  begin
-    case CrossOS_Target of
-      TOS.linux:
-      begin
-        if MUSL then ostype:='MUSL';
-        case CrossCPU_Target of
-          TCPU.x86_64:
-          begin
-            toolversion:='V241';
-            if MUSL then toolversion:='V240';
-          end;
-          TCPU.aarch64:
-          begin
-            toolversion:='V241';
-            if MUSL then toolversion:='V240';
-          end;
-          TCPU.arm:
-          begin
-            if MUSL then
-            begin
-              toolversion:='V240';
-            end
-            else
-            begin
-              toolversion:='V241';
-              {$ifdef LCL}
-              if (CrossUtils[CrossCPU_Target,CrossOS_Target,Self.CrossOS_SubArch].CrossARMArch=TARMARCH.armhf) then s:='Linux_ARMHF_Linux_V241.zip';
-              {$else}
-              s:='Linux_ARMHF_Linux_V241.zip';
-              {$endif LCL}
-            end;
-          end;
-          TCPU.powerpc: toolversion:='V241';
-          TCPU.powerpc64: toolversion:='V241';
-          TCPU.i386: toolversion:='V241';
-          TCPU.loongarch64: toolversion:='V241';
-          TCPU.m68k: toolversion:='V237';
-          TCPU.xtensa: toolversion:='V234';
-          TCPU.riscv32: toolversion:='V241';
-        end;
-      end;
-      TOS.darwin,TOS.ios:
-      begin
-        if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_15.zip';
-        if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PowerPC_GNU.zip';
-      end;
-      TOS.aix:
-      begin
-        //ostype:='unknown';
-        //if (CrossCPU_Target=TCPU.powerpc) then toolversion:='V230';
-        if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='AIX_PowerPC_IBM_V241.zip';
-      end;
-      TOS.aros:
-      begin
-        ostype:='unknown';
-        if (CrossCPU_Target=TCPU.x86_64) then toolversion:='V232';
-        if (CrossCPU_Target=TCPU.arm) then toolversion:='V232';
-        if (CrossCPU_Target=TCPU.i386) then toolversion:='V232';
-      end;
-    end;
-  end;
-
-  // For Linux AMD64
-  if ((GetTOS(GetSourceOS)=TOS.linux) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then
-  begin
-    case CrossOS_Target of
-      TOS.freebsd:
-      begin
-        case CrossCPU_Target of
-          TCPU.x86_64:
-          begin
-            toolversion:='V234';
-            ostype:='FreeBSD12';
-          end;
-          TCPU.aarch64:
-          begin
-            toolversion:='V240';
-            ostype:='FreeBSD13';
-          end;
-          TCPU.i386:
-          begin
-            toolversion:='V234';
-            ostype:='FreeBSD12';
-          end;
-        end;
-      end;
-      TOS.linux:
-      begin
-        if (CrossCPU_Target=TCPU.aarch64) then toolversion:='V234';
-      end;
-      TOS.openbsd:
-      begin
-        if (CrossCPU_Target=TCPU.x86_64) then toolversion:='V217';
-        if (CrossCPU_Target=TCPU.i386) then toolversion:='V217';
-      end;
-      TOS.darwin,TOS.ios:
-      begin
-        if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_12.zip';
-      end;
-    end;
-  end;
-
-
-  // Process the results from the above search for new binary tools
-  if (Length(s)>0) then
-  begin
-    // for special names
-    BinsFileName:=s;
-  end
-  else
-  begin
-    if (toolversion<>'0') then
-    begin
-      WritelnLog('Going to get the [GNU-]binaries for '+ostype+' with version '+toolversion,true);
-      BinsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+toolversion+'.zip';
-    end;
-  end;
-
-end;
-
-
 procedure TFPCupManager.GetCrossToolsPath(out BinPath,LibPath:string);
 begin
   GetCrossToolsDir(CrossCPU_Target,CrossOS_Target,MUSL,SolarisOI,BinPath,LibPath);
@@ -1531,7 +1182,12 @@ begin
         begin
           BaseBinsURL:='';
           if GetTOS(GetSourceOS) in WINDOWS_OS then BaseBinsURL:='windows_';
-          if ((GetTOS(GetSourceOS)=TOS.linux) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then BaseBinsURL:='linux_amd64_';
+
+          if (GetTCPU(GetSourceCPU)=TCPU.x86_64) then
+          begin
+            if (GetTOS(GetSourceOS)=TOS.linux) then BaseBinsURL:='linux_amd64_';
+            if (GetTOS(GetSourceOS)=TOS.freebsd) then BaseBinsURL:='freebsd_amd64_';
+          end;
 
           if (Length(BaseBinsURL)>0) then
           begin
@@ -1940,6 +1596,383 @@ begin
   result:=GetCPU(CrossCPU_Target)+'-'+GetOS(CrossOS_Target);
   if (CrossOS_SubArch<>TSUBARCH.saNone) then
     result:=result+'-'+GetSubarch(CrossOS_SubArch);
+end;
+
+procedure TFPCupManager.GetCrossToolsFileName(out BinsFileName,LibsFileName:string);
+var
+  s:string;
+  toolversion,ostype:string;
+begin
+  s:=GetCPUCase(CrossCPU_Target);
+  if CrossCPU_Target=TCPU.x86_64 then s:='x64'; // Legacy support
+  if CrossCPU_Target=TCPU.aarch64 then s:='Aarch64'; // Legacy support
+  BinsFileName:=s;
+
+  // Set special CPU names
+  if CrossOS_Target=TOS.darwin then
+  begin
+    // Darwin has some universal binaries and libs
+    if CrossCPU_Target=TCPU.i386 then BinsFileName:='All';
+    if CrossCPU_Target=TCPU.x86_64 then BinsFileName:='All';
+    if CrossCPU_Target=TCPU.aarch64 then BinsFileName:='All';
+    if CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
+    if CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC';
+  end;
+
+  if CrossOS_Target=TOS.ios then
+  begin
+    // iOS has some universal binaries and libs
+    if CrossCPU_Target=TCPU.arm then BinsFileName:='All';
+    if CrossCPU_Target=TCPU.aarch64 then BinsFileName:='All';
+  end;
+
+  if CrossOS_Target=TOS.aix then
+  begin
+    // AIX has some universal binaries
+    if CrossCPU_Target=TCPU.powerpc then BinsFileName:='PowerPC';
+    if CrossCPU_Target=TCPU.powerpc64 then BinsFileName:='PowerPC';
+  end;
+
+  // Set OS case
+  s:=GetOSCase(CrossOS_Target);
+  if CrossOS_Target=TOS.aros then s:='Aros'; // Legacy support
+
+  if SolarisOI then s:=s+'OI';
+
+  BinsFileName:=s+BinsFileName;
+
+  if MUSL then BinsFileName:='MUSL'+BinsFileName;
+
+  // normally, we have the same names for libs and bins URL
+  LibsFileName:=BinsFileName;
+
+  {$IF (defined(Windows)) OR (defined(Linux))}
+  if (
+    ((CrossOS_Target=TOS.darwin) AND (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
+    OR
+    ((CrossOS_Target=TOS.ios) AND (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]))
+    ) then
+  begin
+    // Set special BinsFile for universal tools for Darwin
+    BinsFileName:='AppleAll';
+  end;
+
+  if CrossOS_Target=TOS.android then
+  begin
+    // Android has universal binaries
+    BinsFileName:='AndroidAll';
+  end;
+  {$endif}
+
+  if CrossCPU_Target=TCPU.wasm32 then
+  begin
+    // wasm has some universal binaries
+    BinsFileName:='AllWasm32';
+  end;
+
+  if CrossOS_Target=TOS.linux then
+  begin
+    // PowerPC64 is special: only little endian libs for now
+    if (CrossCPU_Target=TCPU.powerpc64) then
+    begin
+      LibsFileName:=StringReplace(LibsFileName,'PowerPC64','PowerPC64LE',[rfIgnoreCase]);
+    end;
+
+    // ARM is special: can be hard or softfloat (Windows only binutils yet)
+    {$ifdef MSWINDOWS}
+    if (CrossCPU_Target=TCPU.arm) then
+    begin
+      if (Pos('SOFT',UpperCase(CrossOPT))>0) OR (Pos('FPC_ARMEL',UpperCase(FPCOPT))>0) then
+      begin
+        // use softfloat binutils
+        BinsFileName:=StringReplace(LibsFileName,'BinsLinuxARM','BinsLinuxARMSoft',[rfIgnoreCase]);
+      end;
+    end;
+    {$endif}
+  end;
+
+  //{$IF defined(CPUAARCH64) AND defined(DARWIN)}
+  {$ifndef MSWINDOWS}
+  // For most targets, FreeRTOS is a special version of embedded, so just use the embedded tools !!
+  if CrossOS_Target=TOS.freertos then
+  begin
+    // use embedded tools for freertos:
+    if (CrossCPU_Target in SUBARCH_CPU) then
+    begin
+      BinsFileName:=StringReplace(BinsFileName,'FreeRTOS','Embedded',[]);
+    end;
+  end;
+  {$endif}
+
+  // All ready !!
+
+  LibsFileName:='CrossLibs'+LibsFileName;
+  {$ifdef MSWINDOWS}
+  BinsFileName:='WinCrossBins'+BinsFileName;
+  {$else}
+  BinsFileName:='CrossBins'+BinsFileName;
+  {$endif MSWINDOWS}
+
+
+
+  // Check for the new libs !!
+  toolversion:='0';
+  ostype:=GetOSCase(CrossOS_Target);
+  s:='';
+
+  if (CrossOS_Target=TOS.linux) then
+  begin
+    if MUSL then
+    begin
+      ostype:='Alpine';
+      if (CrossCPU_Target=TCPU.x86_64) then
+      begin
+        toolversion:='0318';
+      end;
+      if (CrossCPU_Target=TCPU.arm) then
+      begin
+        ostype:='OpenWrt';
+        toolversion:='2203';
+      end;
+    end
+    else
+    begin
+      ostype:='Ubuntu';
+      if (CrossCPU_Target=TCPU.aarch64) then toolversion:='1804';
+      if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
+      if (CrossCPU_Target=TCPU.x86_64) then toolversion:='1804';
+      if (CrossCPU_Target=TCPU.i386) then toolversion:='1804';
+      if (CrossCPU_Target=TCPU.loongarch64) then
+      begin
+        ostype:='Deepin';
+        toolversion:='0803';
+      end;
+      if (CrossCPU_Target=TCPU.riscv32) then// s:='Linux_riscv32_glibc_225.zip';
+      begin
+        ostype:='glibc';
+        toolversion:='225';
+      end;
+
+    end;
+  end;
+  if (CrossOS_Target=TOS.android) then
+  begin
+    ostype:='API';
+    if (CrossCPU_Target=TCPU.aarch64) then toolversion:='21';
+    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='21';
+    if (CrossCPU_Target=TCPU.arm) then s:='Android_ARMEL_API_18.zip';
+    if (CrossCPU_Target=TCPU.i386) then toolversion:='21';
+    if (CrossCPU_Target=TCPU.mipsel) then toolversion:='18';
+  end;
+  if (CrossOS_Target=TOS.darwin) then
+  begin
+    if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='Darwin_All_OSX_1203.zip';
+    if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PPC_OSX_1005.zip';
+  end;
+  if (CrossOS_Target=TOS.ios) then
+  begin
+    if (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]) then s:='IOS_All_IOS_1307.zip';
+  end;
+  if (CrossOS_Target=TOS.solaris) then
+  begin
+    if (CrossCPU_Target=TCPU.x86_64) then
+    begin
+      ostype:='Oracle';
+      toolversion:='1104';
+      if SolarisOI then
+      begin
+        ostype:='OpenIndiana';
+        toolversion:='2010';
+      end;
+    end;
+  end;
+  if (CrossOS_Target=TOS.freebsd) then
+  begin
+    //http://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/VM-IMAGES
+    //https://mirrors.xtom.ee/freebsd-pkg
+    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='10';
+    if (CrossCPU_Target=TCPU.i386) then toolversion:='10';
+  end;
+  if (CrossOS_Target=TOS.netbsd) then
+  begin
+    if (CrossCPU_Target=TCPU.i386) then toolversion:='0903';
+    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='0903';
+  end;
+  if (CrossOS_Target=TOS.openbsd) then
+  begin
+    if (CrossCPU_Target=TCPU.aarch64) then toolversion:='0606';
+    if (CrossCPU_Target=TCPU.i386) then toolversion:='0600';
+    if (CrossCPU_Target=TCPU.x86_64) then toolversion:='0701';
+  end;
+
+  if (Length(s)>0) then
+  begin
+    // for special names
+    LibsFileName:=s;
+  end
+  else
+  begin
+    if (toolversion<>'0') then
+    begin
+      WritelnLog('Going to get the libs from '+ostype+' with version '+toolversion,true);
+      LibsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+toolversion+'.zip';
+    end;
+  end;
+
+  // Check for the new bins !!
+
+
+  toolversion:='0';
+  ostype:=GetOSCase(CrossOS_Target);
+  s:='';
+
+  // Bins for Windows
+  if GetTOS(GetSourceOS) in WINDOWS_OS then
+  begin
+    case CrossOS_Target of
+      TOS.linux:
+      begin
+        if MUSL then ostype:='MUSL';
+        case CrossCPU_Target of
+          TCPU.x86_64:
+          begin
+            toolversion:='V241';
+            if MUSL then toolversion:='V240';
+          end;
+          TCPU.aarch64:
+          begin
+            toolversion:='V241';
+            if MUSL then toolversion:='V240';
+          end;
+          TCPU.arm:
+          begin
+            if MUSL then
+            begin
+              toolversion:='V240';
+            end
+            else
+            begin
+              toolversion:='V241';
+              {$ifdef LCL}
+              if (CrossUtils[CrossCPU_Target,CrossOS_Target,Self.CrossOS_SubArch].CrossARMArch=TARMARCH.armhf) then s:='Linux_ARMHF_Linux_V241.zip';
+              {$else}
+              s:='Linux_ARMHF_Linux_V241.zip';
+              {$endif LCL}
+            end;
+          end;
+          TCPU.powerpc: toolversion:='V241';
+          TCPU.powerpc64: toolversion:='V241';
+          TCPU.i386: toolversion:='V241';
+          TCPU.loongarch64: toolversion:='V241';
+          TCPU.m68k: toolversion:='V237';
+          TCPU.xtensa: toolversion:='V234';
+          TCPU.riscv32: toolversion:='V241';
+        end;
+      end;
+      TOS.darwin,TOS.ios:
+      begin
+        if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_15.zip';
+        if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PowerPC_GNU.zip';
+      end;
+      TOS.aix:
+      begin
+        //ostype:='unknown';
+        //if (CrossCPU_Target=TCPU.powerpc) then toolversion:='V230';
+        if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='AIX_PowerPC_IBM_V241.zip';
+      end;
+      TOS.aros:
+      begin
+        ostype:='unknown';
+        if (CrossCPU_Target=TCPU.x86_64) then toolversion:='V232';
+        if (CrossCPU_Target=TCPU.arm) then toolversion:='V232';
+        if (CrossCPU_Target=TCPU.i386) then toolversion:='V232';
+      end;
+    end;
+  end;
+
+  // Bins for Linux AMD64
+  if ((GetTOS(GetSourceOS)=TOS.linux) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then
+  begin
+    case CrossOS_Target of
+      TOS.freebsd:
+      begin
+        case CrossCPU_Target of
+          TCPU.x86_64:
+          begin
+            toolversion:='V234';
+            ostype:='FreeBSD12';
+          end;
+          TCPU.aarch64:
+          begin
+            toolversion:='V240';
+            ostype:='FreeBSD13';
+          end;
+          TCPU.i386:
+          begin
+            toolversion:='V234';
+            ostype:='FreeBSD12';
+          end;
+        end;
+      end;
+      TOS.linux:
+      begin
+        if (CrossCPU_Target=TCPU.aarch64) then toolversion:='V234';
+      end;
+      TOS.openbsd:
+      begin
+        if (CrossCPU_Target=TCPU.x86_64) then toolversion:='V217';
+        if (CrossCPU_Target=TCPU.i386) then toolversion:='V217';
+      end;
+      TOS.darwin,TOS.ios:
+      begin
+        if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_12.zip';
+      end;
+    end;
+  end;
+
+  // Bins for FreeBSD AMD64
+  if ((GetTOS(GetSourceOS)=TOS.freebsd) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then
+  begin
+    case CrossOS_Target of
+      TOS.linux:
+      begin
+        case CrossCPU_Target of
+          TCPU.x86_64:
+          begin
+            toolversion:='V241';
+          end;
+          TCPU.aarch64:
+          begin
+            toolversion:='V241';
+          end;
+          TCPU.i386:
+          begin
+            toolversion:='V241';
+          end;
+          TCPU.arm:
+          begin
+            s:='Linux_ARMHF_Linux_V241.zip';
+          end;
+        end;
+      end;
+    end;
+  end;
+
+  // Process the results from the above search for new binary tools
+  if (Length(s)>0) then
+  begin
+    // for special names
+    BinsFileName:=s;
+  end
+  else
+  begin
+    if (toolversion<>'0') then
+    begin
+      WritelnLog('Going to get the [GNU-]binaries for '+ostype+' with version '+toolversion,true);
+      BinsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+toolversion+'.zip';
+    end;
+  end;
+
 end;
 
 { TSequencer }
