@@ -253,7 +253,6 @@ begin
     AddFPCCFGSnippet('-k-framework',false);
     AddFPCCFGSnippet('-kCoreFoundation',false);
 
-
     if ((TargetCPU=TCPU.powerpc) OR (TargetCPU=TCPU.powerpc64)) then
     begin
       AddFPCCFGSnippet('-k-framework',false);
@@ -271,6 +270,12 @@ begin
         AddFPCCFGSnippet('-kppc',false);
       end;
     end;
+
+    // if XQuarts found, add path to libs.
+    s:=IncludeTrailingPathDelimiter(LibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator+'..'+DirectorySeparator;
+    s:=ExpandFileName(s);
+    s:=ConcatPaths([s,'XQuartz','X11','lib']);
+    if DirectoryExists(s) then AddFPCCFGSnippet('-Fl'+s);
 
   end
   else

@@ -1766,7 +1766,8 @@ begin
   end;
   if (CrossOS_Target=TOS.darwin) then
   begin
-    if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='Darwin_All_OSX_1203.zip';
+    //if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='Darwin_All_OSX_1203.zip';
+    if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]) then s:='Darwin_All_OSXQuartz_1203.zip';
     if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PPC_OSX_1005.zip';
   end;
   if (CrossOS_Target=TOS.ios) then
