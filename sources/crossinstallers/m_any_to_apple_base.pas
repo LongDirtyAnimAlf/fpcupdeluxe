@@ -249,8 +249,12 @@ begin
     s:=ExcludeTrailingBackslash(s);
     AddFPCCFGSnippet('-XR'+s);
 
-    AddFPCCFGSnippet('-k-framework',false);
-    AddFPCCFGSnippet('-kAppKit',false);
+    if (TargetOS<>TOS.ios) then
+    begin
+      AddFPCCFGSnippet('-k-framework',false);
+      AddFPCCFGSnippet('-kAppKit',false);
+    end;
+
     AddFPCCFGSnippet('-k-framework',false);
     AddFPCCFGSnippet('-kFoundation',false);
     AddFPCCFGSnippet('-k-framework',false);
