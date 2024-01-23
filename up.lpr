@@ -152,24 +152,15 @@ uses
   //{$endif}
   {$endif}
   {$ifdef Darwin}
-  {$ifndef CPUX86_64}
-  m_crossdarwin64,
-  {$endif}
-  {$ifndef CPUX86}
-  m_crossdarwin32,
-  {$endif}
-  {$ifndef CPUAARCH64}
+  m_crossdarwin386,
+  m_crossdarwinx64,
   m_crossdarwinaarch64,
-  {$endif}
-  {$ifdef CPUX86}
-  m_crossdarwinpowerpc,
   m_crossdarwin386iphonesim,
-  {$endif}
-  {$ifdef CPUX86_64}
   m_crossdarwinx64iphonesim,
-  {$endif}
   m_crossiosarm,
   m_crossiosaarch64,
+  m_crossdarwinpowerpc,
+  m_crossdarwinpowerpc64,
   {$else}
   m_any_to_darwin386,
   m_any_to_darwinx64,

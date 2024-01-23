@@ -74,6 +74,9 @@ var
   SDKVersion:string;
   Major,Minor,Release:integer;
   found:boolean;
+  SDKSettings:string;
+  TxtFile:text;
+  i:integer;
 begin
   result:=inherited;
 
@@ -271,11 +274,59 @@ begin
       end;
     end;
 
-    // if XQuarts found, add path to libs.
+    // if XQuarts or X11 found, add path to libs.
+
     s:=IncludeTrailingPathDelimiter(LibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator+'..'+DirectorySeparator;
     s:=ExpandFileName(s);
     s:=ConcatPaths([s,'XQuartz','X11','lib']);
     if DirectoryExists(s) then AddFPCCFGSnippet('-Fl'+s);
+
+    s:=IncludeTrailingPathDelimiter(LibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
+    s:=ExpandFileName(s);
+    s:=ConcatPaths([s,'usr','X11','lib']);
+    if DirectoryExists(s) then AddFPCCFGSnippet('-Fl'+s);
+
+    // if we cross-compile for legacy ppc[64], force OSX version
+    if TargetCPU in [TCPU.powerpc,TCPU.powerpc64] then
+    begin
+      s:=IncludeTrailingPathDelimiter(LibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
+      s:=ExpandFileName(s);
+      SDKSettings:=IncludeTrailingPathDelimiter(s)+'SDKSettings.plist';
+      if FileExists(SDKSettings) then
+      begin
+        AssignFile(TxtFile,SDKSettings);
+        try
+          try
+            System.Reset(TxtFile);
+            while NOT EOF (TxtFile) do
+            begin
+              Readln(TxtFile,s);
+              if (Pos('MaximumDeploymentTarget',s)>0) then
+              begin
+                Readln(TxtFile,s);
+                SDKVersion:='';
+                for i:=1 to Length(s) do
+                begin
+                  if (s[i] in ['0'..'9','.']) then SDKVersion:=SDKVersion+s[i];
+                end;
+                if Length(SDKVersion)>0 then
+                begin
+                  if CompareVersionStrings(SDKVersion,'10.9')>=0 then
+                  begin
+                    SDKVersion:='10.9';
+                  end;
+                  AddFPCCFGSnippet('-WM'+SDKVersion);
+                end;
+              end;
+            end;
+          finally
+            CloseFile(TxtFile);
+          end;
+        except
+          on E: EInOutError do writeln('File handling error occurred. Details: ', E.ClassName, '/', E.Message);
+        end;
+      end;
+    end;
 
   end
   else

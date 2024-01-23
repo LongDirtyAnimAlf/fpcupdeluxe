@@ -1,60 +1,39 @@
 unit m_crossdarwinpowerpc;
 
-{ Cross compiles from Darwin i386 to Darwin powerpc
+{ Cross compiles from Darwin to Darwin powerpc
 }
-
-
-{$mode objfpc}{$H+}
 
 interface
 
+{$mode objfpc}{$H+}
+
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils;
 
 implementation
 
 uses
-  fpcuputil;
+  m_crossinstaller, m_darwin_to_apple_base;
 
 type
-
-{ TDarwinpowerpc }
-
-TDarwinpowerpc = class(TCrossInstaller)
-private
-  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-public
-  function GetLibs(Basepath:string):boolean;override;
-  function GetBinUtils(Basepath:string):boolean;override;
-  constructor Create;
-  destructor Destroy; override;
-end;
+  TDarwinpowerpc = class(Tdarwin_apple)
+  public
+    function GetLibs(Basepath:string):boolean;override;
+    function GetBinUtils(Basepath:string):boolean;override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 { TDarwinpowerpc }
 
 function TDarwinpowerpc.GetLibs(Basepath:string): boolean;
 begin
   result:=inherited;
-  if result then exit;
-  FLibsPath:='';
-  result:=true;
-  FLibsFound:=true;
 end;
 
 function TDarwinpowerpc.GetBinUtils(Basepath:string): boolean;
-var
-  aOption:string;
 begin
   result:=inherited;
-  if result then exit;
-
-  FBinUtilsPath:='';
-  FBinUtilsPrefix:=''; // we have the "native" names, no prefix
-
-  result:=true;
-  FBinsFound:=true;
-  aOption:=GetDarwinSDKVersion('macosx');
-  if Length(aOption)>0 then AddFPCCFGSnippet('-WM'+aOption);
 end;
 
 constructor TDarwinpowerpc.Create;
@@ -63,7 +42,6 @@ begin
   FTargetCPU:=TCPU.powerpc;
   FTargetOS:=TOS.darwin;
   Reset;
-  FAlreadyWarned:=false;
   ShowInfo;
 end;
 
@@ -72,8 +50,8 @@ begin
   inherited Destroy;
 end;
 
-{$IFDEF Darwin}
-{$IFDEF CPUX86}
+{$ifdef DARWIN}
+{$IF (NOT DEFINED(CPUPOWERPC)) OR (DEFINED(CPUPOWERPC64))}
 
 var
   Darwinpowerpc:TDarwinpowerpc;
@@ -84,7 +62,8 @@ initialization
 
 finalization
   Darwinpowerpc.Destroy;
-{$ENDIF}
-{$ENDIF}
+
+{$endif CPUPOWERPC}
+{$endif DARWIN}
 end.
 

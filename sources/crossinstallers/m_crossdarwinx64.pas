@@ -1,6 +1,6 @@
-unit m_crossdarwin32;
+unit m_crossdarwinx64;
 
-{ Cross compiles from Darwin to Darwin i386
+{ Cross compiles from Darwin to Darwin x86_64
 }
 
 interface
@@ -16,7 +16,7 @@ uses
   m_crossinstaller, m_darwin_to_apple_base;
 
 type
-  TDarwin32 = class(Tdarwin_apple)
+  TDarwin64 = class(Tdarwin_apple)
   public
     function GetLibs(Basepath:string):boolean;override;
     function GetBinUtils(Basepath:string):boolean;override;
@@ -24,43 +24,43 @@ type
     destructor Destroy; override;
   end;
 
-{ TDarwin32 }
+{ TDarwin64 }
 
-function TDarwin32.GetLibs(Basepath:string): boolean;
+function TDarwin64.GetLibs(Basepath:string): boolean;
 begin
   result:=inherited;
 end;
 
-function TDarwin32.GetBinUtils(Basepath:string): boolean;
+function TDarwin64.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
 end;
 
-constructor TDarwin32.Create;
+constructor TDarwin64.Create;
 begin
   inherited Create;
-  FTargetCPU:=TCPU.i386;
+  FTargetCPU:=TCPU.x86_64;
   FTargetOS:=TOS.darwin;
   Reset;
   ShowInfo;
 end;
 
-destructor TDarwin32.Destroy;
+destructor TDarwin64.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$ifdef Darwin}
-{$ifndef CPUX86}
+{$ifndef CPUX86_64}
 var
-  Darwin32:TDarwin32;
+  Darwin64:TDarwin64;
 
 initialization
-  Darwin32:=TDarwin32.Create;
-  RegisterCrossCompiler(Darwin32.RegisterName,Darwin32);
+  Darwin64:=TDarwin64.Create;
+  RegisterCrossCompiler(Darwin64.RegisterName,Darwin64);
 
 finalization
-  Darwin32.Destroy;
+  Darwin64.Destroy;
 
 {$endif CPUX86}
 {$endif Darwin}

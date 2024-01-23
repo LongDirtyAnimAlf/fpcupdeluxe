@@ -39,6 +39,7 @@ uses
 implementation
 
 uses
+  fpcuputil,
   m_crossinstaller, m_any_to_apple_base;
 
 type
