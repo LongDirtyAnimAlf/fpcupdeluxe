@@ -2387,15 +2387,17 @@ begin
   begin
     if Sender=PicoBtn then
     begin
-      s:=Format(upInstallConfimation,['FPC embedded','Lazarus trunk',' + cross arm Raspberry Pico compiler + tools']);
+      aFPCTarget:='trunk'+GITLABEXTENSION;
+      s:=Format(upInstallConfimation,['FPC trunk','Lazarus trunk',' + cross arm Raspberry Pico compiler + tools']);
       aModule:='develtools4fpc';
     end;
     if Sender=WioBtn then
     begin
+      aFPCTarget:='embedded'+GITLABEXTENSION;
       s:=Format(upInstallConfimation,['FPC embedded','Lazarus trunk',' + cross arm Wio Terminal compiler + tools']);
       aModule:='develtools4fpc,mbf-freertos-wio';
     end;
-    aFPCTarget:='embedded'+GITLABEXTENSION;
+    //aFPCTarget:='embedded'+GITLABEXTENSION;
     aLazarusTarget:='trunk'+GITLABEXTENSION;
   end;
 
