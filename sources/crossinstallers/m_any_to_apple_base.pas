@@ -46,6 +46,7 @@ type
   Tany_apple = class(TCrossInstaller)
   private
     FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
+    IOSProtection: boolean;
   protected
     function GetOSName:string;virtual;abstract;
     function GetLibName:string;virtual;abstract;
@@ -53,6 +54,7 @@ type
   public
     function GetLibs(Basepath:string):boolean;override;
     function GetBinUtils(Basepath:string):boolean;override;
+    procedure Reset;override;
     constructor Create;
     destructor Destroy; override;
     property OSName:string read GetOSName;
@@ -240,6 +242,8 @@ begin
   begin
     FLibsFound:=True;
 
+    if IOSProtection then AddFPCCFGSnippet('#IFNDEF IOS');
+
     AddFPCCFGSnippet('-Xd');
     AddFPCCFGSnippet('-Fl'+LibsPath);
     AddFPCCFGSnippet('-Fl'+ConcatPaths([LibsPath,'system']));
@@ -332,6 +336,7 @@ begin
       end;
     end;
 
+    if IOSProtection then AddFPCCFGSnippet('#ENDIF IOS');
   end
   else
   begin
@@ -554,11 +559,30 @@ begin
   if result then
   begin
     FBinsFound:=true;
+    if IOSProtection then AddFPCCFGSnippet('#IFNDEF IOS');
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
     //AddFPCCFGSnippet('-XX');
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names};
+    if IOSProtection then AddFPCCFGSnippet('#ENDIF IOS');
   end;
+end;
+
+procedure Tany_apple.Reset;
+begin
+  inherited;
+  {
+  When compiling for iOS, FPC itself also defines DARWIN.
+  So, we must make sure that the Darwin settings are only used when NOT targetting iOS.
+  In that case, add
+  #IFNDEF IOS
+  #ENDIF IOS
+
+  This is already handled in installerfpc, but keep code just for now
+  }
+
+  //IOSProtection:=((TargetOS=TOS.darwin) AND (TargetCPU in [TCPU.aarch64,TCPU.arm]));
+  IOSProtection:=false;
 end;
 
 constructor Tany_apple.Create;

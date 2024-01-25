@@ -350,6 +350,7 @@ var
   SnipBegin,SnipEnd: integer;
   SnippetText,SubarchText: TStringList;
   NewSnipped:boolean;
+  IOSProtection:boolean;
   SUBARCH:TSUBARCH;
   Subarchs:TSUBARCHS;
 begin
@@ -361,6 +362,15 @@ begin
   end;
 
   NewSnipped:=false;
+
+  {
+  When compiling for iOS, FPC itself also defines DARWIN.
+  So, we must make sure that the Darwin settings are only used when NOT targetting iOS.
+  In that case, add
+  #IFNDEF IOS
+  #ENDIF IOS
+  }
+  IOSProtection:=((CrossInstaller.TargetOS=TOS.darwin) AND (CrossInstaller.TargetCPU in [TCPU.aarch64,TCPU.arm]));
 
   //Set CPU
   //s2:=UpperCase(CrossInstaller.TargetCPUName);
@@ -432,8 +442,10 @@ begin
         // Just add new snipped
         if SnippetText.Count>0 then
         begin
+          if IOSProtection then ConfigText.Append('#IFNDEF IOS');
           for i:=0 to (SnippetText.Count-1) do
             ConfigText.Append(SnippetText.Strings[i]);
+          if IOSProtection then ConfigText.Append('#ENDIF IOS');
         end;
         ConfigText.Append('#ENDIF CPU'+UpperCase(CrossInstaller.TargetCPUName));
         ConfigText.Append('#ENDIF '+UpperCase(CrossInstaller.TargetOSName));
@@ -599,11 +611,23 @@ begin
               end;
 
               // Add new config snipped into config file
+
+
               if (SnippetText.Count>0) then
               begin
+                if IOSProtection then
+                begin
+                  ConfigText.Insert(SnipBegin,'#IFNDEF IOS');
+                  Inc(SnipBegin);
+                end;
                 for k:=0 to (SnippetText.Count-1) do
                 begin
                   ConfigText.Insert(SnipBegin,SnippetText.Strings[k]);
+                  Inc(SnipBegin);
+                end;
+                if IOSProtection then
+                begin
+                  ConfigText.Insert(SnipBegin,'#ENDIF IOS');
                   Inc(SnipBegin);
                 end;
               end;
@@ -1035,6 +1059,48 @@ begin
                   begin
                     Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
                   end;
+
+                  s1 := GetFPCConfigPath('RPI4.CFG');
+                  if (NOT FileExists(s1)) then
+                   begin
+                    //create RPI4.CFG
+                    AssignFile(TxtFile,s1);
+                    Rewrite(TxtFile);
+                    try
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'# Raspberry Pi 4B/400/CM4 specific config file');
+                      writeln(TxtFile,'#');
+                      writeln(TxtFile,'#IFDEF CPUARM');
+                      writeln(TxtFile,'-CfVFPV3');
+                      writeln(TxtFile,'-CIARM');
+                      writeln(TxtFile,'-CaEABIHF');
+                      writeln(TxtFile,'-OoFASTMATH');
+                      writeln(TxtFile,'-dRPI4');
+                      writeln(TxtFile,'-dBCM2711');
+                      s2:=GetUnitsInstallDirectory(true);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv7a),[rfIgnoreCase]);
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                      writeln(TxtFile,'#ENDIF');
+                      writeln(TxtFile,'#IFDEF CPUAARCH64');
+                      writeln(TxtFile,'-CfVFP');
+                      writeln(TxtFile,'-OoFASTMATH');
+                      writeln(TxtFile,'-dRPI4');
+                      writeln(TxtFile,'-dBCM2711');
+                      s2:=GetUnitsInstallDirectory(true);
+                      s2:=StringReplace(s2,FPC_SUBARCH_MAGIC,GetSubarch(TSUBARCH.armv8),[rfIgnoreCase]);
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'rtl');
+                      writeln(TxtFile,'-Fu'+s2+DirectorySeparator+'packages');
+                      writeln(TxtFile,'#ENDIF');
+                    finally
+                      CloseFile(TxtFile);
+                    end;
+                  end
+                  else
+                  begin
+                    Infoln(infotext+'Found existing '+ExtractFileName(s1)+' in '+ExtractFileDir(s1));
+                  end;
+
 
                   s1 := GetFPCConfigPath('QEMUVPB.CFG');
                   if (NOT FileExists(s1)) then
