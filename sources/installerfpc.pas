@@ -353,6 +353,7 @@ var
   IOSProtection:boolean;
   SUBARCH:TSUBARCH;
   Subarchs:TSUBARCHS;
+  LocalTargetCPUName:string;
 begin
   result:=true;
 
@@ -373,11 +374,11 @@ begin
   IOSProtection:=((CrossInstaller.TargetOS=TOS.darwin) AND (CrossInstaller.TargetCPU in [TCPU.aarch64,TCPU.arm]));
 
   //Set CPU
-  //s2:=UpperCase(CrossInstaller.TargetCPUName);
-  //if (CrossInstaller.TargetCPU=TCPU.powerpc) then
-  //begin
-  //  s2:='POWERPC32'; //Distinguish between 32 and 64 bit powerpc
-  //end;
+  LocalTargetCPUName:=CrossInstaller.TargetCPUName;
+  if (CrossInstaller.TargetCPU=TCPU.powerpc) then
+  begin
+    LocalTargetCPUName:='powerpc32'; //Distinguish between 32 and 64 bit powerpc
+  end;
 
   ConfigText:=TStringList.Create;
   {$IF FPC_FULLVERSION > 30100}
@@ -438,7 +439,7 @@ begin
         ConfigText.Append('# Cross compile settings dependent on both target OS and target CPU');
         ConfigText.Append('#IFDEF FPC_CROSSCOMPILING');
         ConfigText.Append('#IFDEF '+UpperCase(CrossInstaller.TargetOSName));
-        ConfigText.Append('#IFDEF CPU'+UpperCase(CrossInstaller.TargetCPUName));
+        ConfigText.Append('#IFDEF CPU'+UpperCase(LocalTargetCPUName));
         // Just add new snipped
         if SnippetText.Count>0 then
         begin
@@ -447,7 +448,7 @@ begin
             ConfigText.Append(SnippetText.Strings[i]);
           if IOSProtection then ConfigText.Append('#ENDIF IOS');
         end;
-        ConfigText.Append('#ENDIF CPU'+UpperCase(CrossInstaller.TargetCPUName));
+        ConfigText.Append('#ENDIF CPU'+UpperCase(LocalTargetCPUName));
         ConfigText.Append('#ENDIF '+UpperCase(CrossInstaller.TargetOSName));
         ConfigText.Append('#ENDIF FPC_CROSSCOMPILING');
         ConfigText.Append(SnipMagicEnd{+CrossInstaller.RegisterName});
@@ -468,7 +469,7 @@ begin
         // Existing snipped !! The hard part.
 
         // First, locate real config snipped inside config
-        j:=StringListSame(ConfigText,'#IFDEF CPU'+CrossInstaller.TargetCPUName,SnipBegin);
+        j:=StringListSame(ConfigText,'#IFDEF CPU'+UpperCase(LocalTargetCPUName),SnipBegin);
         if (j>SnipEnd) then j:=-1;
         if (j=-1) then
         begin
@@ -478,7 +479,7 @@ begin
         end
         else
         begin
-          i:=StringListSame(ConfigText,'#ENDIF CPU'+CrossInstaller.TargetCPUName,j);
+          i:=StringListSame(ConfigText,'#ENDIF CPU'+UpperCase(LocalTargetCPUName),j);
           k:=StringListSame(ConfigText,'#ENDIF',j);
           if (i=-1) then i:=k;
           if (k=-1) then k:=i;
@@ -513,10 +514,10 @@ begin
 
             repeat
               // Do we have a config with a Subarch define
-              j:=StringListSame(ConfigText,'#IFDEF CPU'+GetSubarch(SUBARCH),SnipBegin);
+              j:=StringListSame(ConfigText,'#IFDEF CPU'+UpperCase(GetSubarch(SUBARCH)),SnipBegin);
               if (j>SnipEnd) then j:=-1;
               if (j=-1) then break;
-              i:=StringListSame(ConfigText,'#ENDIF CPU'+GetSubarch(SUBARCH),j);
+              i:=StringListSame(ConfigText,'#ENDIF CPU'+UpperCase(GetSubarch(SUBARCH)),j);
               if (i>SnipEnd) then i:=-1;
               if (i=-1) then
               begin
@@ -553,11 +554,11 @@ begin
               SubarchText.Append('#IFDEF CPU'+UpperCase(CrossInstaller.SubArchName));
               repeat
                 // Do we have a config with a Subarch define
-                j:=StringListSame(SnippetText,'#IFDEF CPU'+CrossInstaller.SubArchName,0);
+                j:=StringListSame(SnippetText,'#IFDEF CPU'+UpperCase(CrossInstaller.SubArchName),0);
                 if (j=-1) then break;
                 // We have a subarch
                 // Now, add only subarch part.
-                i:=StringListSame(SnippetText,'#ENDIF CPU'+CrossInstaller.SubArchName,j);
+                i:=StringListSame(SnippetText,'#ENDIF CPU'+UpperCase(CrossInstaller.SubArchName),j);
                 if (i=-1) then
                 begin
                   // This is a severe error and should never happen
@@ -611,7 +612,6 @@ begin
               end;
 
               // Add new config snipped into config file
-
 
               if (SnippetText.Count>0) then
               begin
