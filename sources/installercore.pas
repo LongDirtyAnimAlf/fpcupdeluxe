@@ -29,7 +29,6 @@ interface
 
 uses
   Classes, SysUtils,
-  FileUtil,
   fpcuputil,
   repoclient, GitClient, HGClient, SvnClient,
   processutils, m_crossinstaller;
@@ -91,20 +90,6 @@ const
   LAZARUSGITLABBINARIES = LAZARUSGITLAB + '/binaries';
   LAZARUSTRUNKBRANCH    = 'main';
   LAZARUSBINARIES       = LAZARUSGITLABBINARIES + '/-/raw/'+LAZARUSTRUNKBRANCH;
-
-  SVNBASEHTTP           = 'https://svn.';
-  SVNBASESVN            = 'svn://svn.';
-  //FTPBASEFTP            = 'ftp://ftp.';
-  FTPBASEFTP            = 'ftp://downloads.';
-
-  FPCBASESVNURL         = SVNBASEHTTP+'freepascal.org';
-  FTPBASEURL            = FTPBASEFTP+'freepascal.org';
-  FPCFTPURL             = FTPBASEURL+'/pub/fpc/';
-  LAZARUSFTPURL         = FTPBASEURL+'/pub/lazarus/';
-
-  //FPCFTPSNAPSHOTURL     = FPCFTPURL+'snapshot/';
-
-  //LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
 
   PACKAGESLOCATION      = 'packages.fppkg';
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';
@@ -724,7 +709,9 @@ uses
   //LMessages,
   LCLIntf,
   {$endif}
-  process,LazFileUtils
+  process,
+  FileUtil,
+  LazFileUtils
   {$IF NOT DEFINED(HAIKU) AND NOT DEFINED(AROS) AND NOT DEFINED(MORPHOS)}
   //,ssl_openssl
   // for runtime init of openssl
@@ -1079,7 +1066,7 @@ end;
 function TInstaller.CheckAndGetTools: boolean;
 var
   OperationSucceeded: boolean;
-  Output: string;
+  s: string;
   aDir: string;
   {$ifdef MSWINDOWS}
   aURL,aFile: string;
@@ -1280,14 +1267,14 @@ begin
     end;
 
     if Not FileExists(F7zip) then Which('7zz');
-    Output:='7za';
+    s:='7za';
 
-    if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,Output+GetExeExt]);
+    if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,s+GetExeExt]);
 
     if (NOT (GetTOS(GetSourceOS) in WINDOWS_OS)) then
     begin
-      Output:='7zz';
-      if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,Output]);
+      s:='7zz';
+      if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,s]);
     end;
 
     if (NOT FileExists(F7zip)) then
@@ -1302,15 +1289,15 @@ begin
         {$ENDIF CPUPOWERPC}
         {$ELSE DARWIN}
         {$IF defined(LINUX) OR defined(WINDOWS)}
-        Output:=Output+'_'+GetSourceCPUOS+GetExeExt;
+        s:=s+'_'+GetSourceCPUOS+GetExeExt;
         {$ELSE}
-        Output:='';
+        s:='';
         {$ENDIF}
         {$ENDIF DARWIN}
-        if (Length(Output)>0) then
+        if (Length(s)>0) then
         begin
           Infoln(localinfotext+'Missing 7z unzipper. Trying to get it and install in '+ExtractFileDir(F7zip),etInfo);
-          OperationSucceeded:=GetFile(FPCUPTOOLS+'/'+Output,F7zip);
+          OperationSucceeded:=GetFile(FPCUPTOOLS+'/'+s,F7zip);
           if OperationSucceeded then OperationSucceeded:=FileExists(F7zip);
           {$IFDEF UNIX}
           if OperationSucceeded then fpChmod(F7zip,&755);
@@ -1334,26 +1321,26 @@ begin
         ForceDirectoriesSafe(MakePath+'unrar');
         //ForceDirectoriesSafe(MakePath+'unrar\bin');
         // this version of unrar does not need installation ... so we can silently get it !!
-        Output:='unrar-3.4.3-bin.zip';
-        SysUtils.DeleteFile(MakePath+'unrar\'+Output);
+        s:='unrar-3.4.3-bin.zip';
+        SysUtils.DeleteFile(MakePath+'unrar\'+s);
         aURL:=FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/';
-        OperationSucceeded:=GetFile(aURL+Output,MakePath+'unrar\'+Output);
+        OperationSucceeded:=GetFile(aURL+s,MakePath+'unrar\'+s);
         // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
-        if (FileSize(MakePath+'unrar\'+Output)<50000) then
+        if (FileSize(MakePath+'unrar\'+s)<50000) then
         begin
-          SysUtils.DeleteFile(MakePath+'unrar\'+Output);
+          SysUtils.DeleteFile(MakePath+'unrar\'+s);
           OperationSucceeded:=false;
         end;
         if NOT OperationSucceeded then
         begin
           // try one more time
-          SysUtils.DeleteFile(MakePath+'unrar\'+Output);
+          SysUtils.DeleteFile(MakePath+'unrar\'+s);
           aURL:='https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/';
-          OperationSucceeded:=GetFile(aURL+Output,MakePath+'unrar\'+Output);
+          OperationSucceeded:=GetFile(aURL+s,MakePath+'unrar\'+s);
           // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
-          if (FileSize(MakePath+'unrar\'+Output)<50000) then
+          if (FileSize(MakePath+'unrar\'+s)<50000) then
           begin
-            SysUtils.DeleteFile(MakePath+'unrar\'+Output);
+            SysUtils.DeleteFile(MakePath+'unrar\'+s);
             OperationSucceeded:=false;
           end;
         end;
@@ -1362,7 +1349,7 @@ begin
           with TNormalUnzipper.Create do
           begin
             try
-              OperationSucceeded:=DoUnZip(MakePath+'unrar\'+Output,MakePath+'unrar\',[]);
+              OperationSucceeded:=DoUnZip(MakePath+'unrar\'+s,MakePath+'unrar\',[]);
             finally
               Free;
             end;
@@ -1370,7 +1357,7 @@ begin
 
           if OperationSucceeded then
           begin
-            SysUtils.DeleteFile(MakePath+'unrar\'+Output);
+            SysUtils.DeleteFile(MakePath+'unrar\'+s);
             OperationSucceeded:=FileExists(FUnrar);
           end;
         end;
@@ -1403,8 +1390,8 @@ begin
           begin
             ForceDirectoriesSafe(MakePath+'git');
             {$ifdef win32}
-            //Output:='git32.7z';
-            Output:='git32.zip';
+            //s:='git32.7z';
+            s:='git32.zip';
             //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
             //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-32-bit.zip';
             //aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-32-bit.zip';
@@ -1415,8 +1402,8 @@ begin
             //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-32-bit.zip';
             aURL:='https://github.com/git-for-windows/git/releases/download/v2.33.0.windows.2/MinGit-2.33.0.2-32-bit.zip';
             {$else}
-            //Output:='git64.7z';
-            Output:='git64.zip';
+            //s:='git64.7z';
+            s:='git64.zip';
             //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
             //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-64-bit.zip';
             //aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-64-bit.zip';
@@ -1429,12 +1416,12 @@ begin
             {$endif}
             Infoln(localinfotext+'GIT client not found. Downloading it',etInfo);
             Infoln(localinfotext+'GIT client download (may take time) from '+aURL,etDebug);
-            OperationSucceeded:=GetFile(aURL,MakePath+'git\'+Output);
+            OperationSucceeded:=GetFile(aURL,MakePath+'git\'+s);
             if NOT OperationSucceeded then
             begin
               // try one more time
-              SysUtils.DeleteFile(MakePath+'git\'+Output);
-              OperationSucceeded:=GetFile(aURL,MakePath+'git\'+Output);
+              SysUtils.DeleteFile(MakePath+'git\'+s);
+              OperationSucceeded:=GetFile(aURL,MakePath+'git\'+s);
             end;
             if OperationSucceeded then
             begin
@@ -1442,14 +1429,14 @@ begin
               with TNormalUnzipper.Create do
               begin
                 try
-                  OperationSucceeded:=DoUnZip(MakePath+'git\'+Output,MakePath+'git\',[]);
+                  OperationSucceeded:=DoUnZip(MakePath+'git\'+s,MakePath+'git\',[]);
                 finally
                   Free;
                 end;
               end;
               if OperationSucceeded then
               begin
-                SysUtils.DeleteFile(MakePath+'git\'+Output);
+                SysUtils.DeleteFile(MakePath+'git\'+s);
                 OperationSucceeded:=FileExists(aFile);
                 //Copy certificate ... might be necessary
                 //aURL:=MakePath+'git\mingw32\';
@@ -1485,21 +1472,21 @@ begin
         begin
           //original source from : https://www.mercurial-scm.org/
           {$ifdef win32}
-          Output:='hg32.zip';
-          aURL:=FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/'+Output;
+          s:='hg32.zip';
+          aURL:=FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/'+s;
           {$else}
-          Output:='hg64.zip';
-          aURL:=FPCUPGITREPO+'/releases/download/windowsx64bins_v1.0/'+Output;
+          s:='hg64.zip';
+          aURL:=FPCUPGITREPO+'/releases/download/windowsx64bins_v1.0/'+s;
           {$endif}
           ForceDirectoriesSafe(MakePath+'hg');
           Infoln(localinfotext+'HG (mercurial) client not found. Downloading it',etInfo);
           Infoln(localinfotext+'HG (mercurial) client download (may take time) from '+aURL,etDebug);
-          OperationSucceeded:=GetFile(aURL,MakePath+'hg\'+Output);
+          OperationSucceeded:=GetFile(aURL,MakePath+'hg\'+s);
           if NOT OperationSucceeded then
           begin
             // try one more time
-            SysUtils.DeleteFile(MakePath+'hg\'+Output);
-            OperationSucceeded:=GetFile(aURL,MakePath+'hg\'+Output);
+            SysUtils.DeleteFile(MakePath+'hg\'+s);
+            OperationSucceeded:=GetFile(aURL,MakePath+'hg\'+s);
           end;
           if OperationSucceeded then
           begin
@@ -1507,7 +1494,7 @@ begin
             with TNormalUnzipper.Create do
             begin
               try
-                OperationSucceeded:=DoUnZip(MakePath+'hg\'+Output,MakePath+'hg\',[]);
+                OperationSucceeded:=DoUnZip(MakePath+'hg\'+s,MakePath+'hg\',[]);
               finally
                 Free;
               end;
@@ -1517,7 +1504,7 @@ begin
               OperationSucceeded:=FileExists(aFile);
             end;
           end;
-          SysUtils.DeleteFile(MakePath+'hg\'+Output);
+          SysUtils.DeleteFile(MakePath+'hg\'+s);
           if OperationSucceeded then RepoExecutable:=aFile else RepoExecutable:=RepoExecutableName+GetExeExt;
         end;
         if RepoExecutable <> EmptyStr then
@@ -2386,7 +2373,9 @@ begin
   {$endif win64}
 
   // add wince gdb
-  AddNewUtil('gdb-6.4-win32-arm-wince.zip',FPCFTPURL+'contrib/cross/','',ucDebuggerWince);
+  //AddNewUtil('gdb-6.4-win32-arm-wince.zip',FPCFTPURL+'contrib/cross/','',ucDebuggerWince);
+  aSourceURL:=FPCGITLABBUILDBINARIES+'/-/raw/main/install/crossbinwce/';
+  AddNewUtil('arm-wince-gdb.exe',aSourceURL,'',ucDebuggerWince);
 end;
 
 function TInstaller.DownloadBinUtils: boolean;
@@ -3197,10 +3186,7 @@ begin
 
   // Do we need SVN
   if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(SourceDirectory)+'.svn') then result:=SVNClient;
-  if result=nil then if (Pos(SVNBASEHTTP,LowerCase(FURL))>0) then result:=SVNClient;
   if result=nil then if (Pos('http://svn.',LowerCase(FURL))=1) then result:=SVNClient;
-  if result=nil then if (Pos(SVNBASESVN,LowerCase(FURL))>0) then result:=SVNClient;
-
 
   // Do we need HG
   if result=nil then if ( (Pos('hg.code.sf.net',LowerCase(FURL))>0) ) then result:=HGClient;

@@ -986,10 +986,10 @@ begin
     {$endif Darwin}
 
     // GIT quirks.
-    if AnsiStartsText('fatal: No annotated tags ',line) then exit;
-    if AnsiStartsText('fatal: HEAD does not ',line) then exit;
-    if AnsiStartsText('fatal: no tag exactly matches',line) then exit;
-    if AnsiStartsText('fatal: unknown date format',line) then exit;
+    if AnsiContainsText(line,'fatal: No annotated tags ') then exit;
+    if AnsiContainsText(line,'fatal: HEAD does not ') then exit;
+    if AnsiContainsText(line,'fatal: no tag exactly matches') then exit;
+    if AnsiContainsText(line,'fatal: unknown date format') then exit;
 
     if AnsiStartsText('However, ',line) then exit;
 

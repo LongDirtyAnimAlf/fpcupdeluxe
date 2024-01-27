@@ -162,9 +162,6 @@ type
     function GetSendInfo:boolean;
     procedure SetSendInfo(value:boolean);
 
-    function GetFpcupBootstrappersOnly:boolean;
-    procedure SetFpcupBootstrappersOnly(value:boolean);
-
     function GetForceLocalRepoClient:boolean;
     procedure SetForceLocalRepoClient(value:boolean);
 
@@ -279,7 +276,6 @@ type
     property MakeJobs:boolean read GetMakeJobs write SetMakeJobs;
     property ExtraVerbose:boolean read GetExtraVerbose write SetExtraVerbose;
     property SendInfo:boolean read GetSendInfo write SetSendInfo;
-    property FpcupBootstrappersOnly:boolean read GetFpcupBootstrappersOnly write SetFpcupBootstrappersOnly;
     property ForceLocalRepoClient:boolean read GetForceLocalRepoClient write SetForceLocalRepoClient;
     property GetUpdates:boolean read GetCheckUpdates write SetCheckUpdates;
     property UseSoftFloat:boolean read GetUseSoftFloat write SetUseSoftFloat;
@@ -364,9 +360,6 @@ resourcestring
 
   HintCheckSendInfo = 'Location and install info will be send to public central fpcupdeluxe server.';
   CaptionCheckSendInfo = 'Send location and install info.';
-
-  HintCheckFpcupBootstrappersOnly = '';
-  CaptionCheckFpcupBootstrappersOnly = 'Only use fpcup bootstrappers.';
 
   HintCheckForceLocalRepoClient = 'Use the repo-client by fpcupdeluxe.';
   CaptionCheckForceLocalRepoClient = 'Use local repo-client.';
@@ -492,7 +485,6 @@ begin
 
   SaveScript             := False;
   AskConfirmation        := True;
-  FpcupBootstrappersOnly := True;
   Repo                   := True;
   PackageRepo            := False;
   IncludeHelp            := False;
@@ -648,7 +640,6 @@ begin
     Append(CaptionCheckUseMakeJobs);
     Append(CaptionCheckExtraVerbose);
     Append(CaptionCheckSendInfo);
-    Append(CaptionCheckFpcupBootstrappersOnly);
     Append(CaptionCheckForceLocalRepoClient);
     Append(CaptionCheckGetUpdates);
     Append(CaptionUseSoftFloat80bit);
@@ -1442,15 +1433,6 @@ end;
 procedure TForm2.SetSendInfo(value:boolean);
 begin
   SetCheckState(CaptionCheckSendInfo,value);
-end;
-
-function TForm2.GetFpcupBootstrappersOnly:boolean;
-begin
-  result:=GetCheckState(CaptionCheckFpcupBootstrappersOnly);
-end;
-procedure TForm2.SetFpcupBootstrappersOnly(value:boolean);
-begin
-  SetCheckState(CaptionCheckFpcupBootstrappersOnly,value);
 end;
 
 function TForm2.GetForceLocalRepoClient:boolean;

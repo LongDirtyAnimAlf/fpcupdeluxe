@@ -4105,7 +4105,6 @@ begin
 
   FPCupManager.FPCPatches:=Form2.FPCPatches;
   FPCupManager.LazarusPatches:=Form2.LazPatches;
-  FPCupManager.NativeFPCBootstrapCompiler:=(NOT Form2.FpcupBootstrappersOnly);
   FPCupManager.ForceLocalRepoClient:=Form2.ForceLocalRepoClient;
   FPCupManager.Context:=Form2.AddContext;
 
@@ -4461,8 +4460,6 @@ begin
       Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
       Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
 
-      Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
-
       Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
     finally
       Free;
@@ -4632,8 +4629,6 @@ begin
 
       WriteString('Patches','FPCPatches',Form2.FPCPatches);
       WriteString('Patches','LazarusPatches',Form2.LazPatches);
-
-      WriteBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 
       WriteBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
 

@@ -359,7 +359,6 @@ const
     ('3.0','/Lazarus%203.0/doc-chm-fpc3.2.2-laz3.0-0.zip')
   );
   HELP_URL_BASE='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation';
-  HELP_URL_FTP=LAZARUSFTPURL+'releases/Lazarus%20Documentation';
 
 var
   DocsZip,DocsTar: string;
@@ -447,23 +446,6 @@ begin
           // Deal with timeouts, wrong URLs etc
           OperationSucceeded:=false;
           Infoln(ModuleName+': Download documents failed. URL: '+HELP_URL_BASE+HelpUrl+LineEnding+
-            'Exception: '+E.ClassName+'/'+E.Message, etWarning);
-        end;
-      end;
-    end;
-
-    if NOT OperationSucceeded then
-    begin
-      //Try a final time with FTP URL
-      SysUtils.DeleteFile(DocsZip); //Get rid of temp zip
-      try
-        OperationSucceeded:=Download(FUseWget, HELP_URL_FTP+HelpUrl, DocsZip);
-      except
-        on E: Exception do
-        begin
-          // Deal with timeouts, wrong URLs etc
-          OperationSucceeded:=false;
-          Infoln(ModuleName+': Download documents failed. URL: '+HELP_URL_FTP+HelpUrl+LineEnding+
             'Exception: '+E.ClassName+'/'+E.Message, etWarning);
         end;
       end;

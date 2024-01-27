@@ -232,7 +232,6 @@ type
     FSoftFloat:boolean;
     FOnlinePatching:boolean;
     FUseGitClient:boolean;
-    FNativeFPCBootstrapCompiler:boolean;
     FForceLocalRepoClient:boolean;
     FSequencer: TSequencer;
     FSolarisOI:boolean;
@@ -371,7 +370,6 @@ type
     property SoftFloat:boolean read FSoftFloat write FSoftFloat;
     property OnlinePatching:boolean read FOnlinePatching write FOnlinePatching;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
-    property NativeFPCBootstrapCompiler:boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
     property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
     property SolarisOI:boolean read FSolarisOI write FSolarisOI;
     property MUSL:boolean read FMUSL write FMUSL;
@@ -1130,7 +1128,6 @@ begin
   Context:=false;
   {$endif}
 
-  NativeFPCBootstrapCompiler:=false;
   ForceLocalRepoClient:=false;
   ExportOnly:=false;
 end;
@@ -2418,10 +2415,6 @@ begin
     (FInstaller as TFPCInstaller).PostInstallScriptPath:=FParent.FPCPostInstallScriptPath;
 
     (FInstaller as TFPCInstaller).SoftFloat:=FParent.SoftFloat;
-    if FParent.MUSL then
-      (FInstaller as TFPCInstaller).NativeFPCBootstrapCompiler:=false
-    else
-      (FInstaller as TFPCInstaller).NativeFPCBootstrapCompiler:=FParent.NativeFPCBootstrapCompiler;
     FInstaller.CompilerOptions:=FParent.FPCOPT;
 
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
