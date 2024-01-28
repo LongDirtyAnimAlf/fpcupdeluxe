@@ -1283,9 +1283,9 @@ begin
       begin
         {$IFDEF DARWIN}
         {$IFDEF CPUPOWERPC}
-        Output:='';
+        s:='';
         {$ELSE}
-        Output:=Output+'_all-apple';
+        s:=s+'_all-apple';
         {$ENDIF CPUPOWERPC}
         {$ELSE DARWIN}
         {$IF defined(LINUX) OR defined(WINDOWS)}

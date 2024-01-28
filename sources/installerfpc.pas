@@ -3244,10 +3244,6 @@ begin
     {$ENDIF CPU32}
   {$ENDIF Darwin}
 
-  {$ifdef Linux}
-  if FMUSL then NativeFPCBootstrapCompiler:=false;
-  {$endif}
-
   if (aBootstrapVersion<>'') then
   begin
     aCompilerFound:=false;
