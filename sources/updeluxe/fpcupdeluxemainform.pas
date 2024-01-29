@@ -16,9 +16,7 @@ uses
   {$ifdef RemoteLog}
   mormotdatamodelclient,
   {$endif}
-  installerManager
-  {$ifdef usealternateui},alternateui{$endif}
-  ;
+  installerManager;
 
 //{$ifdef lcl_fullversion}
 {$if lcl_fullversion>2010000}
@@ -218,11 +216,6 @@ type
     procedure CommandOutputScreenMouseWheel({%H-}Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; {%H-}MousePos: TPoint; var {%H-}Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
-    {$ifdef usealternateui}
-    procedure alternateuibutClick(Sender: TObject);
-    procedure alternateuibutEnter(Sender: TObject);
-    procedure alternateuibutLeave(Sender: TObject);
-    {$endif}
   private
     { private declarations }
     MessageTrigger:boolean;
@@ -277,17 +270,8 @@ type
     {$ifdef EnableLanguages}
     procedure Translate(const Language: string);
     {$endif}
-    {$ifndef usealternateui}
     property  FPCTarget:string read FFPCTarget write SetFPCTarget;
     property  LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
-    {$endif}
-  public
-    { public declarations }
-    {$ifdef usealternateui}
-    property FPCTarget:string read FFPCTarget write SetFPCTarget;
-    property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
-    {$endif}
-
   published
     property CmdFontSize: Integer read GetCmdFontSize write SetCmdFontSize;
     property CmdFontName: String read GetCmdFontName write SetCmdFontName;
@@ -487,11 +471,7 @@ begin
 
   {$ifdef RemoteLog}
   aDataClient:=TDataClient.Create;
-  {$ifdef usealternateui}
-  aDataClient.UpInfo.UpVersion:=DELUXEVERSION+'+';
-  {$else}
   aDataClient.UpInfo.UpVersion:=DELUXEVERSION;
-  {$endif}
   aDataClient.UpInfo.UpOS:=GetSourceCPUOS;
   {$endif}
 
@@ -535,11 +515,7 @@ begin
   {$endif}
 
   Form1.Caption:=
-  {$ifdef usealternateui}
-  'FPCUPdeluxery V'+
-  {$else}
   'FPCUPdeluxe V'+
-  {$endif}
     DELUXEVERSION+
     ' for ' +
     GetSourceCPUOS+
@@ -1882,12 +1858,6 @@ begin
     Markup.Background:=BG;
     Markup.Foreground:=FG;
   end;
-
-  {$ifdef usealternateui}
-  if Special
-     then alternateui_AddMessage(s,false,FG)
-     else alternateui_AddMessage(s,false,clLime);
-  {$endif}
 end;
 {$endif}
 
@@ -3001,7 +2971,8 @@ begin
       end
       else
       begin
-        FPCupManager.OnlyModules:=_LCLALLREMOVEONLY+','+_FPCREMOVEONLY;
+        //FPCupManager.OnlyModules:=_LCLALLREMOVEONLY+','+_FPCREMOVEONLY;
+        FPCupManager.OnlyModules:=_FPCREMOVEONLY;
       end;
 
       {$ifdef RemoteLog}
@@ -3899,21 +3870,6 @@ begin
   MessageTrigger:=True;
 end;
 
-{$ifdef usealternateui}
-procedure TForm1.alternateuibutClick(Sender: TObject);
-begin
-  alteranteui_ClickHandler(Sender);
-end;
-procedure TForm1.alternateuibutEnter(Sender: TObject);
-begin
-  alteranteui_EnterHandler(Sender);
-end;
-procedure TForm1.alternateuibutLeave(Sender: TObject);
-begin
-  alteranteui_LeaveHandler(Sender);
-end;
-{$endif}
-
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   Self.OnResize:=nil;
@@ -3986,9 +3942,6 @@ begin
       if c = memoSummary then continue;
     end;
     c.Enabled := value;
-    {$ifdef usealternateui}
-    if ((pos('Halt',c.name)>0) or (pos('Halt',c.caption)>0)) then c.Enabled:=true;
-    {$endif}
   end;
 end;
 
@@ -4551,12 +4504,7 @@ begin
   // get names of cross-compilers
   AutoUpdateCrossCompiler(nil);
   AddMessage('');
-
- {$ifdef usealternateui}
- alternateui_update_interface_buttons;
- {$endif}
 end;
-
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;
 var
@@ -4670,10 +4618,6 @@ begin
   {$else}
   CommandOutputScreen.CaretX:=0;
   CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
-  {$endif}
-
-  {$ifdef usealternateui}
-  alternateui_AddMessage(amessage,updatestatus);
   {$endif}
   Application.ProcessMessages;
 end;
@@ -4924,10 +4868,6 @@ end;
 procedure TForm1.InitFpcupdeluxe(Data: PtrInt);
 begin
   InitFPCupManager;
-  {$ifdef usealternateui}
-  // This must only be called once.
-  If Not Alternate_ui_created then alternateui_Create_Controls;
-  {$endif}
   if Form2.GetUpdates then Application.QueueAsyncCall(@CheckForUpdates,0);
 end;
 

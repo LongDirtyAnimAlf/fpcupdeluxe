@@ -57,24 +57,6 @@ program fpcupdeluxe;
     Ondrej Kelle
     Marco van de Voort (marcov)
     Olly (ollydev)
-
-*)
-(*
-//static QT5 on Linux
-{$ifdef Linux}
-  {$ifdef LCLQT5}
-    //{$linklib libc_nonshared.a}
-    {$L libgcc_s.so.1}
-    {$L libstdc++.so.6}
-    {$L libQt5PrintSupport.so.5}
-    {$L libQt5Widgets.so.5}
-    {$L libQt5Gui.so.5}
-    {$L libQt5Network.so.5}
-    {$L libQt5Core.so.5}
-    {$L libQt5X11Extras.so.5}
-    {$linklib libQt5Pas.a}
-  {$endif}
-{$endif}
 *)
 
 uses
@@ -97,6 +79,11 @@ uses
   checkoptions, fpcuputil,
   {$endif}
   {$ifdef LCL}
+  {$ifdef windows}
+  uMetaDarkStyle,
+  uDarkStyleSchemes,
+  uDarkStyleParams,
+  {$endif Windows}
   {$ifdef READER}
   fpcupdeluxemainformreader,
   {$else}
@@ -201,13 +188,6 @@ uses
   m_crosswinx64,
   m_crosswinarm64,
   {$endif win32}
-  {$ifdef windows}
-  {$ifdef LCL}
-  uMetaDarkStyle,
-  uDarkStyleSchemes,
-  uDarkStyleParams,
-  {$endif LCL}
-  {$endif Windows}
   {$else}
   m_anyinternallinker_to_win386,
   m_anyinternallinker_to_winarm64,
