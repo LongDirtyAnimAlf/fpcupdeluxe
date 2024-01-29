@@ -1693,12 +1693,12 @@ begin
   begin
     if (Pos(s,aDirectory)=1) then exit;
   end;
+  if (NOT ParentDirectoryIsNotRoot(aDirectory)) then exit;
   {$else}
   if Length(aDirectory)<=3 then exit;
   i:=Pos('\windows',aDirectory);
   if ((i>0) AND (i<4)) then exit;
   {$endif}
-  if (NOT ParentDirectoryIsNotRoot(aDirectory)) then exit;
   result:=false;
 end;
 
