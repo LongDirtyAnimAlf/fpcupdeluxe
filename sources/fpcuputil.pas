@@ -237,23 +237,23 @@ type
   {$endif USEONLYCURL}
 
 
-function MulDiv( a, b, c : Integer ) : Integer;
+function MulDiv(const a, b, c : Integer ) : Integer;
 // Create shortcut on desktop to Target file
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false) ;
+procedure CreateDesktopShortCut(const Target, TargetArguments, ShortcutName: string; const AddContext:boolean=false);
 // Create shell script in user directory that links to Target
-procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
+procedure CreateHomeStartLink(const {%H-}Target, {%H-}TargetArguments, {%H-}ShortcutName: string);
 {$IFDEF MSWINDOWS}
 // Delete shortcut on desktop
-procedure DeleteDesktopShortcut(ShortcutName: string);
+procedure DeleteDesktopShortcut(const ShortcutName: string);
 {$ENDIF MSWINDOWS}
-function FindFileInDirList(Filename, DirectoryList: String): String;
-function FindFileInDir(Filename, Path: String): String;
-function FindFileInDirWildCard(Filename, Path: String): String;
+function FindFileInDirList(const Filename, DirectoryList: String): String;
+function FindFileInDir(const Filename, Path: String): String;
+function FindFileInDirWildCard(const Filename, Path: String): String;
 // Copy a file the safe way
-function FileCopy(const Src, Dest: string;Flags: TCopyFileFlags=[cffOverwriteFile]):boolean;
+function FileCopy(const Src, Dest: string;const Flags: TCopyFileFlags=[cffOverwriteFile]):boolean;
 // Copy a directory recursive
-function DirCopy(SourcePath, DestPath: String): Boolean;
-function CheckDirectory(DirectoryName: string):boolean;
+function DirCopy(const SourcePath, DestPath: String): Boolean;
+function CheckDirectory(const DirectoryName: string; const CheckRoot: boolean = false):boolean;
 // Delete directory and children, even read-only. Equivalent to rm -rf <directory>:
 function DeleteDirectoryEx(DirectoryName: string): boolean;
 // Recursively delete files with specified name(s), only if path contains specfied directory name somewhere (or no directory name specified):
@@ -674,7 +674,7 @@ begin
 end;
 {$endif}
 
-function MulDiv( a, b, c : Integer ) : Integer;
+function MulDiv(const a, b, c : Integer ) : Integer;
 begin
   result := int64(a)*int64(b) div c;
 end;
@@ -992,7 +992,7 @@ begin
 end;
 
 {$IFDEF MSWINDOWS}
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false);
+procedure CreateDesktopShortCut(const Target, TargetArguments, ShortcutName: string; const AddContext:boolean);
 var
   IObject: IUnknown;
   ISLink: IShellLink;
@@ -1023,7 +1023,7 @@ begin
 end;
 {$ELSE}
 {$IFDEF DARWIN}
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false);
+procedure CreateDesktopShortCut(const Target, TargetArguments, ShortcutName: string; const AddContext:boolean);
 begin
   // Create shortcut on Desktop and in Applications
   fpSystem(
@@ -1048,7 +1048,7 @@ begin
 end;
 {$ELSE}
 {$IFDEF UNIX}
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false);
+procedure CreateDesktopShortCut(const Target, TargetArguments, ShortcutName: string; const AddContext:boolean);
 var
   OperationSucceeded: boolean;
   XdgDesktopContent: TStringList;
@@ -1198,7 +1198,7 @@ begin
 
 end;
 {$ELSE}
-procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string; AddContext:boolean=false);
+procedure CreateDesktopShortCut(const Target, TargetArguments, ShortcutName: string; const AddContext:boolean);
 begin
   ThreadLog('Not creating desktop shortcut: don''t know how to do this.');
 end;
@@ -1206,11 +1206,12 @@ end;
 {$ENDIF DARWIN}
 {$ENDIF MSWINDOWS}
 
-procedure CreateHomeStartLink(Target, TargetArguments,
-  ShortcutName: string);
+procedure CreateHomeStartLink(const Target, TargetArguments,ShortcutName: string);
+{$IFDEF UNIX}
 var
   ScriptText: TStringList;
   ScriptFile: string;
+{$ENDIF UNIX}
 begin
   {$IFDEF UNIX}
   //create dir if it doesn't exist
@@ -1531,7 +1532,7 @@ end;
 
 
 {$IFDEF MSWINDOWS}
-procedure DeleteDesktopShortcut(ShortcutName: string);
+procedure DeleteDesktopShortcut(const ShortcutName: string);
 var
   PIDL: PItemIDList;
   InFolder: array[0..MAX_PATH] of Char;
@@ -1545,7 +1546,7 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
-function FindFileInDirList(Filename, DirectoryList: String): String;
+function FindFileInDirList(const Filename, DirectoryList: String): String;
 var
   DirList: TStringList;
   ADirectory: String;
@@ -1571,7 +1572,7 @@ begin
   end;
 end;
 
-function FindFileInDir(Filename, Path: String): String;
+function FindFileInDir(const Filename, Path: String): String;
 var
   DirList: TStringList;
   ADirectory: String;
@@ -1595,7 +1596,7 @@ begin
   end;
 end;
 
-function FindFileInDirWildCard(Filename, Path: String): String;
+function FindFileInDirWildCard(const Filename, Path: String): String;
 var
   FilesFound: TStringList;
   AFile: string;
@@ -1619,7 +1620,7 @@ begin
   end;
 end;
 
-function FileCopy(const Src,Dest : string;Flags: TCopyFileFlags):boolean;
+function FileCopy(const Src,Dest : string;const Flags: TCopyFileFlags):boolean;
 Var
   D : String;
   Fin,FOut : TFileStream;
@@ -1666,12 +1667,12 @@ begin
   end;
 end;
 
-function DirCopy(SourcePath, DestPath: String): Boolean;
+function DirCopy(const SourcePath, DestPath: String): Boolean;
 begin
   result:=FileUtil.CopyDirTree(SourcePath, DestPath,[cffOverwriteFile,cffCreateDestDirectory{,cffPreserveTime}]);
 end;
 
-function CheckDirectory(DirectoryName: string):boolean;
+function CheckDirectory(const DirectoryName: string; const CheckRoot: boolean = false):boolean;
 {$ifndef Windows}
 const
   FORBIDDENFOLDERS:array[0..11] of string = ('/bin','/boot','/dev','/lib','/lib32','/lib64','/proc','/root','/run','/sbin','/sys','/var');
@@ -1693,12 +1694,12 @@ begin
   begin
     if (Pos(s,aDirectory)=1) then exit;
   end;
-  if (NOT ParentDirectoryIsNotRoot(aDirectory)) then exit;
   {$else}
   if Length(aDirectory)<=3 then exit;
   i:=Pos('\windows',aDirectory);
   if ((i>0) AND (i<4)) then exit;
   {$endif}
+  if ((CheckRoot) AND (NOT ParentDirectoryIsNotRoot(aDirectory))) then exit;
   result:=false;
 end;
 

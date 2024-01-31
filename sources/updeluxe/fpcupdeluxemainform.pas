@@ -724,9 +724,14 @@ var
   x,y             : integer;
   Lines           : TStrings;
   Handled         : boolean;
-procedure EchoInfo(info:string);
+procedure EchoInfo(const info:string);
 begin
-  memoSummary.Lines.Append(info);
+  if (Pos(BeginSnippet,info)=1) then
+  begin
+    memoSummary.Lines.Append(Trim(Copy(info,Length(BeginSnippet)+1,MaxInt)))
+  end
+  else
+    memoSummary.Lines.Append(info);
   Handled:=true;
 end;
 begin
@@ -2971,8 +2976,7 @@ begin
       end
       else
       begin
-        //FPCupManager.OnlyModules:=_LCLALLREMOVEONLY+','+_FPCREMOVEONLY;
-        FPCupManager.OnlyModules:=_FPCREMOVEONLY;
+        FPCupManager.OnlyModules:=_LCLALLREMOVEONLY+','+_FPCREMOVEONLY;
       end;
 
       {$ifdef RemoteLog}

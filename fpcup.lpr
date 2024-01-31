@@ -59,13 +59,12 @@ program fpcup;
     Ondrej Kelle
     Marco van de Voort (marcov)
     Olly (ollydev)
-
 *)
 
 uses
   {$IFDEF UNIX}
   cthreads,
-  BaseUnix,
+  //BaseUnix,
   {$ENDIF}
   {$ifdef LCL}
   Interfaces, // this includes the LCL widgetset
@@ -73,7 +72,7 @@ uses
   {$endif}
   Classes,
   {$ifndef LCL}
-  SysUtils,// Strings,
+  SysUtils, Strings,
   FileUtil, LazFileUtils,
   synautil, // for rpos ... could also use strutil
   installerManager,
@@ -94,12 +93,16 @@ uses
   m_any_to_androidaarch64,
   m_any_to_androidx64,
   m_any_to_android386,
+  m_any_to_linux386,
+  m_any_to_linuxx64,
   m_any_to_linuxarm,
   m_any_to_linuxmips,
   m_any_to_linuxmipsel,
+  m_any_to_linuxppc,
   m_any_to_linuxpowerpc64,
   m_any_to_linuxaarch64,
   m_any_to_linuxloongarch64,
+  m_any_to_linuxriscv32,
   m_any_to_aros386,
   m_any_to_arosx64,
   m_any_to_arosarm,
@@ -133,24 +136,15 @@ uses
   //{$endif}
   {$endif}
   {$ifdef Darwin}
-  {$ifndef CPUX86_64}
-  m_crossdarwin64,
-  {$endif}
-  {$ifndef CPUX86}
-  m_crossdarwin32,
-  {$endif}
-  {$ifndef CPUAARCH64}
+  m_crossdarwin386,
+  m_crossdarwinx64,
   m_crossdarwinaarch64,
-  {$endif}
-  {$ifdef CPUX86}
-  m_crossdarwinpowerpc,
   m_crossdarwin386iphonesim,
-  {$endif}
-  {$ifdef CPUX86_64}
   m_crossdarwinx64iphonesim,
-  {$endif}
   m_crossiosarm,
   m_crossiosaarch64,
+  m_crossdarwinpowerpc,
+  m_crossdarwinpowerpc64,
   {$else}
   m_any_to_darwin386,
   m_any_to_darwinx64,
@@ -162,14 +156,10 @@ uses
   m_any_to_darwinpowerpc64,
   {$endif}
   {$if defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
-  m_freebsd_to_linux386,
   {$if defined(FREEBSD) AND defined(CPU64)}
   m_freebsd64_to_freebsd32,
   {$endif}
-  m_freebsd_to_linux64,
   {$else}
-  m_any_to_linux386,
-  m_any_to_linuxx64,
   m_any_to_netbsd386,
   m_any_to_netbsdx64,
   m_any_to_freebsdx64,

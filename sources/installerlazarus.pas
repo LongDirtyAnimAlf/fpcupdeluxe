@@ -35,7 +35,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller, processutils, strutils;
+  Classes, SysUtils, installerCore;
 //todo: use processex callback to report on errors like it's done in installerfpc
 
 const
@@ -278,15 +278,18 @@ type
 implementation
 
 uses
+  m_crossinstaller,
+  StrUtils,
+  FileUtil,
+  fpcuputil,
+  repoclient,
+  processutils,
   {$ifdef Unix}
   BaseUnix,
   {$ifdef LCLQT5}
   LazFileUtils,
   {$endif}
   {$endif}
-  FileUtil,
-  fpcuputil,
-  repoclient,
   updatelazconfig;
 
 { TLazarusCrossInstaller }
@@ -466,13 +469,14 @@ begin
         if FLCL_Platform <> '' then
           Processor.SetParamData('--ws=' + FLCL_Platform);
 
-        Processor.SetParamData(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('packager'),'registration'])+DirectorySeparator+'fcl.lpk');
-        Processor.SetParamData(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('components'),'lazutils'])+DirectorySeparator+'lazutils.lpk');
-        Processor.SetParamData(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('lcl'),'interfaces'])+DirectorySeparator+'lcl.lpk');
-        // Also add the basecomponents !
-        Processor.SetParamData(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('components'),'synedit'])+DirectorySeparator+'synedit.lpk');
-        Processor.SetParamData(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('components'),'lazcontrols'])+DirectorySeparator+'lazcontrols.lpk');
-        Processor.SetParamData(ConcatPaths([{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}UnicodeString{$ENDIF}('components'),'ideintf'])+DirectorySeparator+'ideintf.lpk');
+        // Also add the default components !
+        Processor.SetParamData(ConcatPaths(['packager','registration','fcl.lpk']));
+        Processor.SetParamData(ConcatPaths(['components','lazutils','lazutils.lpk']));
+        Processor.SetParamData(ConcatPaths(['lcl','interfaces','lcl.lpk']));
+        // Also add the base components !
+        Processor.SetParamData(ConcatPaths(['components','synedit','synedit.lpk']));
+        Processor.SetParamData(ConcatPaths(['components','lazcontrols','lazcontrols.lpk']));
+        Processor.SetParamData(ConcatPaths(['components','ideintf','ideintf.lpk']));
       end;
 
       if FLCL_Platform = '' then
@@ -548,7 +552,7 @@ begin
 
   FErrorLog.Clear;
 
-  if assigned(CrossInstaller) AND (Length(BaseDirectory)>0) AND (NOT CheckDirectory(BaseDirectory)) then
+  if assigned(CrossInstaller) AND (Length(BaseDirectory)>0) AND (NOT CheckDirectory(BaseDirectory,false)) then
   begin
     if ((CrossInstaller.TargetCPU=TCPU.cpuNone) OR (CrossInstaller.TargetOS=TOS.osNone)) then exit;
 
@@ -636,7 +640,7 @@ begin
     if ((ModuleName=_LAZARUS) OR (ModuleName=_USERIDE)) then
     begin
       Infoln(infotext+'Now building '+ModuleName,etInfo);
-      s1:=ConcatPaths([SourceDirectory,'ide'])+DirectorySeparator+REVINCFILENAME;
+      s1:=ConcatPaths([SourceDirectory,'ide',REVINCFILENAME]);
       // If not there, store the revision in the appropriate location
       if (NOT FileExists(s1)) then
       begin
@@ -1187,7 +1191,7 @@ begin
 
   if result='0.0.0' then
   begin
-    aFileName:=ConcatPaths([SourceDirectory,'ide'])+DirectorySeparator+'version.inc';
+    aFileName:=ConcatPaths([SourceDirectory,'ide','version.inc']);
     if FileExists(aFileName) then
     begin
       AssignFile(TxtFile,aFileName);
@@ -1207,7 +1211,7 @@ begin
 
   if result='0.0.0' then
   begin
-    aFileName:=ConcatPaths([SourceDirectory,'ide','packages','ideconfig'])+DirectorySeparator+'version.inc';
+    aFileName:=ConcatPaths([SourceDirectory,'ide','packages','ideconfig','version.inc']);
     if FileExists(aFileName) then
     begin
       AssignFile(TxtFile,aFileName);
@@ -1327,7 +1331,7 @@ begin
 
   if result=-1 then
   begin
-    aFileName:=ConcatPaths([SourceDirectory,'ide','packages','ideconfig'])+DirectorySeparator+'version.inc';
+    aFileName:=ConcatPaths([SourceDirectory,'ide','packages','ideconfig','version.inc']);
     if FileExists(aFileName) then
     begin
       AssignFile(TxtFile,aFileName);
@@ -1687,11 +1691,11 @@ begin
 
         {$IFDEF MSWINDOWS}
         // On Windows, we provide our own GDB
-        GDBPath:=ConcatPaths([FMakeDir,'gdb',GetSourceCPUOS])+DirectorySeparator+'gdb.exe';
+        GDBPath:=ConcatPaths([FMakeDir,'gdb',GetSourceCPUOS,'gdb.exe']);
         if FileExists(GDBPath) then
         begin
           if (SourceVersionNum>=CalculateFullVersion(0,9,31)) then
-            GDBPath:=ConcatPaths([FMakeDir,'gdb','$(TargetCPU)-$(TargetOS)'])+DirectorySeparator+'gdb.exe'
+            GDBPath:=ConcatPaths([FMakeDir,'gdb','$(TargetCPU)-$(TargetOS)','gdb.exe'])
         end
         else
           GDBPath:='';
@@ -2234,7 +2238,7 @@ begin
   // finally ... if something is still still still floating around ... delete it !!
   if (NOT CrossCompiling) then
   begin
-    s:=ConcatPaths([SourceDirectory,'ide'])+DirectorySeparator+REVINCFILENAME;
+    s:=ConcatPaths([SourceDirectory,'ide',REVINCFILENAME]);
     SysUtils.DeleteFile(s);
 
     s:=ConcatPaths([InstallDirectory,'lazbuild']);
@@ -2371,7 +2375,7 @@ begin
 
     if result and Ultibo then
     begin
-      FilePath:=ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true),'regexpr'])+PathDelim+'Package.fpc';
+      FilePath:=ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true),'regexpr','Package.fpc']);
       //if FileExists(FilePath) then SysUtils.DeleteFile(FilePath);
       if (NOT FileExists(FilePath)) then
       begin
@@ -2523,7 +2527,7 @@ begin
     if Ultibo OR ( (SourceVersion<>'0.0.0') AND (CompareVersionStrings(SourceVersion,'2.0.10')<=0) ) then
     begin
       // Prevent lazbuild crash !!
-      FilePath:=ConcatPaths([SourceDirectory,'components','ideintf'])+PathDelim+'ideexterntoolintf.pas';
+      FilePath:=ConcatPaths([SourceDirectory,'components','ideintf','ideexterntoolintf.pas']);
       if (FileExists(FilePath)) then
       begin
         UpdateWarnings:=TStringList.Create;

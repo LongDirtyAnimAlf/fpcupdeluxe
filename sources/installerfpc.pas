@@ -36,7 +36,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller, processutils;
+  Classes, SysUtils, installerCore, m_crossinstaller;
 
 Const
   Sequences=
@@ -240,13 +240,13 @@ uses
   StrUtils,
   FileUtil,
   fpcuputil,
-  repoclient
+  repoclient,
+  processutils,
   {$IFDEF UNIX}
-    ,baseunix
-    ,LazFileUtils
+  baseunix,
+  LazFileUtils,
   {$ENDIF UNIX}
-  ,math
-  ;
+  math;
 
 {$ifndef FPC_HAS_TYPE_EXTENDED}
 const
@@ -1754,7 +1754,7 @@ begin
   if CheckDirectory(InstallDirectory) then exit;
 
 
-  if assigned(CrossInstaller) AND (Length(BaseDirectory)>0) AND (NOT CheckDirectory(BaseDirectory)) then
+  if assigned(CrossInstaller) AND (Length(BaseDirectory)>0) AND (NOT CheckDirectory(BaseDirectory,false)) then
   begin
     if ((CrossInstaller.TargetCPU=TCPU.cpuNone) OR (CrossInstaller.TargetOS=TOS.osNone)) then exit;
 

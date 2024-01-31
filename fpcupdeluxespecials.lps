@@ -4,16 +4,13 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="linux64musl,solarisx64oi,darwin32carbon,darwin32cocoa,darwin64cocoa,darwin64cocoalegacy,darwin64QT5,openbsdx64,openbsd32,haiku32QT5,haiku64QT5,darwinppccarbon,darwinppccocoa,darwinppc64cocoa,darwinarm64cocoa"/>
-    <BuildModes Active="darwinppccarbon"/>
-    <Units Count="133">
+    <Units Count="148">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
-        <TopLine Value="201"/>
-        <CursorPos X="35" Y="206"/>
-        <UsageCount Value="51"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="57"/>
       </Unit0>
       <Unit1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
@@ -21,10 +18,8 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="973"/>
-        <CursorPos X="56" Y="988"/>
-        <UsageCount Value="51"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="57"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -37,13 +32,13 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1067"/>
         <CursorPos X="106" Y="1075"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="57"/>
       </Unit2>
       <Unit3>
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynEditPopup"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="57"/>
       </Unit3>
       <Unit4>
         <Filename Value="sources\updeluxe\aboutfrm.pas"/>
@@ -52,7 +47,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="AboutFrm"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="57"/>
       </Unit4>
       <Unit5>
         <Filename Value="sources\updeluxe\infounit.pas"/>
@@ -60,7 +55,7 @@
         <ComponentName Value="InfoForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="57"/>
       </Unit5>
       <Unit6>
         <Filename Value="sources\updeluxe\modulesettings.pas"/>
@@ -68,36 +63,34 @@
         <ComponentName Value="Form3"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="57"/>
       </Unit6>
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
-        <CursorPos X="30" Y="15"/>
-        <UsageCount Value="51"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="57"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit7>
       <Unit8>
         <Filename Value="sources\settings.ini"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="57"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit8>
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="2"/>
         <CursorPos X="28" Y="2"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="57"/>
         <Loaded Value="True"/>
       </Unit9>
       <Unit10>
         <Filename Value="sources\processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="57"/>
       </Unit10>
       <Unit11>
         <Filename Value="sources\updeluxe\subarch.pas"/>
@@ -105,22 +98,21 @@
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="57"/>
       </Unit11>
       <Unit12>
         <Filename Value="sources\fpcuputil.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2868"/>
-        <CursorPos X="6" Y="2868"/>
-        <UsageCount Value="13"/>
+        <CursorPos X="15" Y="30"/>
+        <UsageCount Value="14"/>
       </Unit12>
       <Unit13>
         <Filename Value="sources\installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1582"/>
-        <CursorPos Y="1077"/>
-        <UsageCount Value="12"/>
+        <TopLine Value="1274"/>
+        <CursorPos X="13" Y="1288"/>
+        <UsageCount Value="13"/>
       </Unit13>
       <Unit14>
         <Filename Value="C:\fpcupsystems\stablespecial\fpcsrc\rtl\inc\systemh.inc"/>
@@ -260,7 +252,7 @@
         <EditorIndex Value="-1"/>
         <CursorPos X="18" Y="8"/>
         <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="None"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
       </Unit32>
       <Unit33>
         <Filename Value="C:\msys64\home\superdad\ld64\libtapi\tools\tapi-run\tapi-run.cpp"/>
@@ -751,17 +743,17 @@
       <Unit96>
         <Filename Value="sources\m_crossinstaller.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="83"/>
-        <CursorPos X="13" Y="110"/>
-        <UsageCount Value="11"/>
+        <TopLine Value="216"/>
+        <CursorPos X="15" Y="230"/>
+        <UsageCount Value="12"/>
       </Unit96>
       <Unit97>
         <Filename Value="sources\installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="3161"/>
-        <CursorPos X="19" Y="3179"/>
-        <UsageCount Value="11"/>
+        <TopLine Value="2573"/>
+        <CursorPos X="48" Y="2583"/>
+        <UsageCount Value="12"/>
       </Unit97>
       <Unit98>
         <Filename Value="sources\installermanager.pas"/>
@@ -1011,45 +1003,122 @@
       </Unit131>
       <Unit132>
         <Filename Value="sources\gitclient.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="202"/>
         <CursorPos X="32" Y="218"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="12"/>
       </Unit132>
+      <Unit133>
+        <Filename Value="sources\crossinstallers\m_crossdarwinx64.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit133>
+      <Unit134>
+        <Filename Value="sources\crossinstallers\m_crossdarwin386.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit134>
+      <Unit135>
+        <Filename Value="sources\crossinstallers\m_crossiosaarch64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="13"/>
+        <CursorPos X="15" Y="5"/>
+        <UsageCount Value="10"/>
+      </Unit135>
+      <Unit136>
+        <Filename Value="sources\crossinstallers\m_crossdarwinpowerpc.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="15" Y="48"/>
+        <UsageCount Value="10"/>
+      </Unit136>
+      <Unit137>
+        <Filename Value="sources\crossinstallers\m_crossdarwinpowerpc64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="27"/>
+        <CursorPos X="35" Y="46"/>
+        <UsageCount Value="10"/>
+      </Unit137>
+      <Unit138>
+        <Filename Value="sources\crossinstallers\m_darwin_to_apple_base.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="213"/>
+        <CursorPos X="19" Y="235"/>
+        <UsageCount Value="12"/>
+      </Unit138>
+      <Unit139>
+        <Filename Value="sources\crossinstallers\m_any_to_darwinpowerpc.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="57"/>
+        <CursorPos X="5" Y="65"/>
+        <UsageCount Value="12"/>
+      </Unit139>
+      <Unit140>
+        <Filename Value="C:\fpcupsystems\stablespecial\fpcsrc\rtl\objpas\objpas.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="30"/>
+        <CursorPos X="33" Y="142"/>
+        <UsageCount Value="11"/>
+      </Unit140>
+      <Unit141>
+        <Filename Value="sources\crossinstallers\m_any_to_apple_base.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="286"/>
+        <CursorPos X="23" Y="306"/>
+        <UsageCount Value="11"/>
+      </Unit141>
+      <Unit142>
+        <Filename Value="C:\fpcupsystems\stable324special\lazarus\components\lazutils\translations.pas"/>
+        <UnitName Value="Translations"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="836"/>
+        <CursorPos X="16" Y="853"/>
+        <UsageCount Value="11"/>
+      </Unit142>
+      <Unit143>
+        <Filename Value="C:\fpcupsystems\stable324special\fpcsrc\rtl\objpas\sysutils\sysstrh.inc"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="10" Y="83"/>
+        <UsageCount Value="11"/>
+      </Unit143>
+      <Unit144>
+        <Filename Value="C:\fpcupsystems\stable324special\lazarus\lcl\interfaces\cocoa\cocoawscomctrls.pas"/>
+        <UnitName Value="CocoaWSComCtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="256"/>
+        <CursorPos X="57" Y="263"/>
+        <UsageCount Value="10"/>
+      </Unit144>
+      <Unit145>
+        <Filename Value="C:\fpcupsystems\stable324special\lazarus\lcl\widgetset\wscomctrls.pp"/>
+        <UnitName Value="WSComCtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="467"/>
+        <CursorPos X="24" Y="495"/>
+        <UsageCount Value="10"/>
+      </Unit145>
+      <Unit146>
+        <Filename Value="C:\fpcupsystems\stable324special\lazarus\lcl\include\lcl_defines.inc"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit146>
+      <Unit147>
+        <Filename Value="C:\fpcupsystems\stable324special\lazarus\lcl\interfaces\gtk2\gtk2cellrenderer.pas"/>
+        <UnitName Value="Gtk2CellRenderer"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="57"/>
+        <CursorPos Y="75"/>
+        <UsageCount Value="10"/>
+      </Unit147>
     </Units>
-    <JumpHistory Count="8" HistoryIndex="7">
+    <JumpHistory Count="2" HistoryIndex="1">
       <Position1>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3189" Column="54" TopLine="3174"/>
+        <Filename Value="sources\fpcup.ini"/>
+        <Caret Line="5" Column="17"/>
       </Position1>
       <Position2>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="4999" TopLine="4972"/>
       </Position2>
-      <Position3>
-        <Filename Value="sources\gitclient.pas"/>
-        <Caret Line="219" Column="19" TopLine="202"/>
-      </Position3>
-      <Position4>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="988" Column="100" TopLine="973"/>
-      </Position4>
-      <Position5>
-        <Filename Value="sources\gitclient.pas"/>
-        <Caret Line="218" Column="42" TopLine="202"/>
-      </Position5>
-      <Position6>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="988" Column="56" TopLine="973"/>
-      </Position6>
-      <Position7>
-        <Filename Value="sources\gitclient.pas"/>
-        <Caret Line="218" Column="32" TopLine="202"/>
-      </Position7>
-      <Position8>
-        <Filename Value="sources\fpcup.ini"/>
-        <Caret Line="26" Column="5" TopLine="22"/>
-      </Position8>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
