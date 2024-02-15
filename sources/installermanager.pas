@@ -1869,7 +1869,7 @@ begin
       end;
       TOS.darwin,TOS.ios:
       begin
-        if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_15.zip';
+        if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_16.zip';
         if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PowerPC_GNU.zip';
       end;
       TOS.aix:
