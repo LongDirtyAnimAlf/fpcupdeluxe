@@ -1466,14 +1466,14 @@ begin
 
           {$ifndef FPC_HAS_TYPE_EXTENDED}
           // soft 80 bit float if available
-          if (GetSourceCPU=GetCPU(TCPU.x86_64)) then
+          if ((GetSourceCPU=GetCPU(TCPU.x86_64)) OR (GetSourceCPU=GetCPU(TCPU.aarch64))) then
           begin
             if ( (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.i8086)  OR (CrossInstaller.TargetCPU=TCPU.x86_64) ) then
             begin
               if FSoftFloat then
               begin
                 Infoln(infotext+'Adding -d'+DEFINE_FPC_SOFT_FPUX80+' to compiler options to enable 80bit (soft)float support.',etInfo);
-                Infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
+                if (GetSourceCPU=GetCPU(TCPU.x86_64)) then Infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
                 NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_FPC_SOFT_FPUX80;
               end;
             end;

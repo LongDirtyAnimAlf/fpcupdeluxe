@@ -9,7 +9,7 @@ object Form2: TForm2
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '2.3.0.0'
+  LCLVersion = '3.1.0.0'
   object GroupBox1: TGroupBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
@@ -56,9 +56,9 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       BorderSpacing.Right = 12
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 0
+      OnDblClick = EditDblClickDelete
     end
     object Label2: TLabel
       AnchorSideLeft.Side = asrBottom
@@ -86,9 +86,9 @@ object Form2: TForm2
       Width = 89
       Anchors = [akTop, akLeft, akRight]
       NumbersOnly = True
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 1
+      OnDblClick = EditDblClickDelete
     end
     object Label3: TLabel
       AnchorSideLeft.Control = GroupBox1
@@ -112,9 +112,9 @@ object Form2: TForm2
       Top = 73
       Width = 140
       BorderSpacing.Top = 4
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 2
+      OnDblClick = EditDblClickDelete
     end
     object Label4: TLabel
       AnchorSideLeft.Control = Label3
@@ -142,10 +142,10 @@ object Form2: TForm2
       Width = 117
       Anchors = [akTop, akLeft, akRight]
       EchoMode = emPassword
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       PasswordChar = '*'
       TabOrder = 3
+      OnDblClick = EditDblClickDelete
     end
   end
   object GroupBox2: TGroupBox
@@ -220,12 +220,12 @@ object Form2: TForm2
       BorderSpacing.Top = 8
       BorderSpacing.Right = 12
       Enabled = False
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       ParentShowHint = False
       ReadOnly = True
       ShowHint = True
       TabOrder = 0
+      OnDblClick = EditDblClickDelete
     end
     object EditBinLocation: TEdit
       AnchorSideLeft.Control = ScrollBox1
@@ -242,12 +242,12 @@ object Form2: TForm2
       BorderSpacing.Top = 6
       BorderSpacing.Right = 12
       Enabled = False
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       ParentShowHint = False
       ReadOnly = True
       ShowHint = True
       TabOrder = 2
+      OnDblClick = EditDblClickDelete
     end
     object btnSelectLibDir: TButton
       AnchorSideLeft.Control = EditLibLocation
@@ -266,9 +266,9 @@ object Form2: TForm2
       Caption = 'Libraries'
       Constraints.MinWidth = 80
       Enabled = False
-      OnClick = OnDirectorySelect
       ParentFont = False
       TabOrder = 1
+      OnClick = OnDirectorySelect
     end
     object btnSelectBinDir: TButton
       AnchorSideLeft.Control = EditBinLocation
@@ -287,9 +287,9 @@ object Form2: TForm2
       Caption = 'Tools'
       Constraints.MinWidth = 80
       Enabled = False
-      OnClick = OnDirectorySelect
       ParentFont = False
       TabOrder = 3
+      OnClick = OnDirectorySelect
     end
     object EditCrossBuildOptions: TEdit
       AnchorSideLeft.Control = ScrollBox1
@@ -306,10 +306,10 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       BorderSpacing.Right = 6
       Enabled = False
-      OnDblClick = EditDblClickDelete
-      OnEditingDone = EditCrossBuildOptionsEditingDone
       ParentFont = False
       TabOrder = 4
+      OnDblClick = EditDblClickDelete
+      OnEditingDone = EditCrossBuildOptionsEditingDone
     end
     object LabelCrossBuildOptions: TLabel
       AnchorSideLeft.Control = ScrollBox1
@@ -339,12 +339,12 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       BorderSpacing.Right = 12
       Enabled = False
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       ParentShowHint = False
       ReadOnly = True
       ShowHint = True
       TabOrder = 5
+      OnDblClick = EditDblClickDelete
     end
     object btnSelectCompiler: TButton
       AnchorSideLeft.Control = EditLibLocation
@@ -363,9 +363,9 @@ object Form2: TForm2
       Caption = 'Compiler'
       Constraints.MinWidth = 80
       Enabled = False
-      OnClick = btnSelectFile
       ParentFont = False
       TabOrder = 6
+      OnClick = btnSelectFile
     end
     object LabelCompilerOverride: TLabel
       AnchorSideLeft.Control = ScrollBox1
@@ -462,11 +462,11 @@ object Form2: TForm2
           BorderSpacing.Left = 4
           BorderSpacing.Top = 8
           ItemHeight = 15
-          OnChange = ComboBoxCPUOSChange
           ParentFont = False
           ParentShowHint = False
           Style = csDropDownList
           TabOrder = 0
+          OnChange = ComboBoxCPUOSChange
         end
         object ComboBoxOS: TComboBox
           AnchorSideLeft.Control = ComboBoxCPU
@@ -480,10 +480,10 @@ object Form2: TForm2
           Width = 104
           BorderSpacing.Left = 8
           ItemHeight = 15
-          OnChange = ComboBoxCPUOSChange
           ParentFont = False
           Style = csDropDownList
           TabOrder = 1
+          OnChange = ComboBoxCPUOSChange
         end
         object btnListCustomOptions: TButton
           AnchorSideTop.Control = ComboBoxOS
@@ -497,9 +497,9 @@ object Form2: TForm2
           AutoSize = True
           BorderSpacing.Right = 6
           Caption = 'List All'
-          OnClick = btnListCustomOptionsClick
           ParentFont = False
           TabOrder = 2
+          OnClick = btnListCustomOptionsClick
         end
       end
       object tsSUBARCH: TTabSheet
@@ -615,9 +615,9 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       BorderSpacing.Right = 8
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 0
+      OnDblClick = EditDblClickDelete
     end
     object LabelFPCbranch: TLabel
       AnchorSideLeft.Control = EditFPCBranch
@@ -644,9 +644,9 @@ object Form2: TForm2
       Anchors = [akTop, akRight]
       BorderSpacing.Top = 4
       BorderSpacing.Right = 4
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 1
+      OnDblClick = EditDblClickDelete
     end
     object LabelFPCRevision: TLabel
       AnchorSideLeft.Control = EditFPCRevision
@@ -683,9 +683,9 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       BorderSpacing.Right = 8
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 2
+      OnDblClick = EditDblClickDelete
     end
     object LabelLazarusRevision: TLabel
       AnchorSideLeft.Control = EditLazarusRevision
@@ -710,9 +710,9 @@ object Form2: TForm2
       Anchors = [akTop, akRight]
       BorderSpacing.Top = 4
       BorderSpacing.Right = 4
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 3
+      OnDblClick = EditDblClickDelete
     end
   end
   object GroupBoxCompileOptions: TGroupBox
@@ -758,9 +758,9 @@ object Form2: TForm2
       Width = 88
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Top = 4
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 0
+      OnDblClick = EditDblClickDelete
     end
     object LabelLazarusOptions: TLabel
       AnchorSideTop.Control = EditFPCOptions
@@ -784,9 +784,9 @@ object Form2: TForm2
       Width = 88
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Top = 4
-      OnDblClick = EditDblClickDelete
       ParentFont = False
       TabOrder = 1
+      OnDblClick = EditDblClickDelete
     end
     object chkFPCDebug: TCheckBox
       AnchorSideLeft.Control = EditFPCOptions
@@ -860,9 +860,9 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       BorderSpacing.Right = 8
       Constraints.MinWidth = 124
-      OnClick = EditScriptClick
       ParentFont = False
       TabOrder = 0
+      OnClick = EditScriptClick
     end
     object LabelFPCPreInstall: TLabel
       AnchorSideLeft.Control = EditFPCPreInstall
@@ -890,9 +890,9 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       BorderSpacing.Right = 4
       Constraints.MinWidth = 124
-      OnClick = EditScriptClick
       ParentFont = False
       TabOrder = 1
+      OnClick = EditScriptClick
     end
     object LabelFPCPostInstall: TLabel
       AnchorSideLeft.Control = EditFPCPostInstall
@@ -930,9 +930,9 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       BorderSpacing.Right = 8
       Constraints.MinWidth = 124
-      OnClick = EditScriptClick
       ParentFont = False
       TabOrder = 2
+      OnClick = EditScriptClick
     end
     object LabelLazarusPostInstall: TLabel
       AnchorSideLeft.Control = EditLazarusPostInstall
@@ -958,9 +958,9 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       BorderSpacing.Right = 4
       Constraints.MinWidth = 124
-      OnClick = EditScriptClick
       ParentFont = False
       TabOrder = 3
+      OnClick = EditScriptClick
     end
   end
   object grpPatching: TGroupBox
@@ -993,9 +993,9 @@ object Form2: TForm2
       Caption = 'Add FPC patch'
       Constraints.MinHeight = 24
       Constraints.MinWidth = 120
-      OnClick = btnAddPatchClick
       ParentFont = False
       TabOrder = 0
+      OnClick = btnAddPatchClick
     end
     object btnRemFPCPatch: TButton
       AnchorSideLeft.Control = ListBoxFPCPatch
@@ -1010,9 +1010,9 @@ object Form2: TForm2
       Caption = 'Rem. FPC patch'
       Constraints.MinHeight = 24
       Constraints.MinWidth = 120
-      OnClick = btnRemPatchClick
       ParentFont = False
       TabOrder = 1
+      OnClick = btnRemPatchClick
     end
     object ListBoxFPCPatch: TListBox
       AnchorSideLeft.Control = grpPatching
@@ -1046,9 +1046,9 @@ object Form2: TForm2
       Caption = 'Add Laz. patch'
       Constraints.MinHeight = 24
       Constraints.MinWidth = 120
-      OnClick = btnAddPatchClick
       ParentFont = False
       TabOrder = 3
+      OnClick = btnAddPatchClick
     end
     object btnRemLazPatch: TButton
       AnchorSideLeft.Control = ListBoxLazPatch
@@ -1063,9 +1063,9 @@ object Form2: TForm2
       Caption = 'Rem. Laz. patch'
       Constraints.MinHeight = 24
       Constraints.MinWidth = 120
-      OnClick = btnRemPatchClick
       ParentFont = False
       TabOrder = 4
+      OnClick = btnRemPatchClick
     end
     object ListBoxLazPatch: TListBox
       AnchorSideLeft.Control = ListBoxFPCPatch

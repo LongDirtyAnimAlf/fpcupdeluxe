@@ -585,7 +585,7 @@ begin
   FPCUnicode             := False;
   SetCheckEnabled(CaptionCheckFPCUnicode,False);
 
-  {$IF defined(CPUAARCH64) OR defined(CPUARM) OR defined(Haiku)}
+  {$ifdef Haiku}
   // disable some features
   UseSoftFloat:=false;
   SetCheckEnabled(CaptionUseSoftFloat80bit,False);
