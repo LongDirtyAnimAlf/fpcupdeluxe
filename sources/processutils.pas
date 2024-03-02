@@ -936,6 +936,7 @@ begin
   if AnsiContainsText(line,'make') then
   begin
     if AnsiContainsText(line,'error 87') then exit;
+    if AnsiContainsText(line,'gcc: error: ') then exit;
     if AnsiContainsText(line,'(e=87)') then exit;
     if AnsiContainsText(line,':294:') then exit;
   end;

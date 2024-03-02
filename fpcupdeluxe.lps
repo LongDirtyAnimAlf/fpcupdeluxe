@@ -20,6 +20,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
+        <TopLine Value="3840"/>
+        <CursorPos X="16" Y="3880"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -30,7 +32,7 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="1"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -73,7 +75,6 @@
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="3"/>
-        <CursorPos Y="22"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -87,9 +88,10 @@
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="85" Y="4"/>
+        <EditorIndex Value="2"/>
+        <CursorPos X="29" Y="4"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit9>
       <Unit10>
         <Filename Value="sources\updeluxe\subarch.pas"/>
@@ -112,8 +114,8 @@
         <Filename Value="sources\installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="773"/>
-        <CursorPos Y="790"/>
+        <TopLine Value="735"/>
+        <CursorPos X="45" Y="751"/>
         <UsageCount Value="61"/>
       </Unit12>
       <Unit13>
@@ -135,8 +137,8 @@
         <Filename Value="sources\installermanager.pas"/>
         <UnitName Value="installerManager"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2391"/>
-        <CursorPos X="41" Y="2396"/>
+        <TopLine Value="1855"/>
+        <CursorPos X="107" Y="1872"/>
         <UsageCount Value="45"/>
       </Unit15>
       <Unit16>
@@ -150,8 +152,8 @@
         <Filename Value="sources\installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1750"/>
-        <CursorPos X="104" Y="1757"/>
+        <TopLine Value="2782"/>
+        <CursorPos X="35" Y="2800"/>
         <UsageCount Value="67"/>
       </Unit17>
       <Unit18>
@@ -163,10 +165,10 @@
       </Unit18>
       <Unit19>
         <Filename Value="sources\processutils.pas"/>
-        <EditorIndex Value="1"/>
-        <CursorPos X="3" Y="16"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="925"/>
+        <CursorPos X="44" Y="939"/>
         <UsageCount Value="30"/>
-        <Loaded Value="True"/>
       </Unit19>
       <Unit20>
         <Filename Value="C:\fpcupsystems\stable\fpcsrc\rtl\objpas\math.pp"/>
@@ -245,8 +247,8 @@
         <Filename Value="sources\installeruniversal.pas"/>
         <UnitName Value="installerUniversal"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2377"/>
-        <CursorPos X="53" Y="2395"/>
+        <TopLine Value="1196"/>
+        <CursorPos X="36" Y="1210"/>
         <UsageCount Value="18"/>
       </Unit30>
       <Unit31>
@@ -448,8 +450,7 @@
       <Unit57>
         <Filename Value="sources\fpcupdefines.inc"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="2" Y="6"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="10"/>
       </Unit57>
       <Unit58>
         <Filename Value="sources\crossinstallers\m_any_to_linuxarm.pas"/>
@@ -771,8 +772,8 @@
         <Filename Value="sources\installerhelp.pas"/>
         <UnitName Value="installerHelp"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="441"/>
-        <CursorPos X="36" Y="453"/>
+        <TopLine Value="342"/>
+        <CursorPos Y="352"/>
         <UsageCount Value="12"/>
       </Unit104>
       <Unit105>
@@ -3178,126 +3179,105 @@
     <Debugger>
       <Backend Value="{A76EFAFB-3A42-421F-9672-C141897C94AA}"/>
     </Debugger>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="25" HistoryIndex="24">
       <Position1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="72" Column="14" TopLine="44"/>
       </Position1>
       <Position2>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="729" Column="12" TopLine="701"/>
+        <Caret Line="72" Column="14" TopLine="44"/>
       </Position2>
       <Position3>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="1184" Column="14" TopLine="1156"/>
+        <Caret Line="737" Column="26" TopLine="729"/>
       </Position3>
       <Position4>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="1185" Column="14" TopLine="1157"/>
+        <Caret Line="729" Column="15" TopLine="716"/>
       </Position4>
       <Position5>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="1186" Column="14" TopLine="1158"/>
+        <Caret Line="730" Column="16" TopLine="715"/>
       </Position5>
       <Position6>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="1191" Column="14" TopLine="1163"/>
+        <Caret Line="5" Column="12"/>
       </Position6>
       <Position7>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="1322" Column="31" TopLine="1294"/>
+        <Filename Value="sources\fpcup.ini"/>
+        <Caret Line="22"/>
       </Position7>
       <Position8>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="1323" Column="31" TopLine="1295"/>
+        <Filename Value="sources\fpcup.ini"/>
+        <Caret Line="2356" Column="10" TopLine="2338"/>
       </Position8>
       <Position9>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="1324" Column="24" TopLine="1296"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
       </Position9>
       <Position10>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2539" Column="26" TopLine="2511"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="171" Column="24" TopLine="144"/>
       </Position10>
       <Position11>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2540" Column="26" TopLine="2512"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="172" Column="25" TopLine="145"/>
       </Position11>
       <Position12>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2542" Column="18" TopLine="2514"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="281" Column="72" TopLine="254"/>
       </Position12>
       <Position13>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2598" Column="26" TopLine="2570"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="370" Column="39" TopLine="342"/>
       </Position13>
       <Position14>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2599" Column="26" TopLine="2571"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="371" Column="42" TopLine="343"/>
       </Position14>
       <Position15>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2601" Column="18" TopLine="2573"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="576" Column="10" TopLine="548"/>
       </Position15>
       <Position16>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2728" Column="11" TopLine="2703"/>
+        <Filename Value="sources\fpcup.ini"/>
+        <Caret Line="2356" Column="10" TopLine="2338"/>
       </Position16>
       <Position17>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2901" Column="16" TopLine="2873"/>
+        <Filename Value="sources\fpcup.ini"/>
+        <Caret Line="108" TopLine="84"/>
       </Position17>
       <Position18>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2902" Column="16" TopLine="2874"/>
+        <Caret Line="2266" Column="35" TopLine="2257"/>
       </Position18>
       <Position19>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2903" Column="16" TopLine="2875"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="588" TopLine="562"/>
       </Position19>
       <Position20>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2923" Column="18" TopLine="2895"/>
+        <Caret Line="5" Column="11"/>
       </Position20>
       <Position21>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2924" Column="18" TopLine="2896"/>
+        <Filename Value="sources\fpcup.ini"/>
+        <Caret Line="140" Column="20" TopLine="129"/>
       </Position21>
       <Position22>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="2925" Column="18" TopLine="2897"/>
+        <Caret Line="34" Column="22"/>
       </Position22>
       <Position23>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3004" Column="20" TopLine="2976"/>
+        <Caret Line="698" Column="28" TopLine="670"/>
       </Position23>
       <Position24>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3005" Column="20" TopLine="2977"/>
+        <Caret Line="3880" Column="16" TopLine="3852"/>
       </Position24>
       <Position25>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3020" Column="20" TopLine="2992"/>
+        <Caret Line="698" Column="28" TopLine="681"/>
       </Position25>
-      <Position26>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-      </Position26>
-      <Position27>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="72" Column="14" TopLine="44"/>
-      </Position27>
-      <Position28>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="737" Column="26" TopLine="729"/>
-      </Position28>
-      <Position29>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="729" Column="15" TopLine="716"/>
-      </Position29>
-      <Position30>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="730" Column="16" TopLine="715"/>
-      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

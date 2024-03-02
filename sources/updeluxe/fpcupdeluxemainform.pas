@@ -2355,6 +2355,7 @@ begin
     Lazarus 2.2.4   + FPC 3.2.2
     Lazarus 2.2.6   + FPC 3.2.2
     Lazarus 3.0     + FPC 3.2.2
+    Lazarus 3.2     + FPC 3.2.2
     end;
   }
 

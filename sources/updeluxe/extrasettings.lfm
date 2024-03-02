@@ -1,10 +1,10 @@
 object Form2: TForm2
   Left = 533
-  Height = 762
+  Height = 720
   Top = 157
   Width = 842
   Caption = 'Advanced Settings'
-  ClientHeight = 762
+  ClientHeight = 720
   ClientWidth = 842
   OnClose = FormClose
   OnCreate = FormCreate
@@ -155,7 +155,7 @@ object Form2: TForm2
     AnchorSideRight.Control = ScrollBox1
     AnchorSideBottom.Control = grpPatching
     Left = 8
-    Height = 438
+    Height = 396
     Top = 140
     Width = 452
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -164,13 +164,13 @@ object Form2: TForm2
     BorderSpacing.Right = 8
     BorderSpacing.Bottom = 24
     Caption = 'Miscellaneous settings'
-    ClientHeight = 418
+    ClientHeight = 376
     ClientWidth = 448
     ParentFont = False
     TabOrder = 3
     object MiscellaneousCheckListBox: TCheckListBox
       Left = 4
-      Height = 410
+      Height = 368
       Top = 4
       Width = 440
       Align = alClient
@@ -193,7 +193,7 @@ object Form2: TForm2
     AnchorSideBottom.Control = GroupBox2
     AnchorSideBottom.Side = asrBottom
     Left = 468
-    Height = 438
+    Height = 396
     Top = 140
     Width = 366
     HorzScrollBar.Page = 238
@@ -201,7 +201,7 @@ object Form2: TForm2
     Anchors = [akTop, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Right = 8
-    ClientHeight = 434
+    ClientHeight = 392
     ClientWidth = 362
     ParentFont = False
     TabOrder = 4
@@ -831,7 +831,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 416
     Height = 124
-    Top = 630
+    Top = 588
     Width = 276
     Anchors = [akLeft, akBottom]
     AutoSize = True
@@ -969,7 +969,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 8
     Height = 152
-    Top = 602
+    Top = 560
     Width = 384
     Anchors = [akLeft, akBottom]
     AutoSize = True
@@ -1093,7 +1093,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 736
     Height = 89
-    Top = 665
+    Top = 623
     Width = 98
     Anchors = [akRight, akBottom]
     BorderSpacing.Right = 8

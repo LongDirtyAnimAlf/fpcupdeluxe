@@ -43,7 +43,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = &apos;darwin&apos; then begin
   UsageCustomOptions += &apos; -k-macosx_version_min -k10.6&apos;;
@@ -87,7 +87,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -126,7 +126,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -166,7 +166,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="aarch64"/>
@@ -199,7 +199,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -239,7 +239,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -279,7 +279,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -319,7 +319,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -359,7 +359,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -399,7 +399,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -439,7 +439,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -479,7 +479,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -519,7 +519,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -559,7 +559,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -599,7 +599,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -639,7 +639,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -679,7 +679,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -719,7 +719,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
             <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -795,7 +795,7 @@ end;"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);sources;sources\up;dcpcrypt\Ciphers"/>
       <OtherUnitFiles Value="sources;sources\up;sources\crossinstallers;synaser;dcpcrypt\Hashes;dcpcrypt;dcpcrypt\Ciphers"/>
-      <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcup\$(TargetCPU)-$(TargetOS)"/>
+      <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Conditionals Value="if TargetOS = &apos;darwin&apos; then begin
   UsageCustomOptions += &apos; -k-macosx_version_min -k10.6&apos;;
