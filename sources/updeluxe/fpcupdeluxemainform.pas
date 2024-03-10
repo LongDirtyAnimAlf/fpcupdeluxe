@@ -2455,7 +2455,7 @@ begin
     begin
     end;
 
-    if (Sender=WioBtn) OR (Sender=PicoBtn) then
+    if (Sender=WioBtn) {OR (Sender=PicoBtn)} then
     begin
       // Due to changes in Lazarus, we need a trunk/main version of Lazarus that can be compiled with an embedded (old) FPC trunk
       Form2.ForceLazarusRevision:='5b0ed449f3';
