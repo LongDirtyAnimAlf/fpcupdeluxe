@@ -37,6 +37,9 @@ type
     btnCheckToolsLocations: TButton;
     btnBuildNativeCompiler: TButton;
     chkGitlab: TCheckBox;
+    ImageList_200x40: TImageList;
+    ImageList_32x32: TImageList;
+    ImageList_88x32: TImageList;
     imgSVN: TImage;
     imgGitlab: TImage;
     ListBoxFPCHistoryNew: TListView;

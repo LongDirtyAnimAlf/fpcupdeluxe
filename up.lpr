@@ -2,7 +2,8 @@
 Copyright (C) 2012-2014 Reinier Olislagers, Ludo Brands
 
 Recent updates by Alfred, with the help of the fpc / lazarus community
-Icon by Taazz
+BigChimp icon by Taazz
+Revised icons by sesvena
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
