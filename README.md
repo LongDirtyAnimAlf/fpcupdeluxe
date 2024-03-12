@@ -45,6 +45,11 @@ Windows
 
 Linux
 ------------
+
+For your convenience, ready made install scripts can be found in the installscripts directory !
+
+The most common tools and libraries needed can be fetched through the package manager, if the above scripts are not used.
+
 - GNU make
 - the binutils (make etc); e.g. in a package called build-essential
 - GIT client
@@ -85,11 +90,11 @@ Install data collection
 Fpcupdeluxe >= 1.6.0a sends some data about its installs towards a central server.<br/>
 For this, it uses the famous mORMot framework.<br/>
 You can check this data yourself:<br/>
-http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml<br/>
-http://fpcuplogger.batterybutcher.com:8880/root/getinfojson<br/>
-http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes<br/>
-http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?Country=China<br/>
-http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?FPCVersion=trunk<br/>
+fpcuplogger.batterybutcher.com:8880/root/getinfohtml<br/>
+fpcuplogger.batterybutcher.com:8880/root/getinfojson<br/>
+fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes<br/>
+fpcuplogger.batterybutcher.com:8880/root/getinfohtml?Country=China<br/>
+fpcuplogger.batterybutcher.com:8880/root/getinfohtml?FPCVersion=trunk<br/>
 <br/>
 The data collection can be disabled by a setting in setup+
 
