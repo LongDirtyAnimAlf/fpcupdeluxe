@@ -242,7 +242,7 @@ const FPCLINKLIBS : array [0..10] of string = (
   'libz.so'
 );
 
-const FPCEXTRALIBS : array [0..36] of string = (
+const FPCEXTRALIBS : array [0..37] of string = (
   'liba52.so',
   'libaspell.so',
   'libdts.so',
@@ -260,6 +260,7 @@ const FPCEXTRALIBS : array [0..36] of string = (
   'libmatroska.so',
   'libmodplug.so',
   'libogg.so',
+  'libsqlite3.so.0',
   'libvorbis.so',
   'libvorbisfile.so',
   'libvorbisenc.so',
@@ -305,27 +306,28 @@ const LAZLIBS : array [0..30] of string = (
   'libgmodule-2.0.so.0',
   'libpango-1.0.so.0',
   'libcairo.so.2',
+  'libpangocairo-1.0.so.0',
   'libatk-1.0.so.0',
   'libiconv.so.2',
   'libicui18n.so',
   'libgtk-3.so.0',
-  'libsqlite3.so.0',
   'libGL.so',
   'libGLU.so',
   'libEGL.so',
   'libvulkan.so.1'
 );
 
-const LAZLINKLIBS : array [0..13] of string = (
+const LAZLINKLIBS : array [0..14] of string = (
   'libgdk-x11-2.0.so',
   'libgtk-x11-2.0.so',
   'libX11.so',
   'libXi.so',
   'libXext.so',
   'libgdk_pixbuf-2.0.so',
-  'libpango-1.0.so',
   'libiconv.so',
   'libcairo.so',
+  'libpango-1.0.so',
+  'libpangocairo-1.0.so',
   'libatk-1.0.so',
   'libglib-1.2.so',
   'libgdk-1.2.so',
