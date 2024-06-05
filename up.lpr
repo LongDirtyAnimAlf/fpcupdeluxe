@@ -107,6 +107,7 @@ uses
   m_any_to_linuxaarch64,
   m_any_to_linuxloongarch64,
   m_any_to_linuxriscv32,
+  m_any_to_linuxriscv64,
   m_any_to_aros386,
   m_any_to_arosx64,
   m_any_to_arosarm,

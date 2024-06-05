@@ -79,6 +79,16 @@ const
   '/usr/local/lib/loongarch-linux-gnu',
   '/lib/loongarch-linux-gnu',
   {$endif CPULOONGARCH}
+  {$ifdef CPURISCV32}
+  '/usr/lib/riscv32-linux-gnu',
+  '/usr/local/lib/riscv32-linux-gnu',
+  '/lib/riscv32-linux-gnu',
+  {$endif CPURISCV32}
+  {$ifdef CPURISCV64}
+  '/usr/lib/riscv64-linux-gnu',
+  '/usr/local/lib/riscv64-linux-gnu',
+  '/lib/riscv64-linux-gnu',
+  {$endif CPURISCV64}
   '/usr/lib',
   '/usr/local/lib',
   '/lib',
@@ -163,6 +173,16 @@ const
   DYNLINKV2='ld-linux-loongarch-lp64d.so.2';
   DYNLINKV3='ld-linux-loongarch-lp64d.so.3';
   {$endif CPULOONGARCH}
+  {$ifdef CPURISCV32}
+  DYNLINKV1='ld-linux-riscv32-ilp32d.so.1';
+  DYNLINKV2='ld-linux-riscv32-ilp32d.so.2';
+  DYNLINKV3='ld-linux-riscv32-ilp32d.so.3';
+  {$endif CPURISCV32}
+  {$ifdef CPURISCV64}
+  DYNLINKV1='ld-linux-riscv64-lp64d.so.1';
+  DYNLINKV2='ld-linux-riscv64-lp64d.so.2';
+  DYNLINKV3='ld-linux-riscv64-lp64d.so.3';
+  {$endif CPURISCV64}
   {$endif}
   {$endif}
 

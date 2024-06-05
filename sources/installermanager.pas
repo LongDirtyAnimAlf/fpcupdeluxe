@@ -1749,7 +1749,11 @@ begin
         ostype:='glibc';
         toolversion:='225';
       end;
-
+      if (CrossCPU_Target=TCPU.riscv64) then// s:='Linux_riscv64_glibc_235.zip';
+      begin
+        ostype:='glibc';
+        toolversion:='235';
+      end;
     end;
   end;
   if (CrossOS_Target=TOS.android) then
@@ -1865,6 +1869,7 @@ begin
           TCPU.m68k: toolversion:='V237';
           TCPU.xtensa: toolversion:='V234';
           TCPU.riscv32: toolversion:='V241';
+          TCPU.riscv64: toolversion:='V241';
         end;
       end;
       TOS.darwin,TOS.ios:
@@ -2284,7 +2289,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     if (NOT result) AND (Length(Output)>0) then
     begin
       FParent.WritelnLog(etWarning,'You need to install at least '+Output+' to build Lazarus !!', true);
-      FParent.WritelnLog(etWarning,'Make, binutils, git and gdb (optional) are also required !!', true);
+      FParent.WritelnLog(etWarning,'Make, binutils and git are also required !!', true);
+      FParent.WritelnLog(etWarning,'Gdb is optional, but recommended.', true);
     end;
 
     // do not error out ... user could only install FPC
