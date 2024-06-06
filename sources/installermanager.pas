@@ -1920,6 +1920,8 @@ begin
       TOS.linux:
       begin
         if (CrossCPU_Target=TCPU.aarch64) then toolversion:='V234';
+        if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V241';
+        if (CrossCPU_Target=TCPU.riscv64) then toolversion:='V241';
       end;
       TOS.openbsd:
       begin

@@ -2793,7 +2793,7 @@ begin
 
   result:='0.0.0';
 
-  if s='3.3.1' then result:='3.2.2'
+  if s=FPCTRUNKVERSION then result:=FPCTRUNKBOOTVERSION
   else if s='3.2.4' then result:='3.2.2'
   else if s='3.2.3' then result:='3.2.2'
   else if s='3.2.2' then result:='3.2.0'
