@@ -1391,8 +1391,11 @@ end;
 
 function CalculateFullVersion(const Major,Minor,Release:integer):dword;
 begin
-  if (Major>=0) AND (Major<=6) AND (Minor>=0) AND (Release>=0) then
-    result:=((Major *  100 + Minor) * 100 + Release)
+  if (Major>=0) AND (Major<=6) AND (Minor>=0) then
+  begin
+    result:=((Major *  100 + Minor) * 100);
+    if (Release>=0) then result:=result+Release;
+  end
   else
     result:=0;
 end;

@@ -119,6 +119,8 @@ private
   FBuildLCLDocsExeDirectory: string;
   {$endif}
 protected
+  function GetReleaseCandidateFromSource:integer;override;
+  function GetVersionFromSource:string;override;
   // Build module descendant customisation
   function BuildModuleCustom(ModuleName:string): boolean; virtual;
   // internal initialisation, called from BuildModule,CleanModule,GetModule
@@ -240,6 +242,45 @@ end;
 
 { THelpInstaller }
 
+function THelpInstaller.GetReleaseCandidateFromSource:integer;
+begin
+  result:=-1;
+end;
+
+function THelpInstaller.GetVersionFromSource:string;
+var
+  OperationSucceeded:boolean;
+  LazbuildApp: string;
+begin
+  result:='0.0.0';
+
+  OperationSucceeded:=true;
+
+  LazbuildApp:=IncludeTrailingPathDelimiter(InstallDirectory)+LAZBUILDNAME+GetExeExt;
+  if CheckExecutable(LazbuildApp, ['--help'],LAZBUILDNAME)=false then
+  begin
+    //WritelnLog('No valid lazbuild executable found. Aborting.', true);
+    OperationSucceeded:=false;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // We have a working lazbuild; let's hope it works with primary config path as well
+    // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
+    Processor.Executable := LazbuildApp;
+    Processor.Process.Parameters.Clear;
+    Processor.SetParamData('--version');
+    ProcessorResult:=Processor.ExecuteAndWait;
+    //if (ProcessorResult=0) then
+    begin
+      if Processor.WorkerOutput.Count>0 then
+      begin
+        result:=Processor.WorkerOutput.Strings[Processor.WorkerOutput.Count-1];
+      end;
+    end;
+  end;
+end;
+
 function THelpInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
   result:=true;
@@ -308,6 +349,9 @@ begin
     PlainBinDir,true,false);
     {$ENDIF UNIX}
   end;
+
+  GetVersion;
+  InitDone:=result;
 end;
 
 function THelpInstaller.BuildModule(ModuleName: string): boolean;
@@ -392,7 +436,11 @@ begin
     i:=Low(HELPSOURCEURL);
     repeat
       LazarusVersion:=HELPSOURCEURL[i,0];
-      if CalculateNumericalVersion(LazarusVersion)>=CalculateFullVersion(FMajorVersion,FMinorVersion,FReleaseVersion) then
+      if
+        (CalculateNumericalVersion(LazarusVersion)>=CalculateFullVersion(FMajorVersion,FMinorVersion,FReleaseVersion)) // check for a stable version of Lazarus
+        OR
+        ((Odd(FMinorVersion)) AND (CalculateNumericalVersion(LazarusVersion)>=CalculateFullVersion(FMajorVersion,(FMinorVersion-1),FReleaseVersion))) // check for a fixes version of Lazarus
+      then
       begin
         HelpUrl:=HELPSOURCEURL[i,1];
         //Continue search for even better version with same version number
@@ -409,7 +457,6 @@ begin
       end;
       Inc(i);
     until (i>High(HELPSOURCEURL));
-
 
     if Length(HelpUrl)=0 then
     begin
@@ -429,7 +476,6 @@ begin
     ForceDirectoriesSafe(ExcludeTrailingPathDelimiter(FTargetDirectory));
     DocsZip := GetTempFileNameExt('FPCUPTMP','zip');
     DocsTar := ChangeFileExt(DocsZip,'.tar');
-
 
     for RunTwice in boolean do
     begin
