@@ -2538,7 +2538,7 @@ end;
 
 function TPas2jsInstaller.BuildModule(ModuleName: string): boolean;
 var
-  Workingdir,FilePath:string;
+  Workingdir,FilePath,OldPathFPCD:string;
   idx:integer;
   sl:TStringList;
   {$ifndef FPCONLY}
@@ -2578,11 +2578,16 @@ begin
   Processor.Process.Parameters.Clear;
   Processor.Executable:=Make;
   Processor.Process.CurrentDirectory := ExcludeTrailingPathDelimiter(Workingdir);
+    
+  //Store the FPCDIR environment variable
+  OldPathFPCD:=Processor.Environment.GetVar('FPCDIR');
+
   //Processor.SetParamNamePathData('FPC',FCompiler);
   Processor.SetParamNamePathData('PP',FCompiler);
   //Processor.SetParamNamePathData('PP',ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
   //Processor.SetParamNamePathData('FPCDIR',IncludeTrailingPathDelimiter(Workingdir)+'compiler');
-
+  Processor.Environment.SetVar('FPCDIR',FFPCSourceDir);
+  
   Processor.SetParamData('clean');
   Processor.SetParamData('all');
 
@@ -2591,6 +2596,9 @@ begin
   try
     ProcessorResult:=Processor.ExecuteAndWait;
     result := (ProcessorResult=0);
+    
+    //Restore FPCDIR environment variable
+    Processor.Environment.SetVar('FPCDIR',OldPathFPCD);	
 
     if (NOT result) then
     begin
