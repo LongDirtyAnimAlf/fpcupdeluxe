@@ -300,7 +300,7 @@ begin
       if FileExists(s+'libc.a') then
         AddFPCCFGSnippet('-Fl'+ExcludeTrailingPathDelimiter(s));
     end;
-    AddFPCCFGSnippet('-FLlibdl.so',false); {buildfaq 3.3.1: the name of the dynamic linker on the target}
+    //AddFPCCFGSnippet('-FLlibdl.so',false); {buildfaq 3.3.1: the name of the dynamic linker on the target}
   end;
 end;
 
