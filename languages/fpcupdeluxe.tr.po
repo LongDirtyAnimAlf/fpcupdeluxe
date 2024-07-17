@@ -1,0 +1,999 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: fpcupdeluxe\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 18.06.2019\n"
+"PO-Revision-Date: 2024-06-23 03:27+0000\n"
+"Last-Translator: Onur ERÇELEN <onur2x@gmail.com>\n"
+"Language-Team: Turkish (Turkey)\n"
+"Language: tr-TR\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Loco-Source-Locale: tr_TR\n" 
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Flags-xgettext: --add-comments=\"TRANSLATORS: Onur ERÇELEN \"\n"
+"X-Loco-Parser: loco_parse_po"
+
+
+#: extrasettings.captioncheckaddcontext
+msgid "Add context for FPC and Lazarus files."
+msgstr "FPC ve Lazarus dosyaları için içerik ekleyin."
+
+#: extrasettings.captioncheckapplylocalchanges
+msgid "Re-apply local changes when updating."
+msgstr "Güncelleme sırasında yerel değişiklikleri yeniden uygulayın."
+
+#: extrasettings.captioncheckaskconfirmation
+msgid "Always ask for confirmation."
+msgstr "Her zaman onay isteyin."
+
+#: extrasettings.captioncheckautoswitchurl
+msgid "Auto-switch repo URL."
+msgstr "Otomatik geçiş repo URL'si."
+
+#: extrasettings.captioncheckdockedlazarus
+msgid "Docked Lazarus IDE."
+msgstr "Yerleştirilmiş Lazarus IDE."
+
+#: extrasettings.captioncheckenableonlinepatching
+msgid "Allow patching of sources by online patches."
+msgstr "Kaynakların çevrimiçi yamalarla yamalanmasına izin verin."
+
+#: extrasettings.captioncheckextraverbose
+msgid "Be extra verbose."
+msgstr "Daha ayrıntılı olun."
+
+#: extrasettings.captioncheckforcelocalrepoclient
+msgid "Use local repo-client."
+msgstr "Yerel repo istemcisini kullanın."
+
+#: extrasettings.captioncheckfpcupbootstrappersonly
+msgid "Only use fpcup bootstrappers."
+msgstr "Sadece fpcup önyükleyicileri kullanın."
+
+#: extrasettings.captioncheckgetupdates
+msgid "Check for fpcupdeluxe updates."
+msgstr "fpcupdeluxe güncellemelerini kontrol edin."
+
+#: extrasettings.captioncheckincludehelp
+msgid "Include Help."
+msgstr "Yardım ekleyin."
+
+#: extrasettings.captioncheckincludelcl
+msgid "Include LCL with cross-compiler."
+msgstr "LCL'yi çapraz derleyiciye dahil edin."
+
+#: extrasettings.captioncheckpackagerepo
+msgid "Get package repositories."
+msgstr "Paket depolarını alın."
+
+#: extrasettings.captioncheckrepo
+msgid "Get FPC/Laz repositories."
+msgstr "FPC/Laz depolarını alın."
+
+#: extrasettings.captionchecksendinfo
+msgid "Send location and install info."
+msgstr "Konum ve kurulum bilgilerini gönderin."
+
+#: extrasettings.captionchecksplitfpc
+msgid "Split FPC source and bins."
+msgstr "FPC kaynağını ve kutularını bölün."
+
+#: extrasettings.captionchecksplitlazarus
+msgid "Split Lazarus source and bins."
+msgstr "Lazarus kaynağını ve kutularını bölün."
+
+#: extrasettings.captionchecksystemfpc
+msgid "Use system FPC for Lazarus."
+msgstr "Lazarus için sistem FPC'sini kullanın."
+
+#: extrasettings.captioncheckupdateonly
+msgid "FPC/Laz rebuild only."
+msgstr "Sadece FPC/Laz yeniden yapılandırması."
+
+#: extrasettings.captioncheckusemakejobs
+msgid "Use jobs for GNU make."
+msgstr "GNU make için işleri kullanın."
+
+#: extrasettings.captioncheckusewget
+msgid "Use wget/libcurl as downloader."
+msgstr "İndirme aracı olarak wget/libcurl kullanın."
+
+#: extrasettings.captionusesoftfloat80bit
+msgctxt "extrasettings.captionusesoftfloat80bit"
+msgid "Enable software emulation of 80 bit floats."
+msgstr "80 bit kayan değerlerin yazılım emülasyonunu etkinleştirin."
+
+#: extrasettings.hintcheckaddcontext
+msgid "Double clicking on FPC and Lazarus files will open Lazarus."
+msgstr "FPC ve Lazarus dosyalarına çift tıklandığında Lazarus açılacaktır."
+
+#: extrasettings.hintcheckapplylocalchanges
+msgid "Fpcupdeluxe can re-apply the local changes automagically by using local auto-patch."
+msgstr "Fpcupdeluxe yerel otomatik yama kullanarak yerel değişiklikleri otomatik olarak yeniden uygulayabilir."
+
+#: extrasettings.hintcheckaskconfirmation
+msgid "Show a confirmation dialog with yes/no before every build."
+msgstr "Her derlemeden önce evet/hayır içeren bir onay iletişim kutusu gösterin."
+
+#: extrasettings.hintcheckdockedlazarus
+msgid "Build a docked Lazarus IDE"
+msgstr "Yerleşik bir Lazarus IDE'si oluşturun"
+
+#: extrasettings.hintcheckenableonlinepatching
+msgid "Fpcupdeluxe can patch the sources automagically by using online patches."
+msgstr "Fpcupdeluxe çevrimiçi yamaları kullanarak kaynakları otomatik olarak yamalayabilir."
+
+#: extrasettings.hintcheckforcelocalrepoclient
+msgid "Use the repo-client by fpcupdeluxe."
+msgstr "fpcupdeluxe'ün repo-istemcisini kullanın."
+
+#: extrasettings.hintcheckgetupdates
+msgid "Check for updates of fpcupdeluxe binaries."
+msgstr "fpcupdeluxe ikili dosyalarının güncellemelerini kontrol edin."
+
+#: extrasettings.hintcheckrepo
+msgid "Download whole repository, or only latest files."
+msgstr "Tüm depoyu veya yalnızca en son dosyaları indirin."
+
+#: extrasettings.hintchecksendinfo
+msgid "Location and install info will be send to public central fpcupdeluxe server."
+msgstr "Konum ve kurulum bilgileri genel merkezi fpcupdeluxe sunucusuna gönderilecektir."
+
+#: extrasettings.hintchecksystemfpc
+msgid "Use the system wide install of FPC to build Lazarus."
+msgstr "Lazarus'u oluşturmak için sistem genelinde FPC yüklemesini kullanın."
+
+#: extrasettings.hintusesoftfloat80bit
+msgctxt "extrasettings.hintusesoftfloat80bit"
+msgid "Enable software emulation of 80 bit floats."
+msgstr "80 bit kayan değerlerin yazılım emülasyonunu etkinleştirin."
+
+#: fpcupdeluxemainform.upadvertisetools
+msgid "FPCUPdeluxe can try to download them if available !"
+msgstr "FPCUPdeluxe varsa bunları indirmeyi deneyebilir !"
+
+#: fpcupdeluxemainform.upbuildallcrosscompilers
+msgid "Going to auto-build all installed cross-compilers !"
+msgstr "Yüklü tüm çapraz derleyicileri otomatik olarak oluşturacak !"
+
+#: fpcupdeluxemainform.upbuildallcrosscompilerscheck
+msgid "Checking FPC configfile [fpc.cfg] for cross-compilers in "
+msgstr "FPC yapılandırma dosyasının [fpc.cfg] çapraz derleyiciler için kontrol edilmesi "
+
+#: fpcupdeluxemainform.upbuildallcrosscompilersfound
+msgid "Found crosscompiler for "
+msgstr "Şunlar için çapraz derleyici bulundu"
+
+#: fpcupdeluxemainform.upbuildallcrosscompilersupdate
+msgid "Going to update cross-compiler."
+msgstr "Çapraz derleyiciyi güncelleyeceğim."
+
+#: fpcupdeluxemainform.upbuildcrosscompiler
+msgid "Going to install a cross-compiler from available sources."
+msgstr "Mevcut kaynaklardan bir çapraz derleyici yükleyeceğim."
+
+#: fpcupdeluxemainform.upcheckupdate
+msgid "Please wait. Checking for updates."
+msgstr "Lütfen bekleyin. Güncellemeler kontrol ediliyor."
+
+#: fpcupdeluxemainform.updarwinfolderwarning1
+msgid "FPCUPdeluxe cannot be run inside the Downloads folder."
+msgstr "FPCUPdeluxe İndirilenler klasörü içinde çalıştırılamaz."
+
+#: fpcupdeluxemainform.updarwinfolderwarning2
+msgid "This is NOT allowed by OSX security measures."
+msgstr "OSX güvenlik önlemleri buna izin vermez."
+
+#: fpcupdeluxemainform.updarwinfolderwarning3
+msgid "Copy FPCUPdeluxe into its own directory and run from there."
+msgstr "FPCUPdeluxe'ü kendi dizinine kopyalayın ve oradan çalıştırın."
+
+#: fpcupdeluxemainform.upfolderwarning1
+msgid "FPCUPdeluxe could not create its necessary setting-files."
+msgstr "FPCUPdeluxe gerekli ayar dosyalarını oluşturamadı."
+
+#: fpcupdeluxemainform.upfolderwarning2
+msgid "Please check the folder permissions, and re-start."
+msgstr "Lütfen klasör izinlerini kontrol edin ve yeniden başlatın."
+
+#: fpcupdeluxemainform.upinstallconfimation
+#, object-pascal-format
+msgid "Going to install %s and %s%s."
+msgstr "%s ve %s%s yüklenecek."
+
+#: fpcupdeluxemainform.upinstallconfimationsimple
+#, object-pascal-format
+msgid "Going to install the %s."
+msgstr "%s'yi yükleyeceğim."
+
+#: fpcupdeluxemainform.upinstallcrosscompiler
+msgid "Going to install the cross-compiler for"
+msgstr "için çapraz derleyiciyi yükleyeceğim"
+
+#: fpcupdeluxemainform.upinstalldirectory
+msgid "Install directory"
+msgstr "Yükleme dizini"
+
+#: fpcupdeluxemainform.upinstalldirectorycurrent
+msgid "Current install directory"
+msgstr "Geçerli yükleme dizini"
+
+#: fpcupdeluxemainform.upinstallfpc
+msgid "Going to install/update FPC."
+msgstr "FPC'yi kuracak/güncelleyecek."
+
+#: fpcupdeluxemainform.upinstallfpclazarus
+msgid "Going to install/update FPC and Lazarus."
+msgstr "FPC ve Lazarus'u yükleyecek/güncelleyecek."
+
+#: fpcupdeluxemainform.upinstalllazarus
+msgid "Going to install/update Lazarus."
+msgstr "Lazarus' u kuracak/güncelleyecek."
+
+#: fpcupdeluxemainform.upinstallmodule
+msgid "Going to install/update module"
+msgstr "Modülleri kuracak/güncelleyecek."
+
+#: fpcupdeluxemainform.upinstallsettingscurrent
+msgid "Got settings from install directory"
+msgstr "Kurulum dizininden ayarlar alındı"
+
+#: fpcupdeluxemainform.uplookup
+msgid "Looking for"
+msgstr "Arıyor"
+
+#: fpcupdeluxemainform.uplookupbintools
+msgid "Going to look for the right cross-bins. Can (will) take some time !"
+msgstr "Doğru çapraz kutuları aramaya gidiyorum. Biraz zaman alabilir (alacak)!"
+
+#: fpcupdeluxemainform.uplookuplibtools
+msgid "Going to look for the right cross-libraries. Can (will) take some time !"
+msgstr "Doğru çapraz kütüphaneleri arayacağım. Biraz zaman alabilir (alacaktır)!"
+
+#: fpcupdeluxemainform.uplookuptools
+msgid "Looking for FPCUPdeluxe cross-tools on GitHub (if any)."
+msgstr "GitHub'da FPCUPdeluxe çapraz araçlarını arıyorum (varsa)."
+
+#: fpcupdeluxemainform.upmissingtools
+msgid "The building of a crosscompiler failed due to missing cross-tools."
+msgstr "Çapraz derleyici oluşturma işlemi eksik çapraz araçlar nedeniyle başarısız oldu."
+
+#: fpcupdeluxemainform.upquestioncontinue
+msgid "Do you want to continue ?"
+msgstr "Devam etmek istiyormusun?"
+
+#: fpcupdeluxemainform.upquitrequest
+msgid "Please quit FPCUPdeluxe."
+msgstr "Lütfen FPCUPdeluxe'ü kapatın."
+
+#: fpcupy
+#: fpcupdeluxemainform.upremovemodule
+msgid "Going to remove module"
+msgstr "Modülü kaldıracağım"
+
+#: fpcupdeluxemainform.upselectcputarget
+msgid "Please select a CPU target first."
+msgstr "Lütfen önce bir CPU hedefi seçin."
+
+#: fpcupdeluxemainform.upselectfpclazarustarget
+msgid "Please select a FPC and Lazarus target first"
+msgstr "Lütfen önce bir FPC ve Lazarus hedefi seçin"
+
+#: fpcupdeluxemainform.upselectfpctarget
+msgid "Please select a FPC target first"
+msgstr "Lütfen önce bir FPC hedefi seçin"
+
+#: fpcupdeluxemainform.upselectlazarustarget
+msgid "Please select a Lazarus target first"
+msgstr "Lütfen önce bir Lazarus hedefi seçin"
+
+#: fpcupdeluxemainform.upselectostarget
+msgid "Please select an OS target first."
+msgstr "Lütfen önce bir işletim sistemi hedefi seçin."
+
+#: fpcupdeluxemainform.upspacewarning
+msgid "Having a space in your install path is very ill-advised !"
+msgstr "Yükleme yolunuzda bir boşluk olması çok tavsiye edilmez !"
+
+#: fpcupdeluxemainform.uptrybuildcrosscompiler
+msgid "Trying to build the cross-compiler for"
+msgstr "için çapraz derleyici oluşturmaya çalışıyor"
+
+#: fpcupdeluxemainform.upupdatecrossall
+msgid "Going to update all crosscompilers"
+msgstr "Tüm çapraz derleyiciler güncellenecek"
+
+#: fpcupdeluxemainform.upupdatefound
+msgid "New FPCUPdeluxe version available"
+msgstr "Yeni FPCUPdeluxe sürümü mevcut"
+
+#: fpcupdeluxemainform.upupdatenotfound
+msgid "No updates found."
+msgstr "Güncelleme bulunamadı."
+
+#: processutils.lisaborted
+msgid "Aborted"
+msgstr "İptal edildi"
+
+#: processutils.liscannotexecute
+#, object-pascal-format
+msgid "cannot execute \"%s\""
+msgstr ""%s\" çalıştırılamıyor"
+
+#: processutils.liscannotfindexecutable
+#, object-pascal-format
+msgid "cannot find executable \"%s\""
+msgstr "çalıştırılabilir \"%s\" dosyasını bulamıyor"
+
+#: processutils.lisexecutableisadirectory
+#, object-pascal-format
+msgid "executable \"%s\" is a directory"
+msgstr "çalıştırılabilir \"%s\" bir dizindir"
+
+#: processutils.lisexecutablelacksthepermissiontorun
+#, object-pascal-format
+msgid "executable \"%s\" lacks the permission to run"
+msgstr "çalıştırılabilir \"%s\" dosyasının çalıştırma izni yok"
+
+#: processutils.lisexitcode
+#, object-pascal-format
+msgid "Exit code %s"
+msgstr "Çıkış kodu %s"
+
+#: processutils.lisfreeingbufferlines
+#, object-pascal-format
+msgid "freeing buffer lines: %s"
+msgstr "tampon satırları serbest bırakılıyor: %s"
+
+#: processutils.lismissingdirectory
+#, object-pascal-format
+msgid "missing directory \"%s\""
+msgstr "eksik dizin \"%s\""
+
+#: processutils.lismissingexecutable
+#, object-pascal-format
+msgid "missing executable \"%s\""
+msgstr "eksik çalıştırılabilir \"%s\""
+
+#: processutils.lissuccess
+msgid "Success"
+msgstr "Başarılı"
+
+#: processutils.listoolhasnoexecutable
+#, object-pascal-format
+msgid "tool \"%s\" has no executable"
+msgstr ""%s\" aracının çalıştırılabilir dosyası yok"
+
+#: processutils.lisunabletoexecute
+#, object-pascal-format
+msgid "unable to execute: %s"
+msgstr "çalıştırılamıyor: %s"
+
+#: processutils.lisunabletoreadprocessexitstatus
+msgid "unable to read process ExitStatus"
+msgstr "süreç ExitStatus'u okuyamıyor"
+
+#: tform1.actfileexit.caption
+msgid "E&xit"
+msgstr "Çı&kış"
+
+#: tform1.actfileexit.hint
+msgid "Exit"
+msgstr "Çıkış"
+
+#: tform1.actfilesave.caption
+msgid "&Save log"
+msgstr "&Logu kaydet"
+
+#: tform1.actfilesave.hint
+msgid "Save As"
+msgstr "Farklı Kaydet"
+
+#: tform1.androidbtn.caption
+msgid "LAMW"
+msgstr "LAMW"
+
+#: tform1.androidbtn.hint
+msgid "Will install/update FPC and Lazarus stable and LAMW"
+msgstr "FPC ve Lazarus stable ve LAMW'ı yükleyecek/güncelleyecek"
+
+#: tform1.basicsheet.caption
+msgid "Basic"
+msgstr "Temel"
+
+#: tform1.bitbtnfpcandlazarus.caption
+msgid "Install/update FPC+Lazarus"
+msgstr "FPC+Lazarus'u yükleyin/güncelleyin"
+
+#: tform1.bitbtnfpcandlazarus.hint
+msgid "Will install/update the selected version of both FPC and Lazarus."
+msgstr "Hem FPC hem de Lazarus'un seçilen sürümünü yükler/günceller."
+
+#: tform1.bitbtnfpconly.caption
+msgid "Only FPC"
+msgstr "Sadece FPC"
+
+#: tform1.bitbtnfpconly.hint
+msgid "Only install/update selected FPC version."
+msgstr "Yalnızca seçili FPC sürümünü yükleyin/güncelleyin."
+
+#: tform1.bitbtnfpconlytag.caption
+msgctxt "tform1.bitbtnfpconlytag.caption"
+msgid "Add Tag"
+msgstr "Etiket Ekle"
+
+#: tform1.bitbtnfpconlytag.hint
+msgid "Add tag/url into FPC install list"
+msgstr "FPC yükleme listesine etiket/url ekleyin"
+
+#: tform1.bitbtnfpcsetrevision.caption
+msgid "Set FPC hash in Setup+"
+msgstr "Setup+ içinde FPC karmasını ayarlayın"
+
+#: tform1.bitbtnfpcsetrevision.hint
+msgid "Set FPC revision"
+msgstr "FPC revizyonunu ayarlayın"
+
+#: tform1.bitbtnhalt.caption
+msgid "STOP"
+msgstr "DURDUR"
+
+#: tform1.bitbtnhalt.hint
+msgid "Try to stop current install process"
+msgstr "Mevcut yükleme işlemini durdurmayı deneyin"
+
+#: tform1.bitbtnlazarusonly.caption
+msgid "Only Lazarus"
+msgstr "Sadece Lazarus"
+
+#: tform1.bitbtnlazarusonly.hint
+msgid "Only install/update selected Lazarus version."
+msgstr "Yalnızca seçili Lazarus sürümünü yükleyin/güncelleyin."
+
+#: tform1.bitbtnlazarusonlytag.caption
+msgctxt "tform1.bitbtnlazarusonlytag.caption"
+msgid "Add Tag"
+msgstr "Etiket Ekle"
+
+#: tform1.bitbtnlazarusonlytag.hint
+msgid "Add tag/url into Lazarus install list"
+msgstr "Lazarus yükleme listesine etiket/url ekleyin"
+
+#: tform1.bitbtnlazarussetrevision.caption
+msgid "Set Lazarus hash in Setup+"
+msgstr "Setup+'da Lazarus hash'ini ayarlayın"
+
+#: tform1.bitbtnlazarussetrevision.hint
+msgid "Set Lazarus revision"
+msgstr "Lazarus revizyonunu ayarlayın"
+
+#: tform1.btnchecktoolslocations.caption
+msgid "Check Tools Location"
+msgstr "Araçların Konumunu Kontrol Et"
+
+#: tform1.btnclearlog.caption
+msgid "Clear log"
+msgstr "Logu temizle"
+
+#: tform1.btncreatelazarusconfig.caption
+msgid "Create Lazarus Configuration"
+msgstr "Lazarus Yapılandırması Oluşturun"
+
+#: tform1.btngetopenssl.caption
+msgid "Get OpenSSL by Browser"
+msgstr "Tarayıcıya Göre OpenSSL Alın"
+
+#: tform1.btninstalldirselect.caption
+msgid "Set install path"
+msgstr "Yükleme dizinini ayarla"
+
+#: tform1.btninstallmodule.caption
+msgid "Install module"
+msgstr "Modül yükle"
+
+#: tform1.btninstallmodule.hint
+msgid "Install the selected module."
+msgstr "Seçilen modülü kurun."
+
+#: tform1.btnsendlog.caption
+msgid "Email log"
+msgstr "Email logu."
+
+#: tform1.btnsendlog.hint
+msgid "Send email to fpcup maintainer containing Commandscreen output."
+msgstr "fpcup bakımcısına Komut ekranı çıktısını içeren bir e-posta gönderin."
+
+#: tform1.btnsetupplus.caption
+msgid "Setup+"
+msgstr "Kurulum+"
+
+#: tform1.btnsetupplus.hint
+msgid "Open the extended settings form."
+msgstr "Genişletilmiş ayarlar formunu açın."
+
+#: tform1.btnuninstallmodule.caption
+msgid "Uninstall module"
+msgstr "Modülü kaldır"
+
+#: tform1.btnuninstallmodule.hint
+msgid "Uninstall the selected module."
+msgstr "Seçili modülü kaldır"
+
+#: tform1.btnupdatelazarusmakefiles.caption
+msgid "Update Lazarus Makefiles"
+msgstr "Lazarus Makefiles Güncellemesi"
+
+#: tform1.buttonautocrossupdate.caption
+msgid "Update all"
+msgstr "Tümünü güncelle"
+
+#: tform1.buttonautocrossupdate.hint
+msgid "Auto-update all installed cross-compilers."
+msgstr "Yüklü tüm çapraz derleyicileri otomatik güncelleyin."
+
+#: tform1.buttoninstallcrosscompiler.caption
+msgid "Install compiler"
+msgstr "Derleyici yükleyin"
+
+#: tform1.buttoninstallcrosscompiler.hint
+msgid "Install the selected CPU-OS cross-compiler."
+msgstr "Seçilen CPU-OS çapraz derleyicisini yükleyin."
+
+#: tform1.buttonremovecrosscompiler.caption
+msgid "Remove compiler"
+msgstr "Derleryiciyi kaldır"
+
+#: tform1.buttonremovecrosscompiler.hint
+msgid "Remove the selected CPU-OS cross-compiler."
+msgstr "Seçili CPU-OS çapraz derleyicisini kaldırın."
+
+#: tform1.buttonsubarchselect.caption
+msgid "Set subarch"
+msgstr "Subarch'ı ayarla"
+
+#: tform1.buttonsubarchselect.hint
+msgid "Select a subarch for embedded target."
+msgstr "Gömülü hedef için bir alt dizi seçin."
+
+#: tform1.checkautoclear.caption
+msgid "Auto clear"
+msgstr "Otomatik temizle"
+
+#: tform1.chkgitlab.caption
+msgid "GitLab"
+msgstr "GitLab"
+
+#: tform1.chkmakefilefpc.caption
+msgid "Check Makefile FPC"
+msgstr "Makefile FPC'yi kontrol edin"
+
+#: tform1.chkmakefilelaz.caption
+msgid "Check Makefile Lazarus"
+msgstr "Makefile Lazarus'u Kontrol Edin"
+
+#: tform1.createstartup.caption
+msgid "Re-create startup scripts"
+msgstr "Başlangıç komut dosyalarını yeniden oluşturun"
+
+#: tform1.crosssheet.caption
+msgid "Cross"
+msgstr "Çapraz"
+
+#: tform1.espbtn.caption
+msgid "ESP32"
+msgstr "ESP32"
+
+#: tform1.espbtn.hint
+msgid "Get FPC for ESP32 [lx6] boards"
+msgstr "ESP32 [lx6] kartları için FPC alın"
+
+#: tform1.extrasheet.caption
+msgid "Extras"
+msgstr "Ekstralar"
+
+#: tform1.fixesbtn.caption
+msgid "Fixes"
+msgstr "Düzeltmeler"
+
+#: tform1.fixesbtn.hint
+msgid "Will install/update current fixes versions of both FPC and Lazarus"
+msgstr "Hem FPC hem de Lazarus'un güncel düzeltme sürümlerini yükleyecek/güncelleyecek"
+
+#: tform1.fpchistorylabel.caption
+msgid "FPC revision history"
+msgstr "FPC revizyon geçmişi"
+
+#: tform1.fpctaglabel.caption
+msgctxt "tform1.fpctaglabel.caption"
+msgid "FPC version"
+msgstr "FPC versiyonu"
+
+#: tform1.fpcversionlabel.caption
+msgctxt "tform1.fpcversionlabel.caption"
+msgid "FPC version"
+msgstr "FPC versiyonu"
+
+#: tform1.historysheet.caption
+msgid "History"
+msgstr "Geçmiş"
+
+#: tform1.installdiredit.hint
+msgid "Directory to install FPC and Lazarus"
+msgstr "FPC ve Lazarus'un yükleneceği dizin"
+
+#: tform1.lazarushistorylabel.caption
+msgid "Lazarus revision history"
+msgstr "Lazarus revizyon geçmişi"
+
+#: tform1.lazarustaglabel.caption
+msgctxt "tform1.lazarustaglabel.caption"
+msgid "Lazarus version"
+msgstr "Lazarus versiyonu"
+
+#: tform1.lazarusversionlabel.caption
+msgctxt "tform1.lazarusversionlabel.caption"
+msgid "Lazarus version"
+msgstr "Lazarus versiyonu"
+
+#: tform1.listboxfpchistory.columns[0].caption
+msgctxt "tform1.listboxfpchistory.columns[0].caption"
+msgid "Hash"
+msgstr "Hash"
+
+#: tform1.listboxfpchistory.columns[1].caption
+msgctxt "tform1.listboxfpchistory.columns[1].caption"
+msgid "Date"
+msgstr "Tarih"
+
+#: tform1.listboxlazarushistory.columns[0].caption
+msgctxt "tform1.listboxlazarushistory.columns[0].caption"
+msgid "Hash"
+msgstr "Hash"
+
+#: tform1.listboxlazarushistory.columns[1].caption
+msgctxt "tform1.listboxlazarushistory.columns[1].caption"
+msgid "Date"
+msgstr "Tarih"
+
+#: tform1.mchinesecnlanguage.caption
+msgid "Chinese (CN)"
+msgstr "Çince (CN)"
+
+#: tform1.mdutchlanguage.caption
+msgid "Dutch (NL)"
+msgstr "Hollandaca (NL)"
+
+#: tform1.mukrainianlanguage.caption
+msgid "Ukrainian (UK)"
+msgstr "Ukraynaca (UK)"
+
+#: tform1.memosummary.hint
+msgid "Will show info and error"
+msgstr "Bilgi ve hata gösterecek"
+
+#: tform1.menglishlanguage.caption
+msgid "English (EN)"
+msgstr "İngilizce (EN)"
+
+#: tform1.menufile.caption
+msgid "&File"
+msgstr "&Dosya"
+
+#: tform1.menuitem1.caption
+msgid "About"
+msgstr "Hakkında"
+
+#: tform1.menuitem2.caption
+msgid "Languages"
+msgstr "Diller"
+
+#: tform1.menuitem3.caption
+msgid "Issues"
+msgstr "Sorunlar"
+
+#: tform1.menuitem5.caption
+msgid "Exit"
+msgstr "Çıkış"
+
+#: tform1.menuitem6.caption
+msgid "Save log"
+msgstr "Logu kaydet"
+
+#: tform1.mfpcbugs.caption
+msgid "FPC bugs"
+msgstr "FPC hataları"
+
+#: tform1.mfrenchlanguage.caption
+msgid "French (F)"
+msgstr "Fransızca (F)"
+
+#: tform1.mgermanlanguage.caption
+msgid "German (D)"
+msgstr "Almanca (D)"
+
+#: tform1.missuesforum.caption
+msgid "Up Lazarus forum"
+msgstr "Lazarus forumuna git"
+
+#: tform1.missuesgithub.caption
+msgid "Up GitHub issues"
+msgstr "GitHub sorunlarına git"
+
+#: tform1.mkoreanlanguage.caption
+msgid "Korean (KR)"
+msgstr "Korece (KR)"
+
+#: tform1.mlazarusbugs.caption
+msgid "Lazarus bugs"
+msgstr "Lazarus hataları"
+
+#: tform1.modulesheet.caption
+msgid "Modules"
+msgstr "Modüller"
+
+#: tform1.mormotbtn.caption
+msgid "mORMot"
+msgstr "mORMot"
+
+#: tform1.mormotbtn.hint
+msgid "Get the mORMot for FPC"
+msgstr "FPC için mORMot'u alın"
+
+#: tform1.opmbtn.caption
+msgid "OPM"
+msgstr "OPM"
+
+#: tform1.opmbtn.hint
+msgid "Will install/update the Online Package Manager"
+msgstr "Çevrimiçi Paket Yöneticisini kuracak/güncelleyecek"
+
+#: tform1.picobtn.caption
+msgid "Pico"
+msgstr "Pico"
+
+#: tform1.picobtn.hint
+msgid "Get FPC for armv6m RPi Pico"
+msgstr "armv6m RPi Pico için FPC alın"
+
+#: tform1.radgrpcpu.caption
+msgid "CPU"
+msgstr "CPU"
+
+#: tform1.radgrpos.caption
+msgid "OS"
+msgstr "OS"
+
+#: tform1.realfpcurl.hint
+msgctxt "tform1.realfpcurl.hint"
+msgid "Double click to allow editing"
+msgstr "Düzenlemeye izin vermek için çift tıklayın"
+
+#: tform1.reallazurl.hint
+msgctxt "tform1.reallazurl.hint"
+msgid "Double click to allow editing"
+msgstr "Düzenlemeye izin vermek için çift tıklayın"
+
+#: tform1.stablebtn.caption
+msgid "Stable"
+msgstr "Stabil"
+
+#: tform1.stablebtn.hint
+msgid "Will install/update stable versions of both FPC and Lazarus"
+msgstr "Hem FPC hem de Lazarus'un kararlı sürümlerini yükleyecek/güncelleyecek"
+
+#: tform1.statusmessage.text
+msgid "Sitting and waiting"
+msgstr "Oturma ve bekleme"
+
+#: tform1.tagsheet.caption
+msgid "Tags"
+msgstr "Etiketler"
+
+#: tform1.trunkbtn.caption
+msgid "Trunk"
+msgstr "Bagaj"
+
+#: tform1.trunkbtn.hint
+msgid "Will install/update trunk version of both FPC and Lazarus."
+msgstr "Hem FPC hem de Lazarus'un gövde sürümünü yükleyecek / güncelleyecektir."
+
+#: tform1.ultibobtn.hint
+msgid "Install baremetal Ultibo for RPi3"
+msgstr "RPi3 için baremetal Ultibo yükleyin"
+
+#: tform1.wabtn.caption
+msgid "WA"
+msgstr "WA"
+
+#: tform1.wabtn.hint
+msgid "Install FPC and Lazarus for Web Assembly"
+msgstr "Web Assembly için FPC ve Lazarus'u Kurun"
+
+#: tform1.wiobtn.caption
+msgid "Wio"
+msgstr "Wio"
+
+#: tform1.wiobtn.hint
+msgid "Get FPC for SAMD51 embedded on Wio Terminal"
+msgstr "Wio Terminaline gömülü SAMD51 için FPC alın"
+
+#: tform2.btnaddfpcpatch.caption
+msgid "Add FPC patch"
+msgstr "FPC yolu ekleyin"
+
+#: tform2.btnaddlazpatch.caption
+msgid "Add Laz. patch"
+msgstr "Laz. yolu ekleyin"
+
+#: tform2.btnlistcustomoptions.caption
+msgid "List All"
+msgstr "Tümünü listele"
+
+#: tform2.btnremfpcpatch.caption
+msgid "Rem. FPC patch"
+msgstr "FPC yolu kaldırın"
+
+#: tform2.btnremlazpatch.caption
+msgid "Rem. Laz. patch"
+msgstr "Laz. yolu kaldırın"
+
+#: tform2.btnselectbindir.caption
+msgid "Tools"
+msgstr "Araçlar"
+
+#: tform2.btnselectcompiler.caption
+msgid "Compiler"
+msgstr "Derleyici"
+
+#: tform2.btnselectlibdir.caption
+msgid "Libraries"
+msgstr "Kütüphaneler"
+
+#: tform2.caption
+msgid "Advanced settings"
+msgstr "Gelişmiş ayarlar"
+
+#: tform2.chkfpcdebug.caption
+msgctxt "tform2.chkfpcdebug.caption"
+msgid "Debug"
+msgstr "Hata Ayıklama"
+
+#: tform2.chklazarusdebug.caption
+msgctxt "tform2.chklazarusdebug.caption"
+msgid "Debug"
+msgstr "Hata Ayıklama"
+
+#: tform2.editbinlocation.hint
+msgctxt "tform2.editbinlocation.hint"
+msgid "Double click to clear"
+msgstr "Temizlemek için çift tıklayın"
+
+#: tform2.editcompileroverride.hint
+msgctxt "tform2.editcompileroverride.hint"
+msgid "Double click to clear"
+msgstr "Temizlemek için çift tıklayın"
+
+#: tform2.editliblocation.hint
+msgctxt "tform2.editliblocation.hint"
+msgid "Double click to clear"
+msgstr "Temizlemek için çift tıklayın"
+
+#: tform2.groupbox1.caption
+msgid "Proxy settings"
+msgstr "Proxy ayarları"
+
+#: tform2.groupbox2.caption
+msgid "Miscellaneous settings"
+msgstr "Çeşitli ayarlar"
+
+#: tform2.groupboxcompileoptions.caption
+msgid "Options Override"
+msgstr "Seçenekler Geçersiz Kılma"
+
+#: tform2.groupboxfpclazbranchrevision.caption
+msgid "Branch and revision"
+msgstr "Şube ve revizyon"
+
+#: tform2.groupboxfpclazscripts.caption
+msgid "Pre and post install scripts"
+msgstr "Kurulum öncesi ve sonrası komut dosyaları"
+
+#: tform2.grppatching.caption
+msgid "Source patching"
+msgstr "Kaynak yama"
+
+#: tform2.label1.caption
+msgid "HTTP proxy URL:"
+msgstr "HTTP proxy URL:"
+
+#: tform2.label2.caption
+msgid "HTTP proxy port:"
+msgstr "HTTP proxy portu:"
+
+#: tform2.label3.caption
+msgid "HTTP proxy username:"
+msgstr "HTTP proxy kullanıcı adı:"
+
+#: tform2.label4.caption
+msgid "HTTP proxy password:"
+msgstr "HTTP proxy şifresi:"
+
+#: tform2.labelcompileroverride.caption
+msgid "Compiler Override"
+msgstr "Derleyici Geçersiz Kılma"
+
+#: tform2.labelcpu.caption
+msgid "Select CPU"
+msgstr "CPU seçin"
+
+#: tform2.labelcrossbuildoptions.caption
+msgid "Cross Build Options Override (i.e. -CfSoft)"
+msgstr "Çapraz Derleme Seçenekleri Geçersiz Kılma (örn. -CfSoft)"
+
+#: tform2.labelfpcbranch.caption
+msgid "FPC branch"
+msgstr "FPC şube"
+
+#: tform2.labelfpcoptions.caption
+msgid "FPC options"
+msgstr "FPC seçenekleri"
+
+#: tform2.labelfpcpostinstall.caption
+msgid "FPC post"
+msgstr "FPC postası"
+
+#: tform2.labelfpcpreinstall.caption
+msgid "FPC pre"
+msgstr "FPC öncesi"
+
+#: tform2.labelfpcrevision.caption
+msgid "FPC hash/tag"
+msgstr "FPC hash/etiket"
+
+#: tform2.labellazarusbranch.caption
+msgid "Laz. branch"
+msgstr "Laz. Şube"
+
+#: tform2.labellazarusoptions.caption
+msgid "Laz. options"
+msgstr "Laz. seçenekleri"
+
+#: tform2.labellazaruspostinstall.caption
+msgid "Lazarus post"
+msgstr "Lazarus gönderisi"
+
+#: tform2.labellazaruspreinstall.caption
+msgid "Lazarus pre"
+msgstr "Lazarus öncesi"
+
+#: tform2.labellazarusrevision.caption
+msgid "Laz. hash/tag"
+msgstr "Laz. hash/etiket"
+
+#: tform2.labelos.caption
+msgid "Select OS"
+msgstr "OS seçin"
+
+#: tform2.radiogrouparmarch.caption
+msgid "ARM target"
+msgstr "ARM hedefi"
+
+#: tform2.rgrpsearchoptions.caption
+msgid "Search options"
+msgstr "Arama seçenekleri"
+
+#: tform2.rgrpsubarch.caption
+msgid "Select subarch"
+msgstr "Subarch seçin"
+
+#: tform2.tscpuos.caption
+msgid "CPU/OS"
+msgstr "CPU/OS"
+
+#: tform2.tssubarch.caption
+msgid "Subarch"
+msgstr "Subarch"
+

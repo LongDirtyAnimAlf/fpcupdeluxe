@@ -73,6 +73,7 @@ type
     Memo1: TMemo;
     MemoAddTag: TMemo;
     memoSummary: TMemo;
+    MTurkishLanguage: TMenuItem;
     MPortugueseLanguage: TMenuItem;
     MWiki: TMenuItem;
     MHelp: TMenuItem;
@@ -2119,6 +2120,7 @@ begin
   if Sender=MDutchlanguage then sLanguage:='nl';
   if Sender=MUkrainianLanguage then sLanguage:='uk';
   if Sender=MPortugueseLanguage then sLanguage:='pt';
+  if Sender=MTurkishLanguage then sLanguage:='tr';
 
   TransLate(sLanguage);
 

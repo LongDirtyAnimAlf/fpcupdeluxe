@@ -17,7 +17,7 @@
         <TextDesc Value="Installer for FPC and Lazarus."/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="14">
+      <Resources Count="15">
         <Resource_0 FileName="sources\fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="sources\settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="patches\patchfpc\glibc_compat_3_2_2.patch" Type="RCDATA" ResourceName="GLIBC_COMPAT_3_2_2"/>
@@ -32,6 +32,7 @@
         <Resource_11 FileName="languages\fpcupdeluxe.pt.po" Type="RCDATA" ResourceName="FPCUPDELUXE.PT"/>
         <Resource_12 FileName="patches\patchfpc\glibc.inc" Type="RCDATA" ResourceName="GLIBC"/>
         <Resource_13 FileName="patches\patchlazarus\glibc_debugger_trunk.patch" Type="RCDATA" ResourceName="GLIBC_DEBUGGER_TRUNK"/>
+        <Resource_14 FileName="languages\fpcupdeluxe.tr.po" Type="RCDATA" ResourceName="FPCUPDELUXE.TR"/>
       </Resources>
     </General>
     <i18n>

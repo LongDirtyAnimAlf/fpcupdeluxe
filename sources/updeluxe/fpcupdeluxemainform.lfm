@@ -2142,6 +2142,10 @@ object Form1: TForm1
         Caption = 'Portuguese (PT)'
         OnClick = LanguageClick
       end
+      object MTurkishLanguage: TMenuItem
+        Caption = 'Turkish (TR)'
+        OnClick = LanguageClick
+      end
     end
     object MHelp: TMenuItem
       Caption = 'Help'
