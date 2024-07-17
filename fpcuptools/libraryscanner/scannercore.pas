@@ -111,12 +111,14 @@ const
   );
   {$endif}
 
-  {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OenBSD) OR defined(DragonFly)}
-  BSDSEARCHDIRS : array [0..9] of string = (
+  {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OpenBSD) OR defined(DragonFly)}
+  BSDSEARCHDIRS : array [0..11] of string = (
   '/lib',
   '/libexec',
   '/usr/lib',
+  '/usr/libexec',
   '/usr/pkg/lib',
+  '/usr/X11R6/lib',
   '/usr/X11R7/lib',
   '/usr/local/lib',
   '/usr/local/lib/qt5',
@@ -137,7 +139,7 @@ const
   DYNLINKV2='ld-*.so.2';
   DYNLINKV3='ld-*.so.3';
   {$else}
-  {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OenBSD) OR defined(DragonFly)}
+  {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OpenBSD) OR defined(DragonFly)}
   DYNLINKV1='ld-elf.so.1';
   DYNLINKV2='ld-elf.so.2';
   DYNLINKV3='ld-elf.so.3';
@@ -409,11 +411,12 @@ end;
 function GetStartupObjects:string;
 const
   LINKFILE='crtbegin.o';
-  SEARCHDIRS : array [0..5] of string = (
+  SEARCHDIRS : array [0..6] of string = (
     '/usr/local/lib/',
     '/usr/lib/',
     '/usr/local/lib/gcc/',
     '/usr/lib/gcc/',
+    '/usr/lib/gcc-lib/',
     '/lib/gcc/',
     '/lib/'
     );
