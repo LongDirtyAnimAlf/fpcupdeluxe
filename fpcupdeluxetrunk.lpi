@@ -47,8 +47,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS=&apos;darwin&apos; then
@@ -83,8 +83,8 @@ if TargetOS=&apos;openbsd&apos; then
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-cocoa"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-cocoa"/>
           </SearchPaths>
           <CodeGeneration>
@@ -112,8 +112,8 @@ if TargetOS=&apos;openbsd&apos; then
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -143,8 +143,8 @@ if TargetOS=&apos;openbsd&apos; then
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -174,8 +174,8 @@ if TargetOS=&apos;openbsd&apos; then
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -205,8 +205,8 @@ if TargetOS=&apos;openbsd&apos; then
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -236,8 +236,8 @@ if TargetOS=&apos;openbsd&apos; then
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\SQLite3;downloader\src\forms;downloader\src\common;mORMot;mORMot\CrossPlatform;mORMot2\src\core;mORMot2\src\lib;mORMot2\src\net"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS=&apos;darwin&apos; then
@@ -278,8 +278,8 @@ if TargetOS=&apos;openbsd&apos; then
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt6"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt6"/>
           </SearchPaths>
           <CodeGeneration>
@@ -312,8 +312,8 @@ if TargetOS=&apos;openbsd&apos; then
             <Filename Value="deluxebin\linuxqt6\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt6\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt6"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt6"/>
           </SearchPaths>
           <CodeGeneration>
@@ -343,8 +343,8 @@ if TargetOS=&apos;openbsd&apos; then
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-12"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -466,8 +466,8 @@ if TargetOS=&apos;openbsd&apos; then
       <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-      <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net"/>
+      <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+      <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\SQLite3;downloader\src\forms;downloader\src\common;mORMot;mORMot\CrossPlatform;mORMot2\src\core;mORMot2\src\lib;mORMot2\src\net"/>
       <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Conditionals Value="if TargetOS=&apos;darwin&apos; then

@@ -56,7 +56,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\fpcupdeluxeqt\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -84,9 +84,9 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <Libraries Value="libs\$(TargetOS)"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common;metadarkstyle"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common;metadarkstyle"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -129,9 +129,9 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <Libraries Value="libs\$(TargetOS)"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common;metadarkstyle"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common;metadarkstyle"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -164,9 +164,9 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-curl"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <Libraries Value="libs\$(TargetOS);C:\msys64\mingw32\lib\;C:\msys64\mingw32\i686-w64-mingw32\lib\;C:\msys64\mingw32\lib\gcc\i686-w64-mingw32\9.3.0\"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-curl"/>
           </SearchPaths>
           <CodeGeneration>
@@ -196,8 +196,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;metadarkstyle"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\SQLite3;downloader\src\forms;downloader\src\common;mORMot\CrossPlatform;mORMot2\src\core;mORMot2\src\lib;mORMot2\src\net;metadarkstyle"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -231,8 +231,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\SQLite3;downloader\src\forms;downloader\src\common;mORMot\CrossPlatform;mORMot2\src\core;mORMot2\src\lib;mORMot2\src\net"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -274,8 +274,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -305,8 +305,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -336,8 +336,8 @@
             <Filename Value="deluxebin\linuxqt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -367,8 +367,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -395,8 +395,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -425,8 +425,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -458,8 +458,8 @@
             <Filename Value="deluxebin\linuxqt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -489,8 +489,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -520,8 +520,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -551,8 +551,8 @@
             <Filename Value="deluxebin\linuxqt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -579,8 +579,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)v6hf-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)v6hf-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -614,8 +614,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -648,8 +648,8 @@
             <Filename Value="deluxebin\linuxqt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -679,8 +679,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -707,8 +707,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -735,8 +735,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -763,8 +763,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -791,8 +791,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-sun"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-sun"/>
           </SearchPaths>
           <CodeGeneration>
@@ -819,8 +819,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -853,8 +853,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -881,8 +881,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-sun"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-sun"/>
           </SearchPaths>
           <CodeGeneration>
@@ -909,8 +909,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -937,8 +937,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -965,8 +965,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -996,8 +996,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -1030,8 +1030,8 @@
             <Filename Value="deluxebin\freebsdqt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
           </SearchPaths>
           <CodeGeneration>
@@ -1064,8 +1064,8 @@
             <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;..\mORMot;..\mORMot\SQLite3;downloader\src\forms;downloader\src\common"/>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -1186,8 +1186,8 @@
       <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);sources;..\mORMot"/>
-      <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;numcpulib;logger;downloader\src\forms;downloader\src\common;..\mORMot;..\mORMot\SQLite3;..\mORMot\CrossPlatform;..\mORMot2\src\core;..\mORMot2\src\lib;..\mORMot2\src\net;metadarkstyle"/>
+      <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+      <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;downloader\src\forms;downloader\src\common;mORMot;mORMot\CrossPlatform;metadarkstyle"/>
       <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
