@@ -56,9 +56,6 @@ private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
   function GetLibs(Basepath:string):boolean;override;
-  {$ifndef FPCONLY}
-  function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
-  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
 end;
@@ -97,15 +94,6 @@ begin
     ShowInfo('You MAY want to copy your /lib, /usr/lib, /usr/lib/arm-linux-gnueabihf (Raspberry Pi Raspbian) from your device to your cross lib directory.');
   end;
 end;
-
-{$ifndef FPCONLY}
-function Tany_linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
-begin
-  // todo: get gtk at least, add to FFPCCFGSnippet
-  ShowInfo('Implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etDebug);
-  result:=inherited;
-end;
-{$endif}
 
 function Tany_linuxarm.GetBinUtils(Basepath:string): boolean;
 var

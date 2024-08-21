@@ -351,6 +351,7 @@ uses
   InterfaceBase, // for WidgetSet
   LCLType, // for MessageBox
   LCLIntf, // for OpenURL
+  LCLPlatformDef, // for LCL types
   IniFiles,
   StrUtils,
   {$ifdef EnableLanguages}
@@ -511,7 +512,7 @@ begin
   {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
   aSystemTarget:=GetLCLWidgetTypeName;
   {$ELSE}
-  aTarget:='';
+  aSystemTarget:='';
   {$ENDIF}
 
   {$ifdef RemoteLog}
@@ -2361,6 +2362,7 @@ begin
     Lazarus 2.2.6   + FPC 3.2.2
     Lazarus 3.0     + FPC 3.2.2
     Lazarus 3.2     + FPC 3.2.2
+    Lazarus 3.4     + FPC 3.2.2
     end;
   }
 
@@ -3170,28 +3172,31 @@ begin
       begin
         FPCupManager.OnlyModules:=FPCupManager.OnlyModules+','+_LCL;
         if (FPCupManager.CrossOS_Target in WINDOWS_OS) then
-           FPCupManager.LCL_Platform:='win32'
+           FPCupManager.LCL_Platform:=lpWin32
         else
         if (FPCupManager.CrossOS_Target=TOS.wince) then
-           FPCupManager.LCL_Platform:='wince'
+           FPCupManager.LCL_Platform:=lpWinCE
         else
         if (FPCupManager.CrossOS_Target=TOS.darwin) then
         begin
-          FPCupManager.LCL_Platform:='cocoa';
+          FPCupManager.LCL_Platform:=lpCocoa;
           {$ifdef LCLQT5}
-          FPCupManager.LCL_Platform:='qt5';
+          FPCupManager.LCL_Platform:=lpQt5;
+          {$endif}
+          {$ifdef LCLQT6}
+          FPCupManager.LCL_Platform:=lpQt6;
           {$endif}
           {$ifdef LCLCARBON}
-          FPCupManager.LCL_Platform:='carbon';
+          FPCupManager.LCL_Platform:=lpCarbon;
           {$endif}
         end
         else
         if (FPCupManager.CrossOS_Target in [TOS.amiga,TOS.aros,TOS.morphos]) then
-           FPCupManager.LCL_Platform:='mui'
+           FPCupManager.LCL_Platform:=lpMUI
         else
         begin
           if (FPCupManager.CrossOS_Target<>TOS.osNone) AND (FPCupManager.CrossCPU_Target<>TCPU.cpuNone) then
-            FPCupManager.LCL_Platform:='gtk2';
+            FPCupManager.LCL_Platform:=lpGtk2;
         end;
       end
       else
@@ -3265,7 +3270,7 @@ begin
 
       {$ifdef RemoteLog}
       aDataClient.UpInfo.UpFunction:=ufInstallCross;
-      if length(FPCupManager.LCL_Platform)>0 then aDataClient.AddExtraData('LCL',FPCupManager.LCL_Platform);
+      if (FPCupManager.LCL_Platform<>GetDefaultLCLWidgetType) then aDataClient.AddExtraData('LCL',GetLCLName(FPCupManager.LCL_Platform));
       if length(FPCupManager.OnlyModules)>0 then aDataClient.AddExtraData('Only',FPCupManager.OnlyModules);
       if length(FPCupManager.SkipModules)>0 then aDataClient.AddExtraData('Skip',FPCupManager.SkipModules);
       {$endif}
@@ -4073,18 +4078,21 @@ begin
 
   // Set default Darwin LCL platforms
   {$ifdef Darwin}
-    FPCupManager.LCL_Platform:='cocoa';
+    FPCupManager.LCL_Platform:=lpCocoa;
     {$ifdef LCLCARBON}
-      FPCupManager.LCL_Platform:='carbon';
+      FPCupManager.LCL_Platform:=lpCarbon;
     {$endif}
   {$endif}
 
   // Override default LCL platforms in case of QT[5]
   {$ifdef LCLQT}
-    FPCupManager.LCL_Platform:='qt';
+    FPCupManager.LCL_Platform:=lpQt;
   {$endif}
   {$ifdef LCLQT5}
-    FPCupManager.LCL_Platform:='qt5';
+    FPCupManager.LCL_Platform:=lpQt5;
+  {$endif}
+  {$ifdef LCLQT6}
+    FPCupManager.LCL_Platform:=lpQt6;
   {$endif}
 
   {$ifdef RemoteLog}

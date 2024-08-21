@@ -222,7 +222,6 @@ type
 
   TLazarusInstaller = class(TBaseLazarusInstaller)
   private
-    FLCL_Platform: string;
     InitDone: boolean;
     function LCLCrossActionNeeded:boolean;
   protected
@@ -235,8 +234,6 @@ type
     function IsCross:boolean;override;
     function InitModule: boolean;
   public
-    // LCL widget set to be built (NOT OS/CPU combination)
-    property LCL_Platform: string write FLCL_Platform;
     function BuildModule(ModuleName: string): boolean; override;
     // Create configuration in FLazarusPrimaryConfigPath
     function ConfigModule(ModuleName: string): boolean; override;
@@ -279,9 +276,11 @@ implementation
 
 uses
   m_crossinstaller,
+  LCLPlatformDef,
   StrUtils,
   FileUtil,
   fpcuputil,
+  InterfaceBase,
   repoclient,
   processutils,
   {$ifdef Unix}
@@ -323,7 +322,7 @@ begin
     if(ieLibs in FErrorCodes) then
       Infoln(infotext+'Failed to get cross libraries', etError)
     else
-    if not CrossInstaller.GetLibsLCL(FLCL_Platform, BaseDirectory) then
+    if not CrossInstaller.GetLibsLCL(LCL_Platform, BaseDirectory) then
       Infoln(infotext+'Failed to get LCL cross libraries', etError)
     else
     begin
@@ -430,8 +429,10 @@ begin
         Options:=Trim(Options);
         if Length(Options)>0 then Processor.SetParamNameData('OPT',Options);
 
-        if FLCL_Platform <> '' then
-          Processor.SetParamNameData('LCL_PLATFORM',FLCL_Platform);
+        if (LCL_Platform <> GetDefaultLCLWidgetType) then
+        GetLCLName(LCL_Platform);
+
+          Processor.SetParamNameData('LCL_PLATFORM',GetLCLName(LCL_Platform));
 
         //Processor.SetParamData('all');
 
@@ -466,8 +467,8 @@ begin
         if (GetSourceOS<>CrossInstaller.TargetOSName) then
           Processor.SetParamData('--os=' + CrossInstaller.TargetOSName);
 
-        if FLCL_Platform <> '' then
-          Processor.SetParamData('--ws=' + FLCL_Platform);
+        if (LCL_Platform <> GetDefaultLCLWidgetType)  then
+          Processor.SetParamData('--ws=' + GetLCLName(LCL_Platform));
 
         // Also add the default components !
         Processor.SetParamData(ConcatPaths(['packager','registration','fcl.lpk']));
@@ -479,11 +480,7 @@ begin
         Processor.SetParamData(ConcatPaths(['components','ideintf','ideintf.lpk']));
       end;
 
-      if FLCL_Platform = '' then
-        Infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + ' using ' + ExtractFileName(Processor.Executable), etInfo)
-      else
-        Infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + '/' + FLCL_Platform + ' using ' + ExtractFileName(Processor.Executable), etInfo);
-
+      Infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + '/' + GetLCLName(LCL_Platform) + ' using ' + ExtractFileName(Processor.Executable), etInfo);
 
       // Add binutils path to path if necessary
       if CrossInstaller.BinUtilsPathInPath then
@@ -493,7 +490,7 @@ begin
         ProcessorResult:=Processor.ExecuteAndWait;
         Result := (ProcessorResult = 0);
         if (not Result) then
-          WritelnLog(etError,infotext+'Error compiling LCL for ' + GetFPCTarget(false) + ' ' + FLCL_Platform + LineEnding +
+          WritelnLog(etError,infotext+'Error compiling LCL for ' + GetFPCTarget(false) + ' ' + GetLCLName(LCL_Platform) + LineEnding +
             'Details: ' + FErrorLog.Text, true);
       except
         on E: Exception do
@@ -714,8 +711,8 @@ begin
     //Todo: to be investigated
     //Processor.SetParamNamePathData('FPCFPMAKE',ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
 
-    if FLCL_Platform <> '' then
-      Processor.SetParamNameData('LCL_PLATFORM',FLCL_Platform);
+    if (LCL_Platform <> GetDefaultLCLWidgetType) then
+      Processor.SetParamNameData('LCL_PLATFORM',GetLCLName(LCL_Platform));
 
     //Set standard options
     s1:=STANDARDCOMPILERVERBOSITYOPTIONS;
@@ -923,7 +920,7 @@ begin
         Result := false;
         exit;
       end;
-      if FLCL_Platform<>'' then Processor.SetParamNameData('LCL_PLATFORM',FLCL_Platform);
+      if (LCL_Platform<>GetDefaultLCLWidgetType) then Processor.SetParamNameData('LCL_PLATFORM',GetLCLName(LCL_Platform));
     end;
 
     try
@@ -1012,8 +1009,8 @@ begin
       Processor.SetParamNameData('--cpu',GetSourceCPU);
       Processor.SetParamNameData('--os',GetSourceOS);
 
-      if FLCL_Platform <> '' then
-        Processor.SetParamNameData('--ws',FLCL_Platform);
+      if (LCL_Platform <> GetDefaultLCLWidgetType) then
+        Processor.SetParamNameData('--ws',GetLCLName(LCL_Platform));
 
       // Support keeping userdefined installed packages when building.
       // Compile with selected compiler options
@@ -1090,8 +1087,8 @@ begin
           Processor.SetParamData('--cpu=' + GetSourceCPU);
           Processor.SetParamData('--os=' + GetSourceOS);
 
-          if FLCL_Platform <> '' then
-            Processor.SetParamData('--ws=' + FLCL_Platform);
+          if LCL_Platform <> '' then
+            Processor.SetParamData('--ws=' + LCL_Platform);
 
           Processor.SetParamData(DoubleQuoteIfNeeded(IncludeTrailingPathDelimiter(SourceDirectory)+
             'ide'+DirectorySeparator+'startlazarus.lpi'));
@@ -2135,9 +2132,9 @@ begin
       _LCL:
       begin
         CleanDirectory:='lcl';
-        if (CrossCompiling) AND (FLCL_Platform <> '') then
+        if (CrossCompiling) AND (LCL_Platform <> GetDefaultLCLWidgetType) then
         begin
-          Processor.SetParamData('LCL_PLATFORM=' + FLCL_Platform);
+          Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(LCL_Platform));
           CleanCommand:='cleanintf';
         end
         else
@@ -2148,18 +2145,18 @@ begin
       _COMPONENTS:
       begin
         CleanDirectory:='components';
-        if (IsCross) AND (FLCL_Platform <> '') then
+        if (IsCross) AND (LCL_Platform <> GetDefaultLCLWidgetType) then
         begin
-          Processor.SetParamData('LCL_PLATFORM=' + FLCL_Platform);
+          Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(LCL_Platform));
         end;
         CleanCommand:='clean';
       end;
       _PACKAGER:
       begin
         CleanDirectory:='packager';
-        if (IsCross) AND (FLCL_Platform <> '') then
+        if (IsCross) AND (LCL_Platform <> GetDefaultLCLWidgetType) then
         begin
-          Processor.SetParamData('LCL_PLATFORM=' + FLCL_Platform);
+          Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(LCL_Platform));
         end;
         CleanCommand:='clean';
       end;
@@ -2168,7 +2165,7 @@ begin
         CleanDirectory:='lcl';
         if (LCLCrossActionNeeded) then
         begin
-          Processor.SetParamData('LCL_PLATFORM=' + FLCL_Platform);
+          Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(LCL_Platform));
           CleanCommand:='cleanintf';
         end
         else
@@ -2446,16 +2443,7 @@ begin
   if result then
   begin
     SourceVersion:=GetVersion;
-    if (SourceVersion<>'0.0.0') then
-    begin
-      s:=GetRevisionFromVersion(ModuleName,SourceVersion);
-      if (Length(s)>0) then
-      begin
-        //FActualRevision:=s;
-        //FPreviousRevision:=s;
-      end;
-    end
-    else
+    if (SourceVersion='0.0.0') then
     begin
       Infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;
@@ -2865,27 +2853,30 @@ var
   NothingToBeDone:boolean;
 begin
   NothingToBeDone:=true;
-  if FLCL_Platform<>'' then
+  if (LCL_Platform<>GetDefaultLCLWidgetType) then
   begin
     NothingToBeDone:=false;
     {$ifdef Darwin}
       {$ifdef LCLCARBON}
-        NothingToBeDone:=(FLCL_Platform='carbon');
+        NothingToBeDone:=(LCL_Platform=lpCarbon);
       {$endif}
       {$ifdef LCLCOCOA}
-        NothingToBeDone:=(FLCL_Platform='cocoa');
+        NothingToBeDone:=(LCL_Platform=lpCocoa);
       {$endif}
       {$ifdef CPU64}
         {$ifndef LCLQT5}
-          NothingToBeDone:=(FLCL_Platform='cocoa');
+          NothingToBeDone:=(LCL_Platform=lpCocoa);
         {$endif}
       {$endif}
     {$endif}
     {$ifdef LCLQT}
-      NothingToBeDone:=(FLCL_Platform='qt');
+      NothingToBeDone:=(LCL_Platform=lpQT);
     {$endif}
     {$ifdef LCLQT5}
-      NothingToBeDone:=(FLCL_Platform='qt5');
+      NothingToBeDone:=(LCL_Platform=lpQt5);
+    {$endif}
+    {$ifdef LCLQT6}
+      NothingToBeDone:=(LCL_Platform=lpQt6);
     {$endif}
   end;
   result:=(NOT NothingToBeDone);

@@ -178,7 +178,7 @@ type
     FClean: boolean;
     FConfigFile: string;
     {$ifndef FPCONLY}
-    FLCL_Platform: string; //really LCL widgetset
+    FLCL_Platform: LCL_TYPE; //really LCL widgetset
     {$endif}
     FCrossOPT: string;
     FCrossCPU_Target: TCPU;
@@ -306,7 +306,7 @@ type
     // Widgetset for which the user wants to compile the LCL (not the IDE).
     // Empty if default LCL widgetset used for current platform
     {$ifndef FPCONLY}
-    property LCL_Platform:string read FLCL_Platform write FLCL_Platform;
+    property LCL_Platform:LCL_TYPE read FLCL_Platform write FLCL_Platform;
     {$endif}
     property CrossOPT:string read FCrossOPT write FCrossOPT;
     property CrossToolsDirectory:string read FCrossToolsDirectory write SetCrossToolsDirectory;
@@ -1033,7 +1033,8 @@ begin
       {$ifndef FPCONLY}
       if ((CrossOS_Target in LCL_OS) AND (Pos(_LCL,OnlyModules)>0)) then
       begin
-        if (Length(LCL_Platform)>0) then Write(TxtFile,' --lclplatform='+LCL_Platform);
+        Write(TxtFile,' --lclplatform='+GetLCLName(LCL_Platform));
+        //if (Length(LCL_Platform)>0) then Write(TxtFile,' --lclplatform='+LCL_Platform);
       end;
       {$endif}
     end;
@@ -1114,7 +1115,7 @@ begin
   FPCOPT:='';
 
   {$ifndef FPCONLY}
-  LCL_Platform:='';
+  LCL_Platform:=GetDefaultLCLWidgetType;
   LazarusOPT:='';
   LazarusDesiredRevision:='';
   LazarusBranch:='';
@@ -2318,7 +2319,7 @@ begin
     result:=DeleteLazarusScript
   else if FunctionName=_CHECKDEVLIBS then
   begin
-    WidgetTypeName:=FParent.LCL_Platform;
+    WidgetTypeName:=GetLCLName(FParent.LCL_Platform);
     {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
     if (Length(WidgetTypeName)=0) then WidgetTypeName:=GetLCLWidgetTypeName;
     {$ENDIF}

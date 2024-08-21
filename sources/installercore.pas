@@ -669,7 +669,6 @@ type
     //Source revision
     function CreateRevision(ModuleName,aRevision:string): boolean;
     function GetRevision(ModuleName:string): string;
-    function GetRevisionFromVersion(aModuleName,aVersion:string): string;
 
     // Uninstall module
     function UnInstallModule(ModuleName: string): boolean; virtual;
@@ -690,7 +689,17 @@ type
 
   TBaseUniversalInstaller  = class(TInstaller);
   TBaseFPCInstaller        = class(TInstaller);
+  {$ifndef FPCONLY}
+  TBaseLazarusInstaller    = class(TInstaller)
+  private
+    FLCL_Platform: LCL_TYPE;
+  public
+    // LCL widget set to be built (NOT OS/CPU combination)
+    property LCL_Platform: LCL_TYPE read FLCL_Platform write FLCL_Platform;
+  end;
+  {$else}
   TBaseLazarusInstaller    = class(TInstaller);
+  {$endif}
   TBaseHelpInstaller       = class(TInstaller);
   TBaseWinInstaller        = class(TInstaller);
 
@@ -3807,64 +3816,6 @@ begin
   end;
 
   result:=RevString;
-end;
-
-function TInstaller.GetRevisionFromVersion(aModuleName,aVersion:string): string;
-type
-  TVersionTable = record
-    Version:string;
-    Revision:string;
-  end;
-const
-  FPCVersionsTable: array[0..5] of TVersionTable = (
-    (Version:'2.6.4';Revision:'26970'),
-    (Version:'3.0.0';Revision:'32319'),
-    (Version:'3.0.2';Revision:'35401'),
-    (Version:'3.0.4';Revision:'37149'),
-    (Version:'3.2.0';Revision:'45643'),
-    (Version:'3.2.2';Revision:'49371')
-    );
-  LazarusVersionsTable: array[0..10] of TVersionTable = (
-    (Version:'1.6.4';Revision:'54278'),
-    (Version:'1.8.0';Revision:'56623'),
-    (Version:'1.8.2';Revision:'57369'),
-    (Version:'1.8.4';Revision:'57972'),
-    (Version:'2.0.0';Revision:'60307'),
-    (Version:'2.0.2';Revision:'60954'),
-    (Version:'2.0.4';Revision:'61665'),
-    (Version:'2.0.6';Revision:'62129'),
-    (Version:'2.0.8';Revision:'62944'),
-    (Version:'2.0.10';Revision:'63526'),
-    (Version:'2.0.12';Revision:'64642')
-    );
-var
-  aVersionTable:TVersionTable;
-begin
-  result:='';
-
-  if aModuleName=_FPC then
-  begin
-    for aVersionTable in FPCVersionsTable do
-    begin
-      if aVersionTable.Version=aVersion then
-      begin
-        result:=aVersionTable.Revision;
-        exit;
-      end;
-    end;
-  end;
-
-  if aModuleName=_LAZARUS then
-  begin
-    for aVersionTable in LazarusVersionsTable do
-    begin
-      if aVersionTable.Version=aVersion then
-      begin
-        result:=aVersionTable.Revision;
-        exit;
-      end;
-    end;
-  end;
 end;
 
 function TInstaller.UnInstallModule(ModuleName: string): boolean;

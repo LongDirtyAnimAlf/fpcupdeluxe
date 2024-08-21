@@ -59,7 +59,12 @@ Major new features:
 interface
 
 uses
-  Classes, SysUtils;
+  Classes,
+  {$ifndef FPCONLY}
+  InterfaceBase,
+  LCLPlatformDef,
+  {$endif}
+  SysUtils;
 
 const
   ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
@@ -104,6 +109,10 @@ type
 
   TSUBARCHS = set of TSUBARCH;
   TABIS     = set of TABI;
+
+  {$ifndef FPCONLY}
+  LCL_TYPE  = TLCLPlatform;
+  {$endif}
 
 const
   LCL_OS             = [TOS.win32,TOS.win64,TOS.linux,TOS.darwin,TOS.freebsd,TOS.openbsd,TOS.aix,TOS.wince,TOS.haiku,TOS.solaris,TOS.dragonfly,TOS.netbsd,TOS.morphos,TOS.aros,TOS.amiga];
@@ -213,7 +222,7 @@ type
     {$ifndef FPCONLY}
     // In your descendent, implement this function when needed: you can download libraries or check for their existence for Lazarus LCL cross compile libs:
     // Note: the libraries should be presumably under the basepath using the Lazarus naming convention??
-    function GetLibsLCL({%H-}LCL_Platform:string; {%H-}Basepath:string):boolean;virtual;
+    function GetLibsLCL({%H-}LCL_Platform:LCL_TYPE; {%H-}Basepath:string):boolean;virtual;
     {$endif}
     procedure AddFPCCFGSnippet(const aSnip: string; const AddToCrossOptions:boolean=true);
     function AddCrossOption(const aOption: string):boolean;
@@ -291,6 +300,10 @@ procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
 procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI:boolean; out BinPath,LibPath:string);
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 function GetExeExt(const aOS:TOS=TOS.osNone): string;
+{$ifndef FPCONLY}
+function GetLCLName(LCLType:LCL_TYPE):string;
+function GetLCLType(LCLName:string):LCL_TYPE;
+{$endif}
 
 var
   //FPCTargetValid:TFPCTargetValid;
@@ -600,6 +613,30 @@ begin
       result:='';
   end;
 end;
+
+{$ifndef FPCONLY}
+function GetLCLName(LCLType:LCL_TYPE):string;
+begin
+  result:=LCLPlatformDirNames[LCLType];
+end;
+
+
+function GetLCLType(LCLName:string):LCL_TYPE;
+var
+  LCLType:LCL_TYPE;
+begin
+  result:=GetDefaultLCLWidgetType;
+  for LCLType in TLCLPlatforms do
+  begin
+    if (LCLName=GetLCLName(LCLType)) then
+    begin
+      result:=LCLType;
+      break;
+    end;
+  end;
+end;
+
+{$endif}
 
 procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI:boolean; out BinPath,LibPath:string);
 begin
@@ -1094,7 +1131,7 @@ begin
 end;
 
 {$ifndef FPCONLY}
-function TCrossInstaller.GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;
+function TCrossInstaller.GetLibsLCL(LCL_Platform:LCL_TYPE; Basepath:string):boolean;
 begin
   result:=true;
 end;

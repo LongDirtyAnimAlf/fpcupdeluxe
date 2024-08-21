@@ -64,9 +64,6 @@ type
   {$ENDIF MULTILIB}
   public
     function GetLibs(Basepath:string):boolean;override;
-    {$ifndef FPCONLY}
-    function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
-    {$endif}
     function GetBinUtils(Basepath:string):boolean;override;
     constructor Create;
     destructor Destroy; override;
@@ -388,14 +385,6 @@ begin
     {$ENDIF UNIX}
   end;
 end;
-
-{$ifndef FPCONLY}
-function Tany_linux.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
-begin
-  // todo: get gtk at least
-  result:=inherited;
-end;
-{$endif}
 
 function Tany_linux.GetBinUtils(Basepath:string): boolean;
 var

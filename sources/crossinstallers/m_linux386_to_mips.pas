@@ -83,9 +83,6 @@ private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
   function GetLibs(Basepath:string):boolean;override;
-  {$ifndef FPCONLY}
-  function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
-  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -116,14 +113,6 @@ begin
     ShowInfo('Found libspath '+FLibsPath,etInfo);
   end;
 end;
-
-{$ifndef FPCONLY}
-function TLinux386_mips.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
-begin
-  // todo: get gtk at least
-  result:=inherited;
-end;
-{$endif}
 
 function TLinux386_mips.GetBinUtils(Basepath:string): boolean;
 var

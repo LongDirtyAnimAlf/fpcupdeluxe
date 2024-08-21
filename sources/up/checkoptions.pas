@@ -284,7 +284,8 @@ begin
         // handle inclusion of LCL when cross-compiling
         if (FManager.CrossOS_Target in LCL_OS) then
         begin
-          FManager.LCL_Platform:=Options.GetOption('','lclplatform','');
+          s:=Options.GetOption('','lclplatform','');
+          FManager.LCL_Platform:=GetLCLType(s);
         end;
         {$endif}
       end;

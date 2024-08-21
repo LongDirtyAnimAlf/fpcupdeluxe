@@ -4,12 +4,11 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linux64,linuxaarch64,freebsdi386,freebsdx64,linuxppc64,darwinx64,darwinarm64,darwini386"/>
-    <BuildModes Active="Default"/>
+    <BuildModes Active="openbsdx64"/>
     <Units Count="1">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="103"/>
         <CursorPos X="24" Y="106"/>
         <UsageCount Value="69"/>
@@ -47,7 +46,7 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="sources\up\checkoptions.pas"/>
-        <Line Value="713"/>
+        <Line Value="714"/>
       </Item>
     </BreakPoints>
   </Debugging>

@@ -64,9 +64,6 @@ private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
   function GetLibs(Basepath:string):boolean;override;
-  {$ifndef FPCONLY}
-  function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
-  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -122,15 +119,6 @@ begin
   end;
   FLibsFound:=True;
 end;
-
-{$ifndef FPCONLY}
-function TAny_Embeddedmipsel.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
-begin
-  // todo: get gtk at least, add to FFPCCFGSnippet
-  ShowInfo('Todo: implement lcl libs path from basepath '+BasePath,etdebug);
-  result:=inherited;
-end;
-{$endif}
 
 function TAny_Embeddedmipsel.GetBinUtils(Basepath:string): boolean;
 var

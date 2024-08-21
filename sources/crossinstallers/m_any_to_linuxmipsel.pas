@@ -93,9 +93,6 @@ private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
   function GetLibs(Basepath:string):boolean;override;
-  {$ifndef FPCONLY}
-  function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
-  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -133,14 +130,6 @@ begin
     AddFPCCFGSnippet('-Xr/usr/lib');
   end;
 end;
-
-{$ifndef FPCONLY}
-function Tany_linuxmipsel.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
-begin
-  // todo: get gtk at least
-  result:=inherited;
-end;
-{$endif}
 
 function Tany_linuxmipsel.GetBinUtils(Basepath:string): boolean;
 // You can copy the files from Android NDK, e.g.

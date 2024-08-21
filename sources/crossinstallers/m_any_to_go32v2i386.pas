@@ -53,7 +53,7 @@ private
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
-  function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
+  function GetLibsLCL(LCL_Platform:LCL_TYPE; Basepath:string):boolean;override;
   {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
@@ -89,9 +89,9 @@ begin
 end;
 
 {$ifndef FPCONLY}
-function TAny_go32v2i386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TAny_go32v2i386.GetLibsLCL(LCL_Platform: LCL_TYPE; Basepath: string): boolean;
 begin
-  ShowInfo('No support for LCL platform '+LCL_Platform,etInfo);
+  ShowInfo('No support for LCL platform '+GetLCLName(LCL_Platform),etInfo);
   result:=inherited;
 end;
 {$endif}

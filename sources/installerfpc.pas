@@ -5065,16 +5065,7 @@ begin
   if result then
   begin
     SourceVersion:=GetVersion;
-    if (SourceVersion<>'0.0.0') then
-    begin
-      s:=GetRevisionFromVersion(ModuleName,SourceVersion);
-      if (Length(s)>0) then
-      begin
-        //FActualRevision:=s;
-        //FPreviousRevision:=s;
-      end;
-    end
-    else
+    if (SourceVersion='0.0.0') then
     begin
       Infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;

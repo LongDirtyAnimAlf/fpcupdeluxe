@@ -84,7 +84,7 @@ type
     FLazarusNeedsRebuild:boolean;
     FLazarusVersion:string;
     // LCL widget set to be built
-    FLCL_Platform: string;
+    FLCL_Platform: LCL_TYPE;
     function RebuildLazarus:boolean;
     {$endif}
   protected
@@ -113,7 +113,7 @@ type
     // Compiler options user chose to compile Lazarus with (coming from fpcup).
     property LazarusCompilerOptions: string write FLazarusCompilerOptions;
     // LCL widget set to be built
-    property LCL_Platform: string write FLCL_Platform;
+    property LCL_Platform: LCL_TYPE write FLCL_Platform;
     property LazarusVersion:string read FLazarusVersion;
     {$endif}
     // Build module
@@ -223,6 +223,9 @@ implementation
 uses
   StrUtils, typinfo,inifiles, process, fpjson,
   FileUtil, //LazFileUtils,
+  {$ifndef FPCONLY}
+  InterfaceBase,
+  {$endif}
   fpcuputil;
 
 Const
@@ -331,7 +334,7 @@ begin
     //Processor.SetParamNamePathData('INSTALL_BINDIR',FBinPath);
     {$ENDIF MSWINDOWS}
 
-    if FLCL_Platform <> '' then Processor.SetParamData('LCL_PLATFORM=' + FLCL_Platform);
+    if (FLCL_Platform <> GetDefaultLCLWidgetType) then Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(FLCL_Platform));
 
     //Set options
     s := FLazarusCompilerOptions;
@@ -439,8 +442,8 @@ begin
     Processor.SetParamNameData('--cpu',GetSourceCPU);
     Processor.SetParamNameData('--os',GetSourceOS);
 
-    if FLCL_Platform <> '' then
-      Processor.SetParamNameData('--ws',FLCL_Platform);
+    if FLCL_Platform <> GetDefaultLCLWidgetType then
+      Processor.SetParamNameData('--ws',GetLCLName(FLCL_Platform));
 
     s:=FLazarusCompilerOptions;
     if LinuxLegacy then Processor.SetParamNameData('--compiler',ExtractFilePath(FCompiler)+'fpccompat.sh');
@@ -489,13 +492,13 @@ begin
         LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile0/Options/Count', 1);
         LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile0/Options/Item1/Value', Trim(FLazarusCompilerOptions));
       end;
-      if Length(FLCL_Platform)>0 then
+      if (FLCL_Platform <> GetDefaultLCLWidgetType) then
       begin
         // Change the build modes to reflect the default LCL widget set.
         for j:=0 to (i-1) do
         begin
-          Infoln(infotext+'Changing default LCL_platforms for build-profiles in '+MiscellaneousConfig+' to build for '+FLCL_Platform, etInfo);
-          LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', FLCL_Platform);
+          Infoln(infotext+'Changing default LCL_platforms for build-profiles in '+MiscellaneousConfig+' to build for '+GetLCLName(FLCL_Platform), etInfo);
+          LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', GetLCLName(FLCL_Platform));
         end;
       end;
     end;
@@ -866,8 +869,9 @@ begin
   Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
   Processor.SetParamData('--cpu=' + GetSourceCPU);
   Processor.SetParamData('--os=' + GetSourceOS);
-  if FLCL_Platform <> '' then
-            Processor.SetParamData('--ws=' + FLCL_Platform);
+  if FLCL_Platform <> GetDefaultLCLWidgetType then
+            Processor.SetParamData('--ws=' + GetLCLName(FLCL_Platform));
+
   if RegisterPackageFeature then
     Processor.SetParamData('--add-package-link')
   else
@@ -1360,7 +1364,7 @@ begin
       //s:='--quiet';
       {$ENDIF}
 
-      if FLCL_Platform<>'' then s:=s+' --ws=' + FLCL_Platform;
+      if FLCL_Platform<>GetDefaultLCLWidgetType then s:=s+' --ws=' + GetLCLName(FLCL_Platform);
       exec:=StringReplace(exec,LAZBUILDNAME+GetExeExt,LAZBUILDNAME+GetExeExt+' '+s,[rfIgnoreCase]);
     end;
     {$endif}
