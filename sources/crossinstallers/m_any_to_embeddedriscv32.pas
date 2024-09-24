@@ -170,6 +170,17 @@ begin
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
+  // Now also allow for cpu-unknown-elf- binutilsprefix
+  if not result then
+  begin
+    BinPrefixTry:=TargetCPUName+'-unknown-elf-';
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
+
   // Now also allow for empty binutilsprefix in the right directory:
   if not result then
   begin

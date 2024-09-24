@@ -1185,6 +1185,13 @@ begin
           begin
             if (GetTOS(GetSourceOS)=TOS.linux) then BaseBinsURL:='linux_amd64_';
             if (GetTOS(GetSourceOS)=TOS.freebsd) then BaseBinsURL:='freebsd_amd64_';
+            if (GetTOS(GetSourceOS)=TOS.darwin) then BaseBinsURL:='darwin_amd64_';
+          end;
+
+          if (GetTCPU(GetSourceCPU)=TCPU.aarch64) then
+          begin
+            //if (GetTOS(GetSourceOS)=TOS.linux) then BaseBinsURL:='linux_aarch64_';
+            if (GetTOS(GetSourceOS)=TOS.darwin) then BaseBinsURL:='darwin_arm64_';
           end;
 
           if (Length(BaseBinsURL)>0) then
@@ -1736,7 +1743,13 @@ begin
     else
     begin
       ostype:='Ubuntu';
-      if (CrossCPU_Target=TCPU.aarch64) then toolversion:='1804';
+      //if (CrossCPU_Target=TCPU.aarch64) then toolversion:='1804';
+      if (CrossCPU_Target=TCPU.aarch64) then
+      begin
+        ostype:='Debian';
+        toolversion:='11';
+      end;
+
       if (CrossCPU_Target=TCPU.arm) then s:='Linux_ARMHF_Ubuntu_1804.zip';
       if (CrossCPU_Target=TCPU.x86_64) then toolversion:='1804';
       if (CrossCPU_Target=TCPU.i386) then toolversion:='1804';
@@ -1893,8 +1906,12 @@ begin
       end;
       TOS.embedded:
       begin
-        ostype:='none';
-        if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V241';
+        //Tools by fpcup
+        //ostype:='none';
+        //if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V241';
+        //Tools by raspberry from https://github.com/raspberrypi/pico-sdk-tools/releases/
+        ostype:='unknown';
+        if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V240';
       end;
     end;
   end;
@@ -1941,8 +1958,12 @@ begin
       end;
       TOS.embedded:
       begin
-        ostype:='none';
-        if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V241';
+        //Tools by fpcup
+        //ostype:='none';
+        //if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V241';
+        //Tools by raspberry from https://github.com/raspberrypi/pico-sdk-tools/releases/
+        ostype:='unknown';
+        if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V240';
       end;
     end;
   end;
@@ -1976,6 +1997,32 @@ begin
       begin
         if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_16.zip';
         if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PowerPC_GNU.zip';
+      end;
+    end;
+  end;
+
+  // Bins for Darwin AMD64
+  if ((GetTOS(GetSourceOS)=TOS.darwin) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then
+  begin
+    case CrossOS_Target of
+      TOS.embedded:
+      begin
+        //Tools by raspberry from https://github.com/raspberrypi/pico-sdk-tools/releases/
+        ostype:='unknown';
+        if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V240';
+      end;
+    end;
+  end;
+
+  // Bins for Darwin ARM64
+  if ((GetTOS(GetSourceOS)=TOS.darwin) AND (GetTCPU(GetSourceCPU)=TCPU.aarch64)) then
+  begin
+    case CrossOS_Target of
+      TOS.embedded:
+      begin
+        //Tools by raspberry from https://github.com/raspberrypi/pico-sdk-tools/releases/
+        ostype:='unknown';
+        if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V240';
       end;
     end;
   end;

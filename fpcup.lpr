@@ -42,7 +42,7 @@ program fpcup;
 {$warn 5023 off : no warning about unused units}
 (*
   The Initial Developer of the FPCUPdeluxe code is:
-  Alfred Glänzer (donalfredo, aog)
+  Alfred Glï¿½nzer (donalfredo, aog)
 
   The Initial Developers of the Original FPCUP code are:
   Ludo Brands
@@ -117,6 +117,7 @@ uses
   m_any_to_embeddedarm,
   m_any_to_embeddedavr,
   m_any_to_embeddedmipsel,
+  m_any_to_embeddedriscv32,
   m_any_to_javajvm,
   m_any_to_aixpowerpc,
   m_any_to_aixpowerpc64,
