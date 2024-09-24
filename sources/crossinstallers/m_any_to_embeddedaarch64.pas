@@ -139,10 +139,9 @@ begin
   end;
   {$endif unix}
 
-  // Now also allow for arm-none-eabi- binutilsprefix (e.g. launchpadlibrarian)
   if not result then
   begin
-    BinPrefixTry:='aarch64-elf-';
+    BinPrefixTry:=TargetCPUName+'-elf-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);

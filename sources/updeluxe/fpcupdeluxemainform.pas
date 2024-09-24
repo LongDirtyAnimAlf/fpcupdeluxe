@@ -2793,7 +2793,7 @@ begin
 
   if (FPCupManager.CrossOS_Target=TOS.embedded) then
   begin
-    success:=(FPCupManager.CrossCPU_Target in [TCPU.avr,TCPU.arm,TCPU.aarch64,TCPU.mipsel,TCPU.wasm32]);
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.avr,TCPU.arm,TCPU.aarch64,TCPU.mipsel,TCPU.wasm32,TCPU.riscv32,TCPU.riscv64]);
     if (NOT success) then
     begin
       ShowInfo('No valid CPU target for embedded.');
@@ -2803,7 +2803,7 @@ begin
 
   if (FPCupManager.CrossOS_Target=TOS.freertos) then
   begin
-    success:=(FPCupManager.CrossCPU_Target in [TCPU.xtensa,TCPU.arm]);
+    success:=(FPCupManager.CrossCPU_Target in [TCPU.xtensa,TCPU.arm,TCPU.riscv32]);
     if (NOT success) then
     begin
       ShowInfo('No valid CPU target for FreeRTOS.');

@@ -33,8 +33,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$modeswitch advancedrecords}
 
-{$warn 6058 off}
-
 {$i fpcupdefines.inc}
 
 interface
@@ -56,7 +54,7 @@ type
     FMajor: integer;
     FMinor: integer;
     FRelease: integer;
-  FBuild: integer;
+    FBuild: integer;
   public
     function AsString: string;
     procedure GetVersion(alpkdoc:TConfig;key:string);

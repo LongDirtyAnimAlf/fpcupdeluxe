@@ -1891,6 +1891,11 @@ begin
         if (CrossCPU_Target=TCPU.arm) then toolversion:='V232';
         if (CrossCPU_Target=TCPU.i386) then toolversion:='V232';
       end;
+      TOS.embedded:
+      begin
+        ostype:='none';
+        if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V241';
+      end;
     end;
   end;
 
@@ -1933,6 +1938,11 @@ begin
       begin
         if (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64,TCPU.arm]) then s:='Darwin_All_Clang_12.zip';
         if (CrossCPU_Target in [TCPU.powerpc,TCPU.powerpc64]) then s:='Darwin_PowerPC_GNU.zip';
+      end;
+      TOS.embedded:
+      begin
+        ostype:='none';
+        if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V241';
       end;
     end;
   end;

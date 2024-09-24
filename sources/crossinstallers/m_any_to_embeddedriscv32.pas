@@ -1,5 +1,5 @@
-unit m_any_to_embeddedarm;
-{ Cross compiles from any platform with correct binutils to Embedded ARM
+unit m_any_to_embeddedriscv32;
+{ Cross compiles from any platform with correct binutils to Embedded RISCV32
 Copyright (C) 2017 Alf
 
 This library is free software; you can redistribute it and/or modify it
@@ -28,6 +28,15 @@ along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
+{
+RV32IM:
+RV32I: Base Integer Instruction Set
+M: Instructions that multiply and divide values held in two integer registers
+
+binutils:
+./configure --with-arch=rv32im --with-abi=ilp32
+}
+
 {$mode objfpc}{$H+}
 
 interface
@@ -42,8 +51,8 @@ uses
 
 type
 
-{ TAny_Embeddedarm }
-TAny_Embeddedarm = class(TCrossInstaller)
+{ TAny_Embeddedriscv32 }
+TAny_Embeddedriscv32 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -53,9 +62,9 @@ public
   destructor Destroy; override;
 end;
 
-{ TAny_Embeddedarm }
+{ TAny_Embeddedriscv32 }
 
-function TAny_Embeddedarm.GetLibs(Basepath:string): boolean;
+function TAny_Embeddedriscv32.GetLibs(Basepath:string): boolean;
 const
   LibName='libgcc.a';
 var
@@ -121,7 +130,7 @@ begin
   end;
 end;
 
-function TAny_Embeddedarm.GetBinUtils(Basepath:string): boolean;
+function TAny_Embeddedriscv32.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -151,10 +160,10 @@ begin
   end;
   {$endif unix}
 
-  // Now also allow for cpu-none-eabi- binutilsprefix (e.g. launchpadlibrarian)
+  // Now also allow for cpu-none-elf- binutilsprefix
   if not result then
   begin
-    BinPrefixTry:=TargetCPUName+'-none-eabi-';
+    BinPrefixTry:=TargetCPUName+'-none-elf-';
     AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -175,13 +184,6 @@ begin
 
   if not result then
   begin
-    ShowInfo('Suggestion for cross binutils:');
-    {$ifdef mswindows}
-    ShowInfo(CrossWindowsSuggestion);
-    {$else}
-    ShowInfo('Tools from https://launchpad.net/gcc-arm-embedded.');
-    {$endif}
-    ShowInfo('Tools from https://github.com/gnu-mcu-eclipse/arm-none-eabi-gcc');
     FAlreadyWarned:=true;
   end
   else
@@ -193,29 +195,29 @@ begin
   end;
 end;
 
-constructor TAny_Embeddedarm.Create;
+constructor TAny_Embeddedriscv32.Create;
 begin
   inherited Create;
-  FTargetCPU:=TCPU.arm;
+  FTargetCPU:=TCPU.riscv32;
   FTargetOS:=TOS.embedded;
   Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor TAny_Embeddedarm.Destroy;
+destructor TAny_Embeddedriscv32.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Any_Embeddedarm:TAny_Embeddedarm;
+  Any_Embeddedriscv32:TAny_Embeddedriscv32;
 
 initialization
-  Any_Embeddedarm:=TAny_Embeddedarm.Create;
-  RegisterCrossCompiler(Any_Embeddedarm.RegisterName,Any_Embeddedarm);
+  Any_Embeddedriscv32:=TAny_Embeddedriscv32.Create;
+  RegisterCrossCompiler(Any_Embeddedriscv32.RegisterName,Any_Embeddedriscv32);
 
 finalization
-  Any_Embeddedarm.Destroy;
+  Any_Embeddedriscv32.Destroy;
 end.
 

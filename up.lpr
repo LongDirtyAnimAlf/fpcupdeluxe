@@ -121,6 +121,7 @@ uses
   m_any_to_embeddedarm,
   m_any_to_embeddedavr,
   m_any_to_embeddedmipsel,
+  m_any_to_embeddedriscv32,
   m_any_to_javajvm,
   m_any_to_aixpowerpc,
   m_any_to_aixpowerpc64,
