@@ -77,6 +77,7 @@ uses
   {$IFDEF UNIX}
   baseunix,
   {$ENDIF}
+  installerBase,
   FileUtil, fpcuputil;
 
 const

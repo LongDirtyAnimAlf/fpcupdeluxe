@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  ButtonPanel, m_crossinstaller;
+  ButtonPanel, installerBase;
 
 type
   { TSubarchForm }
@@ -57,7 +57,8 @@ implementation
 uses
   fpcuputil,
   installerCore,
-  installerUniversal;
+  installerUniversal,
+  m_crossinstaller;
 
 { TSubarchForm }
 

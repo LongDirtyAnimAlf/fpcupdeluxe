@@ -11,7 +11,7 @@ cd /usr/src && make build32 install32 && ldconfig -v -m -R /usr/lib32
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, installerBase, m_crossinstaller;
 
 implementation
 

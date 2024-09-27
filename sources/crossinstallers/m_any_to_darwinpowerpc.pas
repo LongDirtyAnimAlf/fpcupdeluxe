@@ -39,7 +39,7 @@ uses
 implementation
 
 uses
-  m_crossinstaller, m_any_to_apple_base;
+  installerBase, m_crossinstaller, m_any_to_apple_base;
 
 type
 

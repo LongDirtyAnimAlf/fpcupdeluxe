@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls,
-  Dialogs, CheckLst, IniPropStorage, ComCtrls, m_crossinstaller;
+  Dialogs, CheckLst, IniPropStorage, ComCtrls, installerBase;
 
 type
   TString = class(TObject)
@@ -405,6 +405,7 @@ uses
   DCPsha256,
   fpcuputil,
   installerUniversal,
+  m_crossinstaller,
   IniFiles;
 
 { TForm2 }

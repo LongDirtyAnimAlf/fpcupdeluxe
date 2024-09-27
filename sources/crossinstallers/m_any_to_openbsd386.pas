@@ -40,7 +40,7 @@ uses
 implementation
 
 uses
-  m_crossinstaller, m_any_to_openbsd_base;
+  installerBase, m_crossinstaller, m_any_to_openbsd_base;
 
 type
   TAny_openbsd386 = class(Tany_openbsd_base)

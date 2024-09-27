@@ -40,9 +40,12 @@ http://homer.rice.edu/~sandmann/cwsdpmi/csdpmi7b.zip
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils;
 
 implementation
+
+uses
+  installerBase, m_crossinstaller;
 
 type
 

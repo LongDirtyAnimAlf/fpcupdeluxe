@@ -46,7 +46,8 @@ uses
 implementation
 
 uses
-  FileUtil, m_crossinstaller;
+  FileUtil,
+  installerBase, m_crossinstaller;
 
 type
 

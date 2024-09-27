@@ -38,20 +38,20 @@ uses
 implementation
 
 uses
-  m_crossinstaller, fpcuputil;
+  installerBase, m_crossinstaller,
+  fpcuputil;
 
 type
-
-{ TAny_Solarisx64 }
-TAny_Solarisx64 = class(TCrossInstaller)
-private
-  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-public
-  function GetLibs(Basepath:string):boolean;override;
-  function GetBinUtils(Basepath:string):boolean;override;
-  constructor Create;
-  destructor Destroy; override;
-end;
+  { TAny_Solarisx64 }
+  TAny_Solarisx64 = class(TCrossInstaller)
+  private
+    FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
+  public
+    function GetLibs(Basepath:string):boolean;override;
+    function GetBinUtils(Basepath:string):boolean;override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 { TAny_Solarisx64 }
 

@@ -36,7 +36,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller;
+  Classes, SysUtils, installerBase, installerCore,
+  m_crossinstaller;
 
 Const
   Sequences=
@@ -1229,6 +1230,17 @@ begin
 
           Processor.SetParamNameData('CROSSINSTALL','1');
 
+          // The below is needed due to changes in the Makefile of FPC 3.3.1
+          // Has been reported on the Core Mailing list, but no action taken
+          if (CrossInstaller.TargetOS in [TOS.darwin]) then
+          begin
+            Processor.SetParamNamePathData('SYSTEMDIR',ConcatPaths([SourceDirectory,'rtl','bsd']));
+            Processor.SetParamNamePathData('DOSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+            Processor.SetParamNamePathData('SYSUTILSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+            Processor.SetParamNamePathData('CLASSESDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+            Processor.SetParamNamePathData('TTHREADINCDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+          end;
+
           if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
           begin
             UnitSearchPath:=GetUnitsInstallDirectory+DirectorySeparator;
@@ -1466,7 +1478,8 @@ begin
 
           {$ifndef FPC_HAS_TYPE_EXTENDED}
           // soft 80 bit float if available
-          if ((GetSourceCPU=GetCPU(TCPU.x86_64)) OR (GetSourceCPU=GetCPU(TCPU.aarch64))) then
+          //if ((GetSourceCPU=GetCPU(TCPU.x86_64)) OR (GetSourceCPU=GetCPU(TCPU.aarch64))) then
+          if (GetSourceCPU=GetCPU(TCPU.x86_64)) then
           begin
             if ( (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.i8086)  OR (CrossInstaller.TargetCPU=TCPU.x86_64) ) then
             begin
@@ -1607,12 +1620,12 @@ begin
           if (ModuleName=_NATIVECROSSFPC) then
           begin
             s1:=GetCompilerName(CrossInstaller.TargetCPU);
-            s1:=ChangeFileExt(s1,m_crossinstaller.GetExeExt(CrossInstaller.TargetOS));
+            s1:=ChangeFileExt(s1,installerBase.GetExeExt(CrossInstaller.TargetOS));
             s2:=ConcatPaths([SourceDirectory,'compiler',s1]);
             if FileExists(s2) then
             begin
               s1:=ConcatPaths([FPCBinDir,'native_'+GetFPCTarget(false)+'_'+GetCompilerName(CrossInstaller.TargetCPU)]);
-              s1:=ChangeFileExt(s1,m_crossinstaller.GetExeExt(CrossInstaller.TargetOS));
+              s1:=ChangeFileExt(s1,installerBase.GetExeExt(CrossInstaller.TargetOS));
               SysUtils.DeleteFile(s1);
               FileCopy(s2,s1);
               //SysUtils.DeleteFile(s2);

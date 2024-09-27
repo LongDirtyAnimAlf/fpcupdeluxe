@@ -15,7 +15,9 @@ uses
 implementation
 
 uses
-  FileUtil, LazFileUtils, m_crossinstaller, fpcuputil;
+  FileUtil, LazFileUtils,
+  installerBase, m_crossinstaller,
+  fpcuputil;
 
 type
 

@@ -8,7 +8,7 @@ unit m_darwin_to_apple_base;
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, installerBase, m_crossinstaller;
 
 type
   Tdarwin_apple = class(TCrossInstaller)

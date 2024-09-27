@@ -39,20 +39,21 @@ uses
 implementation
 
 uses
-  FileUtil, fpcuputil, m_crossinstaller;
+  FileUtil,
+  installerBase, m_crossinstaller,
+  fpcuputil;
 
 type
-
-{ Tany_atarim68k }
-Tany_atarim68k = class(TCrossInstaller)
-private
-  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-public
-  function GetLibs(Basepath:string):boolean;override;
-  function GetBinUtils(Basepath:string):boolean;override;
-  constructor Create;
-  destructor Destroy; override;
-end;
+  { Tany_atarim68k }
+  Tany_atarim68k = class(TCrossInstaller)
+  private
+    FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
+  public
+    function GetLibs(Basepath:string):boolean;override;
+    function GetBinUtils(Basepath:string):boolean;override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 { Tany_atarim68k }
 

@@ -81,6 +81,7 @@ uses
   {$IFDEF UNIX}
   Process,
   {$ENDIF UNIX}
+  installerBase,
   FileUtil, fpcuputil;
 
 { Tany_linux }

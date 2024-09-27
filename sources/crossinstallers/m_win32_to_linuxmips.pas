@@ -57,7 +57,7 @@ See page 15 of the getting started manual for the layout of lib and relation to 
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, installerBase, m_crossinstaller;
 
 implementation
 type

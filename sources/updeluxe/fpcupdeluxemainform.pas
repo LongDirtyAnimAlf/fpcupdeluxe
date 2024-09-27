@@ -368,6 +368,7 @@ uses
   DPB.Forms.Sequencial,
   {$ENDIF}
   //checkoptions,
+  installerBase,
   installerCore,
   installerUniversal,
   m_crossinstaller, // for checking of availability of fpc[laz]up[deluxe] cross-compilers
@@ -3300,23 +3301,27 @@ begin
           begin
             if (FPCupManager.CrossCPU_Target=TCPU.xtensa) AND (FPCupManager.CrossOS_Target=TOS.freertos) then
             begin
-              try
-                s:=FPCupManager.OnlyModules;
-                if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
-                FPCupManager.OnlyModules:='xtensatools4fpc';
-                AddMessage('Getting (if any) xtensa tools from https://github.com/michael-ring/espsdk4fpc.');
-                success:=RealRun;
-              finally
-                FPCupManager.OnlyModules:=s;
-              end;
-              if success then
+              //if GetTOS(GetSourceOS) in [TOS.darwin,TOS.linux] then
               begin
-                // Check if we have received some files.
-                s:=ConcatPaths([FPCupManager.BaseDirectory,CROSSBINPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
-                if DirectoryExists(s) then MissingCrossBins:=false;
-                s:=ConcatPaths([FPCupManager.BaseDirectory,CROSSLIBPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
-                if DirectoryExists(s) then MissingCrossLibs:=false;
-                if MissingCrossBins OR MissingCrossLibs then success:=false;
+                // Get (if any) xtensa tools from https://github.com/michael-ring/espsdk4fpc
+                try
+                  s:=FPCupManager.OnlyModules;
+                  if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
+                  FPCupManager.OnlyModules:='xtensatools4fpc';
+                  AddMessage('Getting (if any) xtensa tools from https://github.com/michael-ring/espsdk4fpc.');
+                  success:=RealRun;
+                finally
+                  FPCupManager.OnlyModules:=s;
+                end;
+                if success then
+                begin
+                  // Check if we have received some files.
+                  s:=ConcatPaths([FPCupManager.BaseDirectory,CROSSBINPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
+                  if (NOT DirectoryIsEmpty(s)) then MissingCrossBins:=false;
+                  s:=ConcatPaths([FPCupManager.BaseDirectory,CROSSLIBPATH,GetCPU(TCPU.xtensa)+'-'+GetOS(TOS.freertos)]);
+                  if (NOT DirectoryIsEmpty(s)) then MissingCrossLibs:=false;
+                  if MissingCrossBins OR MissingCrossLibs then success:=false;
+                end;
               end;
             end;
           end;
@@ -3334,19 +3339,35 @@ begin
             FPCupManager.GetCrossToolsPath(BinPath,LibPath);
 
             // bit tricky ... if bins and/or libs are already there exit this retry ... ;-)
-            if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath)) then MissingCrossBins:=false;
-
-            if (FPCupManager.CrossOS_SubArch=TSUBARCH.saNone) then
+            if MissingCrossBins then
             begin
-              if (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath)) then MissingCrossLibs:=false;
-            end
-            else
-            begin
-              s:=ConcatPaths([FPCupManager.BaseDirectory,LibPath,GetSubarch(FPCupManager.CrossOS_SubArch)]);
+              s:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+BinPath;
               if (NOT DirectoryIsEmpty(s)) then
-                MissingCrossLibs:=false
+              begin
+                MissingCrossBins:=false;
+                AddMessage(Seriousness[etError]+' Binary tools directory '+s+' not empty. Skipping auto download of tools');
+              end;
+            end;
+
+            if MissingCrossLibs then
+            begin
+              if (FPCupManager.CrossOS_SubArch=TSUBARCH.saNone) then
+              begin
+                s:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibPath;
+                if (NOT DirectoryIsEmpty(s)) then
+                begin
+                  MissingCrossLibs:=false;
+                  AddMessage(Seriousness[etError]+' Library directory '+s+' not empty. Skipping auto download of libraries');
+                end;
+              end
               else
-                MissingCrossLibs:=true;// force the download of embedded libs if not there ... if this fails, don't worry, building will go on
+              begin
+                s:=ConcatPaths([FPCupManager.BaseDirectory,LibPath,GetSubarch(FPCupManager.CrossOS_SubArch)]);
+                if (NOT DirectoryIsEmpty(s)) then
+                  MissingCrossLibs:=false
+                else
+                  MissingCrossLibs:=true;// force the download of embedded libs if not there ... if this fails, don't worry, building will go on
+              end;
             end;
 
             // Get tools !!
@@ -3613,11 +3634,11 @@ begin
 
             success:=RealRun;
           end
-          else AddMessage('No luck in getting then cross-tools ... aborting.');
+          else AddMessage(Seriousness[etError]+' No luck in getting then cross-tools ... aborting.');
         end
         else
         begin
-          AddMessage('Building cross-tools failed. Aborting.');
+          AddMessage(Seriousness[etError]+' Building cross-tools failed. Aborting.');
         end;
 
       end;

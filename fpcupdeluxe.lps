@@ -5,7 +5,7 @@
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linuxi386QT5,linuxi386QT5zip,linux64,linuxaarch64,linuxaarch64QT5,linuxaarch64QT5zip,linuxarm,linuxarmQT5,linuxarmQT5zip,linuxarmv6,linuxx64QT5,linuxx64QT5zip,linuxppc64,freebsdi386,freebsdx64,solarisx64,dragonflyx64,netbsdx64,netbsdi386,freebsdx64QT5,freebsdx64QT5zip"/>
     <BuildModes Active="Default"/>
-    <Units Count="479">
+    <Units Count="516">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -21,12 +21,9 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="3354"/>
-        <CursorPos X="48" Y="3364"/>
+        <CursorPos X="19" Y="19"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="sources\updeluxe\extrasettings.pas"/>
@@ -35,9 +32,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
+        <TopLine Value="369"/>
+        <CursorPos X="3" Y="408"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
@@ -76,8 +74,9 @@
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
-        <CursorPos X="23" Y="22"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="133"/>
+        <CursorPos Y="169"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -85,17 +84,17 @@
       <Unit8>
         <Filename Value="sources\settings.ini"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="23"/>
         <CursorPos X="24" Y="36"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit8>
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
         <CursorPos X="29" Y="4"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -106,31 +105,31 @@
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="40"/>
+        <CursorPos X="19" Y="61"/>
         <UsageCount Value="200"/>
       </Unit10>
       <Unit11>
         <Filename Value="sources\text.txt"/>
-        <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="3"/>
         <CursorPos Y="32"/>
-        <UsageCount Value="186"/>
+        <UsageCount Value="197"/>
         <DefaultSyntaxHighlighter Value="Text"/>
       </Unit11>
       <Unit12>
         <Filename Value="sources\installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="674"/>
-        <CursorPos Y="697"/>
-        <UsageCount Value="64"/>
+        <TopLine Value="33"/>
+        <CursorPos X="18" Y="33"/>
+        <UsageCount Value="66"/>
       </Unit12>
       <Unit13>
         <Filename Value="sources\fpcuputil.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="3670"/>
-        <CursorPos X="7" Y="3847"/>
-        <UsageCount Value="52"/>
+        <UsageCount Value="53"/>
       </Unit13>
       <Unit14>
         <Filename Value="..\..\stable\fpcsrc\packages\rtl-objpas\src\inc\strutils.pp"/>
@@ -144,9 +143,9 @@
         <Filename Value="sources\installermanager.pas"/>
         <UnitName Value="installerManager"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1058"/>
-        <CursorPos X="31" Y="1193"/>
-        <UsageCount Value="49"/>
+        <TopLine Value="458"/>
+        <CursorPos X="5" Y="475"/>
+        <UsageCount Value="53"/>
       </Unit15>
       <Unit16>
         <Filename Value="sources\NumCPULib.pas"/>
@@ -159,21 +158,23 @@
         <Filename Value="sources\installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="4347"/>
-        <CursorPos X="17" Y="4362"/>
-        <UsageCount Value="70"/>
+        <TopLine Value="1608"/>
+        <CursorPos X="49" Y="1628"/>
+        <UsageCount Value="72"/>
       </Unit17>
       <Unit18>
         <Filename Value="sources\crossinstallers\m_any_to_freebsd386.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="77"/>
-        <CursorPos X="14" Y="91"/>
-        <UsageCount Value="2"/>
+        <TopLine Value="40"/>
+        <CursorPos X="18" Y="47"/>
+        <UsageCount Value="10"/>
       </Unit18>
       <Unit19>
         <Filename Value="sources\processutils.pas"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="33"/>
+        <TopLine Value="461"/>
+        <CursorPos X="3" Y="450"/>
+        <UsageCount Value="34"/>
       </Unit19>
       <Unit20>
         <Filename Value="..\..\stable\fpcsrc\rtl\objpas\math.pp"/>
@@ -193,13 +194,15 @@
       <Unit22>
         <Filename Value="sources\m_crossinstaller.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1065"/>
-        <CursorPos X="3" Y="1051"/>
-        <UsageCount Value="68"/>
+        <TopLine Value="172"/>
+        <CursorPos X="28" Y="179"/>
+        <UsageCount Value="70"/>
       </Unit22>
       <Unit23>
         <Filename Value="sources\crossinstallers\m_any_to_linux_base.pas"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="79"/>
+        <CursorPos X="26" Y="87"/>
         <UsageCount Value="11"/>
       </Unit23>
       <Unit24>
@@ -244,17 +247,17 @@
         <Filename Value="sources\installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2844"/>
-        <CursorPos X="41" Y="2868"/>
-        <UsageCount Value="22"/>
+        <TopLine Value="19"/>
+        <CursorPos X="37" Y="38"/>
+        <UsageCount Value="23"/>
       </Unit29>
       <Unit30>
         <Filename Value="sources\installeruniversal.pas"/>
         <UnitName Value="installerUniversal"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="26"/>
-        <CursorPos X="10" Y="36"/>
-        <UsageCount Value="19"/>
+        <TopLine Value="13"/>
+        <CursorPos X="50" Y="41"/>
+        <UsageCount Value="20"/>
       </Unit30>
       <Unit31>
         <Filename Value="..\..\trunk\lazarus\components\opengl\qlclopenglwidget.pas"/>
@@ -441,15 +444,15 @@
       <Unit55>
         <Filename Value="sources\crossinstallers\m_any_to_aixpowerpc64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="50"/>
-        <CursorPos Y="65"/>
+        <TopLine Value="40"/>
+        <CursorPos X="17" Y="56"/>
         <UsageCount Value="10"/>
       </Unit55>
       <Unit56>
         <Filename Value="sources\crossinstallers\m_any_to_aixpowerpc.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="48"/>
-        <CursorPos Y="65"/>
+        <TopLine Value="41"/>
+        <CursorPos X="18" Y="56"/>
         <UsageCount Value="10"/>
       </Unit56>
       <Unit57>
@@ -462,14 +465,15 @@
       <Unit58>
         <Filename Value="sources\crossinstallers\m_any_to_linuxarm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="28"/>
+        <TopLine Value="43"/>
+        <CursorPos X="3" Y="51"/>
         <UsageCount Value="10"/>
       </Unit58>
       <Unit59>
         <Filename Value="sources\crossinstallers\m_any_to_android_base.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="467"/>
-        <CursorPos X="17" Y="333"/>
+        <TopLine Value="67"/>
+        <CursorPos X="17" Y="80"/>
         <UsageCount Value="10"/>
       </Unit59>
       <Unit60>
@@ -483,15 +487,16 @@
       <Unit61>
         <Filename Value="sources\crossinstallers\m_any_to_linuxppc.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="43"/>
-        <UsageCount Value="3"/>
+        <TopLine Value="41"/>
+        <CursorPos Y="45"/>
+        <UsageCount Value="10"/>
       </Unit61>
       <Unit62>
         <Filename Value="sources\crossinstallers\m_any_to_linuxx64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="11"/>
-        <CursorPos Y="30"/>
-        <UsageCount Value="2"/>
+        <TopLine Value="9"/>
+        <CursorPos Y="13"/>
+        <UsageCount Value="10"/>
       </Unit62>
       <Unit63>
         <Filename Value="..\..\stabletest\fpcsrc\compiler\pdecsub.pas"/>
@@ -778,9 +783,9 @@
         <Filename Value="sources\installerhelp.pas"/>
         <UnitName Value="installerHelp"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="384"/>
-        <CursorPos X="43" Y="399"/>
-        <UsageCount Value="13"/>
+        <TopLine Value="412"/>
+        <CursorPos Y="421"/>
+        <UsageCount Value="15"/>
       </Unit104>
       <Unit105>
         <Filename Value="sources\zipper.pp"/>
@@ -906,36 +911,36 @@
       <Unit121>
         <Filename Value="sources\crossinstallers\m_any_to_linuxaarch64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="31"/>
-        <CursorPos X="35" Y="13"/>
-        <UsageCount Value="7"/>
+        <TopLine Value="2"/>
+        <CursorPos Y="13"/>
+        <UsageCount Value="10"/>
       </Unit121>
       <Unit122>
         <Filename Value="sources\crossinstallers\m_any_to_linuxloongarch64.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="37"/>
-        <CursorPos Y="52"/>
+        <CursorPos X="12" Y="44"/>
         <UsageCount Value="10"/>
       </Unit122>
       <Unit123>
         <Filename Value="sources\crossinstallers\m_any_to_linuxmips.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="36"/>
-        <CursorPos Y="51"/>
+        <CursorPos X="3" Y="44"/>
         <UsageCount Value="10"/>
       </Unit123>
       <Unit124>
         <Filename Value="sources\crossinstallers\m_any_to_linuxmipsel.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="81"/>
-        <CursorPos Y="96"/>
+        <TopLine Value="84"/>
+        <CursorPos X="3" Y="88"/>
         <UsageCount Value="10"/>
       </Unit124>
       <Unit125>
         <Filename Value="sources\crossinstallers\m_any_to_linuxpowerpc64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="37"/>
-        <CursorPos Y="52"/>
+        <TopLine Value="34"/>
+        <CursorPos X="3" Y="44"/>
         <UsageCount Value="10"/>
       </Unit125>
       <Unit126>
@@ -1065,8 +1070,8 @@
       <Unit143>
         <Filename Value="sources\crossinstallers\m_any_to_apple_base.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="350"/>
-        <CursorPos X="25" Y="374"/>
+        <TopLine Value="37"/>
+        <CursorPos Y="68"/>
         <UsageCount Value="32"/>
       </Unit143>
       <Unit144>
@@ -1562,7 +1567,8 @@
       <Unit209>
         <Filename Value="sources\crossinstallers\m_any_to_linuxriscv32.pas"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="14" Y="4"/>
+        <TopLine Value="3"/>
+        <CursorPos Y="13"/>
         <UsageCount Value="10"/>
       </Unit209>
       <Unit210>
@@ -1575,8 +1581,8 @@
       <Unit211>
         <Filename Value="sources\crossinstallers\m_any_to_darwinpowerpc.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="74"/>
-        <CursorPos Y="42"/>
+        <TopLine Value="38"/>
+        <CursorPos X="18" Y="42"/>
         <UsageCount Value="26"/>
       </Unit211>
       <Unit212>
@@ -2997,8 +3003,8 @@
       <Unit395>
         <Filename Value="sources\crossinstallers\m_any_to_msdosi8086.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="111"/>
-        <CursorPos X="26" Y="117"/>
+        <TopLine Value="38"/>
+        <CursorPos X="3" Y="47"/>
         <UsageCount Value="10"/>
       </Unit395>
       <Unit396>
@@ -3011,15 +3017,15 @@
       <Unit397>
         <Filename Value="sources\crossinstallers\m_any_to_embeddedaarch64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="142"/>
-        <CursorPos X="28" Y="142"/>
+        <TopLine Value="33"/>
+        <CursorPos X="3" Y="43"/>
         <UsageCount Value="12"/>
       </Unit397>
       <Unit398>
         <Filename Value="sources\crossinstallers\m_any_to_darwin386.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="68"/>
-        <CursorPos X="7" Y="87"/>
+        <TopLine Value="26"/>
+        <CursorPos X="18" Y="42"/>
         <UsageCount Value="12"/>
       </Unit398>
       <Unit399>
@@ -3136,7 +3142,8 @@
       <Unit415>
         <Filename Value="sources\crossinstallers\m_any_to_darwinpowerpc64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="74"/>
+        <TopLine Value="32"/>
+        <CursorPos X="18" Y="42"/>
         <UsageCount Value="10"/>
       </Unit415>
       <Unit416>
@@ -3246,15 +3253,15 @@
       <Unit430>
         <Filename Value="sources\crossinstallers\m_any_to_linuxriscv64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="14"/>
-        <CursorPos Y="18"/>
+        <TopLine Value="9"/>
+        <CursorPos Y="13"/>
         <UsageCount Value="10"/>
       </Unit430>
       <Unit431>
         <Filename Value="sources\crossinstallers\m_any_to_go32v2i386.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="40"/>
-        <CursorPos X="12" Y="56"/>
+        <TopLine Value="28"/>
+        <CursorPos X="16" Y="48"/>
         <UsageCount Value="10"/>
       </Unit431>
       <Unit432>
@@ -3319,148 +3326,147 @@
       <Unit440>
         <Filename Value="sources\crossinstallers\m_any_to_aros386.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="37"/>
-        <CursorPos Y="52"/>
+        <TopLine Value="35"/>
+        <CursorPos X="3" Y="44"/>
         <UsageCount Value="10"/>
       </Unit440>
       <Unit441>
         <Filename Value="sources\crossinstallers\m_any_to_arosx64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="77"/>
-        <CursorPos Y="89"/>
+        <TopLine Value="40"/>
+        <CursorPos X="29" Y="50"/>
         <UsageCount Value="10"/>
       </Unit441>
       <Unit442>
         <Filename Value="sources\crossinstallers\m_any_to_arosarm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="37"/>
-        <CursorPos Y="52"/>
+        <TopLine Value="40"/>
+        <CursorPos X="3" Y="44"/>
         <UsageCount Value="10"/>
       </Unit442>
       <Unit443>
         <Filename Value="sources\crossinstallers\m_any_to_amigam68k.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="33"/>
-        <CursorPos Y="52"/>
+        <TopLine Value="41"/>
+        <CursorPos Y="47"/>
         <UsageCount Value="10"/>
       </Unit443>
       <Unit444>
         <Filename Value="sources\crossinstallers\m_any_to_atarim68k.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="78"/>
-        <CursorPos Y="90"/>
+        <TopLine Value="35"/>
+        <CursorPos Y="47"/>
         <UsageCount Value="10"/>
       </Unit444>
       <Unit445>
         <Filename Value="sources\crossinstallers\m_any_to_morphospowerpc.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="37"/>
-        <CursorPos Y="52"/>
+        <CursorPos X="18" Y="43"/>
         <UsageCount Value="10"/>
       </Unit445>
       <Unit446>
         <Filename Value="sources\crossinstallers\m_any_to_haiku386.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="44"/>
-        <CursorPos X="12" Y="60"/>
+        <TopLine Value="46"/>
+        <CursorPos X="35" Y="50"/>
         <UsageCount Value="10"/>
       </Unit446>
       <Unit447>
         <Filename Value="sources\crossinstallers\m_any_to_haikux64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="45"/>
-        <CursorPos Y="60"/>
+        <TopLine Value="48"/>
+        <CursorPos Y="50"/>
         <UsageCount Value="10"/>
       </Unit447>
       <Unit448>
         <Filename Value="sources\crossinstallers\m_any_to_dragonflyx64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="37"/>
-        <CursorPos Y="52"/>
+        <TopLine Value="38"/>
+        <CursorPos X="3" Y="44"/>
         <UsageCount Value="10"/>
       </Unit448>
       <Unit449>
         <Filename Value="sources\crossinstallers\m_any_to_embeddedarm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="150"/>
-        <CursorPos X="16" Y="154"/>
+        <TopLine Value="32"/>
+        <CursorPos X="3" Y="43"/>
         <UsageCount Value="13"/>
       </Unit449>
       <Unit450>
         <Filename Value="sources\crossinstallers\m_any_to_embeddedavr.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="147"/>
-        <CursorPos Y="159"/>
+        <TopLine Value="49"/>
+        <CursorPos X="3" Y="59"/>
         <UsageCount Value="10"/>
       </Unit450>
       <Unit451>
         <Filename Value="sources\crossinstallers\m_any_to_embeddedmipsel.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="52"/>
-        <CursorPos Y="67"/>
+        <TopLine Value="47"/>
+        <CursorPos X="3" Y="59"/>
         <UsageCount Value="10"/>
       </Unit451>
       <Unit452>
         <Filename Value="sources\crossinstallers\m_any_to_javajvm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="44"/>
-        <CursorPos Y="59"/>
+        <TopLine Value="27"/>
+        <CursorPos X="3" Y="51"/>
         <UsageCount Value="10"/>
       </Unit452>
       <Unit453>
         <Filename Value="sources\crossinstallers\m_any_to_linuxxtensa.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="36"/>
-        <CursorPos Y="51"/>
-        <UsageCount Value="10"/>
+        <CursorPos X="3" Y="43"/>
+        <UsageCount Value="11"/>
       </Unit453>
       <Unit454>
         <Filename Value="sources\crossinstallers\m_any_to_linuxm68k.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="72"/>
-        <CursorPos Y="86"/>
+        <TopLine Value="36"/>
+        <CursorPos X="3" Y="43"/>
         <UsageCount Value="10"/>
       </Unit454>
       <Unit455>
         <Filename Value="sources\crossinstallers\m_any_to_freebsdx64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="93"/>
-        <CursorPos Y="108"/>
+        <TopLine Value="40"/>
+        <CursorPos X="3" Y="47"/>
         <UsageCount Value="10"/>
       </Unit455>
       <Unit456>
         <Filename Value="sources\crossinstallers\m_any_to_freebsdaarch64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="93"/>
-        <CursorPos Y="107"/>
+        <TopLine Value="43"/>
+        <CursorPos X="18" Y="47"/>
         <UsageCount Value="10"/>
       </Unit456>
       <Unit457>
         <Filename Value="sources\crossinstallers\m_any_to_openbsd_base.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="89"/>
-        <CursorPos Y="103"/>
+        <TopLine Value="38"/>
+        <CursorPos Y="39"/>
         <UsageCount Value="10"/>
       </Unit457>
       <Unit458>
         <Filename Value="sources\crossinstallers\m_win32_to_linuxmips.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="86"/>
-        <CursorPos Y="101"/>
+        <TopLine Value="47"/>
+        <CursorPos X="37" Y="60"/>
         <UsageCount Value="10"/>
       </Unit458>
       <Unit459>
         <Filename Value="sources\crossinstallers\m_win32_to_wincearm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="52"/>
-        <CursorPos Y="67"/>
+        <TopLine Value="50"/>
+        <CursorPos X="37" Y="56"/>
         <UsageCount Value="10"/>
       </Unit459>
       <Unit460>
         <Filename Value="sources\crossinstallers\m_linux386_to_mips.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="71"/>
-        <CursorPos Y="86"/>
+        <TopLine Value="77"/>
+        <CursorPos X="37" Y="74"/>
         <UsageCount Value="10"/>
       </Unit460>
       <Unit461>
@@ -3473,8 +3479,8 @@
       <Unit462>
         <Filename Value="sources\crossinstallers\m_linux386_to_wincearm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="69"/>
-        <CursorPos Y="80"/>
+        <TopLine Value="34"/>
+        <CursorPos X="37" Y="37"/>
         <UsageCount Value="10"/>
       </Unit462>
       <Unit463>
@@ -3537,8 +3543,8 @@
       <Unit471>
         <Filename Value="sources\crossinstallers\m_any_to_embeddedriscv32.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="180"/>
-        <CursorPos X="28" Y="159"/>
+        <TopLine Value="40"/>
+        <CursorPos X="3" Y="52"/>
         <UsageCount Value="13"/>
       </Unit471>
       <Unit472>
@@ -3587,78 +3593,288 @@
       <Unit478>
         <Filename Value="sources\crossinstallers\m_any_to_darwinaarch64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="21"/>
-        <CursorPos X="33" Y="42"/>
+        <TopLine Value="30"/>
+        <CursorPos X="18" Y="42"/>
         <UsageCount Value="11"/>
       </Unit478>
+      <Unit479>
+        <Filename Value="C:\fpcupsystems\trunklatest\fpcsrc\rtl\linux\Makefile"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3616"/>
+        <CursorPos X="31" Y="2934"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit479>
+      <Unit480>
+        <Filename Value="sources\crossinstallers\m_any_to_freertosxtensa.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="38"/>
+        <CursorPos X="3" Y="46"/>
+        <UsageCount Value="10"/>
+      </Unit480>
+      <Unit481>
+        <Filename Value="sources\installerbase.pas"/>
+        <UnitName Value="installerBase"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="19"/>
+        <UsageCount Value="11"/>
+      </Unit481>
+      <Unit482>
+        <Filename Value="sources\crossinstallers\m_any_to_androidarm.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="17" Y="13"/>
+        <UsageCount Value="10"/>
+      </Unit482>
+      <Unit483>
+        <Filename Value="sources\crossinstallers\m_any_to_androidjvm.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="45"/>
+        <CursorPos X="3" Y="51"/>
+        <UsageCount Value="10"/>
+      </Unit483>
+      <Unit484>
+        <Filename Value="sources\crossinstallers\m_any_to_androidaarch64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="9"/>
+        <CursorPos Y="13"/>
+        <UsageCount Value="10"/>
+      </Unit484>
+      <Unit485>
+        <Filename Value="sources\crossinstallers\m_any_to_androidx64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="12"/>
+        <CursorPos X="18" Y="13"/>
+        <UsageCount Value="10"/>
+      </Unit485>
+      <Unit486>
+        <Filename Value="sources\crossinstallers\m_any_to_android386.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="11"/>
+        <CursorPos X="35" Y="21"/>
+        <UsageCount Value="10"/>
+      </Unit486>
+      <Unit487>
+        <Filename Value="sources\crossinstallers\m_any_to_linux386.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="11"/>
+        <CursorPos Y="13"/>
+        <UsageCount Value="10"/>
+      </Unit487>
+      <Unit488>
+        <Filename Value="sources\crossinstallers\m_any_to_solarisx64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="33"/>
+        <CursorPos X="3" Y="55"/>
+        <UsageCount Value="10"/>
+      </Unit488>
+      <Unit489>
+        <Filename Value="sources\crossinstallers\m_any_to_solarissparc.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="30"/>
+        <CursorPos Y="45"/>
+        <UsageCount Value="10"/>
+      </Unit489>
+      <Unit490>
+        <Filename Value="sources\crossinstallers\m_any_to_freertosarm.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="33"/>
+        <CursorPos X="18" Y="41"/>
+        <UsageCount Value="10"/>
+      </Unit490>
+      <Unit491>
+        <Filename Value="sources\crossinstallers\m_any_to_ultiboarm.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="47"/>
+        <CursorPos X="3" Y="51"/>
+        <UsageCount Value="10"/>
+      </Unit491>
+      <Unit492>
+        <Filename Value="sources\crossinstallers\m_any_to_ultiboaarch64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="47"/>
+        <CursorPos X="3" Y="51"/>
+        <UsageCount Value="10"/>
+      </Unit492>
+      <Unit493>
+        <Filename Value="sources\crossinstallers\m_any_to_darwinx64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="35"/>
+        <CursorPos X="18" Y="42"/>
+        <UsageCount Value="10"/>
+      </Unit493>
+      <Unit494>
+        <Filename Value="sources\crossinstallers\m_any_to_darwinarm.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="35"/>
+        <CursorPos X="18" Y="42"/>
+        <UsageCount Value="10"/>
+      </Unit494>
+      <Unit495>
+        <Filename Value="sources\crossinstallers\m_any_to_iosarm.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="36"/>
+        <CursorPos X="16" Y="42"/>
+        <UsageCount Value="10"/>
+      </Unit495>
+      <Unit496>
+        <Filename Value="sources\crossinstallers\m_any_to_iosaarch64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="80"/>
+        <CursorPos X="13" Y="104"/>
+        <UsageCount Value="10"/>
+      </Unit496>
+      <Unit497>
+        <Filename Value="sources\crossinstallers\m_any_to_netbsd_base.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="16"/>
+        <CursorPos X="37" Y="38"/>
+        <UsageCount Value="10"/>
+      </Unit497>
+      <Unit498>
+        <Filename Value="sources\crossinstallers\m_any_to_netbsd386.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="31"/>
+        <CursorPos X="18" Y="43"/>
+        <UsageCount Value="10"/>
+      </Unit498>
+      <Unit499>
+        <Filename Value="sources\crossinstallers\m_any_to_netbsdx64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="37"/>
+        <CursorPos X="18" Y="43"/>
+        <UsageCount Value="10"/>
+      </Unit499>
+      <Unit500>
+        <Filename Value="sources\crossinstallers\m_any_to_openbsd386.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="41"/>
+        <CursorPos X="18" Y="43"/>
+        <UsageCount Value="10"/>
+      </Unit500>
+      <Unit501>
+        <Filename Value="sources\crossinstallers\m_any_to_openbsdx64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="38"/>
+        <CursorPos X="18" Y="43"/>
+        <UsageCount Value="10"/>
+      </Unit501>
+      <Unit502>
+        <Filename Value="sources\crossinstallers\m_crosswinx64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="25"/>
+        <CursorPos X="37" Y="36"/>
+        <UsageCount Value="10"/>
+      </Unit502>
+      <Unit503>
+        <Filename Value="sources\crossinstallers\m_crosswinarm64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="28"/>
+        <CursorPos X="37" Y="36"/>
+        <UsageCount Value="10"/>
+      </Unit503>
+      <Unit504>
+        <Filename Value="sources\crossinstallers\m_any_to_all_wasm32.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="18"/>
+        <CursorPos X="37" Y="36"/>
+        <UsageCount Value="10"/>
+      </Unit504>
+      <Unit505>
+        <Filename Value="sources\crossinstallers\m_any_to_wasi_wasm32.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="24"/>
+        <CursorPos X="18" Y="41"/>
+        <UsageCount Value="10"/>
+      </Unit505>
+      <Unit506>
+        <Filename Value="sources\crossinstallers\m_any_to_embedded_wasm32.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="36"/>
+        <CursorPos X="9" Y="41"/>
+        <UsageCount Value="10"/>
+      </Unit506>
+      <Unit507>
+        <Filename Value="..\Reiniero-fpcup\m_crossinstaller.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="423"/>
+        <CursorPos X="25" Y="426"/>
+        <UsageCount Value="10"/>
+      </Unit507>
+      <Unit508>
+        <Filename Value="sources\crossinstallers\m_crosswin32.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit508>
+      <Unit509>
+        <Filename Value="sources\crossinstallers\m_anyinternallinker_to_win386.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="5"/>
+        <CursorPos X="37" Y="13"/>
+        <UsageCount Value="10"/>
+      </Unit509>
+      <Unit510>
+        <Filename Value="sources\crossinstallers\m_anyinternallinker_to_winarm64.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="8"/>
+        <CursorPos X="3" Y="20"/>
+        <UsageCount Value="10"/>
+      </Unit510>
+      <Unit511>
+        <Filename Value="sources\crossinstallers\m_anyinternallinker_to_winx64.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="37" Y="13"/>
+        <UsageCount Value="10"/>
+      </Unit511>
+      <Unit512>
+        <Filename Value="C:\fpcupsystems\stable324\lazarus\lcl\interfaces\gtk2\gtk2int.pas"/>
+        <UnitName Value="Gtk2Int"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="16"/>
+        <CursorPos X="10" Y="27"/>
+        <UsageCount Value="10"/>
+      </Unit512>
+      <Unit513>
+        <Filename Value="C:\fpcupsystems\stable324\lazarus\lcl\interfaces\gtk2\gtk2defines.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="50"/>
+        <UsageCount Value="10"/>
+      </Unit513>
+      <Unit514>
+        <Filename Value="C:\fpcupsystems\stable324\fpcsrc\packages\fcl-db\src\base\db.pas"/>
+        <UnitName Value="DB"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="9"/>
+        <CursorPos X="23" Y="25"/>
+        <UsageCount Value="11"/>
+      </Unit514>
+      <Unit515>
+        <Filename Value="sources\crossinstallers\m_freebsd64_to_freebsd32.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="8"/>
+        <CursorPos X="37" Y="14"/>
+        <UsageCount Value="11"/>
+      </Unit515>
     </Units>
     <Debugger>
       <Backend Value="{A76EFAFB-3A42-421F-9672-C141897C94AA}"/>
     </Debugger>
-    <JumpHistory Count="12" HistoryIndex="11">
+    <JumpHistory Count="3" HistoryIndex="2">
       <Position1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3334" TopLine="3319"/>
+        <Caret Line="374" Column="3" TopLine="365"/>
       </Position1>
       <Position2>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3337" TopLine="3319"/>
+        <Filename Value="sources\updeluxe\extrasettings.pas"/>
+        <Caret Line="408" Column="5" TopLine="390"/>
       </Position2>
       <Position3>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3339" TopLine="3319"/>
+        <Filename Value="sources\fpcup.ini"/>
+        <Caret Line="169" TopLine="148"/>
       </Position3>
-      <Position4>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3345" TopLine="3320"/>
-      </Position4>
-      <Position5>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3346" TopLine="3321"/>
-      </Position5>
-      <Position6>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3349" TopLine="3324"/>
-      </Position6>
-      <Position7>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3353" TopLine="3328"/>
-      </Position7>
-      <Position8>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3357" TopLine="3332"/>
-      </Position8>
-      <Position9>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3359" TopLine="3334"/>
-      </Position9>
-      <Position10>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3474" TopLine="3354"/>
-      </Position10>
-      <Position11>
-        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
-        <Caret Line="3364" Column="48" TopLine="3354"/>
-      </Position11>
-      <Position12>
-        <Filename Value="sources\updeluxe\extrasettings.pas"/>
-        <Caret Line="254" Column="21" TopLine="253"/>
-      </Position12>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
-  <Debugging>
-    <BreakPoints>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="sources\installermanager.pas"/>
-        <Line Value="1834"/>
-      </Item>
-    </BreakPoints>
-  </Debugging>
 </CONFIG>

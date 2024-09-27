@@ -36,7 +36,7 @@ interface
 
 uses
   Classes, SysUtils,
-  m_crossinstaller,
+  installerBase,
   installerCore,
   installerFpc,
   {$ifndef FPCONLY}
@@ -472,6 +472,7 @@ uses
   {$ENDIF}
   StrUtils,
   fpjson,
+  //m_crossinstaller,
   processutils;
 
 { TFPCupManager }
@@ -1830,7 +1831,7 @@ begin
   begin
     if (toolversion<>'0') then
     begin
-      WritelnLog('Going to get the libs from '+ostype+' with version '+toolversion,true);
+      //WritelnLog('Going to get the libs from '+ostype+' with version '+toolversion,true);
       LibsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+toolversion+'.zip';
     end;
   end;
@@ -1869,11 +1870,7 @@ begin
             else
             begin
               toolversion:='V241';
-              {$ifdef LCL}
-              if (CrossUtils[CrossCPU_Target,CrossOS_Target,Self.CrossOS_SubArch].CrossARMArch=TARMARCH.armhf) then s:='Linux_ARMHF_Linux_V241.zip';
-              {$else}
               s:='Linux_ARMHF_Linux_V241.zip';
-              {$endif LCL}
             end;
           end;
           TCPU.powerpc: toolversion:='V241';
@@ -1912,6 +1909,11 @@ begin
         //Tools by raspberry from https://github.com/raspberrypi/pico-sdk-tools/releases/
         ostype:='unknown';
         if (CrossCPU_Target=TCPU.riscv32) then toolversion:='V240';
+      end;
+      TOS.freertos:
+      begin
+        ostype:='none';
+        if (CrossCPU_Target=TCPU.xtensa) then toolversion:='V241';
       end;
     end;
   end;
@@ -2037,7 +2039,7 @@ begin
   begin
     if (toolversion<>'0') then
     begin
-      WritelnLog('Going to get the [GNU-]binaries for '+ostype+' with version '+toolversion,true);
+      //WritelnLog('Going to get the [GNU-]binaries for '+ostype+' with version '+toolversion,true);
       BinsFileName:=GetOSCase(CrossOS_Target)+'_'+GetCPUCase(CrossCPU_Target)+'_'+ostype+'_'+toolversion+'.zip';
     end;
   end;

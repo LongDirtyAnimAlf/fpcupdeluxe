@@ -10,7 +10,7 @@ uses
 implementation
 
 uses
-  m_crossinstaller, m_any_to_linux_base;
+  installerBase, m_crossinstaller, m_any_to_linux_base;
 
 type
   Tany_linux386 = class(Tany_linux)

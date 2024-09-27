@@ -38,7 +38,7 @@ uses
 implementation
 
 uses
-  m_crossinstaller, fpcuputil;
+  installerBase, m_crossinstaller, fpcuputil;
 
 type
   TAny_FreeRTOSArm = class(TCrossInstaller)

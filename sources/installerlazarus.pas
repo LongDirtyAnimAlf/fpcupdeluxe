@@ -35,7 +35,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, installerCore;
+  Classes, SysUtils, installerBase, installerCore;
 //todo: use processex callback to report on errors like it's done in installerfpc
 
 const
@@ -608,10 +608,13 @@ var
   OldPath                        : string;
   {$endif}
   OperationSucceeded             : boolean;
+  InstallNeeded                  : boolean;
 begin
   Result:=inherited;
 
   OperationSucceeded := true;
+
+  InstallNeeded:=(InstallDirectory<>SourceDirectory);
 
   //Get Freetype and Zlib for ao fpreport ... just to be sure
   {$IFDEF MSWINDOWS}
@@ -848,13 +851,21 @@ begin
       begin
         if FileExists(IncludeTrailingPathDelimiter(SourceDirectory) + LAZBUILDNAME + GetExeExt) then
         begin
-          Infoln(infotext+'Lazbuild already available ... skip building it.', etInfo);
+          Infoln(infotext+'Lazbuild binary already available ... skip building it.', etInfo);
           OperationSucceeded := true;
           Result := true;
           exit;
         end;
         Processor.SetParamData('lazbuild');
-        Infoln(infotext+'Running: make lazbuild', etInfo);
+        if (InstallNeeded) then
+        begin
+          Processor.SetParamData('install');
+          Infoln(infotext+'Running: make install lazbuild', etInfo);
+        end
+        else
+        begin
+          Infoln(infotext+'Running: make lazbuild', etInfo);
+        end;
       end;
       _LCL:
       begin
@@ -893,7 +904,7 @@ begin
           s1:=IncludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)+FPCDefines;
           SysUtils.DeleteFile(s1);
         end;
-        if (InstallDirectory<>SourceDirectory) then
+        if (InstallNeeded) then
         begin
           Processor.SetParamData('install');
           Infoln(infotext+'Running: make install', etInfo);
@@ -960,9 +971,13 @@ begin
     //Special check for lazbuild as that is known to go wrong
     if (OperationSucceeded) and (ModuleName=_LAZBUILD) then
     begin
-      if CheckExecutable(IncludeTrailingPathDelimiter(SourceDirectory) + LAZBUILDNAME + GetExeExt, ['--help'], LAZBUILDNAME) = false then
+      if (InstallNeeded) then
+        LazBuildApp:=IncludeTrailingPathDelimiter(InstallDirectory)+LAZBUILDNAME+GetExeExt
+      else
+        LazBuildApp:=IncludeTrailingPathDelimiter(SourceDirectory)+LAZBUILDNAME+GetExeExt;
+      if CheckExecutable(LazBuildApp, ['--help'], LAZBUILDNAME) = false then
       begin
-        WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
+        WritelnLog(etError, infotext+'Fresh lazbuild could not be run (reason unknown), so cannot use it.', true);
         Result := false;
         exit;
       end;
@@ -976,11 +991,10 @@ begin
     // Check for valid lazbuild.
     // Note: we don't check if we have a valid primary config path, but that will come out
     // in the next steps.
-    //LazBuildApp:=IncludeTrailingPathDelimiter(SourceDirectory)+LAZBUILDNAME+GetExeExt;
     LazBuildApp:=IncludeTrailingPathDelimiter(InstallDirectory)+LAZBUILDNAME+GetExeExt;
     if CheckExecutable(LazBuildApp, ['--help'], LAZBUILDNAME) = false then
     begin
-      WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
+      WritelnLog(etError, infotext+'Lazbuild could not be run, so cannot build USERIDE.', true);
       Result := false;
       exit;
     end

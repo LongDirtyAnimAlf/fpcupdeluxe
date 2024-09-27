@@ -38,7 +38,7 @@ uses
 implementation
 
 uses
-  m_crossinstaller, m_any_to_all_wasm32;
+  installerBase, m_crossinstaller, m_any_to_all_wasm32;
 
 type
   TAny_WasiWasm32 = class(TAny_AllWasm32)

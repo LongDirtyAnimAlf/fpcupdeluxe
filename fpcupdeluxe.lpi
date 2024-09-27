@@ -1107,7 +1107,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="11">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1173,10 +1173,6 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit10>
-      <Unit11>
-        <Filename Value="sources\text.txt"/>
-        <IsPartOfProject Value="True"/>
-      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

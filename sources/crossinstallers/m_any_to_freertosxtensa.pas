@@ -41,7 +41,9 @@ uses
   {$IFDEF LINUX}
   BaseUnix,
   {$ENDIF LINUX}
-  FileUtil, StrUtils, m_crossinstaller, fpcuputil;
+  FileUtil, StrUtils,
+  installerBase, m_crossinstaller,
+  fpcuputil;
 
 type
 

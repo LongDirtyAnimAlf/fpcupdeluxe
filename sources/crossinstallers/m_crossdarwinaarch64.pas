@@ -13,7 +13,7 @@ uses
 implementation
 
 uses
-  m_crossinstaller, m_darwin_to_apple_base;
+  installerBase, m_crossinstaller, m_darwin_to_apple_base;
 
 type
   TDarwinaarch64 = class(Tdarwin_apple)

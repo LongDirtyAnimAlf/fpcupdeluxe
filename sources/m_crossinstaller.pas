@@ -64,102 +64,8 @@ uses
   InterfaceBase,
   LCLPlatformDef,
   {$endif}
+  installerBase,
   SysUtils;
-
-const
-  ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
-    'todo: specify what exactly is missing';
-
-  CrossWindowsSuggestion = 'Suggestion for cross binutils: the crossfpc binutils at https://gitlab.com/freepascal.org/fpc/binaries/-/tree/main/i386-win32.';
-
-  MAXDARWINVERSION=24;
-  MINDARWINVERSION=7;
-
-  MAXOSVERSION=15;
-  MINOSVERSION=8;
-
-  MAXDELPHIVERSION=22;
-  MINDELPHIVERSION=12;
-  NDKVERSIONNAMES:array[0..31] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e','11','11b','11c','12','12b','13b','14b','15c','16b','17c','18b','19c','20b','21e','22b');
-  //PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
-  PLATFORMVERSIONSNUMBERS:array[0..22] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31);
-  {$ifdef unix}
-  UnixBinDirs :array[0..2] of string = ('/usr/local/bin','/usr/bin','/bin');
-  UnixLibDirs :array[0..2] of string = ('/usr/local/lib','/usr/lib','/lib');
-  {$endif}
-  DEFAULTARMCPU  = 'ARMV7A';
-
-  CROSSDIRNAME      = 'cross';
-  CROSSLIBDIRNAME   = 'lib';
-  CROSSBINDIRNAME   = 'bin';
-  CROSSLIBPATH      = CROSSDIRNAME+DirectorySeparator+CROSSLIBDIRNAME;
-  CROSSBINPATH      = CROSSDIRNAME+DirectorySeparator+CROSSBINDIRNAME;
-
-  LIBCFILENAME   = 'libc.so';
-  LDFILENAME     = 'ld';
-  ASFILENAME     = 'as';
-
-type
-  TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa,wasm32,loongarch64);
-  TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo,wasi,atari);
-  TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,armv8,armv8a,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32ec,rv32e,rv32imac{,rv32ima,rv32im},rv32i,rv64imac{,rv64ima,rv64im},rv64i,lx6,lx106);
-  //TABI      = (default,sysv,aix,darwin,elfv2,eabi,armeb,eabihf,oldwin32gnu,aarch64ios,riscvhf,linux386_sysv,windowed,call0);
-  TABI      = (default,eabi,eabihf,aarch64ios,riscvhf,windowed,call0);
-  TARMARCH  = (none,armel,armeb,armhf);
-
-  TSUBARCHS = set of TSUBARCH;
-  TABIS     = set of TABI;
-
-  {$ifndef FPCONLY}
-  LCL_TYPE  = TLCLPlatform;
-  {$endif}
-
-const
-  LCL_OS             = [TOS.win32,TOS.win64,TOS.linux,TOS.darwin,TOS.freebsd,TOS.openbsd,TOS.aix,TOS.wince,TOS.haiku,TOS.solaris,TOS.dragonfly,TOS.netbsd,TOS.morphos,TOS.aros,TOS.amiga];
-  WINDOWS_OS         = [TOS.win32,TOS.win64];
-  SUBARCH_OS         = [TOS.embedded,TOS.freertos,TOS.ultibo];
-  SUBARCH_CPU        = [TCPU.arm,TCPU.aarch64,TCPU.avr,TCPU.mipsel,TCPU.riscv32,TCPU.riscv64,TCPU.xtensa]; //for Ultibo added TCPU.aarch64
-  SUBARCH_ARM        = [TSUBARCH.armv4..TSUBARCH.armv7m];
-  SUBARCH_AARCH64    = [TSUBARCH.armv8a];
-  SUBARCH_AVR        = [TSUBARCH.avr1..TSUBARCH.avrxmega3];
-  SUBARCH_MIPSEL     = [TSUBARCH.pic32mx];
-  SUBARCH_RISCV32    = [TSUBARCH.rv32ec..TSUBARCH.rv32i];
-  SUBARCH_RISCV64    = [TSUBARCH.rv64imac..TSUBARCH.rv64i];
-  SUBARCH_XTENSA     = [TSUBARCH.lx6..TSUBARCH.lx106];
-  SUBARCH_ULTIBO     = [TSUBARCH.armv6,TSUBARCH.armv7a,TSUBARCH.armv8];
-
-  ABI_ARM            = [TABI.default,TABI.eabi,TABI.eabihf];
-  ABI_XTENSA         = [TABI.default,TABI.windowed,TABI.call0];
-  ABI_RISCV64        = [TABI.default,TABI.riscvhf];
-
-  CPUADDRSIZE_64     = [TCPU.aarch64,TCPU.powerpc64,TCPU.sparc64,TCPU.x86_64,TCPU.loongarch64,TCPU.riscv64{,TCPU.ia64]}];
-  CPUADDRSIZE_32     = [TCPU.i386,TCPU.arm,TCPU.powerpc,TCPU.mips,TCPU.mipsel,TCPU.sparc,TCPU.m68k,TCPU.xtensa,TCPU.wasm32,TCPU.riscv32];
-
-  LEGACYLIBS             :array[0..4] of string = ('libanl.so','libdl.so','librt.so','libresolv.so','libpthread.so');
-  LEGACYLIBSVERSIONED    :array[0..4] of string = ('libanl.so.1','libdl.so.2','librt.so.1','libresolv.so.2','libpthread.so.0');
-  LEGACYCPU              = [TCPU.i386,TCPU.x86_64,TCPU.arm,TCPU.aarch64,TCPU.powerpc,TCPU.powerpc64];
-  TODOCPU                = [TCPU.sparc,TCPU.sparc64,TCPU.m68k];
-
-type
-  TSearchSetting = (ssUp,ssAuto,ssCustom);
-
-const
-  LINUXTYPE : array[boolean] of ansistring = ('gnu','musl');
-
-  DEFINE_FPC_LIBC   = 'FPC_USE_LIBC';
-  DEFINE_FPC_DOTTED     = 'FPC_DOTTEDUNITS';
-
-  ARMArchFPCStr : array[TARMARCH] of string = (
-    '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
-  );
-  FPCUP_AUTO_MAGIC      = 'FPCUP_AUTO';
-
-  FPC_TARGET_MAGIC      = '$fpctarget';
-  FPC_SUBARCH_MAGIC     = '$fpcsubarch';
-  FPC_ABI_MAGIC         = '$fpcabi';
-
-  DEFAULTSEARCHSETTING  = TSearchSetting.ssUp;
-  DEFAULTARMARCH        = TARMARCH.none;
 
 type
   TCrossUtil = record
@@ -277,39 +183,12 @@ type
     destructor Destroy; override;
   end;
 
-function GetCPU(aCPU:TCPU):string;
-function GetCPUCase(aCPU:TCPU):string;
-function GetTCPU(aCPU:string):TCPU;
-function GetOS(aOS:TOS):string;
-function GetOSCase(aOS:TOS):string;
-function GetTOS(aOS:string):TOS;
-function GetSubarch(aSubarch:TSUBARCH):string;
-function GetTSubarch(aSubarch:string):TSUBARCH;
-function GetSubarchs(aCPU:TCPU;aOS:TOS):TSUBARCHS;
-function GetARMArch(aARMarch:TARMARCH):string;
-function GetTARMArch(aARMArch:string):TARMARCH;
-function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
-function GetABI(aABI:TABI):string;
-function GetTABI(aABI:string):TABI;
-function GetABIs(aCPU:TCPU;aOS:TOS):TABIS;
-function IsCPUOSComboValid(CPU:TCPU;OS:TOS):boolean;
-{$ifdef LCL}
-function  GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
-procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
-{$endif LCL}
-procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI:boolean; out BinPath,LibPath:string);
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
-function GetExeExt(const aOS:TOS=TOS.osNone): string;
-{$ifndef FPCONLY}
-function GetLCLName(LCLType:LCL_TYPE):string;
-function GetLCLType(LCLName:string):LCL_TYPE;
-{$endif}
 
 var
   //FPCTargetValid:TFPCTargetValid;
   {$ifdef LCL}
   CrossUtils:TCrossUtils;
-  SUBARCHStore:array[TCPU,TOS] of TSUBARCH;
   {$endif LCL}
   CrossInstallers:TStringList=nil;
 
@@ -637,92 +516,6 @@ begin
 end;
 
 {$endif}
-
-procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI:boolean; out BinPath,LibPath:string);
-begin
-  // Setting the location of libs and bins on our system, so they can be found by fpcupdeluxe
-  LibPath:=GetCPU(CrossCPU_Target)+'-'+GetOS(CrossOS_Target);
-  BinPath:=GetCPU(CrossCPU_Target)+'-'+GetOS(CrossOS_Target);
-
-  if SolarisOI then
-  begin
-    LibPath:=LibPath+'-oi';
-    BinPath:=BinPath+'-oi';
-  end
-  else
-  if MUSL then
-  begin
-    LibPath:=LibPath+'-musl';
-    BinPath:=BinPath+'-musl';
-  end;
-
-  {$IF (defined(Windows)) OR (defined(Linux))}
-  // Set special Bins directory for universal tools for Darwin based on clang
-  if (
-    ((CrossOS_Target=TOS.darwin) AND (CrossCPU_Target in [TCPU.i386,TCPU.x86_64,TCPU.aarch64]))
-    OR
-    ((CrossOS_Target=TOS.ios) AND (CrossCPU_Target in [TCPU.arm,TCPU.aarch64]))
-    ) then
-  begin
-    BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
-    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'apple',[]);
-  end;
-
-  // Set special Bins directory for universal tools for Android based on clang
-  if CrossOS_Target=TOS.android then
-  begin
-    BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
-  end;
-  {$endif}
-
-  // Set special Bins directory for universal tools for wasm32
-  if CrossCPU_Target=TCPU.wasm32 then
-  begin
-    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'all',[]);
-  end;
-
-  if CrossOS_Target=TOS.darwin then
-  begin
-    // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
-    if (CrossCPU_Target=TCPU.i386) OR (CrossCPU_Target=TCPU.x86_64) OR (CrossCPU_Target=TCPU.aarch64) then
-    begin
-      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
-      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),'all',[]);
-    end;
-    if (CrossCPU_Target=TCPU.powerpc) OR (CrossCPU_Target=TCPU.powerpc64) then
-    begin
-      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-    end;
-  end;
-
-  if CrossOS_Target=TOS.ios then
-  begin
-    // iOS is special: combined libs for arm and aarch64
-    if (CrossCPU_Target=TCPU.arm) OR (CrossCPU_Target=TCPU.aarch64) then
-    begin
-      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),'all',[]);
-      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),'all',[]);
-    end;
-  end;
-
-  if CrossOS_Target=TOS.aix then
-  begin
-    // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
-    if (CrossCPU_Target=TCPU.powerpc) OR (CrossCPU_Target=TCPU.powerpc64) then
-    begin
-      BinPath:=StringReplace(BinPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-      LibPath:=StringReplace(LibPath,GetCPU(CrossCPU_Target),GetCPU(TCPU.powerpc),[]);
-    end;
-  end;
-
-  //Put all windows stuff (not that much) in a single windows directory
-  if (CrossOS_Target=TOS.win32) OR (CrossOS_Target=TOS.win64) then
-  begin
-    BinPath:=StringReplace(BinPath,GetOS(CrossOS_Target),'windows',[]);
-    LibPath:=StringReplace(LibPath,GetOS(CrossOS_Target),'windows',[]);
-  end;
-end;
 
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 begin

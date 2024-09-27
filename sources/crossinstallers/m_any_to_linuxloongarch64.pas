@@ -39,7 +39,9 @@ uses
 implementation
 
 uses
-  FileUtil, fpcuputil, m_crossinstaller;
+  FileUtil,
+  installerBase, m_crossinstaller,
+  fpcuputil;
 
 type
 

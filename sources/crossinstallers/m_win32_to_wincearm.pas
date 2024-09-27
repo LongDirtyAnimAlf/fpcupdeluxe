@@ -53,7 +53,7 @@ arm-wince-windres.exe
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, installerBase, m_crossinstaller;
 
 implementation
 type

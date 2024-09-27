@@ -10,6 +10,7 @@ uses
 implementation
 
 uses
+  installerBase,
   m_crossinstaller, m_any_to_android_base;
 
 type

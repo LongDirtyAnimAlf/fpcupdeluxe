@@ -39,15 +39,14 @@ uses
 implementation
 
 uses
-  m_crossinstaller, m_any_to_linux_base;
+  installerBase, m_crossinstaller, m_any_to_linux_base;
 
 type
-
-{ Tany_linuxppc }
-Tany_linuxppc = class(Tany_linux)
-public
-  constructor Create;
-end;
+  { Tany_linuxppc }
+  Tany_linuxppc = class(Tany_linux)
+  public
+    constructor Create;
+  end;
 
 { Tany_linuxppc }
 

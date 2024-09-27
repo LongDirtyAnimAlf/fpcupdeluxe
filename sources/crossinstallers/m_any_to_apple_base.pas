@@ -34,7 +34,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, installerBase, m_crossinstaller;
 
 const
   iOSNAME='iPhoneOS';
@@ -64,7 +64,8 @@ type
 implementation
 
 uses
-  FileUtil, fpcuputil;
+  FileUtil,
+  fpcuputil;
 
 { Tany_apple }
 

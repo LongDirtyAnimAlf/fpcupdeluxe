@@ -35,7 +35,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, FileUtil, m_crossinstaller, fpcuputil;
+  Classes, SysUtils, installerBase, m_crossinstaller;
 
 type
   Tany_netbsd_base = class(TCrossInstaller)
@@ -50,6 +50,10 @@ end;
 
 
 implementation
+
+uses
+  FileUtil,
+  fpcuputil;
 
 function Tany_netbsd_base.GetLibs(Basepath:string): boolean;
 begin
