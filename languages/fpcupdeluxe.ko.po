@@ -691,12 +691,12 @@ msgid "Modules"
 msgstr "모듈"
 
 #: tform1.mormotbtn.caption
-msgid "mORMot"
-msgstr "mORMot"
+msgid "mORMot2"
+msgstr "mORMot2"
 
 #: tform1.mormotbtn.hint
-msgid "Get the mORMot for FPC"
-msgstr "FPC용 mORMot 획득"
+msgid "Get the mORMot2 for FPC"
+msgstr "FPC용 mORMot2 획득"
 
 #: tform1.opmbtn.caption
 msgid "OPM"

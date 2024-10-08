@@ -135,6 +135,7 @@ type
     InitDone                                : boolean;
   private
     FSoftFloat       : boolean;
+    FDelphiRTTI      : boolean;
     FUseLibc         : boolean;
     FUseRevInc : boolean;
     function GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
@@ -173,6 +174,7 @@ type
   public
     property UseLibc: boolean read FUseLibc;
     property SoftFloat: boolean write FSoftFloat;
+    property DelphiRTTI: boolean write FDelphiRTTI;
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
     property BootstrapCompilerDirectory: string write FBootstrapCompilerDirectory;
     // Build module
@@ -249,10 +251,11 @@ uses
   {$ENDIF UNIX}
   math;
 
-{$ifndef FPC_HAS_TYPE_EXTENDED}
 const
-  DEFINE_FPC_SOFT_FPUX80 = 'FPC_SOFT_FPUX80';
-{$endif}
+  {$ifndef FPC_HAS_TYPE_EXTENDED}
+  DEFINE_SOFT_FPUX80 = 'FPC_SOFT_FPUX80';
+  {$endif}
+  DEFINE_DELPHI_RTTI = 'ENABLE_DELPHI_RTTI';
 
 { TFPCCrossInstaller }
 
@@ -1485,13 +1488,19 @@ begin
             begin
               if FSoftFloat then
               begin
-                Infoln(infotext+'Adding -d'+DEFINE_FPC_SOFT_FPUX80+' to compiler options to enable 80bit (soft)float support.',etInfo);
+                Infoln(infotext+'Adding -d'+DEFINE_SOFT_FPUX80+' to compiler options to enable 80bit (soft)float support.',etInfo);
                 if (GetSourceCPU=GetCPU(TCPU.x86_64)) then Infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
-                NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_FPC_SOFT_FPUX80;
+                NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_SOFT_FPUX80;
               end;
             end;
           end;
           {$endif}
+
+          if fDelphiRTTI then
+          begin
+            Infoln(infotext+'Adding -d'+DEFINE_DELPHI_RTTI+' to compiler option to Delphi RTTI support (trunk only).',etInfo);
+            NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_DELPHI_RTTI;
+          end;
 
           while Pos('  ',NativeCompilerOptions)>0 do
           begin
@@ -2093,11 +2102,19 @@ begin
     if FSoftFloat then
     begin
       // soft 80 bit float if available
-      Infoln(infotext+'Adding -d'+DEFINE_FPC_SOFT_FPUX80+' to compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
-      FPCBuildOptions:=FPCBuildOptions+' -d'+DEFINE_FPC_SOFT_FPUX80;
+      if (ModuleName=_FPC) then // only info when building real FPC
+        Infoln(infotext+'Adding -d'+DEFINE_SOFT_FPUX80+' to compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
+      FPCBuildOptions:=FPCBuildOptions+' -d'+DEFINE_SOFT_FPUX80;
     end;
   end;
   {$endif}
+
+  if fDelphiRTTI then
+  begin
+    if (ModuleName=_FPC) then // only info when building real FPC
+      Infoln(infotext+'Adding -d'+DEFINE_DELPHI_RTTI+' to compiler option to Delphi RTTI support (trunk only).',etInfo);
+    FPCBuildOptions:=FPCBuildOptions+' -d'+DEFINE_DELPHI_RTTI;
+  end;
 
   {$ifdef BSD}
     {$ifndef DARWIN}

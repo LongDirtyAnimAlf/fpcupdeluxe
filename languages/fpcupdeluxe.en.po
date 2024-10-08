@@ -722,11 +722,11 @@ msgid "Modules"
 msgstr ""
 
 #: tform1.mormotbtn.caption
-msgid "mORMot"
+msgid "mORMot2"
 msgstr ""
 
 #: tform1.mormotbtn.hint
-msgid "Get the mORMot for FPC"
+msgid "Get the mORMot2 for FPC"
 msgstr ""
 
 #: tform1.opmbtn.caption

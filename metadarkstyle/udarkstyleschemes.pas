@@ -45,15 +45,12 @@ uses
 
 function TSchemes.GetMutableValue(key:TSchemeKey):PTSchemeData;
 var
- Pair:TPair;
- Node:TMSet.PNode;
+ Value:TSchemeData;
 begin
- Pair.Key:=key;
- Node:=FSet.NFind(Pair);
- if Node=nil then
-   result:=nil
- else
-   result:=@Node^.Data.Value;
+  if TryGetValue(key,Value) then
+    result:=@Value
+  else
+    result:=nil;
 end;
 
 function SchameName2SchameID(AName:TSchemeName):TSchemeKey;inline;

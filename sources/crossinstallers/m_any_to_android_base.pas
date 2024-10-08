@@ -307,6 +307,7 @@ end;
 
 function Tany_android.GetBinUtils(Basepath:string): boolean;
 var
+  BinPrefixTry: string;
   AsFiles:TStringList;
   ndkversion,toolchain:byte;
   s:string;
@@ -320,7 +321,9 @@ begin
   result:=inherited;
   if result then exit;
 
-  AsFile:=BinUtilsPrefix+ASFILENAME+GetExeExt;
+  BinPrefixTry:=BinUtilsPrefix;
+
+  AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
 
   result:=SearchBinUtil(Basepath,AsFile);
 
@@ -330,6 +333,16 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,'all-'+TargetOSName,AsFile);
 
+  if not result then
+  begin
+    BinPrefixTry:=TargetCPUName+'-linux-'+TargetOSName+'-';
+    if (TargetCPU=TCPU.i386) then BinPrefixTry:='i686-linux-'+TargetOSName+'-';
+    if (TargetCPU=TCPU.arm) then BinPrefixTry:=TargetCPUName+'-linux-'+TargetOSName+'eabi-';
+    AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if (not result) then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
 
   // The newest Android tools are based on clang and llvm.
   // FPC is not yet prepared to use these.
@@ -503,6 +516,8 @@ begin
   end;
 
   *)
+
+  if result then FBinUtilsPrefix:=BinPrefixTry;
 
   SearchBinUtilsInfo(result);
 

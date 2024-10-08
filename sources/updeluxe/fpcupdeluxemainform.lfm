@@ -864,7 +864,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       Left = 930
       Height = 42
-      Hint = 'Get the mORMot for FPC'
+      Hint = 'Get the mORMot2 for FPC'
       Top = 8
       Width = 117
       AutoSize = True

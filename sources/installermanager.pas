@@ -230,6 +230,7 @@ type
     FExportOnly:boolean;
     FNoJobs:boolean;
     FSoftFloat:boolean;
+    FDelphiRTTI:boolean;
     FOnlinePatching:boolean;
     FUseGitClient:boolean;
     FForceLocalRepoClient:boolean;
@@ -368,6 +369,7 @@ type
     property ExportOnly:boolean read FExportOnly write FExportOnly;
     property NoJobs:boolean read FNoJobs write SetNoJobs;
     property SoftFloat:boolean read FSoftFloat write FSoftFloat;
+    property DelphiRTTI:boolean read FDelphiRTTI write FDelphiRTTI;
     property OnlinePatching:boolean read FOnlinePatching write FOnlinePatching;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
     property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
@@ -1066,6 +1068,7 @@ begin
   FPCUnicode:=false;
 
   SoftFloat:=true;
+  Self.DelphiRTTI:=false;;
   OnlinePatching:=false;
   ReApplyLocalChanges:=false;
 
@@ -2483,6 +2486,7 @@ begin
     (FInstaller as TFPCInstaller).PostInstallScriptPath:=FParent.FPCPostInstallScriptPath;
 
     (FInstaller as TFPCInstaller).SoftFloat:=FParent.SoftFloat;
+    (FInstaller as TFPCInstaller).DelphiRTTI:=FParent.DelphiRTTI;
     FInstaller.CompilerOptions:=FParent.FPCOPT;
 
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;

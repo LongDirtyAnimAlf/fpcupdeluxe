@@ -697,8 +697,8 @@ msgid "mORMot2"
 msgstr "mORMot2"
 
 #: tform1.mormotbtn.hint
-msgid "Get the mORMot for FPC"
-msgstr "Отримати MORMot для FPC"
+msgid "Get the mORMot2 for FPC"
+msgstr "Отримати MORMot2 для FPC"
 
 #: tform1.mukrainianlanguage.caption
 msgid "Ukrainian (UK)"

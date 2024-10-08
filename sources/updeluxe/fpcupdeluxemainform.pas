@@ -2364,6 +2364,7 @@ begin
     Lazarus 3.0     + FPC 3.2.2
     Lazarus 3.2     + FPC 3.2.2
     Lazarus 3.4     + FPC 3.2.2
+    Lazarus 3.6     + FPC 3.2.2
     end;
   }
 
@@ -4029,6 +4030,7 @@ begin
   FPCupManager.FPCUnicode:=Form2.FPCUnicode;
 
   FPCupManager.SoftFloat:=Form2.UseSoftFloat;
+  FPCupManager.DelphiRTTI:=Form2.EnableRTTI;
   FPCupManager.OnlinePatching:=Form2.OnlinePatching;
   FPCupManager.ReApplyLocalChanges:=Form2.ApplyLocalChanges;
 
@@ -4440,6 +4442,8 @@ begin
       Form2.UpdateOnly:=ReadBool('General','UpdateOnly',False);
 
       Form2.UseSoftFloat:=ReadBool('General','UseSoftFloat',Form2.UseSoftFloat);
+      Form2.EnableRTTI:=ReadBool('General','EnableRTTI',Form2.EnableRTTI);
+
       Form2.OnlinePatching:=ReadBool('General','OnlinePatching',Form2.OnlinePatching);
       Form2.ApplyLocalChanges:=ReadBool('General','ApplyLocalChanges',Form2.ApplyLocalChanges);
 
@@ -4611,6 +4615,7 @@ begin
       WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
       WriteBool('General','UpdateOnly',Form2.UpdateOnly);
       WriteBool('General','UseSoftFloat',Form2.UseSoftFloat);
+      WriteBool('General','EnableRTTI',Form2.EnableRTTI);
       WriteBool('General','OnlinePatching',Form2.OnlinePatching);
       WriteBool('General','ApplyLocalChanges',Form2.ApplyLocalChanges);
 

@@ -171,6 +171,9 @@ type
     function GetUseSoftFloat:boolean;
     procedure SetUseSoftFloat(value:boolean);
 
+    function GetEnableRTTI:boolean;
+    procedure SetEnableRTTI(value:boolean);
+
     function GetAllowOnlinePatching:boolean;
     procedure SetAllowOnlinePatching(value:boolean);
 
@@ -279,6 +282,7 @@ type
     property ForceLocalRepoClient:boolean read GetForceLocalRepoClient write SetForceLocalRepoClient;
     property GetUpdates:boolean read GetCheckUpdates write SetCheckUpdates;
     property UseSoftFloat:boolean read GetUseSoftFloat write SetUseSoftFloat;
+    property EnableRTTI:boolean read GetEnableRTTI write SetEnableRTTI;
     property OnlinePatching:boolean read GetAllowOnlinePatching write SetAllowOnlinePatching;
     property ApplyLocalChanges:boolean read GetApplyLocalChanges write SetApplyLocalChanges;
     property AddContext:boolean read GetAddContext write SetAddContext;
@@ -370,6 +374,9 @@ resourcestring
   HintUseSoftFloat80bit = 'Enable software emulation of 80 bit floats.';
   CaptionUseSoftFloat80bit = 'Enable software emulation of 80 bit floats.';
 
+  HintEnableDelphiRTTI = 'Enable Delphi RTTI.';
+  CaptionEnableDelphiRTTI = 'Enable Delphi RTTI.';
+
   HintCheckEnableOnlinePatching = 'Fpcupdeluxe can patch the sources automagically by using online patches.';
   CaptionCheckEnableOnlinePatching = 'Allow patching of sources by online patches.';
 
@@ -436,13 +443,13 @@ end;
 
 procedure TForm2.FormCreate(Sender: TObject);
 var
-  CPU       :TCPU;
-  OS        :TOS;
-  ARMArch   :TARMARCH;
-  s         :string;
-  SortedList:TStringList;
-  //Cipher    : TDCP_rc4;
-  Cipher    :TDCP_DES;
+  CPU          : TCPU;
+  OS           : TOS;
+  ARMArch      : TARMARCH;
+  s            : string;
+  SortedList   : TStringList;
+  //Cipher     : TDCP_rc4;
+  Cipher       : TDCP_DES;
 begin
   IniPropStorageSettings.IniFileName:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+installerUniversal.DELUXEFILENAME;
 
@@ -644,6 +651,7 @@ begin
     Append(CaptionCheckForceLocalRepoClient);
     Append(CaptionCheckGetUpdates);
     Append(CaptionUseSoftFloat80bit);
+    Append(CaptionEnableDelphiRTTI);
     Append(CaptionCheckEnableOnlinePatching);
     Append(CaptionCheckApplyLocalChanges);
     Append(CaptionCheckAskConfirmation);
@@ -1462,6 +1470,16 @@ procedure TForm2.SetUseSoftFloat(value:boolean);
 begin
   SetCheckState(CaptionUseSoftFloat80bit,value);
 end;
+
+function TForm2.GetEnableRTTI:boolean;
+begin
+  result:=GetCheckState(CaptionEnableDelphiRTTI);
+end;
+procedure TForm2.SetEnableRTTI(value:boolean);
+begin
+  SetCheckState(CaptionEnableDelphiRTTI,value);
+end;
+
 
 function TForm2.GetAllowOnlinePatching:boolean;
 begin

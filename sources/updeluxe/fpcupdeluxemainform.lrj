@@ -24,7 +24,7 @@
 {"hash":151452383,"name":"tform1.picobtn.hint","sourcebytes":[71,101,116,32,70,80,67,32,102,111,114,32,97,114,109,118,54,109,32,82,80,105,32,80,105,99,111],"value":"Get FPC for armv6m RPi Pico"},
 {"hash":356255,"name":"tform1.picobtn.caption","sourcebytes":[80,105,99,111],"value":"Pico"},
 {"hash":29934325,"name":"tform1.ultibobtn.hint","sourcebytes":[73,110,115,116,97,108,108,32,98,97,114,101,109,101,116,97,108,32,85,108,116,105,98,111,32,102,111,114,32,82,80,105,50,47,51,47,52,47,53],"value":"Install baremetal Ultibo for RPi2/3/4/5"},
-{"hash":12486323,"name":"tform1.mormotbtn.hint","sourcebytes":[71,101,116,32,116,104,101,32,109,79,82,77,111,116,32,102,111,114,32,70,80,67],"value":"Get the mORMot for FPC"},
+{"hash":46696211,"name":"tform1.mormotbtn.hint","sourcebytes":[71,101,116,32,116,104,101,32,109,79,82,77,111,116,50,32,102,111,114,32,70,80,67],"value":"Get the mORMot2 for FPC"},
 {"hash":38225410,"name":"tform1.mormotbtn.caption","sourcebytes":[109,79,82,77,111,116,50],"value":"mORMot2"},
 {"hash":81049587,"name":"tform1.espbtn.hint","sourcebytes":[71,101,116,32,70,80,67,32,102,111,114,32,69,83,80,51,50,32,91,108,120,54,93,32,98,111,97,114,100,115],"value":"Get FPC for ESP32 [lx6] boards"},
 {"hash":4883298,"name":"tform1.espbtn.caption","sourcebytes":[69,83,80,51,50],"value":"ESP32"},
