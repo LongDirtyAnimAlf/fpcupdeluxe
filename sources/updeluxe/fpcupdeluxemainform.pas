@@ -1911,7 +1911,7 @@ begin
         ListBoxLazarusTargetTag.Items.Clear;
 
         aFileList.Clear;
-        RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname',FPCGITLABREPO+'.git','?.?.?'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+        RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',FPCGITLABREPO+'.git','*rc*','?.?.?'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
         aFileList.DelimitedText:=Output;
         for GITTagCombo in aFileList do
         begin
@@ -1922,7 +1922,7 @@ begin
         end;
         aFileList.Clear;
 
-        RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname',LAZARUSGITLABREPO+'.git','*_RC?'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+        RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',LAZARUSGITLABREPO+'.git','*_RC*'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
         aFileList.DelimitedText:=Output;
         for GITTagCombo in aFileList do
         begin
