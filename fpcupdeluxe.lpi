@@ -17,22 +17,20 @@
         <TextDesc Value="Installer for FPC and Lazarus."/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="15">
+      <Resources Count="13">
         <Resource_0 FileName="sources\fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="sources\settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
-        <Resource_2 FileName="patches\patchfpc\glibc_compat_3_2_2.patch" Type="RCDATA" ResourceName="GLIBC_COMPAT_3_2_2"/>
-        <Resource_3 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
-        <Resource_4 FileName="languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
-        <Resource_5 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
-        <Resource_6 FileName="languages\fpcupdeluxe.ko.po" Type="RCDATA" ResourceName="FPCUPDELUXE.KO"/>
-        <Resource_7 FileName="languages\fpcupdeluxe.de.po" Type="RCDATA" ResourceName="FPCUPDELUXE.DE"/>
-        <Resource_8 FileName="languages\fpcupdeluxe.fr.po" Type="RCDATA" ResourceName="FPCUPDELUXE.FR"/>
-        <Resource_9 FileName="languages\fpcupdeluxe.nl.po" Type="RCDATA" ResourceName="FPCUPDELUXE.NL"/>
-        <Resource_10 FileName="languages\fpcupdeluxe.uk.po" Type="RCDATA" ResourceName="FPCUPDELUXE.UK"/>
-        <Resource_11 FileName="languages\fpcupdeluxe.pt.po" Type="RCDATA" ResourceName="FPCUPDELUXE.PT"/>
-        <Resource_12 FileName="patches\patchfpc\glibc.inc" Type="RCDATA" ResourceName="GLIBC"/>
-        <Resource_13 FileName="patches\patchlazarus\glibc_debugger_trunk.patch" Type="RCDATA" ResourceName="GLIBC_DEBUGGER_TRUNK"/>
-        <Resource_14 FileName="languages\fpcupdeluxe.tr.po" Type="RCDATA" ResourceName="FPCUPDELUXE.TR"/>
+        <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
+        <Resource_3 FileName="languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
+        <Resource_4 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
+        <Resource_5 FileName="languages\fpcupdeluxe.ko.po" Type="RCDATA" ResourceName="FPCUPDELUXE.KO"/>
+        <Resource_6 FileName="languages\fpcupdeluxe.de.po" Type="RCDATA" ResourceName="FPCUPDELUXE.DE"/>
+        <Resource_7 FileName="languages\fpcupdeluxe.fr.po" Type="RCDATA" ResourceName="FPCUPDELUXE.FR"/>
+        <Resource_8 FileName="languages\fpcupdeluxe.nl.po" Type="RCDATA" ResourceName="FPCUPDELUXE.NL"/>
+        <Resource_9 FileName="languages\fpcupdeluxe.uk.po" Type="RCDATA" ResourceName="FPCUPDELUXE.UK"/>
+        <Resource_10 FileName="languages\fpcupdeluxe.pt.po" Type="RCDATA" ResourceName="FPCUPDELUXE.PT"/>
+        <Resource_11 FileName="languages\fpcupdeluxe.tr.po" Type="RCDATA" ResourceName="FPCUPDELUXE.TR"/>
+        <Resource_12 FileName="languages\fpcupdeluxe.ru.po" Type="RCDATA" ResourceName="FPCUPDELUXE.RU"/>
       </Resources>
     </General>
     <i18n>

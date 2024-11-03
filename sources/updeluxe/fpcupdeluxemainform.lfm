@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 32
+  Left = 41
   Height = 600
-  Top = 130
+  Top = 84
   Width = 1190
   Anchors = []
   Caption = 'FPCUPdeluxe'
@@ -2144,6 +2144,10 @@ object Form1: TForm1
       end
       object MTurkishLanguage: TMenuItem
         Caption = 'Turkish (TR)'
+        OnClick = LanguageClick
+      end
+      object MRussianLanguage: TMenuItem
+        Caption = 'Russian (RUS)'
         OnClick = LanguageClick
       end
     end

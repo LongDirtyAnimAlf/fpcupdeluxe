@@ -110,6 +110,7 @@
 {"hash":109762793,"name":"tform1.mukrainianlanguage.caption","sourcebytes":[85,107,114,97,105,110,105,97,110,32,40,85,75,41],"value":"Ukrainian (UK)"},
 {"hash":13199817,"name":"tform1.mportugueselanguage.caption","sourcebytes":[80,111,114,116,117,103,117,101,115,101,32,40,80,84,41],"value":"Portuguese (PT)"},
 {"hash":203311945,"name":"tform1.mturkishlanguage.caption","sourcebytes":[84,117,114,107,105,115,104,32,40,84,82,41],"value":"Turkish (TR)"},
+{"hash":166192489,"name":"tform1.mrussianlanguage.caption","sourcebytes":[82,117,115,115,105,97,110,32,40,82,85,83,41],"value":"Russian (RUS)"},
 {"hash":322608,"name":"tform1.mhelp.caption","sourcebytes":[72,101,108,112],"value":"Help"},
 {"hash":69438745,"name":"tform1.mwiki.caption","sourcebytes":[79,110,108,105,110,101,32,87,105,107,105],"value":"Online Wiki"},
 {"hash":158097840,"name":"tform1.mabout.caption","sourcebytes":[65,98,111,117,116,32,85,112],"value":"About Up"},
