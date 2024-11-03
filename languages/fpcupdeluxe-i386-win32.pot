@@ -93,6 +93,11 @@ msgstr ""
 msgid "Use wget/libcurl as downloader."
 msgstr ""
 
+#: extrasettings.captionenabledelphirtti
+msgctxt "extrasettings.captionenabledelphirtti"
+msgid "Enable Delphi RTTI."
+msgstr ""
+
 #: extrasettings.captionusesoftfloat80bit
 msgctxt "extrasettings.captionusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
@@ -152,6 +157,11 @@ msgstr ""
 
 #: extrasettings.hintchecksystemfpc
 msgid "Use the system wide install of FPC to build Lazarus."
+msgstr ""
+
+#: extrasettings.hintenabledelphirtti
+msgctxt "extrasettings.hintenabledelphirtti"
+msgid "Enable Delphi RTTI."
 msgstr ""
 
 #: extrasettings.hintusesoftfloat80bit
@@ -710,11 +720,15 @@ msgid "mORMot2"
 msgstr ""
 
 #: tform1.mormotbtn.hint
-msgid "Get the mORMot for FPC"
+msgid "Get the mORMot2 for FPC"
 msgstr ""
 
 #: tform1.mportugueselanguage.caption
 msgid "Portuguese (PT)"
+msgstr ""
+
+#: tform1.mrussianlanguage.caption
+msgid "Russian (RUS)"
 msgstr ""
 
 #: tform1.mturkishlanguage.caption

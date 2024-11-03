@@ -1874,7 +1874,11 @@ end;
 {$endif}
 
 procedure TForm1.PageControl1Change(Sender: TObject);
+type
+  TTarget             = (FPC,LAZARUS);
 var
+  aTarget             : TTarget;
+  aTargetListBox      : array[TTarget] of TListBox;
   aFileList:TStringList;
   aResultCode: longint;
   Output:string;
@@ -1890,69 +1894,89 @@ begin
 
   if TPageControl(Sender).ActivePage=TagSheet then
   begin
-    Application.ProcessMessages;
-    aFileList:=TStringList.Create;
-    aFileList.Delimiter:=#10;
-    aFileList.StrictDelimiter:=true;
-    ListBoxFPCTargetTag.Items.BeginUpdate;
-    ListBoxLazarusTargetTag.Items.BeginUpdate;
-    try
-      GitExe:=Which('git'+GetExeExt);
-      {$ifdef MSWindows}
-      if (NOT FileExists(GitExe)) then
-      begin
-        GitExe:=ConcatPaths([FPCupManager.MakeDirectory,'git','cmd'])+PathSeparator+'git.exe';
-      end;
-      {$endif}
-
-      if FileExists(GitExe) then
-      begin
-
-        ListBoxFPCTargetTag.Items.Clear;
-        ListBoxLazarusTargetTag.Items.Clear;
-
-        aFileList.Clear;
-        RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',FPCGITLABREPO+'.git','*rc*','?.?.?'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-        aFileList.DelimitedText:=Output;
-        for GITTagCombo in aFileList do
-        begin
-          i:=Pos(#9,GITTagCombo);
-          GITTag:=Copy(GITTagCombo,i+1,MaxInt);
-          Delete(GITTag,1,Length('refs/tags/'));
-          ListBoxFPCTargetTag.Items.Append(GITTag);
-        end;
-        aFileList.Clear;
-
-        RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',LAZARUSGITLABREPO+'.git','*_RC*'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-        aFileList.DelimitedText:=Output;
-        for GITTagCombo in aFileList do
-        begin
-          i:=Pos(#9,GITTagCombo);
-          GITTag:=Copy(GITTagCombo,i+1,MaxInt);
-          Delete(GITTag,1,Length('refs/tags/'));
-          ListBoxLazarusTargetTag.Items.Append(GITTag);
-        end;
-        aFileList.Clear;
-
-        //Do this only once !!
-        TPageControl(Sender).OnChange:=nil;
-      end;
-
-    finally
-      aFileList.Free;
-      ListBoxLazarusTargetTag.Items.EndUpdate;
-      ListBoxFPCTargetTag.Items.EndUpdate;
+    GitExe:=Which('git'+GetExeExt);
+    {$ifdef MSWindows}
+    if (NOT FileExists(GitExe)) then
+    begin
+      GitExe:=ConcatPaths([FPCupManager.MakeDirectory,'git','cmd'])+PathSeparator+'git.exe';
     end;
+    {$endif}
+
+    if FileExists(GitExe) then
+    begin
+      aTargetListBox[FPC]:=ListBoxFPCTargetTag;
+      aTargetListBox[LAZARUS]:=ListBoxLazarusTargetTag;
+
+      aFileList:=TStringList.Create;
+      aFileList.Delimiter:=#10;
+      aFileList.StrictDelimiter:=true;
+
+      for aTarget in TTarget do
+      begin
+        Application.ProcessMessages;
+
+        aTargetListBox[aTarget].Items.BeginUpdate;
+        aTargetListBox[aTarget].Items.Clear;
+
+        aFileList.Clear;
+
+        if aTarget=FPC then
+          RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',FPCGITLABREPO+'.git','*rc*'{,'?.?.?'}], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+        if aTarget=LAZARUS then
+          RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',LAZARUSGITLABREPO+'.git','*RC*'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+
+        aFileList.DelimitedText:=Output;
+        for GITTagCombo in aFileList do
+        begin
+          i:=Pos(#9,GITTagCombo);
+          if i>0 then GITTag:=Copy(GITTagCombo,i+1,MaxInt);
+          i:=Pos(TAG_PREAMBLE,GITTag);
+          if i>0 then Delete(GITTag,1,Length(TAG_PREAMBLE));
+
+          if aTarget=FPC then
+          begin
+            i:=Pos(FPC_TAG_PREAMBLE,GITTag);
+            if i>0 then Delete(GITTag,1,Length(FPC_TAG_PREAMBLE));
+          end;
+          if aTarget=LAZARUS then
+          begin
+            i:=Pos(LAZ_TAG_PREAMBLE,GITTag);
+            if i>0 then Delete(GITTag,1,Length(LAZ_TAG_PREAMBLE));
+          end;
+
+          aTargetListBox[aTarget].Items.Append(GITTag);
+        end;
+        aFileList.Clear;
+        aTargetListBox[aTarget].Items.EndUpdate;
+      end;
+
+      aFileList.Free;
+    end;
+
+    //Do this only once !!
+    TPageControl(Sender).OnChange:=nil;
   end;
 end;
 
 procedure TForm1.OnlyTagClick(Sender: TObject);
 var
   aListBox:TListBox;
+  aPre:string;
 begin
-  if (Sender=BitBtnFPCOnlyTag) then aListBox:=ListBoxFPCTargetTag;
-  if (Sender=BitBtnLazarusOnlyTag) then aListBox:=ListBoxLazarusTargetTag;
-  if (aListBox.ItemIndex<>-1) then AddTag(aListBox,aListBox.GetSelectedText);
+  if (Sender=BitBtnFPCOnlyTag) then
+  begin
+    aListBox:=ListBoxFPCTargetTag;
+    aPre:=FPC_TAG_PREAMBLE;
+  end;
+  if (Sender=BitBtnLazarusOnlyTag) then
+  begin
+    aListBox:=ListBoxLazarusTargetTag;
+    aPre:=LAZ_TAG_PREAMBLE;
+  end;
+  if (aListBox.ItemIndex<>-1) then
+  begin
+    AddTag(aListBox,aPre+aListBox.GetSelectedText);
+  end;
 end;
 
 procedure TForm1.AddTag(Sender: TObject;aTag:string);

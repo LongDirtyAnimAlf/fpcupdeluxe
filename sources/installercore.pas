@@ -91,6 +91,10 @@ const
   LAZARUSTRUNKBRANCH    = 'main';
   LAZARUSBINARIES       = LAZARUSGITLABBINARIES + '/-/raw/'+LAZARUSTRUNKBRANCH;
 
+  TAG_PREAMBLE          = 'refs/tags/';
+  FPC_TAG_PREAMBLE      = 'release_';
+  LAZ_TAG_PREAMBLE      = 'lazarus_';
+
   PACKAGESLOCATION      = 'packages.fppkg';
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';
   //PACKAGESCONFIGDIR     = PACKAGESLOCATION+DirectorySeparator+'fpcpkgconfig';
