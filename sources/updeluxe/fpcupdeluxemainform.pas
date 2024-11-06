@@ -679,13 +679,25 @@ begin
   //if Assigned(Form3) then Form3.Destroy;
   //if Assigned(Form2) then Form2.Destroy;
 
-  for i:=(listModules.Count-1) downto 0 do
+  with listModules do
   begin
-    if Assigned(listModules.Items.Objects[i]) then
-    begin
-      StrDispose(Pchar(listModules.Items.Objects[i]));
-    end;
+    for i:=Pred(Count) downto 0 do
+      if Assigned(Items.Objects[i]) then
+        StrDispose(Pchar(Items.Objects[i]));
   end;
+  with ListBoxFPCTargetTag do
+  begin
+    for i:=Pred(Count) downto 0 do
+      if Assigned(Items.Objects[i]) then
+        StrDispose(Pchar(Items.Objects[i]));
+  end;
+  with ListBoxLazarusTargetTag do
+  begin
+    for i:=Pred(Count) downto 0 do
+      if Assigned(Items.Objects[i]) then
+        StrDispose(Pchar(Items.Objects[i]));
+  end;
+
 
   {$ifdef RemoteLog}
   if Assigned(aDataClient) then aDataClient.Destroy;
@@ -1874,18 +1886,23 @@ end;
 {$endif}
 
 procedure TForm1.PageControl1Change(Sender: TObject);
+const
+  TAG_PREAMBLE          = 'refs/tags/';
+  FPC_TAG_PREAMBLE      = 'release_';
+  LAZ_TAG_PREAMBLE      = 'lazarus_';
 type
   TTarget             = (FPC,LAZARUS);
 var
   aTarget             : TTarget;
   aTargetListBox      : array[TTarget] of TListBox;
-  aFileList:TStringList;
-  aResultCode: longint;
-  Output:string;
-  GitExe:string;
-  GITTagCombo:string;
-  GITTag:string;
-  i:integer;
+  aFileList           : TStringList;
+  aResultCode         : longint;
+  Output              : string;
+  GitExe              : string;
+  GITTagRunner        : string;
+  GITTag              : string;
+  GITTagShort         : string;
+  i                   : integer;
 begin
   if TPageControl(Sender).ActivePage=ModuleSheet then
   begin
@@ -1921,30 +1938,32 @@ begin
         aFileList.Clear;
 
         if aTarget=FPC then
-          RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',FPCGITLABREPO+'.git','*rc*'{,'?.?.?'}], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+          RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',FPCGITLABREPO+'.git','*rc*','?.?.?'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
         if aTarget=LAZARUS then
           RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',LAZARUSGITLABREPO+'.git','*RC*'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
 
         aFileList.DelimitedText:=Output;
-        for GITTagCombo in aFileList do
+        for GITTagRunner in aFileList do
         begin
-          i:=Pos(#9,GITTagCombo);
-          if i>0 then GITTag:=Copy(GITTagCombo,i+1,MaxInt);
+          i:=Pos(#9,GITTagRunner);
+          if i>0 then GITTag:=Copy(GITTagRunner,i+1,MaxInt);
           i:=Pos(TAG_PREAMBLE,GITTag);
           if i>0 then Delete(GITTag,1,Length(TAG_PREAMBLE));
 
+          GITTagShort:=GITTag;
+
           if aTarget=FPC then
           begin
-            i:=Pos(FPC_TAG_PREAMBLE,GITTag);
-            if i>0 then Delete(GITTag,1,Length(FPC_TAG_PREAMBLE));
+            i:=Pos(FPC_TAG_PREAMBLE,GITTagShort);
+            if i>0 then Delete(GITTagShort,1,Length(FPC_TAG_PREAMBLE));
           end;
           if aTarget=LAZARUS then
           begin
-            i:=Pos(LAZ_TAG_PREAMBLE,GITTag);
-            if i>0 then Delete(GITTag,1,Length(LAZ_TAG_PREAMBLE));
+            i:=Pos(LAZ_TAG_PREAMBLE,GITTagShort);
+            if i>0 then Delete(GITTagShort,1,Length(LAZ_TAG_PREAMBLE));
           end;
 
-          aTargetListBox[aTarget].Items.Append(GITTag);
+          aTargetListBox[aTarget].Items.AddObject(GITTagShort,TObject(pointer(StrNew(Pchar(GITTag)))));
         end;
         aFileList.Clear;
         aTargetListBox[aTarget].Items.EndUpdate;
@@ -1961,21 +1980,15 @@ end;
 procedure TForm1.OnlyTagClick(Sender: TObject);
 var
   aListBox:TListBox;
-  aPre:string;
 begin
-  if (Sender=BitBtnFPCOnlyTag) then
+  if (Sender=BitBtnFPCOnlyTag) then aListBox:=ListBoxFPCTargetTag;
+  if (Sender=BitBtnLazarusOnlyTag) then aListBox:=ListBoxLazarusTargetTag;
+  with aListBox do
   begin
-    aListBox:=ListBoxFPCTargetTag;
-    aPre:=FPC_TAG_PREAMBLE;
-  end;
-  if (Sender=BitBtnLazarusOnlyTag) then
-  begin
-    aListBox:=ListBoxLazarusTargetTag;
-    aPre:=LAZ_TAG_PREAMBLE;
-  end;
-  if (aListBox.ItemIndex<>-1) then
-  begin
-    AddTag(aListBox,aPre+aListBox.GetSelectedText);
+    if (ItemIndex<>-1) then
+    begin
+      AddTag(aListBox,StrPas(Pchar(Items.Objects[ItemIndex])));
+    end;
   end;
 end;
 

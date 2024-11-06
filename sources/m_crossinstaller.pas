@@ -3,7 +3,7 @@ unit m_crossinstaller;
 General crossinstaller/updater module
 
 Copyright (C) 2012-2013 Reinier Olislagers, Ludo Brands
-Copyright (C) 2015-2017 Alfred Glänzer
+Copyright (C) 2015-2025 Alfred Glänzer
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by

@@ -4,13 +4,12 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <BuildModes Active="Default"/>
-    <Units Count="4">
+    <Units Count="5">
       <Unit0>
         <Filename Value="fpcproxy.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="24"/>
-        <CursorPos X="3" Y="50"/>
+        <TopLine Value="17"/>
+        <CursorPos X="24" Y="34"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -35,8 +34,17 @@
         <CursorPos X="3" Y="1526"/>
         <UsageCount Value="10"/>
       </Unit3>
+      <Unit4>
+        <Filename Value="C:\fpcupsystems\stable324\fpcsrc\rtl\objpas\sysutils\osutilsh.inc"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="20"/>
+        <CursorPos X="24" Y="36"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit4>
     </Units>
-    <JumpHistory Count="9" HistoryIndex="8">
+    <JumpHistory Count="10" HistoryIndex="9">
       <Position1>
         <Filename Value="fpcproxy.lpr"/>
         <Caret Line="9" Column="15"/>
@@ -73,6 +81,10 @@
         <Filename Value="fpcproxy.lpr"/>
         <Caret Line="41" Column="10" TopLine="19"/>
       </Position9>
+      <Position10>
+        <Filename Value="fpcproxy.lpr"/>
+        <Caret Line="34" Column="24" TopLine="17"/>
+      </Position10>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

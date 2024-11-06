@@ -74,7 +74,7 @@ unit NumCPULib;
 {$IFEND}
 
 {$IFDEF NUMCPULIB_ANDROID}
-   {$DEFINE NUMCPULIB_LINUX}
+   {.$DEFINE NUMCPULIB_LINUX}
 {$ENDIF}
 
 {$IF DEFINED(NUMCPULIB_GENERIC_BSD) OR DEFINED(NUMCPULIB_APPLE)}
@@ -472,8 +472,10 @@ type
     var AOutputParameters: TStringList); static;
   class function GetLogicalCPUCountLinux(): UInt32; static;
   class function GetPhysicalCPUCountLinux(): UInt32; static;
+{$ifndef Android}
   class function GetTotalPhysicalMemoryLinux(): UInt32; static;
   class function GetTotalSwapMemoryLinux(): UInt32; static;
+{$endif}
 {$ENDIF}
   // ================================================================//
 {$IFDEF NUMCPULIB_SOLARIS}
@@ -1219,6 +1221,7 @@ begin
   end;
 end;
 
+{$ifndef Android}
 class function TNumCPULib.GetTotalPhysicalMemoryLinux(): UInt32; static;
 var
   SystemInf: TSysInfo;
@@ -1248,7 +1251,7 @@ begin
   except
   end;
 end;
-
+{$endif}
 
 {$ENDIF}
 // ================================================================//

@@ -269,6 +269,8 @@ function CompilerVersion(CompilerPath: string): string;
 function CompilerRevision(CompilerPath: string): string;
 function CompilerABI(CompilerPath: string): string;
 function CompilerFPU(CompilerPath: string): string;
+function CompilerCPU(CompilerPath: string): string;
+function CompilerOS(CompilerPath: string): string;
 procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build:integer; var Patch: Integer);
 function CalculateFullVersion(const Major,Minor,Release:integer):dword;overload;
 function CalculateFullVersion(const Major,Minor,Release,Patch:integer):qword;overload;
@@ -728,38 +730,19 @@ function SafeGetApplicationPath: String;
 var
   StartPath: String;
 begin
+  {$ifdef Darwin}
   StartPath:=ExtractFileDir(SafeGetApplicationName);
-
-  (*
- //StartPath:=IncludeTrailingPathDelimiter(ProgramDirectory);
- StartPath:=Application.Location;
- {$ifdef Darwin}
- // do not store settings inside app iself ...
- // not necessary the right choice ... ;-)
- x:=pos('/Contents/MacOS',StartPath);
- if x>0 then
- begin
-   Delete(StartPath,x,MaxInt);
-   x:=RPos('/',StartPath);
-   if x>0 then
-   begin
-     Delete(StartPath,x+1,MaxInt);
-   end;
- end;
- {$endif}
- if FileIsSymlink(StartPath) then
-    StartPath:=GetPhysicalFilename(StartPath,pfeException);
- result:=ExtractFilePath(StartPath);
- *)
-
- if DirectoryExists(StartPath) then
- begin
-   try
-     StartPath:=GetPhysicalFilename(StartPath,pfeException);
-   except
-   end;
- end;
- result:=IncludeTrailingPathDelimiter(StartPath);
+  {$else}
+  StartPath:=GetCurrentDir;
+  {$endif}
+  if DirectoryExists(StartPath) then
+  begin
+    try
+      StartPath:=GetPhysicalFilename(StartPath,pfeException);
+    except
+    end;
+  end;
+  result:=IncludeTrailingPathDelimiter(StartPath);
 end;
 
 function SafeGetApplicationConfigPath(Global:boolean=false): String;
@@ -1320,6 +1303,16 @@ end;
 function CompilerFPU(CompilerPath: string): string;
 begin
   Result:=CompilerCommand(CompilerPath,'-if');
+end;
+
+function CompilerCPU(CompilerPath: string): string;
+begin
+  Result:=CompilerCommand(CompilerPath,'-iSP');
+end;
+
+function CompilerOS(CompilerPath: string): string;
+begin
+  Result:=CompilerCommand(CompilerPath,'-iSO');
 end;
 
 procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build:integer; var Patch: Integer);

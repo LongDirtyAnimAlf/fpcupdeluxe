@@ -1244,6 +1244,11 @@ begin
             Processor.SetParamNamePathData('TTHREADINCDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
           end;
 
+          if (CrossInstaller.TargetOS in [TOS.android]) then
+          begin
+            Processor.SetParamNamePathData('DOSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+          end;
+
           if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
           begin
             UnitSearchPath:=GetUnitsInstallDirectory+DirectorySeparator;
@@ -5153,26 +5158,6 @@ begin
 
     if (SourceVersion<>'0.0.0') then
     begin
-
-      // Create the Linux Legacy patch now
-      // It will only be used for FPC 3.2.2
-      // But its there for everybody to have a look
-      (*
-      if (SourceVersion=DEFAULTFPCVERSION) then
-      begin
-        s:=ConcatPaths([BaseDirectory,'patches','patchfpc',LINUXLEGACYPATCH]);
-        if (NOT FileExists(s)) then
-        begin
-          SaveFileFromResource(s,'GLIBC_COMPAT_3_2_2');
-        end;
-        s:=ConcatPaths([SourceDirectory,'compiler','glibc.inc']);
-        if (NOT FileExists(s)) then
-        begin
-          SaveFileFromResource(s,'GLIBC');
-        end;
-      end;
-      *)
-
       // Patch the FPC sources, if there are patches available
       PatchModule(ModuleName);
     end;
