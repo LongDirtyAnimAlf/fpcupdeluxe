@@ -2,9 +2,14 @@ unit scannercore;
 
 {$mode ObjFPC}{$H+}
 
+{$ifdef Android}
+{$define Termux}
+{$endif}
+
 interface
 
 uses
+  termio,streamio,
   Classes, SysUtils;
 
 type
@@ -21,7 +26,7 @@ type
     function StoreLibrary(const aLib:string):boolean;
     procedure CheckAndAddLibrary(const aLib:string);
   public
-    procedure GetAndSaveLibs(const Location:string);
+    procedure GetAndSaveLibs(const Loc:string='');
     constructor Create;
     destructor Destroy; override;
   published
@@ -37,7 +42,8 @@ type
 implementation
 
 uses
-  StrUtils,process,FileUtil,LazFileUtils,LookupStringList;
+  Linux,BaseUnix,
+  Unix,StrUtils,process,FileUtil,LazFileUtils,LookupStringList;
 
 const
   {$ifdef CPUX86}
@@ -70,9 +76,15 @@ const
   {$endif CPUARMHF}
   {$endif CPUARM}
   {$ifdef CPUAARCH64}
+  {$ifdef Android}
+  '/usr/aarch64-linux-android/lib',
+  '/usr/opt/ndk-multilib/aarch64-linux-android/lib',
+  '/system/lib64',
+  {$else}
   '/usr/lib/aarch64-linux-gnu',
   '/usr/local/lib/aarch64-linux-gnu',
   '/lib/aarch64-linux-gnu',
+  {$endif}
   {$endif CPUAARCH64}
   {$ifdef CPULOONGARCH}
   '/usr/lib/loongarch-linux-gnu',
@@ -166,9 +178,15 @@ const
   {$endif CPUARMHF}
   {$endif CPUARM}
   {$ifdef CPUAARCH64}
+  {$ifdef Android}
+  DYNLINKV1='ld-android.so';
+  DYNLINKV2='ld-android.so.1';
+  DYNLINKV3='ld-android.so.2';
+  {$else}
   DYNLINKV1='ld-linux-aarch64.so.1';
   DYNLINKV2='ld-linux-aarch64.so.2';
   DYNLINKV3='ld-linux-aarch64.so.3';
+  {$endif}
   {$endif CPUAARCH64}
   {$ifdef CPULOONGARCH}
   DYNLINKV1='ld-linux-loongarch-lp64d.so.1';
@@ -186,6 +204,10 @@ const
   DYNLINKV3='ld-linux-riscv64-lp64d.so.3';
   {$endif CPURISCV64}
   {$endif}
+  {$endif}
+
+  {$ifdef Termux}
+  TERMUXPATH = '/data/data/com.termux/files';
   {$endif}
 
 const FPCLIBS : array [0..43] of string = (
@@ -305,8 +327,9 @@ const FPCEXTRALIBS : array [0..37] of string = (
   'libmysqlclient.so.12'
 );
 
-const LAZLIBS : array [0..30] of string = (
+const LAZLIBS : array [0..31] of string = (
   'libgdk-1.2.so.0',
+  'libgdk-3.so.0',
   'libglib-1.2.so.0',
   'libgmodule-1.2.so.0',
   'libgtk-1.2.so.0',
@@ -411,14 +434,17 @@ end;
 function GetStartupObjects:string;
 const
   LINKFILE='crtbegin.o';
-  SEARCHDIRS : array [0..6] of string = (
+  SEARCHDIRS : array [0..9] of string = (
     '/usr/local/lib/',
     '/usr/lib/',
     '/usr/local/lib/gcc/',
     '/usr/lib/gcc/',
     '/usr/lib/gcc-lib/',
     '/lib/gcc/',
-    '/lib/'
+    '/lib/',
+    TERMUXPATH+'/usr/lib', // for termux
+    TERMUXPATH+'/usr/lib/clang', // for termux
+    '/system/lib64/' // for termux
     );
 
 var
@@ -663,6 +689,10 @@ begin
     result:='/usr/lib/gcc';
     {$endif}
 
+    {$ifdef Termux}
+    result:=TERMUXPATH+'/usr/lib/clang';
+    {$endif}
+
     if DirectoryExists(result) then
     begin
       LinkFiles := TStringList.Create;
@@ -850,13 +880,19 @@ procedure TScannerCore.CheckAndAddLibrary(const aLib:string);
 const
   MAGICNEEDED = 'NEEDED';
   MAGICSHARED = 'Shared library:';
+  {$ifdef Termux}
+  DATAFILE    = 'elfdynamic.dat';
+  {$endif}
 var
   SearchResultList:TStringList;
   SearchResult:string;
   FileName:string;
   i: integer;
   sd,sr,s:string;
+  sIn:TStringStream;
+  T:TextFile;
 begin
+  sIn:=TStringStream.Create;
   SearchResultList:=TStringList.Create;
   try
     {$ifdef Windows}
@@ -882,6 +918,10 @@ begin
       {$ifdef Windows}
       FileName:=StringReplace(FileName,'dummy',FLibraryLocation,[]);
       {$endif}
+      {$ifdef Termux}
+      if NOT DirectoryExists(sd) then
+        FileName:=TERMUXPATH+FileName;
+      {$endif}
       // Do we have a wildcard ?
       if (Pos('*',aLib)>0) then
       begin
@@ -897,6 +937,18 @@ begin
         FileName:='';
         break;
       end;
+      {$ifdef Termux}
+      if NOT FileExists(FileName) then
+      begin
+        i:=Pos('.so',FileName);
+        if i>0 then
+        begin
+          Delete(FileName,i,MaxInt);
+          FileName:=FileName+'.so';
+        end;
+      end;
+      {$endif}
+
       if FileExists(FileName) then
       begin
         StoreLibrary('['+ExtractFileName(FileName)+']');
@@ -914,7 +966,29 @@ begin
         end;
         while FileIsSymlink(FileName) do FileName:=GetPhysicalFilename(FileName,pfeException);
         SearchResult:='';
+
+        (*
+        AssignFile(T,'yolo');
+        //Streamio.AssignStream(T,sIn);
+        //TextRec(T).Mode:=fmOutput;
+        Append(T);
+        POpen(T,'readelf -d -W '+FileName,'R');
+        //Flush(T);
+        //writeln('Result: ',sIn.DataString);
+        //SearchResult:=sIn.DataString;
+        CloseFile(T);
+        *)
+
+        {$ifdef Termux}
+        DeleteFile(DATAFILE);
+        sIn.Clear;
+        fpSystem('readelf -d -W '+FileName +' > ' + DATAFILE);
+        sIn.LoadFromFile(DATAFILE);
+        SearchResult:=sIn.DataString;
+        {$else}
         RunCommand(FReadelfBinary,['-d','-W',FileName],SearchResult,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+        {$endif}
+
         SearchResultList.Text:=SearchResult;
         if (SearchResultList.Count=0) then continue;
         for sr in SearchResultList do
@@ -922,6 +996,7 @@ begin
           s:=sr;
           if (Pos(MAGICNEEDED,s)>0) then
           begin
+            //writeln('Looking for dependency: ',s);
             i:=Pos(MAGICSHARED,s);
             if (i<>-1) then
             begin
@@ -955,10 +1030,13 @@ begin
     {$endif}
   finally
     SearchResultList.Free;
+    sIn.Free;
   end;
 end;
 
-procedure TScannerCore.GetAndSaveLibs(const Location:string);
+procedure TScannerCore.GetAndSaveLibs(const Loc:string);
+var
+  LibsLocation:string;
 begin
   FLibraryList.Clear;
   FLibraryNotFoundList.Clear;
@@ -1039,6 +1117,10 @@ begin
         {$ifdef Windows}
         SearchLibPath:=StringReplace(SearchLibPath,'dummy',FLibraryLocation,[]);
         {$endif}
+        {$ifdef Termux}
+        if NOT DirectoryExists(SearchDir) then
+          SearchLibPath:=TERMUXPATH+SearchLibPath;
+        {$endif}
         if FileExists(SearchLibPath) then
         begin
           FLibraryLocationList.Append(SearchLibPath);
@@ -1068,13 +1150,23 @@ begin
 
 
   // Process the results from the scan by getting the real files
+  LibsLocation:=Loc;
 
-  ForceDirectories(Location+'libs');
+  if LibsLocation='' then
+  begin
+    RunCommand('pwd',[],LibsLocation,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+  end;
+
+  LibsLocation:='/data/data/com.termux/files';
+  LibsLocation:=IncludeTrailingPathDelimiter(LibsLocation);
+  writeln('Saving files into:',LibsLocation);
+
+  ForceDirectories(LibsLocation+'libs');
 
   aList:=TStringList.Create;
   try
     aList.Add('These libraries were sourced from: '+GetDistro+' version '+GetDistro('VERSION'));
-    aList.SaveToFile(Location+'libs'+DirectorySeparator+'actual_library_version_fpcup.txt');
+    aList.SaveToFile(LibsLocation+'libs'+DirectorySeparator+'actual_library_version_fpcup.txt');
   finally
     aList.Free;
   end;
@@ -1084,7 +1176,7 @@ begin
   begin
     FileName:=FLibraryLocationList.Strings[Index];
     TargetFile:=ExtractFileName(FileName);
-    CopyFile(FileName,Location+'libs'+DirectorySeparator+TargetFile,[]);
+    CopyFile(FileName,LibsLocation+'libs'+DirectorySeparator+TargetFile,[]);
   end;
 
   // if there are any linklibs not found, create them now
@@ -1097,7 +1189,7 @@ begin
     begin
       if (Pos(LinkFile,TargetFile)=1) then
       begin
-        CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile,[]);
+        CopyFile(FileName,LibsLocation+'libs'+DirectorySeparator+LinkFile,[]);
         break;
       end;
     end;
@@ -1105,7 +1197,7 @@ begin
     begin
       if (Pos(LinkFile,TargetFile)=1) then
       begin
-        CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile,[]);
+        CopyFile(FileName,LibsLocation+'libs'+DirectorySeparator+LinkFile,[]);
         break;
       end;
     end;
@@ -1113,7 +1205,7 @@ begin
     begin
       if (Pos(LinkFile,TargetFile)=1) then
       begin
-        CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile,[]);
+        CopyFile(FileName,LibsLocation+'libs'+DirectorySeparator+LinkFile,[]);
         break;
       end;
     end;
@@ -1124,7 +1216,7 @@ begin
       begin
         if (Pos(LinkFile,TargetFile)=1) then
         begin
-          CopyFile(FileName,Location+'libs'+DirectorySeparator+LinkFile,[]);
+          CopyFile(FileName,LibsLocation+'libs'+DirectorySeparator+LinkFile,[]);
           break;
         end;
       end;
@@ -1135,13 +1227,18 @@ begin
 end;
 
 constructor TScannerCore.Create;
+var
+  Output:string;
 begin
   inherited Create;
   FLibraryList:=TStringList.Create;
   FLibraryNotFoundList:=TStringList.Create;
   FLibraryLocationList:=TStringList.Create;
   chkQT:=True;
-  FReadelfBinary:='readelf';
+  FReadelfBinary:='/usr/bin/readelf';
+  {$ifdef Termux}
+  FReadelfBinary:=TERMUXPATH+'/usr/libexec/binutils/readelf';
+  {$endif}
   {$ifdef Windows}
   FLibraryLocation:='c:\fpcupdeluxe';
   {$endif}

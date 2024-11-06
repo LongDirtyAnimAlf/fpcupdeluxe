@@ -47,7 +47,7 @@ begin
   with TScannerCore.Create do
   begin
     try
-      GetAndSaveLibs(Location);
+      GetAndSaveLibs;
     finally
       Free;
     end;
