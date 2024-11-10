@@ -1186,14 +1186,15 @@ begin
 
           //Still not clear if jobs can be enabled for crosscompiler builds ... :-|
           //However, on Windows, erroros occur frequently due to more jobs.
-          //So, again, disabling for the time being.
-          {
-          if (NOT FNoJobs) then
+          //So, again, disabling for the time being, except for building the packages.
+          if (MakeCycle in [st_PackagesBuild,st_PackagesInstall]) then
           begin
-            Processor.SetParamNameData('--jobs',IntToStr(FCPUCount));
-            Processor.SetParamNameData('FPMAKEOPT','--threads='+IntToStr(FCPUCount));
+            if (NOT FNoJobs) then
+            begin
+              Processor.SetParamNameData('--jobs',IntToStr(FCPUCount));
+              Processor.SetParamNameData('FPMAKEOPT','--threads='+IntToStr(FCPUCount));
+            end;
           end;
-          }
 
           Processor.SetParamNameData('--directory',SourceDirectory);
 
