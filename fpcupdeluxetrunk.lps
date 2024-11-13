@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,linuxx64QT6,linuxx64QT6zip,freebsdx64"/>
-    <BuildModes Active="darwinarm64cocoa"/>
+    <BuildModes Active="win64arm64"/>
     <Units Count="24">
       <Unit0>
         <Filename Value="up.lpr"/>
