@@ -165,10 +165,10 @@ function GetLCLType(LCLName:string):LCL_TYPE;
 {$endif}
 procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI:boolean; out BinPath,LibPath:string);
 
+{$ifdef LCL}
 var
-  {$ifdef LCL}
   SUBARCHStore:array[TCPU,TOS] of TSUBARCH;
-  {$endif LCL}
+{$endif LCL}
 
 implementation
 

@@ -9,8 +9,9 @@
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="103"/>
-        <CursorPos X="24" Y="106"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="443"/>
+        <CursorPos Y="458"/>
         <UsageCount Value="69"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -46,7 +47,7 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="sources\up\checkoptions.pas"/>
-        <Line Value="714"/>
+        <Line Value="715"/>
       </Item>
     </BreakPoints>
   </Debugging>

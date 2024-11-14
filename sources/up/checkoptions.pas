@@ -20,6 +20,7 @@ uses
  SysUtils,
  StrUtils,
  m_crossinstaller,
+ installerBase,
  installerCore,
  installerUniversal,
  fpcuputil,

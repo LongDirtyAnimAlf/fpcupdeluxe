@@ -133,8 +133,9 @@ if TargetOS=&apos;openbsd&apos; then
         </CompilerOptions>
       </Item4>
       <Item5 Name="openbsdx64">
-        <MacroValues Count="1">
+        <MacroValues Count="2">
           <Macro2 Name="LCLWidgetType" Value="gtk2"/>
+          <Macro5 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
@@ -150,17 +151,15 @@ if TargetOS=&apos;openbsd&apos; then
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="openbsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
+              <RunWithoutDebug Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-a"/>
+          </Other>
         </CompilerOptions>
       </Item5>
       <Item6 Name="openbsdi386">
@@ -364,11 +363,12 @@ if TargetOS=&apos;openbsd&apos; then
           </Linking>
         </CompilerOptions>
       </Item11>
-      <SharedMatrixOptions Count="4">
+      <SharedMatrixOptions Count="5">
         <Item1 ID="322994045052" Modes="darwinarm64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
         <Item2 ID="369111111759" Modes="linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
         <Item3 ID="636969686655" Modes="win64arm64" Type="IDEMacro" MacroName="LCLWidgetType" Value="win32"/>
         <Item4 ID="457001635124" Modes="linuxx64QT6,linuxx64QT6zip" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt6"/>
+        <Item5 ID="058790206300" Modes="openbsdx64" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>

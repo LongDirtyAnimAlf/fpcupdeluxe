@@ -56,9 +56,9 @@ uses
 
 function Tany_openbsd_base.GetLibs(Basepath:string): boolean;
 const
-  LibNames : array[0..3] of string = ('libc.so.96.2','libc.so.96.1','libc.so.95.0','libc.so.88.0');
+  LibNames : array[0..4] of string = ('libc.so.100.3','libc.so.96.2','libc.so.96.1','libc.so.95.0','libc.so.88.0');
 var
-  sd,lc:string;
+  sd,lc,x11:string;
 begin
   result:=inherited;
 
@@ -84,19 +84,22 @@ begin
   end;
 
   SearchLibraryInfo(result);
+
   if result then
   begin
     FLibsFound:=true;
+
+    x11:=ConcatPaths([LibsPath,'usr','X11R6','lib']);
+    if NOT DirectoryExists(x11) then x11:=ConcatPaths([LibsPath,'usr','X11R7','lib']);
+
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+LibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+    if DirectoryExists(x11) then AddFPCCFGSnippet('-Fl'+x11);
     AddFPCCFGSnippet('-k--allow-shlib-undefined',false);
     AddFPCCFGSnippet('-k--allow-multiple-definition',false);
-    // AddFPCCFGSnippet('-XR'+LibsPath);
-    // -XR does not always work !!
-    // So use a direct linker command !!
     // This helps the linker in finding the correct libs
     AddFPCCFGSnippet('-k--library-path='+IncludeTrailingPathDelimiter(LibsPath),false);
+    if DirectoryExists(x11) then AddFPCCFGSnippet('-k--library-path='+IncludeTrailingPathDelimiter(x11),false);
   end;
 end;
 

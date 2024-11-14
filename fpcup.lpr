@@ -76,6 +76,7 @@ uses
   FileUtil, LazFileUtils,
   synautil, // for rpos ... could also use strutil
   installerManager,
+  installerBase,
   installerCore,
   installerUniversal,
   checkoptions, fpcuputil,
@@ -455,10 +456,6 @@ var
   BinsPath,LibsPath:string;
   ToolTargetFile,ToolTargetPath:string;
   UpOk,BinsOk,LibsOk:boolean;
-  {$ifdef Unix}
-  aList:TStringList;
-  i:integer;
-  {$endif Unix}
 
 {$R fpcup.res}
 

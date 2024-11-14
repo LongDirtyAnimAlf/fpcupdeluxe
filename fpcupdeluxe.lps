@@ -4,16 +4,17 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linuxi386QT5,linuxi386QT5zip,linux64,linuxaarch64,linuxaarch64QT5,linuxaarch64QT5zip,linuxarm,linuxarmQT5,linuxarmQT5zip,linuxarmv6,linuxx64QT5,linuxx64QT5zip,linuxppc64,freebsdi386,freebsdx64,solarisx64,dragonflyx64,netbsdx64,netbsdi386,freebsdx64QT5,freebsdx64QT5zip"/>
-    <BuildModes Active="openbsdx64"/>
-    <Units Count="587">
+    <BuildModes Active="win32"/>
+    <Units Count="634">
       <Unit0>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="187"/>
-        <CursorPos Y="214"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="189"/>
+        <CursorPos Y="215"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
@@ -21,8 +22,8 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="1927"/>
-        <CursorPos X="12" Y="1932"/>
+        <TopLine Value="4194"/>
+        <CursorPos X="80" Y="4208"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -33,8 +34,8 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
+        <CursorPos X="22" Y="22"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -158,8 +159,8 @@
         <Filename Value="sources\installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1175"/>
-        <CursorPos X="86" Y="1189"/>
+        <TopLine Value="4369"/>
+        <CursorPos X="43" Y="4392"/>
         <UsageCount Value="75"/>
       </Unit17>
       <Unit18>
@@ -1461,8 +1462,8 @@
       <Unit195>
         <Filename Value="sources\up\checkoptions.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="370"/>
-        <CursorPos X="47" Y="56"/>
+        <TopLine Value="240"/>
+        <CursorPos X="24" Y="253"/>
         <UsageCount Value="12"/>
       </Unit195>
       <Unit196>
@@ -3441,10 +3442,11 @@
       </Unit456>
       <Unit457>
         <Filename Value="sources\crossinstallers\m_any_to_openbsd_base.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="38"/>
-        <CursorPos Y="39"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="80"/>
+        <CursorPos X="5" Y="94"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit457>
       <Unit458>
         <Filename Value="sources\crossinstallers\m_win32_to_linuxmips.pas"/>
@@ -3499,8 +3501,8 @@
       <Unit465>
         <Filename Value="C:\fpcupsystems\trunklatest\fpcsrc\compiler\options.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="5709"/>
-        <CursorPos Y="5722"/>
+        <TopLine Value="4372"/>
+        <CursorPos X="78" Y="4393"/>
         <UsageCount Value="12"/>
       </Unit465>
       <Unit466>
@@ -3723,10 +3725,11 @@
       </Unit496>
       <Unit497>
         <Filename Value="sources\crossinstallers\m_any_to_netbsd_base.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="16"/>
-        <CursorPos X="37" Y="38"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="65"/>
+        <CursorPos X="33" Y="78"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit497>
       <Unit498>
         <Filename Value="sources\crossinstallers\m_any_to_netbsd386.pas"/>
@@ -3751,10 +3754,11 @@
       </Unit500>
       <Unit501>
         <Filename Value="sources\crossinstallers\m_any_to_openbsdx64.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="38"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="62"/>
         <CursorPos X="18" Y="43"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit501>
       <Unit502>
         <Filename Value="sources\crossinstallers\m_crosswinx64.pas"/>
@@ -4275,7 +4279,7 @@
         <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\bfd\reloc.c"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="382"/>
-        <CursorPos X="97" Y="383"/>
+        <CursorPos X="4" Y="399"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="C++"/>
       </Unit575>
@@ -4367,27 +4371,470 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="C++"/>
       </Unit586>
+      <Unit587>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\include\md5.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="49"/>
+        <CursorPos X="27" Y="73"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit587>
+      <Unit588>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\include\ChangeLog"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="445"/>
+        <CursorPos X="60" Y="459"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit588>
+      <Unit589>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\bfd\bfd.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="997"/>
+        <CursorPos X="35" Y="1011"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit589>
+      <Unit590>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\binutils\dwarf.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="12"/>
+        <CursorPos X="9" Y="28"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit590>
+      <Unit591>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\binutils\readelf.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="9682"/>
+        <CursorPos X="3" Y="9696"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit591>
+      <Unit592>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\config\stdint.m4"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit592>
+      <Unit593>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\bfd\coff-x86_64.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="132"/>
+        <CursorPos X="15" Y="167"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit593>
+      <Unit594>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\libiberty\strtoull.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="94"/>
+        <CursorPos X="18" Y="53"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit594>
+      <Unit595>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\opcodes\d30v-dis.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="149"/>
+        <CursorPos X="13" Y="118"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit595>
+      <Unit596>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\libiberty\physmem.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="64"/>
+        <CursorPos X="35" Y="76"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit596>
+      <Unit597>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\bfd\aout-arm.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="145"/>
+        <CursorPos X="14" Y="153"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit597>
+      <Unit598>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\bfd\bfd-in2.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3159"/>
+        <CursorPos X="10" Y="3173"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit598>
+      <Unit599>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\bfd\som.c"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3042"/>
+        <CursorPos X="62" Y="3056"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit599>
+      <Unit600>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\x86_64-openbsd\binutils\bfd\bfd.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2217"/>
+        <CursorPos X="27" Y="2231"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit600>
+      <Unit601>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\x86_64-openbsd\binutils\bfd\bfd-in3.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2217"/>
+        <CursorPos X="14" Y="2231"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit601>
+      <Unit602>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\include\libiberty.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="95"/>
+        <CursorPos X="41" Y="109"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit602>
+      <Unit603>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\opcodes\configure"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="6444"/>
+        <CursorPos X="3" Y="6458"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit603>
+      <Unit604>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\ld\configure"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2469"/>
+        <CursorPos X="3" Y="2489"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit604>
+      <Unit605>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\config\tcl.m4"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1481"/>
+        <CursorPos X="9" Y="1495"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit605>
+      <Unit606>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\config\target-posix"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="36" Y="4"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit606>
+      <Unit607>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\bfd\configure.ac"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="928"/>
+        <CursorPos X="31" Y="942"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit607>
+      <Unit608>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\bfd\configure"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="8736"/>
+        <CursorPos X="3" Y="8750"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit608>
+      <Unit609>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\bfd\config.bfd"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="376"/>
+        <CursorPos X="25" Y="390"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit609>
+      <Unit610>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\bfd\ChangeLog"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="378"/>
+        <CursorPos X="33" Y="392"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit610>
+      <Unit611>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\libtool.m4"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2540"/>
+        <CursorPos Y="2554"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit611>
+      <Unit612>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\configure"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4082"/>
+        <CursorPos X="19" Y="4096"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit612>
+      <Unit613>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\configure.ac"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1201"/>
+        <CursorPos X="19" Y="1215"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit613>
+      <Unit614>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\config.rpath"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="106"/>
+        <CursorPos X="3" Y="120"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit614>
+      <Unit615>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\bfd\configure.host"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="50"/>
+        <CursorPos X="9" Y="64"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit615>
+      <Unit616>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\config.guess"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="260"/>
+        <CursorPos X="7" Y="274"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit616>
+      <Unit617>
+        <Filename Value="C:\fpcupsystems\trunklatest\fpcsrc\packages\gdbint\src\gdbint.pp"/>
+        <UnitName Value="GdbInt"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="408"/>
+        <CursorPos X="26" Y="422"/>
+        <UsageCount Value="10"/>
+      </Unit617>
+      <Unit618>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\qt6\qtx11.inc"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="26" Y="9"/>
+        <UsageCount Value="10"/>
+      </Unit618>
+      <Unit619>
+        <Filename Value="C:\fpcupsystems\trunklatest\fpcsrc\compiler\systems\t_android.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="403"/>
+        <CursorPos X="38" Y="416"/>
+        <UsageCount Value="10"/>
+      </Unit619>
+      <Unit620>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\bfd\Makefile.am"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="954"/>
+        <CursorPos X="29" Y="968"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit620>
+      <Unit621>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\ld\configure.in"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="10"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit621>
+      <Unit622>
+        <Filename Value="C:\fpcupsystems\trunklatest\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="451"/>
+        <CursorPos X="26" Y="531"/>
+        <UsageCount Value="10"/>
+      </Unit622>
+      <Unit623>
+        <Filename Value="C:\fpcupsystems\trunklatest\fpcsrc\compiler\systems\t_darwin.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="341"/>
+        <CursorPos X="25" Y="143"/>
+        <UsageCount Value="10"/>
+      </Unit623>
+      <Unit624>
+        <Filename Value="C:\msys64\home\superdad\openbsd\binutils-openbsd\binutils-2.17\bfd\configure"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="9394"/>
+        <CursorPos X="3" Y="9408"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit624>
+      <Unit625>
+        <Filename Value="C:\msys64\home\superdad\binutilsnew\binutils-2.41\ChangeLog.git"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="81960"/>
+        <CursorPos X="28" Y="81961"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit625>
+      <Unit626>
+        <Filename Value="..\AAAAAAAAAAAAAAAAAAAAA\openbsd\binutils-2.17\include\elf\common.h"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="305"/>
+        <CursorPos X="70" Y="319"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit626>
+      <Unit627>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk3\gtk3bindings\lazpango1.pas"/>
+        <UnitName Value="LazPango1"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="1532"/>
+        <CursorPos X="139" Y="1546"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit627>
+      <Unit628>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\components\cairocanvas\cairocanvas.pas"/>
+        <UnitName Value="CairoCanvas"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="1232"/>
+        <CursorPos X="3" Y="1246"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit628>
+      <Unit629>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk\gtkfontcache.pas"/>
+        <UnitName Value="GtkFontCache"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="132"/>
+        <CursorPos X="19" Y="146"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit629>
+      <Unit630>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk\gtkproc.inc"/>
+        <EditorIndex Value="10"/>
+        <TopLine Value="7861"/>
+        <CursorPos X="5" Y="7875"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit630>
+      <Unit631>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk2\gtk2fontcache.pas"/>
+        <UnitName Value="Gtk2FontCache"/>
+        <EditorIndex Value="11"/>
+        <TopLine Value="117"/>
+        <CursorPos X="19" Y="131"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit631>
+      <Unit632>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk2\gtk2trayicon.inc"/>
+        <EditorIndex Value="12"/>
+        <TopLine Value="420"/>
+        <CursorPos X="19" Y="434"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit632>
+      <Unit633>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk3\gtk3bindings\lazgobject2.pas"/>
+        <UnitName Value="LazGObject2"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="13"/>
+        <CursorPos X="17" Y="2"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit633>
     </Units>
     <Debugger>
       <Backend Value="{A76EFAFB-3A42-421F-9672-C141897C94AA}"/>
     </Debugger>
-    <JumpHistory Count="4" HistoryIndex="3">
+    <JumpHistory Count="22" HistoryIndex="21">
       <Position1>
         <Filename Value="sources\fpcup.ini"/>
-        <Caret Line="1873" Column="3" TopLine="1852"/>
       </Position1>
       <Position2>
-        <Filename Value="sources\fpcup.ini"/>
-        <Caret Line="1873" Column="3" TopLine="1852"/>
+        <Filename Value="up.lpr"/>
+        <Caret Line="214" TopLine="187"/>
       </Position2>
       <Position3>
-        <Filename Value="sources\fpcup.ini"/>
-        <Caret Line="1856" Column="18" TopLine="1852"/>
+        <Filename Value="up.lpr"/>
+        <Caret Line="194" Column="25" TopLine="187"/>
       </Position3>
       <Position4>
-        <Filename Value="sources\updeluxe\extrasettings.pas"/>
-        <Caret Line="603" Column="30" TopLine="593"/>
+        <Filename Value="up.lpr"/>
+        <Caret Line="39" Column="11" TopLine="30"/>
       </Position4>
+      <Position5>
+        <Filename Value="up.lpr"/>
+        <Caret Line="216" TopLine="189"/>
+      </Position5>
+      <Position6>
+        <Filename Value="up.lpr"/>
+        <Caret Line="39" Column="18" TopLine="24"/>
+      </Position6>
+      <Position7>
+        <Filename Value="up.lpr"/>
+        <Caret Line="216" TopLine="189"/>
+      </Position7>
+      <Position8>
+        <Filename Value="sources\crossinstallers\m_any_to_netbsd_base.pas"/>
+        <Caret Line="78" Column="38" TopLine="65"/>
+      </Position8>
+      <Position9>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="4208" Column="80" TopLine="4194"/>
+      </Position9>
+      <Position10>
+        <Filename Value="sources\crossinstallers\m_any_to_openbsd_base.pas"/>
+        <Caret Line="92" Column="30" TopLine="72"/>
+      </Position10>
+      <Position11>
+        <Filename Value="sources\crossinstallers\m_any_to_openbsd_base.pas"/>
+        <Caret Line="94" Column="5" TopLine="80"/>
+      </Position11>
+      <Position12>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk3\gtk3bindings\lazpango1.pas"/>
+        <Caret Line="1546" Column="139" TopLine="1532"/>
+      </Position12>
+      <Position13>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\components\cairocanvas\cairocanvas.pas"/>
+        <Caret Line="1059" Column="3" TopLine="1046"/>
+      </Position13>
+      <Position14>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\components\cairocanvas\cairocanvas.pas"/>
+        <Caret Line="1218" Column="26" TopLine="1156"/>
+      </Position14>
+      <Position15>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\components\cairocanvas\cairocanvas.pas"/>
+        <Caret Line="1246" Column="3" TopLine="1232"/>
+      </Position15>
+      <Position16>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk\gtkfontcache.pas"/>
+        <Caret Line="146" Column="3" TopLine="132"/>
+      </Position16>
+      <Position17>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk\gtkproc.inc"/>
+        <Caret Line="7875" Column="5" TopLine="7861"/>
+      </Position17>
+      <Position18>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk2\gtk2fontcache.pas"/>
+        <Caret Line="131" Column="3" TopLine="117"/>
+      </Position18>
+      <Position19>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk\gtkfontcache.pas"/>
+        <Caret Line="146" Column="19" TopLine="132"/>
+      </Position19>
+      <Position20>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk2\gtk2fontcache.pas"/>
+        <Caret Line="131" Column="19" TopLine="117"/>
+      </Position20>
+      <Position21>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk2\gtk2trayicon.inc"/>
+        <Caret Line="434" Column="19" TopLine="420"/>
+      </Position21>
+      <Position22>
+        <Filename Value="C:\fpcupsystems\trunklatest\lazarus\lcl\interfaces\gtk3\gtk3bindings\lazgobject2.pas"/>
+        <Caret Line="1565" Column="22" TopLine="1551"/>
+      </Position22>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
