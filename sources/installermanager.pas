@@ -468,6 +468,7 @@ implementation
 
 uses
   {$IFNDEF FPCONLY}
+  LCLPlatformDef,
   {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
   InterfaceBase,
   {$ENDIF}
@@ -1119,7 +1120,7 @@ begin
   FPCOPT:='';
 
   {$ifndef FPCONLY}
-  LCL_Platform:=GetDefaultLCLWidgetType;
+  LCL_Platform:=BuildLCLWidgetType;
   LazarusOPT:='';
   LazarusDesiredRevision:='';
   LazarusBranch:='';
@@ -2155,7 +2156,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   {$ifdef linux}
   function CheckDevLibs(LCLPlatform: string): boolean;
   const
-    LIBSCNT=5;
+    LIBSCNT=7;
   type
     TLibList=array[1..LIBSCNT] of string;
     LibSource = record
@@ -2212,12 +2213,10 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     //qt5-qtbase-devel
     //qt5-qtx11extras
     //qt5-qtx11extras-devel
-
-
-    LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so','libgdk-x11-2.0.so');
-    QTLIBS:TLibList = (LIBQT4VERSION,'','','','');
-    QT5LIBS:TLibList = (LIBQT5VERSION,'','','','');
-    QT6LIBS:TLibList = (LIBQT6VERSION,'','','','');
+    LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so','libgdk-x11-2.0.so','','');
+    QTLIBS:TLibList = (LIBQT4VERSION,'','','','','','');
+    QT5LIBS:TLibList = (LIBQT5VERSION,'libQt5Core.so.5','libQt5Gui.so.5','libQt5Network.so.5','libQt5PrintSupport.so.5','libQt5Widgets.so.5','libQt5X11Extras.so.5');
+    QT6LIBS:TLibList = (LIBQT6VERSION,'libQt6Core.so.6','libQt6DBus.so.6','libQt6Gui.so.6','libQt6PrintSupport.so.6','libQt6Widgets.so.6','');
   var
     i:integer;
     pll:^TLibList;
@@ -2336,6 +2335,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       pll:=@QTLIBS
     else if Uppercase(LCLPlatform)='QT5' then
       pll:=@QT5LIBS
+    else if Uppercase(LCLPlatform)='QT6' then
+      pll:=@QT6LIBS
     else pll:=@LCLLIBS;
 
     if Assigned(pll) then
@@ -2533,9 +2534,6 @@ begin
 
     FInstaller.CompilerOptions:=FParent.LazarusOPT;
 
-    // LCL_Platform is only used when building LCL, but the Lazarus module
-    // will take care of that.
-    (FInstaller as TLazarusInstaller).LCL_Platform:=FParent.LCL_Platform;
     (FInstaller as TLazarusInstaller).SourcePatches:=FParent.LazarusPatches;
     (FInstaller as TLazarusInstaller).PreInstallScriptPath:=FParent.LazarusPreInstallScriptPath;
     (FInstaller as TLazarusInstaller).PostInstallScriptPath:=FParent.LazarusPostInstallScriptPath;
@@ -2614,7 +2612,6 @@ begin
       FInstaller.CompilerOptions:=FParent.FPCOPT;
       {$ifndef FPCONLY}
       (FInstaller as TUniversalInstaller).LazarusCompilerOptions:=FParent.FLazarusOPT;
-      (FInstaller as TUniversalInstaller).LCL_Platform:=FParent.LCL_Platform;
       {$endif}
   end;
 
@@ -2643,6 +2640,13 @@ begin
     if Length(FParent.PatchCmd)>0 then FInstaller.PatchCmd:=FParent.PatchCmd;
     FInstaller.Verbose:=FParent.Verbose;
     FInstaller.LinuxLegacy:=FParent.LinuxLegacy;
+
+    if FInstaller.InheritsFrom(TBaseLCLInstaller) then
+    begin
+      {$ifndef FPCONLY}
+      (FInstaller as TBaseLCLInstaller).LCL_Platform:=FParent.LCL_Platform;
+      {$endif}
+    end;
 
     aCompiler:='';
     if FInstaller.InheritsFrom(TFPCInstaller) then

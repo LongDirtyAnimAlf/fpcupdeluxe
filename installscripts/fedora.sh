@@ -33,10 +33,12 @@ sudo dnf install -y qt5-qtbase
 sudo dnf install -y qt5-qtbase-devel
 sudo dnf install -y qt5-qtx11extras
 sudo dnf install -y qt5-qtx11extras-devel
+sudo dnf install -y libQt5Pas-devel
 
 sudo dnf install -y qt6-qtbase
 sudo dnf install -y qt6-qtbase-devel
 sudo dnf install -y qt6-qtbase-gui
+sudo dnf install -y libQt6Pas-devel
 
 sudo dnf install -y SDL2
 sudo dnf install -y SDL2-devel

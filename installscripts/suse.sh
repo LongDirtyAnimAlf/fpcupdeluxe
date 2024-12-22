@@ -20,3 +20,6 @@ sudo zypper --non-interactive install -y gtk2-devel
 sudo zypper --non-interactive install -y gdk-pixbuf-devel
 sudo zypper --non-interactive install -y cairo-devel
 sudo zypper --non-interactive install -y pango-devel
+
+sudo zypper --non-interactive install -y libQt5Pas-devel
+sudo zypper --non-interactive install -y libQt6Pas-devel

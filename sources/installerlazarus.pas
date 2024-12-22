@@ -285,7 +285,7 @@ uses
   processutils,
   {$ifdef Unix}
   BaseUnix,
-  {$ifdef LCLQT5}
+  {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
   LazFileUtils,
   {$endif}
   {$endif}
@@ -429,7 +429,7 @@ begin
         Options:=Trim(Options);
         if Length(Options)>0 then Processor.SetParamNameData('OPT',Options);
 
-        if (LCL_Platform <> GetDefaultLCLWidgetType) then
+        if (LCL_Platform <> BuildLCLWidgetType) then
         GetLCLName(LCL_Platform);
 
           Processor.SetParamNameData('LCL_PLATFORM',GetLCLName(LCL_Platform));
@@ -467,7 +467,7 @@ begin
         if (GetSourceOS<>CrossInstaller.TargetOSName) then
           Processor.SetParamData('--os=' + CrossInstaller.TargetOSName);
 
-        if (LCL_Platform <> GetDefaultLCLWidgetType)  then
+        if (LCL_Platform <> BuildLCLWidgetType)  then
           Processor.SetParamData('--ws=' + GetLCLName(LCL_Platform));
 
         // Also add the default components !
@@ -604,6 +604,7 @@ function TLazarusNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   i,ExitCode                     : integer;
   s1,s2,LazBuildApp,FPCDirStore  : string;
+  localoptions                   : string;
   {$ifdef MSWindows}
   OldPath                        : string;
   {$endif}
@@ -621,6 +622,64 @@ begin
   //DownloadFreetype;
   //DownloadZlib;
   {$ENDIF}
+
+  //Set standard options
+  localoptions:=STANDARDCOMPILERVERBOSITYOPTIONS;
+
+  //Always limit the search for fpc.cfg to our own fpc.cfg
+  //Only needed on Windows. On Linux, we have already our own config dir for fpc.cfg
+  {$ifdef MsWindows}
+  //localoptions:=localoptions+' -n @'+GetFPCConfigPath(FPCCONFIGFILENAME);
+  {$endif}
+
+  // Add remaining options
+  localoptions:=localoptions+' '+FCompilerOptions;
+
+  //Lazbuild MUST be build without giving any extra optimization options
+  //At least on Linux anything else gives errors when trying to use lazbuild ... :-(
+  if ModuleName=_LAZBUILD then
+  begin
+    i:=Pos('-O',localoptions);
+    if i>0 then
+    begin
+      if localoptions[i+2] in ['0'..'9'] then
+      begin
+        Delete(localoptions,i,3);
+      end;
+    end;
+  end;
+
+  {$ifdef Unix}
+    {$ifndef Darwin}
+      {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
+      if LibWhich(QTLibs,s2) then
+      begin
+        localoptions:=localoptions+' -Fl'+ExcludeTrailingPathDelimiter(s2);
+      end
+      else
+      begin
+        // Did we copy the QT libs ??
+        // If so, add some linker help.
+        if (FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs)) then
+        begin
+          localoptions:=localoptions+' -k"-rpath=./"';
+          localoptions:=localoptions+' -k"-rpath=$$ORIGIN"';
+          localoptions:=localoptions+' -k"-rpath=\\$$$$$\\ORIGIN"';
+          localoptions:=localoptions+' -Fl'+InstallDirectory;
+        end;
+      end;
+      {$endif}
+    {$endif}
+  {$endif}
+
+  if LinuxLegacy then localoptions:=localoptions+' -XLC';
+
+  // remove double spaces
+  while Pos('  ',localoptions)>0 do
+  begin
+    localoptions:=StringReplace(localoptions,'  ',' ',[rfReplaceAll]);
+  end;
+  localoptions:=Trim(localoptions);
 
 
   if ((ModuleName=_LAZARUS) OR (ModuleName=_LAZBUILD) OR (ModuleName=_USERIDE)) then
@@ -714,70 +773,10 @@ begin
     //Todo: to be investigated
     //Processor.SetParamNamePathData('FPCFPMAKE',ExtractFilePath(FCompiler)+GetCompilerName(GetSourceCPU));
 
-    if (LCL_Platform <> GetDefaultLCLWidgetType) then
+    if (LCL_Platform <> BuildLCLWidgetType) then
       Processor.SetParamNameData('LCL_PLATFORM',GetLCLName(LCL_Platform));
 
-    //Set standard options
-    s1:=STANDARDCOMPILERVERBOSITYOPTIONS;
-
-    //Always limit the search for fpc.cfg to our own fpc.cfg
-    //Only needed on Windows. On Linux, we have already our own config dir for fpc.cfg
-    {$ifdef MsWindows}
-    //s1:=s1+' -n @'+GetFPCConfigPath(FPCCONFIGFILENAME);
-    {$endif}
-
-    // Add remaining options
-    s1:=s1+' '+FCompilerOptions;
-
-    //Lazbuild MUST be build without giving any extra optimization options
-    //At least on Linux anything else gives errors when trying to use lazbuild ... :-(
-    if ModuleName=_LAZBUILD then
-    begin
-      i:=Pos('-O',s1);
-      if i>0 then
-      begin
-        if s1[i+2] in ['0'..'9'] then
-        begin
-          Delete(s1,i,3);
-        end;
-      end;
-    end;
-
-    {$ifdef Unix}
-      {$ifndef Darwin}
-        {$ifdef LCLQT}
-        {$endif}
-        {$ifdef LCLQT5}
-        if LibWhich(LIBQT5,s2) then
-        begin
-          s1:=s1+' -Fl'+ExcludeTrailingPathDelimiter(s2);
-        end
-        else
-        begin
-          // Did we copy the QT5 libs ??
-          // If so, add some linker help.
-          if (FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
-          begin
-            s1:=s1+' -k"-rpath=./"';
-            s1:=s1+' -k"-rpath=$$ORIGIN"';
-            s1:=s1+' -k"-rpath=\\$$$$$\\ORIGIN"';
-            s1:=s1+' -Fl'+InstallDirectory;
-          end;
-        end;
-        {$endif}
-      {$endif}
-    {$endif}
-
-    if LinuxLegacy then s1:=s1+' -XLC';
-
-    // remove double spaces
-    while Pos('  ',s1)>0 do
-    begin
-      s1:=StringReplace(s1,'  ',' ',[rfReplaceAll]);
-    end;
-    s1:=Trim(s1);
-
-    if Length(s1)>0 then Processor.SetParamNameData('OPT',s1);
+    Processor.SetParamNameData('OPT',localoptions);
 
     case ModuleName of
       _USERIDE:
@@ -931,7 +930,7 @@ begin
         Result := false;
         exit;
       end;
-      if (LCL_Platform<>GetDefaultLCLWidgetType) then Processor.SetParamNameData('LCL_PLATFORM',GetLCLName(LCL_Platform));
+      if (LCL_Platform<>BuildLCLWidgetType) then Processor.SetParamNameData('LCL_PLATFORM',GetLCLName(LCL_Platform));
     end;
 
     try
@@ -1023,19 +1022,18 @@ begin
       Processor.SetParamNameData('--cpu',GetSourceCPU);
       Processor.SetParamNameData('--os',GetSourceOS);
 
-      if (LCL_Platform <> GetDefaultLCLWidgetType) then
+      if (LCL_Platform <> BuildLCLWidgetType) then
         Processor.SetParamNameData('--ws',GetLCLName(LCL_Platform));
 
       // Support keeping userdefined installed packages when building.
       // Compile with selected compiler options
       // Assume new Laz version on failure getting revision
 
-      s1:=FCompilerOptions;
       if LinuxLegacy then Processor.SetParamNameData('--compiler',ExtractFilePath(FCompiler)+'fpccompat.sh');
 
       if StrToIntDef(ActualRevision, 38971) >= 38971 then
       begin
-        Processor.SetParamNameData('--build-ide','-dKeepInstalledPackages '+s1);
+        Processor.SetParamNameData('--build-ide','-dKeepInstalledPackages '+localoptions);
       end
       else
       begin
@@ -1044,7 +1042,7 @@ begin
         // which could well be a stripped IDE
         // Let's see how/if CompilerOptions clashes with the settings in normal build mode
         WritelnLog(infotext+'LazBuild: building UserIDE but falling back to --build-mode="Normal IDE"', true);
-        Processor.SetParamNameData('--build-ide',s1);
+        Processor.SetParamNameData('--build-ide',localoptions);
         Processor.SetParamNameData('--build-mode','"Normal IDE"');
       end;
 
@@ -1840,20 +1838,20 @@ begin
 
       {$IFDEF UNIX}
       {$IFNDEF DARWIN}
-      {$IFDEF LCLQT5}
-      if (NOT LibWhich(LIBQT5)) then
+      {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
+      if QTTrickeryNeeded then
       begin
-        s:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+LIBQT5;
+        s:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+QTLibs;
         if FileExists(s) then
         begin
           // Strange: running needs a .so.1 file .... but linking needs a .so file ...
-          s2:=IncludeTrailingPathDelimiter(GDBPath)+LIBQT5;
+          s2:=IncludeTrailingPathDelimiter(GDBPath)+QTLibs;
           if (NOT FileExists(s2)) then FileCopy(s,s2);
-          s2:=IncludeTrailingPathDelimiter(GDBPath)+LIBQT5VERSION;
+          s2:=IncludeTrailingPathDelimiter(GDBPath)+QTLibsVersioned;
           if (NOT FileExists(s2)) then FileCopy(s,s2);
         end;
       end;
-      {$ENDIF LCLQT5}
+      {$ENDIF}
       {$ENDIF DARWIN}
       {$ENDIF UNIX}
 
@@ -2146,7 +2144,7 @@ begin
       _LCL:
       begin
         CleanDirectory:='lcl';
-        if (CrossCompiling) AND (LCL_Platform <> GetDefaultLCLWidgetType) then
+        if (CrossCompiling) AND (LCL_Platform <> BuildLCLWidgetType) then
         begin
           Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(LCL_Platform));
           CleanCommand:='cleanintf';
@@ -2159,7 +2157,7 @@ begin
       _COMPONENTS:
       begin
         CleanDirectory:='components';
-        if (IsCross) AND (LCL_Platform <> GetDefaultLCLWidgetType) then
+        if (IsCross) AND (LCL_Platform <> BuildLCLWidgetType) then
         begin
           Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(LCL_Platform));
         end;
@@ -2168,7 +2166,7 @@ begin
       _PACKAGER:
       begin
         CleanDirectory:='packager';
-        if (IsCross) AND (LCL_Platform <> GetDefaultLCLWidgetType) then
+        if (IsCross) AND (LCL_Platform <> BuildLCLWidgetType) then
         begin
           Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(LCL_Platform));
         end;
@@ -2616,7 +2614,7 @@ begin
 
     FilePath:=SafeGetApplicationPath;
 
-    {$ifdef LCLQT5}
+    {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
     // Only for Haiku
     // Get/copy Qt libs if not present yet
     // I know that this involves a lot of trickery and some dirty work, but it gives the user an öut-of-the-box" experience !
@@ -2625,14 +2623,14 @@ begin
     // Do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
     // ToDo : check if this presumption is correct
 
-    if LibWhich(LIBQT5) then
-      Infoln(infotext+'System wide libQT5Pas found. No trickery needed !!',etInfo)
+    if QTTrickeryNeeded then
+      Infoln(infotext+'QT trickery needed: adding '+QTLibs+' library from fpcupdeluxe itself.',etInfo)
     else
-      Infoln(infotext+'QT5 trickery needed: adding QT5Pas library from fpcupdeluxe itself.',etInfo);
+      Infoln(infotext+'System wide '+QTLibs+' found. No trickery needed !!',etInfo);
 
 
     {$ifdef Haiku}
-    if (NOT LibWhich(LIBQT5)) then
+    if QTTrickeryNeeded then
     begin
       {$ifdef CPUX86}
       s:='/boot/system/non-packaged/lib/x86/';
@@ -2640,29 +2638,29 @@ begin
       s:='/boot/system/non-packaged/lib/';
       {$endif}
       ForceDirectoriesSafe(s);
-      if FileExists(FilePath+LIBQT5VERSION) then
+      if FileExists(FilePath+QTLibsVersioned) then
       begin
-        if (NOT FileExists(s+LIBQT5VERSION)) then
-          FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5VERSION);
-        if (NOT FileExists(s+LIBQT5)) then
-          FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5);
+        if (NOT FileExists(s+QTLibsVersioned)) then
+          FileCopy(FilePath+QTLibsVersioned,s+QTLibsVersioned);
+        if (NOT FileExists(s+QTLibs)) then
+          FileCopy(FilePath+QTLibsVersioned,s+QTLibs);
       end;
     end;
     {$endif}
 
     {$ifdef Unix}
-    if (NOT LibWhich(LIBQT5)) then
+    if QTTrickeryNeeded then
     begin
       s:='/usr/local/lib/';
       if DirectoryExists(s) then
       begin
-        if FileExists(FilePath+LIBQT5VERSION) then
+        if FileExists(FilePath+QTLibsVersioned) then
         begin
           try
-            if (NOT FileExists(s+LIBQT5VERSION)) then
-              FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5VERSION);
-            if (NOT FileExists(s+LIBQT5)) then
-              FileCopy(FilePath+LIBQT5VERSION,s+LIBQT5);
+            if (NOT FileExists(s+QTLibsVersioned)) then
+              FileCopy(FilePath+QTLibsVersioned,s+QTLibsVersioned);
+            if (NOT FileExists(s+QTLibs)) then
+              FileCopy(FilePath+QTLibsVersioned,s+QTLibs);
             // User [might] need to run ldconfig as superuser to update the ld cache
           except
             // The above might/will fail due to permission issues.
@@ -2673,67 +2671,42 @@ begin
     end;
     {$endif}
 
-    if (NOT LibWhich(LIBQT5)) then
+    if QTTrickeryNeeded then
     begin
+      {$ifdef LCLQT5}
       s:='.1.2.13';
-      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='.1.2.9';
-      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='.1.2.8';
-      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='.1.2.7';
-      if (NOT FileExists(FilePath+LIBQT5+s)) then s:='.1.2.6';
-      if FileExists(FilePath+LIBQT5+s) then
+      if (NOT FileExists(FilePath+QTLibs+s)) then s:='.1.2.9';
+      if (NOT FileExists(FilePath+QTLibs+s)) then s:='.1.2.8';
+      if (NOT FileExists(FilePath+QTLibs+s)) then s:='.1.2.7';
+      if (NOT FileExists(FilePath+QTLibs+s)) then s:='.1.2.6';
+      if FileExists(FilePath+QTLibs+s) then
       begin
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s)) then
-          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5+s);
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5VERSION)) then
-          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5VERSION);
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
-          FileCopy(FilePath+LIBQT5+s,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs+s)) then
+          FileCopy(FilePath+QTLibs+s,IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs+s);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibsVersioned)) then
+          FileCopy(FilePath+QTLibs+s,IncludeTrailingPathDelimiter(InstallDirectory)+QTLibsVersioned);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs)) then
+          FileCopy(FilePath+QTLibs+s,IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs);
       end;
+      {$endif}
 
       //The below can be trivial, but just in case
-      if FileExists(FilePath+LIBQT5VERSION) then
+      if FileExists(FilePath+QTLibsVersioned) then
       begin
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5VERSION)) then
-          FileCopy(FilePath+LIBQT5VERSION,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5VERSION);
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
-          FileCopy(FilePath+LIBQT5VERSION,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibsVersioned)) then
+          FileCopy(FilePath+QTLibsVersioned,IncludeTrailingPathDelimiter(InstallDirectory)+QTLibsVersioned);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs)) then
+          FileCopy(FilePath+QTLibsVersioned,IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs);
       end;
-      if FileExists(FilePath+LIBQT5) then
+      if FileExists(FilePath+QTLibs) then
       begin
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
-          FileCopy(FilePath+LIBQT5,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5)) then
-          FileCopy(FilePath+LIBQT5,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT5);
-      end;
-    end;
-    {$endif LCLQT5}
-
-    {$ifdef LCLQT6}
-    if LibWhich(LIBQT6) then
-      Infoln(infotext+'System wide libQT6Pas found. No trickery needed !!',etInfo)
-    else
-      Infoln(infotext+'QT6 trickery needed: adding QT6Pas library from fpcupdeluxe itself.',etInfo);
-
-    if (NOT LibWhich(LIBQT6)) then
-    begin
-      //The below can be trivial, but just in case
-      if FileExists(FilePath+LIBQT6VERSION) then
-      begin
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6VERSION)) then
-          FileCopy(FilePath+LIBQT6VERSION,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6VERSION);
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6)) then
-          FileCopy(FilePath+LIBQT6VERSION,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6);
-      end;
-      if FileExists(FilePath+LIBQT6) then
-      begin
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6)) then
-          FileCopy(FilePath+LIBQT6,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6);
-        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6)) then
-          FileCopy(FilePath+LIBQT6,IncludeTrailingPathDelimiter(InstallDirectory)+LIBQT6);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs)) then
+          FileCopy(FilePath+QTLibs,IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs);
+        if (NOT FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs)) then
+          FileCopy(FilePath+QTLibs,IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs);
       end;
     end;
-    {$endif LCLQT6}
-
+    {$endif LCLQT}
     {$endif Darwin}
     {$endif Unix}
 
@@ -2857,7 +2830,7 @@ var
   NothingToBeDone:boolean;
 begin
   NothingToBeDone:=true;
-  if (LCL_Platform<>GetDefaultLCLWidgetType) then
+  if (LCL_Platform<>BuildLCLWidgetType) then
   begin
     NothingToBeDone:=false;
     {$ifdef Darwin}

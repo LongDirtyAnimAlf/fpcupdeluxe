@@ -466,7 +466,7 @@ function GetLCLType(LCLName:string):LCL_TYPE;
 var
   LCLType:LCL_TYPE;
 begin
-  result:=GetDefaultLCLWidgetType;
+  result:=BuildLCLWidgetType;
   for LCLType in TLCLPlatforms do
   begin
     if (LCLName=GetLCLName(LCLType)) then

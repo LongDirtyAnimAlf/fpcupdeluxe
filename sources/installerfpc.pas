@@ -4467,62 +4467,65 @@ begin
         {$ENDIF DARWIN}
 
         {$ifndef FPCONLY}
-        {$ifdef LCLQT5}
-        ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
-        ConfigText.Append('# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)');
-        {$ifdef Darwin}
-        ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
-        ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
+        {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
+        if QTTrickeryNeeded then
+        begin
+          ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
+          ConfigText.Append('# Adding some standard paths for QT locations ... bit dirty, but works ... ;-)');
+          {$ifdef Darwin}
+          ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
+          ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
 
-        ConfigText.Append('-k-rpath');
-        ConfigText.Append('-k@executable_path/../Frameworks');
+          ConfigText.Append('-k-rpath');
+          ConfigText.Append('-k@executable_path/../Frameworks');
 
-        ConfigText.Append('-k-rpath');
-        ConfigText.Append('-k'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
+          ConfigText.Append('-k-rpath');
+          ConfigText.Append('-k'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
 
-        (*
-        ConfigText.Append('-k-framework');
-        ConfigText.Append('-kQt5Pas');
-        ConfigText.Append('-k-framework');
-        ConfigText.Append('-kQtPrintSupport');
-        ConfigText.Append('-k-framework');
-        ConfigText.Append('-kQtWidgets');
-        ConfigText.Append('-k-framework');
-        ConfigText.Append('-kQtGui');
-        ConfigText.Append('-k-framework');
-        ConfigText.Append('-kQtNetwork');
-        ConfigText.Append('-k-framework');
-        ConfigText.Append('-kQtCore');
-        ConfigText.Append('-k-framework');
-        ConfigText.Append('-kOpenGL');
-        ConfigText.Append('-k-framework');
-        ConfigText.Append('-kAGL');
-        *)
+          (*
+          ConfigText.Append('-k-framework');
+          ConfigText.Append('-kQt5Pas');
+          ConfigText.Append('-k-framework');
+          ConfigText.Append('-kQtPrintSupport');
+          ConfigText.Append('-k-framework');
+          ConfigText.Append('-kQtWidgets');
+          ConfigText.Append('-k-framework');
+          ConfigText.Append('-kQtGui');
+          ConfigText.Append('-k-framework');
+          ConfigText.Append('-kQtNetwork');
+          ConfigText.Append('-k-framework');
+          ConfigText.Append('-kQtCore');
+          ConfigText.Append('-k-framework');
+          ConfigText.Append('-kOpenGL');
+          ConfigText.Append('-k-framework');
+          ConfigText.Append('-kAGL');
+          *)
 
-        {$else Darwin}
-        {$ifdef Unix}
-        //ConfigText.Append('-k"-rpath=./"');
+          {$else Darwin}
+          {$ifdef Unix}
+          //ConfigText.Append('-k"-rpath=./"');
 
-        //For runtime
-        ConfigText.Append('-k-rpath');
-        ConfigText.Append('-k./');
-        ConfigText.Append('-k-rpath');
-        ConfigText.Append('-k$$ORIGIN');
+          //For runtime
+          ConfigText.Append('-k-rpath');
+          ConfigText.Append('-k./');
+          ConfigText.Append('-k-rpath');
+          ConfigText.Append('-k$$ORIGIN');
 
-        //For linktime
-        //ConfigText.Append('-k-rpath-link');
-        //ConfigText.Append('-k./');
+          //For linktime
+          //ConfigText.Append('-k-rpath-link');
+          //ConfigText.Append('-k./');
 
-        //ConfigText.Append('-k"-rpath=/usr/local/lib"');
-        //ConfigText.Append('-k"-rpath=$$ORIGIN"');
-        //ConfigText.Append('-k"-rpath=\\$$$$$\\ORIGIN"');
-        //ConfigText.Append('-k-rpath');
-        //ConfigText.Append('-k\\$$$$$\\ORIGIN');
-        {$endif}
-        {$endif Darwin}
-        ConfigText.Append('#ENDIF');
+          //ConfigText.Append('-k"-rpath=/usr/local/lib"');
+          //ConfigText.Append('-k"-rpath=$$ORIGIN"');
+          //ConfigText.Append('-k"-rpath=\\$$$$$\\ORIGIN"');
+          //ConfigText.Append('-k-rpath');
+          //ConfigText.Append('-k\\$$$$$\\ORIGIN');
+          {$endif Unix}
+          {$endif Darwin}
+          ConfigText.Append('#ENDIF');
+        end;
+        {$ENDIF LCLQT}
         {$endif FPCONLY}
-        {$endif LCLQT5}
 
         // add magic
         ConfigText.Append(SnipMagicEnd);

@@ -493,30 +493,6 @@ begin
   end;
 end;
 
-{$ifndef FPCONLY}
-function GetLCLName(LCLType:LCL_TYPE):string;
-begin
-  result:=LCLPlatformDirNames[LCLType];
-end;
-
-
-function GetLCLType(LCLName:string):LCL_TYPE;
-var
-  LCLType:LCL_TYPE;
-begin
-  result:=GetDefaultLCLWidgetType;
-  for LCLType in TLCLPlatforms do
-  begin
-    if (LCLName=GetLCLName(LCLType)) then
-    begin
-      result:=LCLType;
-      break;
-    end;
-  end;
-end;
-
-{$endif}
-
 procedure RegisterCrossCompiler(Platform:string;aCrossInstaller:TCrossInstaller);
 begin
   if not assigned(CrossInstallers) then

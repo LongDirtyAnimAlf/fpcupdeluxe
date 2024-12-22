@@ -466,8 +466,8 @@ begin
 
   FPCupManager:=nil;
 
-  {$IF defined(LCLQT) OR defined(LCLQT5)}
-  // due to a bugger in QT[5]
+  {$IF defined(LCLQT) OR defined(LCLQT5) OR defined(LCLQT6)}
+  // due to a bugger in QT[5/6]
   Self.Position:=poDesigned;
   {$endif}
 

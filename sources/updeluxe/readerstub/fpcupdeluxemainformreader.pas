@@ -4486,6 +4486,12 @@ begin
   else
     AddMessage('No system wide '+LIBQT5+' found. Some QT5 trickery will be used');
   {$endif}
+  {$ifdef LCLQT6}
+  if LibWhich(LIBQT6,QT6LibraryLocation) then
+    AddMessage('Found system wide '+LIBQT6+' in '+QT6LibraryLocation+'. And that will be used.')
+  else
+    AddMessage('No system wide '+LIBQT6+' found. Some QT6 trickery will be used');
+  {$endif}
 
   Cores:=GetLogicalCpuCount;
   if Cores<>0 then AddMessage('CPU cores used: '+InttoStr(Cores));

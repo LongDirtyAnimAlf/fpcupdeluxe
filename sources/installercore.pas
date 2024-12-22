@@ -370,6 +370,9 @@ type
     {$IFDEF UNIX}
     FUseCompilerWrapper        : boolean;
     {$ENDIF}
+    FQTTrickeryNeeded          : boolean;
+    FQTLibs                    : string;
+    FQTLibsVersioned           : string;
     function GetDefaultCompilerFilename(const TargetCPU: TCPU; const Cross: boolean): string;
     procedure SetLinuxLegacy(value:boolean);
     function  GetLinuxLegacy:boolean;
@@ -630,6 +633,11 @@ type
     {$IFDEF UNIX}
     property UseCompilerWrapper : boolean read FUseCompilerWrapper;
     {$ENDIF}
+
+    property QTLibs : string read FQTLibs;
+    property QTLibsVersioned : string read FQTLibsVersioned;
+    property QTTrickeryNeeded : boolean read FQTTrickeryNeeded;
+
     // FPC config directory
     function GetFPCConfigPath(const aCFG:string):string;
     function GetCompilerName(Cpu_Target:TCPU):string;overload;
@@ -681,10 +689,9 @@ type
     destructor Destroy; override;
   end;
 
-  TBaseUniversalInstaller  = class(TInstaller);
   TBaseFPCInstaller        = class(TInstaller);
   {$ifndef FPCONLY}
-  TBaseLazarusInstaller    = class(TInstaller)
+  TBaseLCLInstaller    = class(TInstaller)
   private
     FLCL_Platform: LCL_TYPE;
   public
@@ -692,10 +699,12 @@ type
     property LCL_Platform: LCL_TYPE read FLCL_Platform write FLCL_Platform;
   end;
   {$else}
-  TBaseLazarusInstaller    = class(TInstaller);
+  TBaseLCLInstaller    = class(TInstaller);
   {$endif}
-  TBaseHelpInstaller       = class(TInstaller);
-  TBaseWinInstaller        = class(TInstaller);
+  TBaseLazarusInstaller    = class(TBaseLCLInstaller);
+  TBaseUniversalInstaller  = class(TBaseLCLInstaller);
+  TBaseHelpInstaller       = class(TBaseLCLInstaller);
+  //TBaseWinInstaller        = class(TInstaller);
 
   function GetMinimumFPCVersion(aCPU:TCPU=TCPU.cpuNone;aOS:TOS=TOS.osNone): string;
 
@@ -4284,6 +4293,19 @@ begin
   //FUseCompilerWrapper:=(Length(GetEnvironmentVariable('PPC_CONFIG_PATH'))=0);
   {$endif}
   {$endif}
+
+  FQTTrickeryNeeded:=false;
+  {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
+  {$ifdef LCLQT5}
+  FQTLibs:=LIBQT5;
+  FQTLibsVersioned:=LIBQT5VERSION;
+  {$endif}
+  {$ifdef LCLQT6}
+  FQTLibs:=LIBQT6;
+  FQTLibsVersioned:=LIBQT6VERSION;
+  {$endif}
+  FQTTrickeryNeeded:=(NOT LibWhich(FQTLibs));
+  {$ENDIF}
 
   SanityCheck;
 end;

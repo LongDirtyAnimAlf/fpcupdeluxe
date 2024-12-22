@@ -925,9 +925,6 @@
               <UseLineInfoUnit Value="False"/>
             </Debugging>
           </Linking>
-          <Other>
-            <CustomOptions Value="-s"/>
-          </Other>
         </CompilerOptions>
       </Item29>
       <Item30 Name="netbsdx64">

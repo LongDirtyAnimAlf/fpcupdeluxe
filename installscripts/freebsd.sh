@@ -31,9 +31,11 @@ sudo pkg install -y qt5
 sudo pkg install -y qt5-webkit
 sudo pkg install -y qt5-x11extras
 sudo pkg install -y qt5-qmake
+sudo pkg install -y libQt5Pas
 
 sudo pkg install -y qt6
 sudo pkg install -y qt6-base
+sudo pkg install -y libQt6Pas
 
 # sudo pkg install -y www/iridium
 # sudo sysctl kern.maxtsiz=268435456

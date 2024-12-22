@@ -81,8 +81,6 @@ type
     // or running lazbuild with an .lpk
     FLazarusNeedsRebuild:boolean;
     FLazarusVersion:string;
-    // LCL widget set to be built
-    FLCL_Platform: LCL_TYPE;
     function RebuildLazarus:boolean;
     {$endif}
   protected
@@ -110,8 +108,6 @@ type
     {$ifndef FPCONLY}
     // Compiler options user chose to compile Lazarus with (coming from fpcup).
     property LazarusCompilerOptions: string write FLazarusCompilerOptions;
-    // LCL widget set to be built
-    property LCL_Platform: LCL_TYPE write FLCL_Platform;
     property LazarusVersion:string read FLazarusVersion;
     {$endif}
     // Build module
@@ -222,6 +218,7 @@ uses
   StrUtils, typinfo,inifiles, process, fpjson,
   FileUtil, //LazFileUtils,
   {$ifndef FPCONLY}
+  LCLPlatformDef,
   InterfaceBase,
   {$endif}
   fpcuputil;
@@ -269,6 +266,7 @@ end;
 function TUniversalInstaller.RebuildLazarus:boolean;
 var
   OldPath,s,s2:string;
+  localoptions:string;
   LazarusConfig: TUpdateLazConfig;
   i,j:integer;
 begin
@@ -279,6 +277,40 @@ begin
 
   Processor.Process.Parameters.Clear;
   Processor.Process.CurrentDirectory := FLazarusSourceDir;
+
+  //Set options
+  localoptions := FLazarusCompilerOptions;
+
+  // This code is copied from the native Lazarus installer.
+  // This must be improved: no code duplicated please ... ;-)
+  {$ifdef Unix}
+    {$ifndef Darwin}
+      {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
+      if LibWhich(QTLibs,s2) then
+      begin
+        localoptions:=localoptions+' -Fl'+ExcludeTrailingPathDelimiter(s2);
+      end
+      else
+      begin
+        // Did we copy the QT libs ??
+        // If so, add some linker help.
+        if (FileExists(IncludeTrailingPathDelimiter(FLazarusInstallDir)+QTLibs)) then
+        begin
+          localoptions:=localoptions+' -k"-rpath=./"';
+          localoptions:=localoptions+' -k"-rpath=$$ORIGIN"';
+          localoptions:=localoptions+' -k"-rpath=\\$$$$$\\ORIGIN"';
+          localoptions:=localoptions+' -Fl'+FLazarusInstallDir;
+        end;
+      end;
+      {$ENDIF}
+    {$endif}
+  {$endif}
+
+  while Pos('  ',localoptions)>0 do
+  begin
+    localoptions:=StringReplace(localoptions,'  ',' ',[rfReplaceAll]);
+  end;
+  localoptions:=Trim(localoptions);
 
   {$push}
   {$warn 6018 off}
@@ -332,45 +364,9 @@ begin
     //Processor.SetParamNamePathData('INSTALL_BINDIR',FBinPath);
     {$ENDIF MSWINDOWS}
 
-    if (FLCL_Platform <> GetDefaultLCLWidgetType) then Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(FLCL_Platform));
+    if (LCL_Platform <> BuildLCLWidgetType) then Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(LCL_Platform));
 
-    //Set options
-    s := FLazarusCompilerOptions;
-
-    // This code is copied from the native Lazarus installer.
-    // This must be improved: no code duplicated please ... ;-)
-    {$ifdef Unix}
-      {$ifndef Darwin}
-        {$ifdef LCLQT}
-        {$endif}
-        {$ifdef LCLQT5}
-        if LibWhich(LIBQT5,s2) then
-        begin
-          s:=s+' -Fl'+ExcludeTrailingPathDelimiter(s2);
-        end
-        else
-        begin
-          // Did we copy the QT5 libs ??
-          // If so, add some linker help.
-          if (FileExists(IncludeTrailingPathDelimiter(FLazarusInstallDir)+LIBQT5)) then
-          begin
-            s:=s+' -k"-rpath=./"';
-            s:=s+' -k"-rpath=$$ORIGIN"';
-            s:=s+' -k"-rpath=\\$$$$$\\ORIGIN"';
-            s:=s+' -Fl'+FLazarusInstallDir;
-          end;
-        end;
-        {$endif}
-      {$endif}
-    {$endif}
-
-    while Pos('  ',s)>0 do
-    begin
-      s:=StringReplace(s,'  ',' ',[rfReplaceAll]);
-    end;
-    s:=Trim(s);
-
-    if Length(s)>0 then Processor.SetParamNameData('OPT',s);
+    if Length(localoptions)>0 then Processor.SetParamNameData('OPT',localoptions);
 
     {$ifdef DISABLELAZBUILDJOBS}
     Processor.SetParamData('LAZBUILDJOBS=1');//prevent runtime 217 errors
@@ -440,13 +436,12 @@ begin
     Processor.SetParamNameData('--cpu',GetSourceCPU);
     Processor.SetParamNameData('--os',GetSourceOS);
 
-    if FLCL_Platform <> GetDefaultLCLWidgetType then
-      Processor.SetParamNameData('--ws',GetLCLName(FLCL_Platform));
+    if LCL_Platform <> BuildLCLWidgetType then
+      Processor.SetParamNameData('--ws',GetLCLName(LCL_Platform));
 
-    s:=FLazarusCompilerOptions;
     if LinuxLegacy then Processor.SetParamNameData('--compiler',ExtractFilePath(FCompiler)+'fpccompat.sh');
 
-    Processor.SetParamNameData('--build-ide','-dKeepInstalledPackages '+s);
+    Processor.SetParamNameData('--build-ide','-dKeepInstalledPackages '+localoptions);
     //Processor.SetParamNameData('--build-ide','"'+FLazarusCompilerOptions+'"');
     //Processor.SetParamNameData('--build-mode','"Normal IDE"');
 
@@ -490,13 +485,13 @@ begin
         LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile0/Options/Count', 1);
         LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile0/Options/Item1/Value', Trim(FLazarusCompilerOptions));
       end;
-      if (FLCL_Platform <> GetDefaultLCLWidgetType) then
+      if (LCL_Platform <> BuildLCLWidgetType) then
       begin
         // Change the build modes to reflect the default LCL widget set.
         for j:=0 to (i-1) do
         begin
-          Infoln(infotext+'Changing default LCL_platforms for build-profiles in '+MiscellaneousConfig+' to build for '+GetLCLName(FLCL_Platform), etInfo);
-          LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', GetLCLName(FLCL_Platform));
+          Infoln(infotext+'Changing default LCL_platforms for build-profiles in '+MiscellaneousConfig+' to build for '+GetLCLName(LCL_Platform), etInfo);
+          LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', GetLCLName(LCL_Platform));
         end;
       end;
     end;
@@ -867,8 +862,8 @@ begin
   Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
   Processor.SetParamData('--cpu=' + GetSourceCPU);
   Processor.SetParamData('--os=' + GetSourceOS);
-  if FLCL_Platform <> GetDefaultLCLWidgetType then
-            Processor.SetParamData('--ws=' + GetLCLName(FLCL_Platform));
+  if LCL_Platform <> BuildLCLWidgetType then
+            Processor.SetParamData('--ws=' + GetLCLName(LCL_Platform));
 
   if RegisterPackageFeature then
     Processor.SetParamData('--add-package-link')
@@ -1350,6 +1345,7 @@ begin
     j:=Pos(LAZBUILDNAME,lowerCase(exec));
     if j>0 then
     begin
+      s:='';
       {$IFDEF MSWINDOWS}
       j:=Pos(LAZBUILDNAME+GetExeExt,lowerCase(exec));
       if (j<1) then exec:=StringReplace(exec,LAZBUILDNAME,LAZBUILDNAME+GetExeExt,[rfIgnoreCase]);
@@ -1362,7 +1358,7 @@ begin
       //s:='--quiet';
       {$ENDIF}
 
-      if FLCL_Platform<>GetDefaultLCLWidgetType then s:=s+' --ws=' + GetLCLName(FLCL_Platform);
+      if LCL_Platform<>BuildLCLWidgetType then s:=s+' --ws=' + GetLCLName(LCL_Platform);
       exec:=StringReplace(exec,LAZBUILDNAME+GetExeExt,LAZBUILDNAME+GetExeExt+' '+s,[rfIgnoreCase]);
     end;
     {$endif}
