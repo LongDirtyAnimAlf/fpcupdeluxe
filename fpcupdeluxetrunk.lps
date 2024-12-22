@@ -101,9 +101,10 @@
       <Unit12>
         <Filename Value="sources\installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="7"/>
-        <TopLine Value="649"/>
-        <CursorPos X="56" Y="976"/>
+        <TopLine Value="647"/>
+        <CursorPos Y="655"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit12>
@@ -133,10 +134,9 @@
       <Unit16>
         <Filename Value="sources\installeruniversal.pas"/>
         <UnitName Value="installerUniversal"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
-        <TopLine Value="289"/>
-        <CursorPos X="49" Y="299"/>
+        <TopLine Value="287"/>
+        <CursorPos Y="304"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit16>
@@ -762,7 +762,7 @@
         <Loaded Value="True"/>
       </Unit99>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
         <Filename Value="sources\installercore.pas"/>
         <Caret Line="58" Column="7" TopLine="48"/>
@@ -876,10 +876,6 @@
         <Filename Value="sources\installeruniversal.pas"/>
         <Caret Line="266" Column="21" TopLine="256"/>
       </Position29>
-      <Position30>
-        <Filename Value="sources\installeruniversal.pas"/>
-        <Caret Line="72" Column="38" TopLine="100"/>
-      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

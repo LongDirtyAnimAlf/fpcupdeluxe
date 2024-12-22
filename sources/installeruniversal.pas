@@ -286,11 +286,7 @@ begin
   {$ifdef Unix}
     {$ifndef Darwin}
       {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
-      if LibWhich(QTLibs,s2) then
-      begin
-        localoptions:=localoptions+' -Fl'+ExcludeTrailingPathDelimiter(s2);
-      end
-      else
+      if QTTrickeryNeeded then
       begin
         // Did we copy the QT libs ??
         // If so, add some linker help.
@@ -301,6 +297,11 @@ begin
           localoptions:=localoptions+' -k"-rpath=\\$$$$$\\ORIGIN"';
           localoptions:=localoptions+' -Fl'+FLazarusInstallDir;
         end;
+      end
+      else
+      begin
+        if LibWhich(QTLibs,s2) then
+          localoptions:=localoptions+' -Fl'+ExcludeTrailingPathDelimiter(s2);
       end;
       {$ENDIF}
     {$endif}
