@@ -280,37 +280,6 @@ begin
 
   //Set options
   localoptions := FLazarusCompilerOptions;
-
-  // This code is copied from the native Lazarus installer.
-  // This must be improved: no code duplicated please ... ;-)
-  {$ifdef Unix}
-    {$ifndef Darwin}
-      {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
-      if QTTrickeryNeeded then
-      begin
-        // Did we copy the QT libs ??
-        // If so, add some linker help.
-        if (FileExists(IncludeTrailingPathDelimiter(FLazarusInstallDir)+QTLibs)) then
-        begin
-          localoptions:=localoptions+' -k"-rpath=./"';
-          localoptions:=localoptions+' -k"-rpath=$$ORIGIN"';
-          localoptions:=localoptions+' -k"-rpath=\\$$$$$\\ORIGIN"';
-          localoptions:=localoptions+' -Fl'+FLazarusInstallDir;
-        end;
-      end
-      else
-      begin
-        if LibWhich(QTLibs,s2) then
-          localoptions:=localoptions+' -Fl'+ExcludeTrailingPathDelimiter(s2);
-      end;
-      {$ENDIF}
-    {$endif}
-  {$endif}
-
-  while Pos('  ',localoptions)>0 do
-  begin
-    localoptions:=StringReplace(localoptions,'  ',' ',[rfReplaceAll]);
-  end;
   localoptions:=Trim(localoptions);
 
   {$push}

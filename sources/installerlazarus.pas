@@ -649,30 +649,6 @@ begin
     end;
   end;
 
-  {$ifdef Unix}
-    {$ifndef Darwin}
-      {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
-      if QTTrickeryNeeded then
-      begin
-        // Did we copy the QT libs ??
-        // If so, add some linker help.
-        if (FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs)) then
-        begin
-          localoptions:=localoptions+' -k"-rpath=./"';
-          localoptions:=localoptions+' -k"-rpath=$$ORIGIN"';
-          localoptions:=localoptions+' -k"-rpath=\\$$$$$\\ORIGIN"';
-          localoptions:=localoptions+' -Fl'+InstallDirectory;
-        end;
-      end
-      else
-      begin
-        if LibWhich(QTLibs,s2) then
-          localoptions:=localoptions+' -Fl'+ExcludeTrailingPathDelimiter(s2);
-      end;
-      {$endif}
-    {$endif}
-  {$endif}
-
   if LinuxLegacy then localoptions:=localoptions+' -XLC';
 
   // remove double spaces
@@ -2291,6 +2267,9 @@ end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;
 const
+ QTMAGICBASE = 'QT trickery';
+ QTMAGICBEGIN = SnipMagicBegin+QTMAGICBASE;
+ QTMAGICEND = SnipMagicEnd+' '+QTMAGICBASE;
  VERSIONEXPRESSION='$FPC_VERSION';
  CPUEXPRESSION='$CPU_TARGET';
  OSEXPRESSION='$OS_TARGET';
@@ -2357,13 +2336,16 @@ end;
 {$endif}
 {$endif}
 var
-  UpdateWarnings : TStringList;
-  aRepoClient    : TRepoClient;
-  s              : string;
-  SourceVersion  : string;
-  SourceInfo     : TRevision;
-  FilePath       : string;
-  aIndex         : integer;
+  UpdateWarnings     : TStringList;
+  aRepoClient        : TRepoClient;
+  s                  : string;
+  SourceVersion      : string;
+  SourceInfo         : TRevision;
+  FilePath           : string;
+  aIndex             : integer;
+  FPCConfig          : TStringList;
+  QTConfig           : TStringList;
+  SnipBegin,SnipEnd  : integer;
 begin
   result:=inherited;
   result:=InitModule;
@@ -2616,12 +2598,11 @@ begin
     FilePath:=SafeGetApplicationPath;
 
     {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
-    // Only for Haiku
     // Get/copy Qt libs if not present yet
     // I know that this involves a lot of trickery and some dirty work, but it gives the user an öut-of-the-box" experience !
     // And fpcupdeluxe is there to make the user-experience of FPC and Lazarus an easy one
     // Note:
-    // Do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
+    // Do not fail on error : could be that the fpcupdeluxe user has installed QT by himself
     // ToDo : check if this presumption is correct
 
     if QTTrickeryNeeded then
@@ -2629,10 +2610,9 @@ begin
     else
       Infoln(infotext+'System wide '+QTLibs+' found. No trickery needed !!',etInfo);
 
-
-    {$ifdef Haiku}
     if QTTrickeryNeeded then
     begin
+      {$ifdef Haiku}
       {$ifdef CPUX86}
       s:='/boot/system/non-packaged/lib/x86/';
       {$else}
@@ -2646,12 +2626,9 @@ begin
         if (NOT FileExists(s+QTLibs)) then
           FileCopy(FilePath+QTLibsVersioned,s+QTLibs);
       end;
-    end;
-    {$endif}
+      {$endif}
 
-    {$ifdef Unix}
-    if QTTrickeryNeeded then
-    begin
+      {$ifdef Unix}
       s:='/usr/local/lib/';
       if DirectoryExists(s) then
       begin
@@ -2669,11 +2646,8 @@ begin
           end;
         end;
       end;
-    end;
-    {$endif}
+      {$endif}
 
-    if QTTrickeryNeeded then
-    begin
       {$ifdef LCLQT5}
       s:='.1.2.13';
       if (NOT FileExists(FilePath+QTLibs+s)) then s:='.1.2.9';
@@ -2711,44 +2685,80 @@ begin
     {$endif Darwin}
     {$endif Unix}
 
+    {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
 
-    (*
-    Errors := 0;
-    if (Result) and (Uppercase(FCrossLCL_Platform) = 'QT') then
-    begin
-      for Counter := low(FUtilFiles) to high(FUtilFiles) do
+    // Adjust fpc.cfg
+    FPCConfig:=TStringList.Create;
+    try
+      FPCConfig.LoadFromFile(GetFPCConfigPath(FPCCONFIGFILENAME));
+
+      SnipBegin:=StringListSame(FPCConfig,QTMAGICBEGIN);
+      if (SnipBegin<>-1) then
       begin
-        if (FUtilFiles[Counter].Category = ucQtFile) and not
-          (FileExists(IncludeTrailingPathDelimiter(SourceDirectory) + FUtilFiles[Counter].FileName)) then
+        SnipEnd:=StringListSame(FPCConfig,QTMAGICEND);
+        if (SnipEnd=-1) then
         begin
-          Infoln(infotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + SourceDirectory, etDebug);
-          try
-            if Download(FUseWget, FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName, IncludeTrailingPathDelimiter(SourceDirectory) +
-              FUtilFiles[Counter].FileName, FHTTPProxyHost, FHTTPProxyPort, FHTTPProxyUser,
-              FHTTPProxyPassword) = false then
-            begin
-              Errors := Errors + 1;
-              Infoln(infotext+'Error downloading Qt-related file to ' + IncludeTrailingPathDelimiter(SourceDirectory) +
-                FUtilFiles[Counter].FileName, eterror);
-            end;
-          except
-            on E: Exception do
-            begin
-              Result := false;
-              Infoln(infotext+'Error downloading Qt-related files: ' + E.Message, etError);
-              exit; //out of function.
-            end;
-          end;
+          // Severe config error !!
+          Infoln(infotext+'Existing QT config snippet was not closed correct. Please check your '+FPCCONFIGFILENAME+'.',etWarning);
         end;
       end;
 
-      if Errors > 0 then
+      if (SnipBegin<>-1) AND  (SnipEnd<>-1) then
       begin
-        Result := false;
-        WritelnLog(infotext+IntToStr(Errors) + ' errors downloading Qt-related files.', true);
+        // Remove existing config
+        for aIndex:=0 to (SnipEnd-SnipBegin) do if (SnipBegin<FPCConfig.Count) then FPCConfig.Delete(SnipBegin);
+        while (SnipBegin<FPCConfig.Count) AND (FPCConfig[SnipBegin]='') do FPCConfig.Delete(SnipBegin);
       end;
+
+      // Add new config
+      QTConfig := TStringList.Create;
+      try
+        if (SnipBegin=-1) then QTConfig.Append('');
+        QTConfig.Append(SnipMagicBegin+QTMAGICBEGIN);
+        QTConfig.Append('#IFNDEF FPC_CROSSCOMPILING');
+        QTConfig.Append('# Adding some standard paths for QT locations ... bit dirty, but works ... ;-)');
+        {$ifdef Darwin}
+        ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
+        ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
+        //For runtime
+        ConfigText.Append('-k-rpath');
+        ConfigText.Append('-k@executable_path/../Frameworks');
+        ConfigText.Append('-k-rpath');
+        ConfigText.Append('-k'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
+        {$else Darwin}
+        {$ifdef Unix}
+        if (QTTrickeryNeeded AND (FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs))) then
+          QTConfig.Append('-Fl'+InstallDirectory)
+        else
+          if LibWhich(QTLibs,s) then
+            QTConfig.Append('-Fl'+ExcludeTrailingPathDelimiter(s));
+        //For runtime
+        QTConfig.Append('-k-rpath');
+        QTConfig.Append('-k$ORIGIN');
+        {$endif Unix}
+        {$endif Darwin}
+        QTConfig.Append('#ENDIF');
+        QTConfig.Append(SnipMagicEnd+' '+QTMAGICEND);
+        QTConfig.Append('');
+
+        if (SnipBegin=-1) then SnipBegin:=Pred(FPCConfig.Count);
+
+        for aIndex:=0 to Pred(QTConfig.Count) do
+        begin
+          FPCConfig.Insert(SnipBegin,QTConfig.Strings[aIndex]);
+          Inc(SnipBegin);
+        end;
+
+        FPCConfig.SaveToFile(GetFPCConfigPath(FPCCONFIGFILENAME));
+      finally
+        QTConfig.Free;
+      end;
+
+    finally
+      FPCConfig.Free;
     end;
-    *)
+
+    {$ENDIF}
 
     {$ifdef BSD}
     FilePath:=ConcatPaths([SourceDirectory,'ide','include'])+DirectorySeparator;
