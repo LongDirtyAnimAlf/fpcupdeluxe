@@ -2714,7 +2714,7 @@ begin
       QTConfig := TStringList.Create;
       try
         if (SnipBegin=-1) then QTConfig.Append('');
-        QTConfig.Append(SnipMagicBegin+QTMAGICBEGIN);
+        QTConfig.Append(QTMAGICBEGIN);
         QTConfig.Append('#IFNDEF FPC_CROSSCOMPILING');
         QTConfig.Append('# Adding some standard paths for QT locations ... bit dirty, but works ... ;-)');
         {$ifdef Darwin}
@@ -2738,7 +2738,7 @@ begin
         {$endif Unix}
         {$endif Darwin}
         QTConfig.Append('#ENDIF');
-        QTConfig.Append(SnipMagicEnd+' '+QTMAGICEND);
+        QTConfig.Append(QTMAGICEND);
         QTConfig.Append('');
 
         if (SnipBegin=-1) then SnipBegin:=Pred(FPCConfig.Count);

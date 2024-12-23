@@ -103,8 +103,8 @@
         <UnitName Value="installerLazarus"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="7"/>
-        <TopLine Value="2729"/>
-        <CursorPos Y="2745"/>
+        <TopLine Value="2724"/>
+        <CursorPos X="25" Y="2696"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit12>
