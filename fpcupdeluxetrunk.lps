@@ -4,7 +4,6 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="linuxloongarch64,openbsdx64,openbsdi386,freebsdaarch64,linuxx64QT6,linuxx64QT6zip,freebsdx64"/>
-    <BuildModes Active="linuxx64QT6"/>
     <Units Count="102">
       <Unit0>
         <Filename Value="up.lpr"/>
@@ -13,7 +12,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="33"/>
         <CursorPos Y="38"/>
-        <UsageCount Value="65"/>
+        <UsageCount Value="66"/>
       </Unit0>
       <Unit1>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
@@ -21,9 +20,10 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="4540"/>
-        <CursorPos X="59" Y="4553"/>
-        <UsageCount Value="65"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="1910"/>
+        <CursorPos X="28" Y="1916"/>
+        <UsageCount Value="66"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -35,13 +35,13 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="26" Y="12"/>
-        <UsageCount Value="65"/>
+        <UsageCount Value="66"/>
       </Unit2>
       <Unit3>
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynEditPopup"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
       </Unit3>
       <Unit4>
         <Filename Value="sources\updeluxe\aboutfrm.pas"/>
@@ -50,7 +50,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="AboutFrm"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
       </Unit4>
       <Unit5>
         <Filename Value="sources\updeluxe\infounit.pas"/>
@@ -58,7 +58,7 @@
         <ComponentName Value="InfoForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
       </Unit5>
       <Unit6>
         <Filename Value="sources\updeluxe\modulesettings.pas"/>
@@ -66,29 +66,33 @@
         <ComponentName Value="Form3"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
       </Unit6>
       <Unit7>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="39"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="23" Y="22"/>
+        <UsageCount Value="40"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit7>
       <Unit8>
         <Filename Value="sources\settings.ini"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit8>
       <Unit9>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="39"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="4"/>
+        <UsageCount Value="40"/>
       </Unit9>
       <Unit10>
         <Filename Value="sources\processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
       </Unit10>
       <Unit11>
         <Filename Value="sources\updeluxe\subarch.pas"/>
@@ -96,17 +100,15 @@
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
       </Unit11>
       <Unit12>
         <Filename Value="sources\installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="7"/>
-        <TopLine Value="2724"/>
-        <CursorPos X="25" Y="2696"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2752"/>
+        <CursorPos X="61" Y="2671"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit12>
       <Unit13>
         <Filename Value="sources\repoclient.pas"/>
@@ -118,11 +120,10 @@
       <Unit14>
         <Filename Value="sources\installercore.pas"/>
         <UnitName Value="installerCore"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="177"/>
-        <CursorPos X="3" Y="190"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="46"/>
+        <CursorPos X="3" Y="59"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit14>
       <Unit15>
         <Filename Value="sources\gitclient.pas"/>
@@ -134,11 +135,10 @@
       <Unit16>
         <Filename Value="sources\installeruniversal.pas"/>
         <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="6"/>
-        <TopLine Value="316"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="315"/>
         <CursorPos X="21" Y="303"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit16>
       <Unit17>
         <Filename Value="sources\crossinstallers\m_any_to_linux_base.pas"/>
@@ -164,20 +164,18 @@
       <Unit20>
         <Filename Value="sources\installermanager.pas"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="2282"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2280"/>
         <CursorPos X="55" Y="2219"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit20>
       <Unit21>
         <Filename Value="sources\installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="4420"/>
         <CursorPos X="37" Y="4434"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit21>
       <Unit22>
         <Filename Value="sources\hgclient.pas"/>
@@ -685,11 +683,10 @@
       <Unit90>
         <Filename Value="sources\installerbase.pas"/>
         <UnitName Value="installerBase"/>
-        <EditorIndex Value="10"/>
-        <TopLine Value="455"/>
-        <CursorPos X="13" Y="458"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="439"/>
+        <CursorPos X="3" Y="441"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit90>
       <Unit91>
         <Filename Value="C:\fpcupsystems\trunk\lazarus\lcl\lclplatformdef.pas"/>
@@ -715,11 +712,10 @@
       </Unit93>
       <Unit94>
         <Filename Value="sources\m_crossinstaller.pas"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="646"/>
         <CursorPos Y="495"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit94>
       <Unit95>
         <Filename Value="C:\fpcupsystems\trunk\lazarus\components\opengl\glqtcontext.pas"/>
@@ -739,27 +735,24 @@
       </Unit96>
       <Unit97>
         <Filename Value="sources\updeluxe\readerstub\fpcupdeluxemainformreader.pas"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="4474"/>
         <CursorPos X="10" Y="4490"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit97>
       <Unit98>
         <Filename Value="sources\fpcuputil.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="3868"/>
         <CursorPos X="14" Y="3885"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit98>
       <Unit99>
         <Filename Value="sources\updatelazconfig.pas"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="325"/>
         <CursorPos X="35" Y="336"/>
         <UsageCount Value="11"/>
-        <Loaded Value="True"/>
       </Unit99>
       <Unit100>
         <Filename Value="C:\fpcupsystems\trunk\fpcsrc\rtl\objpas\classes\classesh.inc"/>
@@ -776,119 +769,42 @@
         <UsageCount Value="10"/>
       </Unit101>
     </Units>
-    <JumpHistory Count="28" HistoryIndex="27">
+    <JumpHistory Count="9" HistoryIndex="8">
       <Position1>
-        <Filename Value="sources\installerfpc.pas"/>
-        <Caret Line="4506" Column="41" TopLine="4484"/>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="4550" Column="29" TopLine="4537"/>
       </Position1>
       <Position2>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2722" Column="16" TopLine="2712"/>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="4551" Column="69" TopLine="4537"/>
       </Position2>
       <Position3>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2369" Column="8" TopLine="2356"/>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="4554" Column="18" TopLine="4536"/>
       </Position3>
       <Position4>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2724" Column="36" TopLine="2530"/>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="1979" Column="13" TopLine="1957"/>
       </Position4>
       <Position5>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2709" Column="26" TopLine="2703"/>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="5144" Column="29" TopLine="5130"/>
       </Position5>
       <Position6>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2735" Column="24" TopLine="2716"/>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
       </Position6>
       <Position7>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2368" Column="12" TopLine="2355"/>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="1981" Column="23" TopLine="1965"/>
       </Position7>
       <Position8>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2760" TopLine="2737"/>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="340" Column="66" TopLine="328"/>
       </Position8>
       <Position9>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2746" TopLine="2733"/>
+        <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
+        <Caret Line="1916" Column="28" TopLine="1904"/>
       </Position9>
-      <Position10>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="672" TopLine="646"/>
-      </Position10>
-      <Position11>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2754" Column="33" TopLine="2740"/>
-      </Position11>
-      <Position12>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2732" Column="18" TopLine="2720"/>
-      </Position12>
-      <Position13>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2370" Column="3" TopLine="2357"/>
-      </Position13>
-      <Position14>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2755" TopLine="2735"/>
-      </Position14>
-      <Position15>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2717" Column="48" TopLine="2701"/>
-      </Position15>
-      <Position16>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2295" Column="14" TopLine="2284"/>
-      </Position16>
-      <Position17>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2722" Column="53" TopLine="2705"/>
-      </Position17>
-      <Position18>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2756" Column="99" TopLine="2748"/>
-      </Position18>
-      <Position19>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="651" TopLine="649"/>
-      </Position19>
-      <Position20>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="1814" Column="27" TopLine="1808"/>
-      </Position20>
-      <Position21>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2609" Column="53" TopLine="2596"/>
-      </Position21>
-      <Position22>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2635" Column="32" TopLine="2622"/>
-      </Position22>
-      <Position23>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2654" Column="35" TopLine="2641"/>
-      </Position23>
-      <Position24>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2672" Column="29" TopLine="2659"/>
-      </Position24>
-      <Position25>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2679" Column="29" TopLine="2659"/>
-      </Position25>
-      <Position26>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2732" Column="93" TopLine="2707"/>
-      </Position26>
-      <Position27>
-        <Filename Value="sources\installerlazarus.pas"/>
-        <Caret Line="2735" Column="23" TopLine="2722"/>
-      </Position27>
-      <Position28>
-        <Filename Value="sources\installeruniversal.pas"/>
-        <Caret Line="283" TopLine="268"/>
-      </Position28>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

@@ -337,6 +337,8 @@ resourcestring
   upSelectCPUTarget = 'Please select a CPU target first.';
   upSelectOSTarget = 'Please select an OS target first.';
 
+  upGITNotFound = 'No GIT executable found on system. Tag-list cannot be received.';
+
 var
   Form1: TForm1;
 
@@ -1921,6 +1923,9 @@ begin
 
     if FileExists(GitExe) then
     begin
+      //Do this only once !!
+      TPageControl(Sender).OnChange:=nil;
+
       aTargetListBox[FPC]:=ListBoxFPCTargetTag;
       aTargetListBox[LAZARUS]:=ListBoxLazarusTargetTag;
 
@@ -1970,10 +1975,11 @@ begin
       end;
 
       aFileList.Free;
+    end
+    else
+    begin
+      AddMessage(upGITNotFound);
     end;
-
-    //Do this only once !!
-    TPageControl(Sender).OnChange:=nil;
   end;
 end;
 
