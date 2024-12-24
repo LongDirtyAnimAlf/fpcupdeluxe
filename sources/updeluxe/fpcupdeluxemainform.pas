@@ -4518,8 +4518,8 @@ end;
 procedure TForm1.GetSystemInfo;
 var
   Cores,MemAvailable,SwapAvailable:DWord;
-  {$ifdef LCLQT5}
-  QT5LibraryLocation:string;
+  {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
+  QTLibraryLocation:string;
   {$endif}
 begin
   {$ifdef READER}
@@ -4546,11 +4546,16 @@ begin
   if IsLinuxMUSL then AddMessage('Seems we are running on a MUSL Linux.');
   {$ENDIF LINUX}
 
+  {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
   {$ifdef LCLQT5}
-  if LibWhich(LIBQT5,QT5LibraryLocation) then
-    AddMessage('Found system wide '+LIBQT5+' in '+QT5LibraryLocation+'. And that will be used.')
+  if LibWhich(LIBQT5,QTLibraryLocation) then
+  {$endif}
+  {$ifdef LCLQT6}
+  if LibWhich(LIBQT6,QTLibraryLocation) then
+  {$endif}
+    AddMessage('Found system wide libQTPas in '+QTLibraryLocation+'. And that will be used.')
   else
-    AddMessage('No system wide '+LIBQT5+' found. Some QT5 trickery will be used');
+    AddMessage('No system wide libQTPas found. Some QT trickery will be used');
   {$endif}
 
   Cores:=GetLogicalCpuCount;

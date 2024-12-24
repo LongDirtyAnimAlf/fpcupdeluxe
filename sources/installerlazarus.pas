@@ -2688,6 +2688,7 @@ begin
     {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
 
     // Adjust fpc.cfg
+    // Windows to be done
     FPCConfig:=TStringList.Create;
     try
       FPCConfig.LoadFromFile(GetFPCConfigPath(FPCCONFIGFILENAME));
@@ -2718,25 +2719,33 @@ begin
         QTConfig.Append('#IFNDEF FPC_CROSSCOMPILING');
         QTConfig.Append('# Adding some standard paths for QT locations ... bit dirty, but works ... ;-)');
         {$ifdef Darwin}
-        ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
-        ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
-        //For runtime
-        ConfigText.Append('-k-rpath');
-        ConfigText.Append('-k@executable_path/../Frameworks');
-        ConfigText.Append('-k-rpath');
-        ConfigText.Append('-k'+IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks');
-        {$else Darwin}
+        s:=IncludeTrailingPathDelimiter(BaseDirectory)+'Frameworks';
+        if DirectoryExists(s) then
+        begin
+          QTConfig.Append('-Fl'+s);
+          QTConfig.Append('-k-F'+s);
+          QTConfig.Append('-k-rpath');
+          QTConfig.Append('-k'+s);
+          //For Lazarus runtime
+          QTConfig.Append('-k-rpath');
+          QTConfig.Append('-k@executable_path/../Frameworks');
+        end;
+        //For any runtime
+        QTConfig.Append('-k-rpath');
+        QTConfig.Append('-k@executable_path');
+        {$endif Darwin}
         {$ifdef Unix}
         if (QTTrickeryNeeded AND (FileExists(IncludeTrailingPathDelimiter(InstallDirectory)+QTLibs))) then
           QTConfig.Append('-Fl'+InstallDirectory)
         else
           if LibWhich(QTLibs,s) then
             QTConfig.Append('-Fl'+ExcludeTrailingPathDelimiter(s));
-        //For runtime
+        {$ifndef Darwin}
+        //For any runtime
         QTConfig.Append('-k-rpath');
         QTConfig.Append('-k$ORIGIN');
-        {$endif Unix}
         {$endif Darwin}
+        {$endif Unix}
         QTConfig.Append('#ENDIF');
         QTConfig.Append(QTMAGICEND);
         QTConfig.Append('');

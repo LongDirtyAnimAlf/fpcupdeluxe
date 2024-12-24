@@ -199,8 +199,6 @@ begin
   ExportOnly:=(Length(DesiredTag)>0);
 end;
 
-
-
 procedure TGitClient.CheckOut(UseForce:boolean=false);
 // SVN checkout is more or less equivalent to git clone
 var
@@ -451,9 +449,17 @@ begin
       // Message: "SSL certificate problem: self signed certificate in certificate chain"
       if (Pos('SSL certificate problem',Output)>0) then
       begin
-        // Disable SSL verification
-        Command := ' config --local http.sslVerify false';
-        FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
+        // Never disable ssl on these sites !!
+        if (AnsiStartsStr('https://gitlab.com',Repository) OR AnsiStartsStr('https://github.com',Repository) OR AnsiContainsStr(Repository,'git.sourceforge.net')) then
+        begin
+          FReturnCode := AbortedExitCode;
+          exit;
+        end
+        else
+        begin
+          Command := ' config --local http.sslVerify false';
+          FReturnCode := TInstaller(Parent).ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + Command, LocalRepository, Output, Verbose);
+        end;
       end;
     end;
   end;
