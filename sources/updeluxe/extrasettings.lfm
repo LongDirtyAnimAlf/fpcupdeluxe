@@ -824,16 +824,16 @@ object Form2: TForm2
   object GroupBoxFPCLazScripts: TGroupBox
     AnchorSideLeft.Control = grpPatching
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = Owner
+    AnchorSideTop.Control = grpPatching
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 416
-    Height = 124
-    Top = 588
+    Height = 144
+    Top = 568
     Width = 276
-    Anchors = [akLeft, akBottom]
+    Anchors = [akTop, akLeft, akBottom]
     AutoSize = True
     BorderSpacing.Left = 24
     BorderSpacing.Top = 8
@@ -841,7 +841,7 @@ object Form2: TForm2
     BorderSpacing.Bottom = 8
     BorderSpacing.InnerBorder = 4
     Caption = 'Pre and post install scripts'
-    ClientHeight = 104
+    ClientHeight = 124
     ClientWidth = 272
     Enabled = False
     ParentFont = False
@@ -1087,35 +1087,34 @@ object Form2: TForm2
     end
   end
   object ButtonPanel: TPanel
+    AnchorSideTop.Control = GroupBoxFPCLazScripts
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 736
-    Height = 89
-    Top = 623
+    Height = 144
+    Top = 568
     Width = 98
-    Anchors = [akRight, akBottom]
+    Anchors = [akTop, akRight, akBottom]
     BorderSpacing.Right = 8
     BorderSpacing.Bottom = 8
-    ClientHeight = 89
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ClientHeight = 144
     ClientWidth = 98
     ParentFont = False
     TabOrder = 5
     object BitBtn1: TBitBtn
-      AnchorSideLeft.Control = ButtonPanel
-      AnchorSideTop.Control = ButtonPanel
       AnchorSideRight.Control = ButtonPanel
       AnchorSideRight.Side = asrBottom
-      Left = 5
-      Height = 35
-      Top = 5
-      Width = 88
-      Anchors = [akTop, akLeft, akRight, akBottom]
+      Left = 8
+      Height = 60
+      Top = 8
+      Width = 82
       AutoSize = True
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 4
-      BorderSpacing.Right = 4
+      BorderSpacing.Around = 8
       Constraints.MinHeight = 35
       Default = True
       DefaultCaption = True
@@ -1125,20 +1124,16 @@ object Form2: TForm2
       TabOrder = 0
     end
     object BitBtn2: TBitBtn
-      AnchorSideLeft.Control = ButtonPanel
       AnchorSideRight.Control = ButtonPanel
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonPanel
       AnchorSideBottom.Side = asrBottom
-      Left = 5
-      Height = 35
-      Top = 49
-      Width = 88
-      Anchors = [akLeft, akRight, akBottom]
+      Left = 8
+      Height = 60
+      Top = 76
+      Width = 82
       AutoSize = True
-      BorderSpacing.Left = 4
-      BorderSpacing.Right = 4
-      BorderSpacing.Bottom = 4
+      BorderSpacing.Around = 8
       Cancel = True
       Constraints.MinHeight = 35
       DefaultCaption = True

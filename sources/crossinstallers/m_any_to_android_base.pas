@@ -321,6 +321,11 @@ begin
   result:=inherited;
   if result then exit;
 
+  //https://github.com/android/ndk/wiki/Unsupported-Downloads
+  //https://dl.google.com/android/repository/android-ndk-r26d-windows.zip
+  //https://dl.google.com/android/repository/android-ndk-r26d-darwin.dmg
+  //https://dl.google.com/android/repository/android-ndk-r26d-linux.zip
+
   BinPrefixTry:=BinUtilsPrefix;
 
   AsFile:=BinPrefixTry+ASFILENAME+GetExeExt;
