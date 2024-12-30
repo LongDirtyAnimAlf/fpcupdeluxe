@@ -70,6 +70,13 @@ Apple OSX
 ------------
 - Xcode and Xcode command line tools
 
+In case of this error: "fpcupdeluxe-aarch64-darwin-cocoa.app” is damaged and can’t be opened" :
+```
+xattr -cr fpcupdeluxe-aarch64-darwin-cocoa.app
+```
+The "xattr -cr fpcupdeluxe-aarch64-darwin-cocoa.app" is [still] needed due to the fact that fpcupdeluxe is an external binary not originating from the app-store.
+
+
 FreeBSD 9+
 ------------
 - none, but *strongly recommended* to use a newer gdb than the 6.1 version
