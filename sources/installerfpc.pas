@@ -3736,7 +3736,11 @@ begin
         begin
           s:='fpc'+GetExeExt;
           s:=Which(s);
-          if FileExists(s) then Compiler:=s;
+          if FileExists(s) then
+          begin
+            s2:=CompilerCPUOSTarget(s);
+            if s2=GetSourceCPUOS then Compiler:=s;
+          end;
         end;
 
         if FileExists(FCompiler) then

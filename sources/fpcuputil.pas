@@ -271,6 +271,7 @@ function CompilerABI(CompilerPath: string): string;
 function CompilerFPU(CompilerPath: string): string;
 function CompilerCPU(CompilerPath: string): string;
 function CompilerOS(CompilerPath: string): string;
+function CompilerCPUOSTarget(CompilerPath: string): string;
 procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build:integer; var Patch: Integer);
 function CalculateFullVersion(const Major,Minor,Release:integer):dword;overload;
 function CalculateFullVersion(const Major,Minor,Release,Patch:integer):qword;overload;
@@ -1313,6 +1314,15 @@ end;
 function CompilerOS(CompilerPath: string): string;
 begin
   Result:=CompilerCommand(CompilerPath,'-iSO');
+end;
+
+function CompilerCPUOSTarget(CompilerPath: string): string;
+var
+  i:SizeInt;
+begin
+  result:=Trim(CompilerCommand(CompilerPath,'-iTP -iTO'));
+  i:=Pos(' ',result);
+  if (i>0) then result[i]:='-';
 end;
 
 procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build:integer; var Patch: Integer);
