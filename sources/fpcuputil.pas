@@ -4089,7 +4089,7 @@ begin
           end;
         end
         else
-          Result := true; //not all non-0 result codes are errors. There's no way to tell, really
+          Result := true; //not all non-0 result codes are errors. There's no way to tell, realy
       end;
     except
       on E: Exception do

@@ -92,8 +92,8 @@ begin
 end;
 
 function TGitClient.FindRepoExecutable: string;
-//var
-//  rv:integer;
+var
+  Output:string;
 begin
   Result := FRepoExecutable;
   // Look in path
@@ -155,8 +155,23 @@ begin
     if (NOT CheckExecutable(FRepoExecutable, ['--version'], '', true)) then
     begin
       FRepoExecutable := '';
-      //ThreadLog('GIT client found, but error code during check: '+InttoStr(rv),etError);
-      ThreadLog('GIT client found, but error code during check !',etError);
+      ThreadLog('GIT client found, but returns error code during check !',etError);
+    end
+    else
+    begin
+      {$IFDEF MSWINDOWS}
+      if (TInstaller(Parent).ExecuteCommand(FRepoExecutable,['--exec-path'], Output, false)=0) then
+      begin
+        if (Length(Output)>0) then
+        begin
+          if Output[1]='/' then
+          begin
+            FRepoExecutable := '';
+            ThreadLog('GIT client found in path, but its from MSYS or CYGWIN and that does not work 100% with fpcupdeluxe.',etWarning);
+          end;
+        end;
+      end;
+      {$ENDIF MSWINDOWS}
     end;
   end
   else

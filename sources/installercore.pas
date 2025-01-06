@@ -1081,7 +1081,7 @@ var
   s: string;
   aDir: string;
   {$ifdef MSWINDOWS}
-  aURL,aFile: string;
+  aURL,aFile,aFilePath: string;
   i:integer;
   {$endif}
   {$ifndef USEONLYCURL}
@@ -1334,25 +1334,26 @@ begin
         //ForceDirectoriesSafe(MakePath+'unrar\bin');
         // this version of unrar does not need installation ... so we can silently get it !!
         s:='unrar-3.4.3-bin.zip';
-        SysUtils.DeleteFile(MakePath+'unrar\'+s);
+        aFilePath:=ConcatPaths([MakePath,'unrar',s]);
+        SysUtils.DeleteFile(aFilePath);
         aURL:=FPCUPGITREPO+'/releases/download/windowsi386bins_v1.0/';
-        OperationSucceeded:=GetFile(aURL+s,MakePath+'unrar\'+s);
+        OperationSucceeded:=GetFile(aURL+s,aFilePath);
         // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
         if (FileSize(MakePath+'unrar\'+s)<50000) then
         begin
-          SysUtils.DeleteFile(MakePath+'unrar\'+s);
+          SysUtils.DeleteFile(aFilePath);
           OperationSucceeded:=false;
         end;
         if NOT OperationSucceeded then
         begin
           // try one more time
-          SysUtils.DeleteFile(MakePath+'unrar\'+s);
+          SysUtils.DeleteFile(aFilePath);
           aURL:='https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/';
-          OperationSucceeded:=GetFile(aURL+s,MakePath+'unrar\'+s);
+          OperationSucceeded:=GetFile(aURL+s,aFilePath);
           // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
-          if (FileSize(MakePath+'unrar\'+s)<50000) then
+          if (FileSize(aFilePath)<50000) then
           begin
-            SysUtils.DeleteFile(MakePath+'unrar\'+s);
+            SysUtils.DeleteFile(aFilePath);
             OperationSucceeded:=false;
           end;
         end;
@@ -1361,7 +1362,7 @@ begin
           with TNormalUnzipper.Create do
           begin
             try
-              OperationSucceeded:=DoUnZip(MakePath+'unrar\'+s,MakePath+'unrar\',[]);
+              OperationSucceeded:=DoUnZip(aFilePath,ExtractFilePath(aFilePath),[]);
             finally
               Free;
             end;
@@ -1369,7 +1370,7 @@ begin
 
           if OperationSucceeded then
           begin
-            SysUtils.DeleteFile(MakePath+'unrar\'+s);
+            SysUtils.DeleteFile(aFilePath);
             OperationSucceeded:=FileExists(FUnrar);
           end;
         end;
@@ -1377,11 +1378,10 @@ begin
         OperationSucceeded:=True;
       end;
 
-
       with GitClient do
       begin
         OperationSucceeded:=False;
-        aFile:=MakePath+'git'+DirectorySeparator+'cmd'+DirectorySeparator+RepoExecutableName+GetExeExt;
+        aFile:=ConcatPaths([MakePath,'git','cmd',RepoExecutableName+GetExeExt]);
         // try to find systemwide GIT
         if (NOT ForceLocal) then
         begin
@@ -1428,12 +1428,14 @@ begin
             {$endif}
             Infoln(localinfotext+'GIT client not found. Downloading it',etInfo);
             Infoln(localinfotext+'GIT client download (may take time) from '+aURL,etDebug);
-            OperationSucceeded:=GetFile(aURL,MakePath+'git\'+s);
+
+            aFilePath:=ConcatPaths([MakePath,'git',s]);
+            OperationSucceeded:=GetFile(aURL,aFilePath);
             if NOT OperationSucceeded then
             begin
               // try one more time
-              SysUtils.DeleteFile(MakePath+'git\'+s);
-              OperationSucceeded:=GetFile(aURL,MakePath+'git\'+s);
+              SysUtils.DeleteFile(aFilePath);
+              OperationSucceeded:=GetFile(aURL,aFilePath);
             end;
             if OperationSucceeded then
             begin
@@ -1441,14 +1443,14 @@ begin
               with TNormalUnzipper.Create do
               begin
                 try
-                  OperationSucceeded:=DoUnZip(MakePath+'git\'+s,MakePath+'git\',[]);
+                  OperationSucceeded:=DoUnZip(aFilePath,ExtractFilePath(aFilePath),[]);
                 finally
                   Free;
                 end;
               end;
               if OperationSucceeded then
               begin
-                SysUtils.DeleteFile(MakePath+'git\'+s);
+                SysUtils.DeleteFile(aFilePath);
                 OperationSucceeded:=FileExists(aFile);
                 //Copy certificate ... might be necessary
                 //aURL:=MakePath+'git\mingw32\';
@@ -1468,7 +1470,7 @@ begin
       with HGClient do
       begin
         OperationSucceeded:=False;
-        aFile:=MakePath+'hg'+DirectorySeparator+RepoExecutableName+GetExeExt;
+        aFile:=ConcatPaths([MakePath,'hg',RepoExecutableName+GetExeExt]);
         // try to find systemwide HG
         if (NOT ForceLocal) then
         begin
@@ -1493,12 +1495,15 @@ begin
           ForceDirectoriesSafe(MakePath+'hg');
           Infoln(localinfotext+'HG (mercurial) client not found. Downloading it',etInfo);
           Infoln(localinfotext+'HG (mercurial) client download (may take time) from '+aURL,etDebug);
-          OperationSucceeded:=GetFile(aURL,MakePath+'hg\'+s);
+
+          aFilePath:=ConcatPaths([MakePath,'hg',s]);
+
+          OperationSucceeded:=GetFile(aURL,aFilePath);
           if NOT OperationSucceeded then
           begin
             // try one more time
-            SysUtils.DeleteFile(MakePath+'hg\'+s);
-            OperationSucceeded:=GetFile(aURL,MakePath+'hg\'+s);
+            SysUtils.DeleteFile(aFilePath);
+            OperationSucceeded:=GetFile(aURL,aFilePath);
           end;
           if OperationSucceeded then
           begin
@@ -1506,7 +1511,7 @@ begin
             with TNormalUnzipper.Create do
             begin
               try
-                OperationSucceeded:=DoUnZip(MakePath+'hg\'+s,MakePath+'hg\',[]);
+                OperationSucceeded:=DoUnZip(aFilePath,ExtractFilePath(aFilePath),[]);
               finally
                 Free;
               end;
@@ -1516,7 +1521,7 @@ begin
               OperationSucceeded:=FileExists(aFile);
             end;
           end;
-          SysUtils.DeleteFile(MakePath+'hg\'+s);
+          SysUtils.DeleteFile(aFilePath);
           if OperationSucceeded then RepoExecutable:=aFile else RepoExecutable:=RepoExecutableName+GetExeExt;
         end;
         if RepoExecutable <> EmptyStr then
