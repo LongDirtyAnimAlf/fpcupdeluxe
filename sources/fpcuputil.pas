@@ -1069,6 +1069,7 @@ begin
     {$else}
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments+' %f');
     {$endif}
+    XdgDesktopContent.Add('StartupWMClass=Lazarus');
     XdgDesktopContent.Add('Name='+ShortcutName);
     XdgDesktopContent.Add('GenericName=Lazarus IDE with Free Pascal Compiler');
     XdgDesktopContent.Add('Category=Application;IDE;Development;GUIDesigner;Programming;');
