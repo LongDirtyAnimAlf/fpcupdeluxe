@@ -4626,6 +4626,12 @@ begin
       end;
     end;
 
+    // hack to rename cross-libs for wasi -> wasip1
+    if DirectoryExists(BaseDirectory + '/cross/lib/wasm32-wasi') then
+      RenameFile(
+        BaseDirectory + '/cross/lib/wasm32-wasi',
+        BaseDirectory + '/cross/lib/wasm32-wasip1');
+
     // second, get/set cross libraries !!
     ToolAvailable:=(NOT (ieLibs in FErrorCodes));
     if (NOT ToolAvailable) then

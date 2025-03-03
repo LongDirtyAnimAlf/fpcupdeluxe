@@ -1,4 +1,4 @@
-unit m_any_to_wasi_wasm32;
+unit m_any_to_wasip1_wasm32;
 { Cross compiles from any platform with correct binutils to WebAssembly
 Copyright (C) 2021 Alf
 
@@ -41,28 +41,28 @@ uses
   installerBase, m_crossinstaller, m_any_to_all_wasm32;
 
 type
-  TAny_WasiWasm32 = class(TAny_AllWasm32)
+  TAny_WasiP1Wasm32 = class(TAny_AllWasm32)
   public
     constructor Create;
   end;
 
-constructor TAny_WasiWasm32.Create;
+constructor TAny_WasiP1Wasm32.Create;
 begin
   inherited Create;
   FTargetCPU:=TCPU.wasm32;
-  FTargetOS:=TOS.wasi;
+  FTargetOS:=TOS.wasip1;
   Reset;
   ShowInfo;
 end;
 
 var
-  Any_WasiWasm32:TAny_WasiWasm32;
+  Any_WasiP1Wasm32:TAny_WasiP1Wasm32;
 
 initialization
-  Any_WasiWasm32:=TAny_WasiWasm32.Create;
-  RegisterCrossCompiler(Any_WasiWasm32.RegisterName,Any_WasiWasm32);
+  Any_WasiP1Wasm32:=TAny_WasiP1Wasm32.Create;
+  RegisterCrossCompiler(Any_WasiP1Wasm32.RegisterName,Any_WasiP1Wasm32);
 
 finalization
-  Any_WasiWasm32.Destroy;
+  Any_WasiP1Wasm32.Destroy;
 end.
 
