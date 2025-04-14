@@ -98,6 +98,12 @@ const
   REVINCFILENAME        = 'revision.inc';
 
   {$IFDEF WINDOWS}
+  BATCHEXT     ='.bat';
+  {$ELSE}
+  BATCHEXT     ='.sh';
+  {$ENDIF}
+
+  {$IFDEF WINDOWS}
   PREBUILTBINUTILSURLWINCE = FPCTRUNKBINARIES+'/install/crossbinwce';
   {$ENDIF}
 
