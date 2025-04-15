@@ -241,7 +241,7 @@ function MulDiv(const a, b, c : Integer ) : Integer;
 // Create shortcut on desktop to Target file
 procedure CreateDesktopShortCut(const Target, TargetArguments, ShortcutName: string; const AddContext:boolean=false);
 // Create shell script in user directory that links to Target
-procedure CreateHomeStartLink(const {%H-}Target, {%H-}TargetArguments, {%H-}ShortcutName: string);
+procedure CreateHomeStartLink(const Location, {%H-}Target, {%H-}TargetArguments, {%H-}ShortcutName: string);
 {$IFDEF MSWINDOWS}
 // Delete shortcut on desktop
 procedure DeleteDesktopShortcut(const ShortcutName: string);
@@ -1191,36 +1191,46 @@ end;
 {$ENDIF DARWIN}
 {$ENDIF MSWINDOWS}
 
-procedure CreateHomeStartLink(const Target, TargetArguments,ShortcutName: string);
-{$IFDEF UNIX}
+procedure CreateHomeStartLink(const Location, Target, TargetArguments, ShortcutName: string);
 var
   ScriptText: TStringList;
   ScriptFile: string;
-{$ENDIF UNIX}
 begin
-  {$IFDEF UNIX}
   //create dir if it doesn't exist
-  ForceDirectoriesSafe(ExtractFilePath(IncludeTrailingPathDelimiter(GetUserDir)+ShortcutName));
+  ForceDirectoriesSafe(ExtractFilePath(IncludeTrailingPathDelimiter(Location)+ShortcutName));
   ScriptText:=TStringList.Create;
   try
     // No quotes here, either, we're not in a shell, apparently...
-    ScriptFile:=IncludeTrailingPathDelimiter(GetUserDir)+ShortcutName;
+    ScriptFile:=IncludeTrailingPathDelimiter(Location)+ShortcutName;
     SysUtils.DeleteFile(ScriptFile); //Get rid of any existing remnants
+
+    {$IFDEF MSWINDOWS}
+    ScriptText.Add('@ECHO OFF');
+    ScriptText.Add('REM #####################################################');
+    ScriptText.Add('REM '+FileNameWithoutExt(UnQuote(Target))+' startup for windows');
+    ScriptText.Add('REM #####################################################');
+    {$ENDIF}
+    {$IFDEF UNIX}
     ScriptText.Add('#!/bin/sh');
-    ScriptText.Add('# '+BeginSnippet+' home startlink script');
+    ScriptText.Add('#####################################################');
+    ScriptText.Add('# '+FileNameWithoutExt(UnQuote(Target))+' startup');
+    ScriptText.Add('#####################################################');
     {$ifdef DISABLE_PPC_CONFIG_PATH}
     ScriptText.Add('unset PPC_CONFIG_PATH');
     {$endif}
-    ScriptText.Add(Target+' '+TargetArguments+' "$@"');
+    {$ENDIF}
+
+    ScriptText.Add(Target+' '+TargetArguments{$IFDEF UNIX}+' "$@"'{$ENDIF});
     try
       ScriptText.SaveToFile(ScriptFile);
+      {$IFDEF UNIX}
       FpChmod(ScriptFile, &755); //rwxr-xr-x
+      {$ENDIF}
     except
     end;
   finally
     ScriptText.Free;
   end;
-  {$ENDIF UNIX}
 end;
 
 function FileNameFromURL(URL:string):string;

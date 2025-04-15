@@ -42,6 +42,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+*.res
 *.ppu
 *.lps
 !fpc*.lps
