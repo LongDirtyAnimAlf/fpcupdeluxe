@@ -456,7 +456,7 @@ begin
   if (OS=haiku) AND ((CPU<>i386) AND (CPU<>x86_64) {AND (CPU<>arm)}) then exit;
   if (OS=solaris) AND ((CPU<>x86_64) AND (CPU<>sparc)) then exit;
   if (OS=ios) AND ((CPU<>arm) AND (CPU<>aarch64)) then exit;
-  if ((OS=wasi) AND (CPU<>wasm32)) then exit;
+  if ((OS=wasip1) AND (CPU<>wasm32)) then exit;
   if ((OS=atari) AND (CPU<>m68k)) then exit;
 
   if (CPU=xtensa) AND ((OS<>linux) AND (OS<>freertos)) then exit;
@@ -468,7 +468,7 @@ begin
   if (CPU=avr) AND (OS<>embedded) then exit;
   if (CPU=sparc64) AND (OS<>linux) then exit;
   if ((CPU=riscv32) OR (CPU=riscv64)) AND ((OS<>linux) AND (OS<>embedded)) then exit;
-  if (CPU=wasm32) AND ((OS<>wasi) AND (OS<>embedded)) then exit;
+  if (CPU=wasm32) AND ((OS<>wasip1) AND (OS<>embedded)) then exit;
   if (CPU=loongarch64) AND (OS<>linux) then exit;
 
   result:=true;
@@ -1047,7 +1047,7 @@ end;
 {$ifdef LCL}
 procedure InitDefaultCrossSettings;
 const
-  ARMLESSOS: set of TOS = [TOS.win32..TOS.atari] - [TOS.android,TOS.win32,TOS.win64,TOS.iphonesim,TOS.java,TOS.msdos,TOS.solaris,TOS.morphos,TOS.aros,TOS.amiga,TOS.go32v2,TOS.wasi,TOS.atari];
+  ARMLESSOS: set of TOS = [TOS.win32..TOS.atari] - [TOS.android,TOS.win32,TOS.win64,TOS.iphonesim,TOS.java,TOS.msdos,TOS.solaris,TOS.morphos,TOS.aros,TOS.amiga,TOS.go32v2,TOS.wasip1,TOS.atari];
 var
   CPU:TCPU;
   OS:TOS;

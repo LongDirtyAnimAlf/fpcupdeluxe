@@ -765,7 +765,7 @@ begin
     localOS:=GetTOS(GetSourceOS);
   end;
   if (localCPU in [TCPU.loongarch64,TCPU.xtensa,TCPU.wasm32]) then SetResult('3.3.1',result);
-  if (localOS in [TOS.freertos,TOS.wasi]) then SetResult('3.3.1',result);
+  if (localOS in [TOS.freertos,TOS.wasip1]) then SetResult('3.3.1',result);
   if (localOS in [TOS.aix]) then SetResult('3.0.0',result);
   if (localCPU=TCPU.aarch64) then
   begin

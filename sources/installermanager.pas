@@ -1640,6 +1640,7 @@ begin
   // Set OS case
   s:=GetOSCase(CrossOS_Target);
   if CrossOS_Target=TOS.aros then s:='Aros'; // Legacy support
+  if CrossOS_Target=TOS.wasip1 then s:='Wasi'; // support URL before FPC renamed Wasi->WasiP1
 
   if SolarisOI then s:=s+'OI';
 
