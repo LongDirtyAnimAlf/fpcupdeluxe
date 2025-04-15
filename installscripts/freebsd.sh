@@ -11,10 +11,18 @@ sudo pkg install -y gdb
 sudo pkg install -y lldb
 sudo pkg install -y binutils
 sudo pkg install -y gmake
+
+# Only for GhostBSD
+# All libc and other files are now in these packages
+# sudo pkg install os-generic-userland-devtools
+sudo pkg install -g 'GhostBSD*-dev'
+
 sudo pkg install -y iconv
 sudo pkg install -y xorg-libraries
 sudo pkg install -y libX11
 sudo pkg install -y libXtst
+sudo pkg install -y gnome-themes-extra
+sudo pkg install -y gtk-murrine-engine
 sudo pkg install -y xorg-fonts-type1
 sudo pkg install -y liberation-fonts-ttf
 
