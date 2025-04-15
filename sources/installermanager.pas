@@ -1640,7 +1640,6 @@ begin
   // Set OS case
   s:=GetOSCase(CrossOS_Target);
   if CrossOS_Target=TOS.aros then s:='Aros'; // Legacy support
-  if CrossOS_Target=TOS.wasip1 then s:='Wasi'; // support URL before FPC renamed Wasi->WasiP1
 
   if SolarisOI then s:=s+'OI';
 
@@ -1717,8 +1716,6 @@ begin
   {$else}
   BinsFileName:='CrossBins'+BinsFileName;
   {$endif MSWINDOWS}
-
-
 
   // Check for the new libs !!
   toolversion:='0';
@@ -1820,6 +1817,10 @@ begin
     if (CrossCPU_Target=TCPU.i386) then toolversion:='0600';
     if (CrossCPU_Target=TCPU.x86_64) then toolversion:='0701';
   end;
+  if (CrossCPU_Target=TCPU.wasm32) then
+  begin
+    if (CrossOS_Target=TOS.wasip1) then s:='Wasm32_Wasip1.zip';
+  end;
 
   if (Length(s)>0) then
   begin
@@ -1836,8 +1837,6 @@ begin
   end;
 
   // Check for the new bins !!
-
-
   toolversion:='0';
   ostype:=GetOSCase(CrossOS_Target);
   s:='';

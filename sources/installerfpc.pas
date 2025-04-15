@@ -1234,15 +1234,26 @@ begin
 
           Processor.SetParamNameData('CROSSINSTALL','1');
 
-          // The below is needed due to changes in the Makefile of FPC 3.3.1
-          // Has been reported on the Core Mailing list, but no action taken
-          if (CrossInstaller.TargetOS in [TOS.darwin]) then
+          if (MakeCycle in [st_RtlBuild,st_RtlInstall,st_PackagesBuild,st_PackagesInstall]) then
           begin
-            Processor.SetParamNamePathData('SYSTEMDIR',ConcatPaths([SourceDirectory,'rtl','bsd']));
-            Processor.SetParamNamePathData('DOSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
-            Processor.SetParamNamePathData('SYSUTILSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
-            Processor.SetParamNamePathData('CLASSESDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
-            Processor.SetParamNamePathData('TTHREADINCDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+            // The below is needed due to changes in the Makefile of FPC 3.3.1
+            // Has been reported on the Core Mailing list, but no action taken
+
+            if (CrossInstaller.TargetOS in [TOS.darwin]) then
+            begin
+              Processor.SetParamNamePathData('SYSTEMDIR',ConcatPaths([SourceDirectory,'rtl','bsd']));
+              Processor.SetParamNamePathData('DOSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+              Processor.SetParamNamePathData('SYSUTILSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+              Processor.SetParamNamePathData('CLASSESDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+              Processor.SetParamNamePathData('TTHREADINCDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+            end;
+
+            if (CrossInstaller.TargetOS in [TOS.wasip1]) then
+            begin
+              Processor.SetParamNamePathData('SYSUTILSDIR',ConcatPaths([SourceDirectory,'rtl','wasicommon']));
+              Processor.SetParamNamePathData('CLASSESDIR',ConcatPaths([SourceDirectory,'rtl','wasicommon']));
+              Processor.SetParamNamePathData('TTHREADINCDIR',ConcatPaths([SourceDirectory,'rtl','wasicommon']));
+            end;
           end;
 
           if (CrossInstaller.TargetOS in [TOS.android]) then
@@ -4625,12 +4636,6 @@ begin
         {$ENDIF}
       end;
     end;
-
-    // hack to rename cross-libs for wasi -> wasip1
-    if DirectoryExists(BaseDirectory + '/cross/lib/wasm32-wasi') then
-      RenameFile(
-        BaseDirectory + '/cross/lib/wasm32-wasi',
-        BaseDirectory + '/cross/lib/wasm32-wasip1');
 
     // second, get/set cross libraries !!
     ToolAvailable:=(NOT (ieLibs in FErrorCodes));

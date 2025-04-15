@@ -73,7 +73,7 @@ const
 
 type
   TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa,wasm32,loongarch64);
-  TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo,wasip1,atari);
+  TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo,wasip1{,wasip1threads,wasip2},atari);
   TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,armv8,armv8a,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32ec,rv32e,rv32imac{,rv32ima,rv32im},rv32i,rv64imac{,rv64ima,rv64im},rv64i,lx6,lx106);
   //TABI      = (default,sysv,aix,darwin,elfv2,eabi,armeb,eabihf,oldwin32gnu,aarch64ios,riscvhf,linux386_sysv,windowed,call0);
   TABI      = (default,eabi,eabihf,aarch64ios,riscvhf,windowed,call0);
@@ -196,7 +196,8 @@ begin
                 if aCPU=TCPU.m68k then result:='m68k' else
                   if aCPU=TCPU.riscv32 then result:='riscv32' else
                     if aCPU=TCPU.riscv64 then result:='riscv64' else
-                      result:=UppercaseFirstChar(GetCPU(aCPU));
+                      if aCPU=TCPU.wasm32 then result:='wasm32' else
+                        result:=UppercaseFirstChar(GetCPU(aCPU));
 end;
 
 function GetTCPU(aCPU:string):TCPU;
@@ -242,7 +243,7 @@ begin
                     if aOS=TOS.win32 then result:='Windows' else
                       if aOS=TOS.win64 then result:='Windows' else
                         if aOS=TOS.ios then result:='IOS' else
-                        result:=UppercaseFirstChar(GetOS(aOS));
+                          result:=UppercaseFirstChar(GetOS(aOS));
 end;
 
 function GetTOS(aOS:string):TOS;
