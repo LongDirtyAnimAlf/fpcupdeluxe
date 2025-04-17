@@ -2410,6 +2410,7 @@ begin
     Lazarus 3.2     + FPC 3.2.2
     Lazarus 3.4     + FPC 3.2.2
     Lazarus 3.6     + FPC 3.2.2
+    Lazarus 3.8     + FPC 3.2.2
     end;
   }
 
