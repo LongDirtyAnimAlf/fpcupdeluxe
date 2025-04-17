@@ -1234,25 +1234,27 @@ begin
 
           Processor.SetParamNameData('CROSSINSTALL','1');
 
-          if (MakeCycle in [st_RtlBuild,st_RtlInstall,st_PackagesBuild,st_PackagesInstall]) then
+          // This [hack] is only needed on win32, due to unknown reasons caused by FPC provided [outdated] make.exe
+          // Should be removed when cause is known
+          // We try to solve this by using a new make [4.4] provided by fpcupdeluxe
+          if (GetTOS(GetSourceOS)=TOS.win32) then
           begin
-            // The below is needed due to changes in the Makefile of FPC 3.3.1
-            // Has been reported on the Core Mailing list, but no action taken
-
-            if (CrossInstaller.TargetOS in [TOS.darwin]) then
+            if (MakeCycle in [st_RtlBuild,st_RtlInstall,st_PackagesBuild,st_PackagesInstall]) then
             begin
-              Processor.SetParamNamePathData('SYSTEMDIR',ConcatPaths([SourceDirectory,'rtl','bsd']));
-              Processor.SetParamNamePathData('DOSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
-              Processor.SetParamNamePathData('SYSUTILSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
-              Processor.SetParamNamePathData('CLASSESDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
-              Processor.SetParamNamePathData('TTHREADINCDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
-            end;
-
-            if (CrossInstaller.TargetOS in [TOS.wasip1]) then
-            begin
-              Processor.SetParamNamePathData('SYSUTILSDIR',ConcatPaths([SourceDirectory,'rtl','wasicommon']));
-              Processor.SetParamNamePathData('CLASSESDIR',ConcatPaths([SourceDirectory,'rtl','wasicommon']));
-              Processor.SetParamNamePathData('TTHREADINCDIR',ConcatPaths([SourceDirectory,'rtl','wasicommon']));
+              if (CrossInstaller.TargetOS in [TOS.darwin]) then
+              begin
+                Processor.SetParamNamePathData('SYSTEMDIR',ConcatPaths([SourceDirectory,'rtl','bsd']));
+                Processor.SetParamNamePathData('DOSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+                Processor.SetParamNamePathData('SYSUTILSDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+                Processor.SetParamNamePathData('CLASSESDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+                Processor.SetParamNamePathData('TTHREADINCDIR',ConcatPaths([SourceDirectory,'rtl','unix']));
+              end;
+              if (CrossInstaller.TargetOS in [TOS.wasip1]) then
+              begin
+                Processor.SetParamNamePathData('SYSUTILSDIR',ConcatPaths([SourceDirectory,'rtl','wasicommon']));
+                Processor.SetParamNamePathData('CLASSESDIR',ConcatPaths([SourceDirectory,'rtl','wasicommon']));
+                Processor.SetParamNamePathData('TTHREADINCDIR',ConcatPaths([SourceDirectory,'rtl','wasicommon']));
+              end;
             end;
           end;
 

@@ -37,6 +37,7 @@ uses
 
 const
   DEFAULTFPCVERSION     = '3.2.2';
+  DEFAULTFPCVERSIONURL  = '3_2_2';
 
   FPCTRUNKVERSION       = '3.3.1';
   FPCTRUNKBOOTVERSION   = '3.2.2';
@@ -404,13 +405,12 @@ type
     procedure SetLazarusPrimaryConfigDirectory(value:string);
     procedure SetMakeDirectory(value:string);
     procedure SetCompiler(value:string);
-    function GetShell: string;
-    function GetMake: string;
     procedure SetVerbosity(aValue:boolean);
     procedure SetHTTPProxyHost(AValue: string);
     procedure SetHTTPProxyPassword(AValue: string);
     procedure SetHTTPProxyPort(AValue: integer);
     procedure SetHTTPProxyUser(AValue: string);
+    function GetMake: string;
     function DownloadFromBase(aClient:TRepoClient; aModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
@@ -422,6 +422,7 @@ type
     function IsHelpInstaller:boolean;
     function IsUniversalInstaller:boolean;
     {$IFDEF MSWINDOWS}
+    function GetShell: string;
     function GetStrayShell: boolean;
     {$ENDIF MSWINDOWS}
   protected
@@ -484,7 +485,6 @@ type
     FMUSL: boolean;
     FFPCUnicode: boolean;
     FMUSLLinker: string;
-    property Shell: string read GetShell;
     property Make: string read GetMake;
     procedure SetFPCInstallDirectory(value:string);virtual;
     // Check for existence of required executables; if not there, get them if possible
@@ -506,6 +506,7 @@ type
     // Clone/update using Git; use SourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     {$IFDEF MSWINDOWS}
+    property Shell: string read GetShell;
     // Make a list (in FUtilFiles) of all binutils that can be downloaded
     procedure CreateBinutilsList({%H-}aVersion:string='');
     // Download make.exe, patch.exe etc into the make directory (only implemented for Windows):
@@ -517,6 +518,7 @@ type
     function DownloadWget: boolean;
     function DownloadFreetype: boolean;
     function DownloadZlib: boolean;
+    function DownloadMake: boolean;
     {$ENDIF}
     function DownloadJasmin: boolean;
     // Looks for SVN client in subdirectories and sets FSVNClient.SVNExecutable if found.
@@ -984,14 +986,19 @@ begin
   Result := FMake;
 end;
 
+{$IFDEF MSWINDOWS}
 function TInstaller.GetShell: string;
+var
+  output:string;
 begin
-  {$IFDEF MSWINDOWS}
-  {$IFDEF CPUX86}
+  {$ifdef win32}
   if FShell = '' then
   begin
     // disable for now .... not working 100%
-    {
+    (*
+
+    //FShell := 'C:/Windows/System32/cmd.exe';
+    //exit;
     // do we have a stray sh.exe in the path ...
     if StrayShell then
     begin
@@ -1005,14 +1012,16 @@ begin
         FShell := Trim(output);
       end;
     end;
-    }
+
+    *)
   end;
-  {$ENDIF CPU32}
-  {$ENDIF MSWINDOWS}
+  {$endif}
+  {$ifdef win64}
+  FShell := '';
+  {$endif}
   Result := FShell;
 end;
 
-{$IFDEF MSWINDOWS}
 function TInstaller.GetStrayShell: boolean;
 begin
   result:=false;
@@ -1243,7 +1252,6 @@ begin
     aFile:=MakePath + 'patch.exe';
     if (Not FileExists(aFile)) then
     begin
-      //aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
       aURL:=FPCGITLABBUILDBINARIES+'/-/raw/main/install/binw32/';
       GetFile(aURL+'patch.exe',aFile);
       GetFile(aURL+'patch.exe.manifest',aFile + '.manifest');
@@ -1260,7 +1268,6 @@ begin
     aFile:=MakePath + 'pwd.exe';
     if (Not FileExists(aFile)) then
     begin
-      //aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
       aURL:=FPCGITLABBUILDBINARIES+'/-/raw/main/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
       GetFile(aURL+'pwd.exe',aFile);
     end;
@@ -1596,22 +1603,18 @@ begin
 
     if OperationSucceeded then
     begin
-    {$IFDEF MSWINDOWS}
+      {$IFDEF MSWINDOWS}
       // check if we have make ... otherwise get it from standard URL
       if (NOT FileExists(Make)) then
       begin
-        //aURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
-        //aURL:=FPCTRUNKBINARIES+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
-        aURL:=FPCGITLABBUILDBINARIES+'/-/raw/main/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
         Infoln(localinfotext+'Make binary not found. Getting it.',etInfo);
-        Infoln(localinfotext+'Make binary download from: '+aURL+'.',etDebug);
-        GetFile(aURL+ExtractFileName(Make),Make);
+        DownloadMake;
         OperationSucceeded:=FileExists(Make);
       end;
-    {$ELSE}
+      {$ELSE}
       OperationSucceeded := CheckExecutable(Make, ['-v'], '');
       if (NOT OperationSucceeded) then Infoln(localinfotext+Make+' not found.',etError);
-    {$ENDIF}
+      {$ENDIF}
     end;
 
     FNeededExecutablesChecked:=OperationSucceeded;
@@ -2309,10 +2312,10 @@ begin
   SetLength(FUtilFiles,0); //clean out any cruft
 
   //aSourceURL:=FPCTRUNKBINARIES+'/install/binw32/';
-  aSourceURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
+  aSourceURL:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+DEFAULTFPCVERSIONURL+'/install/binw32/';
   {$ifdef win64}
   //aSourceURL64:=FPCBINARIES+'/install/binw64/';
-  aSourceURL64:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw64/';
+  aSourceURL64:=FPCGITLABBUILDBINARIES+'/-/raw/release_'+DEFAULTFPCVERSIONURL+'/install/binw64/';
   {$endif}
 
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)
@@ -2938,6 +2941,93 @@ begin
   DeleteDirectoryEx(ZipDir+DirectorySeparator);
   Result:=true; //never fail
 end;
+
+function TInstaller.DownloadMake: boolean;
+const
+  {$ifdef win64}
+  NewSourceURL : array [0..2] of string = (
+      FPCUPGITREPO+'/releases/download/windows_'+NEWBINSTAG+'/Make_win64.zip',
+      FPCGITLABBUILDBINARIES+'/-/raw/release_'+DEFAULTFPCVERSIONURL+'/install/binw64/make.exe',
+      FPCGITLABBUILDBINARIES+'/-/raw/main/install/binw64/make.exe'
+    );
+  {$endif}
+  {$ifdef win32}
+  NewSourceURL : array [0..2] of string = (
+      FPCUPGITREPO+'/releases/download/windows_'+NEWBINSTAG+'/Make_win32.zip',
+      FPCGITLABBUILDBINARIES+'/-/raw/release_'+DEFAULTFPCVERSIONURL+'/install/binw32/make.exe',
+      FPCGITLABBUILDBINARIES+'/-/raw/main/install/binw32/make.exe'
+    );
+  {$endif}
+var
+  OperationSucceeded: boolean;
+  SourceMakeExe,TargetMakeExe:string;
+  SourceName,ZipDir:string;
+  i:integer;
+begin
+
+  OperationSucceeded := false;
+  Infoln(localinfotext+'Going to download custom latest fpcupdeluxe Make.',etInfo);
+  SourceName := GetTempFileNameExt('FPCUPTMP','zip');
+  for i:=0 to (Length(NewSourceURL)-1) do
+  begin
+    if (i=0) then SourceName := GetTempFileNameExt('FPCUPTMP','zip');
+    if (i=1) then SourceName := GetTempFileNameExt('FPCUPTMP','exe');
+    //always get this file with the native downloader !!
+    try
+      OperationSucceeded:=GetFile(NewSourceURL[i],SourceName,true,true);
+      if (NOT OperationSucceeded) then
+      begin
+        // try one more time
+        SysUtils.DeleteFile(SourceName);
+        OperationSucceeded:=GetFile(NewSourceURL[i],SourceName,true,true);
+      end;
+      if (NOT OperationSucceeded) then
+        SysUtils.DeleteFile(SourceName)
+      else
+        break;
+    except
+      on E: Exception do
+      begin
+        OperationSucceeded := false;
+        WritelnLog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading Make', true);
+      end;
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    if (ExtractFileExt(SourceName)='.zip') then
+    begin
+      ZipDir:=GetTempDirName;
+      // Extract
+      with TNormalUnzipper.Create do
+      begin
+        try
+          OperationSucceeded:=DoUnZip(SourceName,ZipDir,[]);
+        finally
+          Free;
+        end;
+      end;
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    TargetMakeExe:=Make;
+    SourceMakeExe:=IncludeTrailingPathDelimiter(ZipDir)+ExtractFileName(TargetMakeExe);
+    //MoveFile
+    OperationSucceeded := MoveFile(SourceMakeExe,TargetMakeExe);
+    if (NOT OperationSucceeded) then
+    begin
+      WritelnLog(etError, localinfotext + 'Could not move ' + SourceMakeExe + ' towards '+TargetMakeExe);
+    end;
+  end;
+
+  SysUtils.Deletefile(SourceName);
+
+  Result := OperationSucceeded;
+end;
+
 
 {$ENDIF}
 
