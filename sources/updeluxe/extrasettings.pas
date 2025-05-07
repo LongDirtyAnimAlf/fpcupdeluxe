@@ -336,7 +336,7 @@ resourcestring
   CaptionCheckIncludeLCL = 'Include LCL with cross-compiler.';
 
   HintCheckUpdateOnly = '';
-  CaptionCheckUpdateOnly = 'FPC/Laz rebuild only.';
+  CaptionCheckUpdateOnly = 'FPC/Laz/Modules rebuild only.';
 
   HintCheckSystemFPC = 'Use the system wide install of FPC to build Lazarus.';
   CaptionCheckSystemFPC = 'Use system FPC for Lazarus.';
@@ -345,10 +345,10 @@ resourcestring
   CaptionCheckIncludeHelp = 'Include Help.';
 
   HintCheckSplitFPC = '';
-  CaptionCheckSplitFPC = 'Split FPC source and bins.';
+  CaptionCheckSplitFPC = 'Split FPC sources and bins.';
 
   HintCheckSplitLazarus = '';
-  CaptionCheckSplitLazarus = 'Split Lazarus source and bins.';
+  CaptionCheckSplitLazarus = 'Split Lazarus sources and bins.';
 
   HintCheckDockedLazarus = 'Build a docked Lazarus IDE';
   CaptionCheckDockedLazarus = 'Docked Lazarus IDE.';

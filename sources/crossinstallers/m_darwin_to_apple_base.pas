@@ -232,6 +232,11 @@ begin
     aOption:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
     if Length(aOption)>0 then
     begin
+      if CompareVersionStrings(aOption,'11.0')>=0 then
+      begin
+        aOption:='10.15';
+      end
+      else
       if CompareVersionStrings(aOption,'10.9')>=0 then
       begin
         aOption:='10.9';

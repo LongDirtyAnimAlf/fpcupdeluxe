@@ -2063,6 +2063,11 @@ begin
   {$IFDEF DARWIN}
   //Add minimum required OSX version to prevent "crti not found" errors.
   s2:=GetDarwinSDKVersion('macosx');
+  if CompareVersionStrings(s2,'11.0')>=0 then
+  begin
+    s2:='10.15';
+  end
+  else
   if CompareVersionStrings(s2,'10.9')>=0 then
   begin
     s2:='10.9';
@@ -4438,17 +4443,18 @@ begin
         ConfigText.Append('');
         ConfigText.Append('# Add some extra OSX options, if any');
 
-        // Not needed anymore.
-        (*
         if (Pos('-WM',FCompilerOptions)=0) then
         begin
           ConfigText.Append('#IFDEF DARWIN');
           s:=GetDarwinSDKVersion('macosx');
           if Length(s)>0 then
           begin
-            ConfigText.Append('# Prevents crti not found linking errors');
+            ConfigText.Append('# Prevents [crti not found] linking errors');
             ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
             //ConfigText.Append('#IFDEF CPU'+UpperCase(GetSourceCPU));
+            if CompareVersionStrings(s,'11.0')>=0 then
+              ConfigText.Append('-WM10.15')
+            else
             if CompareVersionStrings(s,'10.9')>=0 then
               ConfigText.Append('-WM10.9')
             else
@@ -4457,7 +4463,6 @@ begin
           end;
           ConfigText.Append('#ENDIF');
         end;
-        *)
 
         s:=GetDarwinSDKVersion('macosx');
         if  (Length(s)=0) OR (CompareVersionStrings(s,'10.14')>=0) then
