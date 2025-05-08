@@ -50,6 +50,10 @@ const
   MAXOSVERSION=15;
   MINOSVERSION=8;
 
+  iSDKNAME='iPhoneOS';
+  macSDKNAME='macOSX';
+  simSDKNAME='iPhoneSimulator';
+
   MAXDELPHIVERSION=22;
   MINDELPHIVERSION=12;
   NDKVERSIONNAMES:array[0..31] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e','11','11b','11c','12','12b','13b','14b','15c','16b','17c','18b','19c','20b','21e','22b');

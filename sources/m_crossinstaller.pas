@@ -633,6 +633,7 @@ var
   BinDir,LibDir:string;
 begin
   result:=FLibsFound;
+
   if (NOT result) then
   begin
     GetCrossToolsDir(TargetCPU,TargetOS,FMUSL,FSolarisOI,BinDir,LibDir);

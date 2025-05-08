@@ -1536,7 +1536,7 @@ begin
 
           {$ifdef DARWIN}
           //{$if (defined(CPUAARCH64)) AND (defined(DARWIN))}
-          s2:=GetDarwinSDKVersion('macosx');
+          s2:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
           if  (Length(s2)=0) OR (CompareVersionStrings(s2,'10.14')>=0) then
           begin
             //if MakeCycle in [st_Compiler,st_Rtl,st_Packages] then
@@ -1568,12 +1568,10 @@ begin
           if (MakeCycle<>st_NativeCompiler) then
           {$endif}
           begin
-            //if LinuxLegacy then CrossInstaller.AddCrossOption('-XLC');
-            if LinuxLegacy then CrossInstaller.AddFPCCFGSnippet('-XLC',True);
+            if LinuxLegacy then CrossInstaller.AddFPCCFGSnippet('-XLC');
             // During a native install with libc, we add this define into the fpc.cfg
             // So, add it also as cross-config, however not 100% necessary
-            //if UseLibc then CrossInstaller.AddCrossOption('-d'+DEFINE_FPC_LIBC);
-            if UseLibc then CrossInstaller.AddFPCCFGSnippet('-d'+DEFINE_FPC_LIBC,True);
+            if UseLibc then CrossInstaller.AddFPCCFGSnippet('-d'+DEFINE_FPC_LIBC);
             for i:=0 to CrossInstaller.CrossOpt.Count-1 do
               CrossCompilerOptions:=CrossCompilerOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
             CrossCompilerOptions:=TrimRight(CrossCompilerOptions);
@@ -2060,27 +2058,31 @@ begin
   if FMUSL then FPCBuildOptions:='-FL'+FMUSLLinker+' '+FPCBuildOptions;
   {$ENDIF}
 
+
   {$IFDEF DARWIN}
-  //Add minimum required OSX version to prevent "crti not found" errors.
-  s2:=GetDarwinSDKVersion('macosx');
-  if CompareVersionStrings(s2,'11.0')>=0 then
+  if (Pos('-WM',FPCBuildOptions)=0) then
   begin
-    s2:='10.15';
-  end
-  else
-  if CompareVersionStrings(s2,'10.9')>=0 then
-  begin
-    s2:='10.9';
-  end;
-  if Length(s2)>0 then
-  begin
-    FPCBuildOptions:='-WM'+s2+' '+FPCBuildOptions;
-    {
-    if CompareVersionStrings(s2,'10.14')>=0 then
+    //Add minimum required OSX version to prevent "crti not found" errors.
+    s2:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
+    if CompareVersionStrings(s2,'11.0')>=0 then
     begin
-      FPCBuildOptions:='-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib '+FPCBuildOptions;
+      s2:='10.15';
+    end
+    else
+    if CompareVersionStrings(s2,'10.9')>=0 then
+    begin
+      s2:='10.9';
     end;
-    }
+    if Length(s2)>0 then
+    begin
+      FPCBuildOptions:='-WM'+s2+' '+FPCBuildOptions;
+      {
+      if CompareVersionStrings(s2,'10.14')>=0 then
+      begin
+        FPCBuildOptions:='-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib '+FPCBuildOptions;
+      end;
+      }
+    end;
   end;
 
   s2:=Which('codesign');
@@ -3569,7 +3571,7 @@ begin
     {$endif}
     {$ifdef Darwin}
     // for the suitable XCode binary utilities
-    s1:=GetDarwinSDKVersion('macosx');
+    s1:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
     if CompareVersionStrings(s1,'10.14')>=0 then
     begin
       s:='/Library/Developer/CommandLineTools/usr/bin'+PathSeparator;
@@ -4446,7 +4448,7 @@ begin
         if (Pos('-WM',FCompilerOptions)=0) then
         begin
           ConfigText.Append('#IFDEF DARWIN');
-          s:=GetDarwinSDKVersion('macosx');
+          s:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
           if Length(s)>0 then
           begin
             ConfigText.Append('# Prevents [crti not found] linking errors');
@@ -4464,7 +4466,7 @@ begin
           ConfigText.Append('#ENDIF');
         end;
 
-        s:=GetDarwinSDKVersion('macosx');
+        s:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
         if  (Length(s)=0) OR (CompareVersionStrings(s,'10.14')>=0) then
         begin
           ConfigText.Append('');

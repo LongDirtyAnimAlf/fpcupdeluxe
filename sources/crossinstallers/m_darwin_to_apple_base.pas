@@ -28,9 +28,6 @@ uses
 
 const
   SDKNAME='$SDK';
-  iSDKNAME='iPhoneOS';
-  macSDKNAME='macOSX';
-  simSDKNAME='iPhoneSimulator';
 
   LIBSLOCATIONSBASEPATH    = SDKNAME+'.platform/Developer/SDKs/'+SDKNAME+'.sdk';
   TOOLSLOCATIONSBASEPATH   = SDKNAME+'.platform/Developer/usr/bin';
@@ -60,6 +57,7 @@ var
   aOption:string;
 begin
   result:=inherited;
+
   if result then exit;
 
   FLibsPath:='';
@@ -202,46 +200,55 @@ begin
 
   if (((TargetOS=TOS.ios) OR (TargetOS=TOS.darwin)) AND (TargetCPU=TCPU.arm)) then
   begin
-    aOption:=GetDarwinSDKVersion(LowerCase(iSDKNAME));
-    if Length(aOption)>0 then
+    if (Pos('-WP',FPCCFGSnippet)=0) then
     begin
-      if CompareVersionStrings(aOption,'6.0')>=0 then
+      aOption:=GetDarwinSDKVersion(LowerCase(iSDKNAME));
+      if Length(aOption)>0 then
       begin
-        aOption:='6.0';
+        if CompareVersionStrings(aOption,'6.0')>=0 then
+        begin
+          aOption:='6.0';
+        end;
+        AddFPCCFGSnippet('-WP'+aOption);
       end;
-      AddFPCCFGSnippet('-WP'+aOption);
     end;
   end;
 
   if (TargetOS=TOS.iphonesim) then
   begin
-    aOption:=GetDarwinSDKVersion(LowerCase(simSDKNAME));
-    if Length(aOption)=0 then aOption:=GetDarwinSDKVersion(LowerCase(iSDKNAME));
-    if Length(aOption)>0 then
+    if (Pos('-WP',FPCCFGSnippet)=0) then
     begin
-      if CompareVersionStrings(aOption,'8.1')>=0 then
+      aOption:=GetDarwinSDKVersion(LowerCase(simSDKNAME));
+      if Length(aOption)=0 then aOption:=GetDarwinSDKVersion(LowerCase(iSDKNAME));
+      if Length(aOption)>0 then
       begin
-        aOption:='8.1';
+        if CompareVersionStrings(aOption,'8.1')>=0 then
+        begin
+          aOption:='8.1';
+        end;
+        AddFPCCFGSnippet('-WP'+aOption);
       end;
-      AddFPCCFGSnippet('-WP'+aOption);
     end;
   end;
 
   if (TargetOS=TOS.darwin) then
   begin
-    aOption:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
-    if Length(aOption)>0 then
+    if (Pos('-WM',FPCCFGSnippet)=0) then
     begin
-      if CompareVersionStrings(aOption,'11.0')>=0 then
+      aOption:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
+      if Length(aOption)>0 then
       begin
-        aOption:='10.15';
-      end
-      else
-      if CompareVersionStrings(aOption,'10.9')>=0 then
-      begin
-        aOption:='10.9';
+        if CompareVersionStrings(aOption,'11.0')>=0 then
+        begin
+          aOption:='10.15';
+        end
+        else
+        if CompareVersionStrings(aOption,'10.9')>=0 then
+        begin
+          aOption:='10.9';
+        end;
+        AddFPCCFGSnippet('-WM'+aOption);
       end;
-      AddFPCCFGSnippet('-WM'+aOption);
     end;
   end;
 
