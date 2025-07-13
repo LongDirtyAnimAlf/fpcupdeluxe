@@ -2267,9 +2267,11 @@ end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;
 const
+ {$if defined(LCLQT) OR defined(LCLQT5) OR defined(LCLQT6)}
  QTMAGICBASE = 'QT trickery';
  QTMAGICBEGIN = SnipMagicBegin+QTMAGICBASE;
  QTMAGICEND = SnipMagicEnd+' '+QTMAGICBASE;
+ {$endif}
  VERSIONEXPRESSION='$FPC_VERSION';
  CPUEXPRESSION='$CPU_TARGET';
  OSEXPRESSION='$OS_TARGET';
@@ -2343,9 +2345,11 @@ var
   SourceInfo         : TRevision;
   FilePath           : string;
   aIndex             : integer;
+  {$IF DEFINED(LCLQt5) OR DEFINED(LCLQt6)}
   FPCConfig          : TStringList;
   QTConfig           : TStringList;
   SnipBegin,SnipEnd  : integer;
+  {$ENDIF}
 begin
   result:=inherited;
   result:=InitModule;

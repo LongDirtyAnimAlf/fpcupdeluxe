@@ -1063,6 +1063,7 @@ begin
   FPCUnicode:=false;
 
   SoftFloat:=true;
+
   Self.DelphiRTTI:=false;;
   OnlinePatching:=false;
   ReApplyLocalChanges:=false;
@@ -1178,19 +1179,19 @@ begin
         if (NOT success) then
         begin
           BaseBinsURL:='';
-          if GetTOS(GetSourceOS) in WINDOWS_OS then BaseBinsURL:='windows_';
+          if GetSourceTOS in WINDOWS_OS then BaseBinsURL:='windows_';
 
-          if (GetTCPU(GetSourceCPU)=TCPU.x86_64) then
+          if (GetSourceTCPU=TCPU.x86_64) then
           begin
-            if (GetTOS(GetSourceOS)=TOS.linux) then BaseBinsURL:='linux_amd64_';
-            if (GetTOS(GetSourceOS)=TOS.freebsd) then BaseBinsURL:='freebsd_amd64_';
-            if (GetTOS(GetSourceOS)=TOS.darwin) then BaseBinsURL:='darwin_amd64_';
+            if (GetSourceTOS=TOS.linux) then BaseBinsURL:='linux_amd64_';
+            if (GetSourceTOS=TOS.freebsd) then BaseBinsURL:='freebsd_amd64_';
+            if (GetSourceTOS=TOS.darwin) then BaseBinsURL:='darwin_amd64_';
           end;
 
-          if (GetTCPU(GetSourceCPU)=TCPU.aarch64) then
+          if (GetSourceTCPU=TCPU.aarch64) then
           begin
-            //if (GetTOS(GetSourceOS)=TOS.linux) then BaseBinsURL:='linux_aarch64_';
-            if (GetTOS(GetSourceOS)=TOS.darwin) then BaseBinsURL:='darwin_arm64_';
+            //if (GetSourceTOS=TOS.linux) then BaseBinsURL:='linux_aarch64_';
+            if (GetSourceTOS=TOS.darwin) then BaseBinsURL:='darwin_arm64_';
           end;
 
           if (Length(BaseBinsURL)>0) then
@@ -1234,7 +1235,7 @@ begin
         if (NOT success) then
         begin
           BaseBinsURL:='';
-          if GetTOS(GetSourceOS) in WINDOWS_OS then BaseBinsURL:='win'
+          if GetSourceTOS in WINDOWS_OS then BaseBinsURL:='win'
           else
              if GetSourceOS=GetOS(TOS.linux) then
              begin
@@ -1490,14 +1491,14 @@ begin
   FShortcutCreated:=false;
 
   if
-    (FSequencer.FParent.CrossCPU_Target=GetTCPU(GetSourceCPU))
+    (FSequencer.FParent.CrossCPU_Target=GetSourceTCPU)
     AND
-    (FSequencer.FParent.CrossOS_Target=GetTOS(GetSourceOS))
+    (FSequencer.FParent.CrossOS_Target=GetSourceTOS)
   then
   begin
     //if (NOT FSequencer.FParent.MUSL) then
     {$ifdef Linux}
-    //if (NOT ((MUSL OR LinuxLegacy) AND (GetTOS(GetSourceOS)=TOS.linux))) then
+    //if (NOT ((MUSL OR LinuxLegacy) AND (GetSourceTOS=TOS.linux))) then
     {$endif}
     begin
       RunInfo:='No crosscompiling to own target !';
@@ -1842,7 +1843,7 @@ begin
   s:='';
 
   // Bins for Windows
-  if GetTOS(GetSourceOS) in WINDOWS_OS then
+  if GetSourceTOS in WINDOWS_OS then
   begin
     case CrossOS_Target of
       TOS.linux:
@@ -1917,7 +1918,7 @@ begin
   end;
 
   // Bins for Linux AMD64
-  if ((GetTOS(GetSourceOS)=TOS.linux) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then
+  if ((GetSourceTOS=TOS.linux) AND (GetSourceTCPU=TCPU.x86_64)) then
   begin
     case CrossOS_Target of
       TOS.freebsd:
@@ -1969,7 +1970,7 @@ begin
   end;
 
   // Bins for FreeBSD AMD64
-  if ((GetTOS(GetSourceOS)=TOS.freebsd) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then
+  if ((GetSourceTOS=TOS.freebsd) AND (GetSourceTCPU=TCPU.x86_64)) then
   begin
     case CrossOS_Target of
       TOS.linux:
@@ -2002,7 +2003,7 @@ begin
   end;
 
   // Bins for Darwin AMD64
-  if ((GetTOS(GetSourceOS)=TOS.darwin) AND (GetTCPU(GetSourceCPU)=TCPU.x86_64)) then
+  if ((GetSourceTOS=TOS.darwin) AND (GetSourceTCPU=TCPU.x86_64)) then
   begin
     case CrossOS_Target of
       TOS.embedded:
@@ -2015,7 +2016,7 @@ begin
   end;
 
   // Bins for Darwin ARM64
-  if ((GetTOS(GetSourceOS)=TOS.darwin) AND (GetTCPU(GetSourceCPU)=TCPU.aarch64)) then
+  if ((GetSourceTOS=TOS.darwin) AND (GetSourceTCPU=TCPU.aarch64)) then
   begin
     case CrossOS_Target of
       TOS.embedded:

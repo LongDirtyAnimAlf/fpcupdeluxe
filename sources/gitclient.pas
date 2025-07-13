@@ -849,7 +849,7 @@ const
   TAGMAGIC = 'tags/';
 var
   Output:string;
-  i,j:integer;
+  j:integer;
 begin
   result:='';
   if NOT ValidClient then exit;

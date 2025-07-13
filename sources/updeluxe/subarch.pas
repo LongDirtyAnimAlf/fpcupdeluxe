@@ -56,7 +56,6 @@ implementation
 
 uses
   fpcuputil,
-  installerCore,
   installerUniversal,
   m_crossinstaller;
 

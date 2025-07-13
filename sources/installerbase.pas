@@ -163,11 +163,15 @@ function  GetSelectedSubArch(aCPU:TCPU;aOS:TOS):TSUBARCH;
 procedure SetSelectedSubArch(aCPU:TCPU;aOS:TOS;aSUBARCH:TSUBARCH);
 {$endif LCL}
 function GetExeExt(const aOS:TOS=TOS.osNone): string;
+function GetSourceTCPU:TCPU;
+function GetSourceTOS:TOS;
 {$ifndef FPCONLY}
 function GetLCLName(LCLType:LCL_TYPE):string;
 function GetLCLType(LCLName:string):LCL_TYPE;
 {$endif}
 procedure GetCrossToolsDir(const CrossCPU_Target:TCPU;const CrossOS_Target:TOS; const MUSL,SolarisOI:boolean; out BinPath,LibPath:string);
+
+
 
 {$ifdef LCL}
 var
@@ -458,6 +462,16 @@ begin
     else
       result:='';
   end;
+end;
+
+function GetSourceTCPU:TCPU;
+begin
+  result:=GetTCPU(GetSourceCPU);
+end;
+
+function GetSourceTOS:TOS;
+begin
+  result:=GetTOS(GetSourceOS);
 end;
 
 {$ifndef FPCONLY}

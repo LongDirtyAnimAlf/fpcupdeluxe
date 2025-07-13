@@ -265,7 +265,7 @@ end;
 {$ifndef FPCONLY}
 function TUniversalInstaller.RebuildLazarus:boolean;
 var
-  OldPath,s,s2:string;
+  OldPath,s:string;
   localoptions:string;
   LazarusConfig: TUpdateLazConfig;
   i,j:integer;
@@ -2705,9 +2705,9 @@ begin
   // Windows 64bit, Linux AMD64, Darwin AMD64, Darwin ARM64
   // This check could also be skipped, but anyhow
   ValidTarget:=false;
-  if (NOT ValidTarget) then ValidTarget:=(GetTOS(GetSourceOS) in WINDOWS_OS);
-  if (NOT ValidTarget) then ValidTarget:=(GetTOS(GetSourceOS) in [TOS.linux]) AND (GetTCPU(GetSourceCPU) in [TCPU.x86_64]);
-  if (NOT ValidTarget) then ValidTarget:=(GetTOS(GetSourceOS) in [TOS.darwin]) AND (GetTCPU(GetSourceCPU) in [TCPU.x86_64,TCPU.aarch64]);
+  if (NOT ValidTarget) then ValidTarget:=(GetSourceTOS in WINDOWS_OS);
+  if (NOT ValidTarget) then ValidTarget:=(GetSourceTOS in [TOS.linux]) AND (GetSourceTCPU in [TCPU.x86_64]);
+  if (NOT ValidTarget) then ValidTarget:=(GetSourceTOS in [TOS.darwin]) AND (GetSourceTCPU in [TCPU.x86_64,TCPU.aarch64]);
 
   if (NOT ValidTarget) then exit;
 
@@ -3384,7 +3384,7 @@ begin
 
   for URLData in CEFBuildsURLTable do
   begin
-    if ((URLData.CPU=GetTCPU(GetSourceCPU)) AND (URLData.OS=GetTOS(GetSourceOS))) then
+    if ((URLData.CPU=GetSourceTCPU) AND (URLData.OS=GetSourceTOS)) then
     begin
       aURL:=URLData.URL;
 

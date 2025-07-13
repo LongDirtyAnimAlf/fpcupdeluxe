@@ -101,7 +101,7 @@ function Tany_linuxarm.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
   BinPrefixTry:string;
-  hardfloat:boolean;
+  //hardfloat:boolean;
   requirehardfloat:boolean;
   {$ifdef Darwin}
   i:integer;
@@ -115,7 +115,7 @@ begin
 
   BinPrefixTry:=TargetCPUName+'-'+TargetOSName+'-'+LINUXTYPE[FMUSL]+'-';
 
-  hardfloat:=false;
+  //hardfloat:=false;
   requirehardfloat:=(StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1);
 
   if (NOT requirehardfloat) then
@@ -229,7 +229,7 @@ begin
     // also check in the gnueabihf directory
     if not result then
        result:=SimpleSearchBinUtil(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabihf',AsFile);
-    if result then hardfloat:=true;
+    //if result then hardfloat:=true;
   end;
 
   // baremetal
@@ -245,7 +245,7 @@ begin
     // also check in the gnueabihf directory
     if not result then
        result:=SimpleSearchBinUtil(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabihf',AsFile);
-    if result then hardfloat:=true;
+    //if result then hardfloat:=true;
   end;
 
   // Also allow for android crossbinutils
@@ -269,7 +269,7 @@ begin
     if not result then
     begin
       result:=SimpleSearchBinUtil(BasePath,DirName+'-'+LINUXTYPE[FMUSL]+'eabihf',AsFile);
-      if result then hardfloat:=true;
+      //if result then hardfloat:=true;
     end;
   end;
 

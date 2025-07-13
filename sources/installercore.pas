@@ -763,8 +763,8 @@ begin
   if ((localCPU=TCPU.cpuNone) AND (localOS=TOS.osNone)) then
   begin
     // We build native, so get native CPU and OS.
-    localCPU:=GetTCPU(GetSourceCPU);
-    localOS:=GetTOS(GetSourceOS);
+    localCPU:=GetSourceTCPU;
+    localOS:=GetSourceTOS;
   end;
   if (localCPU in [TCPU.loongarch64,TCPU.xtensa,TCPU.wasm32]) then SetResult('3.3.1',result);
   if (localOS in [TOS.freertos,TOS.wasip1]) then SetResult('3.3.1',result);
@@ -954,8 +954,8 @@ begin
   end
   else
   begin
-    aCPU:=GetTCPU(GetSourceCPU);
-    aOS:=GetTOS(GetSourceOS);
+    aCPU:=GetSourceTCPU;
+    aOS:=GetSourceTOS;
   end;
   if ((aOS=TOS.linux) AND (aCPU in LEGACYCPU)) then
     result:=FLinuxLegacy;
@@ -1285,7 +1285,7 @@ begin
     F7zip:=Which('7z');
     if Not FileExists(F7zip) then Which('7za');
 
-    if GetTOS(GetSourceOS) in [TOS.darwin] then
+    if GetSourceTOS in [TOS.darwin] then
     begin
       if Not FileExists(F7zip) then Which('7zx');
       if Not FileExists(F7zip) then Which('7zX');
@@ -1296,7 +1296,7 @@ begin
 
     if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,s+GetExeExt]);
 
-    if (NOT (GetTOS(GetSourceOS) in WINDOWS_OS)) then
+    if (NOT (GetSourceTOS in WINDOWS_OS)) then
     begin
       s:='7zz';
       if Not FileExists(F7zip) then F7zip := ConcatPaths([aDir,s]);

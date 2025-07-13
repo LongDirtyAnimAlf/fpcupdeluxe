@@ -2929,7 +2929,7 @@ begin
   //{$ifdef Linux}
   //if FPCupManager.MUSL then
   begin
-    if ((FPCupManager.CrossOS_Target=GetTOS(GetSourceOS)) AND (FPCupManager.CrossCPU_Target=GetTCPU(GetSourceCPU))) then
+    if ((FPCupManager.CrossOS_Target=GetSourceTOS) AND (FPCupManager.CrossCPU_Target=GetSourceTCPU)) then
     begin
       if Sender<>nil then
       begin
@@ -3348,7 +3348,7 @@ begin
           begin
             if (FPCupManager.CrossCPU_Target=TCPU.xtensa) AND (FPCupManager.CrossOS_Target=TOS.freertos) then
             begin
-              //if GetTOS(GetSourceOS) in [TOS.darwin,TOS.linux] then
+              //if GetSourceTOS in [TOS.darwin,TOS.linux] then
               begin
                 // Get (if any) xtensa tools from https://github.com/michael-ring/espsdk4fpc
                 try
@@ -4107,7 +4107,7 @@ begin
   FPCupManager.UseWget:=Form2.UseWget;
 
   // set custom FPC compiler by special user input through setup+
-  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTCPU(GetSourceCPU),GetTOS(GetSourceOS),TSUBARCH.saNone);
+  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetSourceTCPU,GetSourceTOS,TSUBARCH.saNone);
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
   FPCupManager.BaseDirectory:=sInstallDir;
@@ -4548,6 +4548,7 @@ begin
   AddMessage('Detected mayor FreeBSD version '+InttoStr(GetFreeBSDVersion));
   {$endif FreeBSD}
   {$endif NetBSD}
+  AddMessage('Source CPU:'+GetSourceCPU+'. Source OS:'+GetSourceOS+'.');
 
   {$IFDEF LINUX}
   if IsLinuxMUSL then AddMessage('Seems we are running on a MUSL Linux.');

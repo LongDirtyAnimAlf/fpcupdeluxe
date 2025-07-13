@@ -102,9 +102,6 @@ begin
 end;
 
 function TSVNClient.FindRepoExecutable: string;
-var
-  //Output: string;
-  rv:integer;
 begin
   Result := FRepoExecutable;
 
@@ -217,7 +214,6 @@ end;
 
 procedure TSVNClient.CheckOut(UseForce:boolean=false);
 var
-  i:integer;
   Command: string;
   Output: string = '';
   ProxyCommand: string;
@@ -365,7 +361,6 @@ end;
 
 procedure TSVNClient.Update;
 var
-  i:integer;
   Command: string;
   FileList: TStringList;
   Output: string = '';
@@ -877,7 +872,6 @@ const
   RevLength = Length(RevTarget);
   RevExpression = '\:\s+(\d+)\s'; //regex to match revision in svn info
 var
-  i:integer;
   LRevision: string = ''; // Revision of repository as a whole
   Output: string = '';
   RevExtr: TRegExpr;

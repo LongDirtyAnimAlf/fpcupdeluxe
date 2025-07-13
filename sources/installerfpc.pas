@@ -30,7 +30,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {$mode objfpc}{$H+}
-
 {$I fpcupdefines.inc}
 
 interface
@@ -286,7 +285,7 @@ var
   NativeAge,CrossAge:Longint;
 begin
   {$ifdef Darwin}
-  if CrossInstaller.TargetCPU=GetTCPU(GetSourceCPU) then
+  if CrossInstaller.TargetCPU=GetSourceTCPU then
   begin
     // On Darwin, native compiler and cross-compiler share the same name.
     // And also are the same (in theory at least)
@@ -1890,12 +1889,15 @@ const
   YYPARSE='yyparse.cod';
 var
   OperationSucceeded:boolean;
-  i,MakeCommandIndex:integer;
+  MakeCommandIndex:integer;
   UnitSearchPath:string;
   FPCBuildOptions:string;
   s1,s2:string;
   {$IFDEF UNIX}
   //s3:string;
+  {$ENDIF}
+  {$IFDEF MSWINDOWS}
+  i:integer;
   {$ENDIF}
   //FPCDirStore:string;
 begin
@@ -2060,30 +2062,19 @@ begin
 
 
   {$IFDEF DARWIN}
+
+  {$IFDEF MACOSXVERSIONMAGIG}
   if (Pos('-WM',FPCBuildOptions)=0) then
   begin
     //Add minimum required OSX version to prevent "crti not found" errors.
     s2:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
     if CompareVersionStrings(s2,'11.0')>=0 then
-    begin
-      s2:='10.15';
-    end
+      FPCBuildOptions:='-WM10.15 '+FPCBuildOptions;
     else
-    if CompareVersionStrings(s2,'10.9')>=0 then
-    begin
-      s2:='10.9';
-    end;
-    if Length(s2)>0 then
-    begin
-      FPCBuildOptions:='-WM'+s2+' '+FPCBuildOptions;
-      {
-      if CompareVersionStrings(s2,'10.14')>=0 then
-      begin
-        FPCBuildOptions:='-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib '+FPCBuildOptions;
-      end;
-      }
-    end;
+      if CompareVersionStrings(s2,'10.9')>=0 then
+        FPCBuildOptions:='-WM10.9 '+FPCBuildOptions;
   end;
+  {$ENDIF}
 
   s2:=Which('codesign');
   if (NOT FileExists(s2)) then Processor.SetParamNameData('CODESIGN','/usr/bin/true');
@@ -3252,8 +3243,7 @@ var
   i:integer;
   aCompilerFound:boolean;
   {$IFDEF FREEBSD}
-  j,k,l:integer;
-  FreeBSDVersion:integer;
+  BSDVersion:integer;
   {$ENDIF}
   s:string;
   {$ifdef MSWindows}
@@ -3370,16 +3360,16 @@ begin
                 {$ifdef FREEBSD}
                 if (NOT aCompilerFound) then
                 begin
-                  j:=GetFreeBSDVersion;
-                  if j=0 then j:=DEFAULTFREEBSDVERSION; // Use FreeBSD default version when GetFreeBSDVersion does not give a result
-                  aBootstrapURL:=StringReplace(aBootstrapperFilename,'-'+GetSourceOS,'-'+GetSourceOS+InttoStr(j),[]);
+                  BSDVersion:=GetFreeBSDVersion;
+                  if BSDVersion=0 then BSDVersion:=DEFAULTFREEBSDVERSION; // Use FreeBSD default version when GetFreeBSDVersion does not give a result
+                  aBootstrapURL:=StringReplace(aBootstrapperFilename,'-'+GetSourceOS,'-'+GetSourceOS+InttoStr(BSDVersion),[]);
                   aCompilerFound:=(Pos(aBootstrapURL,aCompilerList[i])>0);
                   if (NOT aCompilerFound) then
                   begin
                     //try other versions if available
-                    for j:=14 downto 9 do
+                    for BSDVersion:=14 downto 9 do
                     begin
-                      aBootstrapURL:=StringReplace(aBootstrapperFilename,'-'+GetSourceOS,'-'+GetSourceOS+InttoStr(j),[]);
+                      aBootstrapURL:=StringReplace(aBootstrapperFilename,'-'+GetSourceOS,'-'+GetSourceOS+InttoStr(BSDVersion),[]);
                       aCompilerFound:=(Pos(aBootstrapURL,aCompilerList[i])>0);
                       if aCompilerFound then break;
                     end;
@@ -3405,9 +3395,9 @@ begin
               {$ifdef FREEBSD}
               if (NOT aCompilerFound) then
               begin
-                j:=GetFreeBSDVersion;
-                if j=0 then j:=DEFAULTFREEBSDVERSION; // Use FreeBSD default version when GetFreeBSDVersion does not give a result
-                aBootstrapURL:=FPCUPGITREPOBOOTSTRAPPER+'/'+StringReplace(aBootstrapperFilename,'-'+GetSourceOS,'-'+GetSourceOS+InttoStr(j),[]);
+                BSDVersion:=GetFreeBSDVersion;
+                if BSDVersion=0 then BSDVersion:=DEFAULTFREEBSDVERSION; // Use FreeBSD default version when GetFreeBSDVersion does not give a result
+                aBootstrapURL:=FPCUPGITREPOBOOTSTRAPPER+'/'+StringReplace(aBootstrapperFilename,'-'+GetSourceOS,'-'+GetSourceOS+InttoStr(BSDVersion),[]);
                 aCompilerFound:=aDownLoader.checkURL(aBootstrapURL);
               end;
               {$endif}
@@ -3877,14 +3867,12 @@ begin
   begin
     // This might also be done in the cross-compilers themselves.
     if LinuxLegacy then FUseLibc:=True;
-    if (CrossInstaller.TargetOS=TOS.dragonfly) then FUseLibc:=True;
-    if (CrossInstaller.TargetOS=TOS.freebsd) then FUseLibc:=True;
+    if (CrossInstaller.TargetOS in [TOS.dragonfly,TOS.freebsd,TOS.darwin]) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.openbsd) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end
   else
   begin
-    if (GetSourceOS=GetOS(TOS.dragonfly)) then FUseLibc:=True;
-    if (GetSourceOS=GetOS(TOS.freebsd)) then FUseLibc:=True;
+    if (GetTOS(GetSourceOS) in [TOS.dragonfly,TOS.freebsd,TOS.darwin]) then FUseLibc:=True;
     if (GetSourceOS=GetOS(TOS.openbsd)) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end;
 
@@ -4445,6 +4433,7 @@ begin
         ConfigText.Append('');
         ConfigText.Append('# Add some extra OSX options, if any');
 
+        {$IFDEF MACOSXVERSIONMAGIG}
         if (Pos('-WM',FCompilerOptions)=0) then
         begin
           ConfigText.Append('#IFDEF DARWIN');
@@ -4465,6 +4454,7 @@ begin
           end;
           ConfigText.Append('#ENDIF');
         end;
+        {$ENDIF}
 
         s:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
         if  (Length(s)=0) OR (CompareVersionStrings(s,'10.14')>=0) then
@@ -4864,7 +4854,7 @@ begin
           {$ENDIF UNIX}
 
           // Delete compiler binary
-          aCPU:=GetTCPU(GetSourceCPU);
+          aCPU:=GetSourceTCPU;
           if (aCPU<>TCPU.cpuNone) then
           begin
             aPath:=ConcatPaths([FPCBinDir,GetCompilerName(aCPU)]);

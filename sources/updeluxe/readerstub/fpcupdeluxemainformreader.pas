@@ -2866,7 +2866,7 @@ begin
   //{$ifdef Linux}
   //if FPCupManager.MUSL then
   begin
-    if ((FPCupManager.CrossOS_Target=GetTOS(GetSourceOS)) AND (FPCupManager.CrossCPU_Target=GetTCPU(GetSourceCPU))) then
+    if ((FPCupManager.CrossOS_Target=GetSourceTOS) AND (FPCupManager.CrossCPU_Target=GetSourceTCPU)) then
     begin
       if Sender<>nil then
       begin
@@ -4038,7 +4038,7 @@ begin
   FPCupManager.UseWget:=Form2.UseWget;
 
   // set custom FPC compiler by special user input through setup+
-  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTCPU(GetSourceCPU),GetTOS(GetSourceOS),TSUBARCH.saNone);
+  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetSourceTCPU,GetSourceTOS,TSUBARCH.saNone);
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
   FPCupManager.BaseDirectory:=sInstallDir;

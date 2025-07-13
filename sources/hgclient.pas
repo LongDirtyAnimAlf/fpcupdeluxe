@@ -86,8 +86,6 @@ begin
 end;
 
 function THGClient.FindRepoExecutable: string;
-var
-  rv:integer;
 begin
   Result := FRepoExecutable;
   // Look in path

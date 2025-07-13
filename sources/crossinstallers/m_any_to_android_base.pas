@@ -308,15 +308,7 @@ end;
 function Tany_android.GetBinUtils(Basepath:string): boolean;
 var
   BinPrefixTry: string;
-  AsFiles:TStringList;
-  ndkversion,toolchain:byte;
-  s:string;
-  AsFile,aOption: string;
-  PresetBinPath:string;
-  i:integer;
-  {$IFDEF MSWINDOWS}
-  delphiversion:byte;
-  {$ENDIF}
+  AsFile: string;
 begin
   result:=inherited;
   if result then exit;
