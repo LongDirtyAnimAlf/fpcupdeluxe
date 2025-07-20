@@ -1753,18 +1753,24 @@ begin
       if (CrossCPU_Target=TCPU.i386) then toolversion:='1804';
       if (CrossCPU_Target=TCPU.loongarch64) then
       begin
-        ostype:='Deepin';
-        toolversion:='0803';
+        //ostype:='Deepin';
+        //toolversion:='0803';
+        ostype:='Debian';
+        toolversion:='13';
       end;
-      if (CrossCPU_Target=TCPU.riscv32) then// s:='Linux_riscv32_glibc_225.zip';
+      if (CrossCPU_Target=TCPU.riscv32) then
       begin
+        // s:='Linux_riscv32_glibc_225.zip';
         ostype:='glibc';
         toolversion:='225';
       end;
-      if (CrossCPU_Target=TCPU.riscv64) then// s:='Linux_riscv64_glibc_235.zip';
+      if (CrossCPU_Target=TCPU.riscv64) then
       begin
-        ostype:='glibc';
-        toolversion:='235';
+        // s:='Linux_riscv64_glibc_235.zip';
+        //ostype:='glibc';
+        //toolversion:='235';
+        ostype:='Ubuntu';
+        toolversion:='2504';
       end;
     end;
   end;
@@ -1804,6 +1810,7 @@ begin
   begin
     //http://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/VM-IMAGES
     //https://mirrors.xtom.ee/freebsd-pkg
+    if (CrossCPU_Target=TCPU.aarch64) then toolversion:='14';
     if (CrossCPU_Target=TCPU.x86_64) then toolversion:='10';
     if (CrossCPU_Target=TCPU.i386) then toolversion:='10';
   end;
