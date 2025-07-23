@@ -4,14 +4,14 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="win32,win64,linuxi386,linux64,linuxaarch64,freebsdi386,freebsdx64,linuxppc64,darwinx64,darwinarm64,darwini386"/>
-    <BuildModes Active="openbsdx64"/>
+    <BuildModes Active="linux64"/>
     <Units Count="1">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="443"/>
-        <CursorPos Y="458"/>
+        <TopLine Value="521"/>
+        <CursorPos X="67" Y="543"/>
         <UsageCount Value="69"/>
         <Loaded Value="True"/>
       </Unit0>

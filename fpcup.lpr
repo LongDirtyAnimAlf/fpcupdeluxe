@@ -545,7 +545,9 @@ begin
               begin
                 writeln('Download successfull. Unpacking archive.');
                 ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
-                //ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibsPath+DirectorySeparator;
+                {$ifndef MSWINDOWS}
+                ToolTargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory)+LibsPath+DirectorySeparator;
+                {$endif}
                 ForceDirectoriesSafe(ToolTargetPath);
                 with TNormalUnzipper.Create do
                 begin
