@@ -41,7 +41,6 @@ Windows
 ------------
   - none
   - If needed, the tool will download all needed binaries (bootstrap compiler, binutils, svn executable)
-  - In order to compile programs correctly with GTK widgetset under Windows, you can use the following bundle:   http://www.tarnyko.net/dl/gtk.htm
 
 Linux
 ------------
