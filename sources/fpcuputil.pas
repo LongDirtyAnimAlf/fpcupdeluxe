@@ -1692,7 +1692,7 @@ end;
 function CheckDirectory(const DirectoryName: string; const CheckRoot: boolean = false):boolean;
 {$ifndef Windows}
 const
-  FORBIDDENFOLDERS:array[0..11] of string = ('/bin','/boot','/dev','/lib','/lib32','/lib64','/proc','/root','/run','/sbin','/sys','/var');
+  FORBIDDENFOLDERS:array[0..10] of string = ('/bin','/dev','/lib','/lib32','/lib64','/proc','/root','/run','/sbin','/sys','/var');
 {$endif}
 var
   s,aDirectory:string;
@@ -1711,6 +1711,9 @@ begin
   begin
     if (Pos(s,aDirectory)=1) then exit;
   end;
+  {$ifndef HAIKU}
+  if (Pos(s,'/boot')=1) then exit;
+  {$endif}
   {$else}
   if Length(aDirectory)<=3 then exit;
   i:=Pos('\windows',aDirectory);
@@ -5823,7 +5826,7 @@ end;
 {$ifndef USEONLYCURL}
 function TUseWGetDownloader.WGetDownload(Const URL : String; aDataStream : TStream):boolean;
 var
-  Buffer : Array[0..4096] of byte;
+  Buffer : Array[0..65535] of byte;
   Count : Integer;
 begin
   result:=false;
@@ -5835,12 +5838,14 @@ begin
     // It seems that gitlab and github do'nt like the ipv6+wget combo
     if ((Pos('github.com/',URL)>0) OR (Pos('gitlab.com/',URL)>0)) then Parameters.Add('-4');
     Parameters.Add('-q');
+    //Parameters.Add('-N');
+    //Parameters.Add('--no-if-modified-since');
     Parameters.Add('--no-check-certificate');
     Parameters.Add('--user-agent="'+FUserAgent+'"');
     Parameters.Add('--tries='+InttoStr(MaxRetries));
     Parameters.Add('--output-document=-');
     Parameters.Add(URL);
-    Options:=[poUsePipes,poNoConsole];
+    Options:=[poUsePipes,poNoConsole{,poDetached}];
     Execute;
     while Running do
     begin
