@@ -449,15 +449,12 @@ begin
      except
        on excep:EParserError do begin
           DebugLn(format('{EW}[MetaDarkStyle]DSScheme parse error: "%s" line:%d column:%d  file:%s',[excep.message,excep.row,excep.column,excep.filename]));
-          FreeAndNil(result);
        end;
        on excep:Exception do begin
           DebugLn(format('{EW}[MetaDarkStyle]DSScheme parse exception: "%s" in file "%s"',[excep.message,modulename]));
-          FreeAndNil(result);
        end
        else begin
          DebugLn(format('{EW}[MetaDarkStyle]Error in file "%s"',[modulename]));
-         FreeAndNil(result);
        end;
      end;
    finally
