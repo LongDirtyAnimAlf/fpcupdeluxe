@@ -127,7 +127,7 @@ const
 
   LINUXTYPE : array[boolean] of ansistring = ('gnu','musl');
 
-  DEFINE_FPC_LIBC   = 'FPC_USE_LIBC';
+  DEFINE_FPC_LIBC       = 'FPC_USE_LIBC';
   DEFINE_FPC_DOTTED     = 'FPC_DOTTEDUNITS';
 
   ARMArchFPCStr : array[TARMARCH] of string = (

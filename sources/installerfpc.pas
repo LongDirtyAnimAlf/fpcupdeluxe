@@ -2069,7 +2069,7 @@ begin
     //Add minimum required OSX version to prevent "crti not found" errors.
     s2:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
     if CompareVersionStrings(s2,'11.0')>=0 then
-      FPCBuildOptions:='-WM10.15 '+FPCBuildOptions;
+      FPCBuildOptions:='-WM10.15 '+FPCBuildOptions
     else
       if CompareVersionStrings(s2,'10.9')>=0 then
         FPCBuildOptions:='-WM10.9 '+FPCBuildOptions;
@@ -3863,16 +3863,21 @@ begin
   // Do we need to force the use of libc :
   FUseLibc:=False;
 
+  // The makefile of the following target already have a FPC_USE_LIBC
+  // aix,beos,darwin,haiku,openbsd,solaris
+  // So, do not inlude them !
+  // Otherwise, an error about missing cnetbd will occur when compiling Lazarus
+
   if (IsCross) then
   begin
     // This might also be done in the cross-compilers themselves.
     if LinuxLegacy then FUseLibc:=True;
-    if (CrossInstaller.TargetOS in [TOS.dragonfly,TOS.freebsd,TOS.darwin]) then FUseLibc:=True;
+    if (CrossInstaller.TargetOS in [TOS.dragonfly,TOS.freebsd]) then FUseLibc:=True;
     if (CrossInstaller.TargetOS=TOS.openbsd) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end
   else
   begin
-    if (GetTOS(GetSourceOS) in [TOS.dragonfly,TOS.freebsd,TOS.darwin]) then FUseLibc:=True;
+    if (GetTOS(GetSourceOS) in [TOS.dragonfly,TOS.freebsd]) then FUseLibc:=True;
     if (GetSourceOS=GetOS(TOS.openbsd)) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end;
 

@@ -194,7 +194,6 @@ begin
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then
     begin
-      hardfloat:=true;
       // remove floating point option, if any, as this toolchain does not like them
       // tricky !
       i:=StringListStartsWith(FCrossOpts,'-CfVFPV');

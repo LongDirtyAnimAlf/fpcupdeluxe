@@ -241,7 +241,7 @@ begin
       if Length(aOption)>0 then
       begin
         if CompareVersionStrings(aOption,'11.0')>=0 then
-          AddFPCCFGSnippet('-WM10.15');
+          AddFPCCFGSnippet('-WM10.15')
         else
           if CompareVersionStrings(aOption,'10.9')>=0 then
            AddFPCCFGSnippet('-WM10.9');
