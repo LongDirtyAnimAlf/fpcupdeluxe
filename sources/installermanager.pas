@@ -1829,6 +1829,10 @@ begin
   begin
     if (CrossOS_Target=TOS.wasip1) then s:='Wasm32_Wasip1.zip';
   end;
+  if (CrossOS_Target=TOS.freertos) then
+  begin
+    if (CrossCPU_Target=TCPU.xtensa) then s:='FreeRTOS_Xtensa_437_34.zip';
+  end;
 
   if (Length(s)>0) then
   begin
