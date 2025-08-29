@@ -524,6 +524,13 @@ begin
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names};
+    if (TargetCPU=TCPU.aarch64) then
+    begin
+      AddFPCCFGSnippet('-k-z');
+      AddFPCCFGSnippet('-kcommon-page-size=16384');
+      AddFPCCFGSnippet('-k-z',false);
+      AddFPCCFGSnippet('-kmax-page-size=16384');
+    end;
   end
   else
   begin
