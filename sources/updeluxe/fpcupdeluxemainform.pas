@@ -560,8 +560,8 @@ begin
     AddMessage('FATAL ERROR !!!');
     AddMessage('');
     AddMessage(upDarwinFolderWarning1);
-    AddMessage(upDarwinFolderWarning1);
-    AddMessage(upDarwinFolderWarning1);
+    AddMessage(upDarwinFolderWarning2);
+    AddMessage(upDarwinFolderWarning3);
     AddMessage(upQuitRequest);
     DisEnable(nil,false);
     IniPropStorageApp.Active:=false;

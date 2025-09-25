@@ -3035,6 +3035,8 @@ begin
 
   try
     Output:='';
+
+    //if RunCommand('gcc',['-print-libgcc-file-name'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
     if RunCommand('gcc',['-print-prog-name=cc1'], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}) then
     begin
       s1:=Trim(Output);

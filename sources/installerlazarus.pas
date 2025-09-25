@@ -1666,7 +1666,7 @@ begin
       // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', FCompiler);
 
-      if (LazarusConfig.IfNewFile(EnvironmentConfig)) then
+      //if (LazarusConfig.IfNewFile(EnvironmentConfig)) then
       begin
         if Ultibo then
         begin
@@ -1735,6 +1735,7 @@ begin
           LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/TGDBMIDebugger/History/Item1/Value',GDBPath);
         end;
 
+
         {$IFDEF DARWIN}
         Infoln(infotext+'Looking for LLDB debugger for Lazarus.', etInfo);
         LLDBPath:='/Library/Developer/CommandLineTools/usr/bin/lldb';
@@ -1769,6 +1770,22 @@ begin
             LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/ConfigClass', 'TLldbDebugger');
             LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/DebuggerFilename',LLDBPath);
             LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Configs/'+s+'/Active',True);
+            LazarusConfig.SetVariable(DebuggerConfig, 'Debugger/Version',1);
+            LazarusConfig.SetVariable(DebuggerConfig, 'Debugger/Backends/Version',1);
+
+            s:='Debugger/Backends/'+LazarusConfig.GetListItemXPath(DebuggerConfig,'Config',0,False,True)+'/';
+            LazarusConfig.SetVariable(DebuggerConfig, s+'ConfigName', 'Standard LLDB');
+            LazarusConfig.SetVariable(DebuggerConfig, s+'ConfigClass','TLldbDebugger');
+            LazarusConfig.SetVariable(DebuggerConfig, s+'DebuggerFilename',LLDBPath);
+            LazarusConfig.SetVariable(DebuggerConfig, s+'Properties/SkipGDBDetection',True);
+            LazarusConfig.SetVariable(DebuggerConfig, s+'Properties/IgnoreLaunchWarnings',True);
+            LazarusConfig.SetVariable(DebuggerConfig, s+'Active',False);
+
+            s:='Debugger/Backends/'+LazarusConfig.GetListItemXPath(DebuggerConfig,'Config',1,False,True)+'/';
+            LazarusConfig.SetVariable(DebuggerConfig, s+'ConfigName', 'LLDB through FpDebug');
+            LazarusConfig.SetVariable(DebuggerConfig, s+'ConfigClass','TFpLldbDebugger');
+            LazarusConfig.SetVariable(DebuggerConfig, s+'DebuggerFilename',LLDBPath);
+            LazarusConfig.SetVariable(DebuggerConfig, s+'Active',True);
           end;
 
           LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',LLDBPath);

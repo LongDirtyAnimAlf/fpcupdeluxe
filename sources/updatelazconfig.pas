@@ -52,11 +52,13 @@ const
   EditorConfig='editoroptions.xml';
   // General options:
   EnvironmentConfig='environmentoptions.xml';
-  // Help optons:
+  // Debugger options
+  DebuggerConfig='debuggeroptions.xml';
+  // Help options:
   HelpConfig='helpoptions.xml';
   // Packages:
   PackageConfig='packagefiles.xml';
-  // Miscellaneous Options
+  // Miscellaneous options
   MiscellaneousConfig='miscellaneousoptions.xml';
   // FPC defines (source cache):
   FPCDefines='fpcdefines.xml';
@@ -150,7 +152,7 @@ const
   // Versions used when new config files are generated.
   // Lazarus pre 1.0: 106
   // We can assume Lazarus trunk can parse this version:
-  TrunkVersionNewEnvironmentConfig='110';
+  TrunkVersionNewEnvironmentConfig='120';
   TrunkLazarusNewEnvironmentConfig=LAZARUSTRUNKVERSION;
   // We use a hardcoded version for Lazarus below
   VersionNewHelpConfig='1';
@@ -341,10 +343,15 @@ begin
               Version:='110';
             end
             else
-            if (FLazarusMajorVer>=3) then
+            if (FLazarusMajorVer=3) then
+            begin
+              Version:='110';
+            end;
+            if (FLazarusMajorVer>=4) then
             begin
               Version:=TrunkVersionNewEnvironmentConfig;
             end;
+
 
             if (Length(Version)>0) then NewConfig.SetValue('EnvironmentOptions/Version/Value', Version);
 
