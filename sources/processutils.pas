@@ -470,12 +470,15 @@ begin
   begin
     aCorrectValue:=aValue;
     {$ifdef Windows}
-    if (CorrectPath AND (Length(aCorrectValue)>0)) then
+    if (Length(aCorrectValue)>0) then
     begin
-      if (Pos(' ',aCorrectValue)>0) then aCorrectValue:=ExtractShortPathName(aCorrectValue);
-      for i:=1 to Length(aCorrectValue) do
-        if (aCorrectValue[i]=DirectorySeparator) then
-          aCorrectValue[i]:='/';
+      if CorrectPath then
+      begin
+        if (Pos(' ',aCorrectValue)>0) then aCorrectValue:=ExtractShortPathName(aCorrectValue);
+        for i:=1 to Length(aCorrectValue) do
+          if (aCorrectValue[i]=DirectorySeparator) then
+            aCorrectValue[i]:='/';
+      end;
     end;
     {$endif}
     if (Length(aCorrectValue)=0) then
@@ -484,7 +487,26 @@ begin
       if (i<>-1) then TProcessStringList(Process.Parameters).Delete(i);
     end
     else
+    begin
+      {$ifdef Windows}
+      if (NOT CorrectPath) then
+      begin
+        i:=Length(aCorrectValue);
+        // Brutely remove last character if DirectorySeparator !!
+        // Tricky but needed !
+        if (aCorrectValue[i]=DirectorySeparator) then SetLength(aCorrectValue,i-1);
+        // Always correct any directory-separator
+        // Make does not like them on Windows
+        // Assume that a directory-separator is only used as a directory separator !!
+        (*
+        for i:=1 to Length(aCorrectValue) do
+          if (aCorrectValue[i]=DirectorySeparator) then
+            aCorrectValue[i]:='/';
+        *)
+      end;
+      {$endif}
       Process.Parameters.Values[aName]:=aCorrectValue;
+    end;
   end;
 end;
 
@@ -1448,7 +1470,9 @@ begin
   if (Assigned(Application) AND Assigned(Application.MainForm)) then
   begin
     if not PostMessage(Application.MainForm.Handle, WM_THREADINFO, 0, {%H-}LPARAM(PInfo)) then
+    begin
       StrDispose(PInfo);
+    end;
   end;
 end;
 {$else}

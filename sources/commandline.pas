@@ -97,7 +97,9 @@ type
 
 implementation
 
-uses inifiles;
+uses
+  inifiles,
+  fpcuputil;
 
 { TCommandLineOptions }
 
@@ -362,10 +364,11 @@ function TCommandLineOptions.GetOption(shortname, name: string;
 var
   bPersistent:boolean; //add to persistent options or not
   i:integer;
-  sParam,sCSParam:string;
+  s,sParam,sCSParam:string;
   sCSshortname,sCSname:string;
 begin
   result:=false;
+  s:='';
   if (shortname='') and (name='') then
     exit;
   i:=0;
@@ -404,7 +407,7 @@ begin
             bPersistent:=(FParams.Objects[i]=TObject(True));
             FParams.delete(i);
             i:=i-1;
-            param:=sParam;
+            s:=sParam;
             Result:=true;
             end;
           end;
@@ -424,7 +427,7 @@ begin
             bPersistent:=(FParams.Objects[i]=TObject(True));
             FParams.delete(i);
             i:=i-1;
-            param:=sParam;
+            s:=sParam;
             Result:=true;
             end;
           end;
@@ -433,27 +436,29 @@ begin
     i:=i+1;
     end;
   if Result then
-    begin
+  begin
     if not bHasParam then
-      begin
-      if (param<>'') then //error, no argument for this option
+    begin
+      if (s<>'') then //error, no argument for this option
         raise ECommandLineError.Create('Option -'+shortname+', --'+name+' does not allow an argument');
       if bPersistent and bAppendToPersistentOptions then
         if name<>'' then
           FPersistentOptions:=trim(FPersistentOptions+' --'+name)
         else
           FPersistentOptions:=trim(FPersistentOptions+' -'+shortname);
-      end
+    end
     else
-      begin //argument needed
-      delete(param,1,pos('=',param));
+    begin //argument needed
+      delete(s,1,pos('=',s));
+      s:=UnQuote(s);
       if bPersistent and bAppendToPersistentOptions then
         if name<>'' then
-          FPersistentOptions:=trim(FPersistentOptions+' --'+name+'="'+param+'"')
+          FPersistentOptions:=trim(FPersistentOptions+' --'+name+'='+MaybeQuotedSpacesOnly(s))
         else
-          FPersistentOptions:=trim(FPersistentOptions+' -'+shortname+'="'+param+'"');
-      end;
+          FPersistentOptions:=trim(FPersistentOptions+' -'+shortname+'='+MaybeQuotedSpacesOnly(s));
     end;
+    param:=s;
+  end;
 end;
 
 constructor TCommandLineOptions.Create(FileSection: string);

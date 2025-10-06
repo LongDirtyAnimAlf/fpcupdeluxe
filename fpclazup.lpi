@@ -635,13 +635,13 @@ end;"/>
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="--fpcVersion=&quot;stable.gitlab&quot; --lazVersion=&quot;trunk.gitlab&quot; --installdir=lazarus --only=docker --noconfirm --verbose"/>
+        <CommandLineParams Value="--installdir=C:\fpcupsystems\uptest  --fpcVersion=&quot;stable.gitlab&quot; --lazVersion=&quot;trunk.gitlab&quot; --fpcOPT=&quot;-FDC:\yolo -dYOLO&quot; --verbose"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="2">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="--fpcVersion=&quot;stable.gitlab&quot; --lazVersion=&quot;trunk.gitlab&quot; --installdir=lazarus --only=docker --noconfirm --verbose"/>
+            <CommandLineParams Value="--installdir=C:\fpcupsystems\uptest  --fpcVersion=&quot;stable.gitlab&quot; --lazVersion=&quot;trunk.gitlab&quot; --fpcOPT=&quot;-FDC:\yolo -dYOLO&quot; --verbose"/>
           </local>
         </Mode0>
         <Mode1 Name="docker">

@@ -1577,10 +1577,10 @@ begin
           end;
 
           NativeCompilerOptions:=Trim(NativeCompilerOptions);
-          if (Length(NativeCompilerOptions)>0) then Processor.SetParamNameData('OPT',{MaybeQuotedSpacesOnly}(NativeCompilerOptions));
+          if (Length(NativeCompilerOptions)>0) then Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly(NativeCompilerOptions));
 
           CrossCompilerOptions:=Trim(CrossCompilerOptions);
-          if (Length(CrossCompilerOptions)>0) then Processor.SetParamNameData('CROSSOPT',{MaybeQuotedSpacesOnly}(CrossCompilerOptions));
+          if (Length(CrossCompilerOptions)>0) then Processor.SetParamNameData('CROSSOPT',MaybeQuotedSpacesOnly(CrossCompilerOptions));
 
           try
             s1:=infotext+'Running make ['+UnCamel(GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle)))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')';
@@ -2150,7 +2150,7 @@ begin
   {$endif}
 
   FPCBuildOptions:=Trim(FPCBuildOptions);
-  Processor.SetParamNameData('OPT',FPCBuildOptions);
+  Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly(FPCBuildOptions));
 
   Processor.Process.CurrentDirectory:='';
   case ModuleName of
@@ -2298,7 +2298,7 @@ begin
 
         // Change some settings for this special legacy linking
         Processor.SetParamNamePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
-        Processor.SetParamNameData('OPT','-XLC '+'-d'+DEFINE_FPC_LIBC+' '+FPCBuildOptions);
+        Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly('-XLC '+'-d'+DEFINE_FPC_LIBC+' '+FPCBuildOptions));
 
         // Cleanup rtl and packages for legacy GLIBC
         Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_clean';

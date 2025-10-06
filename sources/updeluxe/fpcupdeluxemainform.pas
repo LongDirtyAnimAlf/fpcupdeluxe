@@ -1499,13 +1499,13 @@ begin
       with TNormalUnzipper.Create do
       begin
         try
-          SysUtils.Deletefile(SafeGetApplicationPath+Crypto_DLL_Name+GetLibExt);
+          SysUtils.Deletefile(SafeGetApplicationPath+Crypto_DLL_Name_Up+GetLibExt);
           if GetLastOSError<>5 then // no access denied
           begin
-            SysUtils.Deletefile(SafeGetApplicationPath+SSL_DLL_Name+GetLibExt);
+            SysUtils.Deletefile(SafeGetApplicationPath+SSL_DLL_Name_Up+GetLibExt);
             if GetLastOSError<>5 then // no access denied
             begin
-              if DoUnZip(OpenSSLZip,SafeGetApplicationPath,[Crypto_DLL_Name+GetLibExt,SSL_DLL_Name+GetLibExt]) then
+              if DoUnZip(OpenSSLZip,SafeGetApplicationPath,[Crypto_DLL_Name_Up+GetLibExt,SSL_DLL_Name_Up+GetLibExt]) then
               begin
                 AddMessage('Success: got OpenSSL library dll by browser!');
               end;
@@ -3761,7 +3761,8 @@ begin
       if Sender=BitBtnFPCOnly then
       begin
         {$ifdef win32}
-        s:=_FPCCLEANBUILDONLY+','+_FPC+_CROSSWIN;
+        //s:=_FPCCLEANBUILDONLY+','+_FPC+_CROSSWIN;
+        s:=_FPCCLEANBUILDONLY;
         {$else}
         s:=_FPCCLEANBUILDONLY;
         {$endif}

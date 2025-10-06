@@ -336,7 +336,7 @@ begin
 
     if (LCL_Platform <> BuildLCLWidgetType) then Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(LCL_Platform));
 
-    if Length(localoptions)>0 then Processor.SetParamNameData('OPT',localoptions);
+    if Length(localoptions)>0 then Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly(localoptions));
 
     {$ifdef DISABLELAZBUILDJOBS}
     Processor.SetParamData('LAZBUILDJOBS=1');//prevent runtime 217 errors
@@ -1153,7 +1153,9 @@ begin
         continue;
         {$endif}
         {$endif}
-
+        {$if defined(MSWINDOWS) AND defined(CPUAARCH64)}
+        continue;
+        {$endif}
         // only install fpdebug on Lazarus 2.2.0 and better.
         // ALF
         if (CompareVersionStrings(LazarusVersion,'2.2.0')<0) then
@@ -3563,17 +3565,17 @@ begin
       begin
         if (Pos(FPCURLLOOKUPMAGIC,aDictionary)=1) OR (Pos(FPCTAGLOOKUPMAGIC,aDictionary)=1) OR (Pos(FPCBRANCHLOOKUPMAGIC,aDictionary)=1) then
         begin
-          //if (aDictionary<>FPCURLLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcURL',   aKeyWord,'');
-          //if (aDictionary=FPCTAGLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+FPCBRANCHLOOKUPMAGIC,   aKeyWord,'');
-          //if (aDictionary=FPCBRANCHLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+FPCTAGLOOKUPMAGIC,aKeyWord,'');
+          //if (aDictionary<>FPCURLLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+'fpcURL',   aKeyWord,'');
+          //if (aDictionary=FPCBRANCHLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+FPCBRANCHLOOKUPMAGIC,   aKeyWord,'');
+          //if (aDictionary=FPCTAGLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+FPCTAGLOOKUPMAGIC,aKeyWord,'');
         end
         {$ifndef FPCONLY}
         else
         if (Pos(LAZARUSURLLOOKUPMAGIC,aDictionary)=1) OR (Pos(LAZARUSTAGLOOKUPMAGIC,aDictionary)=1) OR (Pos(LAZARUSBRANCHLOOKUPMAGIC,aDictionary)=1) then
         begin
-          //if (aDictionary<>LAZARUSURLLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazURL',   aKeyWord,'');
-          //if (aDictionary=LAZARUSTAGLOOKUPMAGIC)    AND (result='') then result:=ini.ReadString(ALIASMAGIC+LAZARUSBRANCHLOOKUPMAGIC,   aKeyWord,'');
-          //if (aDictionary=LAZARUSBRANCHLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+LAZARUSTAGLOOKUPMAGIC,aKeyWord,'');
+          //if (aDictionary<>LAZARUSURLLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+'lazURL',   aKeyWord,'');
+          //if (aDictionary=LAZARUSBRANCHLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+LAZARUSBRANCHLOOKUPMAGIC,   aKeyWord,'');
+          //if (aDictionary=LAZARUSTAGLOOKUPMAGIC) AND (result='') then result:=ini.ReadString(ALIASMAGIC+LAZARUSTAGLOOKUPMAGIC,aKeyWord,'');
         end
         {$endif}
         else

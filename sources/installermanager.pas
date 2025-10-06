@@ -574,7 +574,12 @@ begin
   if ( (Length(LocalURL)=0) AND (Length(AValue)>0) ) then
   begin
     if (NOT AnsiEndsText(GITLABEXTENSION,AValue)) then
-      SetTAG(ATarget,AValue+GITLABEXTENSION)
+    begin
+      if Pos('.',AValue)>0 then
+        SetTAG(ATarget,AValue)
+      else
+        SetTAG(ATarget,AValue+GITLABEXTENSION);
+    end
     else
       SetTAG(ATarget,AValue);
   end;
@@ -586,6 +591,8 @@ var
   LocalURL,LocalTag,LocalBranch:string;
   RemoteURL,BranchLookupMagic,TagLookupMagic:string;
 begin
+  //if Length(AValue)=0 then exit;
+
   if ((ATarget<>_FPC) {$ifndef FPCONLY}AND (ATarget<>_LAZARUS){$endif}) then
   begin
     WritelnLog(etError,'Gitlab alias lookup of '+ATarget+' tag/branch/url error.');
@@ -615,6 +622,7 @@ begin
   {$endif}
 
   if AnsiEndsText(GITLABEXTENSION,AValue) then
+  //if true then
   begin
     LocalURL:='';
     s:=installerUniversal.GetAlias(TagLookupMagic,AValue);
@@ -644,7 +652,7 @@ begin
         LocalURL:=RemoteURL;
     end
     else
-      WritelnLog(etError,'Gitlab alias lookup of '+ATarget+' tag/branch/url failed. Expect errors.');
+      if (Length(AValue)>0) then WritelnLog(etError,'Gitlab alias lookup of '+ATarget+' tag/branch/url failed. Expect errors.');
   end
   else
   begin

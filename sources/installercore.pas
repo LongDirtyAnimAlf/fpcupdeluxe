@@ -156,16 +156,22 @@ const
   {$endif}
 
   {$ifdef WINDOWS}
-  Crypto_DLL_Name = 'libeay32';
-  SSL_DLL_Name    = 'ssleay32';
+  Crypto_DLL_Name_Up = 'libeay32';
+  SSL_DLL_Name_Up    = 'ssleay32';
 
   {$ifdef win64}
-    SSL_DLL_Names:    array[1..3] of string = ({'libssl-3-x64',}    'libssl-1_1-x64',    SSL_DLL_Name, 'libssl32');
-    Crypto_DLL_Names: array[1..3] of string = ({'libcrypto-3-x64',} 'libcrypto-1_1-x64', Crypto_DLL_Name, Crypto_DLL_Name);
+  {$ifdef CPUX86_64}
+  SSL_DLL_Names_Up:    array[1..3] of string = ({'libssl-3-x64',}    'libssl-1_1-x64',    SSL_DLL_Name_Up, 'libssl32');
+  Crypto_DLL_Names_Up: array[1..3] of string = ({'libcrypto-3-x64',} 'libcrypto-1_1-x64', Crypto_DLL_Name_Up, Crypto_DLL_Name_Up);
+  {$endif}
+  {$ifdef CPUAARCH64}
+  SSL_DLL_Names_Up:    array[1..1] of string = ('libssl-3');
+  Crypto_DLL_Names_Up: array[1..1] of string = ('libcrypto-3');
+  {$endif}
   {$endif}
   {$ifdef win32}
-    SSL_DLL_Names:    array[1..3] of string = ({'libssl-3',}    'libssl-1_1',    SSL_DLL_Name, 'libssl32');
-    Crypto_DLL_Names: array[1..3] of string = ({'libcrypto-3',} 'libcrypto-1_1', Crypto_DLL_Name, Crypto_DLL_Name);
+    SSL_DLL_Names_Up:    array[1..3] of string = ({'libssl-3',}    'libssl-1_1',    SSL_DLL_Name_Up, 'libssl32');
+    Crypto_DLL_Names_Up: array[1..3] of string = ({'libcrypto-3',} 'libcrypto-1_1', Crypto_DLL_Name_Up, Crypto_DLL_Name_Up);
   {$endif}
 
   {$ifdef win64}
@@ -303,9 +309,11 @@ const
   _SUGGESTEDADD            = _SUGGESTED+'add';
 
   _UNIVERSALDEFAULT        = 'Universal'+_DEFAULT;
+  _FPCBUILDONLY            = _FPC+_BUILD+_ONLY;
   _FPCCLEANBUILDONLY       = _FPC+_CLEAN+_BUILD+_ONLY;
   _FPCREMOVEONLY           = _FPC+_UNINSTALL+_ONLY;
   _LAZARUSCLEANBUILDONLY   = _LAZARUS+_CLEAN+_BUILD+_ONLY;
+  _LAZARUSBUILDONLY        = _LAZARUS+_BUILD+_ONLY;
   _LAZARUSREMOVEONLY       = _LAZARUS+_UNINSTALL+_ONLY;
 
   _LCLALLREMOVEONLY        = _LCL+'ALL'+_CLEAN+_ONLY;
@@ -1169,10 +1177,15 @@ begin
 
       if (NOT CryptoSucceeded) then
       begin
-        i:=Low(SSL_DLL_Names);
-        while ( (not CryptoSucceeded) AND (i<=High(SSL_DLL_Names)) ) do
+        i:=Low(SSL_DLL_Names_Up);
+        while ( (not CryptoSucceeded) AND (i<=High(SSL_DLL_Names_Up)) ) do
         begin
-          CryptoSucceeded:=(FileExists(SafeGetApplicationPath+Crypto_DLL_Names[i]+GetLibExt)) AND (FileExists(SafeGetApplicationPath+SSL_DLL_Names[i]+GetLibExt));
+          CryptoSucceeded:=(FileExists(SafeGetApplicationPath+Crypto_DLL_Names_Up[i]+GetLibExt)) AND (FileExists(SafeGetApplicationPath+SSL_DLL_Names_Up[i]+GetLibExt));
+          if CryptoSucceeded then
+          begin
+            CryptoSucceeded:=InitSSLInterface(SSL_DLL_Names_Up[i]+GetLibExt,Crypto_DLL_Names_Up[i]+GetLibExt);
+            if CryptoSucceeded then break;
+          end;
           Inc(i);
         end;
         if (NOT CryptoSucceeded) then
@@ -2668,16 +2681,14 @@ begin
       begin
         try
           resultcode:=2;
-          //DLLExt;
-          GetExeExt;
-          SysUtils.Deletefile(SafeGetApplicationPath+Crypto_DLL_Name+GetLibExt);
+          SysUtils.Deletefile(SafeGetApplicationPath+Crypto_DLL_Name_Up+GetLibExt);
           if GetLastOSError<>5 then // no access denied
           begin
-            SysUtils.Deletefile(SafeGetApplicationPath+SSL_DLL_Name+GetLibExt);
+            SysUtils.Deletefile(SafeGetApplicationPath+SSL_DLL_Name_Up+GetLibExt);
             if GetLastOSError<>5 then // no access denied
             begin
               resultcode:=1;
-              if DoUnZip(OpenSSLFileName,SafeGetApplicationPath,[Crypto_DLL_Name+GetLibExt,SSL_DLL_Name+GetLibExt]) then resultcode:=0;
+              if DoUnZip(OpenSSLFileName,SafeGetApplicationPath,[Crypto_DLL_Name_Up+GetLibExt,SSL_DLL_Name_Up+GetLibExt]) then resultcode:=0;
             end;
           end;
         finally
