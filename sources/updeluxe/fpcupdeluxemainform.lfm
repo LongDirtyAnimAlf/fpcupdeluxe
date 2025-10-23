@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 41
+  Left = 177
   Height = 600
-  Top = 84
+  Top = 158
   Width = 1190
   Anchors = []
   Caption = 'FPCUPdeluxe'
@@ -9,11 +9,11 @@ object Form1: TForm1
   ClientWidth = 1190
   Constraints.MinHeight = 400
   Menu = MainMenu1
-  LCLVersion = '4.2.0.0'
-  Visible = True
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  LCLVersion = '3.2.0.0'
+  Visible = True
   object btnSetupPlus: TButton
     AnchorSideLeft.Control = PageControl1
     AnchorSideTop.Control = PageControl1
@@ -111,6 +111,7 @@ object Form1: TForm1
     Font.Name = 'Monospace'
     Font.Pitch = fpFixed
     Font.Quality = fqCleartype
+    Font.Style = [fsBold]
     ParentColor = False
     ParentFont = False
     TabOrder = 5
@@ -688,7 +689,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = AndroidBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 413
+      Left = 414
       Height = 42
       Hint = 'Install FPC and Lazarus for Web Assembly'
       Top = 8
@@ -700,11 +701,11 @@ object Form1: TForm1
       Caption = 'WA'
       Images = ImageList_32x32
       ImageIndex = 7
+      OnClick = QuickBtnClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 9
-      OnClick = QuickBtnClick
     end
     object TrunkBtn: TBitBtn
       AnchorSideLeft.Control = Panel1
@@ -713,7 +714,7 @@ object Form1: TForm1
       Height = 42
       Hint = 'Will install/update trunk version of both FPC and Lazarus.'
       Top = 8
-      Width = 92
+      Width = 93
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 2
@@ -721,17 +722,17 @@ object Form1: TForm1
       Caption = 'Trunk'
       Images = ImageList_32x32
       ImageIndex = 4
+      OnClick = QuickBtnClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
-      OnClick = QuickBtnClick
     end
     object FixesBtn: TBitBtn
       AnchorSideLeft.Control = TrunkBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 110
+      Left = 111
       Height = 42
       Hint = 'Will install/update current fixes versions of both FPC and Lazarus'
       Top = 8
@@ -743,17 +744,17 @@ object Form1: TForm1
       Caption = 'Fixes'
       Images = ImageList_32x32
       ImageIndex = 0
+      OnClick = QuickBtnClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
-      OnClick = QuickBtnClick
     end
     object StableBtn: TBitBtn
       AnchorSideLeft.Control = FixesBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 205
+      Left = 206
       Height = 42
       Hint = 'Will install/update stable versions of both FPC and Lazarus'
       Top = 8
@@ -765,17 +766,17 @@ object Form1: TForm1
       Caption = 'Stable'
       Images = ImageList_32x32
       ImageIndex = 3
+      OnClick = QuickBtnClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
-      OnClick = QuickBtnClick
     end
     object AndroidBtn: TBitBtn
       AnchorSideLeft.Control = StableBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 307
+      Left = 308
       Height = 42
       Hint = 'Will install/update FPC and Lazarus stable and LAMW'
       Top = 8
@@ -787,17 +788,17 @@ object Form1: TForm1
       Caption = 'LAMW'
       Images = ImageList_32x32
       ImageIndex = 6
+      OnClick = QuickBtnClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 3
-      OnClick = QuickBtnClick
     end
     object WioBtn: TBitBtn
       AnchorSideLeft.Control = WABtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 502
+      Left = 503
       Height = 42
       Hint = 'Get FPC for SAMD51 embedded on Wio Terminal'
       Top = 8
@@ -809,17 +810,18 @@ object Form1: TForm1
       Caption = 'Wio'
       Images = ImageList_32x32
       ImageIndex = 14
+      OnClick = QuickBtnClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 4
-      OnClick = QuickBtnClick
+      Visible = False
     end
     object PicoBtn: TBitBtn
       AnchorSideLeft.Control = WioBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 593
+      Left = 594
       Height = 42
       Hint = 'Get FPC for armv6m RPi Pico'
       Top = 8
@@ -831,17 +833,17 @@ object Form1: TForm1
       Caption = 'Pico'
       Images = ImageList_32x32
       ImageIndex = 12
+      OnClick = QuickBtnClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 5
-      OnClick = QuickBtnClick
     end
     object UltiboBtn: TBitBtn
       AnchorSideLeft.Control = ESPBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 787
+      Left = 788
       Height = 42
       Hint = 'Install baremetal Ultibo for RPi2/3/4/5'
       Top = 8
@@ -852,17 +854,17 @@ object Form1: TForm1
       BorderSpacing.Around = 4
       Images = ImageList_88x32
       ImageIndex = 1
+      OnClick = QuickBtnClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 6
-      OnClick = QuickBtnClick
     end
     object mORMotBtn: TBitBtn
       AnchorSideLeft.Control = UltiboBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 929
+      Left = 930
       Height = 42
       Hint = 'Get the mORMot2 for FPC'
       Top = 8
@@ -874,17 +876,17 @@ object Form1: TForm1
       Caption = 'mORMot2'
       Images = ImageList_32x32
       ImageIndex = 11
+      OnClick = btnInstallModuleClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 7
-      OnClick = btnInstallModuleClick
     end
     object ESPBtn: TBitBtn
       AnchorSideLeft.Control = PicoBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 686
+      Left = 687
       Height = 42
       Hint = 'Get FPC for ESP32 [lx6] boards'
       Top = 8
@@ -896,21 +898,21 @@ object Form1: TForm1
       Caption = 'ESP32'
       Images = ImageList_32x32
       ImageIndex = 10
+      OnClick = QuickBtnClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 10
-      OnClick = QuickBtnClick
     end
     object BitBtnHalt: TBitBtn
       AnchorSideTop.Control = Panel1
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
-      Left = 1075
+      Left = 1074
       Height = 42
       Hint = 'Try to stop current install process'
       Top = 8
-      Width = 90
+      Width = 91
       Anchors = [akTop, akRight]
       AutoSize = True
       BorderSpacing.Top = 2
@@ -920,11 +922,11 @@ object Form1: TForm1
       Enabled = False
       Images = ImageList_32x32
       ImageIndex = 5
+      OnClick = BitBtnHaltClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 8
-      OnClick = BitBtnHaltClick
     end
   end
   object memoSummary: TMemo
@@ -1081,11 +1083,11 @@ object Form1: TForm1
         Layout = blGlyphTop
         Images = ImageList_32x32
         ImageIndex = 1
+        OnClick = InstallClick
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 0
-        OnClick = InstallClick
       end
       object BitBtnLazarusOnly: TBitBtn
         AnchorSideLeft.Control = ListBoxLazarusTarget
@@ -1106,11 +1108,11 @@ object Form1: TForm1
         Layout = blGlyphTop
         Images = ImageList_32x32
         ImageIndex = 2
+        OnClick = InstallClick
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 1
-        OnClick = InstallClick
       end
       object BitBtnFPCandLazarus: TBitBtn
         AnchorSideLeft.Control = BasicSheet
@@ -1135,11 +1137,11 @@ object Form1: TForm1
         Layout = blGlyphTop
         Images = ImageList_88x32
         ImageIndex = 0
+        OnClick = InstallClick
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 2
-        OnClick = InstallClick
       end
       object chkGitlab: TCheckBox
         AnchorSideLeft.Control = BasicSheet
@@ -1237,10 +1239,10 @@ object Form1: TForm1
           'riscv32'
           'riscv64'
         )
+        OnSelectionChanged = radgrpTargetChanged
         ParentFont = False
         ParentShowHint = False
         TabOrder = 0
-        OnSelectionChanged = radgrpTargetChanged
       end
       object radgrpOS: TRadioGroup
         AnchorSideLeft.Control = radgrpCPU
@@ -1298,10 +1300,10 @@ object Form1: TForm1
           'wasip1'
           'atari'
         )
+        OnSelectionChanged = radgrpTargetChanged
         ParentFont = False
         ParentShowHint = False
         TabOrder = 1
-        OnSelectionChanged = radgrpTargetChanged
       end
       object ButtonInstallCrossCompiler: TButton
         AnchorSideLeft.Control = radgrpCPU
@@ -1502,10 +1504,10 @@ object Form1: TForm1
         Caption = 'OPM'
         Images = ImageList_32x32
         ImageIndex = 9
+        OnClick = btnInstallModuleClick
         ParentShowHint = False
         ShowHint = True
         TabOrder = 4
-        OnClick = btnInstallModuleClick
       end
       object DockBtn: TBitBtn
         AnchorSideLeft.Control = OPMBtn
@@ -1526,10 +1528,10 @@ object Form1: TForm1
         Caption = 'Dock'
         Images = ImageList_32x32
         ImageIndex = 8
+        OnClick = btnInstallModuleClick
         ParentShowHint = False
         ShowHint = True
         TabOrder = 5
-        OnClick = btnInstallModuleClick
       end
     end
     object TagSheet: TTabSheet
@@ -1643,11 +1645,11 @@ object Form1: TForm1
         Layout = blGlyphTop
         Images = ImageList_32x32
         ImageIndex = 1
+        OnClick = OnlyTagClick
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 2
-        OnClick = OnlyTagClick
       end
       object BitBtnLazarusOnlyTag: TBitBtn
         AnchorSideLeft.Control = ListBoxLazarusTargetTag
@@ -1668,11 +1670,11 @@ object Form1: TForm1
         Layout = blGlyphTop
         Images = ImageList_32x32
         ImageIndex = 2
+        OnClick = OnlyTagClick
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 3
-        OnClick = OnlyTagClick
       end
       object MemoAddTag: TMemo
         AnchorSideLeft.Control = TagSheet
@@ -1761,11 +1763,11 @@ object Form1: TForm1
         Layout = blGlyphTop
         Images = ImageList_32x32
         ImageIndex = 1
+        OnClick = BitBtnSetRevisionClick
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 0
-        OnClick = BitBtnSetRevisionClick
       end
       object BitBtnLazarusSetRevision: TBitBtn
         AnchorSideLeft.Control = HistorySheet
@@ -1789,11 +1791,11 @@ object Form1: TForm1
         Layout = blGlyphTop
         Images = ImageList_32x32
         ImageIndex = 2
+        OnClick = BitBtnSetRevisionClick
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 1
-        OnClick = BitBtnSetRevisionClick
       end
       object MemoHistory: TMemo
         AnchorSideLeft.Control = HistorySheet

@@ -4,7 +4,7 @@
 
 {$define FORCEREVISION}
 {$define FORCELAZBUILD}
-{.$define MACOSXVERSIONMAGIG}
+{$define MACOSXVERSIONMAGIG}
 {.$define DISABLELAZBUILDJOBS}
 
 {.$define crosssimple}

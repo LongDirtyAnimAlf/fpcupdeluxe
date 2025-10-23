@@ -758,6 +758,8 @@ begin
 
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
         begin
+          //if (MakeCycle in [st_PackagesBuild,st_PackagesInstall]) then continue;
+
           if ((ModuleName=_NATIVECROSSFPC) AND (MakeCycle<>st_NativeCompiler)) then continue;
           if ((ModuleName<>_NATIVECROSSFPC) AND (MakeCycle=st_NativeCompiler)) then continue;
 
@@ -4441,23 +4443,25 @@ begin
         {$IFDEF MACOSXVERSIONMAGIG}
         if (Pos('-WM',FCompilerOptions)=0) then
         begin
-          ConfigText.Append('#IFDEF DARWIN');
           s:=GetDarwinSDKVersion(LowerCase(macSDKNAME));
           if Length(s)>0 then
           begin
-            ConfigText.Append('# Prevents [crti not found] linking errors');
-            ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
-            //ConfigText.Append('#IFDEF CPU'+UpperCase(GetSourceCPU));
             if CompareVersionStrings(s,'11.0')>=0 then
-              ConfigText.Append('-WM10.15')
+              s:='-WM10.15'
             else
             if CompareVersionStrings(s,'10.9')>=0 then
-              ConfigText.Append('-WM10.9')
+              s:='-WM10.9'
             else
-              ConfigText.Append('-WM'+s);
+              s:='';
+          end;
+          if Length(s)>0 then
+          begin
+            ConfigText.Append('#IFDEF DARWIN');
+            ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
+            ConfigText.Append(s);
+            ConfigText.Append('#ENDIF');
             ConfigText.Append('#ENDIF');
           end;
-          ConfigText.Append('#ENDIF');
         end;
         {$ENDIF}
 

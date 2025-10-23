@@ -1668,17 +1668,19 @@ begin
     try
       Count:=Fout.CopyFrom(FIn,0);
       result:=(Count=Fin.Size);
-      if (NOT result) then exit;
     finally
       FreeAndNil(Fout);
     end;
-    A:=FileGetDate(FIn.Handle);
-    If (A<>-1) then FileSetDate(D,A);
-{$ifdef UNIX}
-    // Copy the file-access rights on Unix, especially the executable-bit
-    filestat:=Default(stat);
-    if (FpStat(Src,FileStat)=0) then FpChmod(D,FileStat.st_mode);
-{$endif UNIX}
+    if result then
+    begin
+      A:=FileGetDate(FIn.Handle);
+      If (A<>-1) then FileSetDate(D,A);
+  {$ifdef UNIX}
+      // Copy the file-access rights on Unix, especially the executable-bit
+      filestat:=Default(stat);
+      if (FpStat(Src,FileStat)=0) then FpChmod(D,FileStat.st_mode);
+  {$endif UNIX}
+    end;
   finally
     FreeAndNil(Fin);
   end;
@@ -2624,25 +2626,35 @@ begin
     try
       s.Position:=0;
       magic:=s.ReadWord;
-      if magic<>$5A4D then exit;
-      s.Seek(60,soBeginning);
-      offset:=0;
-      s.ReadBuffer(offset,4);
-      s.Seek(offset,soBeginning);
-      magic:=s.ReadWord;
-      if magic<>$4550 then exit;
-      s.Seek(offset+4,soBeginning);
-      magic:=s.ReadWord;
+      result:=(magic=$5A4D);
+      if result then
+      begin
+        s.Seek(60,soBeginning);
+        offset:=0;
+        s.ReadBuffer(offset,4);
+        s.Seek(offset,soBeginning);
+        magic:=s.ReadWord;
+        result:=(magic=$4550);
+        if result then
+        begin
+          s.Seek(offset+4,soBeginning);
+          magic:=s.ReadWord;
+        end;
+      end;
     finally
       s.Free;
     end;
 
-    {$ifdef win32}
-    result:=(magic=$014C);
-    {$endif}
-    {$ifdef win64}
-    result:=((magic=$0200) OR (magic=$8664));
-    {$endif}
+    if result then
+    begin
+      {$ifdef win32}
+      result:=(magic=$014C);
+      {$endif}
+      {$ifdef win64}
+      result:=((magic=$0200) OR (magic=$8664) OR (magic=$AA64));
+      {$endif}
+    end;
+
   except
     result:=true;
   end;
@@ -4631,7 +4643,7 @@ begin
         except
           Json:=nil;
         end;
-        if (JSON=nil) then exit;
+        if Assigned(JSON) then
         try
           JsonObject := TJSONObject(Json);
           // Example ---

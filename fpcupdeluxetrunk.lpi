@@ -441,9 +441,6 @@ if TargetOS=&apos;openbsd&apos; then
           <CodeGeneration>
             <TargetCPU Value="aarch64"/>
             <TargetOS Value="win64"/>
-            <Optimizations>
-              <OptimizationLevel Value="0"/>
-            </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>

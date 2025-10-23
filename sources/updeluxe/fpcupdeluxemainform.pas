@@ -10,7 +10,7 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, Types, Buttons, Menus, ComCtrls,
   {$ifndef READER}
-  SynEdit, SynEditMiscClasses, SynEditPopup,
+  SynEdit, SynEditMiscClasses, SynGutterBase, SynEditPopup,
   {$endif}
   LMessages, ActnList, StdActns, IniPropStorage, LCLVersion,
   {$ifdef RemoteLog}
@@ -654,9 +654,9 @@ begin
     Form3:=TForm3.Create(Form1);
     SubarchForm:=TSubarchForm.Create(Form1);
     InitFpcupdeluxe;
-    Application.QueueAsyncCall(@ScrollToSelected,0);
+    //Application.QueueAsyncCall(@ScrollToSelected,0);
     {$ifdef RemoteLog}
-    Application.QueueAsyncCall(@InitConsent,0);
+    //Application.QueueAsyncCall(@InitConsent,0);
     {$endif}
   end
   else

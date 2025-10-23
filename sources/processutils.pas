@@ -514,8 +514,8 @@ procedure TExternalTool.ProcessRunning;
 begin
   EnterCriticalSection;
   try
-    if FStage<>etsStarting then exit;
-    FStage:=etsRunning;
+    if FStage=etsStarting then
+      FStage:=etsRunning;
   finally
     LeaveCriticalSection;
   end;
@@ -532,10 +532,12 @@ begin
       else if ExitStatus<>0 then
         ErrorMessage:='ExitStatus '+IntToStr(ExitStatus);
     end;
-    if FStage>=etsStopped then exit;
-    if Assigned(FProcessEnvironment) then FProcessEnvironment.Destroy;
-    FProcessEnvironment:=nil;
-    FStage:=etsStopped;
+    if (NOT (FStage>=etsStopped)) then
+    begin
+      if Assigned(FProcessEnvironment) then FProcessEnvironment.Destroy;
+      FProcessEnvironment:=nil;
+      FStage:=etsStopped;
+    end;
   finally
     LeaveCriticalSection;
   end;
@@ -788,18 +790,18 @@ begin
   NeedProcTerminate:=false;
   EnterCriticalSection;
   try
-    if Terminated then exit;
-    if Stage=etsStopped then exit;
-
-    if ErrorMessage='' then
-      ErrorMessage:=lisAborted;
-    fTerminated:=true;
-    if Stage=etsRunning then
-      NeedProcTerminate:=true;
-    if Stage<etsStarting then
-      FStage:=etsStopped
-    else if Stage<=etsRunning then
-      FStage:=etsWaitingForStop;
+    if ((NOT Terminated) AND (Stage<>etsStopped)) then
+    begin
+      if ErrorMessage='' then
+        ErrorMessage:=lisAborted;
+      fTerminated:=true;
+      if Stage=etsRunning then
+        NeedProcTerminate:=true;
+      if Stage<etsStarting then
+        FStage:=etsStopped
+      else if Stage<=etsRunning then
+        FStage:=etsWaitingForStop;
+    end;
   finally
     LeaveCriticalSection;
   end;
