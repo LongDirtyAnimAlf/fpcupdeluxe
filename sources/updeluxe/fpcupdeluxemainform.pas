@@ -4369,6 +4369,12 @@ begin
       MissingCrossBins:=(ieBins in FPCupManager.InstallerErrors);
       MissingCrossLibs:=(ieLibs in FPCupManager.InstallerErrors);
 
+      if (ieTarget in FPCupManager.InstallerErrors) then
+      begin
+        AddMessage('fpcupdeluxe: ERROR: Cross-target not supported by FPC Makefile.');
+        AddMessage('');
+      end;
+
       if (MissingCrossBins OR MissingCrossLibs) then
       begin
         if MissingCrossBins then AddMessage('fpcupdeluxe: ERROR: Failure due to missing cross binary tools.');

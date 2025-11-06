@@ -235,7 +235,6 @@ type
     procedure SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:TSUBARCH);override;
   end;
 
-
 implementation
 
 uses
@@ -4579,6 +4578,8 @@ var
   {$IFDEF UNIX}
   index                                  : integer;
   {$ENDIF}
+  MakeFilePath,s:string;
+  TxtFile:Text;
 begin
   result:=inherited;
 
@@ -4596,6 +4597,42 @@ begin
     CrossInstaller.Reset;
 
     CPUOS_Signature:=GetFPCTarget(false);
+
+    MakeFilePath:=IncludeTrailingPathDelimiter(SourceDirectory)+MAKEFILENAME;
+    if (FileExists(MakeFilePath)) then
+    begin
+      AssignFile(TxtFile,MakeFilePath);
+      try
+        try
+          System.Reset(TxtFile);
+          while NOT EOF (TxtFile) do
+          begin
+            Readln(TxtFile,s);
+            if (Pos('MAKEFILETARGETS=',s)=1) then
+            begin
+              result:=(Pos(CPUOS_Signature,s)>0);
+              if (NOT result) then
+              begin
+                Infoln(infotext+'Makefile does not support '+CPUOS_Signature+' as cross-target. Expect errors.',etError);
+                // These error codes are set by default, so they need to be removed in this special case
+                Exclude(FErrorCodes,ieBins);
+                Exclude(FErrorCodes,ieLibs);
+                // Inform about missing support for selected target
+                Include(FErrorCodes,ieTarget);
+              end;
+              break;
+            end;
+          end;
+        except
+          on E: EInOutError do writeln('File handling error occurred while reading Makefile. Details: ', E.ClassName, '/', E.Message);
+        end;
+      finally
+        CloseFile(TxtFile);
+      end;
+    end;
+
+    if (NOT result) then exit;
+
     // Delete any existing buildstamp file
     Sysutils.DeleteFile(IncludeTrailingPathDelimiter(SourceDirectory)+'build-stamp.'+CPUOS_Signature);
     Sysutils.DeleteFile(IncludeTrailingPathDelimiter(SourceDirectory)+'base.build-stamp.'+CPUOS_Signature);

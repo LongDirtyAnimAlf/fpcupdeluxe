@@ -1842,6 +1842,10 @@ begin
   begin
     if (CrossCPU_Target=TCPU.xtensa) then s:='FreeRTOS_Xtensa_437_34.zip';
   end;
+  if (CrossOS_Target=TOS.haiku) then
+  begin
+    if (CrossCPU_Target=TCPU.x86_64) then s:='Haiku_AMD64_QT6.zip';
+  end;
 
   if (Length(s)>0) then
   begin

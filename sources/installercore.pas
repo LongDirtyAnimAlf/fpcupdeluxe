@@ -346,7 +346,7 @@ const
   URL_ERROR                = 'sources error (URL mismatch)';
 
 type
-  TInstallerError          = (ieLibs,ieBins);
+  TInstallerError          = (ieLibs,ieBins,ieTarget);
   TInstallerErrors         = set of TInstallerError;
 
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
