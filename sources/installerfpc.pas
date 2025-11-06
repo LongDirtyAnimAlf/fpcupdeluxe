@@ -1180,6 +1180,7 @@ begin
 
           Processor.Executable := Make;
           Processor.Process.Parameters.Clear;
+          Processor.SetParamNameData('RELEASE','1');
           {$IFDEF MSWINDOWS}
           if Length(Shell)>0 then Processor.SetParamNameData('SHELL',Shell);
           {$ENDIF}
@@ -1970,6 +1971,7 @@ begin
 
   Processor.Executable := Make;
   Processor.Process.Parameters.Clear;
+  Processor.SetParamNameData('RELEASE','1');
   {$IFDEF MSWINDOWS}
   if Length(Shell)>0 then Processor.SetParamNameData('SHELL',Shell);
   {$ENDIF}
@@ -4702,6 +4704,7 @@ begin
 
     Processor.Executable:=Make;
     Processor.Process.Parameters.Clear;
+    Processor.SetParamNameData('RELEASE','1');
     {$IFDEF MSWINDOWS}
     if Length(Shell)>0 then Processor.SetParamData('SHELL='+Shell);
     {$ENDIF}

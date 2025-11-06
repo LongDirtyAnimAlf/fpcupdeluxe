@@ -409,6 +409,33 @@ begin
   end;
 end;
 
+procedure AdjustButtonHeight(AControl: TControl; AHeight:integer);
+var
+  iControl: Integer;
+  btn:TBitBtn;
+  //h:integer;
+begin
+  if AControl = nil then
+      Exit;
+  if AControl is TWinControl then
+  begin
+      for iControl := 0 to TWinControl(AControl).ControlCount - 1 do
+          AdjustButtonHeight(TWinControl(AControl).Controls[iControl],AHeight);
+  end;
+
+  if (AControl IS TBitBtn) then
+  begin
+    btn:=(AControl AS TBitBtn);
+    if Assigned(btn.Glyph) then
+    begin
+      // This trick forces the correct button theme type setting
+      btn.Caption:=btn.Caption+#10;
+      //btn.AutoSize:=True;
+      btn.Height:=AHeight;
+    end
+  end;
+end;
+
 { TForm1 }
 
 {$ifdef EnableLanguages}
@@ -458,6 +485,11 @@ var
   aFPCTarget,aLazarusTarget:string;
   bGitlab:boolean;
 begin
+  {$IFDEF DARWIN}
+  // Trick to [auto]adjust TBitBtn heights on newest Lazarus
+  AdjustButtonHeight(Form1,Scale96ToScreen(32));
+  {$ENDIF DARWIN}
+
   MessageTrigger:=false;
 
   IniPropStorageApp.IniFileName:=SafeGetApplicationPath+installerUniversal.DELUXEFILENAME;
