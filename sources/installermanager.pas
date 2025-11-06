@@ -1564,6 +1564,7 @@ begin
       if (FIncludeModules<>'') and (result) then
       begin
         // run specified additional modules using the only mechanism
+        //FSequencer.ResetAllExecuted;
         FSequencer.CreateOnly(FIncludeModules);
         result:=FSequencer.Run(_ONLY);
       end;
@@ -2619,6 +2620,7 @@ begin
         'wst'              : FInstaller:=TWSTInstaller.Create;
         'pas2js-rtl'       : FInstaller:=TPas2jsInstaller.Create;
         'CEF4Delphi'       : FInstaller:=TCEFInstaller.Create;
+        'anchordocking'    : FInstaller:=TAnchorDockingInstaller.Create;
       else
         FInstaller:=TUniversalInstaller.Create;
       end;

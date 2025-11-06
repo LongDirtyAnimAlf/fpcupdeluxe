@@ -71,6 +71,10 @@ const
   // BuildIDE config file
   DefaultIDEMakeOptionFilename='idemake.cfg';
 
+  AnchoringOptions='anchordockingoptions.xml';
+  DockedFormOptions='dockedformeditoroptions.xml';
+
+
 type
 
 { TConfigVariable }

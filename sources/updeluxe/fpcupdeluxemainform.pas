@@ -3843,6 +3843,7 @@ begin
         {$ELSE}
         s:=_LAZARUS;
         {$ENDIF}
+        if (Form2.DockedLazarus) then s:=s+',anchordocking';
       end;
 
       if Sender=BitBtnFPCandLazarus then
@@ -3869,7 +3870,7 @@ begin
 
     if (Form2.DockedLazarus) then
     begin
-      if ((Sender=BitBtnLazarusOnly) OR (Sender=BitBtnFPCandLazarus)) then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',anchordocking';
+      if (Sender=BitBtnFPCandLazarus) then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',anchordocking';
     end;
 
     //Delete stray comma
@@ -3879,6 +3880,7 @@ begin
       Delete(s,1,1);
       FPCupManager.IncludeModules:=s;
     end;
+
     //Delete stray comma
     s:=FPCupManager.SkipModules;
     if Pos(',',s)=1 then

@@ -181,6 +181,13 @@ type
     function GetModule(ModuleName: string): boolean; override;
   end;
 
+  { TAnchorDockingInstaller }
+  TAnchorDockingInstaller = class(TUniversalInstaller)
+  public
+    function BuildModule(ModuleName: string): boolean; override;
+  end;
+
+
 
   // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
   function GetModuleEnabledList(var ModuleList:TStringList):boolean;
@@ -3476,6 +3483,27 @@ begin
 
   // Do not fail
   result:=true;
+end;
+
+function TAnchorDockingInstaller.BuildModule(ModuleName: string): boolean;
+var
+  {$ifndef FPCONLY}
+  LazarusConfig                : TUpdateLazConfig;
+  {$endif}
+begin
+  result:=inherited;
+  if not result then exit;
+
+  {$ifndef FPCONLY}
+  LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
+  try
+    LazarusConfig.SetVariable(AnchoringOptions, 'EnableAnchorDock/Value', True);
+    LazarusConfig.SetVariable(AnchoringOptions, 'DoneAskUserEnableAnchorDock/Value', True);
+    LazarusConfig.SetVariable(DockedFormOptions, 'DoneAskUserEnableDockedDesigner/Value', True);
+  finally
+    LazarusConfig.Free;
+  end;
+  {$endif}
 end;
 
 procedure ClearUniModuleList;
