@@ -343,7 +343,8 @@ begin
 
     if (LCL_Platform <> BuildLCLWidgetType) then Processor.SetParamData('LCL_PLATFORM=' + GetLCLName(LCL_Platform));
 
-    if Length(localoptions)>0 then Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly(localoptions));
+    //if Length(localoptions)>0 then Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly(localoptions));
+    if Length(localoptions)>0 then Processor.SetParamNameData('OPT',localoptions);
 
     {$ifdef DISABLELAZBUILDJOBS}
     Processor.SetParamData('LAZBUILDJOBS=1');//prevent runtime 217 errors
@@ -3486,10 +3487,10 @@ begin
 end;
 
 function TAnchorDockingInstaller.BuildModule(ModuleName: string): boolean;
+{$ifndef FPCONLY}
 var
-  {$ifndef FPCONLY}
   LazarusConfig                : TUpdateLazConfig;
-  {$endif}
+{$endif}
 begin
   result:=inherited;
   if not result then exit;

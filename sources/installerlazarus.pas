@@ -427,7 +427,8 @@ begin
           Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         end;
         Options:=Trim(Options);
-        if Length(Options)>0 then Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly(Options));
+        //if Length(Options)>0 then Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly(Options));
+        if Length(Options)>0 then Processor.SetParamNameData('OPT',Options);
 
         if (LCL_Platform <> BuildLCLWidgetType) then
         GetLCLName(LCL_Platform);
@@ -753,7 +754,8 @@ begin
     if (LCL_Platform <> BuildLCLWidgetType) then
       Processor.SetParamNameData('LCL_PLATFORM',GetLCLName(LCL_Platform));
 
-    Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly(localoptions));
+    //Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly(localoptions));
+    Processor.SetParamNameData('OPT',localoptions);
 
     case ModuleName of
       _USERIDE:
