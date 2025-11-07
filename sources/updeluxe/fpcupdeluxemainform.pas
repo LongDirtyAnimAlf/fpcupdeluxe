@@ -4373,8 +4373,8 @@ begin
       begin
         AddMessage('fpcupdeluxe: ERROR: Cross-target not supported by FPC Makefile.');
         AddMessage('');
-      end;
-
+      end
+      else
       if (MissingCrossBins OR MissingCrossLibs) then
       begin
         if MissingCrossBins then AddMessage('fpcupdeluxe: ERROR: Failure due to missing cross binary tools.');

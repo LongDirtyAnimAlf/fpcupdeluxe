@@ -6,10 +6,10 @@ object Form2: TForm2
   Caption = 'Advanced Settings'
   ClientHeight = 720
   ClientWidth = 842
+  LCLVersion = '4.2.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '3.2.0.0'
   object GroupBox1: TGroupBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
@@ -36,7 +36,7 @@ object Form2: TForm2
       Left = 4
       Height = 15
       Top = 4
-      Width = 88
+      Width = 89
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       Caption = 'HTTP proxy URL:'
@@ -51,7 +51,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 23
-      Width = 276
+      Width = 275
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -65,10 +65,10 @@ object Form2: TForm2
       AnchorSideTop.Control = Label1
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 292
+      Left = 291
       Height = 15
       Top = 4
-      Width = 89
+      Width = 90
       Anchors = [akTop, akRight]
       BorderSpacing.Left = 10
       BorderSpacing.Right = 4
@@ -80,10 +80,10 @@ object Form2: TForm2
       AnchorSideTop.Control = EditHTTPProxyHost
       AnchorSideRight.Control = Label2
       AnchorSideRight.Side = asrBottom
-      Left = 292
+      Left = 291
       Height = 23
       Top = 23
-      Width = 89
+      Width = 90
       Anchors = [akTop, akLeft, akRight]
       NumbersOnly = True
       ParentFont = False
@@ -97,7 +97,7 @@ object Form2: TForm2
       Left = 4
       Height = 15
       Top = 54
-      Width = 119
+      Width = 120
       BorderSpacing.Left = 4
       BorderSpacing.Top = 8
       Caption = 'HTTP proxy username:'
@@ -122,10 +122,10 @@ object Form2: TForm2
       AnchorSideTop.Control = Label3
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 264
+      Left = 263
       Height = 15
       Top = 54
-      Width = 117
+      Width = 118
       Anchors = [akTop, akRight]
       BorderSpacing.Right = 4
       Caption = 'HTTP proxy password:'
@@ -136,10 +136,10 @@ object Form2: TForm2
       AnchorSideTop.Control = EditHTTPProxyUser
       AnchorSideRight.Control = Label4
       AnchorSideRight.Side = asrBottom
-      Left = 264
+      Left = 263
       Height = 23
       Top = 73
-      Width = 117
+      Width = 118
       Anchors = [akTop, akLeft, akRight]
       EchoMode = emPassword
       ParentFont = False
@@ -405,9 +405,9 @@ object Form2: TForm2
       ChildSizing.ControlsPerLine = 4
       Columns = 4
       Enabled = False
-      OnSelectionChanged = RadioGroupARMArchSelectionChanged
       ParentFont = False
       TabOrder = 7
+      OnSelectionChanged = RadioGroupARMArchSelectionChanged
     end
     object PageControl1: TPageControl
       AnchorSideLeft.Control = ScrollBox1
@@ -534,8 +534,8 @@ object Form2: TForm2
           ChildSizing.ControlsPerLine = 4
           Columns = 4
           Constraints.MinHeight = 60
-          OnSelectionChanged = rgrpSubarchSelectionChanged
           TabOrder = 0
+          OnSelectionChanged = rgrpSubarchSelectionChanged
         end
       end
     end
@@ -574,9 +574,9 @@ object Form2: TForm2
         'full auto'
         'custom'
       )
-      OnSelectionChanged = rgrpSearchOptionsSelectionChanged
       ParentFont = False
       TabOrder = 9
+      OnSelectionChanged = rgrpSearchOptionsSelectionChanged
     end
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox

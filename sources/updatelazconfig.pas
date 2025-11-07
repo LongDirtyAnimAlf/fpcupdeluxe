@@ -239,12 +239,15 @@ begin
     SetLength(OldPath,length(OldPath)-1);
   NewChild:=FindNode(NewPath+'/blah',false);  // append dummy attribute to path
   OldChild:=FindNode(OldPath+'/bloh',false);
-  while Assigned(NewChild.FirstChild) do
-    NewChild.RemoveChild(NewChild.FirstChild);
-  for i:=0 to OldChild.ChildNodes.Count-1 do
+  if Assigned(NewChild) then
+  begin
+    while Assigned(NewChild.FirstChild) do
+      NewChild.RemoveChild(NewChild.FirstChild);
+    for i:=0 to OldChild.ChildNodes.Count-1 do
     begin
-    NewChild.AppendChild(OldChild.ChildNodes.Item[i].CloneNode(True));
+      NewChild.AppendChild(OldChild.ChildNodes.Item[i].CloneNode(True));
     end;
+  end;
 end;
 
 procedure TUpdateLazConfig.WriteConfig;

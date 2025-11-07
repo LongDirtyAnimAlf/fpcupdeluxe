@@ -2,6 +2,8 @@ unit extrasettings;
 
 {$mode objfpc}{$H+}
 
+{$I fpcupdefines.inc}
+
 interface
 
 uses
