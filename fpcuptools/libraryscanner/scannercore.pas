@@ -1161,12 +1161,13 @@ begin
   if LibsLocation='' then
   begin
     RunCommand('pwd',[],LibsLocation,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+    LibsLocation:=Trim(LibsLocation);
   end;
-
+  {$ifdef Termux}
   LibsLocation:='/data/data/com.termux/files';
+  {$endif}
   LibsLocation:=IncludeTrailingPathDelimiter(LibsLocation);
-  writeln('Saving files into:',LibsLocation);
-
+  writeln('Saving files into:',LibsLocation+'libs');
   ForceDirectories(LibsLocation+'libs');
 
   aList:=TStringList.Create;
@@ -1233,8 +1234,6 @@ begin
 end;
 
 constructor TScannerCore.Create;
-var
-  Output:string;
 begin
   inherited Create;
   FLibraryList:=TStringList.Create;
