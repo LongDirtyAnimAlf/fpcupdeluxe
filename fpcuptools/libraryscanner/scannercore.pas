@@ -434,7 +434,11 @@ end;
 function GetStartupObjects:string;
 const
   LINKFILE='crtbegin.o';
+  {$ifdef Termux}
   SEARCHDIRS : array [0..9] of string = (
+  {$else}
+  SEARCHDIRS : array [0..7] of string = (
+  {$endif}
     '/usr/local/lib/',
     '/usr/lib/',
     '/usr/local/lib/gcc/',
@@ -442,9 +446,11 @@ const
     '/usr/lib/gcc-lib/',
     '/lib/gcc/',
     '/lib/',
+    {$ifdef Termux}
     TERMUXPATH+'/usr/lib', // for termux
     TERMUXPATH+'/usr/lib/clang', // for termux
-    '/system/lib64/' // for termux
+    {$endif}
+    '/system/lib64/'
     );
 
 var
