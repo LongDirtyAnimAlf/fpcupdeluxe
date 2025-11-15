@@ -36,6 +36,10 @@ type
     btnBuildHelp: TButton;
     btnCheckToolsLocations: TButton;
     btnBuildNativeCompiler: TButton;
+    btnGetLazarusCandidates: TButton;
+    btnGetFPCReleases: TButton;
+    btnGetFPCCandidates: TButton;
+    btnGetLazarusReleases: TButton;
     chkGitlab: TCheckBox;
     ImageList_200x40: TImageList;
     ImageList_32x32: TImageList;
@@ -174,6 +178,7 @@ type
     procedure BitBtnSetRevisionClick(Sender: TObject);
     procedure btnBuildHelpClick(Sender: TObject);
     procedure btnCheckToolsLocationsClick({%H-}Sender: TObject);
+    procedure btnGetTagsClick(Sender: TObject);
     procedure btnUpdateLazarusMakefilesClick({%H-}Sender: TObject);
     procedure btnBuildNativeCompilerClick(Sender: TObject);
     procedure ButtonSubarchSelectClick({%H-}Sender: TObject);
@@ -271,7 +276,7 @@ type
     procedure SetCmdFontName(aValue: String);
     procedure ParseRevisions(IniDirectory:string);
     procedure AddRevision(TargetFPC,TargetLAZ:boolean;aHash,aName:string;aDate:TDateTime);
-    procedure AddTag(Sender: TObject;aTag:string);
+    procedure AddTag(Sender: TObject;aName,aTag:string);
     {$ifdef EnableLanguages}
     procedure Translate(const Language: string);
     {$endif}
@@ -682,7 +687,7 @@ begin
 
     // create settings form
     // must be done here, to enable local storage/access of some setttings !!
-    Form2:=TForm2.Create(Form1);
+    SettingsForm:=TSettingsForm.Create(Form1);
     Form3:=TForm3.Create(Form1);
     SubarchForm:=TSubarchForm.Create(Form1);
     InitFpcupdeluxe;
@@ -711,7 +716,7 @@ var
   i:integer;
 begin
   //if Assigned(Form3) then Form3.Destroy;
-  //if Assigned(Form2) then Form2.Destroy;
+  //if Assigned(SettingsForm) then SettingsForm.Destroy;
 
   with listModules do
   begin
@@ -1227,7 +1232,7 @@ begin
   if (Sender<>nil) then
   begin
     s:=upUpdateCrossAll+' !' + sLineBreak + upQuestionContinue;
-    if Form2.AskConfirmation then
+    if SettingsForm.AskConfirmation then
       if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
         exit;
   end;
@@ -1338,7 +1343,7 @@ begin
           for aTSUBARCH in RebuildSubarchs do
           begin
             //if (Sender=nil) then
-            //  Form2.SetCrossAvailable(aTCPU,aTOS,aTSubArch,true);
+            //  SettingsForm.SetCrossAvailable(aTCPU,aTOS,aTSubArch,true);
 
             // Only build for subarch if we do have subarchs
             if (aTOS in SUBARCH_OS) AND (aTCPU in SUBARCH_CPU) AND (aTSUBARCH=saNone) then continue;
@@ -1467,10 +1472,10 @@ begin
     end;
   end;
 
-  FPCupManager.HTTPProxyPort:=Form2.HTTPProxyPort;
-  FPCupManager.HTTPProxyHost:=Form2.HTTPProxyHost;
-  FPCupManager.HTTPProxyUser:=Form2.HTTPProxyUser;
-  FPCupManager.HTTPProxyPassword:=Form2.HTTPProxyPass;
+  FPCupManager.HTTPProxyPort:=SettingsForm.HTTPProxyPort;
+  FPCupManager.HTTPProxyHost:=SettingsForm.HTTPProxyHost;
+  FPCupManager.HTTPProxyUser:=SettingsForm.HTTPProxyUser;
+  FPCupManager.HTTPProxyPassword:=SettingsForm.HTTPProxyPass;
 
   // localize FPCUPSettings if possible
 
@@ -1920,98 +1925,10 @@ end;
 {$endif}
 
 procedure TForm1.PageControl1Change(Sender: TObject);
-const
-  TAG_PREAMBLE          = 'refs/tags/';
-  FPC_TAG_PREAMBLE      = 'release_';
-  LAZ_TAG_PREAMBLE      = 'lazarus_';
-type
-  TTarget             = (FPC,LAZARUS);
-var
-  aTarget             : TTarget;
-  aTargetListBox      : array[TTarget] of TListBox;
-  aFileList           : TStringList;
-  aResultCode         : longint;
-  Output              : string;
-  GitExe              : string;
-  GITTagRunner        : string;
-  GITTag              : string;
-  GITTagShort         : string;
-  i                   : integer;
 begin
   if TPageControl(Sender).ActivePage=ModuleSheet then
   begin
     if (listModules.HandleAllocated) AND (listModules.ItemIndex>8) then listModules.MakeCurrentVisible;
-  end;
-
-  if TPageControl(Sender).ActivePage=TagSheet then
-  begin
-    GitExe:=Which('git'+GetExeExt);
-    {$ifdef MSWindows}
-    if (NOT FileExists(GitExe)) then
-    begin
-      GitExe:=ConcatPaths([FPCupManager.MakeDirectory,'git','cmd'])+PathSeparator+'git.exe';
-    end;
-    {$endif}
-
-    if FileExists(GitExe) then
-    begin
-      //Do this only once !!
-      TPageControl(Sender).OnChange:=nil;
-
-      aTargetListBox[FPC]:=ListBoxFPCTargetTag;
-      aTargetListBox[LAZARUS]:=ListBoxLazarusTargetTag;
-
-      aFileList:=TStringList.Create;
-      aFileList.Delimiter:=#10;
-      aFileList.StrictDelimiter:=true;
-
-      for aTarget in TTarget do
-      begin
-        Application.ProcessMessages;
-
-        aTargetListBox[aTarget].Items.BeginUpdate;
-        aTargetListBox[aTarget].Items.Clear;
-
-        aFileList.Clear;
-
-        if aTarget=FPC then
-          RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',FPCGITLABREPO+'.git','*rc*','?.?.?'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-        if aTarget=LAZARUS then
-          RunCommandIndir('',GitExe,['ls-remote','--tags','--sort=-v:refname','--refs',LAZARUSGITLABREPO+'.git','*RC*'], Output, aResultCode,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
-
-        aFileList.DelimitedText:=Output;
-        for GITTagRunner in aFileList do
-        begin
-          i:=Pos(#9,GITTagRunner);
-          if i>0 then GITTag:=Copy(GITTagRunner,i+1,MaxInt);
-          i:=Pos(TAG_PREAMBLE,GITTag);
-          if i>0 then Delete(GITTag,1,Length(TAG_PREAMBLE));
-
-          GITTagShort:=GITTag;
-
-          if aTarget=FPC then
-          begin
-            i:=Pos(FPC_TAG_PREAMBLE,GITTagShort);
-            if i>0 then Delete(GITTagShort,1,Length(FPC_TAG_PREAMBLE));
-          end;
-          if aTarget=LAZARUS then
-          begin
-            i:=Pos(LAZ_TAG_PREAMBLE,GITTagShort);
-            if i>0 then Delete(GITTagShort,1,Length(LAZ_TAG_PREAMBLE));
-          end;
-
-          aTargetListBox[aTarget].Items.AddObject(GITTagShort,TObject(pointer(StrNew(Pchar(GITTag)))));
-        end;
-        aFileList.Clear;
-        aTargetListBox[aTarget].Items.EndUpdate;
-      end;
-
-      aFileList.Free;
-    end
-    else
-    begin
-      AddMessage(upGITNotFound);
-    end;
   end;
 end;
 
@@ -2025,30 +1942,30 @@ begin
   begin
     if (ItemIndex<>-1) then
     begin
-      AddTag(aListBox,StrPas(Pchar(Items.Objects[ItemIndex])));
+      AddTag(aListBox,Items[ItemIndex],StrPas(Pchar(Items.Objects[ItemIndex])));
     end;
   end;
 end;
 
-procedure TForm1.AddTag(Sender: TObject;aTag:string);
+procedure TForm1.AddTag(Sender: TObject;aName,aTag:string);
 begin
   if (Sender=ListBoxFPCTargetTag) OR (Sender=ListBoxFPCTarget)  then
   begin
-    if SetAlias(FPCTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
+    if SetAlias(FPCTAGLOOKUPMAGIC,aName+GITLABEXTENSION,aTag) then
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
-      MemoAddTag.Lines.Add('The tag with name ['+aTag+'] was added to the FPC sources list.');
+      MemoAddTag.Lines.Add('The tag ['+aTag+'] with name ['+aName+'] was added to the FPC sources list.');
       //ListBoxFPCTarget.ItemIndex:=ListBoxFPCTarget.Count-1;
     end;
   end;
   if (Sender=ListBoxLazarusTargetTag) OR (Sender=ListBoxLazarusTarget) then
   begin
-    if SetAlias(LAZARUSTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
+    if SetAlias(LAZARUSTAGLOOKUPMAGIC,aName+GITLABEXTENSION,aTag) then
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
-      MemoAddTag.Lines.Add('The tag with name ['+aTag+'] was added to the Lazarus sources list.');
+      MemoAddTag.Lines.Add('The tag ['+aTag+'] with name ['+aName+'] was added to the Lazarus sources list.');
       //ListBoxLazarusTarget.ItemIndex:=ListBoxLazarusTarget.Count-1;
     end;
   end;
@@ -2207,7 +2124,7 @@ begin
   GetSystemInfo;
 
   // This is needed to update the contents of the options list
-  Form2.UpdateCheckBoxList;
+  SettingsForm.UpdateCheckBoxList;
   {$endif}
 end;
 
@@ -2249,7 +2166,7 @@ begin
   begin
     if Assigned(ListBoxFPCHistoryNew.Selected) then
     begin
-      Form2.ForceFPCRevision:=ListBoxFPCHistoryNew.Selected.Caption;
+      SettingsForm.ForceFPCRevision:=ListBoxFPCHistoryNew.Selected.Caption;
       valid:=true;
     end;
   end;
@@ -2257,7 +2174,7 @@ begin
   begin
     if Assigned(ListBoxLazarusHistoryNew.Selected) then
     begin
-      Form2.ForceLazarusRevision:=ListBoxLazarusHistoryNew.Selected.Caption;
+      SettingsForm.ForceLazarusRevision:=ListBoxLazarusHistoryNew.Selected.Caption;
       valid:=true;
     end;
   end;
@@ -2329,6 +2246,74 @@ begin
 
   AddMessage('');
   AddMessage('Scanning libs and bins ready.');
+end;
+
+procedure TForm1.btnGetTagsClick(Sender: TObject);
+type
+  TTarget             = (FPC,LAZARUS);
+const
+  FPC_TAG_PREAMBLE      = 'release_';
+  LAZ_TAG_PREAMBLE      = 'lazarus_';
+  TAGURL : array[TTarget] of string =
+    (
+      'https://gitlab.com/api/v4/projects/28644964/repository/tags?search=^'+FPC_TAG_PREAMBLE,
+      'https://gitlab.com/api/v4/projects/28419588/repository/tags?search=^'+LAZ_TAG_PREAMBLE
+    );
+var
+  aTarget             : TTarget;
+  aTargetListBox      : TListBox;
+  aFileList           : TStringList;
+  Output              : string;
+  GITTagRunner        : string;
+  GITTag              : string;
+  GITTagShort         : string;
+  i                   : integer;
+  RC                  : boolean;
+begin
+  if ((Sender=btnGetLazarusCandidates) OR (Sender=btnGetLazarusReleases)) then aTarget:=LAZARUS;
+  if ((Sender=btnGetFPCCandidates) OR (Sender=btnGetFPCReleases)) then aTarget:=FPC;
+
+  if ((Sender=btnGetLazarusCandidates) OR (Sender=btnGetFPCCandidates)) then RC:=True;
+  if ((Sender=btnGetLazarusReleases) OR (Sender=btnGetFPCReleases)) then RC:=False;
+
+  if aTarget=FPC then aTargetListBox:=ListBoxFPCTargetTag;
+  if aTarget=LAZARUS then aTargetListBox:=ListBoxLazarusTargetTag;
+
+  aTargetListBox.Items.BeginUpdate;
+
+  with aTargetListBox do
+  begin
+    for i:=Pred(Count) downto 0 do
+      if Assigned(Items.Objects[i]) then
+        StrDispose(Pchar(Items.Objects[i]));
+  end;
+  aTargetListBox.Items.Clear;
+
+  aFileList:=TStringList.Create;
+
+  FPCupManager.GetReleaseTags(TAGURL[aTarget],RC,Output);
+  aFileList.CommaText:=Output;
+  for GITTagRunner in aFileList do
+  begin
+    GITTag:=GITTagRunner;
+    GITTagShort:=GITTag;
+
+    if aTarget=FPC then
+    begin
+      i:=Pos(FPC_TAG_PREAMBLE,GITTagShort);
+      if i>0 then Delete(GITTagShort,1,Length(FPC_TAG_PREAMBLE));
+      if (NOT RC) then GITTagShort:=StringReplace(GITTagShort,'_','.',[rfReplaceAll]);
+    end;
+    if aTarget=LAZARUS then
+    begin
+      i:=Pos(LAZ_TAG_PREAMBLE,GITTagShort);
+      if i>0 then Delete(GITTagShort,1,Length(LAZ_TAG_PREAMBLE));
+      if (NOT RC) then GITTagShort:=StringReplace(GITTagShort,'_','.',[rfReplaceAll]);
+    end;
+    aTargetListBox.Items.AddObject(GITTagShort,TObject(pointer(StrNew(Pchar(GITTag)))));
+  end;
+  aTargetListBox.Items.EndUpdate;
+  aFileList.Free;
 end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);
@@ -2481,7 +2466,7 @@ begin
 
   s:=s+sLineBreak+sLineBreak;
   s:=s+upInstallDirectory+': '+Self.sInstallDir;
-  if Form2.AskConfirmation then
+  if SettingsForm.AskConfirmation then
     if (MessageDlgEx(s+sLineBreak+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
       exit;
 
@@ -2515,7 +2500,7 @@ begin
         FPCupManager.IncludeModules:=aModule;
     end;
 
-    if (NOT Form2.IncludeHelp) then
+    if (NOT SettingsForm.IncludeHelp) then
     begin
       if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
       FPCupManager.SkipModules:=FPCupManager.SkipModules+_HELPFPC+','+_HELPLAZARUS;
@@ -2538,14 +2523,14 @@ begin
     end;
     {$endif}
 
-    if Form2.UpdateOnly then
+    if SettingsForm.UpdateOnly then
     begin
     end;
 
     if (Sender=WioBtn) {OR (Sender=PicoBtn)} then
     begin
       // Due to changes in Lazarus, we need a trunk/main version of Lazarus that can be compiled with an embedded (old) FPC trunk
-      Form2.ForceLazarusRevision:='5b0ed449f3';
+      SettingsForm.ForceLazarusRevision:='5b0ed449f3';
       FPCupManager.LazarusDesiredRevision:='5b0ed449f3';
     end;
 
@@ -2606,7 +2591,7 @@ begin
       begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
-        //Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
+        //SettingsForm.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
         SetSelectedSubArch(aCPU,aOS,aSUBARCH);
 
         //aSUBARCH:=GetSelectedSubArch(aCPU,aOS);
@@ -2665,7 +2650,7 @@ begin
       begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
-        //Form2.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
+        //SettingsForm.SetCrossAvailable(aCPU,aOS,aSUBARCH,true);
         SetSelectedSubArch(aCPU,aOS,aSUBARCH);
 
         //aSUBARCH:=GetSelectedSubArch(aCPU,aOS);
@@ -2738,7 +2723,7 @@ begin
 
   if UnInstall then modules:=modules+_UNINSTALL else
   begin
-    if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
+    if SettingsForm.UpdateOnly then modules:=modules+_BUILD+_ONLY;
   end;
 
   if Length(modules)>0 then
@@ -2755,7 +2740,7 @@ begin
     s:=s+upInstallDirectory+': '+Self.sInstallDir;
     s:=s+sLineBreak;
     s:=s+upQuestionContinue;
-    if Form2.AskConfirmation then
+    if SettingsForm.AskConfirmation then
       if (MessageDlgEx(s,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
         exit;
 
@@ -2782,7 +2767,7 @@ begin
       exit;
     end;
 
-    FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
+    FPCupManager.ExportOnly:=(NOT SettingsForm.PackageRepo);
     try
       FPCupManager.OnlyModules:=modules;
 
@@ -2798,7 +2783,7 @@ begin
       success:=RealRun;
 
     finally
-      FPCupManager.ExportOnly:=(NOT Form2.Repo);
+      FPCupManager.ExportOnly:=(NOT SettingsForm.Repo);
     end;
 
   end;
@@ -2832,7 +2817,7 @@ begin
   {$if defined(win64) and not defined(aarch64)}
   if (Sender<>nil) then
   begin
-    if Form2.AskConfirmation then
+    if SettingsForm.AskConfirmation then
       if (MessageDlgEx('It is ill-advised to cross from Windows 64 bit !'+sLineBreak+'(Win64 OS disabled extended support for 64-bit applications)'+sLineBreak+'Better use a Windows 32 bit install.'+sLineBreak+upQuestionContinue,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
         exit;
   end;
@@ -3049,7 +3034,7 @@ begin
   if Sender=ButtonRemoveCrossCompiler then
   begin
     s:=upRemoveCrossCompiler+' ['+GetCPU(FPCupManager.CrossCPU_Target)+'-'+GetOS(FPCupManager.CrossOS_Target)+'].'+sLineBreak+upQuestionContinue;
-    if Form2.AskConfirmation then
+    if SettingsForm.AskConfirmation then
       if (MessageDlgEx(s,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
         exit;
 
@@ -3072,7 +3057,7 @@ begin
       {$endif}
       success:=RealRun;
       //if success then
-      //  Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,false);
+      //  SettingsForm.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,false);
     finally
       DisEnable(Sender,true);
     end;
@@ -3173,7 +3158,7 @@ begin
       if (NOT warning) then
         s:=upQuestionContinue;
       s:=upInstallCrossCompiler+' ['+FPCupManager.CrossCombo_Target+']'+sLineBreak+s;
-      if Form2.AskConfirmation then
+      if SettingsForm.AskConfirmation then
         if (MessageDlgEx(s,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
           exit;
     end;
@@ -3233,19 +3218,19 @@ begin
         if (Pos('-dFPC_ARM',FPCupManager.FPCOPT)=0) then
         begin
           // Set arm abi build option
-          FPCupManager.FPCOPT:=FPCupManager.FPCOPT+' '+Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
+          FPCupManager.FPCOPT:=FPCupManager.FPCOPT+' '+SettingsForm.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
           FPCupManager.FPCOPT:=Trim(FPCupManager.FPCOPT);
         end;
       end;
 
       // Set FPC cross-compile options
-      FPCupManager.CrossOPT:=Form2.GetCrossBuildOptions(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
+      FPCupManager.CrossOPT:=SettingsForm.GetCrossBuildOptions(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
 
       // use the available source to build the cross-compiler ... change nothing about source and url !!
       FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;
 
       // handle inclusion of LCL when cross-compiling
-      IncludeLCL:=Form2.IncludeLCL;
+      IncludeLCL:=SettingsForm.IncludeLCL;
       if (NOT (FPCupManager.CrossOS_Target in LCL_OS)) then IncludeLCL:=false;
 
       if IncludeLCL then
@@ -3281,13 +3266,13 @@ begin
       end
       else
       begin
-        if Form2.IncludeLCL then AddMessage('Skipping build of LCL for this target: not supported (yet).');
+        if SettingsForm.IncludeLCL then AddMessage('Skipping build of LCL for this target: not supported (yet).');
       end;
 
       //For testing only !!
       //FPCupManager.OnlyModules:='LCL';
 
-      s:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
+      s:=SettingsForm.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
       s:=Trim(s);
       if Length(s)>0 then
       begin
@@ -3300,7 +3285,7 @@ begin
           AddMessage('Expect failures.');
         end;
       end;
-      s:=Form2.GetToolsDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
+      s:=SettingsForm.GetToolsDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch);
       s:=Trim(s);
       if Length(s)>0 then
       begin
@@ -3723,7 +3708,7 @@ begin
       end;
 
       //if success then
-      //  Form2.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,true);
+      //  SettingsForm.SetCrossAvailable(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.CrossOS_SubArch,true);
 
     finally
       DisEnable(Sender,True);
@@ -3753,7 +3738,7 @@ begin
     exit;
   end;
 
-  if Form2.AskConfirmation then
+  if SettingsForm.AskConfirmation then
   begin
     s:='';
     if Sender=BitBtnFPCOnly then s:=upInstallFPC;
@@ -3774,7 +3759,7 @@ begin
 
     if Sender=BitBtnLazarusOnly then
     begin
-      if (NOT Form2.SystemFPC) then
+      if (NOT SettingsForm.SystemFPC) then
       begin
         success:=FPCupManager.CheckCurrentFPCInstall;
         if (NOT success) then
@@ -3787,7 +3772,7 @@ begin
 
     s:='';
 
-    if Form2.UpdateOnly then
+    if SettingsForm.UpdateOnly then
     begin
 
       if Sender=BitBtnFPCOnly then
@@ -3843,7 +3828,7 @@ begin
         {$ELSE}
         s:=_LAZARUS;
         {$ENDIF}
-        if (Form2.DockedLazarus) then s:=s+',anchordocking';
+        if (SettingsForm.DockedLazarus) then s:=s+',anchordocking';
       end;
 
       if Sender=BitBtnFPCandLazarus then
@@ -3855,7 +3840,7 @@ begin
 
     end;
 
-    if (NOT Form2.IncludeHelp) then
+    if (NOT SettingsForm.IncludeHelp) then
     begin
       if ((Sender=BitBtnFPCOnly) OR (Sender=BitBtnFPCandLazarus)) then FPCupManager.SkipModules:=FPCupManager.SkipModules+','+_HELPFPC;
       if ((Sender=BitBtnLazarusOnly) OR (Sender=BitBtnFPCandLazarus)) then FPCupManager.SkipModules:=FPCupManager.SkipModules+','+_HELPLAZARUS;
@@ -3868,7 +3853,7 @@ begin
       end;
     end;
 
-    if (Form2.DockedLazarus) then
+    if (SettingsForm.DockedLazarus) then
     begin
       if (Sender=BitBtnFPCandLazarus) then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',anchordocking';
     end;
@@ -3929,16 +3914,16 @@ begin
   end;
 
   aOldSubarch:=GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-  Form2.SetCrossTarget(FPCupManager,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+  SettingsForm.SetCrossTarget(FPCupManager,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
 
-  Form2.ShowModal;
-  if (Form2.ModalResult=mrOk) then
+  SettingsForm.ShowModal;
+  if (SettingsForm.ModalResult=mrOk) then
   begin
-    FPCupManager.ExportOnly:=(NOT Form2.Repo);
-    FPCupManager.HTTPProxyHost:=Form2.HTTPProxyHost;
-    FPCupManager.HTTPProxyPort:=Form2.HTTPProxyPort;
-    FPCupManager.HTTPProxyUser:=Form2.HTTPProxyUser;
-    FPCupManager.HTTPProxyPassword:=Form2.HTTPProxyPass;
+    FPCupManager.ExportOnly:=(NOT SettingsForm.Repo);
+    FPCupManager.HTTPProxyHost:=SettingsForm.HTTPProxyHost;
+    FPCupManager.HTTPProxyPort:=SettingsForm.HTTPProxyPort;
+    FPCupManager.HTTPProxyUser:=SettingsForm.HTTPProxyUser;
+    FPCupManager.HTTPProxyPassword:=SettingsForm.HTTPProxyPass;
     aNewSubarch:=GetSelectedSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
     if ((aNewSubarch<>aOldSubarch) AND (aNewSubarch<>TSUBARCH.saNone)) then
       AddMessage('Fpcupdeluxe: selected subarch = '+GetSubarch(aNewSubarch));
@@ -3973,7 +3958,7 @@ end;
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
   sInstallDir:=SetDirSeparators(InstallDirEdit.Text);
-  Form2.ResetAll;
+  SettingsForm.ResetAll;
   if DirectoryExists(sInstallDir) then GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
 
@@ -4106,19 +4091,19 @@ begin
 
   FPCupManager.ResetAll;
 
-  FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
+  FPCupManager.NoJobs:=(NOT SettingsForm.MakeJobs);
 
-  FPCupManager.FPCUnicode:=Form2.FPCUnicode;
+  FPCupManager.FPCUnicode:=SettingsForm.FPCUnicode;
 
-  FPCupManager.SoftFloat:=Form2.UseSoftFloat;
-  FPCupManager.DelphiRTTI:=Form2.EnableRTTI;
-  FPCupManager.OnlinePatching:=Form2.OnlinePatching;
-  FPCupManager.ReApplyLocalChanges:=Form2.ApplyLocalChanges;
+  FPCupManager.SoftFloat:=SettingsForm.UseSoftFloat;
+  FPCupManager.DelphiRTTI:=SettingsForm.EnableRTTI;
+  FPCupManager.OnlinePatching:=SettingsForm.OnlinePatching;
+  FPCupManager.ReApplyLocalChanges:=SettingsForm.ApplyLocalChanges;
 
-  FPCupManager.LinuxLegacy:=Form2.ForceGLIBCLinking;
+  FPCupManager.LinuxLegacy:=SettingsForm.ForceGLIBCLinking;
 
-  FPCupManager.FPCOPT:=Form2.FPCOptions;
-  if Form2.FPCDebug then
+  FPCupManager.FPCOPT:=SettingsForm.FPCOptions;
+  if SettingsForm.FPCDebug then
   begin
     FPCupManager.FPCOPT:=FPCupManager.FPCOPT+' -g -gl -O1';
     FPCupManager.FPCOPT:=Trim(FPCupManager.FPCOPT);
@@ -4127,22 +4112,22 @@ begin
   {$IFDEF DEBUG}
   FPCupManager.Verbose:=True;
   {$ELSE}
-  FPCupManager.Verbose:=Form2.ExtraVerbose;
+  FPCupManager.Verbose:=SettingsForm.ExtraVerbose;
   {$ENDIF}
 
-  FPCupManager.LazarusOPT:=Form2.LazarusOptions;
-  if Form2.LazarusDebug then
+  FPCupManager.LazarusOPT:=SettingsForm.LazarusOptions;
+  if SettingsForm.LazarusDebug then
   begin
     FPCupManager.LazarusOPT:=FPCupManager.LazarusOPT+' -g -gl -O1';
     FPCupManager.LazarusOPT:=Trim(FPCupManager.LazarusOPT);
   end;
 
-  FPCupManager.UseSystemFPC:=Form2.SystemFPC;
+  FPCupManager.UseSystemFPC:=SettingsForm.SystemFPC;
 
-  FPCupManager.UseWget:=Form2.UseWget;
+  FPCupManager.UseWget:=SettingsForm.UseWget;
 
   // set custom FPC compiler by special user input through setup+
-  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetSourceTCPU,GetSourceTOS,TSUBARCH.saNone);
+  FPCupManager.CompilerOverride:=SettingsForm.GetCompiler(GetSourceTCPU,GetSourceTOS,TSUBARCH.saNone);
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
   FPCupManager.BaseDirectory:=sInstallDir;
@@ -4162,23 +4147,23 @@ begin
   FPCupManager.LogFileName:='';
 
   FPCupManager.FPCInstallDirectory:=sInstallDir+'fpc';
-  if Form2.SplitFPC
+  if SettingsForm.SplitFPC
      then FPCupManager.FPCSourceDirectory:=FPCupManager.FPCInstallDirectory+'src'
      else FPCupManager.FPCSourceDirectory:=FPCupManager.FPCInstallDirectory;
 
   FPCupManager.LazarusInstallDirectory:=sInstallDir+'lazarus';
-  if Form2.SplitLazarus
+  if SettingsForm.SplitLazarus
      then FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory+'src'
      else FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory;
 
   FPCupManager.LazarusPrimaryConfigPath:=sInstallDir+'config_'+ExtractFileName(FPCupManager.LazarusInstallDirectory);
 
-  FPCupManager.ExportOnly:=(NOT Form2.Repo);
+  FPCupManager.ExportOnly:=(NOT SettingsForm.Repo);
 
-  FPCupManager.FPCPatches:=Form2.FPCPatches;
-  FPCupManager.LazarusPatches:=Form2.LazPatches;
-  FPCupManager.ForceLocalRepoClient:=Form2.ForceLocalRepoClient;
-  FPCupManager.Context:=Form2.AddContext;
+  FPCupManager.FPCPatches:=SettingsForm.FPCPatches;
+  FPCupManager.LazarusPatches:=SettingsForm.LazPatches;
+  FPCupManager.ForceLocalRepoClient:=SettingsForm.ForceLocalRepoClient;
+  FPCupManager.Context:=SettingsForm.AddContext;
 
   // Set default Darwin LCL platforms
   {$ifdef Darwin}
@@ -4200,7 +4185,7 @@ begin
   {$endif}
 
   {$ifdef RemoteLog}
-  aDataClient.Enabled:=Form2.SendInfo;
+  aDataClient.Enabled:=SettingsForm.SendInfo;
   aDataClient.UpInfo.UpFunction:=ufUnknown;
   aDataClient.ClearExtraData;
   aDataClient.UpInfo.CrossCPUOS:='';
@@ -4276,14 +4261,14 @@ begin
   if (NOT crossing) then
   begin
     // branch and revision overrides from setup+
-    s:=Form2.FPCRevision;
+    s:=SettingsForm.FPCRevision;
     if Length(s)>0 then FPCupManager.FPCDesiredRevision:=s;
-    s:=Form2.FPCBranch;
+    s:=SettingsForm.FPCBranch;
     if Length(s)>0 then FPCupManager.FPCBranch:=s;
 
-    s:=Form2.LazarusRevision;
+    s:=SettingsForm.LazarusRevision;
     if Length(s)>0 then FPCupManager.LazarusDesiredRevision:=s;
-    s:=Form2.LazarusBranch;
+    s:=SettingsForm.LazarusBranch;
     if Length(s)>0 then FPCupManager.LazarusBranch:=s;
 
     // overrides for old versions of Lazarus
@@ -4345,7 +4330,7 @@ begin
   AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
   AddMessage('');
 
-  if Form2.SaveScript then FPCupManager.SaveSettings;
+  if SettingsForm.SaveScript then FPCupManager.SaveSettings;
 
   BitBtnHalt.Enabled:=true;
   try
@@ -4506,49 +4491,49 @@ begin
 
       if (listModules.Items.Count>0) then listModules.ItemIndex:=ReadInteger('General','Module',listModules.ItemIndex);
 
-      Form2.FPCOptions:=ReadString('General','FPCOptions',Form2.FPCOptions);
-      Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
+      SettingsForm.FPCOptions:=ReadString('General','FPCOptions',SettingsForm.FPCOptions);
+      SettingsForm.LazarusOptions:=ReadString('General','LazarusOptions','');
 
-      Form2.FPCDebug:=ReadBool('General','FPCDebug',Form2.FPCDebug);
-      Form2.LazarusDebug:=ReadBool('General','LazarusDebug',Form2.LazarusDebug);
+      SettingsForm.FPCDebug:=ReadBool('General','FPCDebug',SettingsForm.FPCDebug);
+      SettingsForm.LazarusDebug:=ReadBool('General','LazarusDebug',SettingsForm.LazarusDebug);
 
-      Form2.FPCRevision:=ReadString('General','FPCRevision','');
-      Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
-      Form2.FPCBranch:=ReadString('General','FPCBranch','');
-      Form2.LazarusBranch:=ReadString('General','LazarusBranch','');
+      SettingsForm.FPCRevision:=ReadString('General','FPCRevision','');
+      SettingsForm.LazarusRevision:=ReadString('General','LazarusRevision','');
+      SettingsForm.FPCBranch:=ReadString('General','FPCBranch','');
+      SettingsForm.LazarusBranch:=ReadString('General','LazarusBranch','');
 
-      Form2.SplitFPC:=ReadBool('General','SplitFPC',Form2.SplitFPC);
-      Form2.SplitLazarus:=ReadBool('General','SplitLazarus',Form2.SplitLazarus);
-      Form2.DockedLazarus:=ReadBool('General','DockedLazarus',Form2.DockedLazarus);
+      SettingsForm.SplitFPC:=ReadBool('General','SplitFPC',SettingsForm.SplitFPC);
+      SettingsForm.SplitLazarus:=ReadBool('General','SplitLazarus',SettingsForm.SplitLazarus);
+      SettingsForm.DockedLazarus:=ReadBool('General','DockedLazarus',SettingsForm.DockedLazarus);
 
-      Form2.UseWget:=ReadBool('General','UseWget',Form2.UseWget);
-      Form2.MakeJobs:=ReadBool('General','MakeJobs',Form2.MakeJobs);
-      Form2.FPCUnicode:=ReadBool('General','BuildFPCUnicode',Form2.FPCUnicode);
+      SettingsForm.UseWget:=ReadBool('General','UseWget',SettingsForm.UseWget);
+      SettingsForm.MakeJobs:=ReadBool('General','MakeJobs',SettingsForm.MakeJobs);
+      SettingsForm.FPCUnicode:=ReadBool('General','BuildFPCUnicode',SettingsForm.FPCUnicode);
 
-      Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
-      Form2.UpdateOnly:=ReadBool('General','UpdateOnly',False);
+      SettingsForm.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
+      SettingsForm.UpdateOnly:=ReadBool('General','UpdateOnly',False);
 
-      Form2.UseSoftFloat:=ReadBool('General','UseSoftFloat',Form2.UseSoftFloat);
-      Form2.EnableRTTI:=ReadBool('General','EnableRTTI',Form2.EnableRTTI);
+      SettingsForm.UseSoftFloat:=ReadBool('General','UseSoftFloat',SettingsForm.UseSoftFloat);
+      SettingsForm.EnableRTTI:=ReadBool('General','EnableRTTI',SettingsForm.EnableRTTI);
 
-      Form2.OnlinePatching:=ReadBool('General','OnlinePatching',Form2.OnlinePatching);
-      Form2.ApplyLocalChanges:=ReadBool('General','ApplyLocalChanges',Form2.ApplyLocalChanges);
+      SettingsForm.OnlinePatching:=ReadBool('General','OnlinePatching',SettingsForm.OnlinePatching);
+      SettingsForm.ApplyLocalChanges:=ReadBool('General','ApplyLocalChanges',SettingsForm.ApplyLocalChanges);
 
-      Form2.SystemFPC:=ReadBool('General','SystemFPC',False);
+      SettingsForm.SystemFPC:=ReadBool('General','SystemFPC',False);
 
       // To be enabled in a official release
-      //Form2.ForceGLIBCLinking:=ReadBool('General','LinuxLegacy',Form2.ForceGLIBCLinking);
-      Form2.ForceGLIBCLinking:=false;
+      //SettingsForm.ForceGLIBCLinking:=ReadBool('General','LinuxLegacy',SettingsForm.ForceGLIBCLinking);
+      SettingsForm.ForceGLIBCLinking:=false;
 
-      Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
-      Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
+      SettingsForm.FPCPatches:=ReadString('Patches','FPCPatches','');
+      SettingsForm.LazPatches:=ReadString('Patches','LazarusPatches','');
 
-      Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
+      SettingsForm.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',SettingsForm.ForceLocalRepoClient);
     finally
       Free;
     end;
 
-    Form2.SetInstallDir(IniDirectory);
+    SettingsForm.SetInstallDir(IniDirectory);
 
     ParseRevisions(IniDirectory);
   end
@@ -4557,8 +4542,8 @@ begin
     AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
     {$ifdef Solaris}
     // current trunk does not build with the standard -O2, so use -O1 for all
-    Form2.FPCOptions:='-g -gl -O1';
-    FPCupManager.FPCOPT:=Form2.FPCOptions;
+    SettingsForm.FPCOptions:='-g -gl -O1';
+    FPCupManager.FPCOPT:=SettingsForm.FPCOptions;
     {$endif}
   end;
 end;
@@ -4649,7 +4634,7 @@ begin
   result:=false;
 
   if NOT Assigned(FPCupManager) then exit;
-  if NOT Assigned(Form2) then exit;
+  if NOT Assigned(SettingsForm) then exit;
 
   aDir:=ExtractFileDir(IncludeTrailingPathDelimiter(IniDirectory)+installerUniversal.DELUXEFILENAME);
   result:=DirectoryExists(aDir);
@@ -4683,39 +4668,39 @@ begin
 
       if ((listModules.Items.Count>0) AND (listModules.ItemIndex<>-1)) then WriteInteger('General','Module',listModules.ItemIndex);
 
-      WriteString('General','FPCOptions',Form2.FPCOptions);
-      WriteString('General','LazarusOptions',Form2.LazarusOptions);
+      WriteString('General','FPCOptions',SettingsForm.FPCOptions);
+      WriteString('General','LazarusOptions',SettingsForm.LazarusOptions);
 
-      WriteBool('General','FPCDebug',Form2.FPCDebug);
-      WriteBool('General','LazarusDebug',Form2.LazarusDebug);
+      WriteBool('General','FPCDebug',SettingsForm.FPCDebug);
+      WriteBool('General','LazarusDebug',SettingsForm.LazarusDebug);
 
-      WriteString('General','FPCRevision',Form2.FPCRevision);
-      WriteString('General','LazarusRevision',Form2.LazarusRevision);
-      WriteString('General','FPCBranch',Form2.FPCBranch);
-      WriteString('General','LazarusBranch',Form2.LazarusBranch);
+      WriteString('General','FPCRevision',SettingsForm.FPCRevision);
+      WriteString('General','LazarusRevision',SettingsForm.LazarusRevision);
+      WriteString('General','FPCBranch',SettingsForm.FPCBranch);
+      WriteString('General','LazarusBranch',SettingsForm.LazarusBranch);
 
-      WriteBool('General','SplitFPC',Form2.SplitFPC);
-      WriteBool('General','SplitLazarus',Form2.SplitLazarus);
-      WriteBool('General','DockedLazarus',Form2.DockedLazarus);
+      WriteBool('General','SplitFPC',SettingsForm.SplitFPC);
+      WriteBool('General','SplitLazarus',SettingsForm.SplitLazarus);
+      WriteBool('General','DockedLazarus',SettingsForm.DockedLazarus);
 
-      WriteBool('General','SystemFPC',Form2.SystemFPC);
+      WriteBool('General','SystemFPC',SettingsForm.SystemFPC);
 
-      WriteBool('General','LinuxLegacy',Form2.ForceGLIBCLinking);
+      WriteBool('General','LinuxLegacy',SettingsForm.ForceGLIBCLinking);
 
-      WriteBool('General','UseWget',Form2.UseWget);
-      WriteBool('General','MakeJobs',Form2.MakeJobs);
-      WriteBool('General','BuildFPCUnicode',Form2.FPCUnicode);
-      WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
-      WriteBool('General','UpdateOnly',Form2.UpdateOnly);
-      WriteBool('General','UseSoftFloat',Form2.UseSoftFloat);
-      WriteBool('General','EnableRTTI',Form2.EnableRTTI);
-      WriteBool('General','OnlinePatching',Form2.OnlinePatching);
-      WriteBool('General','ApplyLocalChanges',Form2.ApplyLocalChanges);
+      WriteBool('General','UseWget',SettingsForm.UseWget);
+      WriteBool('General','MakeJobs',SettingsForm.MakeJobs);
+      WriteBool('General','BuildFPCUnicode',SettingsForm.FPCUnicode);
+      WriteBool('General','ExtraVerbose',SettingsForm.ExtraVerbose);
+      WriteBool('General','UpdateOnly',SettingsForm.UpdateOnly);
+      WriteBool('General','UseSoftFloat',SettingsForm.UseSoftFloat);
+      WriteBool('General','EnableRTTI',SettingsForm.EnableRTTI);
+      WriteBool('General','OnlinePatching',SettingsForm.OnlinePatching);
+      WriteBool('General','ApplyLocalChanges',SettingsForm.ApplyLocalChanges);
 
-      WriteString('Patches','FPCPatches',Form2.FPCPatches);
-      WriteString('Patches','LazarusPatches',Form2.LazPatches);
+      WriteString('Patches','FPCPatches',SettingsForm.FPCPatches);
+      WriteString('Patches','LazarusPatches',SettingsForm.LazPatches);
 
-      WriteBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
+      WriteBool('General','ForceLocalRepoClient',SettingsForm.ForceLocalRepoClient);
 
       UpdateFile;
     finally
@@ -4826,7 +4811,7 @@ begin
       begin
         //  Store the value provided as a new tag
         aLocalAlias:=Copy(aLocalTarget,1,Length(aLocalTarget)-Length(GITLABEXTENSION));
-        AddTag(aListBox,aLocalAlias);
+        AddTag(aListBox,aLocalAlias,aLocalAlias);
         // Default to stable in case of lookup failure
         //aLocalTarget:='stable'+GITLABEXTENSION;
       end;
@@ -4845,7 +4830,7 @@ begin
       begin
         //  Store the value provided as a new tag
         aLocalAlias:=Copy(aLocalTarget,1,Length(aLocalTarget)-Length(GITLABEXTENSION));
-        AddTag(aListBox,aLocalAlias);
+        AddTag(aListBox,aLocalAlias,aLocalAlias);
         // Default to stable in case of lookup failure
         //aLocalTarget:='stable'+GITLABEXTENSION;
       end;
@@ -5005,7 +4990,7 @@ end;
 procedure TForm1.InitFpcupdeluxe(Data: PtrInt);
 begin
   InitFPCupManager;
-  if Form2.GetUpdates then Application.QueueAsyncCall(@CheckForUpdates,0);
+  if SettingsForm.GetUpdates then Application.QueueAsyncCall(@CheckForUpdates,0);
 end;
 
 {$ifdef RemoteLog}
@@ -5014,7 +4999,7 @@ var
   aModalResult:TModalResult;
 begin
   aDataClient.UpInfo.UpDistro:=GetDistro;
-  if (sConsentWarning) OR (Form2.SendInfo) then
+  if (sConsentWarning) OR (SettingsForm.SendInfo) then
   begin
     if (sConsentWarning) then
     begin
@@ -5029,12 +5014,12 @@ begin
                    'Do you want logging info to be gathered ?'
                  ,mtConfirmation,[mbYes, mbNo],Self));
       if aModalResult=mrYes
-         then Form2.SendInfo:=True
-         else Form2.SendInfo:=False;
+         then SettingsForm.SendInfo:=True
+         else SettingsForm.SendInfo:=False;
     end;
   end;
 
-  if (Form2.SendInfo) then
+  if (SettingsForm.SendInfo) then
   begin
     AddMessage('Fpcupdeluxe logging info:');
     AddMessage('fpcuplogger.batterybutcher.com/root/getinfohtml',true);

@@ -388,6 +388,7 @@ type
     procedure GetCrossToolsPath(out BinPath,LibPath:string);
     function GetCrossBinsURL(out BaseBinsURL:string; var BinsFileName:string):boolean;
     function GetCrossLibsURL(out BaseLibsURL:string; var LibsFileName:string):boolean;
+    function GetReleaseTags(const aURL:string;RC:boolean;out aReleaseList:string):boolean;
     function CheckCurrentFPCInstall: boolean;
     procedure SaveSettings;
     procedure ResetAll;
@@ -1460,6 +1461,67 @@ begin
   end;
 
 end;
+
+function TFPCupManager.GetReleaseTags(const aURL:string;RC:boolean;out aReleaseList:string):boolean;
+(*
+const
+  FPC_TAG_PREAMBLE      = 'release_';
+  LAZ_TAG_PREAMBLE      = 'lazarus_';
+  TAGFPCURL = 'https://gitlab.com/api/v4/projects/28644964/repository/tags?search=^'+FPC_TAG_PREAMBLE;
+  TAGLAZURL = 'https://gitlab.com/api/v4/projects/28419588/repository/tags?search=^'+LAZ_TAG_PREAMBLE;
+  FIXESFPCURL = 'https://gitlab.com/api/v4/projects/28644964/repository/branches?search=^fixes';
+  FIXESLAZURL = 'https://gitlab.com/api/v4/projects/28419588/repository/branches?search=^fixes';
+*)
+var
+  s:string;
+  success:boolean;
+  Json : TJSONData;
+  Assets : TJSONArray;
+  Item,Asset : TJSONObject;
+  TagName, FileName, FileURL : string;
+  i,iassets : integer;
+begin
+  result:=false;
+
+  s:=GetURLDataFromCache(aURL);
+  success:=(Length(s)>0);
+
+  if success then
+  begin
+    json:=nil;
+    try
+      try
+        Json:=GetJSON(s);
+      except
+        Json:=nil;
+      end;
+      if Json.IsNull then success:=false;
+      if success then
+      begin
+        for i:=0 to Pred(Json.Count) do
+        begin
+          Item := TJSONObject(Json.Items[i]);
+          TagName:=Item{%H-}.Get('name');
+          if Pos('macos',TagName)>0 then continue;
+          if RC then
+          begin
+            if Pos('RC',UpperCase(TagName))=0 then continue;
+          end
+          else
+          begin
+            if Pos('RC',UpperCase(TagName))>0 then continue;
+          end;
+          aReleaseList:=aReleaseList+TagName+',';
+        end;
+      end;
+    finally
+      if (Json<>nil) AND (NOT Json.IsNull) then Json.Free;
+    end;
+  end;
+  if Length(aReleaseList)>0 then Delete(aReleaseList,Length(aReleaseList),1);
+  result:=success;
+end;
+
 
 function TFPCupManager.GetRunInfo:string;
 begin

@@ -8,7 +8,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls,
-  Dialogs, CheckLst, IniPropStorage, ComCtrls, installerBase;
+  Dialogs, CheckLst, IniPropStorage, ComCtrls, ButtonPanel, installerBase;
 
 type
   TString = class(TObject)
@@ -19,10 +19,8 @@ type
     property Str: String read FStr write FStr;
   end;
 
-  { TForm2 }
-  TForm2 = class(TForm)
-    BitBtn1: TBitBtn;
-    BitBtn2: TBitBtn;
+  { TSettingsForm }
+  TSettingsForm = class(TForm)
     btnAddFPCPatch: TButton;
     btnAddLazPatch: TButton;
     btnListCustomOptions: TButton;
@@ -31,6 +29,7 @@ type
     btnSelectLibDir: TButton;
     btnSelectBinDir: TButton;
     btnSelectCompiler: TButton;
+    ButtonPanel1: TButtonPanel;
     chkFPCDebug: TCheckBox;
     chkLazarusDebug: TCheckBox;
     ComboBoxCPU: TComboBox;
@@ -83,7 +82,6 @@ type
     LabelLazarusOptions: TLabel;
     LabelLazarusRevision: TLabel;
     OpenDialog1: TOpenDialog;
-    ButtonPanel: TPanel;
     PageControl1: TPageControl;
     rgrpSearchOptions: TRadioGroup;
     rgrpSubarch: TRadioGroup;
@@ -401,7 +399,7 @@ resourcestring
   CaptionCheckFPCDotted = 'Build dotted RTL.';
 
 var
-  Form2: TForm2;
+  SettingsForm: TSettingsForm;
 
 implementation
 
@@ -417,7 +415,7 @@ uses
   m_crossinstaller,
   IniFiles;
 
-{ TForm2 }
+{ TSettingsForm }
 
 constructor TString.Create(const AStr: String) ;
 begin
@@ -425,7 +423,7 @@ begin
   FStr := AStr;
 end;
 
-procedure TForm2.OnDirectorySelect(Sender: TObject);
+procedure TSettingsForm.OnDirectorySelect(Sender: TObject);
 begin
   if Sender=btnSelectLibDir then SelectDirectoryDialog1.InitialDir:=EditLibLocation.Text;
   if Sender=btnSelectBinDir then SelectDirectoryDialog1.InitialDir:=EditBinLocation.Text;
@@ -443,7 +441,7 @@ begin
   end;
 end;
 
-procedure TForm2.FormCreate(Sender: TObject);
+procedure TSettingsForm.FormCreate(Sender: TObject);
 var
   CPU          : TCPU;
   OS           : TOS;
@@ -617,7 +615,7 @@ begin
 end;
 
 
-procedure TForm2.UpdateCheckBoxList;
+procedure TSettingsForm.UpdateCheckBoxList;
 var
   i           : integer;
   boolstore   : array of boolean;
@@ -680,7 +678,7 @@ begin
 
 end;
 
-procedure TForm2.SetInstallDir(const aInstallDir:string='');
+procedure TSettingsForm.SetInstallDir(const aInstallDir:string='');
 var
   CPU:TCPU;
   OS:TOS;
@@ -728,7 +726,7 @@ begin
 
 end;
 
-procedure TForm2.SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS);
+procedure TSettingsForm.SetCrossTarget(aSender:TObject;aCPU:TCPU;aOS:TOS);
 var
   Subarch:TSUBARCH;
   Subarchs:TSUBARCHS;
@@ -818,7 +816,7 @@ begin
 
 end;
 
-procedure TForm2.ComboBoxCPUOSChange(Sender: TObject);
+procedure TSettingsForm.ComboBoxCPUOSChange(Sender: TObject);
 var
   aCPU:TCPU;
   aOS:TOS;
@@ -830,7 +828,7 @@ begin
   SetCrossTarget(Sender,aCPU,aOS);
 end;
 
-procedure TForm2.EditCrossBuildOptionsEditingDone(Sender: TObject);
+procedure TSettingsForm.EditCrossBuildOptionsEditingDone(Sender: TObject);
 begin
   if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
   begin
@@ -838,7 +836,7 @@ begin
   end;
 end;
 
-procedure TForm2.EditDblClickDelete(Sender: TObject);
+procedure TSettingsForm.EditDblClickDelete(Sender: TObject);
 begin
   TEdit(Sender).Text:='';
   if ((LocalCPU<>TCPU.cpuNone) AND (LocalOS<>TOS.osNone)) then
@@ -850,7 +848,7 @@ begin
   end;
 end;
 
-procedure TForm2.EditScriptClick(Sender: TObject);
+procedure TSettingsForm.EditScriptClick(Sender: TObject);
 var
   aEdit:TEdit;
 begin
@@ -870,7 +868,7 @@ begin
   end;
 end;
 
-procedure TForm2.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure TSettingsForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   SetSelectedSubArch(LocalCPU,LocalOS,LocalSUBARCH);
   LocalCPU:=TCPU.cpuNone;
@@ -880,7 +878,7 @@ begin
   EditLazarusRevision.Color:=clDefault;
 end;
 
-procedure TForm2.btnAddPatchClick(Sender: TObject);
+procedure TSettingsForm.btnAddPatchClick(Sender: TObject);
 var
   PatchName: string;
   FullPatchPath: string;
@@ -903,7 +901,7 @@ begin
   end;
 end;
 
-procedure TForm2.btnRemPatchClick(Sender: TObject);
+procedure TSettingsForm.btnRemPatchClick(Sender: TObject);
 var
   i:integer;
   aListBox:TListBox;
@@ -926,7 +924,7 @@ begin
   end;
 end;
 
-procedure TForm2.btnSelectFile(Sender: TObject);
+procedure TSettingsForm.btnSelectFile(Sender: TObject);
 begin
   if Sender=btnSelectCompiler then
   begin
@@ -946,7 +944,7 @@ begin
   end;
 end;
 
-procedure TForm2.btnListCustomOptionsClick(Sender: TObject);
+procedure TSettingsForm.btnListCustomOptionsClick(Sender: TObject);
 var
   CPU:TCPU;
   OS:TOS;
@@ -1026,7 +1024,7 @@ begin
   end;
 end;
 
-procedure TForm2.FormDestroy(Sender: TObject);
+procedure TSettingsForm.FormDestroy(Sender: TObject);
 var
   CPU:TCPU;
   OS:TOS;
@@ -1147,7 +1145,7 @@ begin
   end;
 end;
 
-procedure TForm2.IniPropStorageSettingsRestoringProperties(Sender: TObject);
+procedure TSettingsForm.IniPropStorageSettingsRestoringProperties(Sender: TObject);
 begin
   {$ifdef Haiku}
   {$else}
@@ -1157,7 +1155,7 @@ begin
   //Height := MulDiv(Height, 96, Screen.PixelsPerInch);
 end;
 
-procedure TForm2.IniPropStorageSettingsSavingProperties(Sender: TObject);
+procedure TSettingsForm.IniPropStorageSettingsSavingProperties(Sender: TObject);
 begin
   {$ifdef Haiku}
   {$else}
@@ -1168,7 +1166,7 @@ begin
   {$endif}
 end;
 
-procedure TForm2.rgrpSearchOptionsSelectionChanged(Sender: TObject);
+procedure TSettingsForm.rgrpSearchOptionsSelectionChanged(Sender: TObject);
 var
   e:boolean;
   i:integer;
@@ -1183,7 +1181,7 @@ begin
   btnSelectBinDir.Enabled:=e;
 end;
 
-procedure TForm2.RadioGroupARMArchSelectionChanged(Sender: TObject);
+procedure TSettingsForm.RadioGroupARMArchSelectionChanged(Sender: TObject);
 var
   i:integer;
   xARMArch:TARMARCH;
@@ -1199,7 +1197,7 @@ begin
   end;
 end;
 
-procedure TForm2.rgrpSubarchSelectionChanged(Sender: TObject);
+procedure TSettingsForm.rgrpSubarchSelectionChanged(Sender: TObject);
 var
   i:integer;
 begin
@@ -1212,7 +1210,7 @@ begin
 end;
 
 {
-function TForm2.GetCPUFromComboBox:TCPU;
+function TSettingsForm.GetCPUFromComboBox:TCPU;
 begin
   if (ComboBoxCPU.ItemIndex<>-1) then
   begin
@@ -1220,7 +1218,7 @@ begin
   end;
 end;
 
-function TForm2.GetOSFromComboBox:TOS;
+function TSettingsForm.GetOSFromComboBox:TOS;
 begin
   if (ComboBoxOS.ItemIndex<>-1) then
   begin
@@ -1229,7 +1227,7 @@ begin
 end;
 }
 
-function TForm2.GetLibraryDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
+function TSettingsForm.GetLibraryDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
 begin
   try
     case CrossUtils[aCPU,aOS,aSubarch].Setting of
@@ -1243,7 +1241,7 @@ begin
   end;
 end;
 
-function TForm2.GetToolsDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
+function TSettingsForm.GetToolsDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
 begin
   try
     case CrossUtils[aCPU,aOS,aSubarch].Setting of
@@ -1257,44 +1255,44 @@ begin
   end;
 end;
 
-function TForm2.GetCrossBuildOptions(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
+function TSettingsForm.GetCrossBuildOptions(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
 begin
   result:=CrossUtils[aCPU,aOS,aSubarch].CrossBuildOptions;
 end;
 
-function TForm2.GetCrossARMArch(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): TARMARCH;
+function TSettingsForm.GetCrossARMArch(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): TARMARCH;
 begin
   result:=CrossUtils[aCPU,aOS,aSubarch].CrossARMArch;
 end;
 
-function TForm2.GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
+function TSettingsForm.GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
 begin
   result:=GetARMArchFPCDefine(CrossUtils[aCPU,aOS,aSubarch].CrossARMArch);
 end;
 
-function TForm2.GetCompiler(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
+function TSettingsForm.GetCompiler(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): string;
 begin
   result:=CrossUtils[aCPU,aOS,aSubarch].Compiler;
 end;
 
 {
-procedure TForm2.SetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH; aValue:boolean);
+procedure TSettingsForm.SetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH; aValue:boolean);
 begin
   CrossUtils[aCPU,aOS,aSubarch].Available:=aValue;
 end;
 
-function TForm2.GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
+function TSettingsForm.GetCrossAvailable(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH): boolean;
 begin
   result:=CrossUtils[aCPU,aOS,aSubarch].Available;
 end;
 }
 
-function TForm2.GetCheckIndex(aCaption:string):integer;
+function TSettingsForm.GetCheckIndex(aCaption:string):integer;
 begin
   result:=MiscellaneousCheckListBox.Items.IndexOf(aCaption);
 end;
 
-function TForm2.GetCheckState(aCaption:string):boolean;
+function TSettingsForm.GetCheckState(aCaption:string):boolean;
 var
   aIndex:integer;
 begin
@@ -1303,7 +1301,7 @@ begin
   if (aIndex<>-1) then result:=MiscellaneousCheckListBox.Checked[aIndex];
 end;
 
-procedure TForm2.SetCheckState(aCaption:string;aState:boolean);
+procedure TSettingsForm.SetCheckState(aCaption:string;aState:boolean);
 var
   aIndex:integer;
 begin
@@ -1311,7 +1309,7 @@ begin
   MiscellaneousCheckListBox.Checked[aIndex]:=aState;
 end;
 
-procedure TForm2.SetCheckEnabled(aCaption:string;aState:boolean);
+procedure TSettingsForm.SetCheckEnabled(aCaption:string;aState:boolean);
 var
   aIndex:integer;
 begin
@@ -1319,371 +1317,371 @@ begin
   MiscellaneousCheckListBox.ItemEnabled[aIndex]:=aState;
 end;
 
-function TForm2.GetRepo:boolean;
+function TSettingsForm.GetRepo:boolean;
 begin
   result:=GetCheckState(CaptionCheckRepo);
 end;
-procedure TForm2.SetRepo(value:boolean);
+procedure TSettingsForm.SetRepo(value:boolean);
 begin
   SetCheckState(CaptionCheckRepo,value);
 end;
 
-function TForm2.GetPackageRepo:boolean;
+function TSettingsForm.GetPackageRepo:boolean;
 begin
   result:=GetCheckState(CaptionCheckPackageRepo);
 end;
-procedure TForm2.SetPackageRepo(value:boolean);
+procedure TSettingsForm.SetPackageRepo(value:boolean);
 begin
   SetCheckState(CaptionCheckPackageRepo,value);
 end;
 
-function TForm2.GetFPCUnicode:boolean;
+function TSettingsForm.GetFPCUnicode:boolean;
 begin
   result:=GetCheckState(CaptionCheckFPCUnicode);
 end;
-procedure TForm2.SetFPCUnicode(value:boolean);
+procedure TSettingsForm.SetFPCUnicode(value:boolean);
 begin
   SetCheckState(CaptionCheckFPCUnicode,value);
 end;
 
-function TForm2.GetIncludeLCL:boolean;
+function TSettingsForm.GetIncludeLCL:boolean;
 begin
   result:=GetCheckState(CaptionCheckIncludeLCL);
 end;
-procedure TForm2.SetIncludeLCL(value:boolean);
+procedure TSettingsForm.SetIncludeLCL(value:boolean);
 begin
   SetCheckState(CaptionCheckIncludeLCL,value);
 end;
 
-function TForm2.GetUpdateOnly:boolean;
+function TSettingsForm.GetUpdateOnly:boolean;
 begin
   result:=GetCheckState(CaptionCheckUpdateOnly);
 end;
-procedure TForm2.SetUpdateOnly(value:boolean);
+procedure TSettingsForm.SetUpdateOnly(value:boolean);
 begin
   SetCheckState(CaptionCheckUpdateOnly,value);
 end;
 
-function TForm2.GetSystemFPC:boolean;
+function TSettingsForm.GetSystemFPC:boolean;
 begin
   result:=GetCheckState(CaptionCheckSystemFPC);
 end;
-procedure TForm2.SetSystemFPC(value:boolean);
+procedure TSettingsForm.SetSystemFPC(value:boolean);
 begin
   SetCheckState(CaptionCheckSystemFPC,value);
 end;
 
 
-function TForm2.GetIncludeHelp:boolean;
+function TSettingsForm.GetIncludeHelp:boolean;
 begin
   result:=GetCheckState(CaptionCheckIncludeHelp);
 end;
-procedure TForm2.SetIncludeHelp(value:boolean);
+procedure TSettingsForm.SetIncludeHelp(value:boolean);
 begin
   SetCheckState(CaptionCheckIncludeHelp,value);
 end;
 
-function TForm2.GetSplitFPC:boolean;
+function TSettingsForm.GetSplitFPC:boolean;
 begin
   result:=GetCheckState(CaptionCheckSplitFPC);
 end;
-procedure TForm2.SetSplitFPC(value:boolean);
+procedure TSettingsForm.SetSplitFPC(value:boolean);
 begin
   SetCheckState(CaptionCheckSplitFPC,value);
 end;
 
-function TForm2.GetSplitLazarus:boolean;
+function TSettingsForm.GetSplitLazarus:boolean;
 begin
   result:=GetCheckState(CaptionCheckSplitLazarus);
 end;
-procedure TForm2.SetSplitLazarus(value:boolean);
+procedure TSettingsForm.SetSplitLazarus(value:boolean);
 begin
   SetCheckState(CaptionCheckSplitLazarus,value);
 end;
 
-function TForm2.GetDockedLazarus:boolean;
+function TSettingsForm.GetDockedLazarus:boolean;
 begin
   result:=GetCheckState(CaptionCheckDockedLazarus);
 end;
-procedure TForm2.SetDockedLazarus(value:boolean);
+procedure TSettingsForm.SetDockedLazarus(value:boolean);
 begin
   SetCheckState(CaptionCheckDockedLazarus,value);
 end;
 
-function TForm2.GetUseWget:boolean;
+function TSettingsForm.GetUseWget:boolean;
 begin
   result:=GetCheckState(CaptionCheckUseWget);
 end;
-procedure TForm2.SetUseWget(value:boolean);
+procedure TSettingsForm.SetUseWget(value:boolean);
 begin
   SetCheckState(CaptionCheckUseWget,value);
 end;
 
-function TForm2.GetMakeJobs:boolean;
+function TSettingsForm.GetMakeJobs:boolean;
 begin
   result:=GetCheckState(CaptionCheckUseMakeJobs);
 end;
-procedure TForm2.SetMakeJobs(value:boolean);
+procedure TSettingsForm.SetMakeJobs(value:boolean);
 begin
   SetCheckState(CaptionCheckUseMakeJobs,value);
 end;
 
-function TForm2.GetExtraVerbose:boolean;
+function TSettingsForm.GetExtraVerbose:boolean;
 begin
   result:=GetCheckState(CaptionCheckExtraVerbose);
 end;
-procedure TForm2.SetExtraVerbose(value:boolean);
+procedure TSettingsForm.SetExtraVerbose(value:boolean);
 begin
   SetCheckState(CaptionCheckExtraVerbose,value);
 end;
 
-function TForm2.GetSendInfo:boolean;
+function TSettingsForm.GetSendInfo:boolean;
 begin
   result:=GetCheckState(CaptionCheckSendInfo);
 end;
-procedure TForm2.SetSendInfo(value:boolean);
+procedure TSettingsForm.SetSendInfo(value:boolean);
 begin
   SetCheckState(CaptionCheckSendInfo,value);
 end;
 
-function TForm2.GetForceLocalRepoClient:boolean;
+function TSettingsForm.GetForceLocalRepoClient:boolean;
 begin
   result:=GetCheckState(CaptionCheckForceLocalRepoClient);
 end;
-procedure TForm2.SetForceLocalRepoClient(value:boolean);
+procedure TSettingsForm.SetForceLocalRepoClient(value:boolean);
 begin
   SetCheckState(CaptionCheckForceLocalRepoClient,value);
 end;
 
-function TForm2.GetCheckUpdates:boolean;
+function TSettingsForm.GetCheckUpdates:boolean;
 begin
   result:=GetCheckState(CaptionCheckGetUpdates);
 end;
-procedure TForm2.SetCheckUpdates(value:boolean);
+procedure TSettingsForm.SetCheckUpdates(value:boolean);
 begin
   SetCheckState(CaptionCheckGetUpdates,value);
 end;
 
-function TForm2.GetUseSoftFloat:boolean;
+function TSettingsForm.GetUseSoftFloat:boolean;
 begin
   result:=GetCheckState(CaptionUseSoftFloat80bit);
 end;
-procedure TForm2.SetUseSoftFloat(value:boolean);
+procedure TSettingsForm.SetUseSoftFloat(value:boolean);
 begin
   SetCheckState(CaptionUseSoftFloat80bit,value);
 end;
 
-function TForm2.GetEnableRTTI:boolean;
+function TSettingsForm.GetEnableRTTI:boolean;
 begin
   result:=GetCheckState(CaptionEnableDelphiRTTI);
 end;
-procedure TForm2.SetEnableRTTI(value:boolean);
+procedure TSettingsForm.SetEnableRTTI(value:boolean);
 begin
   SetCheckState(CaptionEnableDelphiRTTI,value);
 end;
 
 
-function TForm2.GetAllowOnlinePatching:boolean;
+function TSettingsForm.GetAllowOnlinePatching:boolean;
 begin
   result:=GetCheckState(CaptionCheckEnableOnlinePatching);
 end;
-procedure TForm2.SetAllowOnlinePatching(value:boolean);
+procedure TSettingsForm.SetAllowOnlinePatching(value:boolean);
 begin
   SetCheckState(CaptionCheckEnableOnlinePatching,value);
 end;
 
-function TForm2.GetApplyLocalChanges:boolean;
+function TSettingsForm.GetApplyLocalChanges:boolean;
 begin
   result:=GetCheckState(CaptionCheckApplyLocalChanges);
 end;
-procedure TForm2.SetApplyLocalChanges(value:boolean);
+procedure TSettingsForm.SetApplyLocalChanges(value:boolean);
 begin
   SetCheckState(CaptionCheckApplyLocalChanges,value);
 end;
 
-function TForm2.GetAddContext:boolean;
+function TSettingsForm.GetAddContext:boolean;
 begin
   result:=GetCheckState(CaptionCheckAddContext);
 end;
-procedure TForm2.SetAddContext(value:boolean);
+procedure TSettingsForm.SetAddContext(value:boolean);
 begin
   SetCheckState(CaptionCheckAddContext,value);
 end;
 
-function TForm2.GetAskConfirmation: boolean;
+function TSettingsForm.GetAskConfirmation: boolean;
 begin
   result := GetCheckState(CaptionCheckAskConfirmation);
 end;
-procedure TForm2.SetAskConfirmation(value: boolean);
+procedure TSettingsForm.SetAskConfirmation(value: boolean);
 begin
   SetCheckState(CaptionCheckAskConfirmation, value);
 end;
 
-function TForm2.GetSaveScript:boolean;
+function TSettingsForm.GetSaveScript:boolean;
 begin
   result := GetCheckState(CaptionCheckSaveScript);
 end;
-procedure TForm2.SetSaveScript(value:boolean);
+procedure TSettingsForm.SetSaveScript(value:boolean);
 begin
   SetCheckState(CaptionCheckSaveScript, value);
 end;
 
-function TForm2.GetGLIBC:boolean;
+function TSettingsForm.GetGLIBC:boolean;
 begin
   result:=GetCheckState(CaptionCheckGLIBCCompat);
 end;
-procedure TForm2.SetGLIBC(value:boolean);
+procedure TSettingsForm.SetGLIBC(value:boolean);
 begin
   SetCheckState(CaptionCheckGLIBCCompat,value);
 end;
 
-function TForm2.GetDotted:boolean;
+function TSettingsForm.GetDotted:boolean;
 begin
   result:=GetCheckState(CaptionCheckFPCDotted);
 end;
-procedure TForm2.SetDotted(value:boolean);
+procedure TSettingsForm.SetDotted(value:boolean);
 begin
   SetCheckState(CaptionCheckFPCDotted,value);
 end;
 
-function TForm2.GetFPCOptions:string;
+function TSettingsForm.GetFPCOptions:string;
 begin
   result:=EditFPCOptions.Text;
 end;
-procedure TForm2.SetFPCOptions(value:string);
+procedure TSettingsForm.SetFPCOptions(value:string);
 begin
   EditFPCOptions.Text:=value;
 end;
 
-function TForm2.GetLazarusOptions:string;
+function TSettingsForm.GetLazarusOptions:string;
 begin
   result:=EditLazarusOptions.Text;
 end;
-procedure TForm2.SetLazarusOptions(value:string);
+procedure TSettingsForm.SetLazarusOptions(value:string);
 begin
   EditLazarusOptions.Text:=value;
 end;
 
-function TForm2.GetFPCDebug:boolean;
+function TSettingsForm.GetFPCDebug:boolean;
 begin
   result:=chkFPCDebug.Checked;
 end;
-procedure TForm2.SetFPCDebug(value:boolean);
+procedure TSettingsForm.SetFPCDebug(value:boolean);
 begin
   chkFPCDebug.Checked:=value;
 end;
-function TForm2.GetLazarusDebug:boolean;
+function TSettingsForm.GetLazarusDebug:boolean;
 begin
   result:=chkLazarusDebug.Checked;
 end;
-procedure TForm2.SetLazarusDebug(value:boolean);
+procedure TSettingsForm.SetLazarusDebug(value:boolean);
 begin
   chkLazarusDebug.Checked:=value;
 end;
 
-function TForm2.GetFPCRevision:string;
+function TSettingsForm.GetFPCRevision:string;
 begin
   result:=EditFPCRevision.Text;
 end;
-procedure TForm2.SetFPCRevision(value:string);
+procedure TSettingsForm.SetFPCRevision(value:string);
 begin
   EditFPCRevision.Text:=value;
 end;
-procedure TForm2.ForceSetFPCRevision(value:string);
+procedure TSettingsForm.ForceSetFPCRevision(value:string);
 begin
   FPCRevision:=value;
   EditFPCRevision.Color:=clRed;
 end;
 
-function TForm2.GetLazarusRevision:string;
+function TSettingsForm.GetLazarusRevision:string;
 begin
   result:=EditLazarusRevision.Text;
 end;
-procedure TForm2.SetLazarusRevision(value:string);
+procedure TSettingsForm.SetLazarusRevision(value:string);
 begin
   EditLazarusRevision.Text:=value;
 end;
-procedure TForm2.ForceSetLazarusRevision(value:string);
+procedure TSettingsForm.ForceSetLazarusRevision(value:string);
 begin
   LazarusRevision:=value;
   EditLazarusRevision.Color:=clRed;
 end;
 
-function TForm2.GetFPCBranch:string;
+function TSettingsForm.GetFPCBranch:string;
 begin
   result:=EditFPCBranch.Text;
 end;
-procedure TForm2.SetFPCBranch(value:string);
+procedure TSettingsForm.SetFPCBranch(value:string);
 begin
   EditFPCBranch.Text:=value;
 end;
 
-function TForm2.GetLazarusBranch:string;
+function TSettingsForm.GetLazarusBranch:string;
 begin
   result:=EditLazarusBranch.Text;
 end;
-procedure TForm2.SetLazarusBranch(value:string);
+procedure TSettingsForm.SetLazarusBranch(value:string);
 begin
   EditLazarusBranch.Text:=value;
 end;
 
-function TForm2.GetFPCPreScript:string;
+function TSettingsForm.GetFPCPreScript:string;
 begin
   result:=EditFPCPreInstall.Text;
 end;
-procedure TForm2.SetFPCPreScript(value:string);
+procedure TSettingsForm.SetFPCPreScript(value:string);
 begin
   EditFPCPreInstall.Text:=value;
 end;
-function TForm2.GetFPCPostScript:string;
+function TSettingsForm.GetFPCPostScript:string;
 begin
   result:=EditFPCPostInstall.Text;
 end;
-procedure TForm2.SetFPCPostScript(value:string);
+procedure TSettingsForm.SetFPCPostScript(value:string);
 begin
   EditFPCPostInstall.Text:=value;
 end;
 
-function TForm2.GetLazarusPreScript:string;
+function TSettingsForm.GetLazarusPreScript:string;
 begin
   result:=EditLazarusPreInstall.Text;
 end;
-procedure TForm2.SetLazarusPreScript(value:string);
+procedure TSettingsForm.SetLazarusPreScript(value:string);
 begin
   EditLazarusPreInstall.Text:=value;
 end;
-function TForm2.GetLazarusPostScript:string;
+function TSettingsForm.GetLazarusPostScript:string;
 begin
   result:=EditLazarusPostInstall.Text;
 end;
-procedure TForm2.SetLazarusPostScript(value:string);
+procedure TSettingsForm.SetLazarusPostScript(value:string);
 begin
   EditLazarusPostInstall.Text:=value;
 end;
 
-function TForm2.GetHTTPProxyHost:string;
+function TSettingsForm.GetHTTPProxyHost:string;
 begin
   result:=EditHTTPProxyHost.Text;
 end;
 
-function TForm2.GetHTTPProxyPort:integer;
+function TSettingsForm.GetHTTPProxyPort:integer;
 var
   i:integer;
 begin
   if TryStrToInt(EditHTTPProxyPort.Text,i) then result:=i;
 end;
 
-function TForm2.GetHTTPProxyUser:string;
+function TSettingsForm.GetHTTPProxyUser:string;
 begin
   result:=EditHTTPProxyUser.Text;
 end;
 
-function TForm2.GetHTTPProxyPass:string;
+function TSettingsForm.GetHTTPProxyPass:string;
 begin
   result:=EditHTTPProxyPassword.Text;
 end;
 
-function TForm2.GetPatches(const Lazarus:boolean=false):string;
+function TSettingsForm.GetPatches(const Lazarus:boolean=false):string;
 var
   i:integer;
   FullPatchPath:string;
@@ -1707,7 +1705,7 @@ begin
   end;
 end;
 
-procedure TForm2.SetPatches(value:string;const Lazarus:boolean=false);
+procedure TSettingsForm.SetPatches(value:string;const Lazarus:boolean=false);
 var
   PatchName: string;
   FullPatchPath: string;
@@ -1746,27 +1744,27 @@ begin
   end;
 end;
 
-function TForm2.GetFPCPatches:string;
+function TSettingsForm.GetFPCPatches:string;
 begin
   result:=GetPatches(false);
 end;
 
-procedure TForm2.SetFPCPatches(value:string);
+procedure TSettingsForm.SetFPCPatches(value:string);
 begin
   SetPatches(value,false);
 end;
 
-function TForm2.GetLazPatches:string;
+function TSettingsForm.GetLazPatches:string;
 begin
   result:=GetPatches(true);
 end;
 
-procedure TForm2.SetLazPatches(value:string);
+procedure TSettingsForm.SetLazPatches(value:string);
 begin
   SetPatches(value,true);
 end;
 
-procedure TForm2.ResetAll;
+procedure TSettingsForm.ResetAll;
 begin
   FPCOptions:='';
   LazarusOptions:='';

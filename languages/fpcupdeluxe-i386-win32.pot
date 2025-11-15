@@ -70,11 +70,11 @@ msgid "Send location and install info."
 msgstr ""
 
 #: extrasettings.captionchecksplitfpc
-msgid "Split FPC source and bins."
+msgid "Split FPC sources and bins."
 msgstr ""
 
 #: extrasettings.captionchecksplitlazarus
-msgid "Split Lazarus source and bins."
+msgid "Split Lazarus sources and bins."
 msgstr ""
 
 #: extrasettings.captionchecksystemfpc
@@ -82,7 +82,7 @@ msgid "Use system FPC for Lazarus."
 msgstr ""
 
 #: extrasettings.captioncheckupdateonly
-msgid "FPC/Laz rebuild only."
+msgid "FPC/Laz/Modules rebuild only."
 msgstr ""
 
 #: extrasettings.captioncheckusemakejobs
@@ -215,6 +215,10 @@ msgstr ""
 
 #: fpcupdeluxemainform.upfolderwarning2
 msgid "Please check the folder permissions, and re-start."
+msgstr ""
+
+#: fpcupdeluxemainform.upgitnotfound
+msgid "No GIT executable found on system. Tag-list cannot be received."
 msgstr ""
 
 #: fpcupdeluxemainform.upinstallconfimation
@@ -447,6 +451,26 @@ msgstr ""
 
 #: tform1.btncreatelazarusconfig.caption
 msgid "Create Lazarus Configuration"
+msgstr ""
+
+#: tform1.btngetfpccandidates.caption
+msgctxt "tform1.btngetfpccandidates.caption"
+msgid "Get candidates"
+msgstr ""
+
+#: tform1.btngetfpcreleases.caption
+msgctxt "tform1.btngetfpcreleases.caption"
+msgid "Get releases"
+msgstr ""
+
+#: tform1.btngetlazaruscandidates.caption
+msgctxt "tform1.btngetlazaruscandidates.caption"
+msgid "Get candidates"
+msgstr ""
+
+#: tform1.btngetlazarusreleases.caption
+msgctxt "tform1.btngetlazarusreleases.caption"
+msgid "Get releases"
 msgstr ""
 
 #: tform1.btngetopenssl.caption
@@ -821,180 +845,218 @@ msgstr ""
 msgid "Get FPC for SAMD51 embedded on Wio Terminal"
 msgstr ""
 
-#: tform2.btnaddfpcpatch.caption
+#: tsettingsform.btnaddfpcpatch.caption
+msgctxt "tsettingsform.btnaddfpcpatch.caption"
 msgid "Add FPC patch"
 msgstr ""
 
-#: tform2.btnaddlazpatch.caption
+#: tsettingsform.btnaddlazpatch.caption
+msgctxt "tsettingsform.btnaddlazpatch.caption"
 msgid "Add Laz. patch"
 msgstr ""
 
-#: tform2.btnlistcustomoptions.caption
+#: tsettingsform.btnlistcustomoptions.caption
+msgctxt "tsettingsform.btnlistcustomoptions.caption"
 msgid "List All"
 msgstr ""
 
-#: tform2.btnremfpcpatch.caption
+#: tsettingsform.btnremfpcpatch.caption
+msgctxt "tsettingsform.btnremfpcpatch.caption"
 msgid "Rem. FPC patch"
 msgstr ""
 
-#: tform2.btnremlazpatch.caption
+#: tsettingsform.btnremlazpatch.caption
+msgctxt "tsettingsform.btnremlazpatch.caption"
 msgid "Rem. Laz. patch"
 msgstr ""
 
-#: tform2.btnselectbindir.caption
+#: tsettingsform.btnselectbindir.caption
+msgctxt "tsettingsform.btnselectbindir.caption"
 msgid "Tools"
 msgstr ""
 
-#: tform2.btnselectcompiler.caption
+#: tsettingsform.btnselectcompiler.caption
+msgctxt "tsettingsform.btnselectcompiler.caption"
 msgid "Compiler"
 msgstr ""
 
-#: tform2.btnselectlibdir.caption
+#: tsettingsform.btnselectlibdir.caption
+msgctxt "tsettingsform.btnselectlibdir.caption"
 msgid "Libraries"
 msgstr ""
 
-#: tform2.caption
+#: tsettingsform.caption
+msgctxt "tsettingsform.caption"
 msgid "Advanced Settings"
 msgstr ""
 
-#: tform2.chkfpcdebug.caption
-msgctxt "tform2.chkfpcdebug.caption"
+#: tsettingsform.chkfpcdebug.caption
+msgctxt "tsettingsform.chkfpcdebug.caption"
 msgid "Debug"
 msgstr ""
 
-#: tform2.chklazarusdebug.caption
-msgctxt "tform2.chklazarusdebug.caption"
+#: tsettingsform.chklazarusdebug.caption
+msgctxt "tsettingsform.chklazarusdebug.caption"
 msgid "Debug"
 msgstr ""
 
-#: tform2.editbinlocation.hint
-msgctxt "tform2.editbinlocation.hint"
+#: tsettingsform.editbinlocation.hint
+msgctxt "tsettingsform.editbinlocation.hint"
 msgid "Double click to clear"
 msgstr ""
 
-#: tform2.editcompileroverride.hint
-msgctxt "tform2.editcompileroverride.hint"
+#: tsettingsform.editcompileroverride.hint
+msgctxt "tsettingsform.editcompileroverride.hint"
 msgid "Double click to clear"
 msgstr ""
 
-#: tform2.editliblocation.hint
-msgctxt "tform2.editliblocation.hint"
+#: tsettingsform.editliblocation.hint
+msgctxt "tsettingsform.editliblocation.hint"
 msgid "Double click to clear"
 msgstr ""
 
-#: tform2.groupbox1.caption
+#: tsettingsform.groupbox1.caption
+msgctxt "tsettingsform.groupbox1.caption"
 msgid "Proxy settings"
 msgstr ""
 
-#: tform2.groupbox2.caption
+#: tsettingsform.groupbox2.caption
+msgctxt "tsettingsform.groupbox2.caption"
 msgid "Miscellaneous settings"
 msgstr ""
 
-#: tform2.groupboxcompileoptions.caption
+#: tsettingsform.groupboxcompileoptions.caption
+msgctxt "tsettingsform.groupboxcompileoptions.caption"
 msgid "Options Override"
 msgstr ""
 
-#: tform2.groupboxfpclazbranchrevision.caption
+#: tsettingsform.groupboxfpclazbranchrevision.caption
+msgctxt "tsettingsform.groupboxfpclazbranchrevision.caption"
 msgid "Branch and revision"
 msgstr ""
 
-#: tform2.groupboxfpclazscripts.caption
+#: tsettingsform.groupboxfpclazscripts.caption
+msgctxt "tsettingsform.groupboxfpclazscripts.caption"
 msgid "Pre and post install scripts"
 msgstr ""
 
-#: tform2.grppatching.caption
+#: tsettingsform.grppatching.caption
+msgctxt "tsettingsform.grppatching.caption"
 msgid "Source patching"
 msgstr ""
 
-#: tform2.label1.caption
+#: tsettingsform.label1.caption
+msgctxt "tsettingsform.label1.caption"
 msgid "HTTP proxy URL:"
 msgstr ""
 
-#: tform2.label2.caption
+#: tsettingsform.label2.caption
+msgctxt "tsettingsform.label2.caption"
 msgid "HTTP proxy port:"
 msgstr ""
 
-#: tform2.label3.caption
+#: tsettingsform.label3.caption
+msgctxt "tsettingsform.label3.caption"
 msgid "HTTP proxy username:"
 msgstr ""
 
-#: tform2.label4.caption
+#: tsettingsform.label4.caption
+msgctxt "tsettingsform.label4.caption"
 msgid "HTTP proxy password:"
 msgstr ""
 
-#: tform2.labelcompileroverride.caption
+#: tsettingsform.labelcompileroverride.caption
+msgctxt "tsettingsform.labelcompileroverride.caption"
 msgid "Compiler Override"
 msgstr ""
 
-#: tform2.labelcpu.caption
+#: tsettingsform.labelcpu.caption
+msgctxt "tsettingsform.labelcpu.caption"
 msgid "Select CPU"
 msgstr ""
 
-#: tform2.labelcrossbuildoptions.caption
+#: tsettingsform.labelcrossbuildoptions.caption
+msgctxt "tsettingsform.labelcrossbuildoptions.caption"
 msgid "Cross Build Options Override (i.e. -CfSoft)"
 msgstr ""
 
-#: tform2.labelfpcbranch.caption
+#: tsettingsform.labelfpcbranch.caption
+msgctxt "tsettingsform.labelfpcbranch.caption"
 msgid "FPC branch/tag"
 msgstr ""
 
-#: tform2.labelfpcoptions.caption
+#: tsettingsform.labelfpcoptions.caption
+msgctxt "tsettingsform.labelfpcoptions.caption"
 msgid "FPC options"
 msgstr ""
 
-#: tform2.labelfpcpostinstall.caption
+#: tsettingsform.labelfpcpostinstall.caption
+msgctxt "tsettingsform.labelfpcpostinstall.caption"
 msgid "FPC post"
 msgstr ""
 
-#: tform2.labelfpcpreinstall.caption
+#: tsettingsform.labelfpcpreinstall.caption
+msgctxt "tsettingsform.labelfpcpreinstall.caption"
 msgid "FPC pre"
 msgstr ""
 
-#: tform2.labelfpcrevision.caption
+#: tsettingsform.labelfpcrevision.caption
+msgctxt "tsettingsform.labelfpcrevision.caption"
 msgid "FPC hash"
 msgstr ""
 
-#: tform2.labellazarusbranch.caption
+#: tsettingsform.labellazarusbranch.caption
+msgctxt "tsettingsform.labellazarusbranch.caption"
 msgid "Laz. branch/tag"
 msgstr ""
 
-#: tform2.labellazarusoptions.caption
+#: tsettingsform.labellazarusoptions.caption
+msgctxt "tsettingsform.labellazarusoptions.caption"
 msgid "Laz. options"
 msgstr ""
 
-#: tform2.labellazaruspostinstall.caption
+#: tsettingsform.labellazaruspostinstall.caption
+msgctxt "tsettingsform.labellazaruspostinstall.caption"
 msgid "Lazarus post"
 msgstr ""
 
-#: tform2.labellazaruspreinstall.caption
+#: tsettingsform.labellazaruspreinstall.caption
+msgctxt "tsettingsform.labellazaruspreinstall.caption"
 msgid "Lazarus pre"
 msgstr ""
 
-#: tform2.labellazarusrevision.caption
+#: tsettingsform.labellazarusrevision.caption
+msgctxt "tsettingsform.labellazarusrevision.caption"
 msgid "Laz. hash"
 msgstr ""
 
-#: tform2.labelos.caption
+#: tsettingsform.labelos.caption
+msgctxt "tsettingsform.labelos.caption"
 msgid "Select OS"
 msgstr ""
 
-#: tform2.radiogrouparmarch.caption
+#: tsettingsform.radiogrouparmarch.caption
+msgctxt "tsettingsform.radiogrouparmarch.caption"
 msgid "ARM target"
 msgstr ""
 
-#: tform2.rgrpsearchoptions.caption
+#: tsettingsform.rgrpsearchoptions.caption
+msgctxt "tsettingsform.rgrpsearchoptions.caption"
 msgid "Search options"
 msgstr ""
 
-#: tform2.rgrpsubarch.caption
+#: tsettingsform.rgrpsubarch.caption
+msgctxt "tsettingsform.rgrpsubarch.caption"
 msgid "Select subarch"
 msgstr ""
 
-#: tform2.tscpuos.caption
+#: tsettingsform.tscpuos.caption
+msgctxt "tsettingsform.tscpuos.caption"
 msgid "CPU/OS"
 msgstr ""
 
-#: tform2.tssubarch.caption
+#: tsettingsform.tssubarch.caption
+msgctxt "tsettingsform.tssubarch.caption"
 msgid "Subarch"
 msgstr ""
 
