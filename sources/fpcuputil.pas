@@ -1977,11 +1977,15 @@ begin
 end;
 
 function DownloadBase(aDownLoader:TBasicDownloader;URL: string; aDataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
+var
+  URI    : URIPARSER.TURI;
 begin
   result:=false;
 
+  URI:=ParseURI(URL);
+
   //if (Length(aDownloader.FilenameOnly)>0) then ThreadLog('Using native downloader to download '+aDownloader.FilenameOnly);
-  //ThreadLog('Using native downloader to download '+URI.Document+' from '+URI.Path);
+  //ThreadLog('Using native downloader to download '+URI.Document+' from '+URI.Path,etDebug);
 
   {$ifdef mswindows}
   if (Pos('/openssl',URL)>0) AND (Pos('.zip',URL)>0) then
@@ -2074,7 +2078,7 @@ begin
   // NetHandle valid?
   if Assigned(NetHandle) then
   try
-    ThreadLog('Using WinINet to download '+URI.Document+' from '+URI.Path);
+    //ThreadLog('Using WinINet to download '+URI.Document+' from '+URI.Path,etDebug);
 
     UrlHandle := InternetOpenUrl(NetHandle, PChar(aURL), nil, 0, INTERNET_FLAG_NO_UI or INTERNET_FLAG_RELOAD, 0);
 
@@ -2192,7 +2196,7 @@ begin
   else
     P:=NORMALUSERAGENT;
 
-  ThreadLog('Using PowerShell to download '+URI.Document+' from '+URI.Path);
+  //ThreadLog('Using PowerShell to download '+URI.Document+' from '+URI.Path,etDebug);
 
   result:=RunCommand('powershell' ,['-command','"$cli = New-Object System.Net.WebClient;$cli.Headers[''User-Agent''] = '''+P+''';$cli.DownloadFile('''+URL+''','''+TargetFile+''')"'],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
 
@@ -2212,7 +2216,7 @@ begin
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
 
-  ThreadLog('Using bitsadmin to download '+URI.Document+' from '+URI.Path);
+  //ThreadLog('Using bitsadmin to download '+URI.Document+' from '+URI.Path,etDebug);
 
   result:=RunCommand('bitsadmin.exe',['/transfer','"JobName"',URL,TargetFile],Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
   if result then

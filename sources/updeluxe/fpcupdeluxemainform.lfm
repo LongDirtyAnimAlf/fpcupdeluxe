@@ -1586,7 +1586,7 @@ object Form1: TForm1
         AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = btnGetFPCReleases
         Left = 8
-        Height = 195
+        Height = 170
         Top = 34
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
@@ -1611,7 +1611,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = btnGetLazarusReleases
         Left = 163
-        Height = 195
+        Height = 170
         Top = 34
         Width = 131
         Anchors = [akTop, akRight, akBottom]
@@ -1700,10 +1700,10 @@ object Form1: TForm1
         AnchorSideLeft.Control = ListBoxFPCTargetTag
         AnchorSideRight.Control = ListBoxFPCTargetTag
         AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = btnGetFPCCandidates
+        AnchorSideBottom.Control = btnGetFPCFixes
         Left = 8
         Height = 25
-        Top = 237
+        Top = 212
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -1730,10 +1730,10 @@ object Form1: TForm1
         AnchorSideLeft.Control = ListBoxLazarusTargetTag
         AnchorSideRight.Control = ListBoxLazarusTargetTag
         AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = btnGetLazarusCandidates
+        AnchorSideBottom.Control = btnGetLazarusFixes
         Left = 163
         Height = 25
-        Top = 237
+        Top = 212
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -1754,6 +1754,36 @@ object Form1: TForm1
         AutoSize = True
         Caption = 'Get candidates'
         TabOrder = 8
+        OnClick = btnGetTagsClick
+      end
+      object btnGetFPCFixes: TButton
+        AnchorSideLeft.Control = ListBoxFPCTargetTag
+        AnchorSideRight.Control = ListBoxFPCTargetTag
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = btnGetFPCCandidates
+        Left = 8
+        Height = 25
+        Top = 237
+        Width = 131
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        Caption = 'Get fixes'
+        TabOrder = 9
+        OnClick = btnGetTagsClick
+      end
+      object btnGetLazarusFixes: TButton
+        AnchorSideLeft.Control = ListBoxLazarusTargetTag
+        AnchorSideRight.Control = ListBoxLazarusTargetTag
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = btnGetLazarusCandidates
+        Left = 163
+        Height = 25
+        Top = 237
+        Width = 131
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        Caption = 'Get fixes'
+        TabOrder = 10
         OnClick = btnGetTagsClick
       end
     end

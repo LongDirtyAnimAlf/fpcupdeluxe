@@ -223,16 +223,14 @@ begin
       if Length(aOption)=0 then aOption:=GetDarwinSDKVersion(LowerCase(iSDKNAME));
       if Length(aOption)>0 then
       begin
-        if CompareVersionStrings(aOption,'8.1')>=0 then
-        begin
-          aOption:='8.1';
-        end;
+        if CompareVersionStrings(aOption,'8.1')>=0 then aOption:='8.1';
         AddFPCCFGSnippet('-WP'+aOption);
       end;
     end;
   end;
 
   {$IFDEF MACOSXVERSIONMAGIG}
+  (*
   if (TargetOS=TOS.darwin) then
   begin
     if (Pos('-WM',FPCCFGSnippet)=0) then
@@ -248,6 +246,7 @@ begin
       end;
     end;
   end;
+  *)
   {$ENDIF}
 
   // Never fail.

@@ -418,7 +418,7 @@ begin
             FManager.FPCURL:=s
           else
           begin
-            s:='stable.gitlab';
+            s:='stable'+GITLABEXTENSION;
             FManager.FPCTag:=s;
 
             Options.PersistentOptions:=trim(Options.PersistentOptions+' --fpcVersion='+MaybeQuotedSpacesOnly(s));
@@ -442,7 +442,7 @@ begin
             FManager.LazarusURL:=s
           else
           begin
-            s:='stable.gitlab';
+            s:='stable'+GITLABEXTENSION;
             FManager.LazarusTag:=s;
             Options.PersistentOptions:=trim(Options.PersistentOptions+' --lazVersion='+MaybeQuotedSpacesOnly(s));
           end;

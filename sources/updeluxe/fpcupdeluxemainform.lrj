@@ -72,6 +72,8 @@
 {"hash":110894675,"name":"tform1.btngetfpccandidates.caption","sourcebytes":[71,101,116,32,99,97,110,100,105,100,97,116,101,115],"value":"Get candidates"},
 {"hash":16248403,"name":"tform1.btngetlazarusreleases.caption","sourcebytes":[71,101,116,32,114,101,108,101,97,115,101,115],"value":"Get releases"},
 {"hash":110894675,"name":"tform1.btngetlazaruscandidates.caption","sourcebytes":[71,101,116,32,99,97,110,100,105,100,97,116,101,115],"value":"Get candidates"},
+{"hash":107823875,"name":"tform1.btngetfpcfixes.caption","sourcebytes":[71,101,116,32,102,105,120,101,115],"value":"Get fixes"},
+{"hash":107823875,"name":"tform1.btngetlazarusfixes.caption","sourcebytes":[71,101,116,32,102,105,120,101,115],"value":"Get fixes"},
 {"hash":252360409,"name":"tform1.historysheet.caption","sourcebytes":[72,105,115,116,111,114,121],"value":"History"},
 {"hash":197353081,"name":"tform1.fpchistorylabel.caption","sourcebytes":[70,80,67,32,114,101,118,105,115,105,111,110,32,104,105,115,116,111,114,121],"value":"FPC revision history"},
 {"hash":149443225,"name":"tform1.lazarushistorylabel.caption","sourcebytes":[76,97,122,97,114,117,115,32,114,101,118,105,115,105,111,110,32,104,105,115,116,111,114,121],"value":"Lazarus revision history"},

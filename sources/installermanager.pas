@@ -1463,23 +1463,14 @@ begin
 end;
 
 function TFPCupManager.GetReleaseTags(const aURL:string;RC:boolean;out aReleaseList:string):boolean;
-(*
-const
-  FPC_TAG_PREAMBLE      = 'release_';
-  LAZ_TAG_PREAMBLE      = 'lazarus_';
-  TAGFPCURL = 'https://gitlab.com/api/v4/projects/28644964/repository/tags?search=^'+FPC_TAG_PREAMBLE;
-  TAGLAZURL = 'https://gitlab.com/api/v4/projects/28419588/repository/tags?search=^'+LAZ_TAG_PREAMBLE;
-  FIXESFPCURL = 'https://gitlab.com/api/v4/projects/28644964/repository/branches?search=^fixes';
-  FIXESLAZURL = 'https://gitlab.com/api/v4/projects/28419588/repository/branches?search=^fixes';
-*)
 var
   s:string;
   success:boolean;
   Json : TJSONData;
   Assets : TJSONArray;
   Item,Asset : TJSONObject;
-  TagName, FileName, FileURL : string;
-  i,iassets : integer;
+  TagName : string;
+  i : integer;
 begin
   result:=false;
 

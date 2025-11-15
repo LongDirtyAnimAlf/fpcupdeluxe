@@ -36,9 +36,11 @@ type
     btnBuildHelp: TButton;
     btnCheckToolsLocations: TButton;
     btnBuildNativeCompiler: TButton;
+    btnGetFPCFixes: TButton;
     btnGetLazarusCandidates: TButton;
     btnGetFPCReleases: TButton;
     btnGetFPCCandidates: TButton;
+    btnGetLazarusFixes: TButton;
     btnGetLazarusReleases: TButton;
     chkGitlab: TCheckBox;
     ImageList_200x40: TImageList;
@@ -1935,6 +1937,7 @@ end;
 procedure TForm1.OnlyTagClick(Sender: TObject);
 var
   aListBox:TListBox;
+  s:string;
 begin
   if (Sender=BitBtnFPCOnlyTag) then aListBox:=ListBoxFPCTargetTag;
   if (Sender=BitBtnLazarusOnlyTag) then aListBox:=ListBoxLazarusTargetTag;
@@ -1942,7 +1945,11 @@ begin
   begin
     if (ItemIndex<>-1) then
     begin
-      AddTag(aListBox,Items[ItemIndex],StrPas(Pchar(Items.Objects[ItemIndex])));
+      s:=StrPas(Pchar(Items.Objects[ItemIndex]));
+      if (Pos('fixes',s)=1) then
+        AddTag(aListBox,'fixes-'+Items[ItemIndex],s)
+      else
+        AddTag(aListBox,Items[ItemIndex],s);
     end;
   end;
 end;
@@ -1956,7 +1963,6 @@ begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
       MemoAddTag.Lines.Add('The tag ['+aTag+'] with name ['+aName+'] was added to the FPC sources list.');
-      //ListBoxFPCTarget.ItemIndex:=ListBoxFPCTarget.Count-1;
     end;
   end;
   if (Sender=ListBoxLazarusTargetTag) OR (Sender=ListBoxLazarusTarget) then
@@ -1966,14 +1972,12 @@ begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
       MemoAddTag.Lines.Add('The tag ['+aTag+'] with name ['+aName+'] was added to the Lazarus sources list.');
-      //ListBoxLazarusTarget.ItemIndex:=ListBoxLazarusTarget.Count-1;
     end;
   end;
 
   FillSourceListboxes;
   ScrollToSelected;
 end;
-
 
 procedure TForm1.TagSelectionChange(Sender: TObject;User: boolean);
 begin
@@ -2250,15 +2254,23 @@ end;
 
 procedure TForm1.btnGetTagsClick(Sender: TObject);
 type
-  TTarget             = (FPC,LAZARUS);
+  TTarget                 = (FPC,LAZARUS);
 const
-  FPC_TAG_PREAMBLE      = 'release_';
-  LAZ_TAG_PREAMBLE      = 'lazarus_';
+  FIXES_PREAMBLE          = 'fixes_';
+  FPC_TAG_PREAMBLE        = 'release_';
+  LAZ_TAG_PREAMBLE        = 'lazarus_';
   TAGURL : array[TTarget] of string =
     (
       'https://gitlab.com/api/v4/projects/28644964/repository/tags?search=^'+FPC_TAG_PREAMBLE,
       'https://gitlab.com/api/v4/projects/28419588/repository/tags?search=^'+LAZ_TAG_PREAMBLE
     );
+
+  BRANCHURL : array[TTarget] of string =
+    (
+       'https://gitlab.com/api/v4/projects/28644964/repository/branches?search=^'+FIXES_PREAMBLE,
+       'https://gitlab.com/api/v4/projects/28419588/repository/branches?search=^'+FIXES_PREAMBLE
+    );
+
 var
   aTarget             : TTarget;
   aTargetListBox      : TListBox;
@@ -2268,16 +2280,29 @@ var
   GITTag              : string;
   GITTagShort         : string;
   i                   : integer;
-  RC                  : boolean;
+  Fixes,RC            : boolean;
+  aLabel              : string;
 begin
-  if ((Sender=btnGetLazarusCandidates) OR (Sender=btnGetLazarusReleases)) then aTarget:=LAZARUS;
-  if ((Sender=btnGetFPCCandidates) OR (Sender=btnGetFPCReleases)) then aTarget:=FPC;
+  if ((Sender=btnGetLazarusCandidates) OR (Sender=btnGetLazarusReleases) OR (Sender=btnGetLazarusFixes)) then aTarget:=LAZARUS;
+  if ((Sender=btnGetFPCCandidates) OR (Sender=btnGetFPCReleases) OR (Sender=btnGetFPCFixes)) then aTarget:=FPC;
 
+  RC:=False;
   if ((Sender=btnGetLazarusCandidates) OR (Sender=btnGetFPCCandidates)) then RC:=True;
-  if ((Sender=btnGetLazarusReleases) OR (Sender=btnGetFPCReleases)) then RC:=False;
+
+  Fixes:=false;
+  if ((Sender=btnGetLazarusFixes) OR (Sender=btnGetFPCFixes)) then Fixes:=True;
 
   if aTarget=FPC then aTargetListBox:=ListBoxFPCTargetTag;
   if aTarget=LAZARUS then aTargetListBox:=ListBoxLazarusTargetTag;
+
+  if Fixes then aLabel:='fixes'
+  else
+  if RC then aLabel:='candidates'
+  else
+  aLabel:='release';
+
+  if (aTarget=FPC) then FPCTagLabel.Caption:='FPC '+aLabel;
+  if (aTarget=Lazarus) then LazarusTagLabel.Caption:='Laz. '+aLabel;
 
   aTargetListBox.Items.BeginUpdate;
 
@@ -2291,27 +2316,43 @@ begin
 
   aFileList:=TStringList.Create;
 
-  FPCupManager.GetReleaseTags(TAGURL[aTarget],RC,Output);
+  if Fixes then
+    FPCupManager.GetReleaseTags(BRANCHURL[aTarget],false,Output)
+  else
+    FPCupManager.GetReleaseTags(TAGURL[aTarget],RC,Output);
+
   aFileList.CommaText:=Output;
   for GITTagRunner in aFileList do
   begin
     GITTag:=GITTagRunner;
     GITTagShort:=GITTag;
 
-    if aTarget=FPC then
+    if Fixes then
     begin
-      i:=Pos(FPC_TAG_PREAMBLE,GITTagShort);
-      if i>0 then Delete(GITTagShort,1,Length(FPC_TAG_PREAMBLE));
-      if (NOT RC) then GITTagShort:=StringReplace(GITTagShort,'_','.',[rfReplaceAll]);
-    end;
-    if aTarget=LAZARUS then
+      i:=Pos(FIXES_PREAMBLE,GITTagShort);
+      if i>0 then Delete(GITTagShort,1,Length(FIXES_PREAMBLE));
+      GITTagShort:=StringReplace(GITTagShort,'_','.',[rfReplaceAll]);
+    end
+    else
     begin
-      i:=Pos(LAZ_TAG_PREAMBLE,GITTagShort);
-      if i>0 then Delete(GITTagShort,1,Length(LAZ_TAG_PREAMBLE));
+      if aTarget=FPC then
+      begin
+        i:=Pos(FPC_TAG_PREAMBLE,GITTagShort);
+        if i>0 then Delete(GITTagShort,1,Length(FPC_TAG_PREAMBLE));
+      end;
+      if aTarget=LAZARUS then
+      begin
+        i:=Pos(LAZ_TAG_PREAMBLE,GITTagShort);
+        if i>0 then Delete(GITTagShort,1,Length(LAZ_TAG_PREAMBLE));
+      end;
       if (NOT RC) then GITTagShort:=StringReplace(GITTagShort,'_','.',[rfReplaceAll]);
     end;
     aTargetListBox.Items.AddObject(GITTagShort,TObject(pointer(StrNew(Pchar(GITTag)))));
   end;
+
+  if aTargetListBox.Items.Count=0 then
+    aTargetListBox.Items.Append('No data found.');
+
   aTargetListBox.Items.EndUpdate;
   aFileList.Free;
 end;

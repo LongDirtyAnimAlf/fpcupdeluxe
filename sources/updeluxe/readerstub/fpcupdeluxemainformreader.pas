@@ -1974,7 +1974,7 @@ procedure TForm1.AddTag(Sender: TObject;aTag:string);
 begin
   if (Sender=ListBoxFPCTargetTag) OR (Sender=ListBoxFPCTarget)  then
   begin
-    if SetAlias(FPCTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
+    if SetAlias(FPCTAGLOOKUPMAGIC,aTag+GITLABEXTENSION,aTag) then
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias(FPCURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
@@ -1984,7 +1984,7 @@ begin
   end;
   if (Sender=ListBoxLazarusTargetTag) OR (Sender=ListBoxLazarusTarget) then
   begin
-    if SetAlias(LAZARUSTAGLOOKUPMAGIC,aTag+'.gitlab',aTag) then
+    if SetAlias(LAZARUSTAGLOOKUPMAGIC,aTag+GITLABEXTENSION,aTag) then
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias(LAZARUSURLLOOKUPMAGIC,'list');
       MemoAddTag.Lines.Clear;
