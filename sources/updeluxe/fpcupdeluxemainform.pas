@@ -416,31 +416,41 @@ begin
   end;
 end;
 
-procedure AdjustButtonHeight(AControl: TControl; AHeight:integer);
+procedure AdjustButtonHeight(AControl: TControl);
 var
   iControl: Integer;
   btn:TBitBtn;
-  //h:integer;
+  h:integer;
+  WC:TWinControl;
 begin
-  if AControl = nil then
-      Exit;
-  if AControl is TWinControl then
+  if AControl = nil then exit;
+
+  if (AControl is TWinControl) then
   begin
-      for iControl := 0 to TWinControl(AControl).ControlCount - 1 do
-          AdjustButtonHeight(TWinControl(AControl).Controls[iControl],AHeight);
+    WC:=(AControl as TWinControl);
+    if WC.ControlCount>0 then
+    begin
+      for iControl := 0 to WC.ControlCount - 1 do
+        AdjustButtonHeight(WC.Controls[iControl]);
+    end
+    else
+    begin
+      if (AControl IS TBitBtn) then
+      begin
+        btn:=(AControl AS TBitBtn);
+        if (Assigned(btn.Glyph) OR (btn.ImageIndex<>-1)) then
+        begin
+          // This trick forces the correct button theme type setting
+          if (btn.Layout=TButtonLayout.blGlyphLeft) then btn.Caption:=btn.Caption+#10;
+          if (btn.Layout=TButtonLayout.blGlyphTop) then btn.Caption:=#10+btn.Caption;
+          //btn.AutoSize:=True;
+          h:=btn.Height;
+          btn.Height:=Form1.Scale96ToScreen(h);
+        end
+      end;
+    end;
   end;
 
-  if (AControl IS TBitBtn) then
-  begin
-    btn:=(AControl AS TBitBtn);
-    if Assigned(btn.Glyph) then
-    begin
-      // This trick forces the correct button theme type setting
-      btn.Caption:=btn.Caption+#10;
-      //btn.AutoSize:=True;
-      btn.Height:=AHeight;
-    end
-  end;
 end;
 
 { TForm1 }
@@ -492,11 +502,6 @@ var
   aFPCTarget,aLazarusTarget:string;
   bGitlab:boolean;
 begin
-  {$IFDEF DARWIN}
-  // Trick to [auto]adjust TBitBtn heights on newest Lazarus
-  AdjustButtonHeight(Form1,Scale96ToScreen(32));
-  {$ENDIF DARWIN}
-
   MessageTrigger:=false;
 
   IniPropStorageApp.IniFileName:=SafeGetApplicationPath+installerUniversal.DELUXEFILENAME;
@@ -711,6 +716,11 @@ begin
     DisEnable(nil,False);
     IniPropStorageApp.Active:=false;
   end;
+
+  {$IFDEF DARWIN}
+  // Trick to [auto]adjust TBitBtn heights on newest Lazarus
+  AdjustButtonHeight(Form1);
+  {$ENDIF DARWIN}
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -1946,10 +1956,7 @@ begin
     if (ItemIndex<>-1) then
     begin
       s:=StrPas(Pchar(Items.Objects[ItemIndex]));
-      if (Pos('fixes',s)=1) then
-        AddTag(aListBox,'fixes-'+Items[ItemIndex],s)
-      else
-        AddTag(aListBox,Items[ItemIndex],s);
+      AddTag(aListBox,Items[ItemIndex],s);
     end;
   end;
 end;
@@ -1974,15 +1981,21 @@ begin
       MemoAddTag.Lines.Add('The tag ['+aTag+'] with name ['+aName+'] was added to the Lazarus sources list.');
     end;
   end;
-
   FillSourceListboxes;
   ScrollToSelected;
 end;
 
 procedure TForm1.TagSelectionChange(Sender: TObject;User: boolean);
+var
+  aListBox:TListBox;
 begin
-  MemoAddTag.Lines.Clear;
-  MemoAddTag.Lines.Add(TListBox(Sender).GetSelectedText);
+  if User then
+  begin
+    aListBox:=TListBox(Sender);
+    MemoAddTag.Lines.Clear;
+    MemoAddTag.Lines.Add('Name: '+aListBox.GetSelectedText);
+    MemoAddTag.Lines.Add('Tag: '+StrPas(Pchar(aListBox.Items.Objects[aListBox.ItemIndex])));
+  end;
 end;
 
 procedure TForm1.btnUpdateLazarusMakefilesClick(Sender: TObject);
@@ -2257,6 +2270,8 @@ type
   TTarget                 = (FPC,LAZARUS);
 const
   FIXES_PREAMBLE          = 'fixes_';
+  FPC_FIXES_PREAMBLE      = 'svn/fixes_';
+
   FPC_TAG_PREAMBLE        = 'release_';
   LAZ_TAG_PREAMBLE        = 'lazarus_';
   TAGURL : array[TTarget] of string =
@@ -2271,6 +2286,8 @@ const
        'https://gitlab.com/api/v4/projects/28419588/repository/branches?search=^'+FIXES_PREAMBLE
     );
 
+  FPCFIXESURL = 'https://gitlab.com/api/v4/projects/28644964/repository/branches?search=^'+FPC_FIXES_PREAMBLE;
+
 var
   aTarget             : TTarget;
   aTargetListBox      : TListBox;
@@ -2279,7 +2296,7 @@ var
   GITTagRunner        : string;
   GITTag              : string;
   GITTagShort         : string;
-  i                   : integer;
+  i,j                 : integer;
   Fixes,RC            : boolean;
   aLabel              : string;
 begin
@@ -2316,8 +2333,17 @@ begin
 
   aFileList:=TStringList.Create;
 
+  Output:='';
+
   if Fixes then
-    FPCupManager.GetReleaseTags(BRANCHURL[aTarget],false,Output)
+  begin
+    FPCupManager.GetReleaseTags(BRANCHURL[aTarget],false,Output);
+    if (aTarget=FPC) then
+    begin
+      if Length(Output)>0 then Output:=Output+',';
+      FPCupManager.GetReleaseTags(FPCFIXESURL,false,Output);
+    end;
+  end
   else
     FPCupManager.GetReleaseTags(TAGURL[aTarget],RC,Output);
 
@@ -2329,9 +2355,10 @@ begin
 
     if Fixes then
     begin
+      i:=Pos(FPC_FIXES_PREAMBLE,GITTagShort);
+      if i>0 then Delete(GITTagShort,1,Length(FPC_FIXES_PREAMBLE));
       i:=Pos(FIXES_PREAMBLE,GITTagShort);
       if i>0 then Delete(GITTagShort,1,Length(FIXES_PREAMBLE));
-      GITTagShort:=StringReplace(GITTagShort,'_','.',[rfReplaceAll]);
     end
     else
     begin
@@ -2345,8 +2372,26 @@ begin
         i:=Pos(LAZ_TAG_PREAMBLE,GITTagShort);
         if i>0 then Delete(GITTagShort,1,Length(LAZ_TAG_PREAMBLE));
       end;
-      if (NOT RC) then GITTagShort:=StringReplace(GITTagShort,'_','.',[rfReplaceAll]);
     end;
+
+    // Replace underscores in version number with dots
+    // Bit clumsy
+    j:=0;
+    repeat
+      i:=Pos('_',GITTagShort,j+1);
+      j:=i;
+      if i>0 then
+      begin
+        if ((i>1) AND (i<Length(GITTagShort))) then
+        begin
+          if ((GITTagShort[i-1] in ['0'..'9']) AND (GITTagShort[i+1] in ['0'..'9'])) then GITTagShort[i]:='.';
+        end;
+      end;
+    until i=0;
+
+    // Use normal naming for a fixes banch
+    if Fixes then GITTagShort:='fixes-'+GITTagShort;
+
     aTargetListBox.Items.AddObject(GITTagShort,TObject(pointer(StrNew(Pchar(GITTag)))));
   end;
 

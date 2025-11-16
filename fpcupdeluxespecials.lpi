@@ -655,7 +655,7 @@ if TargetOS=&apos;openbsd&apos; then
       <Unit2>
         <Filename Value="sources\updeluxe\extrasettings.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form2"/>
+        <ComponentName Value="SettingsForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit2>

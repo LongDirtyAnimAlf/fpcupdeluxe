@@ -388,7 +388,7 @@ type
     procedure GetCrossToolsPath(out BinPath,LibPath:string);
     function GetCrossBinsURL(out BaseBinsURL:string; var BinsFileName:string):boolean;
     function GetCrossLibsURL(out BaseLibsURL:string; var LibsFileName:string):boolean;
-    function GetReleaseTags(const aURL:string;RC:boolean;out aReleaseList:string):boolean;
+    function GetReleaseTags(const aURL:string;RC:boolean;var aReleaseList:string):boolean;
     function CheckCurrentFPCInstall: boolean;
     procedure SaveSettings;
     procedure ResetAll;
@@ -1462,7 +1462,7 @@ begin
 
 end;
 
-function TFPCupManager.GetReleaseTags(const aURL:string;RC:boolean;out aReleaseList:string):boolean;
+function TFPCupManager.GetReleaseTags(const aURL:string;RC:boolean;var aReleaseList:string):boolean;
 var
   s:string;
   success:boolean;
@@ -1509,7 +1509,12 @@ begin
       if (Json<>nil) AND (NOT Json.IsNull) then Json.Free;
     end;
   end;
-  if Length(aReleaseList)>0 then Delete(aReleaseList,Length(aReleaseList),1);
+  if Length(aReleaseList)>0 then
+  begin
+    // Delete last stray comma, if any
+    if aReleaseList[Length(aReleaseList)]=',' then
+      Delete(aReleaseList,Length(aReleaseList),1);
+  end;
   result:=success;
 end;
 

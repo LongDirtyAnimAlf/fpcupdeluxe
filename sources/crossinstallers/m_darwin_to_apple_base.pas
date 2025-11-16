@@ -230,7 +230,6 @@ begin
   end;
 
   {$IFDEF MACOSXVERSIONMAGIG}
-  (*
   if (TargetOS=TOS.darwin) then
   begin
     if (Pos('-WM',FPCCFGSnippet)=0) then
@@ -246,7 +245,6 @@ begin
       end;
     end;
   end;
-  *)
   {$ENDIF}
 
   // Never fail.

@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 48
+  Left = 93
   Height = 621
-  Top = 85
+  Top = 92
   Width = 1190
   Anchors = []
   Caption = 'FPCUPdeluxe'
