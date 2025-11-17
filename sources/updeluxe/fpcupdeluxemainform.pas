@@ -35,13 +35,14 @@ type
     ActionList1: TActionList;
     btnBuildHelp: TButton;
     btnCheckToolsLocations: TButton;
-    btnBuildNativeCompiler: TButton;
     btnGetFPCFixes: TButton;
     btnGetLazarusCandidates: TButton;
     btnGetFPCReleases: TButton;
     btnGetFPCCandidates: TButton;
     btnGetLazarusFixes: TButton;
     btnGetLazarusReleases: TButton;
+    btnSetupPlus: TButton;
+    ButtonBuildNativeCompiler: TButton;
     chkGitlab: TCheckBox;
     ImageList_200x40: TImageList;
     ImageList_32x32: TImageList;
@@ -54,7 +55,6 @@ type
     btnSendLog: TButton;
     btnUpdateLazarusMakefiles: TButton;
     btnInstallModule: TButton;
-    btnSetupPlus: TButton;
     btnClearLog: TButton;
     btnUninstallModule: TButton;
     btnGetOpenSSL: TButton;
@@ -313,7 +313,7 @@ resourcestring
   upRemoveCrossCompiler = 'Going to remove the cross-compiler for';
   upUpdateCrossAll = 'Going to update all crosscompilers';
   upTryBuildCrossCompiler = 'Trying to build the cross-compiler for';
-
+  upBuildNativeCrossCompiler = 'Going to build the native compiler for';
 
   upMissingTools = 'The building of a crosscompiler failed due to missing cross-tools.';
   upAdvertiseTools = 'FPCUPdeluxe can try to download them if available !';
@@ -1919,6 +1919,13 @@ begin
     Special := True;
   end;
 
+  if {(NOT Special) AND }ExistWordInString(PChar(s),'Native compiler: ') then
+  begin
+    FG      := clRed;
+    BG      := clPurple;
+    Special := True;
+  end;
+
   if (ExistWordInString(PChar(s),'error:',[soWholeWord])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord])) OR (ExistWordInString(PChar(s),'Memory warning:',[soWholeWord])) then
   begin
     begin
@@ -2008,6 +2015,7 @@ var
   OSType:TOS;
   sOS:string;
   success:boolean;
+  s:string;
 begin
   CPUType:=TCPU.cpuNone;
   OSType:=TOS.osNone;
@@ -2020,6 +2028,11 @@ begin
 
   if ((CPUType<>TCPU.cpuNone) AND (OSType<>TOS.osNone)) then
   begin
+    s:=upBuildNativeCrossCompiler+' ['+GetCPU(CPUType)+'-'+GetOS(OSType)+'].'+sLineBreak+upQuestionContinue;
+    if SettingsForm.AskConfirmation then
+      if (MessageDlgEx(s,mtConfirmation,[mbYes, mbNo],Self)<>mrYes) then
+        exit;
+
     DisEnable(Sender,False);
     try
       success:=PrepareRun(Sender);

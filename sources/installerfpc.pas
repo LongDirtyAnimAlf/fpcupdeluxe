@@ -1415,6 +1415,12 @@ begin
 
           NativeCompilerOptions:=FCompilerOptions;
 
+          //Always limit the search for fpc.cfg to our own fpc.cfg
+          //Only needed on Windows. On Linux, we have already our own config dir for fpc.cfg
+          {$ifdef Windows}
+          NativeCompilerOptions := NativeCompilerOptions+' -n @'+FPCCfg;
+          {$endif}
+
           // Error checking for some known problems with cross compilers
           //todo: this really should go to the cross compiler unit itself but would require a rewrite
           if (CrossInstaller.TargetCPU=TCPU.i8086) and
@@ -1638,7 +1644,7 @@ begin
             if MakeCycle in [st_Compiler] then
             {$endif}
             begin
-              Infoln(infotext+'Removing all '+GetFPCTarget(false)+' compiler settings from fpc.cfg.',etError);
+              Infoln(infotext+'Removing all '+GetFPCTarget(false)+' compiler settings from fpc.cfg',etError);
               InsertFPCCFGSnippet(FPCCfg,'');
             end;
           end;
@@ -1657,6 +1663,7 @@ begin
               s1:=ChangeFileExt(s1,installerBase.GetExeExt(CrossInstaller.TargetOS));
               SysUtils.DeleteFile(s1);
               FileCopy(s2,s1);
+              Infoln(infotext+'Native compiler: '+s1,etInfo);
               //SysUtils.DeleteFile(s2);
             end;
           end;

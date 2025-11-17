@@ -193,6 +193,10 @@ msgstr ""
 msgid "Going to install a cross-compiler from available sources."
 msgstr ""
 
+#: fpcupdeluxemainform.upbuildnativecrosscompiler
+msgid "Going to build the native compiler for"
+msgstr ""
+
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
 msgstr ""
@@ -437,10 +441,6 @@ msgstr ""
 msgid "Build Help"
 msgstr ""
 
-#: tform1.btnbuildnativecompiler.caption
-msgid "Build Native Compiler"
-msgstr ""
-
 #: tform1.btnchecktoolslocations.caption
 msgid "Check Tools Location"
 msgstr ""
@@ -458,6 +458,11 @@ msgctxt "tform1.btngetfpccandidates.caption"
 msgid "Get candidates"
 msgstr ""
 
+#: tform1.btngetfpcfixes.caption
+msgctxt "tform1.btngetfpcfixes.caption"
+msgid "Get fixes"
+msgstr ""
+
 #: tform1.btngetfpcreleases.caption
 msgctxt "tform1.btngetfpcreleases.caption"
 msgid "Get releases"
@@ -466,6 +471,11 @@ msgstr ""
 #: tform1.btngetlazaruscandidates.caption
 msgctxt "tform1.btngetlazaruscandidates.caption"
 msgid "Get candidates"
+msgstr ""
+
+#: tform1.btngetlazarusfixes.caption
+msgctxt "tform1.btngetlazarusfixes.caption"
+msgid "Get fixes"
 msgstr ""
 
 #: tform1.btngetlazarusreleases.caption
@@ -523,6 +533,14 @@ msgstr ""
 
 #: tform1.buttonautocrossupdate.hint
 msgid "Auto-update all installed cross-compilers."
+msgstr ""
+
+#: tform1.buttonbuildnativecompiler.caption
+msgid "Native compiler"
+msgstr ""
+
+#: tform1.buttonbuildnativecompiler.hint
+msgid "Build the selected CPU-OS native compiler."
 msgstr ""
 
 #: tform1.buttoninstallcrosscompiler.caption
