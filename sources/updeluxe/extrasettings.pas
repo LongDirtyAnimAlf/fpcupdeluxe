@@ -11,15 +11,8 @@ uses
   Dialogs, CheckLst, IniPropStorage, ComCtrls, ButtonPanel, installerBase;
 
 type
-  TString = class(TObject)
-  private
-    fStr: String;
-  public
-    constructor Create(const AStr: String) ;
-    property Str: String read FStr write FStr;
-  end;
-
   { TSettingsForm }
+
   TSettingsForm = class(TForm)
     btnAddFPCPatch: TButton;
     btnAddLazPatch: TButton;
@@ -416,12 +409,6 @@ uses
   IniFiles;
 
 { TSettingsForm }
-
-constructor TString.Create(const AStr: String) ;
-begin
-  inherited Create;
-  FStr := AStr;
-end;
 
 procedure TSettingsForm.OnDirectorySelect(Sender: TObject);
 begin
@@ -896,7 +883,7 @@ begin
 
     if aListBox.Items.IndexOf(PatchName)=-1 then
     begin
-      aListBox.Items.AddObject(PatchName, TString.Create(FullPatchPath));
+      aListBox.Items.AddObject(PatchName,TObject(pointer(StrNew(PChar(FullPatchPath)))));
     end;
   end;
 end;
@@ -916,7 +903,8 @@ begin
     begin
       if aListBox.Selected[i] then
       begin
-        TString(aListBox.Items.Objects[i]).Free;
+        if Assigned(aListBox.Items.Objects[i]) then
+          StrDispose(PChar(aListBox.Items.Objects[i]));
         aListBox.Items.Objects[i]:=nil;
         aListBox.Items.Delete(i);
       end;
@@ -1130,8 +1118,9 @@ begin
   begin
     for i := 0 to ListBoxFPCPatch.Items.Count - 1 do
     begin
-       TString(ListBoxFPCPatch.Items.Objects[i]).Free;
-       ListBoxFPCPatch.Items.Objects[i] := nil;
+      if Assigned(ListBoxFPCPatch.Items.Objects[i]) then
+        StrDispose(PChar(ListBoxFPCPatch.Items.Objects[i]));
+      ListBoxFPCPatch.Items.Objects[i] := nil;
     end;
   end;
 
@@ -1139,8 +1128,9 @@ begin
   begin
     for i := 0 to ListBoxLazPatch.Items.Count - 1 do
     begin
-       TString(ListBoxLazPatch.Items.Objects[i]).Free;
-       ListBoxLazPatch.Items.Objects[i] := nil;
+      if Assigned(ListBoxLazPatch.Items.Objects[i]) then
+        StrDispose(PChar(ListBoxLazPatch.Items.Objects[i]));
+      ListBoxLazPatch.Items.Objects[i] := nil;
     end;
   end;
 end;
@@ -1695,7 +1685,7 @@ begin
   if aListBox.Count=0 then exit;
   for i:=0 to aListBox.Count-1 do
   begin
-    FullPatchPath := TString(aListBox.Items.Objects[i]).Str;
+    FullPatchPath := StrPas(PChar(aListBox.Items.Objects[i]));
     result:=result+FullPatchPath+',';
   end;
   // delete last comma
@@ -1721,9 +1711,10 @@ begin
   // cleanup
   for i := aListBox.Items.Count - 1 downto 0 do
   begin
-     TString(aListBox.Items.Objects[i]).Free;
-     aListBox.Items.Objects[i] := nil;
-     aListBox.Items.Delete(i);
+    if Assigned(aListBox.Items.Objects[i]) then
+      StrDispose(PChar(aListBox.Items.Objects[i]));
+    aListBox.Items.Objects[i] := nil;
+    aListBox.Items.Delete(i);
   end;
 
   PatchList:=TStringList.Create;
@@ -1736,7 +1727,7 @@ begin
       if Length(FullPatchPath)>0 then
       begin
         PatchName := ExtractFileName(FullPatchPath);
-        aListBox.Items.AddObject(PatchName, TString.Create(FullPatchPath));
+        aListBox.Items.AddObject(PatchName,TObject(pointer(StrNew(PChar(FullPatchPath)))));
       end;
     end;
   finally

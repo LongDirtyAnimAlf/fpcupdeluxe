@@ -1593,11 +1593,11 @@ begin
           if (Length(CrossCompilerOptions)>0) then Processor.SetParamNameData('CROSSOPT',CrossCompilerOptions);
 
           try
-            s1:=infotext+'Running make ['+UnCamel(GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle)))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')';
+            s1:=infotext+'Executing: make ['+UnCamel(GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle)))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')';
             if (Length(CrossCompilerOptions)>0) then s1:=s1+' with CROSSOPT: '+CrossCompilerOptions;
             Infoln(s1,etInfo);
 
-            Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
+            Infoln(infotext+'Cross build command: '+Processor.GetExeInfo,etDebug);
 
             ProcessorResult:=Processor.ExecuteAndWait;
             result:=(ProcessorResult=0);
@@ -1606,7 +1606,7 @@ begin
           except
             on E: Exception do
             begin
-              WritelnLog(infotext+'Running cross compiler fpc '+Processor.Executable+' generated an exception!'+LineEnding+'Details: '+E.Message,true);
+              WritelnLog(infotext+'Building cross compiler fpc '+Processor.Executable+' generated an exception!'+LineEnding+'Details: '+E.Message,true);
               result:=false;
             end;
           end;
@@ -1632,7 +1632,7 @@ begin
             result:=true;
           {$endif win64}
           if result then
-            Infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
+            Infoln(infotext+'Building cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
           else
           begin
             Compiler := '////\\\Error trying to build cross-compiler \|!';
