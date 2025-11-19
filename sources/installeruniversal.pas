@@ -396,6 +396,7 @@ begin
     OldPath:=Processor.Environment.GetVar('FPCDIR');
     //Processor.Environment.SetVar('FPCDIR',ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true)]));
     Processor.Environment.SetVar('FPCDIR',FFPCSourceDir);
+    Processor.Environment.SetVar('USESVN2REVISIONINC','0');
     {$IFDEF DEBUG}
     Processor.SetParamData('--verbose');
     {$ELSE}

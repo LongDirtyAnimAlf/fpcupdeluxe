@@ -2622,10 +2622,6 @@ begin
     end;
     {$endif}
 
-    if SettingsForm.UpdateOnly then
-    begin
-    end;
-
     if (Sender=WioBtn) {OR (Sender=PicoBtn)} then
     begin
       // Due to changes in Lazarus, we need a trunk/main version of Lazarus that can be compiled with an embedded (old) FPC trunk
@@ -2822,7 +2818,12 @@ begin
 
   if UnInstall then modules:=modules+_UNINSTALL else
   begin
-    if SettingsForm.UpdateOnly then modules:=modules+_BUILD+_ONLY;
+    if SettingsForm.UpdateOnly then
+    begin
+      s:='Sources will NOT be downloaded: rebuild of module '+aModule+' only !!';
+      MessageDlgEx(s,mtWarning,[mbOK],Self);
+      modules:=modules+_BUILD+_ONLY;
+    end;
   end;
 
   if Length(modules)>0 then
@@ -3873,6 +3874,7 @@ begin
 
     if SettingsForm.UpdateOnly then
     begin
+      MessageDlgEx('Sources will NOT be downloaded: rebuild only !!',mtWarning,[mbOK],Self);
 
       if Sender=BitBtnFPCOnly then
       begin

@@ -457,6 +457,10 @@ begin
         //Processor.SetParamData('--quiet');
         {$ENDIF}
 
+        // Just to be sure that even an old Makefile does not call SVN2REVISIONINC
+        // Might however be very unnecessary, but add it because we also do this when using Make itself
+        Processor.Environment.SetVar('USESVN2REVISIONINC','0');
+
         Processor.SetParamData('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
 
         // Apparently, the .compiled file, that are used to check for a rebuild, do not contain a cpu setting if cpu and cross-cpu do not differ !!
@@ -953,6 +957,7 @@ begin
         LazBuildApp:=IncludeTrailingPathDelimiter(InstallDirectory)+LAZBUILDNAME+GetExeExt
       else
         LazBuildApp:=IncludeTrailingPathDelimiter(SourceDirectory)+LAZBUILDNAME+GetExeExt;
+
       if CheckExecutable(LazBuildApp, ['--help'], LAZBUILDNAME) = false then
       begin
         WritelnLog(etError, infotext+'Fresh lazbuild could not be run (reason unknown), so cannot use it.', true);
@@ -989,6 +994,7 @@ begin
       Processor.Environment.SetVar('FPCDIR',FFPCSourceDir);
       //Processor.Environment.SetVar('FPCDIR',FFPCInstallDir);
       //Processor.Environment.SetVar('FPCDIR',ConcatPaths([FFPCInstallDir,'units',GetFPCTarget(true)]));
+      Processor.Environment.SetVar('USESVN2REVISIONINC','0');
       {$IFDEF DEBUG}
       Processor.SetParamData('--verbose');
       {$ELSE}
