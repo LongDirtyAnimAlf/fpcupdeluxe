@@ -2896,6 +2896,16 @@ begin
   begin
     sInstallDir:=SelectDirectoryDialog1.FileName;
     InstallDirEdit.Text:=sInstallDir;
+    if ((Length(sInstallDir)+Length('lazarus'))>60) then
+    begin
+       MessageDlgEx('The path "'+ConcatPaths([sInstallDir,'lazarus'])+'" is longer than 60 characters, which may fail (hang at building) with earlier Lazarus versions.',mtWarning,[mbOK],Self);
+       AddMessage('Install path might be too long !');
+       AddMessage('See GitLab issue: https://gitlab.com/freepascal.org/lazarus/lazarus/-/merge_requests/598');
+       AddMessage('Either');
+       AddMessage('- Install in a shorter path');
+       AddMessage('- Or use the latest Lazarus "trunk/main" version where this issue is fixed');
+       AddMessage('');
+    end;
   end;
 end;
 
