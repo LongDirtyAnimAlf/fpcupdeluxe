@@ -2260,6 +2260,13 @@ object Form1: TForm1
         OnClick = AboutClick
       end
     end
+    object Donate: TMenuItem
+      Caption = 'Donate'
+      object PayPal: TMenuItem
+        Caption = 'PayPal'
+        OnClick = PayPalClick
+      end
+    end
   end
   object ActionList1: TActionList
     Left = 507

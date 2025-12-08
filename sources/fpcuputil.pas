@@ -273,6 +273,7 @@ function CompilerCPU(CompilerPath: string): string;
 function CompilerOS(CompilerPath: string): string;
 function CompilerCPUOSTarget(CompilerPath: string): string;
 procedure VersionFromString(const VersionSnippet:string;out Major,Minor,Build:integer; var Patch: Integer);
+function CalculateFullVersion(const Major,Minor:integer):dword;overload;
 function CalculateFullVersion(const Major,Minor,Release:integer):dword;overload;
 function CalculateFullVersion(const Major,Minor,Release,Patch:integer):qword;overload;
 function CalculateNumericalVersion(VersionSnippet: string): dword;
@@ -1401,6 +1402,11 @@ begin
     Inc(i);
   end;
   if found then Patch:=j;
+end;
+
+function CalculateFullVersion(const Major,Minor:integer):dword;
+begin
+  result:=CalculateFullVersion(Major,Minor,0);
 end;
 
 function CalculateFullVersion(const Major,Minor,Release:integer):dword;

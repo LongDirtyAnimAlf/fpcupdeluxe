@@ -121,6 +121,8 @@
 {"hash":322608,"name":"tform1.mhelp.caption","sourcebytes":[72,101,108,112],"value":"Help"},
 {"hash":69438745,"name":"tform1.mwiki.caption","sourcebytes":[79,110,108,105,110,101,32,87,105,107,105],"value":"Online Wiki"},
 {"hash":158097840,"name":"tform1.mabout.caption","sourcebytes":[65,98,111,117,116,32,85,112],"value":"About Up"},
+{"hash":79055013,"name":"tform1.donate.caption","sourcebytes":[68,111,110,97,116,101],"value":"Donate"},
+{"hash":90760828,"name":"tform1.paypal.caption","sourcebytes":[80,97,121,80,97,108],"value":"PayPal"},
 {"hash":4710148,"name":"tform1.actfileexit.caption","sourcebytes":[69,38,120,105,116],"value":"E&xit"},
 {"hash":315140,"name":"tform1.actfileexit.hint","sourcebytes":[69,120,105,116],"value":"Exit"},
 {"hash":147282631,"name":"tform1.actfilesave.caption","sourcebytes":[38,83,97,118,101,32,108,111,103],"value":"&Save log"},

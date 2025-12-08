@@ -79,6 +79,8 @@ type
     Memo1: TMemo;
     MemoAddTag: TMemo;
     memoSummary: TMemo;
+    Donate: TMenuItem;
+    PayPal: TMenuItem;
     MRussianLanguage: TMenuItem;
     MTurkishLanguage: TMenuItem;
     MPortugueseLanguage: TMenuItem;
@@ -191,6 +193,7 @@ type
       ARect: TRect; State: TOwnerDrawState);
     procedure LanguageClick(Sender: TObject);
     procedure MOnlineDocsClick({%H-}Sender: TObject);
+    procedure PayPalClick(Sender: TObject);
     procedure WikiClick({%H-}Sender: TObject);
     procedure radgrpTargetChanged({%H-}Sender: TObject);
     procedure TagSelectionChange(Sender: TObject;{%H-}User: boolean);
@@ -2163,6 +2166,11 @@ begin
   OpenURL('https://dsiders.gitlab.io/lazdocsnext');
 end;
 
+procedure TForm1.PayPalClick(Sender: TObject);
+begin
+  OpenURL('https://www.paypal.com/donate/?business=E2N7KG9Q4M83J&no_recurring=1&item_name=You+may+support+the+maintenance+of+fpcupdeluxe.%0AThanks+%21%21&currency_code=EUR');
+end;
+
 procedure TForm1.WikiClick(Sender: TObject);
 begin
   OpenURL('https://wiki.freepascal.org/fpcupdeluxe');
@@ -2890,6 +2898,8 @@ begin
 end;
 
 procedure TForm1.btnInstallDirSelectClick(Sender: TObject);
+var
+  aLazarusVersion:dword;
 begin
   SelectDirectoryDialog1.InitialDir:=sInstallDir;
   if SelectDirectoryDialog1.Execute then
@@ -2898,13 +2908,18 @@ begin
     InstallDirEdit.Text:=sInstallDir;
     if ((Length(sInstallDir)+Length('lazarus'))>60) then
     begin
-       MessageDlgEx('The path "'+ConcatPaths([sInstallDir,'lazarus'])+'" is longer than 60 characters, which may fail (hang at building) with earlier Lazarus versions.',mtWarning,[mbOK],Self);
-       AddMessage('Install path might be too long !');
-       AddMessage('See GitLab issue: https://gitlab.com/freepascal.org/lazarus/lazarus/-/merge_requests/598');
-       AddMessage('Either');
-       AddMessage('- Install in a shorter path');
-       AddMessage('- Or use the latest Lazarus "trunk/main" version where this issue is fixed');
-       AddMessage('');
+      aLazarusVersion:=CalculateNumericalVersion(LazarusTarget);
+      if (aLazarusVersion<>0) AND (aLazarusVersion<CalculateFullVersion(4,6)) then
+      begin
+        MessageDlgEx('The path "'+ConcatPaths([sInstallDir,'lazarus'])+'" is longer than 60 characters, which may fail (hang at building) with earlier Lazarus versions [<4.6].',mtWarning,[mbOK],Self);
+        AddMessage('Install path might be too long !');
+        AddMessage('See GitLab issue: https://gitlab.com/freepascal.org/lazarus/lazarus/-/merge_requests/598');
+        AddMessage('Either');
+        AddMessage('- Install in a shorter path');
+        AddMessage('- Or use the latest Lazarus [trunk/main/>4.4] version where this issue is fixed');
+        AddMessage('');
+      end;
+
     end;
   end;
 end;
