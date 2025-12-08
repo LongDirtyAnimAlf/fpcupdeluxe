@@ -109,3 +109,7 @@ Contact
 =======
 For reporting bugs, suggestions, patches.
 https://github.com/newpascal/fpcupdeluxe/issues
+
+Support fpcupdeluxe
+===================
+[![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?business=E2N7KG9Q4M83J&no_recurring=1&item_name=You+may+support+the+maintenance+of+fpcupdeluxe.%0AThanks+%21%21&currency_code=EUR)
