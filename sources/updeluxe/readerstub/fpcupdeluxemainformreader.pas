@@ -4006,6 +4006,7 @@ begin
   FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
 
   FPCupManager.FPCUnicode:=Form2.FPCUnicode;
+  FPCupManager.DottedRTL:=SettingsForm.Dotted;
 
   FPCupManager.SoftFloat:=Form2.UseSoftFloat;
   FPCupManager.OnlinePatching:=Form2.OnlinePatching;

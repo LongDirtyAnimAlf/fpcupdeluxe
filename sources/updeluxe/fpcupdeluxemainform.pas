@@ -4220,6 +4220,7 @@ begin
   FPCupManager.NoJobs:=(NOT SettingsForm.MakeJobs);
 
   FPCupManager.FPCUnicode:=SettingsForm.FPCUnicode;
+  FPCupManager.DottedRTL:=SettingsForm.Dotted;
 
   FPCupManager.SoftFloat:=SettingsForm.UseSoftFloat;
   FPCupManager.DelphiRTTI:=SettingsForm.EnableRTTI;
@@ -4635,12 +4636,14 @@ begin
       SettingsForm.UseWget:=ReadBool('General','UseWget',SettingsForm.UseWget);
       SettingsForm.MakeJobs:=ReadBool('General','MakeJobs',SettingsForm.MakeJobs);
       SettingsForm.FPCUnicode:=ReadBool('General','BuildFPCUnicode',SettingsForm.FPCUnicode);
+      SettingsForm.Dotted:=ReadBool('General','DottedRTL',SettingsForm.Dotted);
 
       SettingsForm.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
       SettingsForm.UpdateOnly:=ReadBool('General','UpdateOnly',False);
 
       SettingsForm.UseSoftFloat:=ReadBool('General','UseSoftFloat',SettingsForm.UseSoftFloat);
       SettingsForm.EnableRTTI:=ReadBool('General','EnableRTTI',SettingsForm.EnableRTTI);
+
 
       SettingsForm.OnlinePatching:=ReadBool('General','OnlinePatching',SettingsForm.OnlinePatching);
       SettingsForm.ApplyLocalChanges:=ReadBool('General','ApplyLocalChanges',SettingsForm.ApplyLocalChanges);
@@ -4816,6 +4819,8 @@ begin
       WriteBool('General','UseWget',SettingsForm.UseWget);
       WriteBool('General','MakeJobs',SettingsForm.MakeJobs);
       WriteBool('General','BuildFPCUnicode',SettingsForm.FPCUnicode);
+      WriteBool('General','DottedRTL',SettingsForm.Dotted);
+
       WriteBool('General','ExtraVerbose',SettingsForm.ExtraVerbose);
       WriteBool('General','UpdateOnly',SettingsForm.UpdateOnly);
       WriteBool('General','UseSoftFloat',SettingsForm.UseSoftFloat);

@@ -1235,12 +1235,13 @@ begin
 
           Processor.SetParamNameData('CROSSINSTALL','1');
 
-          // This [hack] is only needed on win32, due to unknown reasons caused by FPC provided [outdated] make.exe
-          // Should be removed when cause is known
-          // We try to solve this by using a new make [4.4] provided by fpcupdeluxe
-          if (GetTOS(GetSourceOS)=TOS.win32) then
+          if (MakeCycle in [st_RtlBuild,st_RtlInstall,st_PackagesBuild,st_PackagesInstall]) then
           begin
-            if (MakeCycle in [st_RtlBuild,st_RtlInstall,st_PackagesBuild,st_PackagesInstall]) then
+            if FDottedRTL then Processor.SetParamNameData('FPC_DOTTEDUNITS','1');
+            // This [hack] is only needed on win32, due to unknown reasons caused by FPC provided [outdated] make.exe
+            // Should be removed when cause is known
+            // We try to solve this by using a new make [4.4] provided by fpcupdeluxe
+            if (GetTOS(GetSourceOS)=TOS.win32) then
             begin
               if (CrossInstaller.TargetOS in [TOS.darwin]) then
               begin
@@ -1576,9 +1577,12 @@ begin
           {$endif}
           begin
             if LinuxLegacy then CrossInstaller.AddFPCCFGSnippet('-XLC');
-            // During a native install with libc, we add this define into the fpc.cfg
-            // So, add it also as cross-config, however not 100% necessary
-            if UseLibc then CrossInstaller.AddFPCCFGSnippet('-d'+DEFINE_FPC_LIBC);
+
+            // How to add the libc-define into the build-process ??!!
+            if UseLibc then CrossCompilerOptions:=CrossCompilerOptions+'-d'+DEFINE_FPC_LIBC+' ';
+            //if UseLibc then NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_FPC_LIBC;
+            //if UseLibc then CrossInstaller.AddFPCCFGSnippet('-d'+DEFINE_FPC_LIBC);
+
             for i:=0 to CrossInstaller.CrossOpt.Count-1 do
               CrossCompilerOptions:=CrossCompilerOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
             CrossCompilerOptions:=TrimRight(CrossCompilerOptions);
@@ -1907,9 +1911,7 @@ var
   {$IFDEF UNIX}
   //s3:string;
   {$ENDIF}
-  {$IFDEF MSWINDOWS}
   i:integer;
-  {$ENDIF}
   //FPCDirStore:string;
 begin
   result:=inherited;
@@ -2072,9 +2074,7 @@ begin
   if FMUSL then FPCBuildOptions:='-FL'+FMUSLLinker+' '+FPCBuildOptions;
   {$ENDIF}
 
-
   {$IFDEF DARWIN}
-
   {$IFDEF MACOSXVERSIONMAGIG}
   if (Pos('-WM',FPCBuildOptions)=0) then
   begin
@@ -2220,6 +2220,12 @@ begin
     Processor.SetParamData('all');
   end;
 
+  // The last command added into the parameters is the make instruction
+  // See above lines
+  // We need to change this instruction later without changing anything else
+  // So get its [MakeCommand-]Index. Bit tricky.
+  MakeCommandIndex:=Pred(Processor.Process.Parameters.Count);
+
   Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
 
   try
@@ -2241,12 +2247,6 @@ begin
 
   if (OperationSucceeded AND ((ModuleName=_FPC) OR (ModuleName=_UNICODEFPC))) then
   begin
-
-    // The last command added into the parameters is the make instruction
-    // We need to change this instruction without changing anything else
-    // So get its MakeCommandIndex. Bit tricky.
-    MakeCommandIndex:=Pred(Processor.Process.Parameters.Count);
-
     // Building of FPC succeeded
     // Now install all binaries and units
     UnitSearchPath:=GetUnitsInstallDirectory+DirectorySeparator;
@@ -2305,28 +2305,99 @@ begin
 
     if OperationSucceeded then
     begin
-      if LinuxLegacy then
+      if LinuxLegacy then Infoln(infotext+'Rebuilding RTL and Packages for legacy Linux.',etInfo);
+      if FDottedRTL then Infoln(infotext+'Rebuilding RTL and Packages for dotted units.',etInfo);
+
+      // Remove the previous make-command from the parameter-data
+      // Bit tricky
+      Processor.Process.Parameters.Delete(MakeCommandIndex);
+
+      if LinuxLegacy OR FDottedRTL then
       begin
-        Infoln(infotext+'Rebuilding RTL and Packages for legacy Linux.',etInfo);
+        if LinuxLegacy then
+        begin
+          // Change some settings for this special legacy linking
+          //Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly('-XLC '+'-d'+DEFINE_FPC_LIBC+' '+FPCBuildOptions));
+          Processor.SetParamNameData('OPT','-XLC '+'-d'+DEFINE_FPC_LIBC+' '+FPCBuildOptions);
+        end;
 
-        // Change some settings for this special legacy linking
-        Processor.SetParamNamePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
-        //Processor.SetParamNameData('OPT',MaybeQuotedSpacesOnly('-XLC '+'-d'+DEFINE_FPC_LIBC+' '+FPCBuildOptions));
-        Processor.SetParamNameData('OPT','-XLC '+'-d'+DEFINE_FPC_LIBC+' '+FPCBuildOptions);
+        if FDottedRTL then
+        begin
+          //Processor.SetParamNameData('OPT','-d'+DEFINE_FPC_DOTTED+' '+FPCBuildOptions);
+          Processor.SetParamNameData('FPC_DOTTEDUNITS','1');
+        end;
 
-        // Cleanup rtl and packages for legacy GLIBC
+        Processor.SetParamNamePathData('INSTALL_UNITDIR',GetUnitsInstallDirectory);
+
+        if (NOT FNoJobs) then
+        begin
+          Processor.SetParamNameData('--jobs','1');
+          Processor.SetParamNameData('FPMAKEOPT','--threads=1');
+        end;
+
+        // Use the newly build compiler !
+        //Processor.SetParamNamePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
+        Processor.SetParamNamePathData('PP','');
+        Processor.SetParamNamePathData('FPC',FCompiler);
+
+        // We have removed the previous make command
+        // Add a dummy comand and replace it later !!
+        // Bit tricky
+        Processor.SetParamData('dummymakecommand');
+        MakeCommandIndex:=Pred(Processor.Process.Parameters.Count);
+
+        //SysUtils.DeleteFile(ConcatPaths([SourceDirectory,'rtl','fpmake'+GetExeExt]));
+
+        (*
+        // Add make command for rtl
+        Processor.SetParamData('-C');
+        Processor.SetParamData('rtl');
+        Processor.SetParamData('clean');
+        Processor.SetParamData('all');
+        ProcessorResult:=Processor.ExecuteAndWait;
+        OperationSucceeded:=(ProcessorResult=0);
+
+        // Remove above 4 make commands
+        for i:=1 to 4 do Processor.Process.Parameters.Delete(Pred(Processor.Process.Parameters.Count));
+
+        //SysUtils.DeleteFile(ConcatPaths([SourceDirectory,'packages','fpmake'+GetExeExt]));
+
+        // Add make command for packages
+        Processor.SetParamData('-C');
+        Processor.SetParamData('packages');
+        Processor.SetParamData('clean');
+        Processor.SetParamData('all');
+        ProcessorResult:=Processor.ExecuteAndWait;
+        OperationSucceeded:=(ProcessorResult=0);
+
+        // Remove above 4 make commands
+        for i:=1 to 4 do Processor.Process.Parameters.Delete(Pred(Processor.Process.Parameters.Count));
+
+
+        Processor.SetParamData('dummymakecommand');
+        MakeCommandIndex:=Pred(Processor.Process.Parameters.Count);
+        *)
+
+
+        // Cleanup rtl
         Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_clean';
-        ProcessorResult:=Processor.ExecuteAndWait;
-        OperationSucceeded:=(ProcessorResult=0);
-        Processor.Process.Parameters.Strings[MakeCommandIndex]:='packages_clean';
+        Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
         ProcessorResult:=Processor.ExecuteAndWait;
         OperationSucceeded:=(ProcessorResult=0);
 
-        // Rebuild rtl and packages
+        // Rebuild rtl
         Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_all';
         Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
         ProcessorResult:=Processor.ExecuteAndWait;
         OperationSucceeded:=(ProcessorResult=0);
+
+        // Cleanup packages
+        Processor.Process.Parameters.Strings[MakeCommandIndex]:='packages_clean';
+        Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
+        ProcessorResult:=Processor.ExecuteAndWait;
+        OperationSucceeded:=(ProcessorResult=0);
+
+        // Rebuild packages
         Processor.Process.Parameters.Strings[MakeCommandIndex]:='packages_all';
         Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
         ProcessorResult:=Processor.ExecuteAndWait;
@@ -2334,11 +2405,18 @@ begin
 
         if OperationSucceeded then
         begin
-          Infoln(infotext+'Installing RTL and Packages for legacy Linux.',etInfo);
+          if LinuxLegacy then
+          begin
+            Infoln(infotext+'Installing RTL and Packages for legacy Linux.',etInfo);
+            UnitSearchPath:=GetUnitsInstallDirectory+'_legacy'+DirectorySeparator;
+            Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'rtl');
+          end;
 
-          UnitSearchPath:=GetUnitsInstallDirectory+'_legacy'+DirectorySeparator;
+          if FDottedRTL then
+          begin
+            Infoln(infotext+'Installing RTL and Packages for dotted units.',etInfo);
+          end;
 
-          Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'rtl');
           Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_install';
           Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
           ProcessorResult:=Processor.ExecuteAndWait;
@@ -4775,6 +4853,7 @@ begin
 
     Processor.SetParamData('CPU_SOURCE='+GetSourceCPU);
     Processor.SetParamData('OS_SOURCE='+GetSourceOS);
+
     {$IFDEF MSWINDOWS}
     Processor.SetParamData('UPXPROG=echo'); //Don't use UPX
     //Processor.SetParamData('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ

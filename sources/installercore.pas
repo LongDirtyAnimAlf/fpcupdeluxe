@@ -480,6 +480,7 @@ type
     {$ENDIF MSWINDOWS}
     FExportOnly: boolean;
     FNoJobs: boolean;
+    FDottedRTL: boolean;
     FOnlinePatching: boolean;
     FVerbose: boolean;
     FUseWget: boolean;
@@ -632,6 +633,7 @@ type
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
     property NoJobs: boolean write FNoJobs;
+    property DottedRTL: boolean write FDottedRTL;
     property OnlinePatching: boolean write FOnlinePatching;
     // display and log in temp log file all sub process output
     property Verbose: boolean write SetVerbosity;

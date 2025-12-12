@@ -578,7 +578,7 @@ begin
 
   //Disable FPC unicode by default ... still testing
   FPCUnicode             := False;
-  SetCheckEnabled(CaptionCheckFPCUnicode,False);
+  //SetCheckEnabled(CaptionCheckFPCUnicode,False);
 
   {$ifdef Haiku}
   // disable some features
@@ -595,7 +595,7 @@ begin
 
   //Disable FPC dotted by default ... still testing
   Dotted := False;
-  SetCheckEnabled(CaptionCheckFPCDotted,False);
+  //SetCheckEnabled(CaptionCheckFPCDotted,False);
 
   //Disable OnlinePatching by default starting with 1.6.8p
   OnlinePatching:=false;

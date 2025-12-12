@@ -221,8 +221,8 @@ uses
   Pipes,
   Math,
   FileUtil,
-  LazFileUtils;
-
+  LazFileUtils,
+  fpcuputil;
 
 { TProcessEnvironment }
 
@@ -483,7 +483,7 @@ begin
     {$endif}
     if (Length(aCorrectValue)=0) then
     begin
-      i:=Process.Parameters.IndexOf(aName);
+      i:=TProcessStringList(Process.Parameters).IndexOfName(aName);
       if (i<>-1) then TProcessStringList(Process.Parameters).Delete(i);
     end
     else
@@ -504,8 +504,10 @@ begin
             aCorrectValue[i]:='/';
         *)
       end;
-      {$endif}
+      Process.Parameters.Values[aName]:=MaybeQuotedSpacesOnly(aCorrectValue);
+      {$else}
       Process.Parameters.Values[aName]:=aCorrectValue;
+      {$endif}
     end;
   end;
 end;

@@ -229,6 +229,7 @@ type
     FUseWget: boolean;
     FExportOnly:boolean;
     FNoJobs:boolean;
+    FDottedRTL:boolean;
     FSoftFloat:boolean;
     FDelphiRTTI:boolean;
     FOnlinePatching:boolean;
@@ -368,6 +369,7 @@ type
     property UseWget:boolean read FUseWget write FUseWget;
     property ExportOnly:boolean read FExportOnly write FExportOnly;
     property NoJobs:boolean read FNoJobs write SetNoJobs;
+    property DottedRTL:boolean read FDottedRTL write FDottedRTL;
     property SoftFloat:boolean read FSoftFloat write FSoftFloat;
     property DelphiRTTI:boolean read FDelphiRTTI write FDelphiRTTI;
     property OnlinePatching:boolean read FOnlinePatching write FOnlinePatching;
@@ -1070,10 +1072,11 @@ begin
 
   NoJobs:=true;
   FPCUnicode:=false;
+  FDottedRTL:=false;
 
   SoftFloat:=true;
 
-  Self.DelphiRTTI:=false;;
+  DelphiRTTI:=false;;
   OnlinePatching:=false;
   ReApplyLocalChanges:=false;
 
@@ -2807,6 +2810,7 @@ begin
     {$ENDIF}
     FInstaller.ExportOnly:=FParent.ExportOnly;
     FInstaller.NoJobs:=FParent.NoJobs;
+    FInstaller.DottedRTL:=FParent.DottedRTL;
     FInstaller.OnlinePatching:=FParent.OnlinePatching;
     FInstaller.Log:=FParent.FLog;
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
