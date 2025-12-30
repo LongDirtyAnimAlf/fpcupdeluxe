@@ -317,7 +317,7 @@ type
 
 resourcestring
   HintCheckRepo = 'Download whole repository, or only latest files.';
-  CaptionCheckRepo = 'Get FPC/Laz repositories.';
+  CaptionCheckRepo = 'Get FPC/Lazarus repositories.';
 
   HintCheckPackageRepo = '';
   CaptionCheckPackageRepo = 'Get package repositories.';
@@ -329,7 +329,7 @@ resourcestring
   CaptionCheckIncludeLCL = 'Include LCL with cross-compiler.';
 
   HintCheckUpdateOnly = '';
-  CaptionCheckUpdateOnly = 'FPC/Laz/Modules rebuild only.';
+  CaptionCheckUpdateOnly = 'FPC/Lazarus/Modules rebuild only.';
 
   HintCheckSystemFPC = 'Use the system wide install of FPC to build Lazarus.';
   CaptionCheckSystemFPC = 'Use system FPC for Lazarus.';
@@ -576,10 +576,6 @@ begin
 
   DockedLazarus:=False;
 
-  //Disable FPC unicode by default ... still testing
-  FPCUnicode             := False;
-  //SetCheckEnabled(CaptionCheckFPCUnicode,False);
-
   {$ifdef Haiku}
   // disable some features
   UseSoftFloat:=false;
@@ -593,12 +589,18 @@ begin
   ForceGLIBCLinking      := False;
   SetCheckEnabled(CaptionCheckGLIBCCompat,False);
 
-  //Disable FPC dotted by default ... still testing
-  Dotted := False;
-  //SetCheckEnabled(CaptionCheckFPCDotted,False);
-
   //Disable OnlinePatching by default starting with 1.6.8p
   OnlinePatching:=false;
+
+  // To be investigated !!
+
+  //Disable FPC dotted by default ... still testing
+  Dotted := False;
+  SetCheckEnabled(CaptionCheckFPCDotted,False);
+
+  //Disable FPC unicode by default ... still testing
+  FPCUnicode := False;
+  SetCheckEnabled(CaptionCheckFPCUnicode,False);
 end;
 
 
@@ -631,7 +633,7 @@ begin
     Append(CaptionCheckSplitFPC);
     Append(CaptionCheckSplitLazarus);
     Append(CaptionCheckDockedLazarus);
-    Append(CaptionCheckGLIBCCompat);
+    //Append(CaptionCheckGLIBCCompat);
     Append(CaptionCheckUseMakeJobs);
     Append(CaptionCheckExtraVerbose);
     Append(CaptionCheckSendInfo);
@@ -1296,7 +1298,7 @@ var
   aIndex:integer;
 begin
   aIndex:=GetCheckIndex(aCaption);
-  MiscellaneousCheckListBox.Checked[aIndex]:=aState;
+  if (aIndex<>-1) then MiscellaneousCheckListBox.Checked[aIndex]:=aState;
 end;
 
 procedure TSettingsForm.SetCheckEnabled(aCaption:string;aState:boolean);
@@ -1304,7 +1306,7 @@ var
   aIndex:integer;
 begin
   aIndex:=GetCheckIndex(aCaption);
-  MiscellaneousCheckListBox.ItemEnabled[aIndex]:=aState;
+  if (aIndex<>-1) then MiscellaneousCheckListBox.ItemEnabled[aIndex]:=aState;
 end;
 
 function TSettingsForm.GetRepo:boolean;
