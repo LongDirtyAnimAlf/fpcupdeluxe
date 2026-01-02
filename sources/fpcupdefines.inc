@@ -21,6 +21,8 @@
 {$define ENABLECURL}
 {$define ENABLENATIVE}
 
+{$define EnableLanguages}
+
 {.$define ENABLEEMAIL}
 
 {$ifdef Haiku}

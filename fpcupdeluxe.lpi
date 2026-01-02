@@ -115,7 +115,7 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dDEBUG -dDisableRemoteLog"/>
+            <CustomOptions Value="-dDEBUG"/>
           </Other>
         </CompilerOptions>
       </Item3>

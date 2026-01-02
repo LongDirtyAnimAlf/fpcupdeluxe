@@ -9,6 +9,9 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, Types, Buttons, Menus, ComCtrls,
+  {$ifdef EnableLanguages}
+  LCLTranslator,DefaultTranslator,
+  {$endif}
   {$ifndef READER}
   SynEdit, SynEditMiscClasses, SynGutterBase, SynEditPopup,
   {$endif}
@@ -17,13 +20,6 @@ uses
   mormotdatamodelclient,
   {$endif}
   installerManager;
-
-//{$ifdef lcl_fullversion}
-{$if lcl_fullversion>2010000}
-{.$define EnableLanguages}
-{$endif}
-//{$endif}
-{$define EnableLanguages}
 
 const
   WM_THREADINFO = LM_USER + 2010;
@@ -293,9 +289,35 @@ type
   end;
 
 resourcestring
+  rsMbYes          = '&Yes';
+  rsMbNo           = '&No';
+  rsMbOK           = '&OK';
+  rsMbCancel       = 'Cancel';
+  rsMbAbort        = 'Abort';
+  rsMbRetry        = '&Retry';
+  rsMbIgnore       = '&Ignore';
+  rsMbAll          = '&All';
+  rsMbNoToAll      = 'No to all';
+  rsMbYesToAll     = 'Yes to &All';
+  rsMbHelp         = '&Help';
+  rsMbClose        = '&Close';
+  rsmbOpen         = '&Open';
+  rsmbSave         = '&Save';
+  rsmbUnlock       = '&Unlock';
+
+  rsMtWarning      = 'Warning';
+  rsMtError        = 'Error';
+  rsMtInformation  = 'Information';
+  rsMtConfirmation = 'Confirmation';
+  rsMtAuthentication = 'Authentication';
+  rsMtCustom       = 'Custom';
+
   upCheckUpdate = 'Please wait. Checking for updates.';
   upUpdateFound = 'New FPCUPdeluxe version available';
   upUpdateNotFound = 'No updates found.';
+
+  upNotValid       = 'No valid FPC install found. Please install FPC first.';
+
   upBuildCrossCompiler = 'Going to install a cross-compiler from available sources.';
   upBuildAllCrossCompilers = 'Going to auto-build all installed cross-compilers !';
   upBuildAllCrossCompilersCheck = 'Checking FPC configfile [fpc.cfg] for cross-compilers in ';
@@ -305,9 +327,11 @@ resourcestring
   upSelectFPCTarget = 'Please select a FPC target first';
   upSelectLazarusTarget = 'Please select a Lazarus target first';
   upSelectFPCLazarusTarget = 'Please select a FPC and Lazarus target first';
-  upInstallFPC = 'Going to install/update FPC.';
-  upInstallLazarus = 'Going to install/update Lazarus.';
+  upInstallFPC = 'Going to install/update FPC only.';
+  upInstallLazarus = 'Going to install/update Lazarus only.';
   upInstallFPCLazarus = 'Going to install/update FPC and Lazarus.';
+
+  upOptions = 'with given options.';
 
   upInstallModule = 'Going to install/update module';
   upRemoveModule = 'Going to remove module';
@@ -349,6 +373,16 @@ resourcestring
 
   upGITNotFound = 'No GIT executable found on system. Tag-list cannot be received.';
 
+  upConsent ='Attention !'+sLineBreak+
+  sLineBreak +
+  'Fpcupdeluxe is able to log some install info.' + sLineBreak +
+  '(Country, OS, Versions, Up-Actions)' + sLineBreak +
+  'This data is send towards a mORMot server,' + sLineBreak +
+  'where it is made available to anybody.' + sLineBreak +
+  '(see URL shown in screen and statusbar)' + sLineBreak +
+  sLineBreak +
+  'Do you allow this logging info to be gathered ?';
+
 var
   Form1: TForm1;
 
@@ -367,12 +401,6 @@ uses
   LCLPlatformDef, // for LCL types
   IniFiles,
   StrUtils,
-  {$ifdef EnableLanguages}
-  //Translations,
-  LCLTranslator,
-  DefaultTranslator,
-  //LazUTF8,
-  {$endif}
   AboutFrm,
   extrasettings,
   subarch,
@@ -489,6 +517,8 @@ begin
     except
     end;
   end;
+
+  //TranslateLCLResourceStrings(aLanguage,SafeGetApplicationPath);
 
   if FileExists(PoFileName) then
   begin
@@ -703,7 +733,7 @@ begin
     InitFpcupdeluxe;
     //Application.QueueAsyncCall(@ScrollToSelected,0);
     {$ifdef RemoteLog}
-    //Application.QueueAsyncCall(@InitConsent,0);
+    Application.QueueAsyncCall(@InitConsent,0);
     {$endif}
   end
   else
@@ -2044,7 +2074,7 @@ begin
       success:=FPCupManager.CheckCurrentFPCInstall;
       if (NOT success) then
       begin
-        ShowMessage('No valid FPC install found. Please install FPC first.');
+        ShowMessage(upNotValid);
         exit;
       end;
 
@@ -2871,7 +2901,7 @@ begin
     success:=FPCupManager.CheckCurrentFPCInstall;
     if (NOT success) then
     begin
-      ShowMessage('No valid FPC install found. Please install FPC first.');
+      ShowMessage(upNotValid);
       exit;
     end;
 
@@ -2954,7 +2984,7 @@ begin
   success:=FPCupManager.CheckCurrentFPCInstall;
   if (NOT success) then
   begin
-    ShowInfo('No valid FPC install found. Please install FPC first.');
+    ShowInfo(upNotValid);
     exit;
   end;
 
@@ -3889,7 +3919,7 @@ begin
         success:=FPCupManager.CheckCurrentFPCInstall;
         if (NOT success) then
         begin
-          ShowMessage('No valid FPC install found. Please install FPC first.');
+          ShowMessage(upNotValid);
           exit;
         end;
       end;
@@ -4001,13 +4031,13 @@ begin
     end;
 
     if Sender=BitBtnFPCOnly then
-      sStatus:='Going to install/update FPC only';
+      sStatus:=upInstallFPC;
     if Sender=BitBtnLazarusOnly then
-      sStatus:='Going to install/update Lazarus only';
+      sStatus:=upInstallLazarus;
     if Sender=BitBtnFPCandLazarus then
-      sStatus:='Going to install/update FPC and Lazarus';
+      sStatus:=upInstallFPCLazarus;
 
-    AddMessage(sStatus+' with given options.');
+    AddMessage(sStatus+' '+upOptions);
 
     {$ifdef RemoteLog}
     aDataClient.UpInfo.UpFunction:=ufInstallFPCLAZ;
@@ -5134,16 +5164,7 @@ begin
   begin
     if (sConsentWarning) then
     begin
-      aModalResult:=(MessageDlgEx(
-                   'Attention !'+sLineBreak+
-                   sLineBreak +
-                   'Fpcupdeluxe is able to log some install info.' + sLineBreak +
-                   'This data is send towards a server,' + sLineBreak +
-                   'where it is available to anybody.' + sLineBreak +
-                   '(see URL shown in screen and statusbar)' + sLineBreak +
-                   sLineBreak +
-                   'Do you want logging info to be gathered ?'
-                 ,mtConfirmation,[mbYes, mbNo],Self));
+      aModalResult:=(MessageDlgEx(upConsent,mtConfirmation,[mbYes, mbNo],Self));
       if aModalResult=mrYes
          then SettingsForm.SendInfo:=True
          else SettingsForm.SendInfo:=False;

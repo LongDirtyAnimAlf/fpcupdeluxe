@@ -58,7 +58,7 @@ msgid "Get package repositories."
 msgstr ""
 
 #: extrasettings.captioncheckrepo
-msgid "Get FPC/Laz repositories."
+msgid "Get FPC/Lazarus repositories."
 msgstr ""
 
 #: extrasettings.captionchecksavescript
@@ -82,7 +82,7 @@ msgid "Use system FPC for Lazarus."
 msgstr ""
 
 #: extrasettings.captioncheckupdateonly
-msgid "FPC/Laz/Modules rebuild only."
+msgid "FPC/Lazarus/Modules rebuild only."
 msgstr ""
 
 #: extrasettings.captioncheckusemakejobs
@@ -169,6 +169,90 @@ msgctxt "extrasettings.hintusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
 msgstr ""
 
+#: fpcupdeluxemainform.rsmbabort
+msgid "Abort"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmball
+msgid "&All"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbcancel
+msgid "Cancel"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbclose
+msgid "&Close"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbhelp
+msgid "&Help"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbignore
+msgid "&Ignore"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbno
+msgid "&No"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbnotoall
+msgid "No to all"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbok
+msgid "&OK"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbopen
+msgid "&Open"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbretry
+msgid "&Retry"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbsave
+msgid "&Save"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbunlock
+msgid "&Unlock"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbyes
+msgid "&Yes"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmbyestoall
+msgid "Yes to &All"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmtauthentication
+msgid "Authentication"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmtconfirmation
+msgid "Confirmation"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmtcustom
+msgid "Custom"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmterror
+msgid "Error"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmtinformation
+msgid "Information"
+msgstr ""
+
+#: fpcupdeluxemainform.rsmtwarning
+msgid "Warning"
+msgstr ""
+
 #: fpcupdeluxemainform.upadvertisetools
 msgid "FPCUPdeluxe can try to download them if available !"
 msgstr ""
@@ -199,6 +283,19 @@ msgstr ""
 
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
+msgstr ""
+
+#: fpcupdeluxemainform.upconsent
+msgid ""
+"Attention !\n"
+"\n"
+"Fpcupdeluxe is able to log some install info.\n"
+"(Country, OS, Versions, Up-Actions)\n"
+"This data is send towards a mORMot server,\n"
+"where it is made available to anybody.\n"
+"(see URL shown in screen and statusbar)\n"
+"\n"
+"Do you allow this logging info to be gathered ?"
 msgstr ""
 
 #: fpcupdeluxemainform.updarwinfolderwarning1
@@ -248,7 +345,7 @@ msgid "Current install directory"
 msgstr ""
 
 #: fpcupdeluxemainform.upinstallfpc
-msgid "Going to install/update FPC."
+msgid "Going to install/update FPC only."
 msgstr ""
 
 #: fpcupdeluxemainform.upinstallfpclazarus
@@ -256,7 +353,7 @@ msgid "Going to install/update FPC and Lazarus."
 msgstr ""
 
 #: fpcupdeluxemainform.upinstalllazarus
-msgid "Going to install/update Lazarus."
+msgid "Going to install/update Lazarus only."
 msgstr ""
 
 #: fpcupdeluxemainform.upinstallmodule
@@ -285,6 +382,14 @@ msgstr ""
 
 #: fpcupdeluxemainform.upmissingtools
 msgid "The building of a crosscompiler failed due to missing cross-tools."
+msgstr ""
+
+#: fpcupdeluxemainform.upnotvalid
+msgid "No valid FPC install found. Please install FPC first."
+msgstr ""
+
+#: fpcupdeluxemainform.upoptions
+msgid "with given options."
 msgstr ""
 
 #: fpcupdeluxemainform.upquestioncontinue
@@ -599,6 +704,10 @@ msgstr ""
 msgid "Will change Lazarus into a single form docked editor."
 msgstr ""
 
+#: tform1.donate.caption
+msgid "Donate"
+msgstr ""
+
 #: tform1.espbtn.caption
 msgid "ESP32"
 msgstr ""
@@ -791,6 +900,10 @@ msgstr ""
 
 #: tform1.opmbtn.hint
 msgid "Will install/update the Online Package Manager"
+msgstr ""
+
+#: tform1.paypal.caption
+msgid "PayPal"
 msgstr ""
 
 #: tform1.picobtn.caption
