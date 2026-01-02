@@ -204,6 +204,9 @@ uses
 begin
   RequireDerivedFormResource:=True;
   Application.Scaled:=True;
+  {$PUSH}{$WARN 5044 OFF}
+  Application.MainFormOnTaskbar:=True;
+  {$POP}
   {$ifdef windows}
   PreferredAppMode:=pamAllowDark;
   uMetaDarkStyle.ApplyMetaDarkStyle(DefaultDark);

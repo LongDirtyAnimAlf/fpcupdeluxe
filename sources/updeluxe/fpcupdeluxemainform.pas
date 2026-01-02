@@ -76,6 +76,7 @@ type
     MemoAddTag: TMemo;
     memoSummary: TMemo;
     Donate: TMenuItem;
+    MThaiLanguage: TMenuItem;
     PayPal: TMenuItem;
     MRussianLanguage: TMenuItem;
     MTurkishLanguage: TMenuItem;
@@ -2180,6 +2181,7 @@ begin
   if Sender=MPortugueseLanguage then sLanguage:='pt';
   if Sender=MTurkishLanguage then sLanguage:='tr';
   if Sender=MRussianLanguage then sLanguage:='ru';
+  if Sender=MThaiLanguage then sLanguage:='th';
 
   TransLate(sLanguage);
 

@@ -1,289 +1,294 @@
 msgid ""
-msgstr "Content-Type: text/plain; charset=UTF-8"
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Project-Id-Version: fpcupdeluxe\n"
+"Language: th\n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
 
 #: extrasettings.captioncheckaddcontext
 msgid "Add context for FPC and Lazarus files."
-msgstr ""
+msgstr "เพิ่มเมนูบริบท (Context menu) สำหรับไฟล์ FPC และ Lazarus"
 
 #: extrasettings.captioncheckapplylocalchanges
 msgid "Re-apply local changes when updating."
-msgstr ""
+msgstr "นำการเปลี่ยนแปลงในเครื่องมาใช้ใหม่เมื่อมีการอัปเดต"
 
 #: extrasettings.captioncheckaskconfirmation
 msgid "Always ask for confirmation."
-msgstr ""
+msgstr "ถามเพื่อยืนยันทุกครั้ง"
 
 #: extrasettings.captioncheckdockedlazarus
 msgid "Docked Lazarus IDE."
-msgstr ""
+msgstr "ใช้ Lazarus IDE แบบรวมหน้าต่าง (Docked)"
 
 #: extrasettings.captioncheckenableonlinepatching
 msgid "Allow patching of sources by online patches."
-msgstr ""
+msgstr "อนุญาตให้แก้ไขซอร์สโค้ดด้วยแพตช์ออนไลน์"
 
 #: extrasettings.captioncheckextraverbose
 msgid "Be extra verbose."
-msgstr ""
+msgstr "แสดงรายละเอียดการทำงานอย่างละเอียด"
 
 #: extrasettings.captioncheckforcelocalrepoclient
 msgid "Use local repo-client."
-msgstr ""
+msgstr "ใช้ repo-client ภายในเครื่อง"
 
 #: extrasettings.captioncheckfpcdotted
 msgid "Build dotted RTL."
-msgstr ""
+msgstr "สร้าง RTL แบบ Dotted (Namespaced)"
 
 #: extrasettings.captioncheckfpcunicode
 msgid "Build FPC unicode."
-msgstr ""
+msgstr "สร้าง FPC แบบ Unicode"
 
 #: extrasettings.captioncheckgetupdates
 msgid "Check for fpcupdeluxe updates."
-msgstr ""
+msgstr "ตรวจสอบการอัปเดตของ fpcupdeluxe"
 
 #: extrasettings.captioncheckglibccompat
 msgid "Force linking against lowest @GLIBC-version."
-msgstr ""
+msgstr "บังคับให้ลิงก์กับ GLIBC เวอร์ชันต่ำสุด"
 
 #: extrasettings.captioncheckincludehelp
 msgid "Include Help."
-msgstr ""
+msgstr "รวมไฟล์ช่วยเหลือ (Help)"
 
 #: extrasettings.captioncheckincludelcl
 msgid "Include LCL with cross-compiler."
-msgstr ""
+msgstr "รวม LCL เข้ากับ Cross-compiler"
 
 #: extrasettings.captioncheckpackagerepo
 msgid "Get package repositories."
-msgstr ""
+msgstr "รับคลังแพ็กเกจ (Package repositories)"
 
 #: extrasettings.captioncheckrepo
 msgid "Get FPC/Lazarus repositories."
-msgstr ""
+msgstr "รับคลัง FPC/Lazarus"
 
 #: extrasettings.captionchecksavescript
 msgid "Save settings in fpcup-script."
-msgstr ""
+msgstr "บันทึกการตั้งค่าลงใน fpcup-script"
 
 #: extrasettings.captionchecksendinfo
 msgid "Send location and install info."
-msgstr ""
+msgstr "ส่งข้อมูลตำแหน่งที่ตั้งและรายละเอียดการติดตั้ง"
 
 #: extrasettings.captionchecksplitfpc
 msgid "Split FPC sources and bins."
-msgstr ""
+msgstr "แยกซอร์สโค้ดและไฟล์ไบนารีของ FPC"
 
 #: extrasettings.captionchecksplitlazarus
 msgid "Split Lazarus sources and bins."
-msgstr ""
+msgstr "แยกซอร์สโค้ดและไฟล์ไบนารีของ Lazarus"
 
 #: extrasettings.captionchecksystemfpc
 msgid "Use system FPC for Lazarus."
-msgstr ""
+msgstr "ใช้ FPC ของระบบเพื่อสร้าง Lazarus"
 
 #: extrasettings.captioncheckupdateonly
 msgid "FPC/Lazarus/Modules rebuild only."
-msgstr ""
+msgstr "สร้าง FPC/Lazarus/Modules ใหม่เท่านั้น"
 
 #: extrasettings.captioncheckusemakejobs
 msgid "Use jobs for GNU make."
-msgstr ""
+msgstr "ใช้การทำงานแบบขนาน (Jobs) สำหรับ GNU make"
 
 #: extrasettings.captioncheckusewget
 msgid "Use wget/libcurl as downloader."
-msgstr ""
+msgstr "ใช้ wget/libcurl เป็นตัวดาวน์โหลด"
 
 #: extrasettings.captionenabledelphirtti
 msgctxt "extrasettings.captionenabledelphirtti"
 msgid "Enable Delphi RTTI."
-msgstr ""
+msgstr "เปิดใช้งาน Delphi RTTI"
 
 #: extrasettings.captionusesoftfloat80bit
 msgctxt "extrasettings.captionusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
-msgstr ""
+msgstr "เปิดใช้งานการจำลองซอฟต์แวร์สำหรับทศนิยม 80 บิต"
 
 #: extrasettings.hintcheckaddcontext
 msgid "Double clicking on FPC and Lazarus files will open Lazarus."
-msgstr ""
+msgstr "ดับเบิลคลิกที่ไฟล์ FPC และ Lazarus เพื่อเปิดด้วย Lazarus"
 
 #: extrasettings.hintcheckapplylocalchanges
 msgid "Fpcupdeluxe can re-apply the local changes automagically by using local auto-patch."
-msgstr ""
+msgstr "Fpcupdeluxe สามารถนำการเปลี่ยนแปลงในเครื่องมาใช้ใหม่โดยอัตโนมัติด้วยระบบ auto-patch ในเครื่อง"
 
 #: extrasettings.hintcheckaskconfirmation
 msgid "Show a confirmation dialog with yes/no before every build."
-msgstr ""
+msgstr "แสดงกล่องยืนยัน ใช่/ไม่ใช่ ก่อนการ Build ทุกครั้ง"
 
 #: extrasettings.hintcheckdockedlazarus
 msgid "Build a docked Lazarus IDE"
-msgstr ""
+msgstr "สร้าง Lazarus IDE แบบรวมหน้าต่าง (Docked)"
 
 #: extrasettings.hintcheckenableonlinepatching
 msgid "Fpcupdeluxe can patch the sources automagically by using online patches."
-msgstr ""
+msgstr "Fpcupdeluxe สามารถแพตช์ซอร์สโค้ดโดยอัตโนมัติโดยใช้แพตช์ออนไลน์"
 
 #: extrasettings.hintcheckforcelocalrepoclient
 msgid "Use the repo-client by fpcupdeluxe."
-msgstr ""
+msgstr "ใช้ repo-client โดย fpcupdeluxe"
 
 #: extrasettings.hintcheckfpcdotted
 msgid "FPC has support for creating a \"dotted RTL\". This is a set of units from RTL/Packages where all unit names are namespaced (dotted)."
-msgstr ""
+msgstr "FPC รองรับการสร้าง \"dotted RTL\" ซึ่งเป็นชุดยูนิตจาก RTL/Packages ที่ชื่อยูนิตทั้งหมดถูกกำหนด Namespace (แบบมีจุด)"
 
 #: extrasettings.hintcheckfpcunicode
 msgid "Build FPC unicode for better Delphi compatibility."
-msgstr ""
+msgstr "สร้าง FPC unicode เพื่อการทำงานร่วมกับ Delphi ที่ดีขึ้น"
 
 #: extrasettings.hintcheckgetupdates
 msgid "Check for updates of fpcupdeluxe binaries."
-msgstr ""
+msgstr "ตรวจสอบการอัปเดตของไบนารี fpcupdeluxe"
 
 #: extrasettings.hintcheckglibccompat
 msgid "Force linking against lowest possible GLIBC version to (possibly) increase the compatibility with older Linux versions. Use at your own risk."
-msgstr ""
+msgstr "บังคับให้ลิงก์กับ GLIBC เวอร์ชันต่ำที่สุดเท่าที่จะเป็นไปได้ เพื่อเพิ่มความเข้ากันได้กับ Linux เวอร์ชันเก่า (โปรดใช้งานด้วยความเสี่ยงของท่านเอง)"
 
 #: extrasettings.hintcheckrepo
 msgid "Download whole repository, or only latest files."
-msgstr ""
+msgstr "ดาวน์โหลดคลังทั้งหมด หรือเฉพาะไฟล์ล่าสุด"
 
 #: extrasettings.hintchecksavescript
 msgid "Save the current install-settings in a fpclazup-script for later use."
-msgstr ""
+msgstr "บันทึกการตั้งค่าการติดตั้งปัจจุบันลงใน fpclazup-script เพื่อใช้ในภายหลัง"
 
 #: extrasettings.hintchecksendinfo
 msgid "Location and install info will be send to public central fpcupdeluxe server."
-msgstr ""
+msgstr "ข้อมูลตำแหน่งและรายละเอียดการติดตั้งจะถูกส่งไปยังเซิร์ฟเวอร์ส่วนกลางของ fpcupdeluxe"
 
 #: extrasettings.hintchecksystemfpc
 msgid "Use the system wide install of FPC to build Lazarus."
-msgstr ""
+msgstr "ใช้ FPC ที่ติดตั้งในระบบเพื่อสร้าง Lazarus"
 
 #: extrasettings.hintenabledelphirtti
 msgctxt "extrasettings.hintenabledelphirtti"
 msgid "Enable Delphi RTTI."
-msgstr ""
+msgstr "เปิดใช้งาน Delphi RTTI"
 
 #: extrasettings.hintusesoftfloat80bit
 msgctxt "extrasettings.hintusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
-msgstr ""
+msgstr "เปิดใช้งานการจำลองซอฟต์แวร์สำหรับทศนิยม 80 บิต"
 
 #: fpcupdeluxemainform.rsmbabort
 msgid "Abort"
-msgstr ""
+msgstr "ยกเลิก"
 
 #: fpcupdeluxemainform.rsmball
 msgid "&All"
-msgstr ""
+msgstr "&ทั้งหมด"
 
 #: fpcupdeluxemainform.rsmbcancel
 msgid "Cancel"
-msgstr ""
+msgstr "ยกเลิก"
 
 #: fpcupdeluxemainform.rsmbclose
 msgid "&Close"
-msgstr ""
+msgstr "&ปิด"
 
 #: fpcupdeluxemainform.rsmbhelp
 msgid "&Help"
-msgstr ""
+msgstr "&ช่วยเหลือ"
 
 #: fpcupdeluxemainform.rsmbignore
 msgid "&Ignore"
-msgstr ""
+msgstr "&ละเว้น"
 
 #: fpcupdeluxemainform.rsmbno
 msgid "&No"
-msgstr ""
+msgstr "&ไม่"
 
 #: fpcupdeluxemainform.rsmbnotoall
 msgid "No to all"
-msgstr ""
+msgstr "ไม่ทั้งหมด"
 
 #: fpcupdeluxemainform.rsmbok
 msgid "&OK"
-msgstr ""
+msgstr "&ตกลง"
 
 #: fpcupdeluxemainform.rsmbopen
 msgid "&Open"
-msgstr ""
+msgstr "&เปิด"
 
 #: fpcupdeluxemainform.rsmbretry
 msgid "&Retry"
-msgstr ""
+msgstr "&ลองใหม่"
 
 #: fpcupdeluxemainform.rsmbsave
 msgid "&Save"
-msgstr ""
+msgstr "&บันทึก"
 
 #: fpcupdeluxemainform.rsmbunlock
 msgid "&Unlock"
-msgstr ""
+msgstr "&ปลดล็อก"
 
 #: fpcupdeluxemainform.rsmbyes
 msgid "&Yes"
-msgstr ""
+msgstr "&ใช่"
 
 #: fpcupdeluxemainform.rsmbyestoall
 msgid "Yes to &All"
-msgstr ""
+msgstr "ใช่ทั้ง&หมด"
 
 #: fpcupdeluxemainform.rsmtauthentication
 msgid "Authentication"
-msgstr ""
+msgstr "การยืนยันตัวตน"
 
 #: fpcupdeluxemainform.rsmtconfirmation
 msgid "Confirmation"
-msgstr ""
+msgstr "การยืนยัน"
 
 #: fpcupdeluxemainform.rsmtcustom
 msgid "Custom"
-msgstr ""
+msgstr "กำหนดเอง"
 
 #: fpcupdeluxemainform.rsmterror
 msgid "Error"
-msgstr ""
+msgstr "ข้อผิดพลาด"
 
 #: fpcupdeluxemainform.rsmtinformation
 msgid "Information"
-msgstr ""
+msgstr "ข้อมูล"
 
 #: fpcupdeluxemainform.rsmtwarning
 msgid "Warning"
-msgstr ""
+msgstr "คำเตือน"
 
 #: fpcupdeluxemainform.upadvertisetools
 msgid "FPCUPdeluxe can try to download them if available !"
-msgstr ""
+msgstr "FPCUPdeluxe สามารถพยายามดาวน์โหลดไฟล์เหล่านี้ได้หากมีให้ใช้งาน !"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilers
 msgid "Going to auto-build all installed cross-compilers !"
-msgstr ""
+msgstr "กำลังจะสร้าง (Auto-build) Cross-compilers ทั้งหมดที่ติดตั้งไว้ !"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilerscheck
 msgid "Checking FPC configfile [fpc.cfg] for cross-compilers in "
-msgstr ""
+msgstr "กำลังตรวจสอบไฟล์คอนฟิก FPC [fpc.cfg] สำหรับ Cross-compilers ใน "
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersfound
 msgid "Found crosscompiler for "
-msgstr ""
+msgstr "พบ Crosscompiler สำหรับ "
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersupdate
 msgid "Going to update cross-compiler."
-msgstr ""
+msgstr "กำลังจะอัปเดต Cross-compiler"
 
 #: fpcupdeluxemainform.upbuildcrosscompiler
 msgid "Going to install a cross-compiler from available sources."
-msgstr ""
+msgstr "กำลังจะติดตั้ง Cross-compiler จากซอร์สที่มีอยู่"
 
 #: fpcupdeluxemainform.upbuildnativecrosscompiler
 msgid "Going to build the native compiler for"
-msgstr ""
+msgstr "กำลังจะสร้าง Native compiler สำหรับ"
 
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
-msgstr ""
+msgstr "กรุณารอสักครู่ กำลังตรวจสอบการอัปเดต"
 
 #: fpcupdeluxemainform.upconsent
 msgid ""
@@ -297,901 +302,905 @@ msgid ""
 "\n"
 "Do you allow this logging info to be gathered ?"
 msgstr ""
+"โปรดทราบ !\n"
+"\n"
+"Fpcupdeluxe สามารถบันทึกข้อมูลการติดตั้งบางส่วนได้\n"
+"(ประเทศ, ระบบปฏิบัติการ, เวอร์ชัน, การดำเนินการ)\n"
+"ข้อมูลนี้จะถูกส่งไปยังเซิร์ฟเวอร์ mORMot\n"
+"ซึ่งเปิดเผยข้อมูลต่อสาธารณะ\n"
+"(ดู URL ที่แสดงบนหน้าจอและแถบสถานะ)\n"
+"\n"
+"คุณอนุญาตให้รวบรวมข้อมูลบันทึกนี้หรือไม่ ?"
 
 #: fpcupdeluxemainform.updarwinfolderwarning1
 msgid "FPCUPdeluxe cannot be run inside the Downloads folder."
-msgstr ""
+msgstr "FPCUPdeluxe ไม่สามารถเรียกทำงานภายในโฟลเดอร์ Downloads ได้"
 
 #: fpcupdeluxemainform.updarwinfolderwarning2
 msgid "This is NOT allowed by OSX security measures."
-msgstr ""
+msgstr "สิ่งนี้ไม่ได้รับอนุญาตตามมาตรการความปลอดภัยของ OSX"
 
 #: fpcupdeluxemainform.updarwinfolderwarning3
 msgid "Copy FPCUPdeluxe into its own directory and run from there."
-msgstr ""
+msgstr "โปรดคัดลอก FPCUPdeluxe ไปยังไดเรกทอรีเฉพาะและเรียกใช้งานจากที่นั่น"
 
 #: fpcupdeluxemainform.upfolderwarning1
 msgid "FPCUPdeluxe could not create its necessary setting-files."
-msgstr ""
+msgstr "FPCUPdeluxe ไม่สามารถสร้างไฟล์การตั้งค่าที่จำเป็นได้"
 
 #: fpcupdeluxemainform.upfolderwarning2
 msgid "Please check the folder permissions, and re-start."
-msgstr ""
+msgstr "โปรดตรวจสอบสิทธิ์ของโฟลเดอร์ (Permissions) และเริ่มโปรแกรมใหม่"
 
 #: fpcupdeluxemainform.upgitnotfound
 msgid "No GIT executable found on system. Tag-list cannot be received."
-msgstr ""
+msgstr "ไม่พบไฟล์โปรแกรม GIT ในระบบ ไม่สามารถรับรายการ Tag ได้"
 
 #: fpcupdeluxemainform.upinstallconfimation
 #, object-pascal-format
 msgid "Going to install %s and %s%s."
-msgstr ""
+msgstr "กำลังจะติดตั้ง %s และ %s%s"
 
 #: fpcupdeluxemainform.upinstallconfimationsimple
 #, object-pascal-format
 msgid "Going to install the %s."
-msgstr ""
+msgstr "กำลังจะติดตั้ง %s"
 
 #: fpcupdeluxemainform.upinstallcrosscompiler
 msgid "Going to install the cross-compiler for"
-msgstr ""
+msgstr "กำลังจะติดตั้ง Cross-compiler สำหรับ"
 
 #: fpcupdeluxemainform.upinstalldirectory
 msgid "Install directory"
-msgstr ""
+msgstr "ไดเรกทอรีติดตั้ง"
 
 #: fpcupdeluxemainform.upinstalldirectorycurrent
 msgid "Current install directory"
-msgstr ""
+msgstr "ไดเรกทอรีติดตั้งปัจจุบัน"
 
 #: fpcupdeluxemainform.upinstallfpc
 msgid "Going to install/update FPC only."
-msgstr ""
+msgstr "กำลังจะติดตั้ง/อัปเดต FPC เท่านั้น"
 
 #: fpcupdeluxemainform.upinstallfpclazarus
 msgid "Going to install/update FPC and Lazarus."
-msgstr ""
+msgstr "กำลังจะติดตั้ง/อัปเดต FPC และ Lazarus"
 
 #: fpcupdeluxemainform.upinstalllazarus
 msgid "Going to install/update Lazarus only."
-msgstr ""
+msgstr "กำลังจะติดตั้ง/อัปเดต Lazarus เท่านั้น"
 
 #: fpcupdeluxemainform.upinstallmodule
 msgid "Going to install/update module"
-msgstr ""
+msgstr "กำลังจะติดตั้ง/อัปเดตโมดูล"
 
 #: fpcupdeluxemainform.upinstallsettingscurrent
 msgid "Got settings from install directory"
-msgstr ""
+msgstr "ได้รับค่าการตั้งค่าจากไดเรกทอรีติดตั้ง"
 
 #: fpcupdeluxemainform.uplookup
 msgid "Looking for"
-msgstr ""
+msgstr "กำลังค้นหา"
 
-#: fpcupdeluxemainform.uplookupbintools
+#: fpcupdeluxemainform.uplookubintools
 msgid "Going to look for the right cross-bins. Can (will) take some time !"
-msgstr ""
+msgstr "กำลังค้นหาไฟล์ cross-bins ที่ถูกต้อง อาจใช้เวลาสักครู่ !"
 
 #: fpcupdeluxemainform.uplookuplibtools
 msgid "Going to look for the right cross-libraries. Can (will) take some time !"
-msgstr ""
+msgstr "กำลังค้นหาไฟล์ cross-libraries ที่ถูกต้อง อาจใช้เวลาสักครู่ !"
 
 #: fpcupdeluxemainform.uplookuptools
 msgid "Looking for FPCUPdeluxe cross-tools on GitHub (if any)."
-msgstr ""
+msgstr "กำลังค้นหาเครื่องมือ Cross-tools ของ FPCUPdeluxe บน GitHub (หากมี)"
 
 #: fpcupdeluxemainform.upmissingtools
 msgid "The building of a crosscompiler failed due to missing cross-tools."
-msgstr ""
+msgstr "การสร้าง Crosscompiler ล้มเหลวเนื่องจากขาดเครื่องมือ Cross-tools"
 
 #: fpcupdeluxemainform.upnotvalid
 msgid "No valid FPC install found. Please install FPC first."
-msgstr ""
+msgstr "ไม่พบการติดตั้ง FPC ที่ใช้งานได้ โปรดติดตั้ง FPC ก่อน"
 
 #: fpcupdeluxemainform.upoptions
 msgid "with given options."
-msgstr ""
+msgstr "พร้อมตัวเลือกที่กำหนด"
 
 #: fpcupdeluxemainform.upquestioncontinue
 msgid "Do you want to continue ?"
-msgstr ""
+msgstr "คุณต้องการดำเนินการต่อหรือไม่ ?"
 
 #: fpcupdeluxemainform.upquitrequest
 msgid "Please quit FPCUPdeluxe."
-msgstr ""
+msgstr "กรุณาออกจากโปรแกรม FPCUPdeluxe"
 
 #: fpcupdeluxemainform.upremovecrosscompiler
 msgid "Going to remove the cross-compiler for"
-msgstr ""
+msgstr "กำลังจะลบ Cross-compiler สำหรับ"
 
 #: fpcupdeluxemainform.upremovemodule
 msgid "Going to remove module"
-msgstr ""
+msgstr "กำลังจะลบโมดูล"
 
 #: fpcupdeluxemainform.upselectcputarget
 msgid "Please select a CPU target first."
-msgstr ""
+msgstr "กรุณาเลือกสถาปัตยกรรม CPU (Target CPU) ก่อน"
 
 #: fpcupdeluxemainform.upselectfpclazarustarget
 msgid "Please select a FPC and Lazarus target first"
-msgstr ""
+msgstr "กรุณาเลือกเป้าหมาย FPC และ Lazarus ก่อน"
 
 #: fpcupdeluxemainform.upselectfpctarget
 msgid "Please select a FPC target first"
-msgstr ""
+msgstr "กรุณาเลือกเป้าหมาย FPC ก่อน"
 
 #: fpcupdeluxemainform.upselectlazarustarget
 msgid "Please select a Lazarus target first"
-msgstr ""
+msgstr "กรุณาเลือกเป้าหมาย Lazarus ก่อน"
 
 #: fpcupdeluxemainform.upselectostarget
 msgid "Please select an OS target first."
-msgstr ""
+msgstr "กรุณาเลือกระบบปฏิบัติการ (Target OS) ก่อน"
 
 #: fpcupdeluxemainform.upspacewarning
 msgid "Having a space in your install path is very ill-advised !"
-msgstr ""
+msgstr "ไม่แนะนำอย่างยิ่งให้มีช่องว่าง (Space) ในเส้นทางติดตั้ง !"
 
 #: fpcupdeluxemainform.uptrybuildcrosscompiler
 msgid "Trying to build the cross-compiler for"
-msgstr ""
+msgstr "กำลังพยายามสร้าง Cross-compiler สำหรับ"
 
 #: fpcupdeluxemainform.upupdatecrossall
 msgid "Going to update all crosscompilers"
-msgstr ""
+msgstr "กำลังจะอัปเดต Crosscompilers ทั้งหมด"
 
 #: fpcupdeluxemainform.upupdatefound
 msgid "New FPCUPdeluxe version available"
-msgstr ""
+msgstr "มี FPCUPdeluxe เวอร์ชันใหม่ให้อัปเดต"
 
 #: fpcupdeluxemainform.upupdatenotfound
 msgid "No updates found."
-msgstr ""
+msgstr "ไม่พบการอัปเดต"
 
 #: tform1.actfileexit.caption
 msgid "E&xit"
-msgstr ""
+msgstr "ออ&ก"
 
 #: tform1.actfileexit.hint
 msgid "Exit"
-msgstr ""
+msgstr "ออกจากโปรแกรม"
 
 #: tform1.actfilesave.caption
 msgid "&Save log"
-msgstr ""
+msgstr "&บันทึก Log"
 
 #: tform1.actfilesave.hint
 msgid "Save As"
-msgstr ""
+msgstr "บันทึกเป็น"
 
 #: tform1.androidbtn.caption
 msgid "LAMW"
-msgstr ""
+msgstr "LAMW"
 
 #: tform1.androidbtn.hint
 msgid "Will install/update FPC and Lazarus stable and LAMW"
-msgstr ""
+msgstr "จะติดตั้ง/อัปเดต FPC และ Lazarus เวอร์ชันเสถียร รวมถึง LAMW"
 
 #: tform1.basicsheet.caption
 msgid "Basic"
-msgstr ""
+msgstr "พื้นฐาน"
 
 #: tform1.bitbtnfpcandlazarus.caption
 msgid "Install/update FPC+Lazarus"
-msgstr ""
+msgstr "ติดตั้ง/อัปเดต FPC+Lazarus"
 
 #: tform1.bitbtnfpcandlazarus.hint
 msgid "Will install/update the selected version of both FPC and Lazarus."
-msgstr ""
+msgstr "จะติดตั้งหรืออัปเดต FPC และ Lazarus ตามเวอร์ชันที่เลือก"
 
 #: tform1.bitbtnfpconly.caption
 msgid "Only FPC"
-msgstr ""
+msgstr "เฉพาะ FPC"
 
 #: tform1.bitbtnfpconly.hint
 msgid "Only install/update selected FPC version."
-msgstr ""
+msgstr "ติดตั้ง/อัปเดตเฉพาะเวอร์ชัน FPC ที่เลือก"
 
 #: tform1.bitbtnfpconlytag.caption
 msgctxt "tform1.bitbtnfpconlytag.caption"
 msgid "Add Tag"
-msgstr ""
+msgstr "เพิ่ม Tag"
 
 #: tform1.bitbtnfpconlytag.hint
 msgid "Add tag/url into FPC install list"
-msgstr ""
+msgstr "เพิ่ม Tag หรือ URL ลงในรายการติดตั้ง FPC"
 
 #: tform1.bitbtnfpcsetrevision.caption
 msgid "Set FPC hash in Setup+"
-msgstr ""
+msgstr "ตั้งค่า FPC Hash ใน Setup+"
 
 #: tform1.bitbtnfpcsetrevision.hint
 msgid "Set FPC revision"
-msgstr ""
+msgstr "ตั้งค่า FPC Revision"
 
 #: tform1.bitbtnhalt.caption
 msgid "STOP"
-msgstr ""
+msgstr "หยุด"
 
 #: tform1.bitbtnhalt.hint
 msgid "Try to stop current install process"
-msgstr ""
+msgstr "พยายามหยุดกระบวนการติดตั้งปัจจุบัน"
 
 #: tform1.bitbtnlazarusonly.caption
 msgid "Only Lazarus"
-msgstr ""
+msgstr "เฉพาะ Lazarus"
 
 #: tform1.bitbtnlazarusonly.hint
 msgid "Only install/update selected Lazarus version."
-msgstr ""
+msgstr "ติดตั้ง/อัปเดตเฉพาะเวอร์ชัน Lazarus ที่เลือก"
 
 #: tform1.bitbtnlazarusonlytag.caption
 msgctxt "tform1.bitbtnlazarusonlytag.caption"
 msgid "Add Tag"
-msgstr ""
+msgstr "เพิ่ม Tag"
 
 #: tform1.bitbtnlazarusonlytag.hint
 msgid "Add tag/url into Lazarus install list"
-msgstr ""
+msgstr "เพิ่ม Tag หรือ URL ลงในรายการติดตั้ง Lazarus"
 
 #: tform1.bitbtnlazarussetrevision.caption
 msgid "Set Lazarus hash in Setup+"
-msgstr ""
+msgstr "ตั้งค่า Lazarus Hash ใน Setup+"
 
 #: tform1.bitbtnlazarussetrevision.hint
 msgid "Set Lazarus revision"
-msgstr ""
+msgstr "ตั้งค่า Lazarus Revision"
 
 #: tform1.btnbuildhelp.caption
 msgid "Build Help"
-msgstr ""
+msgstr "สร้างไฟล์ช่วยเหลือ"
 
 #: tform1.btnchecktoolslocations.caption
 msgid "Check Tools Location"
-msgstr ""
+msgstr "ตรวจสอบตำแหน่งเครื่องมือ"
 
 #: tform1.btnclearlog.caption
 msgid "Clear log"
-msgstr ""
+msgstr "ล้างบันทึก (Log)"
 
 #: tform1.btncreatelazarusconfig.caption
 msgid "Create Lazarus Configuration"
-msgstr ""
+msgstr "สร้างการตั้งค่า Lazarus"
 
 #: tform1.btngetfpccandidates.caption
 msgctxt "tform1.btngetfpccandidates.caption"
 msgid "Get candidates"
-msgstr ""
+msgstr "รับเวอร์ชัน Candidate"
 
 #: tform1.btngetfpcfixes.caption
 msgctxt "tform1.btngetfpcfixes.caption"
 msgid "Get fixes"
-msgstr ""
+msgstr "รับเวอร์ชัน Fixes"
 
 #: tform1.btngetfpcreleases.caption
 msgctxt "tform1.btngetfpcreleases.caption"
 msgid "Get releases"
-msgstr ""
+msgstr "รับเวอร์ชัน Releases"
 
 #: tform1.btngetlazaruscandidates.caption
 msgctxt "tform1.btngetlazaruscandidates.caption"
 msgid "Get candidates"
-msgstr ""
+msgstr "รับเวอร์ชัน Candidate"
 
 #: tform1.btngetlazarusfixes.caption
 msgctxt "tform1.btngetlazarusfixes.caption"
 msgid "Get fixes"
-msgstr ""
+msgstr "รับเวอร์ชัน Fixes"
 
 #: tform1.btngetlazarusreleases.caption
 msgctxt "tform1.btngetlazarusreleases.caption"
 msgid "Get releases"
-msgstr ""
+msgstr "รับเวอร์ชัน Releases"
 
 #: tform1.btngetopenssl.caption
 msgid "Get OpenSSL by Browser"
-msgstr ""
+msgstr "รับ OpenSSL ผ่านบราวเซอร์"
 
 #: tform1.btninstalldirselect.caption
 msgid "Set install path"
-msgstr ""
+msgstr "ตั้งค่าเส้นทางติดตั้ง"
 
 #: tform1.btninstallmodule.caption
 msgid "Install module"
-msgstr ""
+msgstr "ติดตั้งโมดูล"
 
 #: tform1.btninstallmodule.hint
 msgid "Install the selected module."
-msgstr ""
+msgstr "ติดตั้งโมดูลที่เลือก"
 
 #: tform1.btnsendlog.caption
 msgid "Email log"
-msgstr ""
+msgstr "ส่ง Log ทางอีเมล"
 
 #: tform1.btnsendlog.hint
 msgid "Send email to fpcup maintainer containing Commandscreen output."
-msgstr ""
+msgstr "ส่งอีเมลถึงผู้ดูแล fpcup พร้อมข้อมูลจากหน้าจอคำสั่ง"
 
 #: tform1.btnsetupplus.caption
 msgid "Setup+"
-msgstr ""
+msgstr "ตั้งค่าเพิ่มเติม (Setup+)"
 
 #: tform1.btnsetupplus.hint
 msgid "Open the extended settings form."
-msgstr ""
+msgstr "เปิดหน้าต่างการตั้งค่าเพิ่มเติม"
 
 #: tform1.btnuninstallmodule.caption
 msgid "Uninstall module"
-msgstr ""
+msgstr "ถอนการติดตั้งโมดูล"
 
 #: tform1.btnuninstallmodule.hint
 msgid "Uninstall the selected module."
-msgstr ""
+msgstr "ถอนการติดตั้งโมดูลที่เลือก"
 
 #: tform1.btnupdatelazarusmakefiles.caption
 msgid "Update Lazarus Makefiles"
-msgstr ""
+msgstr "อัปเดต Lazarus Makefiles"
 
 #: tform1.buttonautocrossupdate.caption
 msgid "Update all"
-msgstr ""
+msgstr "อัปเดตทั้งหมด"
 
 #: tform1.buttonautocrossupdate.hint
 msgid "Auto-update all installed cross-compilers."
-msgstr ""
+msgstr "อัปเดต Cross-compilers ทั้งหมดที่ติดตั้งไว้โดยอัตโนมัติ"
 
 #: tform1.buttonbuildnativecompiler.caption
 msgid "Native compiler"
-msgstr ""
+msgstr "Native compiler"
 
 #: tform1.buttonbuildnativecompiler.hint
 msgid "Build the selected CPU-OS native compiler."
-msgstr ""
+msgstr "สร้าง Native compiler สำหรับ CPU-OS ที่เลือก"
 
 #: tform1.buttoninstallcrosscompiler.caption
 msgid "Install compiler"
-msgstr ""
+msgstr "ติดตั้ง Compiler"
 
 #: tform1.buttoninstallcrosscompiler.hint
 msgid "Install the selected CPU-OS cross-compiler."
-msgstr ""
+msgstr "ติดตั้ง Cross-compiler สำหรับ CPU-OS ที่เลือก"
 
 #: tform1.buttonremovecrosscompiler.caption
 msgid "Remove compiler"
-msgstr ""
+msgstr "ลบ Compiler"
 
 #: tform1.buttonremovecrosscompiler.hint
 msgid "Remove the selected CPU-OS cross-compiler."
-msgstr ""
+msgstr "ลบ Cross-compiler สำหรับ CPU-OS ที่เลือก"
 
 #: tform1.buttonsubarchselect.caption
 msgid "Set subarch"
-msgstr ""
+msgstr "ตั้งค่า Subarch"
 
 #: tform1.buttonsubarchselect.hint
 msgid "Select a subarch for embedded target."
-msgstr ""
+msgstr "เลือก Subarch สำหรับเป้าหมายฝังตัว (Embedded)"
 
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
-msgstr ""
+msgstr "ล้างอัตโนมัติ"
 
 #: tform1.chkgitlab.caption
 msgid "GitLab"
-msgstr ""
+msgstr "GitLab"
 
 #: tform1.chkmakefilefpc.caption
 msgid "Check Makefile FPC"
-msgstr ""
+msgstr "ตรวจสอบ Makefile FPC"
 
 #: tform1.chkmakefilelaz.caption
 msgid "Check Makefile Lazarus"
-msgstr ""
+msgstr "ตรวจสอบ Makefile Lazarus"
 
 #: tform1.createstartup.caption
 msgid "Re-create startup scripts"
-msgstr ""
+msgstr "สร้างสคริปต์เริ่มทำงานใหม่"
 
 #: tform1.crosssheet.caption
 msgid "Cross"
-msgstr ""
+msgstr "Cross"
 
 #: tform1.dockbtn.caption
 msgid "Dock"
-msgstr ""
+msgstr "Dock"
 
 #: tform1.dockbtn.hint
 msgid "Will change Lazarus into a single form docked editor."
-msgstr ""
+msgstr "จะเปลี่ยน Lazarus ให้เป็นตัวแก้ไขแบบรวมหน้าต่างเดียว (Docked)"
 
 #: tform1.donate.caption
 msgid "Donate"
-msgstr ""
+msgstr "บริจาค"
 
 #: tform1.espbtn.caption
 msgid "ESP32"
-msgstr ""
+msgstr "ESP32"
 
 #: tform1.espbtn.hint
 msgid "Get FPC for ESP32 [lx6] boards"
-msgstr ""
+msgstr "รับ FPC สำหรับบอร์ด ESP32 [lx6]"
 
 #: tform1.extrasheet.caption
 msgid "Extras"
-msgstr ""
+msgstr "พิเศษ"
 
 #: tform1.fixesbtn.caption
 msgid "Fixes"
-msgstr ""
+msgstr "Fixes"
 
 #: tform1.fixesbtn.hint
 msgid "Will install/update current fixes versions of both FPC and Lazarus"
-msgstr ""
+msgstr "จะติดตั้ง/อัปเดตเวอร์ชัน fixes ปัจจุบันของทั้ง FPC และ Lazarus"
 
 #: tform1.fpchistorylabel.caption
 msgid "FPC revision history"
-msgstr ""
+msgstr "ประวัติรุ่น FPC"
 
 #: tform1.fpctaglabel.caption
 msgctxt "tform1.fpctaglabel.caption"
 msgid "FPC version"
-msgstr ""
+msgstr "เวอร์ชัน FPC"
 
 #: tform1.fpcversionlabel.caption
 msgctxt "tform1.fpcversionlabel.caption"
 msgid "FPC version"
-msgstr ""
+msgstr "เวอร์ชัน FPC"
 
 #: tform1.historysheet.caption
 msgid "History"
-msgstr ""
+msgstr "ประวัติ"
 
 #: tform1.installdiredit.hint
 msgid "Directory to install FPC and Lazarus"
-msgstr ""
+msgstr "ไดเรกทอรีสำหรับติดตั้ง FPC และ Lazarus"
 
 #: tform1.lazarushistorylabel.caption
 msgid "Lazarus revision history"
-msgstr ""
+msgstr "ประวัติรุ่น Lazarus"
 
 #: tform1.lazarustaglabel.caption
 msgctxt "tform1.lazarustaglabel.caption"
 msgid "Lazarus version"
-msgstr ""
+msgstr "เวอร์ชัน Lazarus"
 
 #: tform1.lazarusversionlabel.caption
 msgctxt "tform1.lazarusversionlabel.caption"
 msgid "Lazarus version"
-msgstr ""
+msgstr "เวอร์ชัน Lazarus"
 
 #: tform1.listboxfpchistorynew.columns[0].caption
 msgctxt "tform1.listboxfpchistorynew.columns[0].caption"
 msgid "Hash"
-msgstr ""
+msgstr "Hash"
 
 #: tform1.listboxfpchistorynew.columns[1].caption
 msgctxt "tform1.listboxfpchistorynew.columns[1].caption"
 msgid "Rev-name"
-msgstr ""
+msgstr "ชื่อรุ่น"
 
 #: tform1.listboxfpchistorynew.columns[2].caption
 msgctxt "tform1.listboxfpchistorynew.columns[2].caption"
 msgid "Date"
-msgstr ""
+msgstr "วันที่"
 
 #: tform1.listboxlazarushistorynew.columns[0].caption
 msgctxt "tform1.listboxlazarushistorynew.columns[0].caption"
 msgid "Hash"
-msgstr ""
+msgstr "Hash"
 
 #: tform1.listboxlazarushistorynew.columns[1].caption
 msgctxt "tform1.listboxlazarushistorynew.columns[1].caption"
 msgid "Rev-name"
-msgstr ""
+msgstr "ชื่อรุ่น"
 
 #: tform1.listboxlazarushistorynew.columns[2].caption
 msgctxt "tform1.listboxlazarushistorynew.columns[2].caption"
 msgid "Date"
-msgstr ""
+msgstr "วันที่"
 
 #: tform1.mabout.caption
 msgid "About Up"
-msgstr ""
+msgstr "เกี่ยวกับโปรแกรม"
 
 #: tform1.mchinesecnlanguage.caption
 msgid "Chinese (CN)"
-msgstr ""
+msgstr "จีน (CN)"
 
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
-msgstr ""
+msgstr "ดัตช์ (NL)"
 
 #: tform1.memosummary.hint
 msgid "Will show info and error"
-msgstr ""
+msgstr "จะแสดงข้อมูลและข้อผิดพลาด"
 
 #: tform1.menglishlanguage.caption
 msgid "English (EN)"
-msgstr ""
+msgstr "อังกฤษ (EN)"
 
 #: tform1.menufile.caption
 msgid "&File"
-msgstr ""
+msgstr "&ไฟล์"
 
 #: tform1.menuitem2.caption
 msgid "Languages"
-msgstr ""
+msgstr "ภาษา"
 
 #: tform1.menuitem3.caption
 msgid "Issues"
-msgstr ""
+msgstr "ปัญหา (Issues)"
 
 #: tform1.mfpcbugs.caption
 msgid "FPC bugs"
-msgstr ""
+msgstr "บั๊ก FPC"
 
 #: tform1.mfrenchlanguage.caption
 msgid "French (F)"
-msgstr ""
+msgstr "ฝรั่งเศส (F)"
 
 #: tform1.mgermanlanguage.caption
 msgid "German (D)"
-msgstr ""
+msgstr "เยอรมัน (D)"
 
 #: tform1.mhelp.caption
 msgid "Help"
-msgstr ""
+msgstr "ช่วยเหลือ"
 
 #: tform1.missuesforum.caption
 msgid "Up Lazarus forum"
-msgstr ""
+msgstr "ไปที่ฟอรัม Lazarus"
 
 #: tform1.missuesgithub.caption
 msgid "Up GitHub issues"
-msgstr ""
+msgstr "ไปที่ปัญหาใน GitHub"
 
 #: tform1.mkoreanlanguage.caption
 msgid "Korean (KR)"
-msgstr ""
+msgstr "เกาหลี (KR)"
 
 #: tform1.mlazarusbugs.caption
 msgid "Lazarus bugs"
-msgstr ""
+msgstr "บั๊ก Lazarus"
 
 #: tform1.modulesheet.caption
 msgid "Modules"
-msgstr ""
+msgstr "โมดูล"
 
 #: tform1.monlinedocs.caption
 msgid "Online docs"
-msgstr ""
+msgstr "เอกสารออนไลน์"
 
 #: tform1.mormotbtn.caption
 msgid "mORMot2"
-msgstr ""
+msgstr "mORMot2"
 
 #: tform1.mormotbtn.hint
 msgid "Get the mORMot2 for FPC"
-msgstr ""
+msgstr "รับ mORMot2 สำหรับ FPC"
 
 #: tform1.mportugueselanguage.caption
 msgid "Portuguese (PT)"
-msgstr ""
+msgstr "โปรตุเกส (PT)"
 
 #: tform1.mrussianlanguage.caption
 msgid "Russian (RUS)"
-msgstr ""
-
-#: tform1.mthailanguage.caption
-msgid "Thai (TH)"
-msgstr ""
+msgstr "รัสเซีย (RUS)"
 
 #: tform1.mturkishlanguage.caption
 msgid "Turkish (TR)"
-msgstr ""
+msgstr "ตุรกี (TR)"
 
 #: tform1.mukrainianlanguage.caption
 msgid "Ukrainian (UK)"
-msgstr ""
+msgstr "ยูเครน (UK)"
 
 #: tform1.mwiki.caption
 msgid "Online Wiki"
-msgstr ""
+msgstr "วิกิออนไลน์"
 
 #: tform1.opmbtn.caption
 msgid "OPM"
-msgstr ""
+msgstr "OPM"
 
 #: tform1.opmbtn.hint
 msgid "Will install/update the Online Package Manager"
-msgstr ""
+msgstr "จะติดตั้ง/อัปเดต Online Package Manager"
 
 #: tform1.paypal.caption
 msgid "PayPal"
-msgstr ""
+msgstr "PayPal"
 
 #: tform1.picobtn.caption
 msgid "Pico"
-msgstr ""
+msgstr "Pico"
 
 #: tform1.picobtn.hint
 msgid "Get FPC for armv6m RPi Pico"
-msgstr ""
+msgstr "รับ FPC สำหรับ armv6m RPi Pico"
 
 #: tform1.radgrpcpu.caption
 msgid "CPU"
-msgstr ""
+msgstr "CPU"
 
 #: tform1.radgrpos.caption
 msgid "OS"
-msgstr ""
+msgstr "ระบบปฏิบัติการ (OS)"
 
 #: tform1.realfpcurl.hint
 msgctxt "tform1.realfpcurl.hint"
 msgid "Double click to allow editing"
-msgstr ""
+msgstr "ดับเบิลคลิกเพื่อแก้ไข"
 
 #: tform1.reallazurl.hint
 msgctxt "tform1.reallazurl.hint"
 msgid "Double click to allow editing"
-msgstr ""
+msgstr "ดับเบิลคลิกเพื่อแก้ไข"
 
 #: tform1.stablebtn.caption
 msgid "Stable"
-msgstr ""
+msgstr "เสถียร (Stable)"
 
 #: tform1.stablebtn.hint
 msgid "Will install/update stable versions of both FPC and Lazarus"
-msgstr ""
+msgstr "จะติดตั้ง/อัปเดตเวอร์ชันเสถียรของทั้ง FPC และ Lazarus"
 
 #: tform1.statusmessage.text
 msgid "Sitting and waiting"
-msgstr ""
+msgstr "กำลังรอการดำเนินการ"
 
 #: tform1.tagsheet.caption
 msgid "Tags"
-msgstr ""
+msgstr "Tags"
 
 #: tform1.trunkbtn.caption
 msgid "Trunk"
-msgstr ""
+msgstr "Trunk"
 
 #: tform1.trunkbtn.hint
 msgid "Will install/update trunk version of both FPC and Lazarus."
-msgstr ""
+msgstr "จะติดตั้ง/อัปเดตเวอร์ชัน trunk ของทั้ง FPC และ Lazarus"
 
 #: tform1.ultibobtn.hint
 msgid "Install baremetal Ultibo for RPi2/3/4/5"
-msgstr ""
+msgstr "ติดตั้ง Ultibo (Bare metal) สำหรับ RPi2/3/4/5"
 
 #: tform1.wabtn.caption
 msgid "WA"
-msgstr ""
+msgstr "WA"
 
 #: tform1.wabtn.hint
 msgid "Install FPC and Lazarus for Web Assembly"
-msgstr ""
+msgstr "ติดตั้ง FPC และ Lazarus สำหรับ Web Assembly"
 
 #: tform1.wiobtn.caption
 msgid "Wio"
-msgstr ""
+msgstr "Wio"
 
 #: tform1.wiobtn.hint
 msgid "Get FPC for SAMD51 embedded on Wio Terminal"
-msgstr ""
+msgstr "รับ FPC สำหรับ SAMD51 ที่ฝังบน Wio Terminal"
 
 #: tsettingsform.btnaddfpcpatch.caption
 msgctxt "tsettingsform.btnaddfpcpatch.caption"
 msgid "Add FPC patch"
-msgstr ""
+msgstr "เพิ่มแพตช์ FPC"
 
 #: tsettingsform.btnaddlazpatch.caption
 msgctxt "tsettingsform.btnaddlazpatch.caption"
 msgid "Add Laz. patch"
-msgstr ""
+msgstr "เพิ่มแพตช์ Laz."
 
 #: tsettingsform.btnlistcustomoptions.caption
 msgctxt "tsettingsform.btnlistcustomoptions.caption"
 msgid "List All"
-msgstr ""
+msgstr "แสดงทั้งหมด"
 
 #: tsettingsform.btnremfpcpatch.caption
 msgctxt "tsettingsform.btnremfpcpatch.caption"
 msgid "Rem. FPC patch"
-msgstr ""
+msgstr "ลบแพตช์ FPC"
 
 #: tsettingsform.btnremlazpatch.caption
 msgctxt "tsettingsform.btnremlazpatch.caption"
 msgid "Rem. Laz. patch"
-msgstr ""
+msgstr "ลบแพตช์ Laz."
 
 #: tsettingsform.btnselectbindir.caption
 msgctxt "tsettingsform.btnselectbindir.caption"
 msgid "Tools"
-msgstr ""
+msgstr "เครื่องมือ"
 
 #: tsettingsform.btnselectcompiler.caption
 msgctxt "tsettingsform.btnselectcompiler.caption"
 msgid "Compiler"
-msgstr ""
+msgstr "Compiler"
 
 #: tsettingsform.btnselectlibdir.caption
 msgctxt "tsettingsform.btnselectlibdir.caption"
 msgid "Libraries"
-msgstr ""
+msgstr "ไลบรารี"
 
 #: tsettingsform.caption
 msgctxt "tsettingsform.caption"
 msgid "Advanced Settings"
-msgstr ""
+msgstr "การตั้งค่าขั้นสูง"
 
 #: tsettingsform.chkfpcdebug.caption
 msgctxt "tsettingsform.chkfpcdebug.caption"
 msgid "Debug"
-msgstr ""
+msgstr "ดีบั๊ก (Debug)"
 
 #: tsettingsform.chklazarusdebug.caption
 msgctxt "tsettingsform.chklazarusdebug.caption"
 msgid "Debug"
-msgstr ""
+msgstr "ดีบั๊ก (Debug)"
 
 #: tsettingsform.editbinlocation.hint
 msgctxt "tsettingsform.editbinlocation.hint"
 msgid "Double click to clear"
-msgstr ""
+msgstr "ดับเบิลคลิกเพื่อล้างข้อมูล"
 
 #: tsettingsform.editcompileroverride.hint
 msgctxt "tsettingsform.editcompileroverride.hint"
 msgid "Double click to clear"
-msgstr ""
+msgstr "ดับเบิลคลิกเพื่อล้างข้อมูล"
 
 #: tsettingsform.editliblocation.hint
 msgctxt "tsettingsform.editliblocation.hint"
 msgid "Double click to clear"
-msgstr ""
+msgstr "ดับเบิลคลิกเพื่อล้างข้อมูล"
 
 #: tsettingsform.groupbox1.caption
 msgctxt "tsettingsform.groupbox1.caption"
 msgid "Proxy settings"
-msgstr ""
+msgstr "ตั้งค่า Proxy"
 
 #: tsettingsform.groupbox2.caption
 msgctxt "tsettingsform.groupbox2.caption"
 msgid "Miscellaneous settings"
-msgstr ""
+msgstr "การตั้งค่าอื่น ๆ"
 
 #: tsettingsform.groupboxcompileoptions.caption
 msgctxt "tsettingsform.groupboxcompileoptions.caption"
 msgid "Options Override"
-msgstr ""
+msgstr "บังคับเปลี่ยนตัวเลือก (Options Override)"
 
 #: tsettingsform.groupboxfpclazbranchrevision.caption
 msgctxt "tsettingsform.groupboxfpclazbranchrevision.caption"
 msgid "Branch and revision"
-msgstr ""
+msgstr "Branch และ Revision"
 
 #: tsettingsform.groupboxfpclazscripts.caption
 msgctxt "tsettingsform.groupboxfpclazscripts.caption"
 msgid "Pre and post install scripts"
-msgstr ""
+msgstr "สคริปต์ก่อนและหลังการติดตั้ง"
 
 #: tsettingsform.grppatching.caption
 msgctxt "tsettingsform.grppatching.caption"
 msgid "Source patching"
-msgstr ""
+msgstr "การแพตช์ซอร์ส"
 
 #: tsettingsform.label1.caption
 msgctxt "tsettingsform.label1.caption"
 msgid "HTTP proxy URL:"
-msgstr ""
+msgstr "HTTP proxy URL:"
 
 #: tsettingsform.label2.caption
 msgctxt "tsettingsform.label2.caption"
 msgid "HTTP proxy port:"
-msgstr ""
+msgstr "HTTP proxy port:"
 
 #: tsettingsform.label3.caption
 msgctxt "tsettingsform.label3.caption"
 msgid "HTTP proxy username:"
-msgstr ""
+msgstr "ชื่อผู้ใช้ HTTP proxy:"
 
 #: tsettingsform.label4.caption
 msgctxt "tsettingsform.label4.caption"
 msgid "HTTP proxy password:"
-msgstr ""
+msgstr "รหัสผ่าน HTTP proxy:"
 
 #: tsettingsform.labelcompileroverride.caption
 msgctxt "tsettingsform.labelcompileroverride.caption"
 msgid "Compiler Override"
-msgstr ""
+msgstr "บังคับเปลี่ยน Compiler"
 
 #: tsettingsform.labelcpu.caption
 msgctxt "tsettingsform.labelcpu.caption"
 msgid "Select CPU"
-msgstr ""
+msgstr "เลือก CPU"
 
 #: tsettingsform.labelcrossbuildoptions.caption
 msgctxt "tsettingsform.labelcrossbuildoptions.caption"
 msgid "Cross Build Options Override (i.e. -CfSoft)"
-msgstr ""
+msgstr "บังคับเปลี่ยนตัวเลือกการสร้าง Cross (เช่น -CfSoft)"
 
 #: tsettingsform.labelfpcbranch.caption
 msgctxt "tsettingsform.labelfpcbranch.caption"
 msgid "FPC branch/tag"
-msgstr ""
+msgstr "FPC branch/tag"
 
 #: tsettingsform.labelfpcoptions.caption
 msgctxt "tsettingsform.labelfpcoptions.caption"
 msgid "FPC options"
-msgstr ""
+msgstr "ตัวเลือก FPC"
 
 #: tsettingsform.labelfpcpostinstall.caption
 msgctxt "tsettingsform.labelfpcpostinstall.caption"
 msgid "FPC post"
-msgstr ""
+msgstr "FPC หลังติดตั้ง"
 
 #: tsettingsform.labelfpcpreinstall.caption
 msgctxt "tsettingsform.labelfpcpreinstall.caption"
 msgid "FPC pre"
-msgstr ""
+msgstr "FPC ก่อนติดตั้ง"
 
 #: tsettingsform.labelfpcrevision.caption
 msgctxt "tsettingsform.labelfpcrevision.caption"
 msgid "FPC hash"
-msgstr ""
+msgstr "FPC hash"
 
 #: tsettingsform.labellazarusbranch.caption
 msgctxt "tsettingsform.labellazarusbranch.caption"
 msgid "Laz. branch/tag"
-msgstr ""
+msgstr "Laz. branch/tag"
 
 #: tsettingsform.labellazarusoptions.caption
 msgctxt "tsettingsform.labellazarusoptions.caption"
 msgid "Laz. options"
-msgstr ""
+msgstr "ตัวเลือก Laz."
 
 #: tsettingsform.labellazaruspostinstall.caption
 msgctxt "tsettingsform.labellazaruspostinstall.caption"
 msgid "Lazarus post"
-msgstr ""
+msgstr "Lazarus หลังติดตั้ง"
 
 #: tsettingsform.labellazaruspreinstall.caption
 msgctxt "tsettingsform.labellazaruspreinstall.caption"
 msgid "Lazarus pre"
-msgstr ""
+msgstr "Lazarus ก่อนติดตั้ง"
 
 #: tsettingsform.labellazarusrevision.caption
 msgctxt "tsettingsform.labellazarusrevision.caption"
 msgid "Laz. hash"
-msgstr ""
+msgstr "Laz. hash"
 
 #: tsettingsform.labelos.caption
 msgctxt "tsettingsform.labelos.caption"
 msgid "Select OS"
-msgstr ""
+msgstr "เลือก OS"
 
 #: tsettingsform.radiogrouparmarch.caption
 msgctxt "tsettingsform.radiogrouparmarch.caption"
 msgid "ARM target"
-msgstr ""
+msgstr "เป้าหมาย ARM"
 
 #: tsettingsform.rgrpsearchoptions.caption
 msgctxt "tsettingsform.rgrpsearchoptions.caption"
 msgid "Search options"
-msgstr ""
+msgstr "ตัวเลือกการค้นหา"
 
 #: tsettingsform.rgrpsubarch.caption
 msgctxt "tsettingsform.rgrpsubarch.caption"
 msgid "Select subarch"
-msgstr ""
+msgstr "เลือก Subarch"
 
 #: tsettingsform.tscpuos.caption
 msgctxt "tsettingsform.tscpuos.caption"
 msgid "CPU/OS"
-msgstr ""
+msgstr "CPU/OS"
 
 #: tsettingsform.tssubarch.caption
 msgctxt "tsettingsform.tssubarch.caption"
 msgid "Subarch"
-msgstr ""
-
+msgstr "Subarch"
