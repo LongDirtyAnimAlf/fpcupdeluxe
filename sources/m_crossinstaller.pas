@@ -770,7 +770,7 @@ end;
 {$ifdef LCL}
 procedure InitDefaultCrossSettings;
 const
-  ARMLESSOS: set of TOS = [TOS.win32..TOS.atari] - [TOS.android,TOS.win32,TOS.win64,TOS.iphonesim,TOS.java,TOS.msdos,TOS.solaris,TOS.morphos,TOS.aros,TOS.amiga,TOS.go32v2,TOS.wasip1,TOS.atari];
+  ARMLESSOS: set of TOS = [TOS.win32..TOS.atari] - [TOS.android,TOS.win32,TOS.win64,TOS.iphonesim,TOS.java,TOS.msdos,TOS.solaris,TOS.morphos,TOS.aros,TOS.amiga,TOS.go32v2,TOS.wasip1,TOS.atari,TOS.zxspectrum];
 var
   CPU:TCPU;
   OS:TOS;

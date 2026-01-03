@@ -76,8 +76,8 @@ const
   ASFILENAME     = 'as';
 
 type
-  TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k,xtensa,wasm32,loongarch64);
-  TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo,wasip1{,wasip1threads,wasip2},atari);
+  TCPU      = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,z80,m68k,xtensa,wasm32,loongarch64);
+  TOS       = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2,freertos,ios,ultibo,wasip1{,wasip1threads,wasip2},atari,zxspectrum,msxdos);
   TSUBARCH  = (saNone,armv4,armv4t,armv6,armv6m,armv7a,armv7em,armv7m,armv8,armv8a,avr1,avr2,avr25,avr35,avr4,avr5,avr51,avr6,avrtiny,avrxmega3,pic32mx,rv32ec,rv32e,rv32imac{,rv32ima,rv32im},rv32i,rv64imac{,rv64ima,rv64im},rv64i,lx6,lx106);
   //TABI      = (default,sysv,aix,darwin,elfv2,eabi,armeb,eabihf,oldwin32gnu,aarch64ios,riscvhf,linux386_sysv,windowed,call0);
   TABI      = (default,eabi,eabihf,aarch64ios,riscvhf,windowed,call0);
@@ -111,6 +111,7 @@ const
 
   CPUADDRSIZE_64     = [TCPU.aarch64,TCPU.powerpc64,TCPU.sparc64,TCPU.x86_64,TCPU.loongarch64,TCPU.riscv64{,TCPU.ia64]}];
   CPUADDRSIZE_32     = [TCPU.i386,TCPU.arm,TCPU.powerpc,TCPU.mips,TCPU.mipsel,TCPU.sparc,TCPU.m68k,TCPU.xtensa,TCPU.wasm32,TCPU.riscv32];
+  CPUADDRSIZE_8      = [TCPU.z80];
 
   LEGACYLIBS             :array[0..4] of string = ('libanl.so','libdl.so','librt.so','libresolv.so','libpthread.so');
   LEGACYLIBSVERSIONED    :array[0..4] of string = ('libanl.so.1','libdl.so.2','librt.so.1','libresolv.so.2','libpthread.so.0');
@@ -122,7 +123,7 @@ type
 
 const
   ppcSuffix : array[TCPU] of string=(
-    'none','386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','68k','xtensa','wasm32','loongarch64'
+    'none','386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','z80','68k','xtensa','wasm32','loongarch64'
   );
 
   LINUXTYPE : array[boolean] of ansistring = ('gnu','musl');
@@ -266,6 +267,8 @@ begin
     if (Pos('linux',aOS)>0) then xOS:=TOS.linux
     else
     if (Pos('solaris',aOS)>0) then xOS:=TOS.solaris
+    else
+    if (Pos('spectrum',aOS)>0) then xOS:=TOS.zxspectrum
     else
     if aOS='windows' then xOS:=TOS.win32
     else
@@ -432,6 +435,7 @@ begin
 
   if (CPU=xtensa) AND ((OS<>linux) AND (OS<>freertos)) then exit;
   if (CPU=m68k) AND ((OS<>linux) AND (OS<>amiga)) then exit;
+  if (CPU=z80) AND ((OS<>embedded) AND (OS<>zxspectrum) AND (OS<>msxdos)) then exit;
   if (CPU=powerpc) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then exit;
   if (CPU=powerpc64) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then exit;
   if (CPU=mips) AND (OS<>linux) then exit;

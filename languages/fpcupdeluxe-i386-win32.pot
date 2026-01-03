@@ -641,7 +641,7 @@ msgid "Auto-update all installed cross-compilers."
 msgstr ""
 
 #: tform1.buttonbuildnativecompiler.caption
-msgid "Native compiler"
+msgid "Build native compiler"
 msgstr ""
 
 #: tform1.buttonbuildnativecompiler.hint
@@ -718,6 +718,10 @@ msgstr ""
 
 #: tform1.extrasheet.caption
 msgid "Extras"
+msgstr ""
+
+#: tform1.extrasheet.hint
+msgid "If cross-compiler present, build the native compiler for selected system in cross."
 msgstr ""
 
 #: tform1.fixesbtn.caption
