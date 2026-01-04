@@ -1,5 +1,6 @@
 unit m_any_to_all_z80;
-{ Cross compiles from any platform to z80
+{
+Cross compiles from any platform to z80
 Copyright (C) 2026 Alf
 
 This library is free software; you can redistribute it and/or modify it
@@ -46,9 +47,6 @@ type
 
 implementation
 
-uses
-  fpcuputil;
-
 { TAny_AllZ80 }
 
 function TAny_AllZ80.GetLibs(Basepath:string): boolean;
@@ -56,8 +54,10 @@ begin
   result:=inherited;
   if result then exit;
 
-  FLibsFound:=True;
+  FLibsPath:='';
+
   result:=true;
+  FLibsFound:=true;
 end;
 
 function TAny_AllZ80.GetBinUtils(Basepath:string): boolean;
@@ -65,9 +65,15 @@ function TAny_AllZ80.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
   if result then exit;
-  FBinsFound:=true;
+
+  FBinUtilsPath:='';
+  FBinUtilsPrefix:='';
+
   result:=true;
+  FBinsFound:=true;
+
   // Configuration snippet for FPC
+  AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
   AddFPCCFGSnippet('-CX -XX');
 end;
 
