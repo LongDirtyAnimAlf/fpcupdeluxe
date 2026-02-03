@@ -1931,6 +1931,14 @@ begin
   if GetSourceTOS in WINDOWS_OS then
   begin
     case CrossOS_Target of
+      TOS.win64:
+      begin
+        if (CrossCPU_Target=TCPU.aarch64) then
+        begin
+          // This check might be trivial !
+          if GetSourceTCPU in [TCPU.x86_64,TCPU.i386] then s:='Windows_All_Clang_18.zip';
+        end;
+      end;
       TOS.linux:
       begin
         if MUSL then ostype:='MUSL';

@@ -11,7 +11,7 @@
         <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="objdump"/>
+      <Title Value="stub"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -24,18 +24,22 @@
     <RunParams>
       <FormatVersion Value="2"/>
     </RunParams>
-    <Units Count="1">
+    <Units Count="2">
       <Unit0>
-        <Filename Value="objdump.lpr"/>
+        <Filename Value="stub.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="filesearcher.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="bin\$NameOnly($(ProjFile))"/>
+      <Filename Value="bin\stub"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>

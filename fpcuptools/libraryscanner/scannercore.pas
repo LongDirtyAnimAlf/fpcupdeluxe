@@ -9,7 +9,10 @@ unit scannercore;
 interface
 
 uses
-  termio,streamio,
+  {$ifdef UNIX}
+  termio,
+  streamio,
+  {$endif}
   Classes, SysUtils;
 
 type
@@ -42,8 +45,14 @@ type
 implementation
 
 uses
-  Linux,BaseUnix,
-  Unix,StrUtils,process,FileUtil,LazFileUtils,LookupStringList;
+  {$ifdef UNIX}
+  BaseUnix,
+  Unix,
+  {$endif}
+  {$ifdef LINUX}
+  Linux,
+  {$endif}
+  StrUtils,process,FileUtil,LazFileUtils,LookupStringList;
 
 const
   {$ifdef CPUX86}
