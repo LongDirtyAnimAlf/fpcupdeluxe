@@ -1,7 +1,7 @@
 { *********************************************************************************** }
 { *                              NumCPULib Library                                  * }
 { *                Copyright (c) 2019 Ugochukwu Mmaduekwe                           * }
-{ *                 Github Repository <https://github.com/Xor-el>                   * }
+{ *                 Github Repository <>                   * }
 
 { *  Distributed under the MIT software license, see the accompanying file LICENSE  * }
 { *          or visit http://www.opensource.org/licenses/mit-license.php.           * }

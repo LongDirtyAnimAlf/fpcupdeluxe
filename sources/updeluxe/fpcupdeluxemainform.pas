@@ -2971,7 +2971,7 @@ var
 begin
   success:=false;
 
-  {$if defined(win64) and not defined(aarch64)}
+  {$if defined(win64) and not defined(cpuaarch64)}
   if (Sender<>nil) then
   begin
     if SettingsForm.AskConfirmation then

@@ -80,11 +80,11 @@ uses
   checkoptions, fpcuputil,
   {$endif}
   {$ifdef LCL}
-  {$ifdef windows}
+  {$ifdef LCLWIN32}
   uMetaDarkStyle,
   uDarkStyleSchemes,
   uDarkStyleParams,
-  {$endif Windows}
+  {$endif LCLWIN32}
   {$ifdef READER}
   fpcupdeluxemainformreader,
   {$else}
@@ -209,10 +209,10 @@ begin
   {$PUSH}{$WARN 5044 OFF}
   Application.MainFormOnTaskbar:=True;
   {$POP}
-  {$ifdef windows}
+  {$ifdef LCLWIN32}
   PreferredAppMode:=pamAllowDark;
   uMetaDarkStyle.ApplyMetaDarkStyle(DefaultDark);
-  {$endif windows}
+  {$endif LCLWIN32}
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);
   Application.Run;

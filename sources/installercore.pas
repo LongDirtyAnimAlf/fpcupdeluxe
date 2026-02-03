@@ -155,6 +155,14 @@ const
   FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION=(2*10000+2*100+4);
   {$endif}
 
+  NEWLIBSTAG                   = 'crosslibs_all';
+  OLDLIBSTAG                   = 'crosslibs';
+
+  BINSTAG                      = 'bins_all';
+
+  OLDBINSTAG                   = 'crossbins';
+  NEWBINSTAG                   = 'cross'+BINSTAG;
+
   {$ifdef WINDOWS}
   Crypto_DLL_Name_Up = 'libeay32';
   SSL_DLL_Name_Up    = 'ssleay32';
@@ -165,8 +173,8 @@ const
   Crypto_DLL_Names_Up: array[1..3] of string = ({'libcrypto-3-x64',} 'libcrypto-1_1-x64', Crypto_DLL_Name_Up, Crypto_DLL_Name_Up);
   {$endif}
   {$ifdef CPUAARCH64}
-  SSL_DLL_Names_Up:    array[1..1] of string = ('libssl-3');
-  Crypto_DLL_Names_Up: array[1..1] of string = ('libcrypto-3');
+  SSL_DLL_Names_Up:    array[1..1] of string = ('libssl-3-arm64');
+  Crypto_DLL_Names_Up: array[1..1] of string = ('libcrypto-3-arm64');
   {$endif}
   {$endif}
   {$ifdef win32}
@@ -175,6 +183,7 @@ const
   {$endif}
 
   {$ifdef win64}
+  {$ifdef CPUX86_64}
   OpenSSLSourceURL : array [0..4] of string = (
     //'https://indy.fulgan.com/SSL/openssl-1.0.2u-x64_86-win64.zip',
     'https://github.com/IndySockets/OpenSSL-Binaries/raw/master/openssl-1.0.2u-x64_86-win64.zip',
@@ -183,6 +192,12 @@ const
     'https://indy.fulgan.com/SSL/openssl-1.0.2u-x64_86-win64.zip',
     'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-x64_86-win64.zip'
     );
+  {$endif}
+  {$ifdef CPUAARCH64}
+  OpenSSLSourceURL : array [0..0] of string = (
+    FPCUPGITREPO+'/releases/download/windowsarm64_'+BINSTAG+'/openssl.zip'
+  );
+  {$endif}
   {$endif}
   {$ifdef win32}
   OpenSSLSourceURL : array [0..4] of string = (
@@ -195,6 +210,10 @@ const
     );
   {$endif}
   {$endif}
+
+  //WINDOWS_ALL_NEWBINSTAG       = 'windows_'+NEWBINSTAG;
+  //LINUXAMD64_NEWBINSTAG        = 'linux_amd64_'+NEWBINSTAG;
+  //FREEBSDAMD64_NEWBINSTAG      = 'freebsd_amd64_'+NEWBINSTAG;
 
   //LINUXLEGACYPATCH = 'glibc_compat_3_2_2.patch';
 
@@ -227,16 +246,6 @@ const
   GITLABEXTENSION              = '.gitlab';
 
   DIFFMAGIC                    = 'revhash_';
-
-  NEWLIBSTAG                   = 'crosslibs_all';
-  OLDLIBSTAG                   = 'crosslibs';
-
-  OLDBINSTAG                   = 'crossbins';
-  NEWBINSTAG                   = 'crossbins_all';
-
-  //WINDOWS_ALL_NEWBINSTAG       = 'windows_'+NEWBINSTAG;
-  //LINUXAMD64_NEWBINSTAG        = 'linux_amd64_'+NEWBINSTAG;
-  //FREEBSDAMD64_NEWBINSTAG      = 'freebsd_amd64_'+NEWBINSTAG;
 
   //Sequence contants for statemachine
 
@@ -2647,6 +2656,13 @@ begin
       Inc(i);
     end;
   end;
+
+  {$if defined(win64) and defined(cpuaarch64)}
+  //https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/windowsarm64_bins_all/openssl.zip
+  //FPCUPGITREPO+'/releases/download/windowarm64_'+BINSTAG+'/openssl.zip',
+  //BINSTAG                      = 'bins_all';
+  {$endif}
+
 
   // Direct download OpenSSL from public sources
   if (NOT OperationSucceeded) then

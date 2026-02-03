@@ -540,12 +540,10 @@ object Form1: TForm1
     SelectedColor.ForePriority = 50
     SelectedColor.BackPriority = 50
     SelectedColor.FramePriority = 50
-    SelectedColor.BoldPriority = 0
-    SelectedColor.ItalicPriority = 0
-    SelectedColor.UnderlinePriority = 0
-    SelectedColor.StrikeOutPriority = 0
+    SelectedColor.ExtendPastEol = True
     IncrementColor.Foreground = clNone
     IncrementColor.Background = clNone
+    IncrementColor.ExtendPastEol = False
     HighlightAllColor.Foreground = clNone
     HighlightAllColor.Background = clNone
     BracketHighlightStyle = sbhsBoth
@@ -562,6 +560,8 @@ object Form1: TForm1
     LineHighlightColor.Background = clNone
     LineHighlightColor.FrameEdges = sfeNone
     OnSpecialLineMarkup = CommandOutputScreenSpecialLineMarkup
+    inline SynLeftGutterPartList1: TSynGutterPartList
+    end
   end
   object InstallDirEdit: TEdit
     AnchorSideLeft.Control = Owner

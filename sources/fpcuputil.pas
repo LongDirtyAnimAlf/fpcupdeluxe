@@ -3315,7 +3315,7 @@ var
 begin
   result:=1;
 
-  {$if defined(win64) and defined(aarch64)}
+  {$if defined(win64) and defined(cpuaarch64)}
   exit;
   {$endif}
 
@@ -3349,7 +3349,7 @@ end;
 
 function GetTotalPhysicalMemory: DWord;
 begin
-  {$if defined(win64) and defined(aarch64)}
+  {$if defined(win64) and defined(cpuaarch64)}
   exit(0);
   {$endif}
   result:=TNumCPULib.GetTotalPhysicalMemory();
@@ -3357,7 +3357,7 @@ end;
 
 function GetSwapFileSize: DWord;
 begin
-  {$if defined(win64) and defined(aarch64)}
+  {$if defined(win64) and defined(cpuaarch64)}
   exit(0);
   {$endif}
   result:=TNumCPULib.GetTotalSwapMemory();
