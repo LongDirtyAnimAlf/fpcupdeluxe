@@ -24,10 +24,7 @@ type
     Data:TDSColors;
   end;
   TSchemeKey=String;
-  TSchemes=class(specialize TMap<TSchemeKey,TSchemeData,specialize TLess<TSchemeKey>>)
-    function GetMutableValue(key:TSchemeKey):PTSchemeData;
-  end;
-
+  TSchemes=specialize TMap<TSchemeKey,TSchemeData,specialize TLess<TSchemeKey>>;
 
 var
   DefaultDark,DefaultWhite:TDSColors;
@@ -43,26 +40,22 @@ implementation
 uses
   uDarkStyleSchemesLoader;
 
-function TSchemes.GetMutableValue(key:TSchemeKey):PTSchemeData;
-var
- Value:TSchemeData;
-begin
-  if TryGetValue(key,Value) then
-    result:=@Value
-  else
-    result:=nil;
-end;
-
 function SchameName2SchameID(AName:TSchemeName):TSchemeKey;inline;
 begin
   result:=UpperCase(AName);
 end;
 
 function GetSchemeMutable(AName:TSchemeName):PTSchemeData;
+var
+  itr:TSchemes.TIterator;
 begin
   if Schemes=nil then
     exit(nil);
-  result:=Schemes.GetMutableValue(SchameName2SchameID(AName));
+  itr:=Schemes.Find(SchameName2SchameID(AName));
+  if itr=nil then
+    exit(nil);
+  result:=itr.GetMutable;
+  itr.free;
 end;
 
 function GetScheme(AName:TSchemeName):TDSColors;
@@ -93,14 +86,17 @@ end;
 procedure AddScheme(AName:TSchemeName;AData:TDSColors);
 var
   id:TSchemeKey;
+  itr:TSchemes.TIterator;
 begin
   id:=SchameName2SchameID(AName);
   if Schemes=nil then begin
     Schemes:=TSchemes.Create;
     Schemes.Insert(id,CreateTSchemeData(AName,AData));
   end else begin
-    if Schemes.GetMutableValue(id)=nil then
+    itr:=Schemes.Find(id);
+    if itr=nil then
       Schemes.Insert(id,CreateTSchemeData(AName,AData));
+    itr.Free;
   end;
 end;
 

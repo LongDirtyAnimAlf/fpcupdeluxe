@@ -9,12 +9,13 @@ interface
 {$IFDEF WINDOWS}
 uses
     {IF DEFINED(LCLQT5)}
-
+      uDarkStyle,
     {ENDIF}
-    uDarkStyle,
     uDarkStyleParams,
-    uDarkStyleSchemesLoader,
-    uWin32WidgetSetDark;
+    {$IFDEF LCLWIN32}
+    uWin32WidgetSetDark,
+    {$ENDIF}
+    uDarkStyleSchemesLoader;
 {$ENDIF}
 
 {$IFDEF WINDOWS}
@@ -27,7 +28,7 @@ implementation
 {$IFDEF WINDOWS}
 procedure ApplyMetaDarkStyle(const CS:TDSColors);
 begin
-  uDarkStyle.InitDarkMode;
+  InitDarkMode;
   Initialize(CS);
   ApplyDarkStyle;
 end;
@@ -35,6 +36,6 @@ end;
 
 procedure MetaDarkFormChanged(Form: TObject);
 begin
-  {$IFDEF WINDOWS}DarkFormChanged(Form);{$ENDIF}
+  {$IFDEF LCLWIN32}DarkFormChanged(Form);{$ENDIF}
 end;
 end.

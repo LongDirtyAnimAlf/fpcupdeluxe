@@ -400,6 +400,11 @@ uses
   LCLType, // for MessageBox
   LCLIntf, // for OpenURL
   LCLPlatformDef, // for LCL types
+  {$ifdef LCLWIN32}
+  uWin32WidgetSetDark,
+  uDarkStyleSchemes,
+  uMetaDarkStyle,
+  {$endif LCLWIN32}
   IniFiles,
   StrUtils,
   AboutFrm,

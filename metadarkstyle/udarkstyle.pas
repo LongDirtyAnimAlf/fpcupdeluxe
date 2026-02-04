@@ -40,7 +40,7 @@ var
   g_darkModeSupported: bool = false;
   //gAppMode: integer = 1;
 
-{$IF DEFINED(LCLQT5)}
+{$IF DEFINED(LCLQT5) OR DEFINED(LCLQT6)}
 procedure ApplyDarkStyle;
 {$ENDIF}
 
@@ -52,11 +52,14 @@ implementation
 
 uses
   UxTheme, JwaWinUser, FileInfo, uDarkStyleParams
-{$IF DEFINED(LCLQT5)}
-  , Qt5
-{$ENDIF}
+  {$IF DEFINED(LCLQT5)}
+  ,Qt5
+  {$ENDIF}
+  {$IF DEFINED(LCLQT6)}
+  ,Qt6
+  {$ENDIF}
   ;
-
+  
 var
   AppMode: TPreferredAppMode;
 
@@ -131,7 +134,7 @@ begin
   end;
 end;
 
-{$IF DEFINED(LCLQT5)}
+{$IF DEFINED(LCLQT5) OR DEFINED(LCLQT6)}
 procedure ApplyDarkStyle;
 const
   StyleName: WideString = 'Fusion';
@@ -146,35 +149,64 @@ var
   end;
 
 begin
-  g_darkModeEnabled:= True;
+  //g_darkModeEnabled:= True;
 
   QApplication_setStyle(QStyleFactory_create(@StyleName));
 
   APalette:= QPalette_Create();
 
   // Modify palette to dark
-  QPalette_setColor(APalette, QPaletteWindow, QColor(53, 53, 53));
-  QPalette_setColor(APalette, QPaletteWindowText, QColor(255, 255, 255));
-  QPalette_setColor(APalette, QPaletteDisabled, QPaletteWindowText, QColor(127, 127, 127));
-  QPalette_setColor(APalette, QPaletteBase, QColor(42, 42, 42));
-  QPalette_setColor(APalette, QPaletteAlternateBase, QColor(66, 66, 66));
-  QPalette_setColor(APalette, QPaletteToolTipBase, QColor(255, 255, 255));
-  QPalette_setColor(APalette, QPaletteToolTipText, QColor(53, 53, 53));
-  QPalette_setColor(APalette, QPaletteText, QColor(255, 255, 255));
-  QPalette_setColor(APalette, QPaletteDisabled, QPaletteText, QColor(127, 127, 127));
-  QPalette_setColor(APalette, QPaletteDark, QColor(35, 35, 35));
-  QPalette_setColor(APalette, QPaletteLight, QColor(66, 66, 66));
-  QPalette_setColor(APalette, QPaletteShadow, QColor(20, 20, 20));
-  QPalette_setColor(APalette, QPaletteButton, QColor(53, 53, 53));
-  QPalette_setColor(APalette, QPaletteButtonText, QColor(255, 255, 255));
-  QPalette_setColor(APalette, QPaletteDisabled, QPaletteButtonText, QColor(127, 127, 127));
-  QPalette_setColor(APalette, QPaletteBrightText, QColor(255, 0, 0));
-  QPalette_setColor(APalette, QPaletteLink, QColor(42, 130, 218));
-  QPalette_setColor(APalette, QPaletteHighlight, QColor(42, 130, 218));
-  QPalette_setColor(APalette, QPaletteDisabled, QPaletteHighlight, QColor(80, 80, 80));
-  QPalette_setColor(APalette, QPaletteHighlightedText, QColor(255, 255, 255));
-  QPalette_setColor(APalette, QPaletteDisabled, QPaletteHighlightedText, QColor(127, 127, 127));
-
+  if (AppMode = pamForceDark) then
+  begin
+    // DarkMode Pallete
+    QPalette_setColor(APalette, QPaletteWindow, QColor(53, 53, 53));
+    QPalette_setColor(APalette, QPaletteWindowText, QColor(255, 255, 255));
+    QPalette_setColor(APalette, QPaletteDisabled, QPaletteWindowText, QColor(127, 127, 127));
+    QPalette_setColor(APalette, QPaletteBase, QColor(42, 42, 42));
+    QPalette_setColor(APalette, QPaletteAlternateBase, QColor(66, 66, 66));
+    QPalette_setColor(APalette, QPaletteToolTipBase, QColor(255, 255, 255));
+    QPalette_setColor(APalette, QPaletteToolTipText, QColor(53, 53, 53));
+    QPalette_setColor(APalette, QPaletteText, QColor(255, 255, 255));
+    QPalette_setColor(APalette, QPaletteDisabled, QPaletteText, QColor(127, 127, 127));
+    QPalette_setColor(APalette, QPaletteDark, QColor(35, 35, 35));
+    QPalette_setColor(APalette, QPaletteLight, QColor(66, 66, 66));
+    QPalette_setColor(APalette, QPaletteShadow, QColor(20, 20, 20));
+    QPalette_setColor(APalette, QPaletteButton, QColor(53, 53, 53));
+    QPalette_setColor(APalette, QPaletteButtonText, QColor(255, 255, 255));
+    QPalette_setColor(APalette, QPaletteDisabled, QPaletteButtonText, QColor(127, 127, 127));
+    QPalette_setColor(APalette, QPaletteBrightText, QColor(255, 0, 0));
+    QPalette_setColor(APalette, QPaletteLink, QColor(42, 130, 218));
+    QPalette_setColor(APalette, QPaletteHighlight, QColor(42, 130, 218));
+    QPalette_setColor(APalette, QPaletteDisabled, QPaletteHighlight, QColor(80, 80, 80));
+    QPalette_setColor(APalette, QPaletteHighlightedText, QColor(255, 255, 255));
+    QPalette_setColor(APalette, QPaletteDisabled, QPaletteHighlightedText, QColor(127, 127, 127));
+  end
+  else
+  begin
+    // LightMode Pallete
+    QPalette_setColor(APalette, QPaletteWindow, QColor(240, 240, 240));
+    QPalette_setColor(APalette, QPaletteWindowText, QColor(0, 0, 0));
+    QPalette_setColor(APalette, QPaletteDisabled, QPaletteWindowText, QColor(127, 127, 127));
+    QPalette_setColor(APalette, QPaletteBase, QColor(225, 225, 225));
+    QPalette_setColor(APalette, QPaletteAlternateBase, QColor(255, 255, 255));
+    QPalette_setColor(APalette, QPaletteToolTipBase, QColor(255, 255, 255));
+    QPalette_setColor(APalette, QPaletteToolTipText, QColor(0, 0, 0));
+    QPalette_setColor(APalette, QPaletteText, QColor(0, 0, 0));
+    QPalette_setColor(APalette, QPaletteDisabled, QPaletteText, QColor(127, 127, 127));
+    QPalette_setColor(APalette, QPaletteDark, QColor(200, 200, 200));
+    QPalette_setColor(APalette, QPaletteLight, QColor(255, 255, 255));
+    QPalette_setColor(APalette, QPaletteShadow, QColor(220, 220, 220));
+    QPalette_setColor(APalette, QPaletteButton, QColor(240, 240, 240));
+    QPalette_setColor(APalette, QPaletteButtonText, QColor(0, 0, 0));
+    QPalette_setColor(APalette, QPaletteDisabled, QPaletteButtonText, QColor(127, 127, 127));
+    QPalette_setColor(APalette, QPaletteBrightText, QColor(255, 0, 0));
+    QPalette_setColor(APalette, QPaletteLink, QColor(42, 130, 218));
+    QPalette_setColor(APalette, QPaletteHighlight, QColor(42, 130, 218));
+    QPalette_setColor(APalette, QPaletteDisabled, QPaletteHighlight, QColor(200, 200, 200));
+    QPalette_setColor(APalette, QPaletteHighlightedText, QColor(255, 255, 255));
+    QPalette_setColor(APalette, QPaletteDisabled, QPaletteHighlightedText, QColor(127, 127, 127));
+  end;
+  
   QApplication_setPalette(APalette);
 end;
 {$ENDIF}

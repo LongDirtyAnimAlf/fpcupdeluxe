@@ -153,6 +153,7 @@ begin
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names}
+    //AddFPCCFGSnippet('-Cg'; {Enable PIC code};
   end;
 end;
 

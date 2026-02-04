@@ -14,6 +14,7 @@ function ReplaceImportFunction(pOldFunction: PPointer; pNewFunction: Pointer): P
 function FindDelayImportLibrary(hModule: THandle; pLibName: PAnsiChar): Pointer;
 function FindDelayImportFunction(hModule: THandle; pImpDesc: PIMAGE_DELAYLOAD_DESCRIPTOR; pFuncName: PAnsiChar): PPointer;
 procedure ReplaceDelayImportFunction(hModule: THandle; pImpDesc: PIMAGE_DELAYLOAD_DESCRIPTOR; pFuncName: PAnsiChar; pNewFunction: Pointer);
+procedure ReplaceDelayImportFunctionByOrdinal(hModule: THandle; pImpDesc: PIMAGE_DELAYLOAD_DESCRIPTOR; Ordinal: DWORD; pNewFunction: Pointer);
 
 implementation
 
@@ -143,6 +144,40 @@ var
   pOldFunction: PPointer;
 begin
   pOldFunction:= FindDelayImportFunction(hModule, pImpDesc, pFuncName);
+  if Assigned(pOldFunction) then ReplaceImportFunction(pOldFunction, pNewFunction);
+end;
+
+function FindDelayImportFunctionByOrdinal(hModule: THandle;
+  pImpDesc: PIMAGE_DELAYLOAD_DESCRIPTOR; Ordinal: DWORD): PPointer;
+var
+  pImpName: PIMAGE_IMPORT_BY_NAME;
+  pImgThunkName: PIMAGE_THUNK_DATA;
+  pImgThunkAddr: PIMAGE_THUNK_DATA;
+  pModule: PAnsiChar absolute hModule;
+begin
+  pImgThunkName:= @pModule[pImpDesc^.ImportNameTableRVA];
+  pImgThunkAddr:= @pModule[pImpDesc^.ImportAddressTableRVA];
+
+  while (pImgThunkName^.u1.Ordinal <> 0) do
+  begin
+    if IMAGE_SNAP_BY_ORDINAL(pImgThunkName^.u1.Ordinal) then
+    begin
+      if IMAGE_ORDINAL(pImgThunkName^.u1.Ordinal)=Ordinal then
+        Exit(PPointer(@pImgThunkAddr^.u1._Function));
+    end;
+    Inc(pImgThunkName);
+    Inc(pImgThunkAddr);
+  end;
+  Result:= nil;
+end;
+
+procedure ReplaceDelayImportFunctionByOrdinal(hModule: THandle;
+  pImpDesc: PIMAGE_DELAYLOAD_DESCRIPTOR; Ordinal: DWORD;
+  pNewFunction: Pointer);
+var
+  pOldFunction: PPointer;
+begin
+  pOldFunction:= FindDelayImportFunctionByOrdinal(hModule, pImpDesc, Ordinal);
   if Assigned(pOldFunction) then ReplaceImportFunction(pOldFunction, pNewFunction);
 end;
 
