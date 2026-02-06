@@ -161,9 +161,15 @@ const
   DYNLINKV3='ld-*.so.3';
   {$else}
   {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OpenBSD) OR defined(DragonFly)}
+  {$if defined(OpenBSD)}
+  DYNLINKV1='ld.so';
+  DYNLINKV2='ld.so';
+  DYNLINKV3='ld.so';
+  {$else}
   DYNLINKV1='ld-elf.so.1';
   DYNLINKV2='ld-elf.so.2';
   DYNLINKV3='ld-elf.so.3';
+  {$endif}
   {$else}
   {$ifdef CPUX86}
   DYNLINKV1='ld-linux.so.1';
@@ -236,34 +242,34 @@ const FPCLIBS : array [0..43] of string = (
   DYNLINKV1,
   DYNLINKV2,
   DYNLINKV3,
-  'libanl.so.1',
-  'libcrypt.so.1',
-  'libc.so.*',
-  'libdb1.so.2',
-  'libdb2.so.3',
-  'libdl.so.1',
-  'libdl.so.2',
-  'libglib-2.0.so.0',
-  'libgobject-2.0.so.0',
-  'libgthread-2.0.so.0',
-  'libgmodule-2.0.so.0',
-  'libm.so.6',
-  'libmvec.so.1',
-  'libnsl.so.1',
-  'libnss_compat.so.2',
-  'libnss_dns6.so.2',
-  'libnss_dns.so.2',
-  'libnss_files.so.2',
-  'libnss_hesiod.so.2',
-  'libnss_ldap.so.2',
-  'libnss_nisplus.so.2',
-  'libnss_nis.so.2',
-  'libpthread.so.0',
-  'libresolv.so.2',
-  'librt.so.1',
-  'libthread_db.so.1',
-  'libutil.so.1',
-  'libz.so.1'
+  'libanl.so*',
+  'libcrypt.so*',
+  'libc.so*',
+  'libdb1.so*',
+  'libdb2.so*',
+  'libdl.so*',
+  'libdl.so*',
+  'libglib-2.0.so*',
+  'libgobject-2.0.so*',
+  'libgthread-2.0.so*',
+  'libgmodule-2.0.so*',
+  'libm.so*',
+  'libmvec.so*',
+  'libnsl.so*',
+  'libnss_compat.so*',
+  'libnss_dns6.so*',
+  'libnss_dns.so*',
+  'libnss_files.so*',
+  'libnss_hesiod.so*',
+  'libnss_ldap.so*',
+  'libnss_nisplus.so*',
+  'libnss_nis.so*',
+  'libpthread.so*',
+  'libresolv.so*',
+  'librt.so*',
+  'libthread_db.so*',
+  'libutil.so*',
+  'libz.so*'
 );
 
 const FPCALIBS : array [0..11] of string = (
@@ -282,96 +288,89 @@ const FPCALIBS : array [0..11] of string = (
 );
 
 const FPCLINKLIBS : array [0..10] of string = (
-  'ld.so',
-  'libc.so',
-  'libm.so',
-  'libpthread.so',
-  'libdl.so',
-  'libgobject-2.0.so',
-  'libglib-2.0.so',
-  'libgthread-2.0.so',
-  'libgmodule-2.0.so',
-  'librt.so',
-  'libz.so'
+  'ld.so*',
+  'libc.so*',
+  'libm.so*',
+  'libpthread.so*',
+  'libdl.so*',
+  'libgobject-2.0.so*',
+  'libglib-2.0.so*',
+  'libgthread-2.0.so*',
+  'libgmodule-2.0.so*',
+  'librt.so*',
+  'libz.so*'
 );
 
-const FPCEXTRALIBS : array [0..37] of string = (
-  'liba52.so',
-  'libaspell.so',
-  'libdts.so',
-  'libfreetype.so',
-  'libgmp.so',
-  'libgtkhtml-2.so',
-  'libglade-2.0.so',
-  'libfontconfig.so',
-  'libnettle.so',
-  'libhogweed.so',
-  'librsvg-2.so',
-  'libsee.so',
-  'libusb-1.0.so',
-  'libmad.so',
-  'libmatroska.so',
-  'libmodplug.so',
-  'libogg.so',
-  'libsqlite3.so.0',
-  'libvorbis.so',
-  'libvorbisfile.so',
-  'libvorbisenc.so',
-  'libopenal.so',
-  'libOpenCL.so',
-  'libSDL2.so',
-  'libSDL2_image.so',
-  'libSDL2_mixer.so',
-  'libSDL2_net.so',
-  'libSDL2_ttf.so',
-  'libsmpeg.so',
-  'libwasmtime.so',
-  'libmysqlclient.so',
-  'libmysqlclient.so.21',
-  'libmysqlclient.so.20',
-  'libmysqlclient.so.18',
-  'libmysqlclient.so.16',
-  'libmysqlclient.so.15',
-  'libmysqlclient.so.14',
-  'libmysqlclient.so.12'
+const FPCEXTRALIBS : array [0..30] of string = (
+  'liba52.so*',
+  'libaspell.so*',
+  'libdts.so*',
+  'libfreetype.so*',
+  'libgmp.so*',
+  'libgtkhtml-2.so*',
+  'libglade-2.0.so*',
+  'libfontconfig.so*',
+  'libnettle.so*',
+  'libhogweed.so*',
+  'librsvg-2.so*',
+  'libsee.so*',
+  'libusb-1.0.so*',
+  'libmad.so*',
+  'libmatroska.so*',
+  'libmodplug.so*',
+  'libogg.so*',
+  'libsqlite3.so*',
+  'libvorbis.so*',
+  'libvorbisfile.so*',
+  'libvorbisenc.so*',
+  'libopenal.so*',
+  'libOpenCL.so*',
+  'libSDL2.so*',
+  'libSDL2_image.so*',
+  'libSDL2_mixer.so*',
+  'libSDL2_net.so*',
+  'libSDL2_ttf.so*',
+  'libsmpeg.so*',
+  'libwasmtime.so*',
+  'libmysqlclient.so*'
 );
 
 const LAZLIBS : array [0..34] of string = (
-  'libgdk-1.2.so.0',
-  'libgdk-3.so.0',
-  'libglib-1.2.so.0',
-  'libgmodule-1.2.so.0',
-  'libgtk-1.2.so.0',
-  'libgdk_pixbuf.so.2',
-  'libgdk_pixbuf-xlib.so.2',
-  'libgdk-x11-2.0.so.0',
-  'libgtk-x11-2.0.so.0',
-  'libX11.so.6',
-  'libXi.so.6',
-  'libXext.so.6',
-  'libXau.so.6',
-  'libXdmcp.so.6',
-  'libXtst.so.6',
-  'libgdk_pixbuf-2.0.so.0',
-  'libgdk_pixbuf-xlib-2.0.so.0',
-  'libgobject-2.0.so.0',
-  'libglib-2.0.so.0',
-  'libgthread-2.0.so.0',
-  'libgmodule-2.0.so.0',
-  'libpango-1.0.so.0',
-  'libcairo.so.2',
-  'libpangocairo-1.0.so.0',
-  'libatk-1.0.so.0',
-  'libiconv.so.2',
-  'libicui18n.so',
-  'libgtk-3.so.0',
-  'libgdk-3.so.0',
-  'libharfbuzz.so.0',
-  'libharfbuzz-gobject.so.0',
-  'libGL.so',
-  'libGLU.so',
-  'libEGL.so',
-  'libvulkan.so.1'
+  'libgdk-1.2.so*',
+  'libgdk-3.so*',
+  'libglib-1.2.so*',
+  'libgmodule-1.2.so*',
+  'libgtk-1.2.so*',
+  'libgdk_pixbuf.so*',
+  'libgdk_pixbuf-xlib.so*',
+  'libgdk-x11-2.0.so*',
+  'libgtk-x11-2.0.so*',
+  'libX11.so*',
+  'libXi.so*',
+  'libXext.so*',
+  'libXau.so*',
+  'libXdmcp.so*',
+  'libXtst.so*',
+  'libgdk_pixbuf-2.0.so*',
+  'libgdk_pixbuf-xlib-2.0.so*',
+  'libgobject-2.0.so*',
+  'libglib-2.0.so*',
+  'libgthread-2.0.so*',
+  'libgmodule-2.0.so*',
+  'libpango-1.0.so*',
+  'libcairo.so*',
+  'libpangocairo-1.0.so*',
+  'libatk-1.0.so*',
+  'libiconv.so*',
+  'libicui18nso',
+  'libgtk-3.so*',
+  'libgdk-3.so*',
+  'libharfbuzz.so*',
+  'libharfbuzz-gobject.so*',
+  'libGL.so*',
+  'libGLU.so*',
+  'libEGL.so*',
+  'libvulkan.so*'
 );
 
 const LAZLINKLIBS : array [0..20] of string = (
@@ -925,7 +924,7 @@ begin
     {$ifdef Haiku}
     for sd in HAIKUSEARCHDIRS do
     {$else}
-    {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OenBSD) OR defined(DragonFly)}
+    {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OpenBSD) OR defined(DragonFly)}
     for sd in BSDSEARCHDIRS do
     {$else}
     for sd in UNIXSEARCHDIRS do
@@ -949,17 +948,20 @@ begin
       // Do we have a wildcard ?
       if (Pos('*',aLib)>0) then
       begin
+        //writeln(sd+DirectorySeparator+aLib);
         SearchResultList.Clear;
-        FindAllFiles(SearchResultList,ExtractFileDir(FileName),aLib,false);
+        FindAllFiles(SearchResultList,sd,aLib,false);
         if (SearchResultList.Count>0) then
         begin
-          for sr in SearchResultList do
-          begin
-            StoreLibrary('['+ExtractFileName(sr)+']');
-          end;
+          FileName:=SearchResultList.Strings[0];
+          //for sr in SearchResultList do
+          //begin
+          //  StoreLibrary('['+ExtractFileName(sr)+']');
+          //end;
+          //break;
         end;
-        FileName:='';
-        break;
+        //FileName:='';
+        //break;
       end;
       {$ifdef Termux}
       if NOT FileExists(FileName) then
@@ -1012,7 +1014,6 @@ begin
         {$else}
         RunCommand(FReadelfBinary,['-d','-W',FileName],SearchResult,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
         {$endif}
-
         SearchResultList.Text:=SearchResult;
         if (SearchResultList.Count=0) then continue;
         for sr in SearchResultList do
@@ -1124,7 +1125,7 @@ begin
       {$ifdef Haiku}
       for SearchDir in HAIKUSEARCHDIRS do
       {$else}
-      {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OenBSD) OR defined(DragonFly)}
+      {$if defined(FreeBSD) OR defined(NetBSD) OR defined(OpenBSD) OR defined(DragonFly)}
       for SearchDir in BSDSEARCHDIRS do
       {$else}
       for SearchDir in UNIXSEARCHDIRS do
@@ -1259,6 +1260,7 @@ begin
   FLibraryLocationList:=TStringList.Create;
   chkQT:=True;
   FReadelfBinary:='/usr/bin/readelf';
+  if (NOT FileExists(FReadelfBinary)) then FReadelfBinary:='/usr/local/bin/readelf';
   {$ifdef Termux}
   FReadelfBinary:=TERMUXPATH+'/usr/libexec/binutils/readelf';
   {$endif}
