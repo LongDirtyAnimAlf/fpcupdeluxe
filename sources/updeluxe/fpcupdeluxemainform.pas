@@ -4326,6 +4326,7 @@ begin
 
   FPCupManager.FPCPatches:=SettingsForm.FPCPatches;
   FPCupManager.LazarusPatches:=SettingsForm.LazPatches;
+  //FPCupManager.NativeFPCBootstrapCompiler:=(NOT SettingsForm.FpcupBootstrappersOnly);
   FPCupManager.ForceLocalRepoClient:=SettingsForm.ForceLocalRepoClient;
   FPCupManager.Context:=SettingsForm.AddContext;
 
@@ -4393,11 +4394,6 @@ begin
   AddMessage('Binutils dir:              '+FPCupManager.MakeDirectory);
   {$ENDIF MSWINDOWS}
   AddMessage('Bootstrap dir:             '+FPCupManager.BootstrapCompilerDirectory);
-
-  {$IF (defined(BSD)) and (not defined(Darwin))}
-  FPCupManager.FPCOpt:=FPCupManager.FPCOpt+' -Fl/usr/local/lib -Fl/usr/pkg/lib';
-  FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib -Fl/usr/pkg/lib -Fl/usr/X11R7/lib';
-  {$endif}
 
   if AnsiEndsText(GITLABEXTENSION,FPCTarget) then
   begin

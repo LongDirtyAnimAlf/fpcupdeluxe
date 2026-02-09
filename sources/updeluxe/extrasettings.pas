@@ -106,6 +106,9 @@ type
     LocalOS:TOS;
     LocalSUBARCH:TSUBARCH;
 
+    function GetCPUFromComboBox:TCPU;
+    function GetOSFromComboBox:TOS;
+
     function GetCheckIndex(aCaption:string):integer;
     function GetCheckState(aCaption:string):boolean;
     procedure SetCheckState(aCaption:string;aState:boolean);
@@ -229,9 +232,6 @@ type
     procedure SetLazPatches(value:string);
 
     {
-    function GetCPUFromComboBox:TCPU;
-    function GetOSFromComboBox:TOS;
-
     property CPUFromComboBox:TCPU read GetCPUFromComboBox;
     property OSFromComboBox:TOS read GetOSFromComboBox;
     }
@@ -726,8 +726,17 @@ begin
 
   SystemChange:=( (LocalCPU<>aCPU) OR (LocalOS<>aOS) );
 
-  LocalCPU:=aCPU;
-  LocalOS:=aOS;
+  if SystemChange then
+  begin
+    LocalCPU:=aCPU;
+    LocalOS:=aOS;
+  end
+  else
+  begin
+    LocalCPU:=GetCPUFromComboBox;
+    LocalOS:=GetOSFromComboBox;
+  end;
+
   LocalSUBARCH:=GetSelectedSubArch(LocalCPU,LocalOS);
 
   if SystemChange then
@@ -1201,23 +1210,23 @@ begin
   SetCrossTarget(Sender,LocalCPU,LocalOS);
 end;
 
-{
 function TSettingsForm.GetCPUFromComboBox:TCPU;
 begin
+  result:=TCPU.cpuNone;
   if (ComboBoxCPU.ItemIndex<>-1) then
   begin
-    result:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],'').CPU;
+    result:=GetTCPU(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex]);
   end;
 end;
 
 function TSettingsForm.GetOSFromComboBox:TOS;
 begin
+  result:=TOS.osNone;
   if (ComboBoxOS.ItemIndex<>-1) then
   begin
-    result:=GetCPUOSCombo('',ComboBoxOS.Items[ComboBoxOS.ItemIndex]).OS;
+    result:=GetTOS(ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
   end;
 end;
-}
 
 function TSettingsForm.GetLibraryDirectory(aCPU:TCPU;aOS:TOS;aSubarch:TSUBARCH):string;
 begin

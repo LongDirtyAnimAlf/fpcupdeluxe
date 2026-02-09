@@ -2741,8 +2741,10 @@ begin
     aCompiler:='';
     if FInstaller.InheritsFrom(TFPCInstaller) then
     begin
-      // override bootstrapper only for FPC if needed
-      if FParent.CompilerOverride<>'' then aCompiler:=FParent.CompilerOverride;
+      if (Length(FParent.CompilerOverride)>0) then
+      begin
+        aCompiler:=FParent.CompilerOverride;
+      end;
     end
     else
     begin

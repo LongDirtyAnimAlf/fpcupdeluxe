@@ -6,7 +6,7 @@ object SettingsForm: TSettingsForm
   Caption = 'Advanced Settings'
   ClientHeight = 757
   ClientWidth = 842
-  LCLVersion = '4.2.0.0'
+  LCLVersion = '4.99.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -1105,7 +1105,7 @@ object SettingsForm: TSettingsForm
     Top = 264
   end
   object OpenDialog1: TOpenDialog
-    Filter = 'Patch|*.patch|Diff|*.diff|All|*.*'
+    Filter = 'Patch|*.patch|Diff|*.diff|All|*.*;*'
     Options = [ofFileMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail, ofAutoPreview]
     Left = 80
     Top = 352

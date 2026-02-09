@@ -255,6 +255,13 @@ const
   {$endif}
   DEFINE_DELPHI_RTTI = 'ENABLE_DELPHI_RTTI';
 
+type
+  {$ifdef crosssimple}
+  TSTEPS = (st_Start,st_MakeAll,st_RtlInstall,st_PackagesInstall,st_NativeCompiler,st_Finished);
+  {$else}
+  TSTEPS = (st_Start,st_Compiler,st_CompilerInstall,st_RtlBuild,st_RtlInstall,st_PackagesBuild,st_PackagesInstall,st_NativeCompiler,st_Finished);
+  {$endif}
+
 { TFPCCrossInstaller }
 
 constructor TFPCCrossInstaller.Create;
@@ -682,12 +689,6 @@ function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 // Runs make/make install for cross compiler.
 // Error out on problems; unless module considered optional, i.e. in
 // crosswin32-64 and crosswin64-32 steps.
-type
-  {$ifdef crosssimple}
-  TSTEPS = (st_Start,st_MakeAll,st_RtlInstall,st_PackagesInstall,st_NativeCompiler,st_Finished);
-  {$else}
-  TSTEPS = (st_Start,st_Compiler,st_CompilerInstall,st_RtlBuild,st_RtlInstall,st_PackagesBuild,st_PackagesInstall,st_NativeCompiler,st_Finished);
-  {$endif}
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
   NativeCompilerOptions:String;
@@ -1598,8 +1599,19 @@ begin
 
           try
             s1:=infotext+'Executing: make ['+UnCamel(GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle)))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')';
-            if (Length(CrossCompilerOptions)>0) then s1:=s1+' with CROSSOPT: '+CrossCompilerOptions;
             Infoln(s1,etInfo);
+
+            {$ifdef crosssimple}
+            if (MakeCycle=st_MakeAll) then
+            {$else}
+            if (MakeCycle=st_Compiler) then
+            {$endif}
+            begin
+              if Length(NativeCompilerOptions)>0 then
+                Infoln('Building FPC cross-compiler with [extra] options: '+NativeCompilerOptions);
+              if Length(CrossCompilerOptions)>0 then
+                Infoln('Building FPC cross-compilr with [extra] cross-options: '+CrossCompilerOptions);
+            end;
 
             Infoln(infotext+'Cross build command: '+Processor.GetExeInfo,etDebug);
 
@@ -2145,13 +2157,16 @@ begin
     FPCBuildOptions:=FPCBuildOptions+' -d'+DEFINE_DELPHI_RTTI;
   end;
 
-  {$ifdef BSD}
-    {$ifndef DARWIN}
-      FPCBuildOptions:=FPCBuildOptions+' -Fl/usr/pkg/lib';
-    {$endif}
-  {$endif}
-
   if UseLibc then FPCBuildOptions:=FPCBuildOptions+' -d'+DEFINE_FPC_LIBC;
+
+  if (GetTOS(GetSourceOS) in BSD_OS) then
+  begin
+    FPCBuildOptions:=FPCBuildOptions+' -Fl/usr/local/lib -Fl/usr/pkg/lib';
+    if (GetTOS(GetSourceOS)=TOS.openbsd) AND (SourceVersionNum<CalculateNumericalVersion('3.3.0')) then
+    begin
+      FPCBuildOptions:=FPCBuildOptions+' -Aas';
+    end;
+  end;
 
   {$ifdef Haiku}
     s2:='';
@@ -2216,8 +2231,16 @@ begin
     Processor.SetParamData('all');
   end
   else
+  if (ModuleName=_FPC) then
   begin
     Processor.SetParamData('all');
+    if Length(FPCBuildOptions)>0 then
+      Infoln(infotext+'Building FPC with [extra] options: '+FPCBuildOptions);
+  end
+  else
+  begin
+    Processor.SetParamData('all');
+    Infoln(infotext+'Building '+ModuleName+' by running make all',etWarning);
   end;
 
   // The last command added into the parameters is the make instruction
@@ -3334,6 +3357,7 @@ var
   aCompilerList:TStringList;
   i:integer;
   aCompilerFound:boolean;
+  SkipCompilerCheck:boolean;
   {$IFDEF FREEBSD}
   BSDVersion:integer;
   {$ENDIF}
@@ -3362,13 +3386,15 @@ begin
 
   aBootstrapVersion:=DesiredBootstrapVersion;
 
+  SkipCompilerCheck:=false;
   if (aBootstrapVersion<>'') then
   begin
     // Check if we have an override compiler !!
     if FileExists(FCompiler) then
     begin
-      FBootstrapCompiler:=FCompiler;
-      FCompiler:='';
+      // Force override in all cases, including case of version-mismatch
+      SkipCompilerCheck:=true;
+      //FBootstrapCompilerOverrideVersionCheck:=true;
     end;
   end;
 
@@ -3382,7 +3408,7 @@ begin
     {$ENDIF CPU32}
   {$ENDIF Darwin}
 
-  if (aBootstrapVersion<>'') then
+  if ((aBootstrapVersion<>'') AND (NOT SkipCompilerCheck)) then
   begin
     aCompilerFound:=false;
 
@@ -3553,6 +3579,7 @@ begin
       begin
         // final check ... do we have the correct (as in version) compiler already ?
         Infoln(localinfotext+'Check if we already have a bootstrap compiler with version '+ aBootstrapVersion,etInfo);
+
         if s<>aBootstrapVersion then
         begin
           Infoln(localinfotext+'No correct bootstrapper. Going to download new bootstrapper',etInfo);
@@ -3965,12 +3992,12 @@ begin
     // This might also be done in the cross-compilers themselves.
     if LinuxLegacy then FUseLibc:=True;
     if (CrossInstaller.TargetOS in [TOS.dragonfly,TOS.freebsd]) then FUseLibc:=True;
-    if (CrossInstaller.TargetOS=TOS.openbsd) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
+    //if (CrossInstaller.TargetOS=TOS.openbsd) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end
   else
   begin
     if (GetTOS(GetSourceOS) in [TOS.dragonfly,TOS.freebsd]) then FUseLibc:=True;
-    if (GetSourceOS=GetOS(TOS.openbsd)) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
+    //if (GetSourceOS=GetOS(TOS.openbsd)) AND (SourceVersionNum>CalculateNumericalVersion('3.2.0')) then FUseLibc:=True;
   end;
 
   {$ifdef FORCEREVISION}
@@ -4465,7 +4492,7 @@ begin
         if FMUSL then ConfigText.Append('-FL'+FMUSLLinker);
 
         ConfigText.Append('#IFDEF FPC_LINK_COMPAT');
-        if (NOT UseLibc) then ConfigText.Append('-d'+DEFINE_FPC_LIBC);
+        //if (NOT UseLibc) then ConfigText.Append('-d'+DEFINE_FPC_LIBC);
         s:=ConcatPaths([InstallDirectory,'units',FPC_TARGET_MAGIC])+'_legacy';
         ConfigText.Append('-Fu'+s);
         ConfigText.Append('-Fu'+s+DirectorySeparator+'*');
@@ -4480,14 +4507,19 @@ begin
         {$endif}
 
         //if (NOT LinuxLegacy) then
-        if UseLibc then ConfigText.Append('-d'+DEFINE_FPC_LIBC);
+        //if UseLibc then ConfigText.Append('-d'+DEFINE_FPC_LIBC);
 
         {$IF (defined(BSD)) and (not defined(Darwin))}
         s:='-Fl/usr/local/lib'+';'+'/usr/pkg/lib';
         {$ifndef FPCONLY}
         //VersionSnippet:=GetEnvironmentVariable('X11BASE');
         //if Length(VersionSnippet)>0 then s:=s+';'+VersionSnippet
-        s:=s+';'+'/usr/X11R6/lib'+';'+'/usr/X11R7/lib';
+
+        s2:='/usr/X11R6/lib';
+        if DirectoryExists(s2) then s:=s+';'+s2;
+        s2:='/usr/X11R7/lib';
+        if DirectoryExists(s2) then s:=s+';'+s2;
+
         {$endif FPCONLY}
         ConfigText.Append(s);
         {$endif}
@@ -5311,6 +5343,8 @@ begin
   FCompiler                    := '';
   FUseLibc                     := false;
   FUseRevInc                   := false;
+  FSoftFloat                   := false;
+  FDelphiRTTI                  := false;
 
   InitDone   := false;
 end;
