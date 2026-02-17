@@ -2112,6 +2112,11 @@ begin
   if ((GetSourceTOS=TOS.darwin) AND (GetSourceTCPU=TCPU.aarch64)) then
   begin
     case CrossOS_Target of
+      TOS.linux:
+      begin
+        ostype:='unknown';
+        if (CrossCPU_Target=TCPU.aarch64) then toolversion:='V245';
+      end;
       TOS.embedded:
       begin
         //Tools by raspberry from https://github.com/raspberrypi/pico-sdk-tools/releases/
