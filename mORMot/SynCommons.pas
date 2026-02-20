@@ -6,7 +6,7 @@ unit SynCommons;
 (*
     This file is part of Synopse framework.
 
-    Synopse framework. Copyright (C) 2023 Arnaud Bouchez
+    Synopse framework. Copyright (c) Arnaud Bouchez
       Synopse Informatique - https://synopse.info
 
   *** BEGIN LICENSE BLOCK *****
@@ -25,7 +25,7 @@ unit SynCommons;
 
   The Initial Developer of the Original Code is Arnaud Bouchez.
 
-  Portions created by the Initial Developer are Copyright (C) 2023
+  Portions created by the Initial Developer are Copyright (c)
   the Initial Developer. All Rights Reserved.
 
   Contributor(s):
@@ -59316,7 +59316,9 @@ begin
     {$elseif defined(VER330)}'Delphi 10.3 Rio'
     {$elseif defined(VER340)}'Delphi 10.4 Sydney'
     {$elseif defined(VER350)}'Delphi 11 Alexandria'
-    {$elseif defined(VER360)}'Delphi 11.1 Next'
+    {$elseif defined(VER360)}'Delphi 12 Athens'
+    {$elseif defined(VER370)}'Delphi 13 Florence'
+    {$elseif defined(VER380)}'Delphi 14 Next'
     {$ifend}
   {$endif CONDITIONALEXPRESSIONS}
 {$endif FPC}
@@ -60650,8 +60652,7 @@ begin
   try
     result := 0;
     if not Assigned(OnMatch) or
-       (NOT (Assigned(KeyCompare) or
-        Assigned(ValueCompare))) then
+       (not Assigned(KeyCompare) and not Assigned(ValueCompare)) then
       exit;
     n := fSafe.Padding[DIC_KEYCOUNT].VInteger;
     k := fKeys.Value^;

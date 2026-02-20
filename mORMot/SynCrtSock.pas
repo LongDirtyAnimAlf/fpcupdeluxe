@@ -6,7 +6,7 @@ unit SynCrtSock;
 {
     This file is part of Synopse framework.
 
-    Synopse framework. Copyright (C) 2023 Arnaud Bouchez
+    Synopse framework. Copyright (c) Arnaud Bouchez
       Synopse Informatique - https://synopse.info
 
   *** BEGIN LICENSE BLOCK *****
@@ -25,7 +25,7 @@ unit SynCrtSock;
 
   The Initial Developer of the Original Code is Arnaud Bouchez.
 
-  Portions created by the Initial Developer are Copyright (C) 2023
+  Portions created by the Initial Developer are Copyright (c)
   the Initial Developer. All Rights Reserved.
 
   Contributor(s):
@@ -5378,7 +5378,7 @@ begin
     BufSize := InputBufferSize;
     BufPtr := pointer(PAnsiChar(SockIn)+sizeof(TTextRec)); // ignore Buffer[] (Delphi 2009+)
     OpenFunc := @OpenSock;
-    Handle := -1;
+    Handle := {$ifdef FPC}THandle{$endif}(0); // some invalid handle
   end;
   {$ifndef DELPHI5OROLDER}
   SetLineBreakStyle(SockIn^,LineBreak); // http does break lines with #13#10
@@ -5400,7 +5400,7 @@ begin
     BufSize := OutputBufferSize;
     BufPtr := pointer(PAnsiChar(SockIn)+sizeof(TTextRec)); // ignore Buffer[] (Delphi 2009+)
     OpenFunc := @OpenSock;
-    Handle := -1;
+    Handle := {$ifdef FPC}THandle{$endif}(0); // some invalid handle
   end;
   {$ifndef DELPHI5OROLDER}
   SetLineBreakStyle(SockOut^,tlbsCRLF); // force e.g. for Linux platforms
@@ -6973,7 +6973,7 @@ var s,c: SockString;
     i, len: PtrInt;
     err: integer;
     P: PAnsiChar;
-    line: array[0..4095] of AnsiChar; // avoid most memory allocation
+    line: array[0..8191] of AnsiChar; // avoid most memory allocation
 begin
   HeaderFlags := [];
   fBodyRetrieved := false;
@@ -7002,7 +7002,8 @@ begin
       P := pointer(s); // set P=nil below to store in Headers[]
     end;
     case IdemPCharArray(P,['CONTENT-', 'TRANSFER-ENCODING: CHUNKED', 'CONNECTION: ',
-      'ACCEPT-ENCODING:', 'UPGRADE:', 'SERVER-INTERNALSTATE:', 'X-POWERED-BY:']) of
+      'ACCEPT-ENCODING:', 'UPGRADE:', 'SERVER-INTERNALSTATE:', 'X-POWERED-BY:',
+      'REMOTEIP:']) of
     0: case IdemPCharArray(P+8,['LENGTH:', 'TYPE:', 'ENCODING:']) of
        0: ContentLength := GetCardinal(P+16);
        1: begin
@@ -7046,6 +7047,7 @@ begin
     4: GetTrimmed(P+8,Upgrade);
     5: ServerInternalState := GetCardinal(P+21);
     6: GetTrimmed(P+13,XPoweredBy);
+    7: continue; // any transmitted 'RemoteIP:' should be ignored
     else P := nil;
     end;
     if (P=nil) or HeadersUnFiltered then // only store meaningful headers
@@ -8541,7 +8543,12 @@ begin
     end;
   P := Request.Headers.pUnknownHeaders;
   if P<>nil then
-    for i := 1 to Request.Headers.UnknownHeaderCount do begin
+    for i := 1 to Request.Headers.UnknownHeaderCount do
+    if (P^.NameLength<>8) or // filter unexpected 'RemoteIP:' from client
+       ((PCardinal(P^.pName)^ or $20202020) <>
+         ord('r') + ord('e') shl 8 + ord('m') shl 16 + ord('o') shl 24) or
+       ((PCardinal(P^.pName + 4)^ or $20202020) <>
+         ord('t') + ord('e') shl 8 + ord('i') shl 16 + ord('p') shl 24) then begin
       move(P^.pName^,D^,P^.NameLength);
       inc(D,P^.NameLength);
       PWord(D)^ := ord(':')+ord(' ')shl 8;
@@ -8558,13 +8565,10 @@ begin
     move(pointer(RemoteIP)^,D^,Lip);
     inc(D,Lip);
     PWord(D)^ := 13+10 shl 8;
-  {$ifopt C+}
     inc(D,2);
   end;
-  assert(D-pointer(result)=L);
-  {$else}
-  end;
-  {$endif}
+  if D-pointer(result)<>L then // external 'RemoteIP:' was filtered
+    SetLength(result,D-pointer(result));
 end;
 
 type
@@ -9068,15 +9072,15 @@ var Buffer: array[0..511] of byte;
     tmp: SockUnicode;
     P: PWideChar;
 begin
-   if not GetTokenInformation(UserToken,TokenUser,@Buffer,SizeOf(Buffer),{%H-}BufferSize) then
+   if not GetTokenInformation(UserToken,TokenUser,@Buffer,SizeOf(Buffer),BufferSize) then
      exit;
    UserInfo := @Buffer;
    UserSize := 0;
    DomainSize := 0;
-   LookupAccountSidW(nil,UserInfo^.Sid,nil,UserSize,nil,DomainSize,{%H-}NameUse);
+   LookupAccountSidW(nil,UserInfo^.Sid,nil,UserSize,nil,DomainSize,NameUse);
    if (UserSize=0) or (DomainSize=0) then
      exit;
-   SetLength({%H-}tmp,UserSize+DomainSize-1);
+   SetLength(tmp,UserSize+DomainSize-1);
    P := pointer(tmp);
    if not LookupAccountSidW(nil,UserInfo^.Sid,P+DomainSize,UserSize,P,DomainSize,NameUse) then
      exit;
@@ -9293,8 +9297,7 @@ begin
       Context.fAuthenticatedUser := '';
       // retrieve next pending request, and read its headers
       fillchar(Req^,sizeof(HTTP_REQUEST),0);
-      BytesRead := 0;
-      Err := Http.ReceiveHttpRequest(fReqQueue,ReqID,0,Req^,length(ReqBuf),BytesRead);
+      Err := Http.ReceiveHttpRequest(fReqQueue,ReqID,0,Req^,length(ReqBuf),bytesRead);
       if Terminated then
         break;
       case Err of

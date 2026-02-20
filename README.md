@@ -16,6 +16,10 @@ As of August 28, 2015, this new repo contains all previous commits by Reinier.<b
 Many thanks towards user "Arvur" (see forum) for making this possible.<br/>
 Follow the fpcup development on http://forum.lazarus.freepascal.org/index.php/topic,27211.0.html
 
+Support fpcupdeluxe
+===================
+[![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?business=E2N7KG9Q4M83J&no_recurring=1&item_name=You+may+support+the+maintenance+of+fpcupdeluxe.%0AThanks+%21%21&currency_code=EUR)
+
 What is it?
 ===========
 Fpcup, fpclazup and fpcupdeluxe are basically wrappers around svn/make on steroids.
@@ -46,6 +50,8 @@ Linux
 ------------
 
 For your convenience, ready made install scripts can be found in the installscripts directory !
+
+https://github.com/LongDirtyAnimAlf/fpcupdeluxe/tree/master/installscripts
 
 The most common tools and libraries needed can be fetched through the package manager, if the above scripts are not used.
 
@@ -95,21 +101,23 @@ Install data collection
 =========================
 Fpcupdeluxe >= 1.6.0a sends some data about its installs towards a central server.<br/>
 For this, it uses the famous mORMot framework.<br/>
+The data collection can be enabled or disabled by a setting in setup+.<br/>
 You can check this data yourself:<br/>
-fpcuplogger.batterybutcher.com:8880/root/getinfohtml<br/>
-fpcuplogger.batterybutcher.com:8880/root/getinfojson<br/>
-fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes<br/>
-fpcuplogger.batterybutcher.com:8880/root/getinfohtml?Country=China<br/>
-fpcuplogger.batterybutcher.com:8880/root/getinfohtml?FPCVersion=trunk<br/>
-<br/>
-The data collection can be disabled by a setting in setup+
+https://batterybutcher.com:8843/root/getinfohtml<br/>
+https://batterybutcher.com:8843/root/getinfojson<br/>
+https://batterybutcher.com:8843/root/getinfohtml?ShowErrors=yes<br/>
+https://batterybutcher.com:8843/root/getinfohtml?Country=China<br/>
+https://batterybutcher.com:8843/root/getinfohtml?FPCVersion=trunk<br/>
+
+
+The collected data contains the following items:<br/>
+UpVersion, UpOS, Distro, Widgetset, City, Country, Latitude, Longitude, UpFunction, FPCVersion, LazarusVersion, CrossCPUOS, DateOfUse<br/>
+
+The collected data contains also the following items, but these are set to be removed in the new version (>2.4.0h):<br/>
+UpInstallDir, IPV4Address, IPV6Address, ExtraData, LogEntry<br/>
 
 
 Contact
 =======
-For reporting bugs, suggestions, patches.
-https://github.com/newpascal/fpcupdeluxe/issues
-
-Support fpcupdeluxe
-===================
-[![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?business=E2N7KG9Q4M83J&no_recurring=1&item_name=You+may+support+the+maintenance+of+fpcupdeluxe.%0AThanks+%21%21&currency_code=EUR)
+For reporting bugs, suggestions, patches.<br/>
+https://github.com/newpascal/fpcupdeluxe/issues<br/>

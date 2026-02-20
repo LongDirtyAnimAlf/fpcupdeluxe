@@ -280,18 +280,17 @@ if TargetOS=&apos;openbsd&apos; then
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="openbsd"/>
             <Optimizations>
-              <OptimizationLevel Value="0"/>
+              <OptimizationLevel Value="2"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
+              <GenerateDebugInfo Value="False"/>
               <RunWithoutDebug Value="True"/>
               <DebugInfoType Value="dsDwarf3"/>
+              <UseLineInfoUnit Value="False"/>
             </Debugging>
           </Linking>
-          <Other>
-            <CustomOptions Value="-a"/>
-          </Other>
         </CompilerOptions>
       </Item9>
       <Item10 Name="freebsdaarch64">

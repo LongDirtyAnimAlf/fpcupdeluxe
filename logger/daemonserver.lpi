@@ -27,7 +27,7 @@
           <SearchPaths>
             <IncludeFiles Value="mORMot;$(ProjOutDir)"/>
             <Libraries Value="mORMot\static\x86_64-linux"/>
-            <OtherUnitFiles Value="mORMot;mORMot\SQLite3"/>
+            <OtherUnitFiles Value="..\mORMot;..\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>

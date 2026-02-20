@@ -5177,8 +5177,9 @@ begin
   if (SettingsForm.SendInfo) then
   begin
     AddMessage('Fpcupdeluxe logging info:');
-    AddMessage('fpcuplogger.batterybutcher.com/root/getinfohtml',true);
-    AddMessage('fpcuplogger.batterybutcher.com/root/getinfohtml?ShowErrors=yes');
+
+    AddMessage('https://www.batterybutcher.com:8843/root/getinfohtml',true);
+    AddMessage('https://www.batterybutcher.com:8843/root/getinfohtml?ShowErrors=yes');
   end;
 
 end;

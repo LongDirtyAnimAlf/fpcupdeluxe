@@ -71,7 +71,7 @@ begin
   aModel:=TSQLModel.Create([TSQLUp]);
 
   {$ifdef SynCrossPlatform}
-  inherited Create(IP_DEFAULT,PORT_DEFAULT_CLIENT,aModel,true,false,'','',5000,5000,5000);
+  inherited Create(IP_DEFAULT,PORT_DEFAULT_CLIENT,aModel,true,true,'','',5000,5000,5000);
   {$else}
   inherited Create(IP_DEFAULT,InttoStr(PORT_DEFAULT_CLIENT),aModel);
   Model.Owner:=Self;

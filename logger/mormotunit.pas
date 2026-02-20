@@ -12,11 +12,11 @@ const
   //IP_DEFAULT   = '127.0.0.1';
   //IP_DEFAULT   = '192.168.1.175';
   //IP_DEFAULT   = '192.168.2.14';
-  IP_DEFAULT   = '62.207.77.22';
+  //IP_DEFAULT   = '62.207.77.22';
   //PORT_DEFAULT = '8880';
   PORT_DEFAULT = '80';
-  USER_DEFAULT = 'User';
-  PASS_DEFAULT = 'synopse';
+  //USER_DEFAULT = 'User';
+  //PASS_DEFAULT = 'synopse';
   CONNECTIONTIMEOUT = 5000;
 
 type

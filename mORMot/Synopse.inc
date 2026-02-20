@@ -1,7 +1,7 @@
 {
     This file is part of Synopse framework.
 
-    Synopse framework. Copyright (C) 2023 Arnaud Bouchez
+    Synopse framework. Copyright (c) Arnaud Bouchez
       Synopse Informatique - https://synopse.info
 
   *** BEGIN LICENSE BLOCK *****
@@ -20,7 +20,7 @@
 
   The Initial Developer of the Original Code is Arnaud Bouchez.
 
-  Portions created by the Initial Developer are Copyright (C) 2023
+  Portions created by the Initial Developer are Copyright (c)
   the Initial Developer. All Rights Reserved.
 
   Contributor(s):
@@ -40,10 +40,6 @@
 
   ***** END LICENSE BLOCK *****
 }
-
-{$define PUREPASCAL}
-{$define ABSOLUTEPASCAL}
-{$define ABSOLUTEPASCALORNOTINTEL}
 
 
 (********************** User-Trigerred Conditionals **********************)
@@ -237,7 +233,7 @@
     {$define HASTTHREADTERMINATESET} // introduced TThread.TerminateSet
   {$endif}
   {$if not defined(VER3_0) and not defined(VER3_2) and not defined(VER2)}
-    {$define FPC_PROVIDE_ATTR_TABLE} // to be defined since SVN 42356-42411
+    {.$define FPC_PROVIDE_ATTR_TABLE} // to be defined since SVN 42356-42411
     // on compilation error in SynFPCTypInfo, undefine the above conditional
     // see https://lists.freepascal.org/pipermail/fpc-announce/2019-July/000612.html
     {$define STRCNT32} // 32-bit TAnsiRec.RefCnt even on 64-bit CPU
@@ -612,6 +608,12 @@
       {$ifend}
       {$if CompilerVersion >= 35.0}
         {$define ISDELPHI11}
+      {$ifend}
+      {$if CompilerVersion >= 36.0}
+        {$define ISDELPHI12}
+      {$ifend}
+      {$if CompilerVersion >= 37.0}
+        {$define ISDELPHI13}
       {$ifend}
     {$ifend CompilerVersion >= 17}
     {$ifopt O-} // if we don't expect fast code, don't optimize the framework

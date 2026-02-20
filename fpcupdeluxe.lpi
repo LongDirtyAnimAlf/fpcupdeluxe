@@ -131,7 +131,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <Libraries Value="libs\$(TargetOS)"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common;metadarkstyle"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\SQLite3;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common;metadarkstyle"/>
             <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -1235,7 +1235,7 @@
       </Options>
     </Linking>
     <Other>
-      <CustomOptions Value="-dDisableRemoteLog"/>
+      <CustomOptions Value="-dDisableRemoteLoggg"/>
     </Other>
   </CompilerOptions>
   <Debugging>
