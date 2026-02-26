@@ -746,6 +746,10 @@ msgctxt "tform1.fpcversionlabel.caption"
 msgid "FPC version"
 msgstr ""
 
+#: tform1.grpcustomtasks.caption
+msgid "Custom Tasks"
+msgstr ""
+
 #: tform1.historysheet.caption
 msgid "History"
 msgstr ""

@@ -42,7 +42,7 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="35">
+    <BuildModes Count="31">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="DefaultQT">
         <MacroValues Count="1">
@@ -117,7 +117,8 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dDEBUG"/>
+            <CustomOptions Value="-dDEBUG
+-dDisableRemoteLog"/>
           </Other>
         </CompilerOptions>
       </Item3>
@@ -756,35 +757,7 @@
           </Linking>
         </CompilerOptions>
       </Item23>
-      <Item24 Name="freebsdaarch64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="aarch64"/>
-            <TargetOS Value="freebsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item24>
-      <Item25 Name="solarisx64">
+      <Item24 Name="solarisx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -811,8 +784,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item25>
-      <Item26 Name="dragonflyx64">
+      </Item24>
+      <Item25 Name="dragonflyx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -842,11 +815,8 @@
             <CustomOptions Value="-dDisableRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item26>
-      <Item27 Name="linux64gtk3">
-        <MacroValues Count="1">
-          <Macro2 Name="LCLWidgetType" Value="gtk3"/>
-        </MacroValues>
+      </Item25>
+      <Item26 Name="netbsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -860,7 +830,35 @@
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
-            <TargetOS Value="linux"/>
+            <TargetOS Value="netbsd"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item26>
+      <Item27 Name="netbsdi386">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="netbsd"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
             </Optimizations>
@@ -874,119 +872,7 @@
           </Linking>
         </CompilerOptions>
       </Item27>
-      <Item28 Name="solarisxi386">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-sun"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-sun"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="i386"/>
-            <TargetOS Value="solaris"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item28>
-      <Item29 Name="openbsdx64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="openbsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <RunWithoutDebug Value="True"/>
-              <UseLineInfoUnit Value="False"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item29>
-      <Item30 Name="netbsdx64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="netbsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item30>
-      <Item31 Name="netbsdi386">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
-            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="i386"/>
-            <TargetOS Value="netbsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item31>
-      <Item32 Name="freebsdx64QT5">
+      <Item28 Name="freebsdx64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -1019,8 +905,8 @@
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item32>
-      <Item33 Name="freebsdx64QT5zip">
+      </Item28>
+      <Item29 Name="freebsdx64QT5zip">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -1053,8 +939,8 @@
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item33>
-      <Item34 Name="linux64gtk1">
+      </Item29>
+      <Item30 Name="linux64gtk1">
         <MacroValues Count="1">
           <Macro3 Name="LCLWidgetType" Value="gtk"/>
         </MacroValues>
@@ -1084,8 +970,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item34>
-      <Item35 Name="androidaarch64">
+      </Item30>
+      <Item31 Name="androidaarch64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -1111,10 +997,10 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item35>
+      </Item31>
       <SharedMatrixOptions Count="3">
         <Item1 ID="784204643275" Modes="DefaultQT,linuxx64QT5,linuxi386QT5,linuxaarch64QT5,linuxarmQT5,linuxaarch64QT5zip,linuxarmQT5zip,linuxx64QT5zip,freebsdx64QT5,freebsdx64QT5zip" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
-        <Item2 ID="591091371099" Modes="linux64gtk3" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
+        <Item2 ID="591091371099" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
         <Item3 ID="808696547197" Modes="linux64gtk1" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk"/>
       </SharedMatrixOptions>
     </BuildModes>
@@ -1235,7 +1121,7 @@
       </Options>
     </Linking>
     <Other>
-      <CustomOptions Value="-dDisableRemoteLoggg"/>
+      <CustomOptions Value="-dDisableRemoteLog"/>
     </Other>
   </CompilerOptions>
   <Debugging>

@@ -485,7 +485,7 @@ begin
   IncludeHelp            := False;
   IncludeLCL             := False;
   {$ifdef RemoteLog}
-  SendInfo               := False;
+  SendInfo               := True;
   {$endif}
 
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do

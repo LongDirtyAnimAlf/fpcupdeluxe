@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 97
+  Left = 195
   Height = 645
-  Top = 156
+  Top = 154
   Width = 1190
   Anchors = []
   Caption = 'FPCUPdeluxe'
@@ -9,7 +9,7 @@ object Form1: TForm1
   ClientWidth = 1190
   Constraints.MinHeight = 400
   Menu = MainMenu1
-  LCLVersion = '4.4.0.0'
+  LCLVersion = '4.6.0.0'
   Visible = True
   OnClose = FormClose
   OnCreate = FormCreate
@@ -1990,6 +1990,7 @@ object Form1: TForm1
       end
     end
     object ExtraSheet: TTabSheet
+      AnchorSideLeft.Control = PageControl1
       Hint = 'If cross-compiler present, build the native compiler for selected system in cross.'
       Caption = 'Extras'
       ClientHeight = 518
@@ -1997,152 +1998,121 @@ object Form1: TForm1
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      object btnGetOpenSSL: TButton
-        AnchorSideLeft.Control = ExtraSheet
-        AnchorSideLeft.Side = asrCenter
-        AnchorSideTop.Control = CreateStartup
-        AnchorSideTop.Side = asrBottom
-        Left = 74
-        Height = 25
-        Top = 95
-        Width = 155
-        AutoSize = True
-        BorderSpacing.Top = 4
-        Caption = 'Get OpenSSL by Browser'
-        ParentFont = False
-        TabOrder = 0
-        OnClick = btnGetOpenSSLClick
-      end
-      object ChkMakefileFPC: TButton
+      object grpCustomTasks: TGroupBox
         AnchorSideLeft.Control = ExtraSheet
         AnchorSideLeft.Side = asrCenter
         AnchorSideTop.Control = ExtraSheet
-        Left = 86
-        Height = 25
-        Top = 8
-        Width = 131
+        Left = 60
+        Height = 245
+        Top = 0
+        Width = 183
         AutoSize = True
-        BorderSpacing.Top = 8
-        Caption = 'Check Makefile FPC'
-        ParentFont = False
-        TabOrder = 1
-        OnClick = ChkMakefileFPCClick
-      end
-      object ChkMakefileLaz: TButton
-        AnchorSideLeft.Control = ExtraSheet
-        AnchorSideLeft.Side = asrCenter
-        AnchorSideTop.Control = ChkMakefileFPC
-        AnchorSideTop.Side = asrBottom
-        Left = 77
-        Height = 25
-        Top = 37
-        Width = 149
-        AutoSize = True
-        BorderSpacing.Top = 4
-        Caption = 'Check Makefile Lazarus'
-        ParentFont = False
-        TabOrder = 2
-        OnClick = ChkMakefileFPCClick
-      end
-      object CreateStartup: TButton
-        AnchorSideLeft.Control = ExtraSheet
-        AnchorSideLeft.Side = asrCenter
-        AnchorSideTop.Control = ChkMakefileLaz
-        AnchorSideTop.Side = asrBottom
-        Left = 75
-        Height = 25
-        Top = 66
-        Width = 153
-        AutoSize = True
-        BorderSpacing.Top = 4
-        Caption = 'Re-create startup scripts'
-        ParentFont = False
-        TabOrder = 3
-        OnClick = ChkMakefileFPCClick
-      end
-      object btnUpdateLazarusMakefiles: TButton
-        AnchorSideLeft.Control = ExtraSheet
-        AnchorSideLeft.Side = asrCenter
-        AnchorSideTop.Control = btnGetOpenSSL
-        AnchorSideTop.Side = asrBottom
-        Left = 72
-        Height = 25
-        Top = 124
-        Width = 159
-        AutoSize = True
-        BorderSpacing.Top = 4
-        Caption = 'Update Lazarus Makefiles'
-        ParentFont = False
-        TabOrder = 4
-        Visible = False
-        OnClick = btnUpdateLazarusMakefilesClick
-      end
-      object btnCreateLazarusConfig: TButton
-        AnchorSideLeft.Control = ExtraSheet
-        AnchorSideLeft.Side = asrCenter
-        AnchorSideTop.Control = btnUpdateLazarusMakefiles
-        AnchorSideTop.Side = asrBottom
-        Left = 62
-        Height = 25
-        Top = 153
-        Width = 179
-        AutoSize = True
-        BorderSpacing.Top = 4
-        Caption = 'Create Lazarus Configuration'
-        TabOrder = 5
-        OnClick = btnCreateLazarusConfigClick
-      end
-      object btnCheckToolsLocations: TButton
-        AnchorSideLeft.Control = ExtraSheet
-        AnchorSideLeft.Side = asrCenter
-        AnchorSideTop.Control = btnCreateLazarusConfig
-        AnchorSideTop.Side = asrBottom
-        Left = 81
-        Height = 25
-        Top = 182
-        Width = 140
-        AutoSize = True
-        BorderSpacing.Top = 4
-        Caption = 'Check Tools Location'
-        TabOrder = 6
-        OnClick = btnCheckToolsLocationsClick
-      end
-      object btnBuildHelp: TButton
-        AnchorSideLeft.Control = ExtraSheet
-        AnchorSideLeft.Side = asrCenter
-        AnchorSideTop.Control = btnCheckToolsLocations
-        AnchorSideTop.Side = asrBottom
-        Left = 111
-        Height = 25
-        Top = 211
-        Width = 81
-        AutoSize = True
-        BorderSpacing.Top = 4
-        Caption = 'Build Help'
-        TabOrder = 7
-        OnClick = btnBuildHelpClick
-      end
-      object ButtonBuildNativeCompiler: TButton
-        AnchorSideLeft.Control = ExtraSheet
-        AnchorSideLeft.Side = asrCenter
-        AnchorSideTop.Control = btnBuildHelp
-        AnchorSideTop.Side = asrBottom
-        AnchorSideRight.Control = radgrpCPU
-        AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = ButtonAutoCrossUpdate
-        Left = 82
-        Height = 25
-        Hint = 'Build the selected CPU-OS native compiler.'
-        Top = 240
-        Width = 138
-        AutoSize = True
-        BorderSpacing.Top = 4
-        Caption = 'Build native compiler'
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 8
-        OnClick = btnBuildNativeCompilerClick
+        Caption = 'Custom Tasks'
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 1
+        ClientHeight = 225
+        ClientWidth = 179
+        TabOrder = 0
+        object ChkMakefileFPC: TButton
+          Left = 0
+          Height = 25
+          Top = 0
+          Width = 179
+          AutoSize = True
+          Caption = 'Check Makefile FPC'
+          ParentFont = False
+          TabOrder = 0
+          OnClick = ChkMakefileFPCClick
+        end
+        object ChkMakefileLaz: TButton
+          Left = 0
+          Height = 25
+          Top = 25
+          Width = 179
+          AutoSize = True
+          Caption = 'Check Makefile Lazarus'
+          ParentFont = False
+          TabOrder = 1
+          OnClick = ChkMakefileFPCClick
+        end
+        object CreateStartup: TButton
+          Left = 0
+          Height = 25
+          Top = 50
+          Width = 179
+          AutoSize = True
+          Caption = 'Re-create startup scripts'
+          ParentFont = False
+          TabOrder = 2
+          OnClick = ChkMakefileFPCClick
+        end
+        object btnGetOpenSSL: TButton
+          Left = 0
+          Height = 25
+          Top = 75
+          Width = 179
+          AutoSize = True
+          Caption = 'Get OpenSSL by Browser'
+          ParentFont = False
+          TabOrder = 3
+          OnClick = btnGetOpenSSLClick
+        end
+        object btnUpdateLazarusMakefiles: TButton
+          Left = 0
+          Height = 25
+          Top = 100
+          Width = 179
+          AutoSize = True
+          Caption = 'Update Lazarus Makefiles'
+          ParentFont = False
+          TabOrder = 4
+          Visible = False
+          OnClick = btnUpdateLazarusMakefilesClick
+        end
+        object btnCreateLazarusConfig: TButton
+          Left = 0
+          Height = 25
+          Top = 125
+          Width = 179
+          AutoSize = True
+          Caption = 'Create Lazarus Configuration'
+          TabOrder = 5
+          OnClick = btnCreateLazarusConfigClick
+        end
+        object btnCheckToolsLocations: TButton
+          Left = 0
+          Height = 25
+          Top = 150
+          Width = 179
+          AutoSize = True
+          Caption = 'Check Tools Location'
+          TabOrder = 6
+          OnClick = btnCheckToolsLocationsClick
+        end
+        object btnBuildHelp: TButton
+          Left = 0
+          Height = 25
+          Top = 175
+          Width = 179
+          AutoSize = True
+          Caption = 'Build Help'
+          TabOrder = 7
+          OnClick = btnBuildHelpClick
+        end
+        object ButtonBuildNativeCompiler: TButton
+          Left = 0
+          Height = 25
+          Hint = 'Build the selected CPU-OS native compiler.'
+          Top = 200
+          Width = 179
+          AutoSize = True
+          Caption = 'Build native compiler'
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 8
+          OnClick = btnBuildNativeCompilerClick
+        end
       end
     end
   end
