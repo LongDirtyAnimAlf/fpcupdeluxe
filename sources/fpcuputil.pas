@@ -308,6 +308,7 @@ function MaybeQuoted(const s:string):string;
 function MaybeQuotedSpacesOnly(const s:string):string;
 function UnQuote(const s:string):string;
 function OccurrencesOfChar(const ContentString: string; const CharToCount: char): integer;
+function SafePhysicalFileName (Const FileName : String): String;
 // Like ExpandFilename but does not expand an empty string to current directory
 function SafeExpandFileName (Const FileName : String): String;
 // Get application name
@@ -683,7 +684,26 @@ begin
   result := int64(a)*int64(b) div c;
 end;
 
-function SafeExpandFileName (Const FileName : String): String;
+function SafePhysicalFileName(Const FileName : String): String;
+begin
+  if FileName='' then
+    result:=''
+  else
+  begin
+    result:=FileName;
+    {$ifdef UNIX}
+    while FileIsSymlink(result) do
+    begin
+      try
+        result:=GetPhysicalFilename(result,pfeException);
+      except
+      end;
+    end;
+    {$endif}
+  end;
+end;
+
+function SafeExpandFileName(Const FileName : String): String;
 begin
   if FileName='' then
     result:=''
@@ -1252,7 +1272,7 @@ begin
   result:=URI.Host+URI.Path;
 end;
 
-function CompilerCommand(CompilerPath,Command: string): string;
+function CompilerCommand(const CompilerPath:string;const Commands:array of string): string;
 var
   Output: string;
 begin
@@ -1260,7 +1280,7 @@ begin
   if ((CompilerPath='') OR (NOT FileExists(CompilerPath))) then exit;
   try
     Output:='';
-    if RunCommand(CompilerPath,[Command], Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}{$ENDIF}) then
+    if RunCommand(CompilerPath,Commands, Output,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)}{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF}{$ENDIF}) then
     begin
       Output:=TrimRight(Output);
       if Length(Output)>0 then Result:=Output;
@@ -1274,7 +1294,7 @@ var
   Output: string;
 begin
   Result:='0.0.0';
-  Output:=CompilerCommand(CompilerPath,'-iV');
+  Output:=CompilerCommand(CompilerPath,['-iV']);
   if Length(Output)>0 then Result:=Output;
 end;
 
@@ -1284,7 +1304,7 @@ var
   i:integer;
 begin
   Result:='';
-  Output:=CompilerCommand(CompilerPath,'-iW');
+  Output:=CompilerCommand(CompilerPath,['-iW']);
   if Length(Output)>0 then
   begin
     i:=0;
@@ -1310,29 +1330,29 @@ end;
 
 function CompilerABI(CompilerPath: string): string;
 begin
-  Result:=CompilerCommand(CompilerPath,'-ia');
+  Result:=CompilerCommand(CompilerPath,['-ia']);
 end;
 
 function CompilerFPU(CompilerPath: string): string;
 begin
-  Result:=CompilerCommand(CompilerPath,'-if');
+  Result:=CompilerCommand(CompilerPath,['-if']);
 end;
 
 function CompilerCPU(CompilerPath: string): string;
 begin
-  Result:=CompilerCommand(CompilerPath,'-iSP');
+  Result:=CompilerCommand(CompilerPath,['-iSP']);
 end;
 
 function CompilerOS(CompilerPath: string): string;
 begin
-  Result:=CompilerCommand(CompilerPath,'-iSO');
+  Result:=CompilerCommand(CompilerPath,['-iSO']);
 end;
 
 function CompilerCPUOSTarget(CompilerPath: string): string;
 var
   i:SizeInt;
 begin
-  result:=Trim(CompilerCommand(CompilerPath,'-iTP -iTO'));
+  result:=Trim(CompilerCommand(CompilerPath,['-iTP','-iTO']));
   i:=Pos(' ',result);
   if (i>0) then result[i]:='-';
 end;

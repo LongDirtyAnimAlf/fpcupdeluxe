@@ -231,7 +231,7 @@ begin
   //Command:=' clone --recurse-submodules';
   Command:=' clone';
 
-  if ExportOnly then Command:=Command+' --depth=1';
+  if ExportOnly then Command:=Command+' --single-branch --depth=1';
 
   Branch:='';
   if (DesiredBranch<>'') then

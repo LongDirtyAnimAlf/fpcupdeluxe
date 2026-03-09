@@ -2533,9 +2533,10 @@ function TSequencer.GetInstaller(ModuleName: string): boolean;
 var
   Ultibo,CrossCompiling:boolean;
   aCompiler:string;
+  s:string;
   LocalFPCLocation:string;
-  Dir:string;
-  Dirs:array[0..127] of pchar;
+  //s,Dir:string;
+  //Dirs:array[0..127] of pchar;
   i,count:longint;
 begin
   result:=true;
@@ -2753,11 +2754,19 @@ begin
     end
     else
     begin
+      {$ifndef FPCONLY}
+      //if FInstaller.InheritsFrom(TLazarusNativeInstaller) then
       if FParent.UseSystemFPC then
       begin
-        aCompiler:=Which('fpc');
-        //if FInstaller.InheritsFrom(TLazarusNativeInstaller) then
+        s:='fpc'+GetExeExt;
+        s:=Which(s);
+        //s:=SafePhysicalFileName(s);
+        FParent.WritelnLog('Found existing FPC: '+s+'. Compiler target: '+CompilerCPUOSTarget(s)+'. System: '+GetSourceCPUOS);
+        if (FileExists(s) AND (GetSourceCPUOS=CompilerCPUOSTarget(s))) then
         begin
+          aCompiler:=s;
+          FParent.WritelnLog('Existing FPC install look good enough, so use it for the Lazarus install !');
+
           (*
           FInstaller.Processor.Executable:=aCompiler;
           FInstaller.Processor.Process.Parameters.Clear;
@@ -2773,6 +2782,8 @@ begin
           except
           end;
           *)
+
+          (*
           LocalFPCLocation:=ExtractFileDir(aCompiler);
           // check the logic of the install dir
           // must fit into the logic of fpcupdeluxe
@@ -2806,13 +2817,14 @@ begin
               FInstaller.FPCSourceDir:='';
             until true;
           end;
-          if (count<>-1) then
-          begin
-            FParent.WritelnLog('Existing FPC install could not be used by fpcupdeluxe !');
-            aCompiler:='';
-          end;
+          *)
+        end
+        else
+        begin
+          FParent.WritelnLog('Existing FPC install could not be used by fpcupdeluxe !');
         end;
       end;
+      {$endif}
       if (NOT FParent.UseSystemFPC) OR (Length(aCompiler)=0) then aCompiler:=FInstaller.GetFPCInBinDir; // use FPC compiler itself
     end;
     FInstaller.Compiler:=aCompiler;

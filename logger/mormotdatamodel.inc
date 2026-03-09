@@ -39,7 +39,6 @@ type
     property UpInstallDir: RawUTF8 index 255 read fUpInstallDir write fUpInstallDir;
     property IPV4Address: RawUTF8 index 15 read fIPV4Address write fIPV4Address;
     property IPV6Address: RawUTF8 index 40 read fIPV6Address write fIPV6Address;
-    property ExtraData: variant read fExtraData write fExtraData;
     property LogEntry: RawUTF8 index 500 read fLogEntry write fLogEntry;
   published
     property UpVersion: RawUTF8 index 20 read fUpVersion write fUpVersion;
@@ -55,6 +54,7 @@ type
     property LazarusVersion: RawUTF8 index 15 read fLazarusVersion write fLazarusVersion;
     property CrossCPUOS: RawUTF8 index 40 read fCrossCPUOS write fCrossCPUOS;
     property DateOfUse: TDateTime read fDateOfUse write fDateOfUse;
+    property ExtraData: variant read fExtraData write fExtraData;
   end;
 
 const

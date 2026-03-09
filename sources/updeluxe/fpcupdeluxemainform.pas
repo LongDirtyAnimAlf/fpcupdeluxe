@@ -1465,6 +1465,10 @@ begin
   begin
     AddMessage('');
     AddMessage(aResultMessage,True);
+  end
+  else
+  begin
+    if ((aTCPU<>TCPU.cpuNone) AND (aTOS<>TOS.osNone)) then AddMessage('');
   end;
 end;
 
@@ -4536,7 +4540,8 @@ begin
           StatusMessage.Text:='Hmmm, something went wrong ... have a good look at the command screen !';
           AddMessage(FPCupManager.RunInfo);
           {$ifdef RemoteLog}
-          aDataClient.UpInfo.LogEntry:=memoSummary.Text+LineEnding+FPCupManager.RunInfo;
+          aDataClient.UpInfo.LogEntry:='ERROR: Fpcupdeluxe fatal error !';
+          //aDataClient.UpInfo.LogEntry:=memoSummary.Text+LineEnding+FPCupManager.RunInfo;
           aDataClient.SendData;
           {$endif}
         end
@@ -4702,7 +4707,7 @@ begin
   end
   else
   begin
-    AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
+    //AddMessage(upInstallDirectoryCurrent+': '+sInstallDir);
     {$ifdef Solaris}
     // current trunk does not build with the standard -O2, so use -O1 for all
     SettingsForm.FPCOptions:='-g -gl -O1';
@@ -4787,7 +4792,6 @@ begin
 
   // get names of cross-compilers
   AutoUpdateCrossCompiler(nil);
-  AddMessage('');
 end;
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;

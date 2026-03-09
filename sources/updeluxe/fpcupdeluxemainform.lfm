@@ -1059,6 +1059,7 @@ object Form1: TForm1
         BorderSpacing.Bottom = 8
         Caption = 'Only FPC'
         Layout = blGlyphTop
+        Margin = 5
         Images = ImageList_32x32
         ImageIndex = 1
         ParentFont = False
@@ -1084,6 +1085,7 @@ object Form1: TForm1
         BorderSpacing.Bottom = 8
         Caption = 'Only Lazarus'
         Layout = blGlyphTop
+        Margin = 5
         Images = ImageList_32x32
         ImageIndex = 2
         ParentFont = False
@@ -1112,6 +1114,7 @@ object Form1: TForm1
         Caption = 'Install/update FPC+Lazarus'
         Constraints.MinHeight = 60
         Layout = blGlyphTop
+        Margin = 5
         Images = ImageList_88x32
         ImageIndex = 0
         ParentFont = False

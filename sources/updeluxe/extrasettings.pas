@@ -595,8 +595,8 @@ begin
   // To be investigated !!
 
   //Disable FPC dotted by default ... still testing
-  Dotted := False;
-  SetCheckEnabled(CaptionCheckFPCDotted,False);
+  //Dotted := False;
+  //SetCheckEnabled(CaptionCheckFPCDotted,False);
 
   //Disable FPC unicode by default ... still testing
   FPCUnicode := False;

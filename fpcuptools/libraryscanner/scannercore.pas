@@ -225,7 +225,7 @@ const
   TERMUXPATH = '/data/data/com.termux/files';
   {$endif}
 
-const FPCLIBS : array [0..43] of string = (
+const FPCLIBS : array [0..44] of string = (
   'crtbegin.o',
   'crtbeginS.o',
   'crtend.o',
@@ -244,6 +244,7 @@ const FPCLIBS : array [0..43] of string = (
   DYNLINKV3,
   'libanl.so*',
   'libcrypt.so*',
+  'libc.so',
   'libc.so*',
   'libdb1.so*',
   'libdb2.so*',
