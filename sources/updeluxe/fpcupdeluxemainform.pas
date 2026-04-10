@@ -2948,6 +2948,7 @@ begin
   begin
     sInstallDir:=SelectDirectoryDialog1.FileName;
     InstallDirEdit.Text:=sInstallDir;
+    Self.Edit1Change(Sender); //Update the display.
     if ((Length(sInstallDir)+Length('lazarus'))>60) then
     begin
       aLazarusVersion:=CalculateNumericalVersion(LazarusTarget);
@@ -4492,7 +4493,7 @@ begin
 
   AddMessage(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.');
   AddMessage('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetSourceCPUOS+' running on '+GetDistro);
-  AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
+  AddMessage('Built with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
   AddMessage('');
 
   if SettingsForm.SaveScript then FPCupManager.SaveSettings;
@@ -4737,7 +4738,7 @@ begin
   AddMessage(Self.Caption);
   {$ifndef NetBSD}
   AddMessage('Running on '+GetDistro);
-  AddMessage('Build with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
+  AddMessage('Built with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
   {$ifdef FreeBSD}
   AddMessage('Detected mayor FreeBSD version '+InttoStr(GetFreeBSDVersion));
   {$endif FreeBSD}
