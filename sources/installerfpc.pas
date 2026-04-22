@@ -1522,6 +1522,17 @@ begin
               end;
             end;
           end;
+          if (GetSourceCPU=GetCPU(TCPU.aarch64)) then
+          begin
+            if ( (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.i8086)  OR (CrossInstaller.TargetCPU=TCPU.x86_64) ) then
+            begin
+              if (MakeCycle in [st_RtlBuild,st_PackagesBuild]) then
+              begin
+                Infoln(infotext+'Adding -d'+DEFINE_SOFT_FPUX80+' to compiler options to enable 80bit (soft)float support.',etInfo);
+                NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_SOFT_FPUX80;
+              end;
+            end;
+          end;
           {$endif}
 
           if fDelphiRTTI then
