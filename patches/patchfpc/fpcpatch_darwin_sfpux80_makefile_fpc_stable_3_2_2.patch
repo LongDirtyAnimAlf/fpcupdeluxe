@@ -1,0 +1,33 @@
+diff --git a/rtl/darwin/Makefile.fpc b/rtl/darwin/Makefile.fpc
+index b30629a6..3fdb0064 100644
+--- a/rtl/darwin/Makefile.fpc
++++ b/rtl/darwin/Makefile.fpc
+@@ -16,7 +16,8 @@ units=$(SYSTEMUNIT) sysinit uuchar unixtype ctypes objpas macpas iso7185 extpas
+       charset cpall character getopts heaptrc lineinfo lnfodwrf lnfogdb \
+       errors termio \
+       sysconst cthreads rtlconsts cwstring bsd fpwidestring \
+-      fpintres fpextres objc objcbase unixcp
++      fpintres fpextres objc objcbase unixcp \
++      softfpu sfpux80 ufloatx80 sfpu128 ufloat128
+ implicitunits=exeinfo \
+       cp1250 cp1251 cp1252 cp1253 cp1254 cp1255 cp1256 cp1257 cp1258 \
+       cp437 cp646 cp737 cp775 cp850 cp852 cp855 cp856 cp857 cp860 cp861 cp862 \
+@@ -317,3 +318,18 @@ cwstring$(PPUEXT) : $(UNIXINC)/cwstring.pp $(SYSTEMUNIT)$(PPUEXT) sysutils$(PPUE
+ 
+ bsd$(PPUEXT) : $(BSDINC)/bsd.pas initc$(PPUEXT) unix$(PPUEXT)
+ 	$(COMPILER) $<
++
++softfpu$(PPUEXT) : $(INC)/softfpu.pp $(SYSTEMUNIT)$(PPUEXT) objpas$(PPUEXT)
++	$(COMPILER) $<
++
++sfpux80$(PPUEXT) : $(INC)/sfpux80.pp $(INC)/softfpu.pp $(SYSTEMUNIT)$(PPUEXT) objpas$(PPUEXT)
++	$(COMPILER) $<
++
++sfpu128$(PPUEXT) : $(INC)/sfpu128.pp $(INC)/softfpu.pp $(SYSTEMUNIT)$(PPUEXT) objpas$(PPUEXT)
++	$(COMPILER) $<
++
++ufloatx80$(PPUEXT) : $(INC)/ufloatx80.pp sfpux80$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
++
++ufloat128$(PPUEXT) : $(INC)/ufloat128.pp sfpu128$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT)
++	$(COMPILER) $<
