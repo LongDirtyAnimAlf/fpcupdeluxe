@@ -1521,6 +1521,14 @@ begin
                 NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_SOFT_FPUX80;
               end;
             end;
+          end
+          else if (GetSourceCPU=GetCPU(TCPU.aarch64)) then
+          begin
+            if (CrossInstaller.TargetCPU in [TCPU.i386,TCPU.i8086,TCPU.x86_64]) then
+            begin
+              Infoln(infotext+'Adding -d'+DEFINE_SOFT_FPUX80+' to compiler options to enable 80bit (soft)float support.',etInfo);
+              NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_SOFT_FPUX80;
+            end;
           end;
           {$endif}
 
@@ -1583,18 +1591,6 @@ begin
             if UseLibc then CrossCompilerOptions:=CrossCompilerOptions+'-d'+DEFINE_FPC_LIBC+' ';
             //if UseLibc then NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_FPC_LIBC;
             //if UseLibc then CrossInstaller.AddFPCCFGSnippet('-d'+DEFINE_FPC_LIBC);
-
-            if (GetSourceCPU=GetCPU(TCPU.aarch64)) then
-            begin
-              if (CrossInstaller.TargetCPU in [TCPU.i386,TCPU.i8086,TCPU.x86_64]) then
-              begin
-                if (MakeCycle in [st_RtlBuild,st_PackagesBuild]) then
-                begin
-                  Infoln(infotext+'Adding -d'+DEFINE_SOFT_FPUX80+' to compiler cross-options to enable 80bit (soft)float support.',etInfo);
-                  CrossCompilerOptions:=CrossCompilerOptions+'-d'+DEFINE_SOFT_FPUX80+' ';
-                end;
-              end;
-            end;
 
             for i:=0 to CrossInstaller.CrossOpt.Count-1 do
               CrossCompilerOptions:=CrossCompilerOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
