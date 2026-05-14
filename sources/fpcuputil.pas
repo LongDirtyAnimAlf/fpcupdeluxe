@@ -4625,7 +4625,16 @@ begin
       if RunCommand('sw_vers',['-productVersion'], s) and (Length(s)>0) then
       begin
         VersionFromString(s,Major,Minor,Build,Patch);
-        result:=result+' '+InttoStr(Major)+'.'+InttoStr(Minor);
+        case Major of
+          26: result:='macOS Tahoe ('+InttoStr(Major)+'.'+InttoStr(Minor)+')';
+          15: result:='macOS Sequoia ('+InttoStr(Major)+'.'+InttoStr(Minor)+')';
+          14: result:='macOS Sonoma ('+InttoStr(Major)+'.'+InttoStr(Minor)+')';
+          13: result:='macOS Ventura ('+InttoStr(Major)+'.'+InttoStr(Minor)+')';
+          12: result:='macOS Monterey ('+InttoStr(Major)+'.'+InttoStr(Minor)+')';
+          11: result:='macOS Big Sur ('+InttoStr(Major)+'.'+InttoStr(Minor)+')';
+        else
+          result:=result+' '+InttoStr(Major)+'.'+InttoStr(Minor);
+        end;
       end;
     {$else}
       result:=GetDistro;
