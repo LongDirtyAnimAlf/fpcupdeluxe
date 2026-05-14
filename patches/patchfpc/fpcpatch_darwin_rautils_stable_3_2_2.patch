@@ -1,0 +1,14 @@
+diff --git a/compiler/rautils.pas b/compiler/rautils.pas
+index 200572baee..89728f2b20 100644
+--- a/compiler/rautils.pas
++++ b/compiler/rautils.pas
+@@ -1656,7 +1656,8 @@ function AsmRegisterPara(sym: tabstractnormalvarsym): boolean;
+       begin
+         if symtablestack.top.symtablelevel<>srsymtable.symtablelevel then
+           begin
+-            Tlabelsym(sym).nonlocal:=true;
++            if (srsymtable.symtabletype=globalsymtable) or create_smartlink_library then
++              Tlabelsym(sym).nonlocal:=true;
+             if emit then
+               exclude(current_procinfo.procdef.procoptions,po_inline);
+           end;
