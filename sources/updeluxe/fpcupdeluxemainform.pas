@@ -4493,7 +4493,7 @@ begin
 
   AddMessage(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.');
   AddMessage('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetSourceCPUOS+' running on '+GetDistro);
-  AddMessage('Built with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
+  AddMessage('Built with: FPC '+GetFPCBuildVersion + ' on '+GetBuildPlatform);
   AddMessage('');
 
   if SettingsForm.SaveScript then FPCupManager.SaveSettings;
@@ -4738,7 +4738,7 @@ begin
   AddMessage(Self.Caption);
   {$ifndef NetBSD}
   AddMessage('Running on '+GetDistro);
-  AddMessage('Built with: FPC '+GetFPCBuildVersion + ' on Win11 x86_64');
+  AddMessage('Built with: FPC '+GetFPCBuildVersion + ' on '+GetBuildPlatform);
   {$ifdef FreeBSD}
   AddMessage('Detected mayor FreeBSD version '+InttoStr(GetFreeBSDVersion));
   {$endif FreeBSD}

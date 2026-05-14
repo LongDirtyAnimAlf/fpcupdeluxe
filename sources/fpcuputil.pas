@@ -379,6 +379,7 @@ function GetSourceOS:string;
 function GetSourceCPUOS:string;
 function GetFPCBuildVersion:string;
 function GetDistro(const aID:string=''):string;
+function GetBuildPlatform:string;
 function GetFreeBSDVersion:byte;
 function checkGithubRelease(const aURL:string):string;
 {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION < 30200)}
@@ -4595,6 +4596,42 @@ begin
        then t:=t+'-'+InttoStr(Major)+'.'+InttoStr(Minor)+'.'+InttoStr(Build);
   {$endif MSWindows}
   result:=t;
+end;
+
+function GetBuildPlatform:string;
+var
+  Major,Minor,Build,Patch: Integer;
+  s: string;
+begin
+  {$ifdef MSWindows}
+    if GetWin32Version(Major,Minor,Build) then
+    begin
+      if (Major=10) and (Build>=22000) then result:='Win11'
+      else if Major=10 then result:='Win10'
+      else if (Major=6) and (Minor=3) then result:='Win8.1'
+      else if (Major=6) and (Minor=2) then result:='Win8'
+      else if (Major=6) and (Minor=1) then result:='Win7'
+      else result:='Win'+InttoStr(Major)+'.'+InttoStr(Minor);
+    end
+    else result:='Win';
+    if IsWindows64
+       then result:=result+' x86_64'
+       else result:=result+' i386';
+  {$else}
+    {$ifdef Darwin}
+      if RunCommand('sw_vers',['-productName'], s) and (Length(s)>0)
+         then result:=Trim(s)
+         else result:=GetSourceOS;
+      if RunCommand('sw_vers',['-productVersion'], s) and (Length(s)>0) then
+      begin
+        VersionFromString(s,Major,Minor,Build,Patch);
+        result:=result+' '+InttoStr(Major)+'.'+InttoStr(Minor);
+      end;
+    {$else}
+      result:=GetDistro;
+    {$endif Darwin}
+    result:=result+' '+GetSourceCPU;
+  {$endif MSWindows}
 end;
 
 function GetFreeBSDVersion:byte;
