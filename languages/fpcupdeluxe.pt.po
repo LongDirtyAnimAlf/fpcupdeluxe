@@ -641,6 +641,10 @@ msgstr "Data"
 msgid "Chinese (CN)"
 msgstr "Chinês (CN)"
 
+#: tform1.mchinesetwlanguage.caption
+msgid "Traditional Chinese (TW)"
+msgstr "Chinês tradicional (TW)"
+
 #: tform1.mukrainianlanguage.caption
 msgid "Ukrainian (UK)"
 msgstr "Ucraniano (UK)"

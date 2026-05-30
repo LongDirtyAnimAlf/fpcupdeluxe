@@ -646,6 +646,10 @@ msgstr "日期"
 msgid "Chinese (CN)"
 msgstr "简体中文 (CN)"
 
+#: tform1.mchinesetwlanguage.caption
+msgid "Traditional Chinese (TW)"
+msgstr "繁体中文 (TW)"
+
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
 msgstr "荷兰语 (NL)"
