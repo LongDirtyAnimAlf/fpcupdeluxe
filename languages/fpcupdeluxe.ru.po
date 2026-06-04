@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpcupdeluxe\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2026-06-04 13:54+0300\n"
+"PO-Revision-Date: 2026-06-04 14:43+0300\n"
 "Last-Translator: Artem78 <megabyte1024@ya.ru>\n"
 "Language-Team: Russian\n"
 "Language: ru_RU\n"
@@ -76,8 +76,6 @@ msgid "Get package repositories."
 msgstr "Получать репозитории пакетов."
 
 #: extrasettings.captioncheckrepo
-#, fuzzy
-#| msgid "Get FPC/Laz repositories."
 msgid "Get FPC/Lazarus repositories."
 msgstr "Получать репозитории FPC/Lazarus."
 
@@ -90,14 +88,10 @@ msgid "Send location and install info."
 msgstr "Отправлять информацию о местоположении и установке."
 
 #: extrasettings.captionchecksplitfpc
-#, fuzzy
-#| msgid "Split FPC source and bins."
 msgid "Split FPC sources and bins."
 msgstr "Разделять исходники и бинарные файлы FPC."
 
 #: extrasettings.captionchecksplitlazarus
-#, fuzzy
-#| msgid "Split Lazarus source and bins."
 msgid "Split Lazarus sources and bins."
 msgstr "Разделять исходники и бинарные файлы Lazarus."
 
@@ -106,10 +100,8 @@ msgid "Use system FPC for Lazarus."
 msgstr "Использовать системный FPC для Lazarus."
 
 #: extrasettings.captioncheckupdateonly
-#, fuzzy
-#| msgid "FPC/Laz rebuild only."
 msgid "FPC/Lazarus/Modules rebuild only."
-msgstr "Только пересборка FPC/Lazarus."
+msgstr "Только пересборка FPC/Lazarus/Модули."
 
 #: extrasettings.captioncheckusemakejobs
 msgid "Use jobs for GNU make."
@@ -120,8 +112,6 @@ msgid "Use wget/libcurl as downloader."
 msgstr "Использовать wget/libcurl в качестве загрузчика."
 
 #: extrasettings.captionenabledelphirtti
-#, fuzzy
-#| msgid "Enable Delphi RTTI."
 msgctxt "extrasettings.captionenabledelphirtti"
 msgid "Enable Delphi RTTI."
 msgstr "Включить Delphi RTTI."
@@ -210,8 +200,6 @@ msgid "Use the system wide install of FPC to build Lazarus."
 msgstr "Используйте общесистемную установку FPC для сборки Lazarus."
 
 #: extrasettings.hintenabledelphirtti
-#, fuzzy
-#| msgid "Enable Delphi RTTI."
 msgctxt "extrasettings.hintenabledelphirtti"
 msgid "Enable Delphi RTTI."
 msgstr "Включить Delphi RTTI."
@@ -222,14 +210,12 @@ msgid "Enable software emulation of 80 bit floats."
 msgstr "Включить программную эмуляцию 80-битных плавающих значений."
 
 #: fpcupdeluxemainform.rsmbabort
-#, fuzzy
-#| msgid "Aborted"
 msgid "Abort"
-msgstr "Прервано"
+msgstr "Прервать"
 
 #: fpcupdeluxemainform.rsmball
 msgid "&All"
-msgstr "Все"
+msgstr "&Все"
 
 #: fpcupdeluxemainform.rsmbcancel
 msgid "Cancel"
@@ -237,21 +223,19 @@ msgstr "Отмена"
 
 #: fpcupdeluxemainform.rsmbclose
 msgid "&Close"
-msgstr "Закрыть"
+msgstr "&Закрыть"
 
 #: fpcupdeluxemainform.rsmbhelp
-#, fuzzy
-#| msgid "Help"
 msgid "&Help"
-msgstr "Помощь"
+msgstr "&Помощь"
 
 #: fpcupdeluxemainform.rsmbignore
 msgid "&Ignore"
-msgstr "Игнорировать"
+msgstr "&Игнорировать"
 
 #: fpcupdeluxemainform.rsmbno
 msgid "&No"
-msgstr "Нет"
+msgstr "&Нет"
 
 #: fpcupdeluxemainform.rsmbnotoall
 msgid "No to all"
@@ -259,33 +243,31 @@ msgstr "Нет для всех"
 
 #: fpcupdeluxemainform.rsmbok
 msgid "&OK"
-msgstr "OK"
+msgstr "&OK"
 
 #: fpcupdeluxemainform.rsmbopen
 msgid "&Open"
-msgstr "Открыть"
+msgstr "&Открыть"
 
 #: fpcupdeluxemainform.rsmbretry
 msgid "&Retry"
-msgstr "Повторить"
+msgstr "&Повторить"
 
 #: fpcupdeluxemainform.rsmbsave
-#, fuzzy
-#| msgid "Save As"
 msgid "&Save"
-msgstr "Сохранить как"
+msgstr "Сохранить "
 
 #: fpcupdeluxemainform.rsmbunlock
 msgid "&Unlock"
-msgstr "Разблокировать"
+msgstr "&Разблокировать"
 
 #: fpcupdeluxemainform.rsmbyes
 msgid "&Yes"
-msgstr "Да"
+msgstr "&Да"
 
 #: fpcupdeluxemainform.rsmbyestoall
 msgid "Yes to &All"
-msgstr "Да для всех"
+msgstr "Да для &всех"
 
 #: fpcupdeluxemainform.rsmtauthentication
 msgid "Authentication"
@@ -337,10 +319,8 @@ msgid "Going to install a cross-compiler from available sources."
 msgstr "Идет установка кросс-компилятора из доступных источников."
 
 #: fpcupdeluxemainform.upbuildnativecrosscompiler
-#, fuzzy
-#| msgid "Trying to build the cross-compiler for"
 msgid "Going to build the native compiler for"
-msgstr "Попытка собрать кросс-компилятор для"
+msgstr "Идёт сборка кросс-компилятора для"
 
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
@@ -416,20 +396,16 @@ msgid "Current install directory"
 msgstr "Текущий каталог установки"
 
 #: fpcupdeluxemainform.upinstallfpc
-#, fuzzy
-#| msgid "Going to install/update FPC."
 msgid "Going to install/update FPC only."
-msgstr "Идет установка/обновление FPC."
+msgstr "Идет установка/обновление только FPC."
 
 #: fpcupdeluxemainform.upinstallfpclazarus
 msgid "Going to install/update FPC and Lazarus."
 msgstr "Идет установка/обновление FPC и Lazarus."
 
 #: fpcupdeluxemainform.upinstalllazarus
-#, fuzzy
-#| msgid "Going to install/update Lazarus."
 msgid "Going to install/update Lazarus only."
-msgstr "Идет установка/обновление Lazarus."
+msgstr "Идет установка/обновление только Lazarus."
 
 #: fpcupdeluxemainform.upinstallmodule
 msgid "Going to install/update module"
@@ -537,10 +513,8 @@ msgid "Exit"
 msgstr "Выход"
 
 #: tform1.actfilesave.caption
-#, fuzzy
-#| msgid "Save log"
 msgid "&Save log"
-msgstr "Сохранить лог"
+msgstr "&Сохранить лог"
 
 #: tform1.actfilesave.hint
 msgid "Save As"
@@ -725,16 +699,12 @@ msgid "Auto-update all installed cross-compilers."
 msgstr "Автоматическое обновление всех установленных кросс-компиляторов."
 
 #: tform1.buttonbuildnativecompiler.caption
-#, fuzzy
-#| msgid "Build Native Compiler"
 msgid "Build native compiler"
 msgstr "Собрать нативный компилятор"
 
 #: tform1.buttonbuildnativecompiler.hint
-#, fuzzy
-#| msgid "Install the selected CPU-OS cross-compiler."
 msgid "Build the selected CPU-OS native compiler."
-msgstr "Установить выбранный CPU-OS кросс-компилятор."
+msgstr "Собрать выбранный CPU-OS нативный компилятор."
 
 #: tform1.buttoninstallcrosscompiler.caption
 msgid "Install compiler"
@@ -979,10 +949,8 @@ msgid "Portuguese (PT)"
 msgstr "Португальский (PT)"
 
 #: tform1.mrussianlanguage.caption
-#, fuzzy
-#| msgid "Russian (RU)"
 msgid "Russian (RUS)"
-msgstr "Русский (RU)"
+msgstr "Русский (RUS)"
 
 #: tform1.mthailanguage.caption
 msgid "Thai (TH)"
@@ -1063,10 +1031,8 @@ msgid "Will install/update trunk version of both FPC and Lazarus."
 msgstr "Установить/обновить транковую версию FPC и Lazarus."
 
 #: tform1.ultibobtn.hint
-#, fuzzy
-#| msgid "Install baremetal Ultibo for RPi3"
 msgid "Install baremetal Ultibo for RPi2/3/4/5"
-msgstr "Установить baremetal Ultibo для RPi3"
+msgstr "Установить baremetal Ultibo для RPi2/3/4/5"
 
 #: tform1.wabtn.caption
 msgid "WA"
@@ -1085,307 +1051,216 @@ msgid "Get FPC for SAMD51 embedded on Wio Terminal"
 msgstr "Получите FPC для SAMD51, встроенного в Wio Terminal"
 
 #: tsettingsform.btnaddfpcpatch.caption
-#, fuzzy
-#| msgid "Add FPC patch"
 msgctxt "tsettingsform.btnaddfpcpatch.caption"
 msgid "Add FPC patch"
 msgstr "Добавить патч FPC"
 
 #: tsettingsform.btnaddlazpatch.caption
-#, fuzzy
-#| msgid "Add Laz. patch"
 msgctxt "tsettingsform.btnaddlazpatch.caption"
 msgid "Add Laz. patch"
 msgstr "Добавить патч Lazarus"
 
 #: tsettingsform.btnlistcustomoptions.caption
-#, fuzzy
-#| msgid "List All"
 msgctxt "tsettingsform.btnlistcustomoptions.caption"
 msgid "List All"
 msgstr "Показать все"
 
 #: tsettingsform.btnremfpcpatch.caption
-#, fuzzy
-#| msgid "Rem. FPC patch"
 msgctxt "tsettingsform.btnremfpcpatch.caption"
 msgid "Rem. FPC patch"
 msgstr "Удалить патч FPC"
 
 #: tsettingsform.btnremlazpatch.caption
-#, fuzzy
-#| msgid "Rem. Laz. patch"
 msgctxt "tsettingsform.btnremlazpatch.caption"
 msgid "Rem. Laz. patch"
 msgstr "Удалить патч Lazarus"
 
 #: tsettingsform.btnselectbindir.caption
-#, fuzzy
-#| msgid "Tools"
 msgctxt "tsettingsform.btnselectbindir.caption"
 msgid "Tools"
 msgstr "Инструменты"
 
 #: tsettingsform.btnselectcompiler.caption
-#, fuzzy
-#| msgid "Compiler"
 msgctxt "tsettingsform.btnselectcompiler.caption"
 msgid "Compiler"
 msgstr "Компилятор"
 
 #: tsettingsform.btnselectlibdir.caption
-#, fuzzy
-#| msgid "Libraries"
 msgctxt "tsettingsform.btnselectlibdir.caption"
 msgid "Libraries"
 msgstr "Библиотеки"
 
 #: tsettingsform.caption
-#, fuzzy
-#| msgid "Advanced Settings"
 msgctxt "tsettingsform.caption"
 msgid "Advanced Settings"
 msgstr "Расширенные настройки"
 
 #: tsettingsform.chkfpcdebug.caption
-#, fuzzy
-#| msgctxt "tform2.chkfpcdebug.caption"
-#| msgid "Debug"
 msgctxt "tsettingsform.chkfpcdebug.caption"
 msgid "Debug"
 msgstr "Отладочный"
 
 #: tsettingsform.chklazarusdebug.caption
-#, fuzzy
-#| msgctxt "tform2.chkfpcdebug.caption"
-#| msgid "Debug"
 msgctxt "tsettingsform.chklazarusdebug.caption"
 msgid "Debug"
 msgstr "Отладочный"
 
 #: tsettingsform.editbinlocation.hint
-#, fuzzy
-#| msgctxt "tform2.editbinlocation.hint"
-#| msgid "Double click to clear"
 msgctxt "tsettingsform.editbinlocation.hint"
 msgid "Double click to clear"
 msgstr "Щелкните дважды для очистки"
 
 #: tsettingsform.editcompileroverride.hint
-#, fuzzy
-#| msgctxt "tform2.editbinlocation.hint"
-#| msgid "Double click to clear"
 msgctxt "tsettingsform.editcompileroverride.hint"
 msgid "Double click to clear"
 msgstr "Щелкните дважды для очистки"
 
 #: tsettingsform.editliblocation.hint
-#, fuzzy
-#| msgctxt "tform2.editbinlocation.hint"
-#| msgid "Double click to clear"
 msgctxt "tsettingsform.editliblocation.hint"
 msgid "Double click to clear"
 msgstr "Щелкните дважды для очистки"
 
 #: tsettingsform.groupbox1.caption
-#, fuzzy
-#| msgid "Proxy settings"
 msgctxt "tsettingsform.groupbox1.caption"
 msgid "Proxy settings"
-msgstr "Настройка Proxy"
+msgstr "Настройка прокси"
 
 #: tsettingsform.groupbox2.caption
-#, fuzzy
-#| msgid "Miscellaneous settings"
 msgctxt "tsettingsform.groupbox2.caption"
 msgid "Miscellaneous settings"
 msgstr "Различные настройки"
 
 #: tsettingsform.groupboxcompileoptions.caption
-#, fuzzy
-#| msgid "Options Override"
 msgctxt "tsettingsform.groupboxcompileoptions.caption"
 msgid "Options Override"
 msgstr "Переопределение параметров"
 
 #: tsettingsform.groupboxfpclazbranchrevision.caption
-#, fuzzy
-#| msgid "Branch and revision"
 msgctxt "tsettingsform.groupboxfpclazbranchrevision.caption"
 msgid "Branch and revision"
 msgstr "Ветка и ревизия"
 
 #: tsettingsform.groupboxfpclazscripts.caption
-#, fuzzy
-#| msgid "Pre and post install scripts"
 msgctxt "tsettingsform.groupboxfpclazscripts.caption"
 msgid "Pre and post install scripts"
 msgstr "Скрипты до и после установки"
 
 #: tsettingsform.grppatching.caption
-#, fuzzy
-#| msgid "Source patching"
 msgctxt "tsettingsform.grppatching.caption"
 msgid "Source patching"
 msgstr "Патчинг исходников"
 
 #: tsettingsform.label1.caption
-#, fuzzy
-#| msgid "HTTP proxy URL:"
 msgctxt "tsettingsform.label1.caption"
 msgid "HTTP proxy URL:"
 msgstr "URL-адрес HTTP-прокси:"
 
 #: tsettingsform.label2.caption
-#, fuzzy
-#| msgid "HTTP proxy port:"
 msgctxt "tsettingsform.label2.caption"
 msgid "HTTP proxy port:"
 msgstr "Порт HTTP прокси:"
 
 #: tsettingsform.label3.caption
-#, fuzzy
-#| msgid "HTTP proxy username:"
 msgctxt "tsettingsform.label3.caption"
 msgid "HTTP proxy username:"
 msgstr "Имя пользователя HTTP-прокси:"
 
 #: tsettingsform.label4.caption
-#, fuzzy
-#| msgid "HTTP proxy password:"
 msgctxt "tsettingsform.label4.caption"
 msgid "HTTP proxy password:"
 msgstr "Пароль HTTP-прокси:"
 
 #: tsettingsform.labelcompileroverride.caption
-#, fuzzy
-#| msgid "Compiler Override"
 msgctxt "tsettingsform.labelcompileroverride.caption"
 msgid "Compiler Override"
 msgstr "Переопределение компилятора"
 
 #: tsettingsform.labelcpu.caption
-#, fuzzy
-#| msgid "Select CPU"
 msgctxt "tsettingsform.labelcpu.caption"
 msgid "Select CPU"
 msgstr "Выберите ЦП"
 
 #: tsettingsform.labelcrossbuildoptions.caption
-#, fuzzy
-#| msgid "Cross Build Options Override (i.e. -CfSoft)"
 msgctxt "tsettingsform.labelcrossbuildoptions.caption"
 msgid "Cross Build Options Override (i.e. -CfSoft)"
 msgstr "Переопред. параметров кросс-компиляции (т.е. -CfSoft)"
 
 #: tsettingsform.labelfpcbranch.caption
-#, fuzzy
-#| msgid "FPC branch/tag"
 msgctxt "tsettingsform.labelfpcbranch.caption"
 msgid "FPC branch/tag"
 msgstr "FPC ветка/тег"
 
 #: tsettingsform.labelfpcoptions.caption
-#, fuzzy
-#| msgid "FPC options"
 msgctxt "tsettingsform.labelfpcoptions.caption"
 msgid "FPC options"
 msgstr "Опции FPC"
 
 #: tsettingsform.labelfpcpostinstall.caption
-#, fuzzy
-#| msgid "FPC post"
 msgctxt "tsettingsform.labelfpcpostinstall.caption"
 msgid "FPC post"
 msgstr "FPC после"
 
 #: tsettingsform.labelfpcpreinstall.caption
-#, fuzzy
-#| msgid "FPC pre"
 msgctxt "tsettingsform.labelfpcpreinstall.caption"
 msgid "FPC pre"
 msgstr "FPC до"
 
 #: tsettingsform.labelfpcrevision.caption
-#, fuzzy
-#| msgid "FPC hash"
 msgctxt "tsettingsform.labelfpcrevision.caption"
 msgid "FPC hash"
 msgstr "Хеш FPC"
 
 #: tsettingsform.labellazarusbranch.caption
-#, fuzzy
-#| msgid "Laz. branch/tag"
 msgctxt "tsettingsform.labellazarusbranch.caption"
 msgid "Laz. branch/tag"
-msgstr "Ветка/тег Lazarus."
+msgstr "Ветка/тег Lazarus"
 
 #: tsettingsform.labellazarusoptions.caption
-#, fuzzy
-#| msgid "Laz. options"
 msgctxt "tsettingsform.labellazarusoptions.caption"
 msgid "Laz. options"
 msgstr "Опции Lazarus"
 
 #: tsettingsform.labellazaruspostinstall.caption
-#, fuzzy
-#| msgid "Lazarus post"
 msgctxt "tsettingsform.labellazaruspostinstall.caption"
 msgid "Lazarus post"
 msgstr "Lazarus после"
 
 #: tsettingsform.labellazaruspreinstall.caption
-#, fuzzy
-#| msgid "Lazarus pre"
 msgctxt "tsettingsform.labellazaruspreinstall.caption"
 msgid "Lazarus pre"
 msgstr "Lazarus до"
 
 #: tsettingsform.labellazarusrevision.caption
-#, fuzzy
-#| msgid "Laz. hash"
 msgctxt "tsettingsform.labellazarusrevision.caption"
 msgid "Laz. hash"
 msgstr "Хеш Lazarus"
 
 #: tsettingsform.labelos.caption
-#, fuzzy
-#| msgid "Select OS"
 msgctxt "tsettingsform.labelos.caption"
 msgid "Select OS"
 msgstr "Выберите ОС"
 
 #: tsettingsform.radiogrouparmarch.caption
-#, fuzzy
-#| msgid "ARM target"
 msgctxt "tsettingsform.radiogrouparmarch.caption"
 msgid "ARM target"
 msgstr "Цель ARM"
 
 #: tsettingsform.rgrpsearchoptions.caption
-#, fuzzy
-#| msgid "Search options"
 msgctxt "tsettingsform.rgrpsearchoptions.caption"
 msgid "Search options"
 msgstr "Опции поиска"
 
 #: tsettingsform.rgrpsubarch.caption
-#, fuzzy
-#| msgid "Select subarch"
 msgctxt "tsettingsform.rgrpsubarch.caption"
 msgid "Select subarch"
 msgstr "Выберите субархитектуру"
 
 #: tsettingsform.tscpuos.caption
-#, fuzzy
-#| msgid "CPU/OS"
 msgctxt "tsettingsform.tscpuos.caption"
 msgid "CPU/OS"
 msgstr "ЦП/ОС"
 
 #: tsettingsform.tssubarch.caption
-#, fuzzy
-#| msgid "Subarch"
 msgctxt "tsettingsform.tssubarch.caption"
 msgid "Subarch"
 msgstr "Субархитектура"
