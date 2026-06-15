@@ -632,6 +632,10 @@ msgstr ""
 msgid "Chinese (CN)"
 msgstr ""
 
+#: tform1.mchinesetwlanguage.caption
+msgid "Traditional Chinese (TW)"
+msgstr ""
+
 #: tform1.memosummary.hint
 msgid "Will show error"
 msgstr "오류 보기"

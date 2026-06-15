@@ -816,6 +816,10 @@ msgstr "เกี่ยวกับโปรแกรม"
 msgid "Chinese (CN)"
 msgstr "จีน (CN)"
 
+#: tform1.mchinesetwlanguage.caption
+msgid "Traditional Chinese (TW)"
+msgstr "จีนตัวเต็ม (TW)"
+
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
 msgstr "ดัตช์ (NL)"

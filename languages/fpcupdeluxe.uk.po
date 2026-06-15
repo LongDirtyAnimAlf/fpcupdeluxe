@@ -628,6 +628,10 @@ msgstr "Про додаток"
 msgid "Chinese (CN)"
 msgstr "Китайська (CN)"
 
+#: tform1.mchinesetwlanguage.caption
+msgid "Traditional Chinese (TW)"
+msgstr "Традиційна китайська (TW)"
+
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
 msgstr "Німецька (NL)"

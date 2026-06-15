@@ -18,7 +18,7 @@
         <TextDesc Value="Installer for FPC and Lazarus."/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="14">
+      <Resources Count="15">
         <Resource_0 FileName="sources\fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="sources\settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
@@ -33,6 +33,7 @@
         <Resource_11 FileName="languages\fpcupdeluxe.tr.po" Type="RCDATA" ResourceName="FPCUPDELUXE.TR"/>
         <Resource_12 FileName="languages\fpcupdeluxe.ru.po" Type="RCDATA" ResourceName="FPCUPDELUXE.RU"/>
         <Resource_13 FileName="languages\fpcupdeluxe.th.po" Type="RCDATA" ResourceName="FPCUPDELUXE.TH"/>
+        <Resource_14 FileName="languages\fpcupdeluxe.zh_TW.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH_TW"/>
       </Resources>
     </General>
     <i18n>

@@ -714,6 +714,10 @@ msgstr "О программе"
 msgid "Chinese (CN)"
 msgstr "Китайский (CN)"
 
+#: tform1.mchinesetwlanguage.caption
+msgid "Traditional Chinese (TW)"
+msgstr "Традиционный китайский (TW)"
+
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
 msgstr "Нидерландский (NL)"

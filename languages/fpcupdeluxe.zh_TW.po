@@ -1,329 +1,300 @@
 msgid ""
 msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
-"Last-Translator: swirti <swirti@free.fr>\n"
 "Language-Team: \n"
-"Language: fr\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.2\n"
+"X-Generator: Poedit 3.0\n"
+"Last-Translator: Peter Dave Hello <hsu@peterdavehello.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: zh_TW\n"
 
 #: extrasettings.captioncheckaddcontext
 msgid "Add context for FPC and Lazarus files."
-msgstr "Ajouter un contexte pour les fichiers FPC et Lazarus."
+msgstr "為 FPC 和 Lazarus 檔案加入關聯。"
 
 #: extrasettings.captioncheckapplylocalchanges
 msgid "Re-apply local changes when updating."
-msgstr "Réappliquer les modifications locales lors de la mise à jour."
+msgstr "更新時重新套用本機變更。"
 
 #: extrasettings.captioncheckaskconfirmation
 msgid "Always ask for confirmation."
-msgstr "Toujours demander une confirmation."
+msgstr "每次都要求確認。"
 
 #: extrasettings.captioncheckdockedlazarus
 msgid "Docked Lazarus IDE."
-msgstr "IDE Lazarus docké."
+msgstr "停駐式 Lazarus IDE。"
 
 #: extrasettings.captioncheckenableonlinepatching
 msgid "Allow patching of sources by online patches."
-msgstr "Autoriser la correction des sources par des correctifs en ligne."
+msgstr "允許以線上修補檔修補原始程式碼。"
 
 #: extrasettings.captioncheckextraverbose
 msgid "Be extra verbose."
-msgstr "Être plus verbeux."
+msgstr "顯示更詳細的輸出。"
 
 #: extrasettings.captioncheckforcelocalrepoclient
 msgid "Use local repo-client."
-msgstr "Utiliser le client du dépôt local."
+msgstr "使用本機版本庫用戶端。"
 
 #: extrasettings.captioncheckfpcdotted
 msgid "Build dotted RTL."
-msgstr "Construire RTL ponctué."
+msgstr "建置帶命名空間的 RTL。"
 
 #: extrasettings.captioncheckfpcunicode
 msgid "Build FPC unicode."
-msgstr "Construire FPC unicode."
+msgstr "建置 FPC Unicode 版本。"
 
 #: extrasettings.captioncheckgetupdates
 msgid "Check for fpcupdeluxe updates."
-msgstr "Vérifier les mises à jour de fpcupdeluxe."
+msgstr "檢查 fpcupdeluxe 更新。"
 
 #: extrasettings.captioncheckglibccompat
 msgid "Force linking against lowest @GLIBC-version."
-msgstr "Forcer la liaison avec la version @GLIBC la plus basse."
+msgstr "強制連結最低版本的 @GLIBC。"
 
 #: extrasettings.captioncheckincludehelp
 msgid "Include Help."
-msgstr "Inclure l'aide."
+msgstr "包含說明。"
 
 #: extrasettings.captioncheckincludelcl
 msgid "Include LCL with cross-compiler."
-msgstr "Inclure LCL avec le compilateur croisé."
+msgstr "在交叉編譯器中一併包含 LCL。"
 
 #: extrasettings.captioncheckpackagerepo
 msgid "Get package repositories."
-msgstr "Obtenir les dépôts de paquets."
+msgstr "取得套件版本庫。"
 
 #: extrasettings.captioncheckrepo
 msgid "Get FPC/Lazarus repositories."
-msgstr "Obtenir les dépôts FPC/Lazarus."
+msgstr "取得 FPC/Lazarus 版本庫。"
 
 #: extrasettings.captionchecksavescript
 msgid "Save settings in fpcup-script."
-msgstr "Enregistrer les paramètres dans fpcup-script."
+msgstr "將設定儲存至 fpcup 指令稿。"
 
 #: extrasettings.captionchecksendinfo
 msgid "Send location and install info."
-msgstr "Envoyer l'emplacement et les infos d'installation."
+msgstr "傳送位置與安裝資訊。"
 
 #: extrasettings.captionchecksplitfpc
 msgid "Split FPC sources and bins."
-msgstr "Séparer les sources et binaires FPC."
+msgstr "分離 FPC 原始程式碼與執行檔。"
 
 #: extrasettings.captionchecksplitlazarus
 msgid "Split Lazarus sources and bins."
-msgstr "Séparer les sources et binaires Lazarus."
+msgstr "分離 Lazarus 原始程式碼與執行檔。"
 
 #: extrasettings.captionchecksystemfpc
 msgid "Use system FPC for Lazarus."
-msgstr ""
-"Utiliser le FPC du \n"
-"système pour Lazarus."
+msgstr "讓 Lazarus 使用系統上的 FPC。"
 
 #: extrasettings.captioncheckupdateonly
 msgid "FPC/Lazarus/Modules rebuild only."
-msgstr "Reconstruction uniquement de FPC/Lazarus/Modules."
+msgstr "僅重新建置 FPC/Lazarus/模組。"
 
 #: extrasettings.captioncheckusemakejobs
 msgid "Use jobs for GNU make."
-msgstr "Utiliser les tâches pour GNU make."
+msgstr "為 GNU make 使用 jobs。"
 
 #: extrasettings.captioncheckusewget
 msgid "Use wget/libcurl as downloader."
-msgstr "Utiliser wget/libcurl comme téléchargeur."
+msgstr "使用 wget/libcurl 作為下載工具。"
 
 #: extrasettings.captionenabledelphirtti
 msgctxt "extrasettings.captionenabledelphirtti"
 msgid "Enable Delphi RTTI."
-msgstr "Activer Delphi RTTI."
+msgstr "啟用 Delphi RTTI。"
 
 #: extrasettings.captionusesoftfloat80bit
 msgctxt "extrasettings.captionusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
-msgstr "Activer l'émulation logicielle des nombres flottants 80 bits."
+msgstr "啟用 80 位元浮點數的軟體模擬。"
 
 #: extrasettings.hintcheckaddcontext
 msgid "Double clicking on FPC and Lazarus files will open Lazarus."
-msgstr "Un double clic sur les fichiers FPC et Lazarus ouvrira Lazarus."
+msgstr "對 FPC 和 Lazarus 檔案按兩下即可開啟 Lazarus。"
 
 #: extrasettings.hintcheckapplylocalchanges
-msgid ""
-"Fpcupdeluxe can re-apply the local changes automagically by using local auto-"
-"patch."
-msgstr ""
-"Fpcupdeluxe peut réappliquer automatiquement les modifications locales à "
-"l'aide d'un patch automatique local."
+msgid "Fpcupdeluxe can re-apply the local changes automagically by using local auto-patch."
+msgstr "Fpcupdeluxe 可使用本機自動修補來自動重新套用本機變更。"
 
 #: extrasettings.hintcheckaskconfirmation
 msgid "Show a confirmation dialog with yes/no before every build."
-msgstr ""
-"Afficher une boîte de dialogue de confirmation avec oui/non avant chaque "
-"compilation."
+msgstr "每次建置前顯示含「是/否」的確認對話方塊。"
 
 #: extrasettings.hintcheckdockedlazarus
 msgid "Build a docked Lazarus IDE"
-msgstr "Construire un IDE Lazarus docké"
+msgstr "建置停駐式 Lazarus IDE"
 
 #: extrasettings.hintcheckenableonlinepatching
-msgid ""
-"Fpcupdeluxe can patch the sources automagically by using online patches."
-msgstr ""
-"Fpcupdeluxe peut corriger les sources automatiquement à l'aide de correctifs "
-"en ligne."
+msgid "Fpcupdeluxe can patch the sources automagically by using online patches."
+msgstr "Fpcupdeluxe 可使用線上修補檔自動修補原始程式碼。"
 
 #: extrasettings.hintcheckforcelocalrepoclient
 msgid "Use the repo-client by fpcupdeluxe."
-msgstr "Utiliser le dépôt client par fpcupdeluxe."
+msgstr "使用 fpcupdeluxe 內建的版本庫用戶端。"
 
 #: extrasettings.hintcheckfpcdotted
-msgid ""
-"FPC has support for creating a \"dotted RTL\". This is a set of units from "
-"RTL/Packages where all unit names are namespaced (dotted)."
-msgstr ""
-"FPC prend en charge la création d'un \"RTL pointé\". Il s'agit d'un ensemble "
-"d'unités provenant de RTL/Packages où tous les noms d'unités sont nommés "
-"(pointés)."
+msgid "FPC has support for creating a \"dotted RTL\". This is a set of units from RTL/Packages where all unit names are namespaced (dotted)."
+msgstr "FPC 可建立「帶命名空間的 RTL」。這是一組來自 RTL/Packages 的單元，所有單元名稱均帶有命名空間（以點號分隔）。"
 
 #: extrasettings.hintcheckfpcunicode
 msgid "Build FPC unicode for better Delphi compatibility."
-msgstr "Construire FPC unicode pour une meilleure compatibilité avec Delphi."
+msgstr "建置 FPC Unicode 版本，以提升 Delphi 相容性。"
 
 #: extrasettings.hintcheckgetupdates
 msgid "Check for updates of fpcupdeluxe binaries."
-msgstr "Vérifier les mises à jour des binaires fpcupdeluxe."
+msgstr "檢查 fpcupdeluxe 執行檔是否有更新。"
 
 #: extrasettings.hintcheckglibccompat
-msgid ""
-"Force linking against lowest possible GLIBC version to (possibly) increase "
-"the compatibility with older Linux versions. Use at your own risk."
-msgstr ""
-"Forcer la liaison avec la version GLIBC la plus basse possible afin "
-"d'augmenter (éventuellement) la compatibilité avec les anciennes versions de "
-"Linux. À utiliser à vos propres risques."
+msgid "Force linking against lowest possible GLIBC version to (possibly) increase the compatibility with older Linux versions. Use at your own risk."
+msgstr "強制連結最低可用的 GLIBC 版本，以 (可能) 提高與舊版 Linux 的相容性。風險自負。"
 
 #: extrasettings.hintcheckrepo
 msgid "Download whole repository, or only latest files."
-msgstr ""
-"Télécharger l'intégralité du référentiel ou uniquement les fichiers les plus "
-"récents."
+msgstr "下載整個版本庫，或只下載最新檔案。"
 
 #: extrasettings.hintchecksavescript
 msgid "Save the current install-settings in a fpclazup-script for later use."
-msgstr ""
-"Enregistrer les paramètres d'installation actuels dans un script fpclazup "
-"pour une utilisation ultérieure."
+msgstr "將目前的安裝設定儲存至 fpclazup 指令稿，以便日後使用。"
 
 #: extrasettings.hintchecksendinfo
-msgid ""
-"Location and install info will be send to public central fpcupdeluxe server."
-msgstr ""
-"Les infos de localisation et d'installation seront envoyées au serveur "
-"central public fpcupdeluxe."
+msgid "Location and install info will be send to public central fpcupdeluxe server."
+msgstr "位置與安裝資訊將傳送至公開的 fpcupdeluxe 中央伺服器。"
 
 #: extrasettings.hintchecksystemfpc
 msgid "Use the system wide install of FPC to build Lazarus."
-msgstr "Utiliser l'installation système de FPC pour compiler Lazarus."
+msgstr "使用系統上已安裝的 FPC 來建置 Lazarus。"
 
 #: extrasettings.hintenabledelphirtti
 msgctxt "extrasettings.hintenabledelphirtti"
 msgid "Enable Delphi RTTI."
-msgstr "Activer Delphi RTTI."
+msgstr "啟用 Delphi RTTI。"
 
 #: extrasettings.hintusesoftfloat80bit
 msgctxt "extrasettings.hintusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
-msgstr "Activer l'émulation logicielle des nombres flottants 80 bits."
+msgstr "啟用 80 位元浮點數的軟體模擬。"
 
 #: fpcupdeluxemainform.rsmbabort
 msgid "Abort"
-msgstr "Abandonner"
+msgstr "中止"
 
 #: fpcupdeluxemainform.rsmball
 msgid "&All"
-msgstr "Tout"
+msgstr "全部(&A)"
 
 #: fpcupdeluxemainform.rsmbcancel
 msgid "Cancel"
-msgstr "Annuler"
+msgstr "取消"
 
 #: fpcupdeluxemainform.rsmbclose
 msgid "&Close"
-msgstr "Fermer"
+msgstr "關閉(&C)"
 
 #: fpcupdeluxemainform.rsmbhelp
 msgid "&Help"
-msgstr "Aide"
+msgstr "說明(&H)"
 
 #: fpcupdeluxemainform.rsmbignore
 msgid "&Ignore"
-msgstr "&Ignorer"
+msgstr "忽略(&I)"
 
 #: fpcupdeluxemainform.rsmbno
 msgid "&No"
-msgstr "&Non"
+msgstr "否(&N)"
 
 #: fpcupdeluxemainform.rsmbnotoall
 msgid "No to all"
-msgstr "Non à tout"
+msgstr "全部皆否"
 
 #: fpcupdeluxemainform.rsmbok
 msgid "&OK"
-msgstr "&OK"
+msgstr "確定(&O)"
 
 #: fpcupdeluxemainform.rsmbopen
 msgid "&Open"
-msgstr "&Ouvrir"
+msgstr "開啟(&O)"
 
 #: fpcupdeluxemainform.rsmbretry
 msgid "&Retry"
-msgstr "&Réessayer"
+msgstr "重試(&R)"
 
 #: fpcupdeluxemainform.rsmbsave
 msgid "&Save"
-msgstr "Enregi&strer"
+msgstr "儲存(&S)"
 
 #: fpcupdeluxemainform.rsmbunlock
 msgid "&Unlock"
-msgstr "Déverrouiller"
+msgstr "解鎖(&U)"
 
 #: fpcupdeluxemainform.rsmbyes
 msgid "&Yes"
-msgstr "Oui"
+msgstr "是(&Y)"
 
 #: fpcupdeluxemainform.rsmbyestoall
 msgid "Yes to &All"
-msgstr "Oui à tout"
+msgstr "全部皆是(&A)"
 
 #: fpcupdeluxemainform.rsmtauthentication
 msgid "Authentication"
-msgstr "Authentification"
+msgstr "驗證"
 
 #: fpcupdeluxemainform.rsmtconfirmation
 msgid "Confirmation"
-msgstr "Confirmation"
+msgstr "確認"
 
 #: fpcupdeluxemainform.rsmtcustom
 msgid "Custom"
-msgstr "Personnalisé"
+msgstr "自訂"
 
 #: fpcupdeluxemainform.rsmterror
 msgid "Error"
-msgstr "Erreur"
+msgstr "錯誤"
 
 #: fpcupdeluxemainform.rsmtinformation
 msgid "Information"
-msgstr "Information"
+msgstr "資訊"
 
 #: fpcupdeluxemainform.rsmtwarning
 msgid "Warning"
-msgstr "Avertissement"
+msgstr "警告"
 
 #: fpcupdeluxemainform.upadvertisetools
 msgid "FPCUPdeluxe can try to download them if available !"
-msgstr "FPCUPdeluxe peut essayer de les télécharger s'ils sont disponibles !"
+msgstr "FPCUPdeluxe 可在有提供的情況下嘗試下載！"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilers
 msgid "Going to auto-build all installed cross-compilers !"
-msgstr "Compilation auto de tous les compilateurs croisés installés !"
+msgstr "即將自動建置所有已安裝的交叉編譯器！"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilerscheck
 msgid "Checking FPC configfile [fpc.cfg] for cross-compilers in "
-msgstr ""
-"Vérification du fichier de configuration de FPC [fpc.cfg] pour les "
-"compilateurs croisés en "
+msgstr "正在檢查 FPC 組態檔 [fpc.cfg] 中的交叉編譯器，位於 "
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersfound
 msgid "Found crosscompiler for "
-msgstr "Compilateur croisé trouvé pour "
+msgstr "找到交叉編譯器，目標為 "
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersupdate
 msgid "Going to update cross-compiler."
-msgstr "Mise à jour du compilateur croisé."
+msgstr "即將更新交叉編譯器。"
 
 #: fpcupdeluxemainform.upbuildcrosscompiler
 msgid "Going to install a cross-compiler from available sources."
-msgstr "Installer un compilateur croisé à partir des sources disponibles."
+msgstr "即將從可用來源安裝交叉編譯器。"
 
 #: fpcupdeluxemainform.upbuildnativecrosscompiler
 msgid "Going to build the native compiler for"
-msgstr "Construire le compilateur natif pour"
+msgstr "即將建置原生編譯器，目標為"
 
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
-msgstr "Veuillez patienter. Vérification des mises à jour."
+msgstr "請稍候，正在檢查更新。"
 
 #: fpcupdeluxemainform.upconsent
 msgid ""
@@ -337,196 +308,181 @@ msgid ""
 "\n"
 "Do you allow this logging info to be gathered ?"
 msgstr ""
-"Attention !\n"
+"注意！\n"
 "\n"
-"Fpcupdeluxe est capable d'enregistrer certaines informations "
-"d'installation.\n"
-"(Pays, OS, versions, actions de mise à jour)\n"
-"Ces données sont envoyées vers un serveur mORMot,\n"
-"où elles sont mises à la disposition de tous.\n"
-"(voir l'URL affichée à l'écran et dans la barre d'état)\n"
+"Fpcupdeluxe 可記錄部分安裝資訊。\n"
+"(國家、作業系統、版本、更新動作)\n"
+"這些資料會傳送至 mORMot 伺服器，\n"
+"並對所有人公開。\n"
+"(請參閱畫面及狀態列中顯示的網址)\n"
 "\n"
-"Autorisez-vous la collecte de ces informations ?"
+"是否允許收集這些記錄資訊？"
 
 #: fpcupdeluxemainform.updarwinfolderwarning1
 msgid "FPCUPdeluxe cannot be run inside the Downloads folder."
-msgstr "FPCUPdeluxe ne peut pas être exécuté dans le dossier Téléchargements."
+msgstr "FPCUPdeluxe 無法在「下載項目」資料夾中執行。"
 
 #: fpcupdeluxemainform.updarwinfolderwarning2
 msgid "This is NOT allowed by OSX security measures."
-msgstr "Ceci n'est PAS autorisé par les mesures de sécurité d'OSX."
+msgstr "macOS 安全性機制不允許此操作。"
 
 #: fpcupdeluxemainform.updarwinfolderwarning3
 msgid "Copy FPCUPdeluxe into its own directory and run from there."
-msgstr ""
-"Copier FPCUPdeluxe dans son propre répertoire et l'exécuter à partir de là."
+msgstr "請將 FPCUPdeluxe 複製到獨立的目錄中再執行。"
 
 #: fpcupdeluxemainform.upfolderwarning1
 msgid "FPCUPdeluxe could not create its necessary setting-files."
-msgstr ""
-"FPCUPdeluxe n'a pas pu créer ses fichiers de configuration nécessaires."
+msgstr "FPCUPdeluxe 無法建立必要的設定檔。"
 
 #: fpcupdeluxemainform.upfolderwarning2
 msgid "Please check the folder permissions, and re-start."
-msgstr "Veuillez vérifier les permissions du dossier, et redémarrer."
+msgstr "請檢查資料夾權限，然後重新啟動。"
 
 #: fpcupdeluxemainform.upgitnotfound
 msgid "No GIT executable found on system. Tag-list cannot be received."
-msgstr ""
-"Aucun exécutable GIT trouvé sur le système. Impossible de recevoir la liste "
-"des tags."
+msgstr "系統上找不到 GIT 執行檔，無法接收標籤清單。"
 
 #: fpcupdeluxemainform.upinstallconfimation
 #, object-pascal-format
 msgid "Going to install %s and %s%s."
-msgstr "Installation de %s et %s%s."
+msgstr "即將安裝 %s 和 %s%s。"
 
 #: fpcupdeluxemainform.upinstallconfimationsimple
 #, object-pascal-format
 msgid "Going to install the %s."
-msgstr "Installation de %s."
+msgstr "即將安裝 %s。"
 
 #: fpcupdeluxemainform.upinstallcrosscompiler
 msgid "Going to install the cross-compiler for"
-msgstr "Installation du compilateur croisé pour"
+msgstr "即將安裝交叉編譯器，目標為"
 
 #: fpcupdeluxemainform.upinstalldirectory
 msgid "Install directory"
-msgstr "Répertoire d'installation"
+msgstr "安裝目錄"
 
 #: fpcupdeluxemainform.upinstalldirectorycurrent
 msgid "Current install directory"
-msgstr "Répertoire d'installation actuel"
+msgstr "目前的安裝目錄"
 
 #: fpcupdeluxemainform.upinstallfpc
 msgid "Going to install/update FPC only."
-msgstr "Installation/mise à jour de FPC uniquement."
+msgstr "即將僅安裝/更新 FPC。"
 
 #: fpcupdeluxemainform.upinstallfpclazarus
 msgid "Going to install/update FPC and Lazarus."
-msgstr "Installation/mise à jour de FPC et Lazarus."
+msgstr "即將安裝/更新 FPC 和 Lazarus。"
 
 #: fpcupdeluxemainform.upinstalllazarus
 msgid "Going to install/update Lazarus only."
-msgstr "Installation/mise à jour de Lazarus uniquement."
+msgstr "即將僅安裝/更新 Lazarus。"
 
 #: fpcupdeluxemainform.upinstallmodule
 msgid "Going to install/update module"
-msgstr "Installation/mise à jour du module"
+msgstr "即將安裝/更新模組"
 
 #: fpcupdeluxemainform.upinstallsettingscurrent
 msgid "Got settings from install directory"
-msgstr "Paramètres récupérés depuis le répertoire d'installation"
+msgstr "已從安裝目錄取得設定"
 
 #: fpcupdeluxemainform.uplookup
 msgid "Looking for"
-msgstr "À la recherche de"
+msgstr "正在尋找"
 
 #: fpcupdeluxemainform.uplookupbintools
 msgid "Going to look for the right cross-bins. Can (will) take some time !"
-msgstr ""
-"Recherche des binaires croisés corrects. Cela peut (va) prendre un certain "
-"temps !"
+msgstr "即將尋找正確的交叉工具執行檔，這可能需要一些時間！"
 
 #: fpcupdeluxemainform.uplookuplibtools
-msgid ""
-"Going to look for the right cross-libraries. Can (will) take some time !"
-msgstr ""
-"Recherche des bibliothèques croisées correctes. Cela peut (va) prendre un "
-"certain temps !"
+msgid "Going to look for the right cross-libraries. Can (will) take some time !"
+msgstr "即將尋找正確的交叉函式庫，這可能需要一些時間！"
 
 #: fpcupdeluxemainform.uplookuptools
 msgid "Looking for FPCUPdeluxe cross-tools on GitHub (if any)."
-msgstr "Recherche d'outils croisés FPCUPdeluxe sur GitHub (si existants)"
+msgstr "正在 GitHub 上尋找 FPCUPdeluxe 交叉工具（如有）。"
 
 #: fpcupdeluxemainform.upmissingtools
 msgid "The building of a crosscompiler failed due to missing cross-tools."
-msgstr ""
-"La compilation du compilateur croisé a échoué en raison de l'absence "
-"d'outils croisés."
+msgstr "因缺少交叉工具，交叉編譯器建置失敗。"
 
 #: fpcupdeluxemainform.upnotvalid
 msgid "No valid FPC install found. Please install FPC first."
-msgstr ""
-"Aucune installation FPC valide trouvée. Veuillez d'abord installer FPC."
+msgstr "找不到有效的 FPC 安裝，請先安裝 FPC。"
 
 #: fpcupdeluxemainform.upoptions
 msgid "with given options."
-msgstr "avec les options fournies."
+msgstr "使用指定的選項。"
 
 #: fpcupdeluxemainform.upquestioncontinue
 msgid "Do you want to continue ?"
-msgstr "Voulez-vous continuer ?"
+msgstr "是否要繼續？"
 
 #: fpcupdeluxemainform.upquitrequest
 msgid "Please quit FPCUPdeluxe."
-msgstr "Veuillez quitter FPCUPdeluxe."
+msgstr "請結束 FPCUPdeluxe。"
 
 #: fpcupdeluxemainform.upremovecrosscompiler
 msgid "Going to remove the cross-compiler for"
-msgstr "Suppression du compilateur croisé pour"
+msgstr "即將移除交叉編譯器，目標為"
 
 #: fpcupdeluxemainform.upremovemodule
 msgid "Going to remove module"
-msgstr "Suppression du module"
+msgstr "即將移除模組"
 
 #: fpcupdeluxemainform.upselectcputarget
 msgid "Please select a CPU target first."
-msgstr "Veuillez d'abord sélectionner une cible CPU."
+msgstr "請先選擇 CPU 目標。"
 
 #: fpcupdeluxemainform.upselectfpclazarustarget
 msgid "Please select a FPC and Lazarus target first"
-msgstr "Veuillez d'abord sélectionner une cible FPC et Lazarus"
+msgstr "請先選擇 FPC 和 Lazarus 目標"
 
 #: fpcupdeluxemainform.upselectfpctarget
 msgid "Please select a FPC target first"
-msgstr "Veuillez d'abord sélectionner une cible FPC"
+msgstr "請先選擇 FPC 目標"
 
 #: fpcupdeluxemainform.upselectlazarustarget
 msgid "Please select a Lazarus target first"
-msgstr "Veuillez d'abord sélectionner une cible Lazarus"
+msgstr "請先選擇 Lazarus 目標"
 
 #: fpcupdeluxemainform.upselectostarget
 msgid "Please select an OS target first."
-msgstr "Veuillez d'abord sélectionner un OS cible."
+msgstr "請先選擇作業系統目標。"
 
 #: fpcupdeluxemainform.upspacewarning
 msgid "Having a space in your install path is very ill-advised !"
-msgstr ""
-"Il est fortement déconseillé d'avoir un espace dans votre chemin "
-"d'installation !"
+msgstr "強烈建議安裝路徑中不要包含空格！"
 
 #: fpcupdeluxemainform.uptrybuildcrosscompiler
 msgid "Trying to build the cross-compiler for"
-msgstr "Tentative de création du compilateur croisé pour"
+msgstr "正在嘗試建置交叉編譯器，目標為"
 
 #: fpcupdeluxemainform.upupdatecrossall
 msgid "Going to update all crosscompilers"
-msgstr "Mise à jour de tous les compilateurs croisés"
+msgstr "即將更新所有交叉編譯器"
 
 #: fpcupdeluxemainform.upupdatefound
 msgid "New FPCUPdeluxe version available"
-msgstr "Nouvelle version de FPCUPdeluxe disponible"
+msgstr "有新版本的 FPCUPdeluxe 可用"
 
 #: fpcupdeluxemainform.upupdatenotfound
 msgid "No updates found."
-msgstr "Aucune mise à jour trouvée."
+msgstr "找不到更新。"
 
 #: tform1.actfileexit.caption
 msgid "E&xit"
-msgstr "&Quitter"
+msgstr "結束(&X)"
 
 #: tform1.actfileexit.hint
 msgid "Exit"
-msgstr "Quitter"
+msgstr "結束"
 
 #: tform1.actfilesave.caption
 msgid "&Save log"
-msgstr "Enregi&strer les log"
+msgstr "儲存記錄(&S)"
 
 #: tform1.actfilesave.hint
 msgid "Save As"
-msgstr "Enregistrer sous"
+msgstr "另存新檔"
 
 #: tform1.androidbtn.caption
 msgid "LAMW"
@@ -534,213 +490,211 @@ msgstr "LAMW"
 
 #: tform1.androidbtn.hint
 msgid "Will install/update FPC and Lazarus stable and LAMW"
-msgstr "Installera/mettra à jour FPC et Lazarus stable et LAMW"
+msgstr "安裝/更新 FPC 和 Lazarus 穩定版及 LAMW"
 
 #: tform1.basicsheet.caption
 msgid "Basic"
-msgstr "Base"
+msgstr "基本"
 
 #: tform1.bitbtnfpcandlazarus.caption
 msgid "Install/update FPC+Lazarus"
-msgstr "Installer/mettre à jour FPC+Lazarus"
+msgstr "安裝/更新 FPC+Lazarus"
 
 #: tform1.bitbtnfpcandlazarus.hint
 msgid "Will install/update the selected version of both FPC and Lazarus."
-msgstr "Installera/mettra à jour la version sélectionnée de FPC et Lazarus."
+msgstr "安裝/更新所選版本的 FPC 和 Lazarus。"
 
 #: tform1.bitbtnfpconly.caption
 msgid "Only FPC"
-msgstr "Seulement FPC"
+msgstr "僅 FPC"
 
 #: tform1.bitbtnfpconly.hint
 msgid "Only install/update selected FPC version."
-msgstr "Installer/mettrez à jour uniquement la version sélectionnée du FPC."
+msgstr "僅安裝/更新所選的 FPC 版本。"
 
 #: tform1.bitbtnfpconlytag.caption
 msgctxt "tform1.bitbtnfpconlytag.caption"
 msgid "Add Tag"
-msgstr "Ajouter un tag"
+msgstr "新增標籤"
 
 #: tform1.bitbtnfpconlytag.hint
 msgid "Add tag/url into FPC install list"
-msgstr "Ajouter un tag/url à la liste d'installation FPC"
+msgstr "將標籤/網址加入 FPC 安裝清單"
 
 #: tform1.bitbtnfpcsetrevision.caption
 msgid "Set FPC hash in Setup+"
-msgstr "Définir le hachage FPC dans Configuration+"
+msgstr "在 Setup+ 中設定 FPC hash"
 
 #: tform1.bitbtnfpcsetrevision.hint
 msgid "Set FPC revision"
-msgstr "Définir la révision de FPC"
+msgstr "設定 FPC 修訂版本"
 
 #: tform1.bitbtnhalt.caption
 msgid "STOP"
-msgstr "ARRÊTER"
+msgstr "停止"
 
 #: tform1.bitbtnhalt.hint
 msgid "Try to stop current install process"
-msgstr "Tenter d'arrêter le processus d'installation en cours"
+msgstr "嘗試停止目前的安裝程序"
 
 #: tform1.bitbtnlazarusonly.caption
 msgid "Only Lazarus"
-msgstr "Seulement Lazarus"
+msgstr "僅 Lazarus"
 
 #: tform1.bitbtnlazarusonly.hint
 msgid "Only install/update selected Lazarus version."
-msgstr "Installer/mettre à jour seulement la version sélectionnée de Lazarus."
+msgstr "僅安裝/更新所選的 Lazarus 版本。"
 
 #: tform1.bitbtnlazarusonlytag.caption
 msgctxt "tform1.bitbtnlazarusonlytag.caption"
 msgid "Add Tag"
-msgstr "Ajouter un tag"
+msgstr "新增標籤"
 
 #: tform1.bitbtnlazarusonlytag.hint
 msgid "Add tag/url into Lazarus install list"
-msgstr "Ajouter un tag/url à la liste d'installation de Lazarus"
+msgstr "將標籤/網址加入 Lazarus 安裝清單"
 
 #: tform1.bitbtnlazarussetrevision.caption
 msgid "Set Lazarus hash in Setup+"
-msgstr "Définir le hachage Lazarus dans Configuration+"
+msgstr "在 Setup+ 中設定 Lazarus hash"
 
 #: tform1.bitbtnlazarussetrevision.hint
 msgid "Set Lazarus revision"
-msgstr "Définir la révision de Lazarus"
+msgstr "設定 Lazarus 修訂版本"
 
 #: tform1.btnbuildhelp.caption
 msgid "Build Help"
-msgstr "Construire l'aide"
+msgstr "建置說明"
 
 #: tform1.btnchecktoolslocations.caption
 msgid "Check Tools Location"
-msgstr "Vérifier l'emplacement des outils"
+msgstr "檢查工具位置"
 
 #: tform1.btnclearlog.caption
 msgid "Clear log"
-msgstr "Effacer le journal"
+msgstr "清除記錄"
 
 #: tform1.btncreatelazarusconfig.caption
 msgid "Create Lazarus Configuration"
-msgstr "Créer la  configuration Lazarus"
+msgstr "建立 Lazarus 組態"
 
 #: tform1.btngetfpccandidates.caption
 msgctxt "tform1.btngetfpccandidates.caption"
 msgid "Get candidates"
-msgstr "Obtenir des candidats"
+msgstr "取得候選版本"
 
 #: tform1.btngetfpcfixes.caption
 msgctxt "tform1.btngetfpcfixes.caption"
 msgid "Get fixes"
-msgstr "Obtenir des correctifs"
+msgstr "取得修正版本"
 
 #: tform1.btngetfpcreleases.caption
 msgctxt "tform1.btngetfpcreleases.caption"
 msgid "Get releases"
-msgstr "Obtenir les versions"
+msgstr "取得正式版本"
 
 #: tform1.btngetlazaruscandidates.caption
 msgctxt "tform1.btngetlazaruscandidates.caption"
 msgid "Get candidates"
-msgstr "Obtenir des candidats"
+msgstr "取得候選版本"
 
 #: tform1.btngetlazarusfixes.caption
 msgctxt "tform1.btngetlazarusfixes.caption"
 msgid "Get fixes"
-msgstr "Obtenir des correctifs"
+msgstr "取得修正版本"
 
 #: tform1.btngetlazarusreleases.caption
 msgctxt "tform1.btngetlazarusreleases.caption"
 msgid "Get releases"
-msgstr "Obtenir les versions"
+msgstr "取得正式版本"
 
 #: tform1.btngetopenssl.caption
 msgid "Get OpenSSL by Browser"
-msgstr "Obtenir OpenSSL via le navigateur"
+msgstr "以瀏覽器取得 OpenSSL"
 
 #: tform1.btninstalldirselect.caption
 msgid "Set install path"
-msgstr "Définir le chemin d'installation"
+msgstr "設定安裝路徑"
 
 #: tform1.btninstallmodule.caption
 msgid "Install module"
-msgstr "Installer le module"
+msgstr "安裝模組"
 
 #: tform1.btninstallmodule.hint
 msgid "Install the selected module."
-msgstr "Installez le module sélectionné."
+msgstr "安裝所選的模組。"
 
 #: tform1.btnsendlog.caption
 msgid "Email log"
-msgstr "Envoyer le journal"
+msgstr "以電子郵件傳送記錄"
 
 #: tform1.btnsendlog.hint
 msgid "Send email to fpcup maintainer containing Commandscreen output."
-msgstr ""
-"Envoyer un e-mail au responsable de fpcup contenant la sortie de l'écran de "
-"commande."
+msgstr "將指令畫面輸出以電子郵件傳送給 fpcup 維護者。"
 
 #: tform1.btnsetupplus.caption
 msgid "Setup+"
-msgstr "Configuration+"
+msgstr "Setup+"
 
 #: tform1.btnsetupplus.hint
 msgid "Open the extended settings form."
-msgstr "Ouvrir le formulaire des paramètres avancés."
+msgstr "開啟進階設定表單。"
 
 #: tform1.btnuninstallmodule.caption
 msgid "Uninstall module"
-msgstr "Désinstaller le module"
+msgstr "解除安裝模組"
 
 #: tform1.btnuninstallmodule.hint
 msgid "Uninstall the selected module."
-msgstr "Désinstaller le module sélectionné."
+msgstr "解除安裝所選的模組。"
 
 #: tform1.btnupdatelazarusmakefiles.caption
 msgid "Update Lazarus Makefiles"
-msgstr "Mettre à jour les Makefiles de Lazarus"
+msgstr "更新 Lazarus Makefiles"
 
 #: tform1.buttonautocrossupdate.caption
 msgid "Update all"
-msgstr "Tout mettre à jour"
+msgstr "全部更新"
 
 #: tform1.buttonautocrossupdate.hint
 msgid "Auto-update all installed cross-compilers."
-msgstr "Mettre à jour automatiquement tous les compilateurs croisés installés."
+msgstr "自動更新所有已安裝的交叉編譯器。"
 
 #: tform1.buttonbuildnativecompiler.caption
 msgid "Build native compiler"
-msgstr "Construire le compilateur natif"
+msgstr "建置原生編譯器"
 
 #: tform1.buttonbuildnativecompiler.hint
 msgid "Build the selected CPU-OS native compiler."
-msgstr "Construire le compilateur natif du CPU-OS sélectionné."
+msgstr "建置所選 CPU-OS 的原生編譯器。"
 
 #: tform1.buttoninstallcrosscompiler.caption
 msgid "Install compiler"
-msgstr "Installer le compilateur"
+msgstr "安裝編譯器"
 
 #: tform1.buttoninstallcrosscompiler.hint
 msgid "Install the selected CPU-OS cross-compiler."
-msgstr "Installer le compilateur croisé du CPU-OS sélectionné."
+msgstr "安裝所選 CPU-OS 的交叉編譯器。"
 
 #: tform1.buttonremovecrosscompiler.caption
 msgid "Remove compiler"
-msgstr "Supprimer le compilateur"
+msgstr "移除編譯器"
 
 #: tform1.buttonremovecrosscompiler.hint
 msgid "Remove the selected CPU-OS cross-compiler."
-msgstr "Supprimer le compilateur croisé du CPU-OS sélectionné."
+msgstr "移除所選 CPU-OS 的交叉編譯器。"
 
 #: tform1.buttonsubarchselect.caption
 msgid "Set subarch"
-msgstr "Définir la sous-architecture"
+msgstr "設定子架構"
 
 #: tform1.buttonsubarchselect.hint
 msgid "Select a subarch for embedded target."
-msgstr "Sélectionner une sous-architecture pour la cible intégrée."
+msgstr "為嵌入式目標選擇子架構。"
 
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
-msgstr "Effacement auto"
+msgstr "自動清除"
 
 #: tform1.chkgitlab.caption
 msgid "GitLab"
@@ -748,31 +702,31 @@ msgstr "GitLab"
 
 #: tform1.chkmakefilefpc.caption
 msgid "Check Makefile FPC"
-msgstr "Vérifier le Makefile FPC"
+msgstr "檢查 Makefile FPC"
 
 #: tform1.chkmakefilelaz.caption
 msgid "Check Makefile Lazarus"
-msgstr "Vérifier le Makefile Lazarus"
+msgstr "檢查 Makefile Lazarus"
 
 #: tform1.createstartup.caption
 msgid "Re-create startup scripts"
-msgstr "Recréer les scripts de démarrage"
+msgstr "重新建立啟動指令稿"
 
 #: tform1.crosssheet.caption
 msgid "Cross"
-msgstr "Croisé"
+msgstr "交叉編譯"
 
 #: tform1.dockbtn.caption
 msgid "Dock"
-msgstr "Dock"
+msgstr "停駐"
 
 #: tform1.dockbtn.hint
 msgid "Will change Lazarus into a single form docked editor."
-msgstr "Transformera Lazarus en un éditeur unique en mode docké."
+msgstr "將 Lazarus 切換為單一視窗停駐式編輯器。"
 
 #: tform1.donate.caption
 msgid "Donate"
-msgstr "Faire un don"
+msgstr "贊助"
 
 #: tform1.espbtn.caption
 msgid "ESP32"
@@ -780,170 +734,169 @@ msgstr "ESP32"
 
 #: tform1.espbtn.hint
 msgid "Get FPC for ESP32 [lx6] boards"
-msgstr "Obtenir FPC pour les cartes ESP32 [lx6]"
+msgstr "取得適用於 ESP32 [lx6] 開發板的 FPC"
 
 #: tform1.extrasheet.caption
 msgid "Extras"
-msgstr "Extras"
+msgstr "附加"
 
 #: tform1.extrasheet.hint
-msgid ""
-"If cross-compiler present, build the native compiler for selected system in "
-"cross."
-msgstr ""
-"Si le compilateur croisé est présent, compiler le compilateur natif pour le "
-"système sélectionné en croisé."
+msgid "If cross-compiler present, build the native compiler for selected system in cross."
+msgstr "已有交叉編譯器時，為所選交叉系統建置原生編譯器。"
 
 #: tform1.fixesbtn.caption
 msgid "Fixes"
-msgstr "Correctifs"
+msgstr "修正版"
 
 #: tform1.fixesbtn.hint
 msgid "Will install/update current fixes versions of both FPC and Lazarus"
-msgstr ""
-"Installera/mettra à jour les versions actuelles corrigées de FPC et Lazarus"
+msgstr "安裝/更新 FPC 和 Lazarus 目前的修正版本"
 
 #: tform1.fpchistorylabel.caption
 msgid "FPC revision history"
-msgstr "Historique des révisions de FPC"
+msgstr "FPC 修訂歷史"
 
 #: tform1.fpctaglabel.caption
 msgctxt "tform1.fpctaglabel.caption"
 msgid "FPC version"
-msgstr "Version FPC"
+msgstr "FPC 版本"
 
 #: tform1.fpcversionlabel.caption
 msgctxt "tform1.fpcversionlabel.caption"
 msgid "FPC version"
-msgstr "Version FPC"
+msgstr "FPC 版本"
+
+#: tform1.grpcustomtasks.caption
+msgid "Custom Tasks"
+msgstr "自訂工作"
 
 #: tform1.historysheet.caption
 msgid "History"
-msgstr "Historique"
+msgstr "歷史記錄"
 
 #: tform1.installdiredit.hint
 msgid "Directory to install FPC and Lazarus"
-msgstr "Répertoire pour installer FPC et Lazarus"
+msgstr "安裝 FPC 和 Lazarus 的目錄"
 
 #: tform1.lazarushistorylabel.caption
 msgid "Lazarus revision history"
-msgstr "Historique des révisions de Lazarus"
+msgstr "Lazarus 修訂歷史"
 
 #: tform1.lazarustaglabel.caption
 msgctxt "tform1.lazarustaglabel.caption"
 msgid "Lazarus version"
-msgstr "Version Lazarus"
+msgstr "Lazarus 版本"
 
 #: tform1.lazarusversionlabel.caption
 msgctxt "tform1.lazarusversionlabel.caption"
 msgid "Lazarus version"
-msgstr "Version Lazarus"
+msgstr "Lazarus 版本"
 
 #: tform1.listboxfpchistorynew.columns[0].caption
 msgctxt "tform1.listboxfpchistorynew.columns[0].caption"
 msgid "Hash"
-msgstr "Hachage"
+msgstr "雜湊值"
 
 #: tform1.listboxfpchistorynew.columns[1].caption
 msgctxt "tform1.listboxfpchistorynew.columns[1].caption"
 msgid "Rev-name"
-msgstr "Nom de révision"
+msgstr "修訂名稱"
 
 #: tform1.listboxfpchistorynew.columns[2].caption
 msgctxt "tform1.listboxfpchistorynew.columns[2].caption"
 msgid "Date"
-msgstr "Date"
+msgstr "日期"
 
 #: tform1.listboxlazarushistorynew.columns[0].caption
 msgctxt "tform1.listboxlazarushistorynew.columns[0].caption"
 msgid "Hash"
-msgstr "Hachage"
+msgstr "雜湊值"
 
 #: tform1.listboxlazarushistorynew.columns[1].caption
 msgctxt "tform1.listboxlazarushistorynew.columns[1].caption"
 msgid "Rev-name"
-msgstr "Nom de révision"
+msgstr "修訂名稱"
 
 #: tform1.listboxlazarushistorynew.columns[2].caption
 msgctxt "tform1.listboxlazarushistorynew.columns[2].caption"
 msgid "Date"
-msgstr "Date"
+msgstr "日期"
 
 #: tform1.mabout.caption
 msgid "About Up"
-msgstr "À propos de Up"
+msgstr "關於 Up"
 
 #: tform1.mchinesecnlanguage.caption
 msgid "Chinese (CN)"
-msgstr "Chinois (CN)"
+msgstr "簡體中文 (CN)"
 
 #: tform1.mchinesetwlanguage.caption
 msgid "Traditional Chinese (TW)"
-msgstr "Chinois traditionnel (TW)"
+msgstr "繁體中文 (TW)"
 
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
-msgstr "Néerlandais (NL)"
+msgstr "荷蘭語 (NL)"
 
 #: tform1.memosummary.hint
 msgid "Will show info and error"
-msgstr "Afichera les infos et les erreurs"
+msgstr "顯示資訊與錯誤"
 
 #: tform1.menglishlanguage.caption
 msgid "English (EN)"
-msgstr "Anglais (EN)"
+msgstr "英語 (EN)"
 
 #: tform1.menufile.caption
 msgid "&File"
-msgstr "&Fichier"
+msgstr "檔案(&F)"
 
 #: tform1.menuitem2.caption
 msgid "Languages"
-msgstr "Langues"
+msgstr "語言"
 
 #: tform1.menuitem3.caption
 msgid "Issues"
-msgstr "Problèmes"
+msgstr "問題回報"
 
 #: tform1.mfpcbugs.caption
 msgid "FPC bugs"
-msgstr "Bogues de FPC"
+msgstr "FPC 臭蟲"
 
 #: tform1.mfrenchlanguage.caption
 msgid "French (F)"
-msgstr "Français (F)"
+msgstr "法語 (F)"
 
 #: tform1.mgermanlanguage.caption
 msgid "German (D)"
-msgstr "Allemand (D)"
+msgstr "德語 (D)"
 
 #: tform1.mhelp.caption
 msgid "Help"
-msgstr "Aide"
+msgstr "說明"
 
 #: tform1.missuesforum.caption
 msgid "Up Lazarus forum"
-msgstr "Forum Lazarus Up"
+msgstr "前往 Lazarus 論壇"
 
 #: tform1.missuesgithub.caption
 msgid "Up GitHub issues"
-msgstr "Problèmes GitHub Up"
+msgstr "前往 GitHub issues"
 
 #: tform1.mkoreanlanguage.caption
 msgid "Korean (KR)"
-msgstr "Coréen (KR)"
+msgstr "韓語 (KR)"
 
 #: tform1.mlazarusbugs.caption
 msgid "Lazarus bugs"
-msgstr "Bogues de Lazarus"
+msgstr "Lazarus 臭蟲"
 
 #: tform1.modulesheet.caption
 msgid "Modules"
-msgstr "Modules"
+msgstr "模組"
 
 #: tform1.monlinedocs.caption
 msgid "Online docs"
-msgstr "Documentation en ligne"
+msgstr "線上文件"
 
 #: tform1.mormotbtn.caption
 msgid "mORMot2"
@@ -951,31 +904,31 @@ msgstr "mORMot2"
 
 #: tform1.mormotbtn.hint
 msgid "Get the mORMot2 for FPC"
-msgstr "Obtenir le mORMot2 pour FPC"
+msgstr "為 FPC 取得 mORMot2"
 
 #: tform1.mportugueselanguage.caption
 msgid "Portuguese (PT)"
-msgstr "Portugais (PT)"
+msgstr "葡萄牙語 (PT)"
 
 #: tform1.mrussianlanguage.caption
 msgid "Russian (RUS)"
-msgstr "Russe (RUS)"
+msgstr "俄語 (RUS)"
 
 #: tform1.mthailanguage.caption
 msgid "Thai (TH)"
-msgstr "Thaï (TH)"
+msgstr "泰語 (TH)"
 
 #: tform1.mturkishlanguage.caption
 msgid "Turkish (TR)"
-msgstr "Turc (TR)"
+msgstr "土耳其語 (TR)"
 
 #: tform1.mukrainianlanguage.caption
 msgid "Ukrainian (UK)"
-msgstr "Ukrainien (UK)"
+msgstr "烏克蘭語 (UK)"
 
 #: tform1.mwiki.caption
 msgid "Online Wiki"
-msgstr "Wiki en ligne"
+msgstr "線上 Wiki"
 
 #: tform1.opmbtn.caption
 msgid "OPM"
@@ -983,7 +936,7 @@ msgstr "OPM"
 
 #: tform1.opmbtn.hint
 msgid "Will install/update the Online Package Manager"
-msgstr "Installera/mettra à jour le Online Package Manager"
+msgstr "安裝/更新線上套件管理員"
 
 #: tform1.paypal.caption
 msgid "PayPal"
@@ -995,7 +948,7 @@ msgstr "Pico"
 
 #: tform1.picobtn.hint
 msgid "Get FPC for armv6m RPi Pico"
-msgstr "Obtenir FPC pour armv6m RPi Pico"
+msgstr "取得適用於 armv6m RPi Pico 的 FPC"
 
 #: tform1.radgrpcpu.caption
 msgid "CPU"
@@ -1003,45 +956,45 @@ msgstr "CPU"
 
 #: tform1.radgrpos.caption
 msgid "OS"
-msgstr "OS"
+msgstr "作業系統"
 
 #: tform1.realfpcurl.hint
 msgctxt "tform1.realfpcurl.hint"
 msgid "Double click to allow editing"
-msgstr "Doubler-cliquer pour autoriser la modification"
+msgstr "按兩下以允許編輯"
 
 #: tform1.reallazurl.hint
 msgctxt "tform1.reallazurl.hint"
 msgid "Double click to allow editing"
-msgstr "Doubler-cliquer pour autoriser la modification"
+msgstr "按兩下以允許編輯"
 
 #: tform1.stablebtn.caption
 msgid "Stable"
-msgstr "Stable"
+msgstr "穩定版"
 
 #: tform1.stablebtn.hint
 msgid "Will install/update stable versions of both FPC and Lazarus"
-msgstr "Installera/mettra à jour les versions stables de FPC et Lazarus"
+msgstr "安裝/更新 FPC 和 Lazarus 的穩定版本"
 
 #: tform1.statusmessage.text
 msgid "Sitting and waiting"
-msgstr "S'asseoir et attendre"
+msgstr "待命中"
 
 #: tform1.tagsheet.caption
 msgid "Tags"
-msgstr "Tags"
+msgstr "標籤"
 
 #: tform1.trunkbtn.caption
 msgid "Trunk"
-msgstr "Trunk"
+msgstr "主幹版"
 
 #: tform1.trunkbtn.hint
 msgid "Will install/update trunk version of both FPC and Lazarus."
-msgstr "Installera/mettra à jour la version trunk de FPC et Lazarus."
+msgstr "安裝/更新 FPC 和 Lazarus 的主幹 (trunk) 版本。"
 
 #: tform1.ultibobtn.hint
 msgid "Install baremetal Ultibo for RPi2/3/4/5"
-msgstr "Installer Ultibo baremetal pour RPi2/3/4/5"
+msgstr "為 RPi2/3/4/5 安裝裸機 Ultibo"
 
 #: tform1.wabtn.caption
 msgid "WA"
@@ -1049,7 +1002,7 @@ msgstr "WA"
 
 #: tform1.wabtn.hint
 msgid "Install FPC and Lazarus for Web Assembly"
-msgstr "Installer FPC et Lazarus pour l'assemblage Web"
+msgstr "安裝適用於 WebAssembly 的 FPC 和 Lazarus"
 
 #: tform1.wiobtn.caption
 msgid "Wio"
@@ -1057,284 +1010,219 @@ msgstr "Wio"
 
 #: tform1.wiobtn.hint
 msgid "Get FPC for SAMD51 embedded on Wio Terminal"
-msgstr "Obtenir FPC pour SAMD51 embarqué sur le terminal Wio"
+msgstr "取得適用於 Wio Terminal 上 SAMD51 嵌入式的 FPC"
 
 #: tsettingsform.btnaddfpcpatch.caption
 msgctxt "tsettingsform.btnaddfpcpatch.caption"
 msgid "Add FPC patch"
-msgstr "Ajouter un correctif FPC"
+msgstr "新增 FPC 修補檔"
 
 #: tsettingsform.btnaddlazpatch.caption
 msgctxt "tsettingsform.btnaddlazpatch.caption"
 msgid "Add Laz. patch"
-msgstr "Ajouter un correctif Laz."
+msgstr "新增 Laz. 修補檔"
 
 #: tsettingsform.btnlistcustomoptions.caption
 msgctxt "tsettingsform.btnlistcustomoptions.caption"
 msgid "List All"
-msgstr "Tout lister"
+msgstr "列出全部"
 
 #: tsettingsform.btnremfpcpatch.caption
 msgctxt "tsettingsform.btnremfpcpatch.caption"
 msgid "Rem. FPC patch"
-msgstr "Retirer un correctif FPC"
+msgstr "移除 FPC 修補檔"
 
 #: tsettingsform.btnremlazpatch.caption
 msgctxt "tsettingsform.btnremlazpatch.caption"
 msgid "Rem. Laz. patch"
-msgstr "Retirer un correctif Laz."
+msgstr "移除 Laz. 修補檔"
 
 #: tsettingsform.btnselectbindir.caption
 msgctxt "tsettingsform.btnselectbindir.caption"
 msgid "Tools"
-msgstr "Outils"
+msgstr "工具"
 
 #: tsettingsform.btnselectcompiler.caption
 msgctxt "tsettingsform.btnselectcompiler.caption"
 msgid "Compiler"
-msgstr "Compilateur"
+msgstr "編譯器"
 
 #: tsettingsform.btnselectlibdir.caption
 msgctxt "tsettingsform.btnselectlibdir.caption"
 msgid "Libraries"
-msgstr "Bibliothèques"
+msgstr "函式庫"
 
 #: tsettingsform.caption
 msgctxt "tsettingsform.caption"
 msgid "Advanced Settings"
-msgstr "Paramètres avancés"
+msgstr "進階設定"
 
 #: tsettingsform.chkfpcdebug.caption
 msgctxt "tsettingsform.chkfpcdebug.caption"
 msgid "Debug"
-msgstr "Déboguer"
+msgstr "除錯"
 
 #: tsettingsform.chklazarusdebug.caption
 msgctxt "tsettingsform.chklazarusdebug.caption"
 msgid "Debug"
-msgstr "Déboguer"
+msgstr "除錯"
 
 #: tsettingsform.editbinlocation.hint
 msgctxt "tsettingsform.editbinlocation.hint"
 msgid "Double click to clear"
-msgstr "Double-cliquer pour effacer"
+msgstr "按兩下以清除"
 
 #: tsettingsform.editcompileroverride.hint
 msgctxt "tsettingsform.editcompileroverride.hint"
 msgid "Double click to clear"
-msgstr "Double-cliquer pour effacer"
+msgstr "按兩下以清除"
 
 #: tsettingsform.editliblocation.hint
 msgctxt "tsettingsform.editliblocation.hint"
 msgid "Double click to clear"
-msgstr "Double-cliquer pour effacer"
+msgstr "按兩下以清除"
 
 #: tsettingsform.groupbox1.caption
 msgctxt "tsettingsform.groupbox1.caption"
 msgid "Proxy settings"
-msgstr "Paramètres du proxy"
+msgstr "代理伺服器設定"
 
 #: tsettingsform.groupbox2.caption
 msgctxt "tsettingsform.groupbox2.caption"
 msgid "Miscellaneous settings"
-msgstr "Paramètres divers"
+msgstr "雜項設定"
 
 #: tsettingsform.groupboxcompileoptions.caption
 msgctxt "tsettingsform.groupboxcompileoptions.caption"
 msgid "Options Override"
-msgstr "Remplacement des options"
+msgstr "選項覆寫"
 
 #: tsettingsform.groupboxfpclazbranchrevision.caption
 msgctxt "tsettingsform.groupboxfpclazbranchrevision.caption"
 msgid "Branch and revision"
-msgstr "Branche et révision"
+msgstr "分支與修訂版本"
 
 #: tsettingsform.groupboxfpclazscripts.caption
 msgctxt "tsettingsform.groupboxfpclazscripts.caption"
 msgid "Pre and post install scripts"
-msgstr "Scripts avant et après installation"
+msgstr "安裝前與安裝後指令稿"
 
 #: tsettingsform.grppatching.caption
 msgctxt "tsettingsform.grppatching.caption"
 msgid "Source patching"
-msgstr "Correction de la source"
+msgstr "原始程式碼修補"
 
 #: tsettingsform.label1.caption
 msgctxt "tsettingsform.label1.caption"
 msgid "HTTP proxy URL:"
-msgstr "URL du proxy HTTP :"
+msgstr "HTTP 代理伺服器網址："
 
 #: tsettingsform.label2.caption
 msgctxt "tsettingsform.label2.caption"
 msgid "HTTP proxy port:"
-msgstr "Port du proxy HTTP :"
+msgstr "HTTP 代理伺服器連接埠："
 
 #: tsettingsform.label3.caption
 msgctxt "tsettingsform.label3.caption"
 msgid "HTTP proxy username:"
-msgstr "Utilisateur du proxy HTTP :"
+msgstr "HTTP 代理伺服器使用者名稱："
 
 #: tsettingsform.label4.caption
 msgctxt "tsettingsform.label4.caption"
 msgid "HTTP proxy password:"
-msgstr "Mot de passe du proxy HTTP :"
+msgstr "HTTP 代理伺服器密碼："
 
 #: tsettingsform.labelcompileroverride.caption
 msgctxt "tsettingsform.labelcompileroverride.caption"
 msgid "Compiler Override"
-msgstr "Remplacement du compilateur"
+msgstr "編譯器覆寫"
 
 #: tsettingsform.labelcpu.caption
 msgctxt "tsettingsform.labelcpu.caption"
 msgid "Select CPU"
-msgstr "Sélectionner un CPU"
+msgstr "選擇 CPU"
 
 #: tsettingsform.labelcrossbuildoptions.caption
 msgctxt "tsettingsform.labelcrossbuildoptions.caption"
 msgid "Cross Build Options Override (i.e. -CfSoft)"
-msgstr "Remplacement des options de compilation croisée (-CfSoft)"
+msgstr "交叉建置選項覆寫 (例如 -CfSoft)"
 
 #: tsettingsform.labelfpcbranch.caption
 msgctxt "tsettingsform.labelfpcbranch.caption"
 msgid "FPC branch/tag"
-msgstr "Branche/tag FPC"
+msgstr "FPC 分支/標籤"
 
 #: tsettingsform.labelfpcoptions.caption
 msgctxt "tsettingsform.labelfpcoptions.caption"
 msgid "FPC options"
-msgstr "Options FPC"
+msgstr "FPC 選項"
 
 #: tsettingsform.labelfpcpostinstall.caption
 msgctxt "tsettingsform.labelfpcpostinstall.caption"
 msgid "FPC post"
-msgstr "FPC après"
+msgstr "FPC 安裝後"
 
 #: tsettingsform.labelfpcpreinstall.caption
 msgctxt "tsettingsform.labelfpcpreinstall.caption"
 msgid "FPC pre"
-msgstr "FPC avant"
+msgstr "FPC 安裝前"
 
 #: tsettingsform.labelfpcrevision.caption
 msgctxt "tsettingsform.labelfpcrevision.caption"
 msgid "FPC hash"
-msgstr "Hachage FPC"
+msgstr "FPC hash"
 
 #: tsettingsform.labellazarusbranch.caption
 msgctxt "tsettingsform.labellazarusbranch.caption"
 msgid "Laz. branch/tag"
-msgstr "Branche/tag Laz."
+msgstr "Laz. 分支/標籤"
 
 #: tsettingsform.labellazarusoptions.caption
 msgctxt "tsettingsform.labellazarusoptions.caption"
 msgid "Laz. options"
-msgstr "Options Laz."
+msgstr "Laz. 選項"
 
 #: tsettingsform.labellazaruspostinstall.caption
 msgctxt "tsettingsform.labellazaruspostinstall.caption"
 msgid "Lazarus post"
-msgstr "Lazarus après"
+msgstr "Lazarus 安裝後"
 
 #: tsettingsform.labellazaruspreinstall.caption
 msgctxt "tsettingsform.labellazaruspreinstall.caption"
 msgid "Lazarus pre"
-msgstr "Lazarus avant"
+msgstr "Lazarus 安裝前"
 
 #: tsettingsform.labellazarusrevision.caption
 msgctxt "tsettingsform.labellazarusrevision.caption"
 msgid "Laz. hash"
-msgstr "Hachage Laz."
+msgstr "Laz. hash"
 
 #: tsettingsform.labelos.caption
 msgctxt "tsettingsform.labelos.caption"
 msgid "Select OS"
-msgstr "Sélectionner l'OS"
+msgstr "選擇作業系統"
 
 #: tsettingsform.radiogrouparmarch.caption
 msgctxt "tsettingsform.radiogrouparmarch.caption"
 msgid "ARM target"
-msgstr "Cible ARM"
+msgstr "ARM 目標"
 
 #: tsettingsform.rgrpsearchoptions.caption
 msgctxt "tsettingsform.rgrpsearchoptions.caption"
 msgid "Search options"
-msgstr "Options de recherche"
+msgstr "搜尋選項"
 
 #: tsettingsform.rgrpsubarch.caption
 msgctxt "tsettingsform.rgrpsubarch.caption"
 msgid "Select subarch"
-msgstr "Sélectionner la sous-architecture"
+msgstr "選擇子架構"
 
 #: tsettingsform.tscpuos.caption
 msgctxt "tsettingsform.tscpuos.caption"
 msgid "CPU/OS"
-msgstr "CPU/OS"
+msgstr "CPU/作業系統"
 
 #: tsettingsform.tssubarch.caption
 msgctxt "tsettingsform.tssubarch.caption"
 msgid "Subarch"
-msgstr "Sous-arch"
-
-#~ msgid "Auto-switch repo URL."
-#~ msgstr "Changer automatiquement l'URL du dépôt."
-
-#~ msgid "Only use fpcup bootstrappers."
-#~ msgstr "Utiliser uniquement les bootstrappers fpcup."
-
-#~ msgid "cannot execute \"%s\""
-#~ msgstr "ne peut pas exécuter \\\"%s \\\""
-
-#~ msgid "cannot find executable \"%s\""
-#~ msgstr "ne trouve pas l'exécutable \\\"%s \\\""
-
-#~ msgid "executable \"%s\" is a directory"
-#~ msgstr "exécutable \\\"%s \\\" est un répertoire"
-
-#~ msgid "executable \"%s\" lacks the permission to run"
-#~ msgstr "l'exécutable \"%s \" n'a pas la permission de s'exécuter"
-
-#~ msgid "Exit code %s"
-#~ msgstr "Code de sortie %s"
-
-#~ msgid "freeing buffer lines: %s"
-#~ msgstr "libérer les lignes de la mémoire tampon : %s"
-
-#~ msgid "missing directory \"%s\""
-#~ msgstr "répertoire manquant \\\"%s \\\""
-
-#~ msgid "missing executable \"%s\""
-#~ msgstr "exécutable manquant\"%s \""
-
-#~ msgid "Success"
-#~ msgstr "Succès"
-
-#~ msgid "tool \"%s\" has no executable"
-#~ msgstr "l'outil \\\"%s \\\" n'a pas d'exécutable"
-
-#~ msgid "unable to execute: %s"
-#~ msgstr "incapable d'exécuter : %s"
-
-#~ msgid "unable to read process ExitStatus"
-#~ msgstr "impossible de lire le statut de sortie du processus"
-
-#~ msgctxt "tform1.listboxlazarushistory.columns[0].caption"
-#~ msgid "Hash"
-#~ msgstr "Hash"
-
-#~ msgctxt "tform1.listboxlazarushistory.columns[1].caption"
-#~ msgid "Date"
-#~ msgstr "Date"
-
-#~ msgid "Save log"
-#~ msgstr "Enregistrer le journal"
-
-#~ msgctxt "tform2.chklazarusdebug.caption"
-#~ msgid "Debug"
-#~ msgstr "Déboguer"
-
-#~ msgctxt "tform2.editcompileroverride.hint"
-#~ msgid "Double click to clear"
-#~ msgstr "Double-cliquez pour effacer"
-
-#~ msgctxt "tform2.editliblocation.hint"
-#~ msgid "Double click to clear"
-#~ msgstr "Double-cliquez pour effacer"
+msgstr "子架構"

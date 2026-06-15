@@ -811,6 +811,10 @@ msgstr "Over Up"
 msgid "Chinese (CN)"
 msgstr "Chinees (CN)"
 
+#: tform1.mchinesetwlanguage.caption
+msgid "Traditional Chinese (TW)"
+msgstr "Traditioneel Chinees (TW)"
+
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
 msgstr "Nederlands (NL)"

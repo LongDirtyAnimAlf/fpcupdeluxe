@@ -77,6 +77,7 @@ type
     MenuItem2: TMenuItem;
     MEnglishlanguage: TMenuItem;
     MChineseCNlanguage: TMenuItem;
+    MChineseTWlanguage: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
     MenuFile: TMenuItem;
@@ -2132,6 +2133,7 @@ begin
   {$ifdef EnableLanguages}
   if ((Sender=nil) OR (Sender=MEnglishlanguage)) then sLanguage:='en';
   if Sender=MChineseCNlanguage then sLanguage:='zh';
+  if Sender=MChineseTWlanguage then sLanguage:='zh_TW';
   if Sender=MKoreanlanguage then sLanguage:='ko';
   if Sender=MGermanlanguage then sLanguage:='de';
   if Sender=MFrenchlanguage then sLanguage:='fr';
