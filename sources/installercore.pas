@@ -4112,6 +4112,17 @@ begin
 end;
 
 function TInstaller.GetDefaultCompilerFilename(const TargetCPU: TCPU; const Cross: boolean): string;
+const
+{$ifdef darwin}
+  { the mach-o format supports "fat" binaries whereby }
+  { a single executable contains machine code for     }
+  { several architectures -> it is counter-intuitive  }
+  { and non-standard to use different binary names    }
+  { for cross-compilers vs. native compilers          }
+  CrossSuffix = '';
+{$else not darwin}
+  CrossSuffix = 'ross';
+{$endif not darwin}
 var
   s:string;
 begin
@@ -4120,6 +4131,7 @@ begin
   begin
     if Cross then
       s:='ppcross'+ppcSuffix[TargetCPU]
+      //s:='ppc'+CrossSuffix+ppcSuffix[TargetCPU]
     else
       s:='ppc'+ppcSuffix[TargetCPU];
   end;
@@ -4144,6 +4156,7 @@ begin
       if (Cpu_Target=GetCPU(aCPU)) then
       begin
         result:=GetDefaultCompilerFilename(aCPU,false);
+        break;
       end;
     end;
   end;

@@ -3431,7 +3431,7 @@ begin
         else
         begin
           if (FPCupManager.CrossOS_Target<>TOS.osNone) AND (FPCupManager.CrossCPU_Target<>TCPU.cpuNone) then
-            FPCupManager.LCL_Platform:=lpGtk2;
+            FPCupManager.LCL_Platform:=lpGtk3;
         end;
       end
       else

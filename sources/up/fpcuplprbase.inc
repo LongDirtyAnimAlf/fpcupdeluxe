@@ -95,7 +95,7 @@ begin
   {$ifndef FPCONLY}
   writeln(' lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.');
   writeln(' lclplatform=<name>    LCL widget set. <name> has to be one of the following:');
-  writeln('                       carbon,fpgui,gtk,gtk2,qt,win32,wince');
+  writeln('                       carbon,cocoa,fpgui,gtk,gtk2,gtk3,qt5,qt6,win32,wince');
   {$endif}
   writeln(' installdir=<dir>      Base installation dir. Leads to these subdirs:');
   {$ifndef FPCONLY}

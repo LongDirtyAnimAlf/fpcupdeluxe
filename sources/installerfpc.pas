@@ -672,6 +672,12 @@ begin
   begin
     FCrossCompilerName:=GetCrossCompilerName(CrossInstaller.TargetCPU);
     {$ifdef Darwin}
+    { from fpc.pp from the FPC sources }
+    { the mach-o format supports "fat" binaries whereby }
+    { a single executable contains machine code for     }
+    { several architectures -> it is counter-intuitive  }
+    { and non-standard to use different binary names    }
+    { for cross-compilers vs. native compilers          }
     FFPCCrossCompilerName:=GetCompilerName(CrossInstaller.TargetCPU);
     {$else}
     FFPCCrossCompilerName:=FCrossCompilerName;
@@ -680,7 +686,7 @@ begin
   else
   begin
     FCrossCompilerName:='invalid';
-    FFPCCrossCompilerName:=FCrossCompilerName;
+    FFPCCrossCompilerName:='invalid';
     raise Exception.Create('Invalid crosscompiler name. Cause: cross-installer not assigned.');
   end;
 end;
@@ -1591,6 +1597,24 @@ begin
             if UseLibc then CrossCompilerOptions:=CrossCompilerOptions+'-d'+DEFINE_FPC_LIBC+' ';
             //if UseLibc then NativeCompilerOptions:=NativeCompilerOptions+' -d'+DEFINE_FPC_LIBC;
             //if UseLibc then CrossInstaller.AddFPCCFGSnippet('-d'+DEFINE_FPC_LIBC);
+
+            (*
+            // Might be solved by earlier setting of this flag
+            // But keep code just in case
+            {$ifndef FPC_HAS_TYPE_EXTENDED}
+            if (GetSourceCPU=GetCPU(TCPU.aarch64)) then
+            begin
+              if (CrossInstaller.TargetCPU in [TCPU.i386,TCPU.i8086,TCPU.x86_64]) then
+              begin
+                if (MakeCycle in [st_RtlBuild,st_PackagesBuild]) then
+                begin
+                  Infoln(infotext+'Adding -d'+DEFINE_SOFT_FPUX80+' to compiler cross-options to enable 80bit (soft)float support.',etInfo);
+                  CrossCompilerOptions:=CrossCompilerOptions+'-d'+DEFINE_SOFT_FPUX80+' ';
+                end;
+              end;
+            end;
+            {$endif}
+            *)
 
             for i:=0 to CrossInstaller.CrossOpt.Count-1 do
               CrossCompilerOptions:=CrossCompilerOptions+Trim(CrossInstaller.CrossOpt[i])+' ';

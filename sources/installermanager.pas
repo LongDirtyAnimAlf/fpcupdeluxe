@@ -2261,7 +2261,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   const
     DEBIAN_INSTALL_COMMAND='sudo apt-get install';
 
-    DEBIAN_LIBS : array [0..16] of string = (
+    DEBIAN_LIBS : array [0..18] of string = (
     'unrar',
     'unzip',
     'p7zip',
@@ -2278,6 +2278,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     'libxtst-dev',
     'libx11-dev',
     'libgtk2.0-dev',
+    'libgtk-3-dev',
     'libcairo2-dev',
     'libcanberra-gtk-module'
     );
@@ -2307,7 +2308,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     //qt5-qtbase-devel
     //qt5-qtx11extras
     //qt5-qtx11extras-devel
-    LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so','libgdk-x11-2.0.so','','');
+    LCLLIBS:TLibList = ('libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so.2','','','','');
     QTLIBS:TLibList = (LIBQT4VERSION,'','','','','','');
     QT5LIBS:TLibList = (LIBQT5VERSION,'libQt5Core.so.5','libQt5Gui.so.5','libQt5Network.so.5','libQt5PrintSupport.so.5','libQt5Widgets.so.5','libQt5X11Extras.so.5');
     QT6LIBS:TLibList = (LIBQT6VERSION,'libQt6Core.so.6','libQt6DBus.so.6','libQt6Gui.so.6','libQt6PrintSupport.so.6','libQt6Widgets.so.6','');
@@ -2344,8 +2345,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     Output:=GetDistro;
     if (AnsiContainsText(Output,'arch') OR AnsiContainsText(Output,'manjaro')) then
     begin
-      Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
-      AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo ibus-gtk and ibus-gtk3 xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation unrar';
+      Output:='libx11 gtk2 gtk3 gdk-pixbuf2 pango cairo';
+      AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gtk3 gdk-pixbuf2 pango cairo ibus-gtk and ibus-gtk3 xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation unrar';
     end
     else if (AnsiContainsText(Output,'debian') OR AnsiContainsText(Output,'ubuntu') OR AnsiContainsText(Output,'linuxmint')) then
     begin
@@ -2395,7 +2396,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
        libpangocairo-1.0
        libx11
       }
-      Output:='libx11-dev libgtk2.0-dev libcairo2-dev libpango1.0-dev libxtst-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
+      Output:='libx11-dev libgtk2.0-dev libgtk3.0-dev libcairo2-dev libpango1.0-dev libxtst-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
       AdvicedLibs:=AdvicedLibs+
                    'make binutils build-essential gdb gcc subversion unrar devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
                    'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
