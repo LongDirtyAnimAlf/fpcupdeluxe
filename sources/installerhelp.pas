@@ -119,7 +119,6 @@ private
   FBuildLCLDocsExeDirectory: string;
   {$endif}
 protected
-  function GetReleaseCandidateFromSource:integer;override;
   function GetVersionFromSource:string;override;
   // Build module descendant customisation
   function BuildModuleCustom(ModuleName:string): boolean; virtual;
@@ -242,30 +241,20 @@ end;
 
 { THelpInstaller }
 
-function THelpInstaller.GetReleaseCandidateFromSource:integer;
-begin
-  result:=-1;
-end;
-
 function THelpInstaller.GetVersionFromSource:string;
 var
-  OperationSucceeded:boolean;
   LazbuildApp: string;
 begin
   result:='0.0.0';
 
-  OperationSucceeded:=true;
-
   if GetInstallerClass(THelpLazarusInstaller) then
   begin
     LazbuildApp:=IncludeTrailingPathDelimiter(FLazarusInstallDir)+LAZBUILDNAME+GetExeExt;
-    if CheckExecutable(LazbuildApp, ['--help'],LAZBUILDNAME)=false then
+    if (NOT CheckExecutable(LazbuildApp, ['--help'],LAZBUILDNAME)) then
     begin
       //WritelnLog('No valid lazbuild executable found. Aborting.', true);
-      OperationSucceeded:=false;
-    end;
-
-    if OperationSucceeded then
+    end
+    else
     begin
       // We have a working lazbuild; let's hope it works with primary config path as well
       // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
@@ -327,7 +316,6 @@ begin
       FReleaseVersion := -1;
       FPatchVersion := -1;
       VersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
-      if (FPatchVersion=-1) then FPatchVersion:=GetReleaseCandidateFromSource;
     end;
 
     {$IFDEF MSWINDOWS}
@@ -706,7 +694,6 @@ var
   GeneratedLCLHelp: string;
   LazbuildApp: string;
   LCLDate: TDateTime;
-  LHelpDirectory: string;
   OperationSucceeded:boolean;
 begin
   result:=inherited;

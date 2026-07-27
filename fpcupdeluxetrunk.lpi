@@ -4,15 +4,13 @@
     <Version Value="13"/>
     <PathDelim Value="\"/>
     <General>
-      <Flags>
-        <CompatibilityMode Value="True"/>
-      </Flags>
       <SessionStorage Value="InProjectDir"/>
       <Title Value="fpcupdeluxetrunk"/>
       <Scaled Value="True"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
       <XPManifest>
+        <DpiAware Value="True"/>
         <TextName Value="don.alfredo.fpcupdeluxe"/>
         <TextDesc Value="Installer for FPC and Lazarus."/>
       </XPManifest>
@@ -40,9 +38,9 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="22">
-      <Item1 Name="default" Default="True"/>
-      <Item2 Name="debug">
+    <BuildModes>
+      <Item Name="default" Default="True"/>
+      <Item Name="debug">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -74,8 +72,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item2>
-      <Item3 Name="Win64ARM64">
+      </Item>
+      <Item Name="Win64ARM64">
         <MacroValues Count="1">
           <Macro3 Name="LCLWidgetType" Value="win32"/>
         </MacroValues>
@@ -114,8 +112,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-dDisableRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item3>
-      <Item4 Name="DarwinARM64cocoa">
+      </Item>
+      <Item Name="DarwinARM64cocoa">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -143,8 +141,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item4>
-      <Item5 Name="LinuxLoongarch64">
+      </Item>
+      <Item Name="LinuxLoongarch64">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="gtk2"/>
         </MacroValues>
@@ -174,8 +172,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item5>
-      <Item6 Name="LinuxRiscv64">
+      </Item>
+      <Item Name="LinuxRiscv64">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="gtk2"/>
         </MacroValues>
@@ -205,8 +203,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item6>
-      <Item7 Name="LinuxAMD64QT6">
+      </Item>
+      <Item Name="LinuxAMD64QT6">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -236,8 +234,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item7>
-      <Item8 Name="LinuxAMD64QT6zip">
+      </Item>
+      <Item Name="LinuxAMD64QT6zip">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -267,8 +265,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item8>
-      <Item9 Name="OpenBSDi386">
+      </Item>
+      <Item Name="OpenBSDi386">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="gtk2"/>
         </MacroValues>
@@ -298,8 +296,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item9>
-      <Item10 Name="OpenBSDAMD64">
+      </Item>
+      <Item Name="OpenBSDAMD64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -327,8 +325,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item10>
-      <Item11 Name="FreeBSDARM64">
+      </Item>
+      <Item Name="FreeBSDARM64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -355,8 +353,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item11>
-      <Item12 Name="FreeBSDAMD64">
+      </Item>
+      <Item Name="FreeBSDAMD64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -383,8 +381,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item12>
-      <Item13 Name="FreeBSDAMD64qt5">
+      </Item>
+      <Item Name="FreeBSDAMD64qt5">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -414,8 +412,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item13>
-      <Item14 Name="FreeBSDAMD64qt6">
+      </Item>
+      <Item Name="FreeBSDAMD64qt6">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -445,8 +443,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item14>
-      <Item15 Name="FreeBSDAMD64qt6zip">
+      </Item>
+      <Item Name="FreeBSDAMD64qt6zip">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -476,8 +474,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item15>
-      <Item16 Name="LinuxARM64QT6">
+      </Item>
+      <Item Name="LinuxARM64QT6">
         <MacroValues Count="1">
           <Macro5 Name="LCLWidgetType" Value="qt6"/>
         </MacroValues>
@@ -510,8 +508,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item16>
-      <Item17 Name="LinuxARM64QT6zip">
+      </Item>
+      <Item Name="LinuxARM64QT6zip">
         <MacroValues Count="1">
           <Macro5 Name="LCLWidgetType" Value="qt6"/>
         </MacroValues>
@@ -544,8 +542,8 @@ if TargetOS=&apos;openbsd&apos; then
             <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item17>
-      <Item18 Name="LinuxAMD64gtk3">
+      </Item>
+      <Item Name="LinuxAMD64gtk3">
         <MacroValues Count="1">
           <Macro6 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
@@ -553,12 +551,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-gtk3"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-gtk3"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
@@ -575,8 +573,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item18>
-      <Item19 Name="LinuxARM64gtk3">
+      </Item>
+      <Item Name="LinuxARM64gtk3">
         <MacroValues Count="1">
           <Macro6 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
@@ -584,12 +582,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-gtk3"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-gtk3"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="aarch64"/>
@@ -606,8 +604,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item19>
-      <Item20 Name="FreeBSDAMD64gtk3">
+      </Item>
+      <Item Name="FreeBSDAMD64gtk3">
         <MacroValues Count="1">
           <Macro6 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
@@ -615,12 +613,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-gtk3"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-gtk3"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
@@ -637,8 +635,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item20>
-      <Item21 Name="LinuxARMgtk3">
+      </Item>
+      <Item Name="LinuxARMgtk3">
         <MacroValues Count="1">
           <Macro6 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
@@ -646,12 +644,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-gtk3"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-gtk3"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="arm"/>
@@ -668,8 +666,8 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item21>
-      <Item22 Name="Linuxi386gtk3">
+      </Item>
+      <Item Name="Linuxi386gtk3">
         <MacroValues Count="1">
           <Macro6 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
@@ -677,12 +675,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-gtk3"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;metadarkstyle;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-gtk3"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="i386"/>
@@ -699,7 +697,7 @@ if TargetOS=&apos;openbsd&apos; then
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item22>
+      </Item>
       <SharedMatrixOptions Count="6">
         <Item1 ID="322994045052" Modes="darwinarm64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
         <Item2 ID="369111111759" Modes="linuxloongarch64,openbsdi386,linuxriscv64" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
@@ -714,88 +712,88 @@ if TargetOS=&apos;openbsd&apos; then
     </PublishOptions>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes Count="1">
-        <Mode0 Name="default"/>
+      <Modes>
+        <Mode Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="2">
-      <Item1>
+    <RequiredPackages>
+      <Item>
         <PackageName Value="SynEdit"/>
-      </Item1>
-      <Item2>
+      </Item>
+      <Item>
         <PackageName Value="LCL"/>
-      </Item2>
+      </Item>
     </RequiredPackages>
-    <Units Count="12">
-      <Unit0>
+    <Units>
+      <Unit>
         <Filename Value="up.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcupdeluxe"/>
-      </Unit0>
-      <Unit1>
+      </Unit>
+      <Unit>
         <Filename Value="sources\updeluxe\fpcupdeluxemainform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit1>
-      <Unit2>
+      </Unit>
+      <Unit>
         <Filename Value="sources\updeluxe\extrasettings.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SettingsForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit2>
-      <Unit3>
+      </Unit>
+      <Unit>
         <Filename Value="sources\updeluxe\syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynEditPopup"/>
-      </Unit3>
-      <Unit4>
+      </Unit>
+      <Unit>
         <Filename Value="sources\updeluxe\aboutfrm.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="AboutForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="AboutFrm"/>
-      </Unit4>
-      <Unit5>
+      </Unit>
+      <Unit>
         <Filename Value="sources\updeluxe\infounit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="InfoForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit5>
-      <Unit6>
+      </Unit>
+      <Unit>
         <Filename Value="sources\updeluxe\modulesettings.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form3"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit6>
-      <Unit7>
+      </Unit>
+      <Unit>
         <Filename Value="sources\fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-      </Unit7>
-      <Unit8>
+      </Unit>
+      <Unit>
         <Filename Value="sources\settings.ini"/>
         <IsPartOfProject Value="True"/>
-      </Unit8>
-      <Unit9>
+      </Unit>
+      <Unit>
         <Filename Value="sources\revision.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit9>
-      <Unit10>
+      </Unit>
+      <Unit>
         <Filename Value="sources\processutils.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit10>
-      <Unit11>
+      </Unit>
+      <Unit>
         <Filename Value="sources\updeluxe\subarch.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SubarchForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit11>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -834,10 +832,10 @@ if TargetOS=&apos;openbsd&apos; then
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="1">
-      <Item1>
+    <Exceptions>
+      <Item>
         <Name Value="EInOutError"/>
-      </Item1>
+      </Item>
     </Exceptions>
   </Debugging>
 </CONFIG>
