@@ -1090,7 +1090,7 @@ begin
     {$else}
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments+' %f');
     {$endif}
-    XdgDesktopContent.Add('StartupWMClass=Lazarus');
+    XdgDesktopContent.Add('StartupWMClass=lazarus');
     XdgDesktopContent.Add('Name='+ShortcutName);
     XdgDesktopContent.Add('GenericName=Lazarus IDE with Free Pascal Compiler');
     XdgDesktopContent.Add('Category=Application;IDE;Development;GUIDesigner;Programming;');
@@ -1099,7 +1099,7 @@ begin
 
     if AddContext then
     begin
-      //XdgDesktopContent.Add('StartupWMClass=Lazarus');
+      //XdgDesktopContent.Add('StartupWMClass=lazarus');
       XdgDesktopContent.Add('MimeType=application/x-lazarus;');
       //XdgDesktopContent.Add('Patterns=*.pas;*.pp;*.p;*.inc;*.lpi;*.lpk;*.lpr;*.lfm;*.lrs;*.lpl;');
     end;

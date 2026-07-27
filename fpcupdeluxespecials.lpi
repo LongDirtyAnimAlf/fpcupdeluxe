@@ -47,7 +47,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
@@ -81,7 +81,7 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-musl"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-musl-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
@@ -109,7 +109,7 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-oi"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-oi-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
@@ -140,12 +140,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-carbon"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-carbon"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="i386"/>
@@ -171,12 +171,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="i386"/>
@@ -202,12 +202,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
@@ -232,12 +232,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-cocoa-legacy"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-legacy-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
@@ -267,12 +267,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
@@ -317,12 +317,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)70"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-70-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-70"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
@@ -346,7 +346,7 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
@@ -378,12 +378,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\haiku\fpcupdeluxe-i386-haiku-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
+            <Filename Value="deluxebin\haiku\fpcupdeluxe-i386-haiku-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="i386"/>
@@ -419,12 +419,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\haiku\fpcupdeluxe-x86_64-haiku-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt5"/>
+            <Filename Value="deluxebin\haiku\fpcupdeluxe-x86_64-haiku-qt5\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt5"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
@@ -459,12 +459,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\haiku\fpcupdeluxe-x86_64-haiku-qt6\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-qt6"/>
+            <Filename Value="deluxebin\haiku\fpcupdeluxe-x86_64-haiku-qt6\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-qt6"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
@@ -500,12 +500,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-carbon"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-carbon"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="powerpc"/>
@@ -531,12 +531,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="powerpc"/>
@@ -562,12 +562,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="powerpc64"/>
@@ -593,12 +593,12 @@ if TargetOS=&apos;openbsd&apos; then
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
             <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
-            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="aarch64"/>
@@ -716,7 +716,7 @@ if TargetOS=&apos;openbsd&apos; then
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)"/>
+      <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>

@@ -10,7 +10,7 @@ object Form1: TForm1
   Constraints.MinHeight = 480
   Constraints.MinWidth = 970
   Menu = MainMenu1
-  LCLVersion = '4.6.0.0'
+  LCLVersion = '4.99.0.0'
   Visible = True
   OnClose = FormClose
   OnCreate = FormCreate
@@ -88,25 +88,20 @@ object Form1: TForm1
     Font.Color = clLime
     Font.Height = -13
     Font.Name = 'Monospace'
-    Font.Pitch = fpFixed
     Font.Quality = fqCleartype
     Font.Style = [fsBold]
-    ParentColor = False
-    ParentFont = False
     TabOrder = 4
     OnMouseWheel = CommandOutputScreenMouseWheel
     Gutter.AutoSize = False
     Gutter.Visible = False
     Gutter.Width = 55
-    Gutter.MouseActions = <>
     RightGutter.AutoSize = False
     RightGutter.Visible = False
     RightGutter.Width = 0
-    RightGutter.MouseActions = <>
     HideSelection = True
     InsertCaret = ctBlock
     InsertMode = False
-    Keystrokes = <    
+    KeyStrokes = <    
       item
         Command = ecUp
         ShortCut = 38
@@ -527,9 +522,6 @@ object Form1: TForm1
         Command = ecColSelEditorBottom
         ShortCut = 57379
       end>
-    MouseActions = <>
-    MouseTextActions = <>
-    MouseSelActions = <>
     MaxLeftChar = 8096
     MaxUndo = 0
     Options = [eoHideRightMargin, eoNoCaret, eoShowSpecialChars]
@@ -538,29 +530,12 @@ object Form1: TForm1
     ReadOnly = True
     RightEdge = 8096
     RightEdgeColor = clNone
-    SelectedColor.BackPriority = 50
-    SelectedColor.ForePriority = 50
-    SelectedColor.FramePriority = 50
-    SelectedColor.BoldPriority = 50
-    SelectedColor.ItalicPriority = 50
-    SelectedColor.UnderlinePriority = 50
-    SelectedColor.StrikeOutPriority = 50
-    IncrementColor.Background = clNone
     IncrementColor.Foreground = clNone
-    HighlightAllColor.Background = clNone
+    IncrementColor.Background = clNone
     HighlightAllColor.Foreground = clNone
-    BracketHighlightStyle = sbhsBoth
-    BracketMatchColor.Background = clNone
-    BracketMatchColor.Foreground = clNone
-    BracketMatchColor.Style = [fsBold]
-    FoldedCodeColor.Background = clNone
+    HighlightAllColor.Background = clNone
     FoldedCodeColor.Foreground = clNone
-    FoldedCodeColor.FrameColor = clGray
     FoldedCodeColor.FrameEdges = sfeNone
-    MouseLinkColor.Background = clNone
-    MouseLinkColor.Foreground = clBlue
-    LineHighlightColor.Background = clNone
-    LineHighlightColor.Foreground = clNone
     LineHighlightColor.FrameEdges = sfeNone
     OnSpecialLineMarkup = CommandOutputScreenSpecialLineMarkup
     inline SynLeftGutterPartList1: TSynGutterPartList
