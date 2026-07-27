@@ -432,7 +432,6 @@ type
     function GetCrossInstaller: TCrossInstaller;
     function GetFullVersionString:string;
     function GetFullVersion:dword;
-    function GetInstallerClass(aClassToFind:TClass):boolean;
     function IsFPCInstaller:boolean;
     function IsLazarusInstaller:boolean;
     function IsHelpInstaller:boolean;
@@ -502,6 +501,7 @@ type
     FMUSL: boolean;
     FFPCUnicode: boolean;
     FMUSLLinker: string;
+    function GetInstallerClass(aClassToFind:TClass):boolean;
     property Make: string read GetMake;
     procedure SetFPCInstallDirectory(value:string);virtual;
     procedure SetLazarusInstallDirectory(value:string);virtual;
@@ -4062,17 +4062,17 @@ end;
 function TInstaller.GetVersionFromSource:string;
 begin
   result:='';
-  raise Exception.Create('TInstaller descendants must implement this function themselves.');
+  raise Exception.Create('TInstaller descendants must implement function GetVersionFromSource themselves.');
 end;
 function TInstaller.GetVersionFromURL(aUrl:string):string;
 begin
   result:='';
-  raise Exception.Create('TInstaller descendants must implement this function themselves.');
+  raise Exception.Create('TInstaller descendants must implement function GetVersionFromURL themselves.');
 end;
 function TInstaller.GetReleaseCandidateFromSource:integer;
 begin
   result:=0;
-  raise Exception.Create('TInstaller descendants must implement this function themselves.');
+  raise Exception.Create('TInstaller descendants must implement function GetReleaseCandidateFromSource themselves.');
 end;
 
 function TInstaller.GetVersion:string;

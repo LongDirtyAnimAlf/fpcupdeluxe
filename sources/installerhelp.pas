@@ -256,29 +256,38 @@ begin
 
   OperationSucceeded:=true;
 
-  LazbuildApp:=IncludeTrailingPathDelimiter(InstallDirectory)+LAZBUILDNAME+GetExeExt;
-  if CheckExecutable(LazbuildApp, ['--help'],LAZBUILDNAME)=false then
+  if GetInstallerClass(THelpLazarusInstaller) then
   begin
-    //WritelnLog('No valid lazbuild executable found. Aborting.', true);
-    OperationSucceeded:=false;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // We have a working lazbuild; let's hope it works with primary config path as well
-    // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
-    Processor.Executable := LazbuildApp;
-    Processor.Process.Parameters.Clear;
-    Processor.SetParamData('--version');
-    ProcessorResult:=Processor.ExecuteAndWait;
-    //if (ProcessorResult=0) then
+    LazbuildApp:=IncludeTrailingPathDelimiter(FLazarusInstallDir)+LAZBUILDNAME+GetExeExt;
+    if CheckExecutable(LazbuildApp, ['--help'],LAZBUILDNAME)=false then
     begin
-      if Processor.WorkerOutput.Count>0 then
+      //WritelnLog('No valid lazbuild executable found. Aborting.', true);
+      OperationSucceeded:=false;
+    end;
+
+    if OperationSucceeded then
+    begin
+      // We have a working lazbuild; let's hope it works with primary config path as well
+      // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
+      Processor.Executable := LazbuildApp;
+      Processor.Process.Parameters.Clear;
+      Processor.SetParamData('--version');
+      ProcessorResult:=Processor.ExecuteAndWait;
+      //if (ProcessorResult=0) then
       begin
-        result:=Processor.WorkerOutput.Strings[Processor.WorkerOutput.Count-1];
+        if Processor.WorkerOutput.Count>0 then
+        begin
+          result:=Processor.WorkerOutput.Strings[Processor.WorkerOutput.Count-1];
+        end;
       end;
     end;
   end;
+
+  if GetInstallerClass(THelpFPCInstaller) then
+  begin
+    result:=CompilerVersion(GetFPCInBinDir);
+  end;
+
 end;
 
 function THelpInstaller.BuildModuleCustom(ModuleName: string): boolean;
@@ -291,20 +300,36 @@ end;
 function THelpInstaller.InitModule: boolean;
 var
   PlainBinDir: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
+  s:string;
   {$IFDEF MSWINDOWS}
-  aPath,s:string;
+  aPath:string;
   {$ENDIF MSWINDOWS}
 begin
   localinfotext:=InitInfoText(' (InitModule): ');
 
+  Infoln(localinfotext+'Entering ...',etDebug);
+
   PlainBinDir := SafeExpandFileName(FPCBinDir+DirectorySeparator+'..'+DirectorySeparator+'..');
 
-  Infoln(localinfotext+'Entering ...',etDebug);
+  if GetInstallerClass(THelpLazarusInstaller) then InstallDirectory:=FLazarusInstallDir;
+  if GetInstallerClass(THelpFPCInstaller) then InstallDirectory:=FFPCInstallDir;
 
   result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
 
   if result then
   begin
+
+    s:=GetVersionFromSource;
+    if (s<>'0.0.0') then
+    begin
+      FMajorVersion := -1;
+      FMinorVersion := -1;
+      FReleaseVersion := -1;
+      FPatchVersion := -1;
+      VersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion,FPatchVersion);
+      if (FPatchVersion=-1) then FPatchVersion:=GetReleaseCandidateFromSource;
+    end;
+
     {$IFDEF MSWINDOWS}
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
@@ -350,7 +375,6 @@ begin
     {$ENDIF UNIX}
   end;
 
-  GetVersion;
   InitDone:=result;
 end;
 
@@ -376,7 +400,7 @@ end;
 
 function THelpInstaller.GetModule(ModuleName: string): boolean;
 const
-  HELPSOURCEURL : array [0..31,0..1] of string = (
+  HELPSOURCEURL : array [0..32,0..1] of string = (
     ('0.9.28','/Old%20releases/Lazarus%200.9.28/fpc-lazarus-0.9.28-doc-chm.tar.bz2'),
     ('0.9.30','/Old%20releases/Lazarus%200.9.30/fpc-lazarus-doc-chm-0.9.30.tar.bz2'),
     ('0.9.30.4','/Old%20releases/Lazarus%200.9.30.4/fpc-lazarus-doc-chm-0.9.30.4.tar.bz2'),
@@ -408,7 +432,8 @@ const
     ('4.0','/Lazarus%204.0/doc-chm-fpc3.2.2-laz4.0-0.zip'),
     ('4.2','/Lazarus%204.2/doc-chm-fpc3.2.2-laz4.2-0.zip'),
     ('4.4','/Lazarus%204.4/doc-chm-fpc3.2.2-laz4.4-0.zip'),
-    ('4.6','/Lazarus%204.6/doc-chm-fpc3.2.4-laz4.6-0.zip')
+    ('4.6','/Lazarus%204.6/doc-chm-fpc3.2.4-laz4.6-0.zip'),
+    ('4.8','/Lazarus%204.8/doc-chm-fpc3.2.4-laz4.8-0.zip')
   );
   HELP_URL_BASE='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation';
 
@@ -600,7 +625,7 @@ begin
   if inherited InitModule then
   begin
     //todo: check with FreeVision FPCIDE to see if this is a sensible location.
-    FTargetDirectory:=IncludeTrailingPathDelimiter(InstallDirectory)+
+    FTargetDirectory:=IncludeTrailingPathDelimiter(FFPCInstallDir)+
       'doc'+DirectorySeparator+
       'ide'+DirectorySeparator; ;
     Infoln(infotext+'Documentation directory: '+FTargetDirectory,etInfo);
@@ -732,7 +757,7 @@ begin
           // Check for valid lazbuild.
           // Note: we don't check if we have a valid primary config path, but that will come out
           // in the next steps.
-          LazbuildApp:=IncludeTrailingPathDelimiter(InstallDirectory)+LAZBUILDNAME+GetExeExt;
+          LazbuildApp:=IncludeTrailingPathDelimiter(FLazarusInstallDir)+LAZBUILDNAME+GetExeExt;
           if CheckExecutable(LazbuildApp, ['--help'],LAZBUILDNAME)=false then
           begin
             WritelnLog(ModuleName+': No valid lazbuild executable found. Aborting.', true);
@@ -887,7 +912,7 @@ begin
   begin
     // This must be the directory of the build_lcl_docs project, otherwise
     // build_lcl_docs will fail; at least it won't pick up the FPC help files for cross references
-    FTargetDirectory:=IncludeTrailingPathDelimiter(InstallDirectory)+
+    FTargetDirectory:=IncludeTrailingPathDelimiter(FLazarusInstallDir)+
       'docs'+DirectorySeparator+
       'chm'+DirectorySeparator;
     Infoln('helplazarus: documentation directory: '+FTargetDirectory,etInfo);

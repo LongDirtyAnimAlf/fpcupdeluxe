@@ -840,7 +840,7 @@ begin
   Processor.SetParamData('--cpu=' + GetSourceCPU);
   Processor.SetParamData('--os=' + GetSourceOS);
   if LCL_Platform <> GetBuildLCLWidgetType then
-            Processor.SetParamData('--ws=' + GetLCLName(LCL_Platform));
+            Processor.SetParamNameData('--ws',GetLCLName(LCL_Platform));
 
   if RegisterPackageFeature then
     Processor.SetParamData('--add-package-link')

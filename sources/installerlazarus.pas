@@ -479,7 +479,7 @@ begin
           Processor.SetParamData('--os=' + CrossInstaller.TargetOSName);
 
         if (LCL_Platform <> GetBuildLCLWidgetType)  then
-          Processor.SetParamData('--ws=' + GetLCLName(LCL_Platform));
+          Processor.SetParamNameData('--ws',GetLCLName(LCL_Platform));
 
         // Also add the default components !
         Processor.SetParamData(ConcatPaths(['packager','registration','fcl.lpk']));
@@ -1106,7 +1106,7 @@ begin
           Processor.SetParamData('--os=' + GetSourceOS);
 
           if LCL_Platform <> '' then
-            Processor.SetParamData('--ws=' + LCL_Platform);
+            Processor.SetParamNameData('--ws',GetLCLName(LCL_Platform));
 
           Processor.SetParamData(DoubleQuoteIfNeeded(IncludeTrailingPathDelimiter(SourceDirectory)+
             'ide'+DirectorySeparator+'startlazarus.lpi'));
