@@ -145,6 +145,7 @@ type
 
     procedure SetParamNamePathData(const aName,aValue:string);
     procedure SetParamData(const aValue:string);
+    procedure ReplaceLastParamData(const aValue:string);
     procedure SetParamNameData(const aName,aValue:string;const CorrectPath:boolean=false);
 
 
@@ -459,6 +460,17 @@ begin
     if (Length(aValue)>0) then
     begin
       Process.Parameters.Append(aValue);
+    end;
+  end;
+end;
+
+procedure TAbstractExternalTool.ReplaceLastParamData(const aValue:string);
+begin
+  if Assigned(Process) then
+  begin
+    if ((Length(aValue)>0) AND (Process.Parameters.Count>0)) then
+    begin
+      Process.Parameters.Strings[Process.Parameters.Count-1]:=aValue;
     end;
   end;
 end;
@@ -1022,6 +1034,10 @@ begin
 
     if AnsiStartsText('However, ',line) then exit;
 
+    {$ifdef LINUX}
+    if AnsiStartsText('gcc: error: unrecognized',line) then exit;
+    {$endif}
+
     // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
     // will be a bit redundant , but just to be sure !
     if (AnsiContainsText(line,'error:'))
@@ -1121,12 +1137,14 @@ begin
 
       // suppress "trivial"* build commands
       {$ifdef MSWINDOWS}
-      if AnsiContainsText(line,'rm.exe ') then exit;
-      if AnsiContainsText(line,'mkdir.exe ') then exit;
-      if AnsiContainsText(line,'mv.exe ') then exit;
-      if AnsiContainsText(line,'cmp.exe ') then exit;
-      if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then exit;
-      //if AnsiContainsText(line,'ginstall.exe ') then exit;
+      if AnsiContainsText(line,'/rm.exe ') then exit;
+      if AnsiContainsText(line,'/mkdir.exe ') then exit;
+      if AnsiContainsText(line,'/gmkdir.exe ') then exit;
+      if AnsiContainsText(line,'/mv.exe ') then exit;
+      if AnsiContainsText(line,'/cmp.exe ') then exit;
+      if AnsiContainsText(line,'/cp.exe ') then exit;
+      //if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then exit;
+      if AnsiContainsText(line,'/ginstall.exe ') then exit;
       {$endif}
 
       s:='rm ';

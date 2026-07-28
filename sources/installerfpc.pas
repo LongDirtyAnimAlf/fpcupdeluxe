@@ -1177,7 +1177,7 @@ begin
           //Still not clear if jobs can be enabled for crosscompiler builds ... :-|
           //However, on Windows, erroros occur frequently due to more jobs.
           //So, again, disabling for the time being, except for building the packages.
-          if (MakeCycle in [st_PackagesBuild,st_PackagesInstall]) then
+          if (MakeCycle in [{$ifndef crosssimple}st_PackagesBuild,{$endif}st_PackagesInstall]) then
           begin
             if (NOT FNoJobs) then
             begin
@@ -1213,7 +1213,6 @@ begin
           Processor.SetParamNamePathData('INSTALL_DOCDIR',MakeDocDir);
           Processor.SetParamNamePathData('INSTALL_EXAMPLEDIR',MakeExampleDir);
 
-
           Processor.SetParamNameData('CPU_SOURCE',GetSourceCPU);
           Processor.SetParamNameData('OS_SOURCE',GetSourceOS);
 
@@ -1224,7 +1223,7 @@ begin
 
           Processor.SetParamNameData('CROSSINSTALL','1');
 
-          if (MakeCycle in [st_RtlBuild,st_RtlInstall,st_PackagesBuild,st_PackagesInstall]) then
+          if (MakeCycle in [{$ifndef crosssimple}st_RtlBuild,st_PackagesBuild,{$endif}st_RtlInstall,st_PackagesInstall]) then
           begin
             if FDottedRTL then Processor.SetParamNameData('FPC_DOTTEDUNITS','1');
             // This [hack] is only needed on win32, due to unknown reasons caused by FPC provided [outdated] make.exe
@@ -1256,14 +1255,24 @@ begin
 
           if (MakeCycle in [st_RtlInstall,st_PackagesInstall]) then
           begin
-            UnitSearchPath:=GetUnitsInstallDirectory+DirectorySeparator;
-            if (MakeCycle=st_RtlInstall) then UnitSearchPath:=UnitSearchPath+'rtl';
-            if (MakeCycle=st_PackagesInstall) then
-            {$ifdef Windows}
-            UnitSearchPath:=UnitSearchPath+'$$(packagename)';
-            {$else}
-            UnitSearchPath:=UnitSearchPath+'\$$\(packagename\)';
-            {$endif}
+            if (SourceVersionNum>CalculateFullVersion(3,0,0)) then
+            begin
+              if (MakeCycle=st_RtlInstall) then
+              begin
+                UnitSearchPath:=ConcatPaths([GetUnitsInstallDirectory,'rtl']);
+              end;
+              if (MakeCycle=st_PackagesInstall) then
+              begin
+                UnitSearchPath:=GetUnitsInstallDirectory+DirectorySeparator;
+                {$ifdef Windows}
+                UnitSearchPath:=UnitSearchPath+'$$(packagename)';
+                {$else}
+                UnitSearchPath:=UnitSearchPath+'\$$\(packagename\)';
+                {$endif}
+              end;
+            end
+            else
+              UnitSearchPath:='';
             Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath);
           end;
 
@@ -1289,6 +1298,9 @@ begin
              Processor.SetParamNamePathData('CROSSBINDIR',CrossInstaller.BinUtilsPath);
           if (CrossInstaller.BinUtilsPrefix<>'') then
              Processor.SetParamNamePathData('BINUTILSPREFIX',CrossInstaller.BinUtilsPrefix);
+          //if (CrossInstaller.LibsPath<>'') then
+          //  Processor.SetParamNamePathData('SYSROOTPATH',CrossInstaller.LibsPath);
+          //  Processor.SetParamNamePathData('SYSROOTPATH',ConcatPaths([CrossInstaller.LibsPath,'usr','lib']));
 
           //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
           //Todo: to be investigated
@@ -1622,9 +1634,9 @@ begin
             {$endif}
             begin
               if Length(NativeCompilerOptions)>0 then
-                Infoln('Building FPC cross-compiler with [extra] options: '+NativeCompilerOptions);
+                Infoln('Building FPC cross-compiler with [extra] native options: '+NativeCompilerOptions);
               if Length(CrossCompilerOptions)>0 then
-                Infoln('Building FPC cross-compilr with [extra] cross-options: '+CrossCompilerOptions);
+                Infoln('Building FPC cross-compiler with [extra] cross-options: '+CrossCompilerOptions);
             end;
 
             Infoln(infotext+'Cross build command: '+Processor.GetExeInfo,etDebug);
@@ -1930,9 +1942,9 @@ const
   YYPARSE='yyparse.cod';
 var
   OperationSucceeded:boolean;
-  MakeCommandIndex:integer;
   UnitSearchPath:string;
   FPCBuildOptions:string;
+  ProcessStringsStore:TStringList;
   s1,s2:string;
   {$IFDEF UNIX}
   //s3:string;
@@ -2041,7 +2053,6 @@ begin
   Processor.SetParamNamePathData('INSTALL_PREFIX',InstallDirectory);
   Processor.SetParamNamePathData('INSTALL_SOURCEDIR',SourceDirectory);
 
-  Processor.SetParamNamePathData('INSTALL_UNITDIR',GetUnitsInstallDirectory);
   Processor.SetParamNamePathData('INSTALL_BINDIR',FPCBinDir);
 
   Processor.SetParamNamePathData('INSTALL_BASEDIR',MakeBaseDir);
@@ -2226,8 +2237,22 @@ begin
     exit;
   end;
 
+  if ModuleName=_UNICODEFPC then
+    Processor.SetParamNameData('SUB_TARGET','unicodertl');
+
   Processor.SetParamNameData('--directory',Processor.Process.CurrentDirectory);
 
+  // Store all immutable process parameter-data from above into a temporary store for later use.
+  // We only change a few parameters later
+  ProcessStringsStore:=TStringList.Create;
+
+  ProcessStringsStore.Clear;
+  ProcessStringsStore.Assign(Processor.Process.Parameters);
+
+  if (SourceVersionNum>CalculateFullVersion(3,0,0)) then
+    Processor.SetParamNamePathData('INSTALL_UNITDIR',GetUnitsInstallDirectory);
+
+  // Now add the suitable Make command target
   if ModuleName=_MAKEFILECHECKFPC then
   begin
     Processor.SetParamData('fpc_baseinfo');
@@ -2240,27 +2265,21 @@ begin
   else
   if ModuleName=_UNICODEFPC then
   begin
-    Processor.SetParamNameData('SUB_TARGET','unicodertl');
     Processor.SetParamData('all');
+    Infoln(infotext+'Building FPC unicode');
   end
   else
   if (ModuleName=_FPC) then
   begin
     Processor.SetParamData('all');
     if Length(FPCBuildOptions)>0 then
-      Infoln(infotext+'Building FPC with [extra] options: '+FPCBuildOptions);
+      Infoln(infotext+'Building basic FPC with [extra] options: '+FPCBuildOptions);
   end
   else
   begin
     Processor.SetParamData('all');
     Infoln(infotext+'Building '+ModuleName+' by running make all',etWarning);
   end;
-
-  // The last command added into the parameters is the make instruction
-  // See above lines
-  // We need to change this instruction later without changing anything else
-  // So get its [MakeCommand-]Index. Bit tricky.
-  MakeCommandIndex:=Pred(Processor.Process.Parameters.Count);
 
   Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
 
@@ -2284,16 +2303,18 @@ begin
   if (OperationSucceeded AND ((ModuleName=_FPC) OR (ModuleName=_UNICODEFPC))) then
   begin
     // Building of FPC succeeded
-    // Now install all binaries and units
-    UnitSearchPath:=GetUnitsInstallDirectory+DirectorySeparator;
-    if OperationSucceeded then
-    begin
-      Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'rtl');
-      Processor.Process.Parameters.Strings[MakeCommandIndex]:='installbase';
-      Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
-      ProcessorResult:=Processor.ExecuteAndWait;
-      OperationSucceeded:=(ProcessorResult=0);
-    end;
+    // Now install rtl and all packages and binaries if any
+
+    // Restore process parameters from datastore
+    Processor.Process.Parameters.Clear;
+    Processor.Process.Parameters.Assign(ProcessStringsStore);
+
+    if (SourceVersionNum>CalculateFullVersion(3,0,0)) then
+      Processor.SetParamNamePathData('INSTALL_UNITDIR',ConcatPaths([GetUnitsInstallDirectory,'rtl']));
+    Processor.SetParamData('installbase');
+    Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
+    ProcessorResult:=Processor.ExecuteAndWait;
+    OperationSucceeded:=(ProcessorResult=0);
 
     {$ifdef UNIX}
     // On Unix, the messages are now installed into a undesired directory (fpcbindir).
@@ -2307,12 +2328,22 @@ begin
 
     if OperationSucceeded then
     begin
-      {$ifdef Windows}
-      Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'$$(packagename)');
-      {$else}
-      Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'\$$\(packagename\)');
-      {$endif}
-      Processor.Process.Parameters.Strings[MakeCommandIndex]:='installother';
+
+      // Restore process parameters from datastore
+      Processor.Process.Parameters.Clear;
+      Processor.Process.Parameters.Assign(ProcessStringsStore);
+
+      if (SourceVersionNum>CalculateFullVersion(3,0,0)) then
+      begin
+        UnitSearchPath:=IncludeTrailingPathDelimiter(GetUnitsInstallDirectory);
+        {$ifdef Windows}
+        Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'$$(packagename)');
+        {$else}
+        Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'\$$\(packagename\)');
+        {$endif}
+      end;
+
+      Processor.SetParamData('installother');
       Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
       ProcessorResult:=Processor.ExecuteAndWait;
       OperationSucceeded:=(ProcessorResult=0);
@@ -2339,17 +2370,17 @@ begin
       Compiler:='////\\\Error trying to compile FPC\|!';
     end;
 
-    if OperationSucceeded then
+    if (OperationSucceeded AND (SourceVersionNum>=CalculateFullVersion(3,3,0))) then
     begin
-      if LinuxLegacy then Infoln(infotext+'Rebuilding RTL and Packages for legacy Linux.',etInfo);
-      if FDottedRTL then Infoln(infotext+'Rebuilding RTL and Packages for dotted units.',etInfo);
-
-      // Remove the previous make-command from the parameter-data
-      // Bit tricky
-      Processor.Process.Parameters.Delete(MakeCommandIndex);
-
-      if LinuxLegacy OR FDottedRTL then
+      if (LinuxLegacy OR FDottedRTL) then
       begin
+        if LinuxLegacy then Infoln(infotext+'Rebuilding RTL and Packages for legacy Linux.',etInfo);
+        if FDottedRTL then Infoln(infotext+'Rebuilding RTL and Packages for dotted units.',etInfo);
+
+        // Restore process parameters from datastore
+        Processor.Process.Parameters.Clear;
+        Processor.Process.Parameters.Assign(ProcessStringsStore);
+
         if LinuxLegacy then
         begin
           // Change some settings for this special legacy linking
@@ -2363,8 +2394,6 @@ begin
           Processor.SetParamNameData('FPC_DOTTEDUNITS','1');
         end;
 
-        Processor.SetParamNamePathData('INSTALL_UNITDIR',GetUnitsInstallDirectory);
-
         if (NOT FNoJobs) then
         begin
           Processor.SetParamNameData('--jobs','1');
@@ -2375,12 +2404,6 @@ begin
         //Processor.SetParamNamePathData('PP',ConcatPaths([FFPCSourceDir,'compiler',GetCompilerName(GetSourceCPU)]));
         Processor.SetParamNamePathData('PP','');
         Processor.SetParamNamePathData('FPC',FCompiler);
-
-        // We have removed the previous make command
-        // Add a dummy comand and replace it later !!
-        // Bit tricky
-        Processor.SetParamData('dummymakecommand');
-        MakeCommandIndex:=Pred(Processor.Process.Parameters.Count);
 
         //SysUtils.DeleteFile(ConcatPaths([SourceDirectory,'rtl','fpmake'+GetExeExt]));
 
@@ -2414,37 +2437,48 @@ begin
         MakeCommandIndex:=Pred(Processor.Process.Parameters.Count);
         *)
 
+        // Store all immutable process parameter-data from above into a temporary store for later use.
+        // We only change a few parameters later
+        ProcessStringsStore.Clear;
+        ProcessStringsStore.Assign(Processor.Process.Parameters);
+
+        // Add a dummy make command to be replaced by a real command
+        // Makes life easy
+        Processor.SetParamData('dummymakecommand');
 
         // Cleanup rtl
-        Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_clean';
+        Processor.ReplaceLastParamData('rtl_clean'); // Set command
         Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
         ProcessorResult:=Processor.ExecuteAndWait;
         OperationSucceeded:=(ProcessorResult=0);
 
         // Rebuild rtl
-        Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_all';
+        Processor.ReplaceLastParamData('rtl_all'); // Set command
         Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
         ProcessorResult:=Processor.ExecuteAndWait;
         OperationSucceeded:=(ProcessorResult=0);
 
         // Cleanup packages
-        Processor.Process.Parameters.Strings[MakeCommandIndex]:='packages_clean';
+        Processor.ReplaceLastParamData('packages_clean'); // Set command
         Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
         ProcessorResult:=Processor.ExecuteAndWait;
         OperationSucceeded:=(ProcessorResult=0);
 
         // Rebuild packages
-        Processor.Process.Parameters.Strings[MakeCommandIndex]:='packages_all';
+        Processor.ReplaceLastParamData('packages_all'); // Set command
         Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
         ProcessorResult:=Processor.ExecuteAndWait;
         OperationSucceeded:=(ProcessorResult=0);
 
         if OperationSucceeded then
         begin
+          Processor.Process.Parameters.Clear;
+          Processor.Process.Parameters.Assign(ProcessStringsStore);
+
           if LinuxLegacy then
           begin
             Infoln(infotext+'Installing RTL and Packages for legacy Linux.',etInfo);
-            UnitSearchPath:=GetUnitsInstallDirectory+'_legacy'+DirectorySeparator;
+            UnitSearchPath:=IncludeTrailingPathDelimiter(GetUnitsInstallDirectory+'_legacy');
             Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'rtl');
           end;
 
@@ -2453,17 +2487,21 @@ begin
             Infoln(infotext+'Installing RTL and Packages for dotted units.',etInfo);
           end;
 
-          Processor.Process.Parameters.Strings[MakeCommandIndex]:='rtl_install';
+          Processor.SetParamData('rtl_install');
           Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
           ProcessorResult:=Processor.ExecuteAndWait;
           OperationSucceeded:=(ProcessorResult=0);
 
+          Processor.Process.Parameters.Clear;
+          Processor.Process.Parameters.Assign(ProcessStringsStore);
+
+          UnitSearchPath:=IncludeTrailingPathDelimiter(GetUnitsInstallDirectory);
           {$ifdef Windows}
           Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'$$(packagename)');
           {$else}
           Processor.SetParamNamePathData('INSTALL_UNITDIR',UnitSearchPath+'\$$\(packagename\)');
           {$endif}
-          Processor.Process.Parameters.Strings[MakeCommandIndex]:='installother';
+          Processor.SetParamData('installother');
           Infoln(infotext+'Running command. '+Processor.GetExeInfo,etDebug);
           ProcessorResult:=Processor.ExecuteAndWait;
           OperationSucceeded:=(ProcessorResult=0);
@@ -2496,6 +2534,8 @@ begin
     {$ENDIF MSWINDOWS}
 
   end;
+
+  ProcessStringsStore.Free;
 
   result:=OperationSucceeded;
 end;

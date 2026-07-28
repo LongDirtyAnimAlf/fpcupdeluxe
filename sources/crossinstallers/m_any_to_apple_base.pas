@@ -560,6 +560,15 @@ begin
     AddFPCCFGSnippet('-FD'+BinUtilsPath); {search this directory for compiler utilities}
     //AddFPCCFGSnippet('-XX');
     AddFPCCFGSnippet('-XP'+BinUtilsPrefix); {Prepend the binutils names};
+
+    if (TargetCPU in [TCPU.powerpc]) then
+    begin
+      // This is needed to prevent NSRect <-> GSRect errors on Cocoa
+      // However, linking fails on any lcl-target but Carbon, so skip
+      //AddFPCCFGSnippet('-dNSGEOMETRY_TYPES_SAME_AS_CGGEOMETRY_TYPES');
+      //AddFPCCFGSnippet('-dTYPES');
+    end;
+
   end;
 end;
 
