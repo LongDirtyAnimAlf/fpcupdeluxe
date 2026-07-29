@@ -4001,10 +4001,13 @@ begin
 
       if Sender=BitBtnLazarusOnly then
       begin
-        {$IF defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
+        {$IF defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64) or defined(CPUAARCH64)}
         s:=_LAZARUSSIMPLE;
         {$ELSE}
         s:=_LAZARUS;
+        {$ENDIF}
+        {$IF defined(win64) or defined(Darwin)}
+        s:=_LAZARUS; // Always build big and heavy on Windows and Darwin !!
         {$ENDIF}
         if (SettingsForm.DockedLazarus) then s:=s+',anchordocking';
       end;
