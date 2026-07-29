@@ -103,11 +103,7 @@ Fpcupdeluxe >= 1.6.0a sends some data about its installs towards a central serve
 For this, it uses the famous mORMot framework.<br/>
 The data collection can be enabled or disabled by a setting in setup+.<br/>
 You can check this data yourself:<br/>
-https://www.batterybutcher.com:8843/root/getinfohtml<br/>
-https://www.batterybutcher.com:8843/root/getinfojson<br/>
 https://www.batterybutcher.com:8843/root/getinfohtml?ShowErrors=yes<br/>
-https://www.batterybutcher.com:8843/root/getinfohtml?Country=China<br/>
-https://www.batterybutcher.com:8843/root/getinfohtml?FPCVersion=trunk<br/>
 
 The collected data contains the following items:<br/>
 UpVersion, UpOS, Distro, Widgetset, City, Country, Latitude, Longitude, UpFunction, FPCVersion, LazarusVersion, CrossCPUOS, DateOfUse<br/>
