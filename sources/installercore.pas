@@ -354,6 +354,13 @@ const
   URL_ERROR                = 'sources error (URL mismatch)';
 
 type
+  {$IFDEF MSWINDOWS}
+  TOpenSSLNames = record
+    FullCryptoName:string;
+    FullSSLName:string;
+  end;
+  {$ENDIF}
+
   TInstallerError          = (ieLibs,ieBins,ieTarget);
   TInstallerErrors         = set of TInstallerError;
 
@@ -396,6 +403,9 @@ type
     FQTTrickeryNeeded          : boolean;
     FQTLibs                    : string;
     FQTLibsVersioned           : string;
+    {$IFDEF MSWINDOWS}
+    OpenSSLNames: array of TOpenSSLNames;
+    {$ENDIF}
     function GetDefaultCompilerFilename(const TargetCPU: TCPU; const Cross: boolean): string;
     procedure SetLinuxLegacy(value:boolean);
     function  GetLinuxLegacy:boolean;
@@ -1224,22 +1234,20 @@ begin
     if OperationSucceeded then
     begin
 
-      (*
       CryptoSucceeded:=IsSSLloaded;
       if (NOT CryptoSucceeded) then
       begin
         InitSSLInterface;
         CryptoSucceeded:=IsSSLloaded;
       end;
-      *)
 
       if (NOT CryptoSucceeded) then
       begin
-        i:=Low(SSL_DLL_Names_Up);
-        while ( (not CryptoSucceeded) AND (i<=High(SSL_DLL_Names_Up)) ) do
+        i:=Low(OpenSSLNames);
+        while (i<=High(OpenSSLNames)) do
         begin
-          CryptoLib:=SafeGetApplicationPath+Crypto_DLL_Names_Up[i]+GetLibExt;
-          SSLLib:=SafeGetApplicationPath+SSL_DLL_Names_Up[i]+GetLibExt;
+          CryptoLib:=SafeGetApplicationPath+OpenSSLNames[i].FullCryptoName;
+          SSLLib:=SafeGetApplicationPath+OpenSSLNames[i].FullSSLName;
           CryptoSucceeded:=(FileExists(CryptoLib) AND FileExists(SSLLib));
           if CryptoSucceeded then
           begin
@@ -1263,11 +1271,11 @@ begin
 
         if (NOT IsSSLloaded) then
         begin
-          i:=Low(SSL_DLL_Names_Up);
-          while ( (not CryptoSucceeded) AND (i<=High(SSL_DLL_Names_Up)) ) do
+          i:=Low(OpenSSLNames);
+          while (i<=High(OpenSSLNames)) do
           begin
-            CryptoLib:=SafeGetApplicationPath+Crypto_DLL_Names_Up[i]+GetLibExt;
-            SSLLib:=SafeGetApplicationPath+SSL_DLL_Names_Up[i]+GetLibExt;
+            CryptoLib:=SafeGetApplicationPath+OpenSSLNames[i].FullCryptoName;
+            SSLLib:=SafeGetApplicationPath+OpenSSLNames[i].FullSSLName;
             CryptoSucceeded:=(FileExists(CryptoLib) AND FileExists(SSLLib));
             if CryptoSucceeded then
             begin
@@ -1277,7 +1285,6 @@ begin
             Inc(i);
           end;
         end;
-
 
       end;
     end;
@@ -2796,24 +2803,22 @@ begin
   // Direct download OpenSSL from from Lazarus binaries
   if (NOT OperationSucceeded) then
   begin
+    // Only loop over standard provide openssl names
     i:=Low(SSL_DLL_Names);
-    while ( (not OperationSucceeded) AND (i<=High(SSL_DLL_Names)) ) do
+    while (i<=High(SSL_DLL_Names)) do
     begin
-      OpenSSLFileName:=Crypto_DLL_Names[i]+GetLibExt;
-      OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
-      if OperationSucceeded then OperationSucceeded:=FileExists(SafeGetApplicationPath+OpenSSLFileName);
+      aCryptoFile:=Crypto_DLL_Names[i]+GetLibExt;
+      aSSLFile:=SSL_DLL_Names[i]+GetLibExt;
+      OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+aCryptoFile,SafeGetApplicationPath+aCryptoFile,true,true);
+      if OperationSucceeded then OperationSucceeded:=FileExists(SafeGetApplicationPath+aCryptoFile);
       if OperationSucceeded then
       begin
-        OpenSSLFileName:=SSL_DLL_Names[i]+GetLibExt;
-        OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
-        if OperationSucceeded then OperationSucceeded:=FileExists(SafeGetApplicationPath+OpenSSLFileName);
+        OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+aSSLFile,SafeGetApplicationPath+aSSLFile,true,true);
+        if OperationSucceeded then OperationSucceeded:=FileExists(SafeGetApplicationPath+aSSLFile);
       end;
       Inc(i);
     end;
   end;
-
-
-  OperationSucceeded:=false;
 
   // Direct download OpenSSL from public sources
   if (NOT OperationSucceeded) then
@@ -2850,11 +2855,11 @@ begin
     begin
 
       // Delete standard libs, if any
-      i:=Low(SSL_DLL_Names);
-      while (i<=High(SSL_DLL_Names)) do
+      i:=Low(OpenSSLNames);
+      while (i<=High(OpenSSLNames)) do
       begin
-        aCryptoFile:=SafeGetApplicationPath+Crypto_DLL_Names[i]+GetLibExt;
-        aSSLFile:=SafeGetApplicationPath+SSL_DLL_Names[i]+GetLibExt;
+        aCryptoFile:=SafeGetApplicationPath+OpenSSLNames[i].FullCryptoName;
+        aSSLFile:=SafeGetApplicationPath+OpenSSLNames[i].FullSSLName;
         if FileExists(aCryptoFile) then
         begin
           SysUtils.Deletefile(aCryptoFile);
@@ -2868,27 +2873,6 @@ begin
         if (NOT OperationSucceeded) then break;
         Inc(i);
       end;
-
-      // Delete fpcup libs, if any
-      i:=Low(SSL_DLL_Names_Up);
-      while (i<=High(SSL_DLL_Names_Up)) do
-      begin
-        aCryptoFile:=SafeGetApplicationPath+Crypto_DLL_Names_Up[i]+GetLibExt;
-        aSSLFile:=SafeGetApplicationPath+SSL_DLL_Names_Up[i]+GetLibExt;
-        if FileExists(aCryptoFile) then
-        begin
-          SysUtils.Deletefile(aCryptoFile);
-          OperationSucceeded:=(NOT FileExists(aCryptoFile));
-        end;
-        if FileExists(aSSLFile) then
-        begin
-          SysUtils.Deletefile(aSSLFile);
-          OperationSucceeded:=(NOT FileExists(aSSLFile));
-        end;
-        if (NOT OperationSucceeded) then break;
-        Inc(i);
-      end;
-
 
       if OperationSucceeded then // no access denied
       begin
@@ -2898,31 +2882,15 @@ begin
           try
 
             // Try to extract the standard libs
-            i:=Low(SSL_DLL_Names);
-            while (i<=High(SSL_DLL_Names)) do
+            i:=Low(OpenSSLNames);
+            while (i<=High(OpenSSLNames)) do
             begin
-              aCryptoFile:=Crypto_DLL_Names[i]+GetLibExt;
-              aSSLFile:=SSL_DLL_Names[i]+GetLibExt;
+              aCryptoFile:=OpenSSLNames[i].FullCryptoName;
+              aSSLFile:=OpenSSLNames[i].FullSSLName;
               DoUnZip(OpenSSLFileName,SafeGetApplicationPath,[aCryptoFile,aSSLFile]);
               OperationSucceeded:=(FileExists(SafeGetApplicationPath+aCryptoFile) AND FileExists(SafeGetApplicationPath+aSSLFile));
               if OperationSucceeded then break;
               Inc(i);
-            end;
-
-            if NOT OperationSucceeded then
-            begin
-              // Try to extract the fpcup libs
-              i:=Low(SSL_DLL_Names_Up);
-              while (i<=High(SSL_DLL_Names_Up)) do
-              begin
-                aCryptoFile:=Crypto_DLL_Names_Up[i]+GetLibExt;
-                aSSLFile:=SSL_DLL_Names_Up[i]+GetLibExt;
-                DoUnZip(OpenSSLFileName,SafeGetApplicationPath,[aCryptoFile,aSSLFile]);
-                OperationSucceeded:=(FileExists(SafeGetApplicationPath+aCryptoFile) AND FileExists(SafeGetApplicationPath+aSSLFile));
-                if OperationSucceeded then break;
-                Inc(i);
-              end;
-
             end;
 
             if OperationSucceeded then resultcode:=0;
@@ -4592,8 +4560,31 @@ begin
 end;
 
 constructor TInstaller.Create;
+var
+  i:integer;
 begin
   inherited Create;
+
+  {$IFDEF MSWINDOWS}
+  i:=Length(SSL_DLL_Names);
+  i:=i+Length(SSL_DLL_Names_Up);
+
+  SetLength(OpenSSLNames,i);
+
+  for i:=Low(SSL_DLL_Names) to High(SSL_DLL_Names) do
+  begin
+    //SSL_DLL_Names and Crypto_DLL_Names always have the same length
+    OpenSSLNames[i].FullSSLName:=SSL_DLL_Names[i]+GetLibExt;
+    OpenSSLNames[i].FullCryptoName:=Crypto_DLL_Names[i]+GetLibExt;
+  end;
+
+  for i:=Low(SSL_DLL_Names_Up) to High(SSL_DLL_Names_Up) do
+  begin
+    //SSL_DLL_Names_Up and Crypto_DLL_Names_Up always have the same length
+    OpenSSLNames[i+Length(SSL_DLL_Names)].FullSSLName:=SSL_DLL_Names_Up[i]+GetLibExt;
+    OpenSSLNames[i+Length(SSL_DLL_Names)].FullCryptoName:=SSL_DLL_Names_Up[i]+GetLibExt;
+  end;
+  {$ENDIF}
 
   FErrorCodes := [];
 
