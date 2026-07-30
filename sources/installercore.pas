@@ -1599,32 +1599,15 @@ begin
           begin
             ForceDirectoriesSafe(MakePath+'git');
             {$ifdef win32}
-            //s:='git32.7z';
             s:='git32.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-32-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-32-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-32-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-32-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/MinGit-2.23.0-32-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-32-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-32-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.33.0.windows.2/MinGit-2.33.0.2-32-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.33.0.windows.2/MinGit-2.33.0.2-32-bit.zip';
             aURL:='https://github.com/git-for-windows/git/releases/download/v2.52.0.windows.1/MinGit-2.52.0-32-bit.zip';
             {$else}
-            //s:='git64.7z';
             s:='git64.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-64-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-64-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-64-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-64-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/MinGit-2.23.0-64-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-64-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-64-bit.zip';
-            //aURL:='https://github.com/git-for-windows/git/releases/download/v2.33.0.windows.2/MinGit-2.33.0.2-64-bit.zip';
+            {$ifdef cpuaarch64}
+            aURL:='https://github.com/git-for-windows/git/releases/download/v2.52.0.windows.1/MinGit-2.52.0-arm64.zip';
+            {$else}
             aURL:='https://github.com/git-for-windows/git/releases/download/v2.52.0.windows.1/MinGit-2.52.0-64-bit.zip';
+            {$endif}
             {$endif}
             Infoln(localinfotext+'GIT client not found. Downloading it',etInfo);
             Infoln(localinfotext+'GIT client download (may take time) from '+aURL,etDebug);
@@ -4560,8 +4543,10 @@ begin
 end;
 
 constructor TInstaller.Create;
+{$IFDEF MSWINDOWS}
 var
-  i:integer;
+  i,j:integer;
+{$ENDIF}
 begin
   inherited Create;
 
@@ -4570,19 +4555,20 @@ begin
   i:=i+Length(SSL_DLL_Names_Up);
 
   SetLength(OpenSSLNames,i);
-
+  j:=0;
   for i:=Low(SSL_DLL_Names) to High(SSL_DLL_Names) do
   begin
     //SSL_DLL_Names and Crypto_DLL_Names always have the same length
-    OpenSSLNames[i].FullSSLName:=SSL_DLL_Names[i]+GetLibExt;
-    OpenSSLNames[i].FullCryptoName:=Crypto_DLL_Names[i]+GetLibExt;
+    OpenSSLNames[j].FullSSLName:=SSL_DLL_Names[i]+GetLibExt;
+    OpenSSLNames[j].FullCryptoName:=Crypto_DLL_Names[i]+GetLibExt;
+    Inc(j);
   end;
-
   for i:=Low(SSL_DLL_Names_Up) to High(SSL_DLL_Names_Up) do
   begin
     //SSL_DLL_Names_Up and Crypto_DLL_Names_Up always have the same length
-    OpenSSLNames[i+Length(SSL_DLL_Names)].FullSSLName:=SSL_DLL_Names_Up[i]+GetLibExt;
-    OpenSSLNames[i+Length(SSL_DLL_Names)].FullCryptoName:=SSL_DLL_Names_Up[i]+GetLibExt;
+    OpenSSLNames[j].FullSSLName:=SSL_DLL_Names_Up[i]+GetLibExt;
+    OpenSSLNames[j].FullCryptoName:=SSL_DLL_Names_Up[i]+GetLibExt;
+    Inc(j);
   end;
   {$ENDIF}
 
