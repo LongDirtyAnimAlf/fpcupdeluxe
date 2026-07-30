@@ -27,7 +27,7 @@ const
 {$endif UNIX}
 
 procedure error(const s : string);
-function FileSearch (Const Name, DirList : string) : string;
+function FileSearch (Const LDDFileName, DirList : string) : string;
 
 implementation
 
@@ -37,12 +37,13 @@ begin
   halt(1);
 end;
 
-function FileSearch (Const Name, DirList : string) : string;
+function FileSearch (Const LDDFileName, DirList : string) : string;
 var
   I : longint;
   Temp : string;
 begin
-  Result:=Name;
+  Result:=LDDFileName;
+
   temp:=SetDirSeparators(DirList);
 
   // Start with checking the file in the current directory
@@ -51,9 +52,9 @@ begin
   while true do
   begin
     If Temp = '' then Break;
-    I:=pos(':',Temp);
-    if ((I>0) and (Length(Temp)>I) AND (Temp[I+1]='\')) then I:=0;
-    if (I=0) then I:=pos(';',Temp);
+    I:=pos(PathSeparator,Temp);
+    if ((I>0) and (Length(Temp)>I) AND (Temp[I+1] in AllowDirectorySeparators)) then I:=0;
+    if (I=0) then I:=pos(PathSeparator,Temp);
     if I<>0 then
     begin
       Result:=Copy (Temp,1,I-1);
@@ -71,8 +72,9 @@ begin
         Result:=Copy(Result,2,Length(Result)-2);
       {$endif}
       if (Result<>'') then
-        Result:=IncludeTrailingPathDelimiter(Result)+name;
+        Result:=IncludeTrailingPathDelimiter(Result)+LDDFileName;
     end;
+
     if (Result <> '') and FileExists(Result) then exit;
   end;
   Result:='';

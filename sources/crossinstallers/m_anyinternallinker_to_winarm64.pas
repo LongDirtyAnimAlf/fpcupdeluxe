@@ -78,7 +78,7 @@ begin
     FBinsFound:=true;
     if (Length(FBinUtilsPath)>0) then AddFPCCFGSnippet('-FD'+BinUtilsPath);
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
-    AddFPCCFGSnippet('-O-'); // Diable optimizer for now.
+    AddFPCCFGSnippet('-O-'); // Disable optimizer for now.
   end
   else
   begin

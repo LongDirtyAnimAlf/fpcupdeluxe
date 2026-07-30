@@ -181,7 +181,6 @@ const
     SSL_DLL_Names_Up:    array[1..3] of string = ({'libssl-3',}    'libssl-1_1',    SSL_DLL_Name_Up, 'libssl32');
     Crypto_DLL_Names_Up: array[1..3] of string = ({'libcrypto-3',} 'libcrypto-1_1', Crypto_DLL_Name_Up, Crypto_DLL_Name_Up);
   {$endif}
-
   {$ifdef win64}
   {$ifdef CPUX86_64}
   OpenSSLSourceURL : array [0..4] of string = (
@@ -1161,10 +1160,11 @@ var
   aDir: string;
   {$ifdef MSWINDOWS}
   aURL,aFile,aFilePath: string;
-  i:integer;
+  i,j:integer;
   {$endif}
   {$ifndef USEONLYCURL}
-  CryptoSucceeded: boolean;
+  CryptoSucceeded: boolean=false;
+  CryptoLib,SSLLib:string;
   {$endif}
 begin
   OperationSucceeded := true;
@@ -1224,22 +1224,26 @@ begin
     if OperationSucceeded then
     begin
 
+      (*
       CryptoSucceeded:=IsSSLloaded;
       if (NOT CryptoSucceeded) then
       begin
         InitSSLInterface;
         CryptoSucceeded:=IsSSLloaded;
       end;
+      *)
 
       if (NOT CryptoSucceeded) then
       begin
         i:=Low(SSL_DLL_Names_Up);
         while ( (not CryptoSucceeded) AND (i<=High(SSL_DLL_Names_Up)) ) do
         begin
-          CryptoSucceeded:=(FileExists(SafeGetApplicationPath+Crypto_DLL_Names_Up[i]+GetLibExt)) AND (FileExists(SafeGetApplicationPath+SSL_DLL_Names_Up[i]+GetLibExt));
+          CryptoLib:=SafeGetApplicationPath+Crypto_DLL_Names_Up[i]+GetLibExt;
+          SSLLib:=SafeGetApplicationPath+SSL_DLL_Names_Up[i]+GetLibExt;
+          CryptoSucceeded:=(FileExists(CryptoLib) AND FileExists(SSLLib));
           if CryptoSucceeded then
           begin
-            CryptoSucceeded:=InitSSLInterface(SSL_DLL_Names_Up[i]+GetLibExt,Crypto_DLL_Names_Up[i]+GetLibExt);
+            CryptoSucceeded:=InitSSLInterface(SSLLib,CryptoLib);
             if CryptoSucceeded then break;
           end;
           Inc(i);
@@ -1250,11 +1254,31 @@ begin
           DownloadOpenSSL;
           DestroySSLInterface; // disable ssl and release libs
         end;
+
         if (NOT IsSSLloaded) then
         begin
           InitSSLInterface;
           CryptoSucceeded:=IsSSLloaded;
         end;
+
+        if (NOT IsSSLloaded) then
+        begin
+          i:=Low(SSL_DLL_Names_Up);
+          while ( (not CryptoSucceeded) AND (i<=High(SSL_DLL_Names_Up)) ) do
+          begin
+            CryptoLib:=SafeGetApplicationPath+Crypto_DLL_Names_Up[i]+GetLibExt;
+            SSLLib:=SafeGetApplicationPath+SSL_DLL_Names_Up[i]+GetLibExt;
+            CryptoSucceeded:=(FileExists(CryptoLib) AND FileExists(SSLLib));
+            if CryptoSucceeded then
+            begin
+              CryptoSucceeded:=InitSSLInterface(SSLLib,CryptoLib);
+              if CryptoSucceeded then break;
+            end;
+            Inc(i);
+          end;
+        end;
+
+
       end;
     end;
 
@@ -1340,6 +1364,90 @@ begin
       aURL:=FPCGITLABBUILDBINARIES+'/-/raw/main/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/';
       GetFile(aURL+'pwd.exe',aFile);
     end;
+
+
+    {$if defined(win64) and defined(cpuaarch64)}
+
+    // Check clang
+
+    aFile:=MakePath+'clang.exe';
+    OperationSucceeded:=FileExists(aFile);
+
+    if (Not OperationSucceeded) then
+    begin
+      aFile:=ConcatPaths([FPCBinDir,'clang.exe']);
+      OperationSucceeded:=FileExists(aFile);
+    end;
+
+    if (Not OperationSucceeded) then
+    begin
+      // Did the user provide a path towards the tools ?
+      i:=Pos('-FD',FCompilerOptions);
+      if i>0 then
+      begin
+        Inc(i,3);
+        j:=i;
+        while (j<Length(FCompilerOptions)) AND (NOT (FCompilerOptions[j] in [#10,#13,' '])) do Inc(j);
+        if (j<Length(FCompilerOptions)) AND (FCompilerOptions[j] in [#10,#13,' ']) then Dec(j);
+        aFilePath:=Copy(FCompilerOptions,i,j-i+1);
+        aFilePath:=IncludeTrailingPathDelimiter(aFilePath);
+        aFile:=aFilePath+'clang.exe';
+        OperationSucceeded:=FileExists(aFile);
+      end;
+    end;
+
+    if (Not OperationSucceeded) then
+    begin
+      // Look in the path
+      aFile:=Which('clang.exe');
+      OperationSucceeded:=FileExists(aFile);
+      if OperationSucceeded then
+      begin
+        aFilePath:=ExtractFilePath(aFile);
+        if FileIsSymlink(aFile) then
+        begin
+          try
+            aFile:=GetPhysicalFilename(aFile,pfeException);
+            aFilePath:=ExtractFilePath(aFile);
+          except
+          end;
+        end;
+        FCompilerOptions:=FCompilerOptions+' -FD'+aFilePath;
+      end;
+    end;
+
+    if (Not OperationSucceeded) then
+    begin
+      ForceDirectoriesSafe(FPCBinDir);
+
+      // We need to download clang !!
+      aFile:=ConcatPaths([FPCBinDir,'clang.exe']);
+      aFilePath:=ConcatPaths([FPCBinDir,'arm64tools.zip']);
+      aURL:=FPCUPGITREPO+'/releases/download/windowsarm64_'+BINSTAG+'/Windows_All_Clang_15.zip';
+
+      OperationSucceeded:=GetFile(aURL,aFilePath);
+
+      if OperationSucceeded then
+      begin
+        with TNormalUnzipper.Create do
+        begin
+          try
+            OperationSucceeded:=DoUnZip(aFilePath,ExtractFilePath(aFilePath),[]);
+          finally
+            Free;
+          end;
+        end;
+
+        if OperationSucceeded then
+        begin
+          SysUtils.DeleteFile(aFilePath);
+          OperationSucceeded:=FileExists(aFile);
+        end;
+      end;
+
+
+    end;
+    {$endif}
 
     // do not fail
     OperationSucceeded:=True;
@@ -2674,7 +2782,7 @@ function TInstaller.DownloadOpenSSL: boolean;
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
-  OpenSSLFileName,aSourceURL: string;
+  OpenSSLFileName,aSourceURL,aCryptoFile,aSSLFile: string;
   i:integer;
 begin
   result:=false;
@@ -2693,21 +2801,19 @@ begin
     begin
       OpenSSLFileName:=Crypto_DLL_Names[i]+GetLibExt;
       OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
+      if OperationSucceeded then OperationSucceeded:=FileExists(SafeGetApplicationPath+OpenSSLFileName);
       if OperationSucceeded then
       begin
         OpenSSLFileName:=SSL_DLL_Names[i]+GetLibExt;
         OperationSucceeded:=GetFile(OPENSSL_URL_LATEST+'/'+OpenSSLFileName,SafeGetApplicationPath+OpenSSLFileName,true,true);
+        if OperationSucceeded then OperationSucceeded:=FileExists(SafeGetApplicationPath+OpenSSLFileName);
       end;
       Inc(i);
     end;
   end;
 
-  {$if defined(win64) and defined(cpuaarch64)}
-  //https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/windowsarm64_bins_all/openssl.zip
-  //FPCUPGITREPO+'/releases/download/windowarm64_'+BINSTAG+'/openssl.zip',
-  //BINSTAG                      = 'bins_all';
-  {$endif}
 
+  OperationSucceeded:=false;
 
   // Direct download OpenSSL from public sources
   if (NOT OperationSucceeded) then
@@ -2742,25 +2848,93 @@ begin
 
     if OperationSucceeded then
     begin
-      // Extract
-      with TNormalUnzipper.Create do
+
+      // Delete standard libs, if any
+      i:=Low(SSL_DLL_Names);
+      while (i<=High(SSL_DLL_Names)) do
       begin
-        try
-          resultcode:=2;
-          SysUtils.Deletefile(SafeGetApplicationPath+Crypto_DLL_Name_Up+GetLibExt);
-          if GetLastOSError<>5 then // no access denied
-          begin
-            SysUtils.Deletefile(SafeGetApplicationPath+SSL_DLL_Name_Up+GetLibExt);
-            if GetLastOSError<>5 then // no access denied
-            begin
-              resultcode:=1;
-              if DoUnZip(OpenSSLFileName,SafeGetApplicationPath,[Crypto_DLL_Name_Up+GetLibExt,SSL_DLL_Name_Up+GetLibExt]) then resultcode:=0;
-            end;
-          end;
-        finally
-          Free;
+        aCryptoFile:=SafeGetApplicationPath+Crypto_DLL_Names[i]+GetLibExt;
+        aSSLFile:=SafeGetApplicationPath+SSL_DLL_Names[i]+GetLibExt;
+        if FileExists(aCryptoFile) then
+        begin
+          SysUtils.Deletefile(aCryptoFile);
+          OperationSucceeded:=(NOT FileExists(aCryptoFile));
         end;
+        if FileExists(aSSLFile) then
+        begin
+          SysUtils.Deletefile(aSSLFile);
+          OperationSucceeded:=(NOT FileExists(aSSLFile));
+        end;
+        if (NOT OperationSucceeded) then break;
+        Inc(i);
       end;
+
+      // Delete fpcup libs, if any
+      i:=Low(SSL_DLL_Names_Up);
+      while (i<=High(SSL_DLL_Names_Up)) do
+      begin
+        aCryptoFile:=SafeGetApplicationPath+Crypto_DLL_Names_Up[i]+GetLibExt;
+        aSSLFile:=SafeGetApplicationPath+SSL_DLL_Names_Up[i]+GetLibExt;
+        if FileExists(aCryptoFile) then
+        begin
+          SysUtils.Deletefile(aCryptoFile);
+          OperationSucceeded:=(NOT FileExists(aCryptoFile));
+        end;
+        if FileExists(aSSLFile) then
+        begin
+          SysUtils.Deletefile(aSSLFile);
+          OperationSucceeded:=(NOT FileExists(aSSLFile));
+        end;
+        if (NOT OperationSucceeded) then break;
+        Inc(i);
+      end;
+
+
+      if OperationSucceeded then // no access denied
+      begin
+        // Extract the zip we just downloaded
+        with TNormalUnzipper.Create do
+        begin
+          try
+
+            // Try to extract the standard libs
+            i:=Low(SSL_DLL_Names);
+            while (i<=High(SSL_DLL_Names)) do
+            begin
+              aCryptoFile:=Crypto_DLL_Names[i]+GetLibExt;
+              aSSLFile:=SSL_DLL_Names[i]+GetLibExt;
+              DoUnZip(OpenSSLFileName,SafeGetApplicationPath,[aCryptoFile,aSSLFile]);
+              OperationSucceeded:=(FileExists(SafeGetApplicationPath+aCryptoFile) AND FileExists(SafeGetApplicationPath+aSSLFile));
+              if OperationSucceeded then break;
+              Inc(i);
+            end;
+
+            if NOT OperationSucceeded then
+            begin
+              // Try to extract the fpcup libs
+              i:=Low(SSL_DLL_Names_Up);
+              while (i<=High(SSL_DLL_Names_Up)) do
+              begin
+                aCryptoFile:=Crypto_DLL_Names_Up[i]+GetLibExt;
+                aSSLFile:=SSL_DLL_Names_Up[i]+GetLibExt;
+                DoUnZip(OpenSSLFileName,SafeGetApplicationPath,[aCryptoFile,aSSLFile]);
+                OperationSucceeded:=(FileExists(SafeGetApplicationPath+aCryptoFile) AND FileExists(SafeGetApplicationPath+aSSLFile));
+                if OperationSucceeded then break;
+                Inc(i);
+              end;
+
+            end;
+
+            if OperationSucceeded then resultcode:=0;
+
+          finally
+            Free;
+          end;
+
+        end;
+
+      end;
+
 
       if resultcode <> 0 then
       begin

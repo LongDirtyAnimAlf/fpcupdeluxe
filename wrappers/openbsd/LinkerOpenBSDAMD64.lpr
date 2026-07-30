@@ -1,4 +1,4 @@
-program linker;
+program LinkerOpenBSDAMD64;
 
 {$mode objfpc}{$H+}
 
@@ -6,7 +6,11 @@ uses
  SysUtils, filesearcher;
 
 const
-   EXENAME='ld.lld.exe';
+{$ifdef Windows}
+  EXENAME='ld.lld.exe';
+{$else}
+  EXENAME='ld.lld';
+{$endif}
 var
   pc              : integer;
   path            : string;
@@ -32,9 +36,8 @@ begin
     if (paramcount>0) then
     begin
       setlength({%H-}ppccommandline,paramcount);
-
       pc:=0;
-      while (pc<(paramcount-1)) do
+      while (pc<=(paramcount-1)) do
       begin
         (*
         --allow-multiple-definition

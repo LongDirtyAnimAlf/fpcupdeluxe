@@ -23,7 +23,9 @@ sudo apt-get install -y libx11-dev
 sudo apt-get install -y libglvnd-dev
 
 sudo apt-get install -y appmenu-gtk2-module
+sudo apt-get install -y appmenu-gtk3-module
 sudo apt-get install -y libcanberra-gtk-module
+sudo apt-get install -y libcanberra-gtk3-module
 
 sudo apt-get install -y libgtk-3-dev
 

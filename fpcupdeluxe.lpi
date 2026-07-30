@@ -367,6 +367,37 @@
       </Item>
       <Item Name="linux64">
         <MacroValues Count="1">
+          <Macro4 Name="LCLWidgetType" Value="gtk2"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\fpcupdeluxe-$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);sources;mORMot"/>
+            <OtherUnitFiles Value="sources;sources\updeluxe;sources\crossinstallers;synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;mORMot;mORMot\CrossPlatform;downloader\src\forms;downloader\src\common"/>
+            <UnitOutputDirectory Value="buildlibs\$NameOnly($(ProjFile))\$NameOnly($Project(InfoFile))\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item>
+      <Item Name="linux64gtk3">
+        <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="gtk3"/>
         </MacroValues>
         <CompilerOptions>
@@ -1037,9 +1068,9 @@
       </Item>
       <SharedMatrixOptions Count="4">
         <Item1 ID="784204643275" Modes="DefaultQT,linuxx64QT5,linuxi386QT5,linuxaarch64QT5,linuxarmQT5,linuxaarch64QT5zip,linuxarmQT5zip,linuxx64QT5zip,freebsdx64QT5,freebsdx64QT5zip,linuxi386QT5zip" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
-        <Item2 ID="591091371099" Modes="linux64,linuxaarch64" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
+        <Item2 ID="591091371099" Modes="linuxaarch64,linux64gtk3" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
         <Item3 ID="808696547197" Modes="linux64gtk1" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk"/>
-        <Item4 ID="246146204062" Modes="linuxi386,freebsdi386,netbsdi386,linuxarm,linuxarmv6,linuxppc64,freebsdx64,solarisx64,dragonflyx64,netbsdx64" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
+        <Item4 ID="246146204062" Modes="linuxi386,freebsdi386,netbsdi386,linuxarm,linuxarmv6,linuxppc64,freebsdx64,solarisx64,dragonflyx64,netbsdx64,linux64" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>

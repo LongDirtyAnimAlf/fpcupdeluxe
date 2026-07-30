@@ -2517,8 +2517,11 @@ begin
         for i:=low(FUtilFiles) to high(FUtilFiles) do
         begin
           if FUtilFiles[i].Category=ucBinutil then
-            FileCopy(MakePath+FUtilFiles[i].FileName,
-              FPCBinDir+DirectorySeparator+FUtilFiles[i].FileName);
+          begin
+            s1:=MakePath+FUtilFiles[i].FileName;
+            s2:=FPCBinDir+DirectorySeparator+FUtilFiles[i].FileName;
+            if (NOT FileExists(s2)) then FileCopy(s1,s2);
+          end;
         end;
         // Also, we can change the make/binutils path to our new environment
         // Will modify fmake as well.
