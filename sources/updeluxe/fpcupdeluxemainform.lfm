@@ -754,14 +754,14 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       Left = 502
       Height = 42
-      Hint = 'Get FPC unleashed'
+      Hint = 'Get unleashed Pascal'
       Top = 8
-      Width = 96
+      Width = 85
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 2
       BorderSpacing.Around = 4
-      Caption = 'U-FPC'
+      Caption = 'UPC'
       Images = ImageList_32x32
       ImageIndex = 16
       ParentFont = False
@@ -774,7 +774,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = UnleashedBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 606
+      Left = 595
       Height = 42
       Hint = 'Get FPC for armv6m RPi Pico'
       Top = 8
@@ -796,7 +796,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = ESPBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 800
+      Left = 789
       Height = 42
       Hint = 'Install baremetal Ultibo for RPi2/3/4/5'
       Top = 8
@@ -817,7 +817,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = UltiboBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 942
+      Left = 931
       Height = 42
       Hint = 'Get the mORMot2 for FPC'
       Top = 8
@@ -839,7 +839,7 @@ object Form1: TForm1
       AnchorSideLeft.Control = PicoBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 699
+      Left = 688
       Height = 42
       Hint = 'Get FPC for ESP32 [lx6] boards'
       Top = 8
