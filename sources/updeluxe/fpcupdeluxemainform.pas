@@ -135,7 +135,7 @@ type
     StableBtn: TButton;
     AndroidBtn: TButton;
     WABtn: TButton;
-    WioBtn: TButton;
+    UnleashedBtn: TButton;
     PicoBtn: TButton;
     UltiboBtn: TButton;
     mORMotBtn: TButton;
@@ -162,7 +162,7 @@ type
     StableBtn: TBitBtn;
     AndroidBtn: TBitBtn;
     WABtn: TBitBtn;
-    WioBtn: TBitBtn;
+    UnleashedBtn: TBitBtn;
     PicoBtn: TBitBtn;
     UltiboBtn: TBitBtn;
     mORMotBtn: TBitBtn;
@@ -2582,19 +2582,13 @@ begin
     end;
   }
 
-  if (Sender=WioBtn) OR (Sender=PicoBtn) then
+  if (Sender=PicoBtn) then
   begin
     if Sender=PicoBtn then
     begin
       aFPCTarget:='trunk'+GITLABEXTENSION;
       s:=Format(upInstallConfimation,['FPC trunk','Lazarus trunk',' + cross arm Raspberry Pico compiler + tools']);
       aModule:='develtools4fpc';
-    end;
-    if Sender=WioBtn then
-    begin
-      aFPCTarget:='embedded'+GITLABEXTENSION;
-      s:=Format(upInstallConfimation,['FPC embedded','Lazarus trunk',' + cross arm Wio Terminal compiler + tools']);
-      aModule:='develtools4fpc,mbf-freertos-wio';
     end;
     //aFPCTarget:='embedded'+GITLABEXTENSION;
     aLazarusTarget:='trunk'+GITLABEXTENSION;
@@ -2613,6 +2607,13 @@ begin
     s:=Format(upInstallConfimationSimple,['Ultibo']);
     aFPCTarget:='ultibo.git';
     aLazarusTarget:='ultibo.git';
+  end;
+
+  if Sender=UnleashedBtn then
+  begin
+    s:=Format(upInstallConfimation,['FPC unleashed','Lazarus unleashed','']);
+    aFPCTarget:='unleashed.git';
+    aLazarusTarget:='unleashed.git';
   end;
 
   s:=s+sLineBreak+sLineBreak;
@@ -2674,13 +2675,6 @@ begin
     end;
     {$endif}
 
-    if (Sender=WioBtn) {OR (Sender=PicoBtn)} then
-    begin
-      // Due to changes in Lazarus, we need a trunk/main version of Lazarus that can be compiled with an embedded (old) FPC trunk
-      SettingsForm.ForceLazarusRevision:='5b0ed449f3';
-      FPCupManager.LazarusDesiredRevision:='5b0ed449f3';
-    end;
-
     success:=RealRun;
     //success:=true; // for testing only
 
@@ -2694,14 +2688,6 @@ begin
         aCPU:=TCPU.arm;
         aOS:=TOS.embedded;
         aSUBARCH:=TSUBARCH.armv6m;
-      end;
-
-      if Sender=WioBtn then
-      begin
-        s:='Going to install FPC cross-compiler for Wio Terminal.';
-        aCPU:=TCPU.arm;
-        aOS:=TOS.freertos;
-        aSUBARCH:=TSUBARCH.armv7em;
       end;
 
       if Sender=ESPBtn then
@@ -2734,7 +2720,7 @@ begin
         aOS:=TOS.wasip1;
       end;
 
-      if (Sender=PicoBtn) OR (Sender=WioBtn) OR (Sender=ESPBtn) OR (Sender=UltiboBtn) OR (Sender=AndroidBtn) OR (Sender=WABtn) then
+      if (Sender=PicoBtn) OR (Sender=ESPBtn) OR (Sender=UltiboBtn) OR (Sender=AndroidBtn) OR (Sender=WABtn) then
       begin
         radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(GetCPU(aCPU));
         radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(GetOS(aOS));
@@ -5087,7 +5073,7 @@ begin
   imgSVN.Visible:=(NOT TCheckBox(Sender).Checked);
   imgGitlab.Visible:=(TCheckBox(Sender).Checked);
 
-  //WioBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
+  //UnleashedBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
   //PicoBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
   //UltiboBtn.Enabled:=(NOT TCheckBox(Sender).Checked);
 
