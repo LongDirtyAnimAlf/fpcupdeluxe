@@ -3,6 +3,7 @@ sudo pkg_add -r gdb
 sudo pkg_add -r lldb
 sudo pkg_add -r binutils
 sudo pkg_add -r gmake
+sudo pkg_add -r ld.lld
 
 sudo pkg_add -r libiconv
 sudo pkg_add -r xorg
@@ -15,6 +16,7 @@ sudo pkg_add -r xorg-fonts-type1
 sudo pkg_add -r liberation-fonts-ttf
 
 sudo pkg_add -r gtk+2
+sudo pkg_add -r gtk+3
 sudo pkg_add -r gtkglext
 
 # sudo pkg_add -r gdk-pixbuf2

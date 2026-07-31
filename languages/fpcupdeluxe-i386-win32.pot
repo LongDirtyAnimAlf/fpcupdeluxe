@@ -448,68 +448,6 @@ msgstr ""
 msgid "No updates found."
 msgstr ""
 
-#: processutils.lisaborted
-msgid "Aborted"
-msgstr ""
-
-#: processutils.liscannotexecute
-#, object-pascal-format
-msgid "cannot execute \"%s\""
-msgstr ""
-
-#: processutils.liscannotfindexecutable
-#, object-pascal-format
-msgid "cannot find executable \"%s\""
-msgstr ""
-
-#: processutils.lisexecutableisadirectory
-#, object-pascal-format
-msgid "executable \"%s\" is a directory"
-msgstr ""
-
-#: processutils.lisexecutablelacksthepermissiontorun
-#, object-pascal-format
-msgid "executable \"%s\" lacks the permission to run"
-msgstr ""
-
-#: processutils.lisexitcode
-#, object-pascal-format
-msgid "Exit code %s"
-msgstr ""
-
-#: processutils.lisfreeingbufferlines
-#, object-pascal-format
-msgid "freeing buffer lines: %s"
-msgstr ""
-
-#: processutils.lismissingdirectory
-#, object-pascal-format
-msgid "missing directory \"%s\""
-msgstr ""
-
-#: processutils.lismissingexecutable
-#, object-pascal-format
-msgid "missing executable \"%s\""
-msgstr ""
-
-#: processutils.lissuccess
-msgid "Success"
-msgstr ""
-
-#: processutils.listoolhasnoexecutable
-#, object-pascal-format
-msgid "tool \"%s\" has no executable"
-msgstr ""
-
-#: processutils.lisunabletoexecute
-#, object-pascal-format
-msgid "unable to execute: %s"
-msgstr ""
-
-#: processutils.lisunabletoreadprocessexitstatus
-msgid "unable to read process ExitStatus"
-msgstr ""
-
 #: tform1.actfileexit.caption
 msgid "E&xit"
 msgstr ""
@@ -1038,20 +976,22 @@ msgstr ""
 msgid "Install baremetal Ultibo for RPi2/3/4/5"
 msgstr ""
 
+#: tform1.unleashedbtn.caption
+msgctxt "tform1.unleashedbtn.caption"
+msgid "U-FPC"
+msgstr ""
+
+#: tform1.unleashedbtn.hint
+msgctxt "tform1.unleashedbtn.hint"
+msgid "Get FPC unleashed"
+msgstr ""
+
 #: tform1.wabtn.caption
 msgid "WA"
 msgstr ""
 
 #: tform1.wabtn.hint
 msgid "Install FPC and Lazarus for Web Assembly"
-msgstr ""
-
-#: tform1.wiobtn.caption
-msgid "Wio"
-msgstr ""
-
-#: tform1.wiobtn.hint
-msgid "Get FPC for SAMD51 embedded on Wio Terminal"
 msgstr ""
 
 #: tsettingsform.btnaddfpcpatch.caption

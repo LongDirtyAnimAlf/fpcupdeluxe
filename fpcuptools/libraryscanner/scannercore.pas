@@ -373,7 +373,7 @@ const LAZLIBS : array [0..33] of string = (
   'libvulkan.so*'
 );
 
-const LAZLINKLIBS : array [0..22] of string = (
+const LAZLINKLIBS : array [0..26] of string = (
   'libgdk-x11-2.0.so',
   'libgtk-x11-2.0.so',
   'libX11.so',
@@ -396,7 +396,11 @@ const LAZLINKLIBS : array [0..22] of string = (
   'libgdk-3.so',
   'libharfbuzz.so',
   'libharfbuzz-gobject.so',
-  'libgio-2.0.so'
+  'libgio-2.0.so',
+  'libpthread.so',
+  'libdl.so',
+  'libgobject-2.0.so',
+  'libgthread-2.0.so'
 );
 
 const QTLIBS : array [0..14] of string = (
