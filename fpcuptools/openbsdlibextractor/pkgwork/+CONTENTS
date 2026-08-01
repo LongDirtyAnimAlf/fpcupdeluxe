@@ -1,0 +1,430 @@
+@name gsettings-desktop-schemas-49.1
+@version 15
+@comment pkgpath=devel/gsettings-desktop-schemas ftp=yes
+@arch amd64
++DESC
+@sha vr/MbljznLIHVUGUizLT4AjeHIOUWdgr21ionMGElsQ=
+@size 248
+@depend devel/dconf:dconf-*:dconf-0.40.0p2
+@depend devel/glib2:glib2-*-!bootstrap:glib2-2.86.5
+@cwd /usr/local
+include/gsettings-desktop-schemas/
+include/gsettings-desktop-schemas/gdesktop-enums.h
+@sha zcrDDLUK9smo0o03JrP8zRRZs307XuUKoafQ2iPyVas=
+@size 7567
+@ts 1760386866
+lib/girepository-1.0/GDesktopEnums-3.0.typelib
+@sha vvsdu8NoGJ14IAnFy4Xd9upYSoHs0VWKmbPSCE4v6rw=
+@size 11140
+@ts 1777067894
+share/GConf/
+share/GConf/gsettings/
+share/GConf/gsettings/gsettings-desktop-schemas.convert
+@sha JypkXSGyJ5LyHza+tBC4taS9+l3/xeqm+TpP9i5yGXE=
+@size 8426
+@ts 1760386866
+share/GConf/gsettings/wm-schemas.convert
+@sha 1KBGIwbSAQnThPwZjmVHdf0yYbL8UytMfBglOoLw2ug=
+@size 6870
+@ts 1760386866
+share/gir-1.0/GDesktopEnums-3.0.gir
+@sha 1ePDQzAU6S/MVkIUm3GDMHUiAJTkGgrWG1h0D/o+HF8=
+@size 23696
+@ts 1777067893
+share/glib-2.0/schemas/10_org.gnome.desktop.lockdown.gschema.override
+@sha rFwzHwxnkWfa/ja/1DYs5LqtRF6HUPCY6B3WiKMmpn4=
+@size 130
+@ts 1777067897
+share/glib-2.0/schemas/10_org.gnome.desktop.media-handling.gschema.override
+@sha r3b3pD3tzN0Sq8Fnw/36+MRjshBeKAMDSz0ge+yx/FQ=
+@size 132
+@ts 1777067897
+share/glib-2.0/schemas/10_org.gnome.desktop.screensaver.gschema.override
+@sha ttbDLE8S8kvgR05ixYJm1BhAyjNFgBqoIr2sXHJqxVo=
+@size 131
+@ts 1777067897
+share/glib-2.0/schemas/org.gnome.desktop.a11y.applications.gschema.xml
+@sha bmfG2QCw5phoFFSUjcahGQTtwQWa9p2Dro/xxpq/5Mo=
+@size 845
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.a11y.gschema.xml
+@sha 9HECje7cB3CGOMfqBW7RxutmMrmHkFMhCFKI6DbzN6g=
+@size 828
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.a11y.interface.gschema.xml
+@sha 1bpYOwtP+y/ArqqZQ9NUbeLJ2rYdIxHCeq/4MmbN1V4=
+@size 676
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.a11y.keyboard.gschema.xml
+@sha QpslAAqUfhsDckVG6IsPPdbTusQq3a7DbWz4EGLInLs=
+@size 4897
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.a11y.magnifier.gschema.xml
+@sha Axa+sQIL8OFZTBV41O4XBE2NTwSljniGMbBUUD8H4KA=
+@size 9380
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.a11y.mouse.gschema.xml
+@sha JAmQPt4cheiZ/2V2vJcRuQFnBO4ENMIih9NNfoyIjDY=
+@size 2907
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.app-folders.gschema.xml
+@sha 9qa+mZr11e0pB5QyGCr3cIre/Aose+63QYJUSH7kt3I=
+@size 1841
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.background.gschema.xml
+@sha zrA2UfkPHeslsFKbEm/Iyer0Wf9xtb2u5Q20MRmHevM=
+@size 2624
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.break-reminders.gschema.xml
+@sha 3kfdTgsXHB6wt+gXYaePI9BDq+ZiiV4345oxT5a7GSs=
+@size 5751
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.calendar.gschema.xml
+@sha 0VPrsfvztyOWvjMsNAI2ZCCBnJQkikuWxN93uxpJ7D4=
+@size 427
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.datetime.gschema.xml
+@sha 24+R2JZuJFcIRPTw5SttXk0CEss5jHFQn188q2s50pI=
+@size 439
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.default-applications.gschema.xml
+@sha IjoDSpe6s/Bg6giP9gs0XStmoUHEF90FkJVfZCF9l5M=
+@size 3095
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.enums.xml
+@sha 041lbvePafR/GcsZ6pudRj1Ws2YOHyXUmfZvfjtqUI0=
+@size 7363
+@ts 1777067893
+share/glib-2.0/schemas/org.gnome.desktop.input-sources.gschema.xml
+@sha ElWx5rqPzM9DqH/2yiND/VW5ny2JqTZVb/H6apsjBp4=
+@size 2839
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.interface.gschema.xml
+@sha Ml0HKPVyROuhcEDfLJvABodYc0Pzwq2H2tUC+xPei1k=
+@size 13554
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.lockdown.gschema.xml
+@sha NXjneezuJewky2nnFwQRwD9Xjs2j9IRVuGMFtEL8rWU=
+@size 3463
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.media-handling.gschema.xml
+@sha zaqOl0D7mYUrI3z66O/NC7hdLeizLqSDqtSRnjyHuxA=
+@size 2604
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.notifications.gschema.xml
+@sha t+mDtfpM7cy6fmSUyJ3gmXJ0mGzcaTd6UVidl6wHrLQ=
+@size 2838
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.peripherals.gschema.xml
+@sha 7RUkERKuWhPPP+lwlpt7JCzGPd1Tr9wFtLdFbvb6bDM=
+@size 17348
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.privacy.gschema.xml
+@sha ME8m8gMNU48OerGouuSG4rXlh5vFXGGOiTHcgiKEq9U=
+@size 4907
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.screen-time-limits.gschema.xml
+@sha ycYlw9i8TwZITPHf3lSDBZDF5aOoWmylIf97CATqK+c=
+@size 1378
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.screensaver.gschema.xml
+@sha CmdXB9kMStd9CY3v9z9BS6misaDCKPNtTG8tYiC8phw=
+@size 6210
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.search-providers.gschema.xml
+@sha AObEkx2aQAW+gKuuLSi7e3FnJM7cGce+nm0BWgrA6pw=
+@size 1906
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.session.gschema.xml
+@sha Ris7T+RWrs1ypYTlM1ZqC+zP6557YYT4vEEMQUej73o=
+@size 668
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.sound.gschema.xml
+@sha /33K4rKz1hCb9NdVEfDOFTjjmwWTv80z818SZTxivpI=
+@size 1055
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.thumbnail-cache.gschema.xml
+@sha ICRvxQAqmJKH635eNRz9eSRd9j0JeLh5iC/z1TS4+fs=
+@size 600
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.thumbnailers.gschema.xml
+@sha iZv8FcMQBRZ0cUrdxUGCRVah5tZbMstxXLoYZi3G6gI=
+@size 866
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.wm.keybindings.gschema.xml
+@sha I6uIbXXpOnm1gpZ30dQfVdTsJ6gjsjnp8bgNW33WTvo=
+@size 13590
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.desktop.wm.preferences.gschema.xml
+@sha zMyGNg+2++RR6LJ8l9dWxxHYXcIbwZEHXasrhhOwVaE=
+@size 12393
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.system.locale.gschema.xml
+@sha Wx5lYpp33NIB9NhpMq1iwMQexh+xF/FRlm0T5pQR4tw=
+@size 448
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.system.location.gschema.xml
+@sha P+kOvoyFE0Akmh/r50G3d8ZbSagjIB6tAvNBvoYQYO0=
+@size 1159
+@ts 1777067891
+share/glib-2.0/schemas/org.gnome.system.proxy.gschema.xml
+@sha DwLbkV5yYBfBfBYZ7p/Y+e5+bUaY8PwWCg64iynyuv0=
+@size 6363
+@ts 1777067891
+share/locale/ab/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha pa3QoAjvzJC/kjkM/pLJJgEq6Il+1nCdlZ1nCRnZtj8=
+@size 7828
+@ts 1777067894
+share/locale/as/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha KAfEkxrZIEuRFtisgCoY/eYvm4rGklVjZKE3bpuUUnI=
+@size 16323
+@ts 1777067894
+share/locale/be/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha odE7Kze/+ObhfsECjxVVHEVx0HL6v7KWbFh1YIPNWJk=
+@size 26476
+@ts 1777067894
+share/locale/bg/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha vkK7zZOjZdhxDvOiqDb34N5+DK7ZIw1QPgpfwQq2S2w=
+@size 158860
+@ts 1777067894
+share/locale/bs/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha oZ0qP6f3uOfJv8LZHO1qm69HFCPzJi5PY0TJJua0nLI=
+@size 88500
+@ts 1777067894
+share/locale/ca/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha GIU3OH2ItQapCBP0QqxkpGYjBfPq9/9nvHJCSzN0WHI=
+@size 122251
+@ts 1777067894
+share/locale/ca@valencia/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha ynI4/SNT0bEIcQu2+PyZnQfvg3nyqOnsEloWKGkXjcE=
+@size 97205
+@ts 1777067894
+share/locale/cs/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha lfV5+DIOaBchqppLTCDvW6LTeEUMzPSwE+lJ5kX9lX4=
+@size 119651
+@ts 1777067894
+share/locale/da/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha VDWW5K0QcNaPvhOdhOS8ga5HJhZ8VSA5YbFh8cXAnGg=
+@size 114190
+@ts 1777067894
+share/locale/de/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha Bq9L6K8X4JeJVrBtyp2Ef1i+Ucwenudw8CeJ0YRx9ZE=
+@size 120603
+@ts 1777067894
+share/locale/el/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha H9lzhqIzIVXwNaDzBnIk2CnXKoohEgptYyxpyrq7g8Q=
+@size 94418
+@ts 1777067894
+share/locale/en_GB/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha 90zNzO1GiypG1hYilxECx1Q+uxDpjyroltXQxa20HwI=
+@size 111654
+@ts 1777067894
+share/locale/en_US/
+share/locale/en_US/LC_MESSAGES/
+share/locale/en_US/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha aoziVNe6BlH6VVLMzXeWIg6XmJJKjQem2szDcaiHxn4=
+@size 559
+@ts 1777067894
+share/locale/eo/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha EA3GzJjf0rlC24g8LUpC5TvPbClOln4N2DIHBXorOew=
+@size 112196
+@ts 1777067894
+share/locale/es/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha w+MYjiFPedHUXiQ9SkrgFQwp1nBmfBZYQ/D1+m5HFzA=
+@size 121435
+@ts 1777067894
+share/locale/eu/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha o7mDgc246Sg1IVHShdjY2ap+k6r+fblWKIqP2rk98ro=
+@size 119046
+@ts 1777067894
+share/locale/fa/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha /A0bHEBg9y4kAudbZ1cXywm3ww5hCoxnE1vxvTzluQI=
+@size 116173
+@ts 1777067894
+share/locale/fi/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha HIj27acgFTk8uLiW9p8Lv4cM/Ex3QQb6P6av9wCmX5g=
+@size 9344
+@ts 1777067894
+share/locale/fr/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha fVB/jr+Sc7sNI3XvrmO+8GDWRSpaAfjlcLuNhRqxPGM=
+@size 128878
+@ts 1777067894
+share/locale/fur/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha aOq3623swd3+NV5EvFuZG8zUXSIyhBEiz0MqQ+438J4=
+@size 114284
+@ts 1777067894
+share/locale/gl/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha CSwDJikdmfg7w/ywDfSXtC4eeJA578Kkf49pknDdhiw=
+@size 119860
+@ts 1777067894
+share/locale/gu/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha HfkhDTO7HrpL9iR4SiISJxu0VsuKRX7JQZueB5CcTd0=
+@size 31435
+@ts 1777067894
+share/locale/he/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha KIBGbY6VPntuF2rsBKD1/7u6Q2cFS0NqeYnr1/HvGn0=
+@size 111775
+@ts 1777067894
+share/locale/hi/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha uuwrjN2hDG2RY1JdKd86MWZg3SAu5r/fNnQeq76PF6U=
+@size 185875
+@ts 1777067894
+share/locale/hr/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha mmcfHjqGJsJbRp4knvuPzoO1/g0y+7hj6w5FgIrRSiQ=
+@size 108580
+@ts 1777067894
+share/locale/hu/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha 1YmBuCXzoG42pO9ES8wmjv6ei424ghfro+V8jGKn5KM=
+@size 123604
+@ts 1777067894
+share/locale/id/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha qHewDYxojuj85W6Zy4pl6BtQ3R/yZK4C6PW8FH2JqJg=
+@size 114135
+@ts 1777067894
+share/locale/is/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha JjIGEFwqUq47fSboimQZEx2eVJBl1/sAAn0P3SDerbM=
+@size 17043
+@ts 1777067894
+share/locale/it/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha jh8jV6/pskXqTaj19NsgD97g6SUBQH3pPmhUmL34oU0=
+@size 111153
+@ts 1777067894
+share/locale/ja/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha 1O4kCbfmiCbH68kZUYTVfmTa8LkON/DZY3eytvmFMxY=
+@size 127281
+@ts 1777067894
+share/locale/ka/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha IzerEh31uqzQHYqBHzP76J03iA3vHrhQ0lW6MHBG9O4=
+@size 196497
+@ts 1777067894
+share/locale/kab/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha UV+y2bhfQOw1n/cJs5IyqLvjV5R4gXYxy97sZK+CSfY=
+@size 5801
+@ts 1777067895
+share/locale/kk/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha sw4wH59dBTdS3wuhMsYPugx4qHaSARpich1iVlKQYhs=
+@size 26811
+@ts 1777067895
+share/locale/lt/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha 0wHZ6GYmTl6E4rBEtXlhXLr7W+qTOdXk0L/OVNaWRgE=
+@size 115000
+@ts 1777067895
+share/locale/lv/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha h0zRagjUVV/jd8Ho2FsTEXbIbElnxyukKvaB0xcSea8=
+@size 111322
+@ts 1777067895
+share/locale/ml/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha Gx1F6VfPy0Y7znOEJqd7qeCQOLCE5gymGLjIfr96LgA=
+@size 18627
+@ts 1777067895
+share/locale/ms/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha 8VKj/2iIr+9Q5MrkUKtFua2nJZbp3hKUzy7TEE68kuA=
+@size 100263
+@ts 1777067895
+share/locale/nb/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha z8i8egtlxaga+9hrDcgo/Jz9UBjwa8a4CCEnbKC1Qc0=
+@size 27622
+@ts 1777067895
+share/locale/ne/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha tZ4M6jdYOd9ykQgQ5MHA5brX8j+FWVXtJWIw3H2vdFo=
+@size 59959
+@ts 1777067895
+share/locale/nl/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha UcU97few72S6MVnw/hOmAysh9LIVo75g2IC9LfwIaOA=
+@size 60219
+@ts 1777067895
+share/locale/oc/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha KnW0OxT5rqpYCeP9Io++49THQS5QnzPm5gibBODk/YU=
+@size 99034
+@ts 1777067895
+share/locale/or/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha TtuXPs0EweiQnArbuc0xv90JWrnt0xtpcQSvWXdyHs0=
+@size 56041
+@ts 1777067895
+share/locale/pa/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha RgbxZSvKKikIGz7oSEl40yiI/jOjjqlcvGIb5gukUOA=
+@size 50121
+@ts 1777067895
+share/locale/pl/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha VWDDVYNoAEbLDK7WJ+fWSOP07gDg4OZ6gEJdeoILhbA=
+@size 122040
+@ts 1777067895
+share/locale/pt/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha A5N/FNPcy7DldebKFgTnC+LhcBcUtivO+ColrnO9HuQ=
+@size 119341
+@ts 1777067895
+share/locale/pt_BR/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha X8PEevClLs1UDQ1/JiNFha9Et1tXAingb2TCweiui/Q=
+@size 119836
+@ts 1777067895
+share/locale/ro/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha QtBUW9r0mGntVxCeDWaY6NzAGv5KCTehOruPW6IhQEw=
+@size 121803
+@ts 1777067895
+share/locale/ru/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha BzCYQ85DKe9zt2NLmRPIlvFJqfMCeftSTjXC/jFjy+U=
+@size 159111
+@ts 1777067895
+share/locale/sk/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha TcqNejd/hnG/vJ40RjCk2BjafUeO2ZA4CN+Y18SSoOw=
+@size 120343
+@ts 1777067895
+share/locale/sl/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha Wi7dlOJ8rM8osA+6z1IoFB0NuEioSgHv1u9z/47Zukg=
+@size 113550
+@ts 1777067895
+share/locale/sr/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha KucLxf7DqEziiFpeVnU+c5rfqBi7FIRpWLyQZxVCyOo=
+@size 152299
+@ts 1777067895
+share/locale/sr@latin/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha fL+xkVihmk6zulzH+clpW/nWu3kdu3Skyy04oF12yIc=
+@size 98767
+@ts 1777067895
+share/locale/sv/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha C8qQf6H/dEFcPMOfY5+PWQYCyqABnXhC/8z5m71KXBI=
+@size 117050
+@ts 1777067895
+share/locale/tg/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha etwl8BOLIh6fdmvdCTdOyonN3ZXGLbUKvTnxhB9u6x0=
+@size 719
+@ts 1777067895
+share/locale/tr/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha Kqm1SLsAUktMVsYqvzlOxmpGNLTXxlZHwixW4djCNGw=
+@size 121203
+@ts 1777067895
+share/locale/ug/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha ppSGihmeurXx8M5wsmZy1S/WDCOYBjYeoXTrOhRzbxI=
+@size 77825
+@ts 1777067895
+share/locale/uk/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha 66UictWXQQ0wefp6lj7JNR62Lqj6DVi52ZDG+cxTgLs=
+@size 159334
+@ts 1777067895
+share/locale/uz/
+share/locale/uz/LC_MESSAGES/
+share/locale/uz/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha pLx/tIAsZXwwEDNHlgqcFCe+oOT1sn9X6o3uDU4sprQ=
+@size 121001
+@ts 1777067895
+share/locale/vi/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha JKy6bFhXJ5rAub3xWR/BYw58s/X69znpDYEX2vWmzEU=
+@size 14519
+@ts 1777067895
+share/locale/zh_CN/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha 2kbOcCHkz5QZV4j3VMcCifB/3X78BGiGLeHCWPeOCn4=
+@size 104964
+@ts 1777067895
+share/locale/zh_HK/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha 2S7IgmaElAka1cyDvOX7FHk6ESnSJcvQKSkhL0Hi8rE=
+@size 80351
+@ts 1777067895
+share/locale/zh_TW/LC_MESSAGES/gsettings-desktop-schemas.mo
+@sha XbjZ+kjryioXYBIaH1aQHHrMkiunewI7rv5re80YgDA=
+@size 90905
+@ts 1777067895
+share/pkgconfig/gsettings-desktop-schemas.pc
+@sha R/AV0KuJrofiGhRexUkuRnsRg5Nza9K42shxj72gRe4=
+@size 200
+@ts 1777067890
+@tag glib-compile-schemas

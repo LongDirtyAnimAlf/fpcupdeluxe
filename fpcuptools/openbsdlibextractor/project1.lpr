@@ -178,10 +178,9 @@ var
   FileToDownload,URL:string;
   PackageName, PackageVersion: string;
   Archive, OutDir, WorkDir, SoPath, ContentsFile: string;
-  Depends, WantLibs, ElfNeeded, Libraries, LibraryNames: TStringList;
+  Depends, DependsNew, WantLibs, ElfNeeded, Libraries, LibraryNames: TStringList;
   StartName,FullName:string;
-
-  FS:TFileStream;
+  LibraryCount:integer;
   I: Integer;
 
 {---------------------------------------------------------------}
@@ -403,7 +402,9 @@ begin
           begin
             P:=RPos(':',Val);
             Dep:=Copy(Val,P+1,MaxInt)+'.tgz';
+            P:=Depends.Count;
             Depends.Add(Dep);
+            if Depends.Count<>P then DependsNew.Add(Dep);
             //Depends.Add(Val);
           end;
         'wantlib': WantLibs.Add(Val);
@@ -456,15 +457,13 @@ end;
 {---------------------------------------------------------------}
 { Copy the library into OutDir/libs/                             }
 {---------------------------------------------------------------}
-function StoreLibrary(const RelPath, SrcRoot, DestRoot: string): string;
+function StoreLibrary(const RelPath, SrcRoot, DestRoot, DestDir: string): string;
 var
-  Src, Dest, DestDir: string;
+  Src, Dest: string;
 begin
   Src := IncludeTrailingPathDelimiter(SrcRoot) + RelPath;
-  Dest := IncludeTrailingPathDelimiter(DestRoot) + 'libs' +
-          DirectorySeparator + ExtractFileName(RelPath);
-  DestDir := ExtractFilePath(Dest);
-  ForceDirectories(DestDir);
+  Dest := ConcatPaths([DestRoot,DestDir,ExtractFileName(RelPath)]);
+  ForceDirectories(ExtractFilePath(Dest));
   if FileExists(Src) then
   begin
     CopyFile(Src, Dest);
@@ -505,15 +504,21 @@ begin
 
   ForceDirectories(WorkDir);
 
-  Depends   := TStringList.Create;
-  WantLibs  := TStringList.Create;
-  ElfNeeded := TStringList.Create;
-  Libraries := TStringList.Create;
-  LibraryNames := TStringList.Create;
+  Depends       := TStringList.Create;
+  DependsNew    := TStringList.Create;
+  WantLibs      := TStringList.Create;
+  ElfNeeded     := TStringList.Create;
+  Libraries     := TStringList.Create;
+  LibraryNames  := TStringList.Create;
 
-  Depends.Sorted := True;   Depends.Duplicates := dupIgnore;
-  WantLibs.Sorted := True;  WantLibs.Duplicates := dupIgnore;
-  ElfNeeded.Sorted := True; ElfNeeded.Duplicates := dupIgnore;
+  Depends.Sorted := False;
+  Depends.Duplicates := dupIgnore;
+
+  WantLibs.Sorted := True;
+  WantLibs.Duplicates := dupIgnore;
+
+  ElfNeeded.Sorted := True;
+  ElfNeeded.Duplicates := dupIgnore;
 
   try
 
@@ -574,12 +579,16 @@ begin
     *)
 
 
+    // Locate our required Lazarus libs in the packages signature file
+
     URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
     FileToDownload:='SHA256.sig';
-    if (NOT FileExists(FileToDownload)) then DownloadPackage(URL+FileToDownload,FileToDownload) ;
-    if FileExists(FileToDownload) then
+    ContentsFile:='packages.'+FileToDownload;
+    if (NOT FileExists(FileToDownload)) then DownloadPackage(URL+FileToDownload,ContentsFile) ;
+    if FileExists(FileToDownload) then if (NOT FileExists(ContentsFile)) then CopyFile(FileToDownload,ContentsFile);
+    if FileExists(ContentsFile) then
     begin
-      LibraryNames.LoadFromFile(FileToDownload);
+      LibraryNames.LoadFromFile(ContentsFile);
       for FullName in LibraryNames do
       begin
         for StartName in LAZFILES do
@@ -593,123 +602,84 @@ begin
             FileToDownload:=Copy(FileToDownload,1,i-1);
             Libraries.Add(FileToDownload);
           end;
-
         end;
-
-
       end;
 
       LibraryNames.Clear;
       LibraryNames.Assign(Libraries);
+      Depends.Assign(Libraries);
 
-      Depends.Clear;
+      //Depends.Clear;
       WantLibs.Clear;
       ElfNeeded.Clear;
       Libraries.Clear;
 
-      for FullName in LibraryNames do
-      begin
-        URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
-        if (NOT FileExists(FullName)) then DownloadPackage(URL+FullName,FullName) ;
+      // Get our required Lazarus libs
 
-        if FileExists(FullName) then
+      LibraryCount:=LibraryNames.Count;
+      URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
+
+      repeat
+
+        LibraryCount:=Depends.Count;
+
+        DependsNew.Clear;
+
+        for FullName in LibraryNames do
         begin
-          ExtractMembers(FullName, WorkDir,['\lib\*.so.*']);
-          ExtractMembers(FullName, WorkDir,['lib\*.so.*']);
 
-          ContentsFile := IncludeTrailingPathDelimiter(WorkDir) + '+CONTENTS';
-          if FileExists(ContentsFile) then
+          if (NOT FileExists(FullName)) then
           begin
-            if FileIsReadOnly(ContentsFile) then FileSetAttr(ContentsFile, FileGetAttr(ContentsFile) and not faReadOnly);
-            if (NOT SysUtils.DeleteFile(ContentsFile)) then
-            begin
-              WriteLn(StdErr, '+CONTENTS not deleted');
-            end;
+            DownloadPackage(URL+FullName,FullName) ;
           end;
 
-          PackageName:='Unknown';
-          PackageVersion:='Unknown';
-
-          if ExtractMembers(FullName, WorkDir,['+CONTENTS']) then
+          if true then
           begin
-            if not FileExists(ContentsFile) then
+            if FileExists(FullName) then
             begin
-              WriteLn(StdErr, '+CONTENTS not found inside archive');
-              Halt(1);
-            end;
+              ExtractMembers(FullName, WorkDir,['\lib\*.so.*']);
+              ExtractMembers(FullName, WorkDir,['lib\*.so.*']);
 
-            { 2. Parse package metadata }
-            ParseContents(ContentsFile);
-
-            WriteLn;
-            WriteLn('=== Package information ===');
-            WriteLn('Name     : ', PackageName);
-            if Version <> '' then
-              WriteLn('Version  : ', PackageVersion);
-
-            (*
-
-            WriteLn;
-            WriteLn('=== Package-level dependencies (@depend) ===');
-            if Depends.Count = 0 then
-              WriteLn('  (none)')
-            else
-              for I := 0 to Depends.Count - 1 do
-                WriteLn('  ', Depends[I]);
-
-            WriteLn;
-            WriteLn('=== Required libraries (@wantlib) ===');
-            if WantLibs.Count = 0 then
-              WriteLn('  (none)')
-            else
-              for I := 0 to WantLibs.Count - 1 do
-                WriteLn('  ', WantLibs[I]);
-
-            { 3. Store the shared object }
-            WriteLn;
-            WriteLn('=== Shared libraries found in package ===');
-            SoPath := '';
-            for I := 0 to Libraries.Count - 1 do
-            begin
-              WriteLn('  ', Libraries[I]);
-              //if SoPath = '' then   { take the first real .so }
+              ContentsFile := IncludeTrailingPathDelimiter(WorkDir) + '+CONTENTS';
+              if FileExists(ContentsFile) then
               begin
-                ExtractMembers(Archive, WorkDir,[Libraries[I]]);
-                SoPath := StoreLibrary(Libraries[I], WorkDir, OutDir);
+                if FileIsReadOnly(ContentsFile) then FileSetAttr(ContentsFile, FileGetAttr(ContentsFile) and not faReadOnly);
+                if (NOT SysUtils.DeleteFile(ContentsFile)) then
+                begin
+                  WriteLn(StdErr, '+CONTENTS not deleted');
+                end;
+              end;
+
+              PackageName:='Unknown';
+              PackageVersion:='Unknown';
+
+              if ExtractMembers(FullName, WorkDir,['+CONTENTS']) then
+              begin
+                if not FileExists(ContentsFile) then
+                begin
+                  WriteLn(StdErr, '+CONTENTS not found inside archive');
+                  Halt(1);
+                end;
+
+                { 2. Parse package metadata }
+                ParseContents(ContentsFile);
+
+                WriteLn;
+                WriteLn('=== Package information ===');
+                WriteLn('Name     : ', PackageName);
+                if Version <> '' then
+                  WriteLn('Version  : ', PackageVersion);
+
               end;
             end;
-
-            { 4. ELF NEEDED inspection (more precise than @wantlib) }
-            if SoPath <> '' then
-            begin
-              WriteLn;
-              WriteLn('=== ELF NEEDED entries (from the .so itself) ===');
-              GetElfNeeded(SoPath);
-              if ElfNeeded.Count = 0 then
-                WriteLn('  (none / not a dynamic object for this host)')
-              else
-                for I := 0 to ElfNeeded.Count - 1 do
-                  WriteLn('  ', ElfNeeded[I]);
-            end;
-
-            { 5. Combined set that would be walked }
-            WriteLn;
-            WriteLn('=== All libraries that need to be resolved (union) ===');
-            for I := 0 to WantLibs.Count - 1 do
-              if not ElfNeeded.ContainsCI(WantLibs[I]) then
-                ElfNeeded.Add(WantLibs[I]);   { keep unique }
-            for I := 0 to ElfNeeded.Count - 1 do
-              WriteLn('  ', ElfNeeded[I]);
-
-            *)
-
           end;
-
-
         end;
-      end;
 
-    end;
+        LibraryNames.Assign(DependsNew);
+
+      until LibraryCount=Depends.Count;
+
+    end; // packages
 
     WriteLn;
     WriteLn('=== Package-level dependencies (@depend) ===');
@@ -727,6 +697,9 @@ begin
       for I := 0 to WantLibs.Count - 1 do
         WriteLn('  ', WantLibs[I]);
 
+
+    (*
+
     { 3. Store the shared object }
     WriteLn;
     WriteLn('=== Shared libraries found in package ===');
@@ -737,7 +710,7 @@ begin
       //if SoPath = '' then   { take the first real .so }
       begin
         ExtractMembers(Archive, WorkDir,[Libraries[I]]);
-        SoPath := StoreLibrary(Libraries[I], WorkDir, OutDir);
+        SoPath := StoreLibrary(Libraries[I], WorkDir, OutDir,'libs');
       end;
     end;
 
@@ -762,6 +735,8 @@ begin
         ElfNeeded.Add(WantLibs[I]);   { keep unique }
     for I := 0 to ElfNeeded.Count - 1 do
       WriteLn('  ', ElfNeeded[I]);
+
+    *)
 
     WriteLn;
     WriteLn('To continue the dependency walk you would:');
