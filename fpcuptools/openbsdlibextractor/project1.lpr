@@ -2,25 +2,30 @@ program project1;
 { inspect_pkg.pas
   FPC program to inspect an OpenBSD package archive, extract its
   shared library, detect package dependencies and ELF NEEDED entries.
-
-  Compile:  fpc -O2 inspect_pkg.pas
-  Usage:    ./inspect_pkg /path/to/qtx11extras-5.15.18pl0.tgz [outdir]
 }
 
 {$mode objfpc}{$H+}
+
+{$define BASE}
+{$define PACKAGES}
+{$define QTLIBRARIES}
 
 uses
   SysUtils, Classes, Process, StrUtils, URIParser, ftpsend, httpsend, synautil, ssl_openssl;
 
 
 const
-  BASEURL      = 'https://cdn.openbsd.org/pub/OpenBSD/%s'; // VERSION
+  BASEURL      = 'https://ftp.eu.openbsd.org/pub/OpenBSD/%s'; // VERSION
+  //BASEURL      = 'https://cdn.openbsd.org/pub/OpenBSD/%s'; // VERSION
   PACKAGES     = 'packages/%s'; // CPU
 
   CPU          = 'amd64';
-  VERSION      = '79';
-  VERSIONDOT   = '7.9';
 
+  VERSIONMAJOR = '6';
+  VERSIONMINOR = '8';
+
+  VERSION      = VERSIONMAJOR+VERSIONMINOR;
+  VERSIONDOT   = VERSIONMAJOR+'.'+VERSIONMINOR;
 
   BASE         = 'base%s.tgz'; // CPU;VERSION
   COMP         = 'comp%s.tgz'; // CPU;VERSION
@@ -29,57 +34,10 @@ const
   XSERV        = 'xserv%s.tgz'; // CPU;VERSION
   XSHARE       = 'xshare%s.tgz'; // CPU;VERSION
 
-
-const FPCLINKLIBS : array [0..10] of string = (
-  'ld.so*',
-  'libc.so*',
-  'libm.so*',
-  'libpthread.so*',
-  'libdl.so*',
-  'libgobject-2.0.so*',
-  'libglib-2.0.so*',
-  'libgthread-2.0.so*',
-  'libgmodule-2.0.so*',
-  'librt.so*',
-  'libz.so*'
-);
-
-const FPCEXTRALIBS : array [0..30] of string = (
-  'liba52.so*',
-  'libaspell.so*',
-  'libdts.so*',
-  'libfreetype.so*',
-  'libgmp.so*',
-  'libgtkhtml-2.so*',
-  'libglade-2.0.so*',
-  'libfontconfig.so*',
-  'libnettle.so*',
-  'libhogweed.so*',
-  'librsvg-2.so*',
-  'libsee.so*',
-  'libusb-1.0.so*',
-  'libmad.so*',
-  'libmatroska.so*',
-  'libmodplug.so*',
-  'libogg.so*',
-  'libsqlite3.so*',
-  'libvorbis.so*',
-  'libvorbisfile.so*',
-  'libvorbisenc.so*',
-  'libopenal.so*',
-  'libOpenCL.so*',
-  'libSDL2.so*',
-  'libSDL2_image.so*',
-  'libSDL2_mixer.so*',
-  'libSDL2_net.so*',
-  'libSDL2_ttf.so*',
-  'libsmpeg.so*',
-  'libwasmtime.so*',
-  'libmysqlclient.so*'
-);
-
-const LAZFILES : array [0..9] of string = (
+const LAZFILES : array [0..11] of string = (
   'glib2-',
+  'gtk+2-',
+  'gtk+3-',
   'gdk-pixbuf-',
   'gdk-pixbuf-xlib-',
   'pango-',
@@ -91,34 +49,10 @@ const LAZFILES : array [0..9] of string = (
   'libcanberra-gtk3-'
 );
 
-const LAZLINKLIBS : array [0..26] of string = (
-  'libgdk-x11-2.0.so',
-  'libgtk-x11-2.0.so',
-  'libX11.so',
-  'libXi.so',
-  'libXext.so',
-  'libgdk_pixbuf-2.0.so',
-  'libiconv.so',
-  'libcairo.so',
-  'libcairo-gobject.so',
-  'libpango-1.0.so',
-  'libpangocairo-1.0.so',
-  'libatk-1.0.so',
-  'libglib-1.2.so',
-  'libglib-2.0.so',
-  'libgmodule-2.0.so',
-  'libgdk-1.2.so',
-  'libgtk-1.2.so',
-  'libgdk_pixbuf.so',
-  'libgtk-3.so',
-  'libgdk-3.so',
-  'libharfbuzz.so',
-  'libharfbuzz-gobject.so',
-  'libgio-2.0.so',
-  'libpthread.so',
-  'libdl.so',
-  'libgobject-2.0.so',
-  'libgthread-2.0.so'
+const LAZQTFILES : array [0..2] of string = (
+  'qtbase',
+  'qtx11extras-',
+  'qt6-qtbase'
 );
 
 
@@ -138,6 +72,7 @@ begin
 
   //'https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/base79.tgz'
 
+  writeln('Going do download '+FileName);
 
   URL := FileName;
 
@@ -180,7 +115,6 @@ var
   Archive, OutDir, WorkDir, SoPath, ContentsFile: string;
   Depends, DependsNew, WantLibs, ElfNeeded, Libraries, LibraryNames: TStringList;
   StartName,FullName:string;
-  LibraryCount:integer;
   I: Integer;
 
 {---------------------------------------------------------------}
@@ -306,7 +240,7 @@ end;
 function ExtractMembers(const Arch, Dest: string; const Members: array of string): Boolean;
 var
   OutS: string;
-  A,M: string;
+  A,M,Mnew: string;
 begin
   Result:=True;
   A:=ExtractFileName(ChangeFileExt(Arch,'.tar'));
@@ -325,12 +259,19 @@ begin
       if (NOT FileExists(ConcatPaths([Dest,M]))) then
       begin
         OutS:='';
-        if Pos('gdk',A)>0 then
-        begin
-          OutS:='';
-        end;
         //Result := RunCommand('.\7za.exe',['x',A,'-o'+Dest,M],OutS,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
         Result := RunCommand('.\7za.exe',['x',A,'-y','-o'+Dest,M],OutS,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+
+        if (Pos('No files to process',OutS)>0) then
+        begin
+          if M[1] in AllowDirectorySeparators then
+            Mnew:=Copy(M,2,MaxInt)
+          else
+            Mnew:=DirectorySeparator+M;
+
+          Result := RunCommand('.\7za.exe',['x',A,'-y','-o'+Dest,Mnew],OutS,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
+        end;
+
         if not Result then
           WriteLn(StdErr, '7za failed: ', OutS);
       end;
@@ -487,7 +428,7 @@ begin
   Archive := ExpandFileName(ParamStr(1));
   if not FileExists(Archive) then
   begin
-    WriteLn(StdErr, 'Archive not found: ', Archive);
+    //WriteLn(StdErr, 'Archive not found: ', Archive);
     //Halt(1);
   end;
 
@@ -511,7 +452,7 @@ begin
   Libraries     := TStringList.Create;
   LibraryNames  := TStringList.Create;
 
-  Depends.Sorted := False;
+  Depends.Sorted := True;
   Depends.Duplicates := dupIgnore;
 
   WantLibs.Sorted := True;
@@ -522,7 +463,7 @@ begin
 
   try
 
-    (*
+    {$ifdef BASE}
 
     URL:=Format(BASEURL,[VERSIONDOT])+'/'+CPU+'/';
 
@@ -531,7 +472,7 @@ begin
     if (NOT FileExists(FileToDownload)) then DownloadPackage(URL+FileToDownload,FileToDownload) ;
     if FileExists(FileToDownload) then
     begin
-      ExtractMembers(FileToDownload, WorkDir,['.\usr\lib\*.so.*']);
+      ExtractMembers(FileToDownload, WorkDir,['.\usr\lib\*.so.*','.\usr\lib\crtendS.o','.\usr\lib\crtbegin.o','.\usr\lib\crtbeginS.o','.\usr\lib\crtend.o']);
     end;
 
     (*
@@ -576,11 +517,12 @@ begin
     *)
 
 
-    *)
+    {$endif}
 
 
     // Locate our required Lazarus libs in the packages signature file
 
+    {$ifdef PACKAGES}
     URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
     FileToDownload:='SHA256.sig';
     ContentsFile:='packages.'+FileToDownload;
@@ -616,12 +558,9 @@ begin
 
       // Get our required Lazarus libs
 
-      LibraryCount:=LibraryNames.Count;
       URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
 
       repeat
-
-        LibraryCount:=Depends.Count;
 
         DependsNew.Clear;
 
@@ -637,8 +576,9 @@ begin
           begin
             if FileExists(FullName) then
             begin
+              // Extract the so-libraries
+
               ExtractMembers(FullName, WorkDir,['\lib\*.so.*']);
-              ExtractMembers(FullName, WorkDir,['lib\*.so.*']);
 
               ContentsFile := IncludeTrailingPathDelimiter(WorkDir) + '+CONTENTS';
               if FileExists(ContentsFile) then
@@ -652,6 +592,8 @@ begin
 
               PackageName:='Unknown';
               PackageVersion:='Unknown';
+
+              // Extract the contentsfile
 
               if ExtractMembers(FullName, WorkDir,['+CONTENTS']) then
               begin
@@ -677,8 +619,7 @@ begin
 
         LibraryNames.Assign(DependsNew);
 
-      until LibraryCount=Depends.Count;
-
+      until (DependsNew.Count=0);
     end; // packages
 
     WriteLn;
@@ -698,8 +639,6 @@ begin
         WriteLn('  ', WantLibs[I]);
 
 
-    (*
-
     { 3. Store the shared object }
     WriteLn;
     WriteLn('=== Shared libraries found in package ===');
@@ -709,11 +648,13 @@ begin
       WriteLn('  ', Libraries[I]);
       //if SoPath = '' then   { take the first real .so }
       begin
-        ExtractMembers(Archive, WorkDir,[Libraries[I]]);
-        SoPath := StoreLibrary(Libraries[I], WorkDir, OutDir,'libs');
+        //ExtractMembers(Archive, WorkDir,[Libraries[I]]);
+        //SoPath := StoreLibrary(Libraries[I], WorkDir, OutDir,'libs');
       end;
     end;
 
+
+    (*
     { 4. ELF NEEDED inspection (more precise than @wantlib) }
     if SoPath <> '' then
     begin
@@ -737,6 +678,67 @@ begin
       WriteLn('  ', ElfNeeded[I]);
 
     *)
+    {$endif}
+
+
+
+
+    {$ifdef QTLIBRARIES}
+
+    // QT files
+    Libraries.Clear;
+    LibraryNames.Clear;
+
+    URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
+    FileToDownload:='SHA256.sig';
+    ContentsFile:='packages.'+FileToDownload;
+    if (NOT FileExists(FileToDownload)) then DownloadPackage(URL+FileToDownload,ContentsFile) ;
+    if FileExists(FileToDownload) then if (NOT FileExists(ContentsFile)) then CopyFile(FileToDownload,ContentsFile);
+    if FileExists(ContentsFile) then
+    begin
+      LibraryNames.LoadFromFile(ContentsFile);
+      for FullName in LibraryNames do
+      begin
+        for StartName in LAZQTFILES do
+        begin
+          i:=Pos('('+StartName,FullName);
+          if i>0 then
+          begin
+            FileToDownload:=Copy(FullName,i+1,MaxInt);
+            i:=Pos(')',FileToDownload);
+            if i=0 then i:=MaxInt;
+            FileToDownload:=Copy(FileToDownload,1,i-1);
+            Libraries.Add(FileToDownload);
+          end;
+        end;
+      end;
+
+      for FullName in Libraries do
+      begin
+
+        if (NOT FileExists(FullName)) then
+        begin
+          DownloadPackage(URL+FullName,FullName) ;
+        end;
+
+        if true then
+        begin
+          if FileExists(FullName) then
+          begin
+            // Extract the so-libraries
+            ExtractMembers(FullName, WorkDir,['\lib\qt5\libQt5Core.so.*','\lib\qt5\libQt5Gui.so.*','\lib\qt5\libQt5Network.so.*','\lib\qt5\libQt5PrintSupport.so.*','\lib\qt5\libQt5Widgets.so.*']);
+            ExtractMembers(FullName, WorkDir,['\lib\qt5\libQt5X11Extras.so.3.0']);
+            ExtractMembers(FullName, WorkDir,['\lib\libQt6Core.so.*','\lib\libQt6DBus.so.*','\lib\libQt6Gui.so.*','\lib\libQt6PrintSupport.so.*','\lib\libQt6Widgets.so.*']);
+          end;
+        end;
+
+      end;
+
+
+
+
+    end;
+    {$endif}
 
     WriteLn;
     WriteLn('To continue the dependency walk you would:');

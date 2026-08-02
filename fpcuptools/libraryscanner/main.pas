@@ -83,6 +83,9 @@ begin
   {$ifndef Windows}
   Edit1.Visible:=false;
   Edit2.Visible:=false;
+  {$else}
+  Edit1.Text:='C:\Users\superdad\Documents\GitHub\fpcupdeluxe\fpcuptools\openbsdlibextractor\readelf.exe';
+  Edit2.Text:='C:\Users\superdad\Documents\GitHub\fpcupdeluxe\fpcuptools\openbsdlibextractor\libs'
   {$endif}
 end;
 

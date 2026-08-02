@@ -150,12 +150,6 @@ const
   {$endif}
 
   {$ifdef Windows}
-  WINDOWSSEARCHDIRS : array [0..0] of string = (
-  'dummy'
-  );
-  {$endif}
-
-  {$ifdef Windows}
   DYNLINKV1='ld-*.so.1';
   DYNLINKV2='ld-*.so.2';
   DYNLINKV3='ld-*.so.3';
@@ -289,8 +283,8 @@ const FPCALIBS : array [0..11] of string = (
 );
 
 const FPCLINKLIBS : array [0..10] of string = (
-  'ld.so*',
   'libc.so*',
+  'ld.so*',
   'libm.so*',
   'libpthread.so*',
   'libdl.so*',
@@ -925,7 +919,8 @@ begin
   SearchResultList:=TStringList.Create;
   try
     {$ifdef Windows}
-    for sd in WINDOWSSEARCHDIRS do
+    //for sd in WINDOWSSEARCHDIRS do
+    sd:=FLibraryLocation;
     {$else}
     {$ifdef Haiku}
     for sd in HAIKUSEARCHDIRS do
@@ -944,9 +939,6 @@ begin
       {$endif}
       {$endif}
       FileName:=sd+DirectorySeparator+aLib;
-      {$ifdef Windows}
-      FileName:=StringReplace(FileName,'dummy',FLibraryLocation,[]);
-      {$endif}
       {$ifdef Termux}
       if NOT DirectoryExists(sd) then
         FileName:=TERMUXPATH+FileName;
@@ -988,13 +980,17 @@ begin
         if ((ExtractFileName(FileName)='libc.so') OR (ExtractFileName(FileName)='libm.so') OR (ExtractFileName(FileName)='libpthread.so')) then
         begin
           FileName:='';
+          {$ifndef Windows}
           break;
+          {$endif}
         end;
         // Skip static files from analysis
         if ExtractFileExt(FileName)='.a' then
         begin
           FileName:='';
+          {$ifndef Windows}
           break;
+          {$endif}
         end;
         while FileIsSymlink(FileName) do FileName:=GetPhysicalFilename(FileName,pfeException);
         SearchResult:='';
@@ -1021,7 +1017,9 @@ begin
         RunCommand(FReadelfBinary,['-d','-W',FileName],SearchResult,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
         {$endif}
         SearchResultList.Text:=SearchResult;
+        {$ifndef Windows}
         if (SearchResultList.Count=0) then continue;
+        {$endif}
         for sr in SearchResultList do
         begin
           s:=sr;
@@ -1041,7 +1039,9 @@ begin
           end;
         end;
         FileName:='';
+        {$ifndef Windows}
         break;
+        {$endif}
       end;
     end;
     {$ifndef Windows}
@@ -1126,7 +1126,7 @@ begin
     begin
       SearchLib:=Copy(sl,2,Length(sl)-2);
       {$ifdef Windows}
-      for SearchDir in WINDOWSSEARCHDIRS do
+      SearchDir:=FLibraryLocation;
       {$else}
       {$ifdef Haiku}
       for SearchDir in HAIKUSEARCHDIRS do
@@ -1145,9 +1145,6 @@ begin
         {$endif}
         {$endif}
         SearchLibPath:=SearchDir+DirectorySeparator+SearchLib;
-        {$ifdef Windows}
-        SearchLibPath:=StringReplace(SearchLibPath,'dummy',FLibraryLocation,[]);
-        {$endif}
         {$ifdef Termux}
         if NOT DirectoryExists(SearchDir) then
           SearchLibPath:=TERMUXPATH+SearchLibPath;
@@ -1192,7 +1189,7 @@ begin
   LibsLocation:='/data/data/com.termux/files';
   {$endif}
   LibsLocation:=IncludeTrailingPathDelimiter(LibsLocation);
-  writeln('Saving files into:',LibsLocation+'libs');
+  //writeln('Saving files into:',LibsLocation+'libs');
   ForceDirectories(LibsLocation+'libs');
 
   aList:=TStringList.Create;
