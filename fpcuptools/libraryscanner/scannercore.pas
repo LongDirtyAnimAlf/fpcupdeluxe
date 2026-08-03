@@ -907,6 +907,9 @@ const
   DATAFILE    = 'elfdynamic.dat';
   {$endif}
 var
+  {$ifdef Windows}
+  DirectoryList:TStringList;
+  {$endif}
   SearchResultList:TStringList;
   SearchResult:string;
   FileName:string;
@@ -917,10 +920,16 @@ var
 begin
   sIn:=TStringStream.Create;
   SearchResultList:=TStringList.Create;
+
+  {$ifdef Windows}
+  DirectoryList:=TStringList.Create;
+  {$endif}
+
   try
     {$ifdef Windows}
-    //for sd in WINDOWSSEARCHDIRS do
-    sd:=FLibraryLocation;
+    FindAllDirectories(DirectoryList,FLibraryLocation);
+    DirectoryList.Add(FLibraryLocation);
+    for sd in DirectoryList do
     {$else}
     {$ifdef Haiku}
     for sd in HAIKUSEARCHDIRS do
@@ -980,17 +989,13 @@ begin
         if ((ExtractFileName(FileName)='libc.so') OR (ExtractFileName(FileName)='libm.so') OR (ExtractFileName(FileName)='libpthread.so')) then
         begin
           FileName:='';
-          {$ifndef Windows}
           break;
-          {$endif}
         end;
         // Skip static files from analysis
         if ExtractFileExt(FileName)='.a' then
         begin
           FileName:='';
-          {$ifndef Windows}
           break;
-          {$endif}
         end;
         while FileIsSymlink(FileName) do FileName:=GetPhysicalFilename(FileName,pfeException);
         SearchResult:='';
@@ -1017,9 +1022,7 @@ begin
         RunCommand(FReadelfBinary,['-d','-W',FileName],SearchResult,[poUsePipes, poStderrToOutPut]{$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION >= 30200)},swoHide{$ENDIF});
         {$endif}
         SearchResultList.Text:=SearchResult;
-        {$ifndef Windows}
         if (SearchResultList.Count=0) then continue;
-        {$endif}
         for sr in SearchResultList do
         begin
           s:=sr;
@@ -1039,9 +1042,7 @@ begin
           end;
         end;
         FileName:='';
-        {$ifndef Windows}
         break;
-        {$endif}
       end;
     end;
     {$ifndef Windows}
@@ -1060,6 +1061,9 @@ begin
     end;
     {$endif}
   finally
+    {$ifdef Windows}
+    DirectoryList.Free;
+    {$endif}
     SearchResultList.Free;
     sIn.Free;
   end;
@@ -1068,6 +1072,9 @@ end;
 procedure TScannerCore.GetAndSaveLibs(const Loc:string);
 var
   LibsLocation:string;
+  {$ifdef Windows}
+  DirectoryList:TStringList;
+  {$endif}
 begin
   FLibraryList.Clear;
   FLibraryNotFoundList.Clear;
@@ -1080,6 +1087,10 @@ begin
   //end;
   {$ifndef Windows}
   GccDirectory:=GetStartupObjects;
+  {$endif}
+
+  {$ifdef Windows}
+  DirectoryList:=TStringList.Create;
   {$endif}
 
   FinalSearchResultList:=TLookupStringList.Create;
@@ -1126,7 +1137,9 @@ begin
     begin
       SearchLib:=Copy(sl,2,Length(sl)-2);
       {$ifdef Windows}
-      SearchDir:=FLibraryLocation;
+      FindAllDirectories(DirectoryList,FLibraryLocation);
+      DirectoryList.Add(FLibraryLocation);
+      for SearchDir in DirectoryList do
       {$else}
       {$ifdef Haiku}
       for SearchDir in HAIKUSEARCHDIRS do
@@ -1173,6 +1186,9 @@ begin
       end;
     end;
   finally
+    {$ifdef Windows}
+    DirectoryList.Free;
+    {$endif}
     FinalSearchResultList.Free;
   end;
 
@@ -1192,20 +1208,33 @@ begin
   //writeln('Saving files into:',LibsLocation+'libs');
   ForceDirectories(LibsLocation+'libs');
 
-  aList:=TStringList.Create;
-  try
-    aList.Add('These libraries were sourced from: '+GetDistro+' version '+GetDistro('VERSION'));
-    aList.SaveToFile(LibsLocation+'libs'+DirectorySeparator+'actual_library_version_fpcup.txt');
-  finally
-    aList.Free;
+
+  // Save ID
+  FileName:=ConcatPaths([FLibraryLocation,'actual_library_version_fpcup.txt']);
+  TargetFile:=ConcatPaths([LibsLocation,'libs','actual_library_version_fpcup.txt']);
+  if FileExists(FileName) then
+  begin
+    CopyFile(FileName,TargetFile,[]);
+  end
+  else
+  begin
+    aList:=TStringList.Create;
+    try
+      aList.Add('These libraries were sourced from: '+GetDistro+' version '+GetDistro('VERSION'));
+      aList.SaveToFile(TargetFile);
+    finally
+      aList.Free;
+    end;
   end;
 
   // copy the libraries found
   for Index:=0 to Pred(FLibraryLocationList.Count) do
   begin
     FileName:=FLibraryLocationList.Strings[Index];
-    TargetFile:=ExtractFileName(FileName);
-    CopyFile(FileName,LibsLocation+'libs'+DirectorySeparator+TargetFile,[]);
+    TargetFile:=ExtractRelativePath(IncludeTrailingPathDelimiter(FLibraryLocation),FileName);
+    TargetFile:=ConcatPaths([LibsLocation,'libs',TargetFile]);
+    ForceDirectories(ExtractFileDir(TargetFile));
+    CopyFile(FileName,TargetFile,[]);
   end;
 
   // if there are any linklibs not found, create them now
@@ -1214,38 +1243,54 @@ begin
     FileName:=FLibraryLocationList.Strings[Index];
     TargetFile:=ExtractFileName(FileName);
 
-    for LinkFile in FPCLINKLIBS do
+    for sl in FPCLINKLIBS do
     begin
+      LinkFile:=sl;
+      // Remove wildcard, if any
+      if sl[Length(LinkFile)]='*' then Delete(LinkFile, Length(LinkFile), 1);
       if (Pos(LinkFile,TargetFile)=1) then
       begin
-        CopyFile(FileName,LibsLocation+'libs'+DirectorySeparator+LinkFile,[]);
+        LinkFile:=ConcatPaths([LibsLocation,'libs',LinkFile]);
+        if NOT FileExists(LinkFile) then CopyFile(FileName,LinkFile,[]);
         break;
       end;
     end;
-    for LinkFile in FPCEXTRALIBS do
+    for sl in FPCEXTRALIBS do
     begin
+      LinkFile:=sl;
+      // Remove wildcard, if any
+      if sl[Length(LinkFile)]='*' then Delete(LinkFile, Length(LinkFile), 1);
       if (Pos(LinkFile,TargetFile)=1) then
       begin
-        CopyFile(FileName,LibsLocation+'libs'+DirectorySeparator+LinkFile,[]);
+        LinkFile:=ConcatPaths([LibsLocation,'libs',LinkFile]);
+        if NOT FileExists(LinkFile) then CopyFile(FileName,LinkFile,[]);
         break;
       end;
     end;
-    for LinkFile in LAZLINKLIBS do
+    for sl in LAZLINKLIBS do
     begin
+      LinkFile:=sl;
+      // Remove wildcard, if any
+      if sl[Length(LinkFile)]='*' then Delete(LinkFile, Length(LinkFile), 1);
       if (Pos(LinkFile,TargetFile)=1) then
       begin
-        CopyFile(FileName,LibsLocation+'libs'+DirectorySeparator+LinkFile,[]);
+        LinkFile:=ConcatPaths([LibsLocation,'libs',LinkFile]);
+        if NOT FileExists(LinkFile) then CopyFile(FileName,LinkFile,[]);
         break;
       end;
     end;
 
     if chkQT then
     begin
-      for LinkFile in QTLINKLIBS do
+      for sl in QTLINKLIBS do
       begin
+        LinkFile:=sl;
+        // Remove wildcard, if any
+        if sl[Length(LinkFile)]='*' then Delete(LinkFile, Length(LinkFile), 1);
         if (Pos(LinkFile,TargetFile)=1) then
         begin
-          CopyFile(FileName,LibsLocation+'libs'+DirectorySeparator+LinkFile,[]);
+          LinkFile:=ConcatPaths([LibsLocation,'libs',LinkFile]);
+          if NOT FileExists(LinkFile) then CopyFile(FileName,LinkFile,[]);
           break;
         end;
       end;

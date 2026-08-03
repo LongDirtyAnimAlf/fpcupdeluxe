@@ -596,12 +596,13 @@ if TargetOS=&apos;openbsd&apos; then
           </Linking>
         </CompilerOptions>
       </Item>
-      <SharedMatrixOptions Count="5">
+      <SharedMatrixOptions Count="6">
         <Item1 ID="784204643275" Modes="darwin64QT5,haiku32QT5,haiku64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item2 ID="322994045052" Modes="darwin32cocoa,darwin64cocoa,darwinppccocoa,darwin64cocoalegacy,darwinarm64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
         <Item3 ID="015223611220" Modes="darwin32carbon,darwinppccarbon" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
-        <Item4 ID="369111111759" Modes="linux64musl,solarisx64oi,openbsd32,openbsdx64" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
+        <Item4 ID="369111111759" Modes="linux64musl,solarisx64oi,openbsdx64,openbsd32" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
         <Item5 ID="689893290897" Modes="haiku64QT6" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt6"/>
+        <Item6 ID="314103590172" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>

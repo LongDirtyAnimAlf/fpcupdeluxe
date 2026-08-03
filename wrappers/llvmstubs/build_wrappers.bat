@@ -3,7 +3,7 @@ mkdir .\fpc-wrappers\lib
 mkdir .\fpc-wrappers\bin
 del .\fpc-wrappers\lib\wrapper.o
 
-set FPC=C:\fpcupsystems\trunk\fpc\bin\i386-win32\fpc.exe
+set FPC=C:\fpcupsystems\trunklatest\fpc\bin\i386-win32\fpc.exe
 set SYSTEM=-Twin64 -Px86_64
 
 call %FPC% %SYSTEM% -dAR_STUB -o.\fpc-wrappers\bin\ar.exe -FU.\fpc-wrappers\lib stub.lpr

@@ -11,7 +11,7 @@ program project1;
 {$define QTLIBRARIES}
 
 uses
-  SysUtils, Classes, Process, StrUtils, URIParser, ftpsend, httpsend, synautil, ssl_openssl;
+  SysUtils, Classes, Process, StrUtils, URIParser, httpsend, synautil, ssl_openssl;
 
 
 const
@@ -19,9 +19,9 @@ const
   //BASEURL      = 'https://cdn.openbsd.org/pub/OpenBSD/%s'; // VERSION
   PACKAGES     = 'packages/%s'; // CPU
 
-  CPU          = 'amd64';
+  CPU          = 'i386';
 
-  VERSIONMAJOR = '6';
+  VERSIONMAJOR = '7';
   VERSIONMINOR = '8';
 
   VERSION      = VERSIONMAJOR+VERSIONMINOR;
@@ -461,11 +461,12 @@ begin
   ElfNeeded.Sorted := True;
   ElfNeeded.Duplicates := dupIgnore;
 
+  URL:=Format(BASEURL,[VERSIONDOT])+'/'+CPU+'/';
+
   try
 
     {$ifdef BASE}
 
-    URL:=Format(BASEURL,[VERSIONDOT])+'/'+CPU+'/';
 
     FileToDownload:=Format(BASE,[VERSION]);
 
@@ -523,7 +524,10 @@ begin
     // Locate our required Lazarus libs in the packages signature file
 
     {$ifdef PACKAGES}
-    URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
+    if CPU='arm64' then
+      URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+'aarch64'+'/'
+    else
+      URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
     FileToDownload:='SHA256.sig';
     ContentsFile:='packages.'+FileToDownload;
     if (NOT FileExists(FileToDownload)) then DownloadPackage(URL+FileToDownload,ContentsFile) ;
@@ -558,7 +562,11 @@ begin
 
       // Get our required Lazarus libs
 
-      URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
+      if CPU='arm64' then
+        URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+'aarch64'+'/'
+      else
+        URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
+
 
       repeat
 
@@ -689,7 +697,11 @@ begin
     Libraries.Clear;
     LibraryNames.Clear;
 
-    URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
+    if CPU='arm64' then
+      URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+'aarch64'+'/'
+    else
+      URL:=Format(BASEURL,[VERSIONDOT])+'/packages/'+CPU+'/';
+
     FileToDownload:='SHA256.sig';
     ContentsFile:='packages.'+FileToDownload;
     if (NOT FileExists(FileToDownload)) then DownloadPackage(URL+FileToDownload,ContentsFile) ;
@@ -739,6 +751,13 @@ begin
 
     end;
     {$endif}
+
+
+    URL:=Format(BASEURL,[VERSIONDOT])+'/'+CPU+'/';
+
+    LibraryNames.Clear;
+    LibraryNames.Add('These OpenBSD '+VERSIONDOT+' libraries were sourced from URL: '+URL);
+    LibraryNames.SaveToFile(ConcatPaths([WorkDir,'usr','lib','actual_library_version_fpcup.txt']));
 
     WriteLn;
     WriteLn('To continue the dependency walk you would:');

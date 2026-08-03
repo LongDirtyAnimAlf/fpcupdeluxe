@@ -85,7 +85,7 @@ begin
   Edit2.Visible:=false;
   {$else}
   Edit1.Text:='C:\Users\superdad\Documents\GitHub\fpcupdeluxe\fpcuptools\openbsdlibextractor\readelf.exe';
-  Edit2.Text:='C:\Users\superdad\Documents\GitHub\fpcupdeluxe\fpcuptools\openbsdlibextractor\libs'
+  Edit2.Text:='C:\Users\superdad\Documents\GitHub\fpcupdeluxe\fpcuptools\openbsdlibextractor\pkgwork\lib'
   {$endif}
 end;
 
