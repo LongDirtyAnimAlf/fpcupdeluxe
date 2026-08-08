@@ -2500,12 +2500,13 @@ begin
   AddNewUtil('windres' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('windres.h',aSourceURL,'',ucBinutil);
   AddNewUtil('zip' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('nm' + GetExeExt,aSourceURL,'',ucBinutil);
 
+  {$ifndef CPUAARCH64}
   // add win32/64 gdb from lazarus
   AddNewUtil('gdb' + GetExeExt,SourceURL_gdb_default,'',ucDebugger32);
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucDebugger64);
   //AddNewUtil('libiconv-2'+GetLibExt,SourceURL64_gdb_default,'',ucDebugger64);
+  {$endif}
 
   {$ifdef win32}
   AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -2524,6 +2525,7 @@ begin
   AddNewUtil('ld' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('make' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('mv' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('nm' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('objdump' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('pwd' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('rm' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -2545,24 +2547,26 @@ begin
   {$endif win32}
 
   {$ifdef win64}
-  AddNewUtil('ar' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('as' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('cmp' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('cp' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('diff' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('gdate' + GetExeExt,aSourceURL64,'',ucBinutil);
   // just add default 64 bit debugger for all usercases as a binutil !
+  {$ifdef CPUX86_64}
+  AddNewUtil('ar' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('as' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb_default,'',ucBinutil);
+  AddNewUtil('ld' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('objdump' + GetExeExt,aSourceURL64,'',ucBinutil);
+  {$endif}
   //AddNewUtil('libiconv-2'+GetLibExt,SourceURL64_gdb_default,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL64,'',ucBinutil);
   AddNewUtil('gmkdir' + GetExeExt,aSourceURL64,'',ucBinutil);
   //AddNewUtil('GoRC' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('ld' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('make' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('mv' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('objdump' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('pwd' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('rm' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('strip' + GetExeExt,aSourceURL64,'',ucBinutil);

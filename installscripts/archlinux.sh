@@ -26,3 +26,6 @@ sudo pacman -S --noconfirm cairo
 sudo pacman -S --noconfirm pango
 sudo pacman -S --noconfirm gtk-engine-murrine
 
+sudo pacman -S --noconfirm gtk3
+sudo pacman -S --noconfirm appmenu-gtk-module
+sudo pacman -S --noconfirm libcanberra

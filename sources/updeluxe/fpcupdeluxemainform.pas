@@ -1057,6 +1057,15 @@ begin
 
   if Handled then exit;
 
+  // GTK3 linking error errors
+  if (ExistWordInString(PChar(s),'lazarus.pp',[soWholeWord])) AND (ExistWordInString(PChar(s),'Error while linking',[soWholeWord])) then
+  begin
+    EchoInfo(BeginSnippet+' Most (99%) likely, the GTK3 libraries are missing.');
+    EchoInfo(BeginSnippet+' Run: "sudo apt-get install libgtk-3-dev"');
+  end;
+
+  if Handled then exit;
+
   // warn for time consuming help files
   if (ExistWordInString(PChar(s),'writing')) AND (ExistWordInString(PChar(s),'pages...')) then
   begin
@@ -1968,6 +1977,14 @@ begin
   begin
     FG      := clRed;
     BG      := clPurple;
+    Special := True;
+  end;
+
+
+  if (ExistWordInString(PChar(s),'lazarus.pp',[soWholeWord])) AND (ExistWordInString(PChar(s),'Error while linking',[soWholeWord])) then
+  begin
+    FG      := clGreen;
+    BG      := clFuchsia;
     Special := True;
   end;
 
