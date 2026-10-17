@@ -8,167 +8,167 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.0\n"
-"Last-Translator: 郑建平@夏宗萍 aka  robsean <robsean@126.com> PerfBleu <lunaticstarksm@gmail.com>\n"
+"Last-Translator: ACTom <i@actom.me>\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Language: zh_CN\n"
 
 #: extrasettings.captioncheckaddcontext
 msgid "Add context for FPC and Lazarus files."
-msgstr "为FPC和Lazarus文件添加上下文"
+msgstr "为 FPC 和 Lazarus 的源文件添加文件关联。"
 
 #: extrasettings.captioncheckapplylocalchanges
 msgid "Re-apply local changes when updating."
-msgstr "当更新时,重新应用本地更改"
+msgstr "更新时重新应用本地修改。"
 
 #: extrasettings.captioncheckaskconfirmation
 msgid "Always ask for confirmation."
-msgstr "始终要求确认"
+msgstr "每次操作前都要求确认。"
 
 #: extrasettings.captioncheckautoswitchurl
 msgid "Auto-switch repo URL."
-msgstr "自动切换仓库的URL"
+msgstr "自动切换仓库 URL。"
 
 #: extrasettings.captioncheckdockedlazarus
 msgid "Docked Lazarus IDE."
-msgstr "单窗口 (停靠式) Lazarus IDE"
+msgstr "停靠式 Lazarus IDE（单窗口模式）。"
 
 #: extrasettings.captioncheckenableonlinepatching
 msgid "Allow patching of sources by online patches."
-msgstr "允许通过在线修补程序修补源文件"
+msgstr "允许使用在线补丁修改源代码。"
 
 #: extrasettings.captioncheckextraverbose
 msgid "Be extra verbose."
-msgstr "更加冗长的输出"
+msgstr "输出更详细的信息。"
 
 #: extrasettings.captioncheckforcelocalrepoclient
 msgid "Use local repo-client."
-msgstr "使用本地仓库客户端"
+msgstr "使用本程序自带的仓库客户端。"
 
 #: extrasettings.captioncheckfpcupbootstrappersonly
 msgid "Only use fpcup bootstrappers."
-msgstr "仅使用fpcup bootstrappers"
+msgstr "仅使用 fpcup 的 bootstrap 引导程序。"
 
 #: extrasettings.captioncheckgetupdates
 msgid "Check for fpcupdeluxe updates."
-msgstr "检查fpcupdeluxe的更新"
+msgstr "检查 fpcupdeluxe 是否有更新。"
 
 #: extrasettings.captioncheckincludehelp
 msgid "Include Help."
-msgstr "包含帮助"
+msgstr "同时安装帮助文档。"
 
 #: extrasettings.captioncheckincludelcl
 msgid "Include LCL with cross-compiler."
-msgstr "包括交叉/跨平台编译器使用的LCL"
+msgstr "安装交叉编译器时一并安装 LCL。"
 
 #: extrasettings.captioncheckpackagerepo
 msgid "Get package repositories."
-msgstr "获取软件包仓库"
+msgstr "获取软件包仓库。"
 
 #: extrasettings.captioncheckrepo
 msgid "Get FPC/Laz repositories."
-msgstr "获取FPC/Laz存储库"
+msgstr "获取 FPC/Lazarus 仓库。"
 
 #: extrasettings.captionchecksendinfo
 msgid "Send location and install info."
-msgstr "发送位置和安装信息"
+msgstr "发送安装位置与安装信息。"
 
 #: extrasettings.captionchecksplitfpc
 msgid "Split FPC source and bins."
-msgstr "分离FPC源文件和二进制文件"
+msgstr "将 FPC 的源码与二进制文件分开放置。"
 
 #: extrasettings.captionchecksplitlazarus
 msgid "Split Lazarus source and bins."
-msgstr "分离Lazarus源文件和二进制文件"
+msgstr "将 Lazarus 的源码与二进制文件分开放置。"
 
 #: extrasettings.captionchecksystemfpc
 msgid "Use system FPC for Lazarus."
-msgstr "让Lazarus使用系统上的FPC"
+msgstr "构建 Lazarus 时使用系统安装的 FPC。"
 
 #: extrasettings.captioncheckupdateonly
 msgid "FPC/Laz rebuild only."
-msgstr "仅重新构建FPC/Lazarus"
+msgstr "仅重新构建 FPC/Lazarus。"
 
 #: extrasettings.captioncheckusemakejobs
 msgid "Use jobs for GNU make."
-msgstr "为GNU make使用jobs"
+msgstr "让 GNU make 并行执行多个任务。"
 
 #: extrasettings.captioncheckusewget
 msgid "Use wget/libcurl as downloader."
-msgstr "使用wget/libcurl作为下载器"
+msgstr "使用 wget/libcurl 作为下载工具。"
 
 #: extrasettings.captionusesoftfloat80bit
 msgctxt "extrasettings.captionusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
-msgstr "启用80位浮点的软件仿真"
+msgstr "启用 80 位浮点数的软件模拟。"
 
 #: extrasettings.hintcheckaddcontext
 msgid "Double clicking on FPC and Lazarus files will open Lazarus."
-msgstr "在FPC和Lazarus文件上双击将打开Lazarus"
+msgstr "双击 FPC 和 Lazarus 的源文件时，将使用 Lazarus 打开。"
 
 #: extrasettings.hintcheckapplylocalchanges
 msgid "Fpcupdeluxe can re-apply the local changes automagically by using local auto-"patch."
-msgstr "Fpcupdeluxe可以通过使用本地自动补丁来自动地重新应用本地更改"
+msgstr "更新时，fpcupdeluxe 可以借助本地的自动补丁自动重新应用这些本地修改。"
 
 #: extrasettings.hintcheckaskconfirmation
 msgid "Show a confirmation dialog with yes/no before every build."
-msgstr "在每次构建前,显示一个带有 是/否 的确认对话框"
+msgstr "每次构建前都显示一个供选择“是/否”的确认对话框。"
 
 #: extrasettings.hintcheckdockedlazarus
 msgid "Build a docked Lazarus IDE"
-msgstr "构建一个单窗口 (停靠式) 的Lazarus IDE"
+msgstr "构建停靠式的 Lazarus IDE（单窗口模式）。"
 
 #: extrasettings.hintcheckenableonlinepatching
 msgid "Fpcupdeluxe can patch the sources automagically by using online patches."
-msgstr "Fpcupluxex可以使用在线修补程序来自动修补源文件"
+msgstr "fpcupdeluxe 可以利用在线补丁自动修改源代码。"
 
 #: extrasettings.hintcheckforcelocalrepoclient
 msgid "Use the repo-client by fpcupdeluxe."
-msgstr "使用fpcupdeluxe的repo-client"
+msgstr "使用 fpcupdeluxe 自带的仓库客户端。"
 
 #: extrasettings.hintcheckgetupdates
 msgid "Check for updates of fpcupdeluxe binaries."
-msgstr "检查fpcupdeluxe二进制文件的的更新"
+msgstr "检查 fpcupdeluxe 程序本身是否有更新。"
 
 #: extrasettings.hintcheckrepo
 msgid "Download whole repository, or only latest files."
-msgstr "下载整个仓库,或者只下载最新的文件"
+msgstr "下载整个仓库，或者只下载最新版本的文件。"
 
 #: extrasettings.hintchecksendinfo
 msgid "Location and install info will be send to public central fpcupdeluxe server."
-msgstr "位置和安装信息将发送到公共的中心fpcupdeluxe服务器"
+msgstr "安装位置与安装信息将被发送至 fpcupdeluxe 的公共中心服务器。"
 
 #: extrasettings.hintchecksystemfpc
 msgid "Use the system wide install of FPC to build Lazarus."
-msgstr "使用全系统范围内安装的FPC来构建Lazarus"
+msgstr "使用系统全局安装的 FPC 来构建 Lazarus。"
 
 #: extrasettings.hintusesoftfloat80bit
 msgctxt "extrasettings.hintusesoftfloat80bit"
 msgid "Enable software emulation of 80 bit floats."
-msgstr "启用80位浮点的软件仿真."
+msgstr "使用软件模拟来实现 80 位浮点运算，而不是依赖硬件支持。"
 
 #: fpcupdeluxemainform.upadvertisetools
 msgid "FPCUPdeluxe can try to download them if available !"
-msgstr "如果可以的话，FPCUPdeluxe会尝试下载它们！"
+msgstr "如果可以获取到它们，FPCUPdeluxe 会尝试下载！"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilers
 msgid "Going to auto-build all installed cross-compilers !"
-msgstr "将自动构建所有已安装的交叉编译器!"
+msgstr "即将自动构建所有已安装的交叉编译器！"
 
 #: fpcupdeluxemainform.upbuildallcrosscompilerscheck
 msgid "Checking FPC configfile [fpc.cfg] for cross-compilers in "
-msgstr "检查FPC配置文件[fpc.cfg]对于交叉编译器 在 "
+msgstr "正在检查 FPC 配置文件 [fpc.cfg] 中的交叉编译器："
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersfound
 msgid "Found crosscompiler for "
-msgstr "找到交叉编译器用于："
+msgstr "已找到对应的交叉编译器："
 
 #: fpcupdeluxemainform.upbuildallcrosscompilersupdate
 msgid "Going to update cross-compiler."
-msgstr "将更新交叉编译器。"
+msgstr "即将更新交叉编译器。"
 
 #: fpcupdeluxemainform.upbuildcrosscompiler
 msgid "Going to install a cross-compiler from available sources."
-msgstr "将从可获得的源文件去安装一个交叉编译器。"
+msgstr "即将从可用的源中安装一个交叉编译器。"
 
 #: fpcupdeluxemainform.upcheckupdate
 msgid "Please wait. Checking for updates."
@@ -176,27 +176,27 @@ msgstr "请稍候，正在检查更新。"
 
 #: fpcupdeluxemainform.updarwinfolderwarning1
 msgid "FPCUPdeluxe cannot be run inside the Downloads folder."
-msgstr "FPCUPdeluxe不能在其下载的文件夹中运行."
+msgstr "FPCUPdeluxe 不能在“下载”文件夹中运行。"
 
 #: fpcupdeluxemainform.updarwinfolderwarning2
 msgid "This is NOT allowed by OSX security measures."
-msgstr "在OSX的安全措施下，这是不允许的。"
+msgstr "OSX 的安全机制不允许这样做。"
 
 #: fpcupdeluxemainform.updarwinfolderwarning3
 msgid "Copy FPCUPdeluxe into its own directory and run from there."
-msgstr "将FPCUPdeluxe复制到它自己的目录中,并从中运行。"
+msgstr "请将 FPCUPdeluxe 复制到单独的目录中，并从该目录运行。"
 
 #: fpcupdeluxemainform.upfolderwarning1
 msgid "FPCUPdeluxe could not create its necessary setting-files."
-msgstr "FPCUPdeluxe无法创建其必需的设置文件。"
+msgstr "FPCUPdeluxe 无法创建所需的设置文件。"
 
 #: fpcupdeluxemainform.upfolderwarning2
 msgid "Please check the folder permissions, and re-start."
-msgstr "请检查文件夹权限,并重新启动。"
+msgstr "请检查文件夹的权限，然后重新启动。"
 
 #: fpcupdeluxemainform.upinstallcrosscompiler
 msgid "Going to install the cross-compiler for"
-msgstr "转到安装交叉/跨平台编译器,针对"
+msgstr "即将安装目标为"
 
 #: fpcupdeluxemainform.upinstalldirectory
 msgid "Install directory"
@@ -208,135 +208,135 @@ msgstr "当前安装目录"
 
 #: fpcupdeluxemainform.upinstallfpc
 msgid "Going to install/update FPC."
-msgstr "将安装/更新FPC。"
+msgstr "正在安装/更新 FPC。"
 
 #: fpcupdeluxemainform.upinstallfpclazarus
 msgid "Going to install/update FPC and Lazarus."
-msgstr "将安装/更新FPC和Lazarus。"
+msgstr "正在安装/更新 FPC 和 Lazarus。"
 
 #: fpcupdeluxemainform.upinstalllazarus
 msgid "Going to install/update Lazarus."
-msgstr "将安装/更新Lazarus。"
+msgstr "正在安装/更新 Lazarus。"
 
 #: fpcupdeluxemainform.upinstallmodule
 msgid "Going to install/update module"
-msgstr "将安装/更新模块"
+msgstr "正在安装/更新模块"
 
 #: fpcupdeluxemainform.upinstallsettingscurrent
 msgid "Got settings from install directory"
-msgstr "从安装目录中取得了设置"
+msgstr "已从安装目录中读取设置"
 
 #: fpcupdeluxemainform.uplookup
 msgid "Looking for"
-msgstr "查找"
+msgstr "正在查找"
 
 #: fpcupdeluxemainform.uplookupbintools
 msgid "Going to look for the right cross-bins. Can (will) take some time !"
-msgstr "将要查找正确的交叉二进制文件，这可能会花费一段时间！"
+msgstr "正在查找所需的交叉编译工具，可能需要一些时间！"
 
 #: fpcupdeluxemainform.uplookuplibtools
 msgid "Going to look for the right cross-libraries. Can (will) take some time !"
-msgstr "将要查找正确的交叉库，这可能会花费一段时间！"
+msgstr "正在查找所需的交叉编译库，可能需要一些时间！"
 
 #: fpcupdeluxemainform.uplookuptools
 msgid "Looking for FPCUPdeluxe cross-tools on GitHub (if any)."
-msgstr "正在Github上查找FPCUPdeluxe交叉工具 (如果存在)"
+msgstr "正在 GitHub 上查找 FPCUPdeluxe 的交叉工具（如果有）。"
 
 #: fpcupdeluxemainform.upmissingtools
 msgid "The building of a crosscompiler failed due to missing cross-tools."
-msgstr "由于缺少交叉/跨平台的工具,交叉/跨平台编译器的构建失败."
+msgstr "由于缺少交叉工具，交叉编译器构建失败。"
 
 #: fpcupdeluxemainform.upquestioncontinue
 msgid "Do you want to continue ?"
-msgstr "你想继续吗?"
+msgstr "是否继续？"
 
 #: fpcupdeluxemainform.upquitrequest
 msgid "Please quit FPCUPdeluxe."
-msgstr "请退出fpcupdeluxe。"
+msgstr "请退出 FPCUPdeluxe。"
 
 #: fpcupdeluxemainform.upremovecrosscompiler
 msgid "Going to remove the cross-compiler for"
-msgstr "转到移除交叉/跨平台编译器,针对"
+msgstr "即将移除目标为"
 
 #: fpcupdeluxemainform.upremovemodule
 msgid "Going to remove module"
-msgstr "转到移除模块"
+msgstr "正在移除模块"
 
 #: fpcupdeluxemainform.upselectfpclazarustarget
 msgid "Please select a FPC and Lazarus target first"
-msgstr "请先选择一个FPC目标和一个Lazarus目标"
+msgstr "请先选择 FPC 和 Lazarus 的目标平台"
 
 #: fpcupdeluxemainform.upselectfpctarget
 msgid "Please select a FPC target first"
-msgstr "请先选择一个FPC目标"
+msgstr "请先选择 FPC 的目标平台"
 
 #: fpcupdeluxemainform.upselectlazarustarget
 msgid "Please select a Lazarus target first"
-msgstr "请先选择一个Lazarus目标"
+msgstr "请先选择 Lazarus 的目标平台"
 
 #: fpcupdeluxemainform.upspacewarning
 msgid "Having a space in your install path is very ill-advised !"
-msgstr "在你的安装路径中包含空格是十分不明智的！"
+msgstr "安装路径中包含空格会带来很多麻烦，请尽量避免！"
 
 #: fpcupdeluxemainform.uptrybuildcrosscompiler
 msgid "Trying to build the cross-compiler for"
-msgstr "尝试构建交叉/跨平台编译器,针对"
+msgstr "正在尝试为下列目标构建交叉编译器："
 
 #: fpcupdeluxemainform.upupdatecrossall
 msgid "Going to update all crosscompilers"
-msgstr "转到更新所有的交叉/跨平台编译器"
+msgstr "正在更新所有交叉编译器"
 
 #: fpcupdeluxemainform.upupdatefound
 msgid "New FPCUPdeluxe version available"
-msgstr "可新的fpcupdeluxe版本"
+msgstr "发现 FPCUPdeluxe 新版本"
 
 #: fpcupdeluxemainform.upupdatenotfound
 msgid "No updates found."
-msgstr "未找到更新."
+msgstr "未找到更新。"
 
 #: processutils.lisaborted
 msgid "Aborted"
-msgstr "中止"
+msgstr "已中止"
 
 #: processutils.liscannotexecute
 #, object-pascal-format
 msgid "cannot execute \"%s\""
-msgstr "无法执行\"%s\""
+msgstr "无法执行 \"%s\""
 
 #: processutils.liscannotfindexecutable
 #, object-pascal-format
 msgid "cannot find executable \"%s\""
-msgstr "无法找到可执行文件\"%s\""
+msgstr "找不到可执行文件 \"%s\""
 
 #: processutils.lisexecutableisadirectory
 #, object-pascal-format
 msgid "executable \"%s\" is a directory"
-msgstr "可执行文件\"%s\"是一个目录"
+msgstr "可执行文件 \"%s\" 其实是一个目录"
 
 #: processutils.lisexecutablelacksthepermissiontorun
 #, object-pascal-format
 msgid "executable \"%s\" lacks the permission to run"
-msgstr "可执行文件\"%s\"缺少权限来运行"
+msgstr "可执行文件 \"%s\" 没有运行权限"
 
 #: processutils.lisexitcode
 #, object-pascal-format
 msgid "Exit code %s"
-msgstr "退出代码%s"
+msgstr "退出代码 %s"
 
 #: processutils.lisfreeingbufferlines
 #, object-pascal-format
 msgid "freeing buffer lines: %s"
-msgstr "释放缓冲器行: %s"
+msgstr "正在释放缓冲区中的行：%s"
 
 #: processutils.lismissingdirectory
 #, object-pascal-format
 msgid "missing directory \"%s\""
-msgstr "缺少目录\"%s\""
+msgstr "缺少目录 \"%s\""
 
 #: processutils.lismissingexecutable
 #, object-pascal-format
 msgid "missing executable \"%s\""
-msgstr "缺少可执行文件\"%s\""
+msgstr "缺少可执行文件 \"%s\""
 
 #: processutils.lissuccess
 msgid "Success"
@@ -345,24 +345,24 @@ msgstr "成功"
 #: processutils.listoolhasnoexecutable
 #, object-pascal-format
 msgid "tool \"%s\" has no executable"
-msgstr "tool \"%s\"没有可执行文件"
+msgstr "工具 \"%s\" 没有对应的可执行文件"
 
 #: processutils.lisunabletoexecute
 #, object-pascal-format
 msgid "unable to execute: %s"
-msgstr "无法执行:%s"
+msgstr "无法执行：%s"
 
 #: processutils.lisunabletoreadprocessexitstatus
 msgid "unable to read process ExitStatus"
-msgstr "无法读取进程的ExitStatus"
+msgstr "无法读取进程的退出状态"
 
 #: tform1.actfileexit.caption
 msgid "E&xit"
-msgstr "退出(&x)"
+msgstr "退出(&X)"
 
 #: tform1.actfilesave.caption
 msgid "&Save log"
-msgstr "保存日志"
+msgstr "保存日志(&S)"
 
 #: tform1.actfileexit.hint
 msgid "Exit"
@@ -382,7 +382,7 @@ msgstr "LAMW"
 
 #: tform1.androidbtn.hint
 msgid "Will install/update FPC and Lazarus stable and LAMW"
-msgstr "将安装/更新FPC和Lazarus稳定版本和LAMW"
+msgstr "将安装/更新 FPC 和 Lazarus 的稳定版以及 LAMW"
 
 #: tform1.basicsheet.caption
 msgid "Basic"
@@ -390,19 +390,19 @@ msgstr "基本"
 
 #: tform1.bitbtnfpcandlazarus.caption
 msgid "Install/update FPC+Lazarus"
-msgstr "安装/更新FPC和Lazarus"
+msgstr "安装/更新 FPC+Lazarus"
 
 #: tform1.bitbtnfpcandlazarus.hint
 msgid "Will install/update the selected version of both FPC and Lazarus."
-msgstr "将安装/更新选定的FPC和Lazarus版本。"
+msgstr "将安装/更新所选的 FPC 和 Lazarus 版本。"
 
 #: tform1.bitbtnfpconly.caption
 msgid "Only FPC"
-msgstr "仅安装FPC"
+msgstr "仅 FPC"
 
 #: tform1.bitbtnfpconly.hint
 msgid "Only install/update selected FPC version."
-msgstr "仅安装/更新选择的FPC版本."
+msgstr "仅安装/更新所选的 FPC 版本。"
 
 #: tform1.bitbtnfpconlytag.caption
 msgctxt "tform1.bitbtnfpconlytag.caption"
@@ -411,15 +411,15 @@ msgstr "添加标签"
 
 #: tform1.bitbtnfpconlytag.hint
 msgid "Add tag/url into FPC install list"
-msgstr "将标签/url添加到FPC安装列表"
+msgstr "将标签/URL 添加到 FPC 安装列表中"
 
 #: tform1.bitbtnfpcsetrevision.caption
 msgid "Set FPC hash in Setup+"
-msgstr "在设置+中设置FPC的hash"
+msgstr "在“高级设置”中指定 FPC 哈希值"
 
 #: tform1.bitbtnfpcsetrevision.hint
 msgid "Set FPC revision"
-msgstr "设置FPC修订版本"
+msgstr "指定 FPC 的版本号"
 
 #: tform1.bitbtnhalt.caption
 msgid "STOP"
@@ -427,15 +427,15 @@ msgstr "停止"
 
 #: tform1.bitbtnhalt.hint
 msgid "Try to stop current install process"
-msgstr "尝试停止当前安装过程"
+msgstr "尝试停止当前的安装过程"
 
 #: tform1.bitbtnlazarusonly.caption
 msgid "Only Lazarus"
-msgstr "仅安装Lazarus"
+msgstr "仅 Lazarus"
 
 #: tform1.bitbtnlazarusonly.hint
 msgid "Only install/update selected Lazarus version."
-msgstr "仅安装/更新选择的Lazarus版本."
+msgstr "仅安装/更新所选的 Lazarus 版本。"
 
 #: tform1.bitbtnlazarusonlytag.caption
 msgctxt "tform1.bitbtnlazarusonlytag.caption"
@@ -444,15 +444,15 @@ msgstr "添加标签"
 
 #: tform1.bitbtnlazarusonlytag.hint
 msgid "Add tag/url into Lazarus install list"
-msgstr "将标签/url添加到Lazarus安装列表"
+msgstr "将标签/URL 添加到 Lazarus 安装列表中"
 
 #: tform1.bitbtnlazarussetrevision.caption
 msgid "Set Lazarus hash in Setup+"
-msgstr "在设置+中设置Lazarus的hash"
+msgstr "在“高级设置”中指定 Lazarus 哈希值"
 
 #: tform1.bitbtnlazarussetrevision.hint
 msgid "Set Lazarus revision"
-msgstr "设置Lazarus修订版本"
+msgstr "指定 Lazarus 的版本号"
 
 #: tform1.btnchecktoolslocations.caption
 msgid "Check Tools Location"
@@ -460,15 +460,15 @@ msgstr "检查工具位置"
 
 #: tform1.btnclearlog.caption
 msgid "Clear log"
-msgstr "清除日志"
+msgstr "清空日志"
 
 #: tform1.btncreatelazarusconfig.caption
 msgid "Create Lazarus Configuration"
-msgstr "创建Lazarus配置文件"
+msgstr "创建 Lazarus 配置"
 
 #: tform1.btngetopenssl.caption
 msgid "Get OpenSSL by Browser"
-msgstr "通过浏览器获取OpenSSL"
+msgstr "通过浏览器下载 OpenSSL"
 
 #: tform1.btninstalldirselect.caption
 msgid "Set install path"
@@ -480,23 +480,23 @@ msgstr "安装模块"
 
 #: tform1.btninstallmodule.hint
 msgid "Install the selected module."
-msgstr "安装选择的模块."
+msgstr "安装所选的模块。"
 
 #: tform1.btnsendlog.caption
 msgid "Email log"
-msgstr "电邮日志"
+msgstr "邮件发送日志"
 
 #: tform1.btnsendlog.hint
 msgid "Send email to fpcup maintainer containing Commandscreen output."
-msgstr "将命令窗口中的输出发送给fpcup维护人员。"
+msgstr "通过邮件将命令窗口的输出内容发送给 fpcup 维护者。"
 
 #: tform1.btnsetupplus.caption
 msgid "Setup+"
-msgstr "设置+"
+msgstr "高级设置+"
 
 #: tform1.btnsetupplus.hint
 msgid "Open the extended settings form."
-msgstr "打开扩展的设置窗体。"
+msgstr "打开扩展设置窗口。"
 
 #: tform1.btnuninstallmodule.caption
 msgid "Uninstall module"
@@ -504,19 +504,19 @@ msgstr "卸载模块"
 
 #: tform1.btnuninstallmodule.hint
 msgid "Uninstall the selected module."
-msgstr "卸载选择的模块。"
+msgstr "卸载所选的模块。"
 
 #: tform1.btnupdatelazarusmakefiles.caption
 msgid "Update Lazarus Makefiles"
-msgstr "更新Lazarus的Makefiles"
+msgstr "更新 Lazarus 的 Makefile"
 
 #: tform1.buttonautocrossupdate.caption
 msgid "Update all"
-msgstr "更新所有"
+msgstr "全部更新"
 
 #: tform1.buttonautocrossupdate.hint
 msgid "Auto-update all installed cross-compilers."
-msgstr "自动升级所有已安装的交叉编译器。"
+msgstr "自动更新所有已安装的交叉编译器。"
 
 #: tform1.buttoninstallcrosscompiler.caption
 msgid "Install compiler"
@@ -524,7 +524,7 @@ msgstr "安装编译器"
 
 #: tform1.buttoninstallcrosscompiler.hint
 msgid "Install the selected CPU-OS cross-compiler."
-msgstr "安装选择的CPU和操作系统的交叉编译器。"
+msgstr "安装所选的 CPU-操作系统交叉编译器。"
 
 #: tform1.buttonremovecrosscompiler.caption
 msgid "Remove compiler"
@@ -532,19 +532,19 @@ msgstr "移除编译器"
 
 #: tform1.buttonremovecrosscompiler.hint
 msgid "Remove the selected CPU-OS cross-compiler."
-msgstr "移除已选择的目标CPU和操作系统的交叉编译器。"
+msgstr "移除所选的 CPU-操作系统交叉编译器。"
 
 #: tform1.buttonsubarchselect.caption
 msgid "Set subarch"
-msgstr "设置subarch"
+msgstr "设置子架构"
 
 #: tform1.buttonsubarchselect.hint
 msgid "Select a subarch for embedded target."
-msgstr "为嵌入式目标选择一个subarch"
+msgstr "为嵌入式目标选择子架构。"
 
 #: tform1.checkautoclear.caption
 msgid "Auto clear"
-msgstr "自动清理"
+msgstr "自动清空"
 
 #: tform1.chkgitlab.caption
 msgid "GitLab"
@@ -552,11 +552,11 @@ msgstr "GitLab"
 
 #: tform1.chkmakefilefpc.caption
 msgid "Check Makefile FPC"
-msgstr "检查Makefile FPC"
+msgstr "检查 FPC Makefile"
 
 #: tform1.chkmakefilelaz.caption
 msgid "Check Makefile Lazarus"
-msgstr "检查Makefile Lazarus"
+msgstr "检查 Lazarus Makefile"
 
 #: tform1.createstartup.caption
 msgid "Re-create startup scripts"
@@ -564,7 +564,7 @@ msgstr "重新创建启动脚本"
 
 #: tform1.crosssheet.caption
 msgid "Cross"
-msgstr "交叉"
+msgstr "交叉编译"
 
 #: tform1.espbtn.caption
 msgid "ESP32"
@@ -572,33 +572,33 @@ msgstr "ESP32"
 
 #: tform1.espbtn.hint
 msgid "Get FPC for ESP32 [lx6] boards"
-msgstr "为ESP32 [lx6]开发板安装FPC"
+msgstr "获取用于 ESP32 [lx6] 开发板的 FPC"
 
 #: tform1.extrasheet.caption
 msgid "Extras"
-msgstr "附加"
+msgstr "附加功能"
 
 #: tform1.fixesbtn.caption
 msgid "Fixes"
-msgstr "修复"
+msgstr "修正版"
 
 #: tform1.fixesbtn.hint
 msgid "Will install/update current fixes versions of both FPC and Lazarus"
-msgstr "将安装/更新FPC和Lazarus的当前修正的版本"
+msgstr "将安装/更新 FPC 和 Lazarus 当前的修正版"
 
 #: tform1.fpchistorylabel.caption
 msgid "FPC revision history"
-msgstr "FPC修订版本历史"
+msgstr "FPC 历史版本"
 
 #: tform1.fpctaglabel.caption
 msgctxt "tform1.fpctaglabel.caption"
 msgid "FPC version"
-msgstr "FPC版本"
+msgstr "FPC 版本"
 
 #: tform1.fpcversionlabel.caption
 msgctxt "tform1.fpcversionlabel.caption"
 msgid "FPC version"
-msgstr "FPC版本"
+msgstr "FPC 版本"
 
 #: tform1.historysheet.caption
 msgid "History"
@@ -606,21 +606,21 @@ msgstr "历史"
 
 #: tform1.installdiredit.hint
 msgid "Directory to install FPC and Lazarus"
-msgstr "安装FPC和Lazarus的目录"
+msgstr "用于安装 FPC 和 Lazarus 的目录"
 
 #: tform1.lazarushistorylabel.caption
 msgid "Lazarus revision history"
-msgstr "Lazarus修订版本历史"
+msgstr "Lazarus 历史版本"
 
 #: tform1.lazarustaglabel.caption
 msgctxt "tform1.lazarustaglabel.caption"
 msgid "Lazarus version"
-msgstr "Lazarus版本"
+msgstr "Lazarus 版本"
 
 #: tform1.lazarusversionlabel.caption
 msgctxt "tform1.lazarusversionlabel.caption"
 msgid "Lazarus version"
-msgstr "Lazarus版本"
+msgstr "Lazarus 版本"
 
 #: tform1.listboxfpchistory.columns[0].caption
 msgctxt "tform1.listboxfpchistory.columns[0].caption"
@@ -653,13 +653,14 @@ msgstr "繁体中文 (TW)"
 #: tform1.mdutchlanguage.caption
 msgid "Dutch (NL)"
 msgstr "荷兰语 (NL)"
+
 #: tform1.mukrainianlanguage.caption
 msgid "Ukrainian (UK)"
-msgstr "乌克兰 (UK)"
+msgstr "乌克兰语 (UK)"
 
 #: tform1.memosummary.hint
 msgid "Will show info and error"
-msgstr "将显示信息和错误"
+msgstr "将显示信息和错误信息"
 
 #: tform1.menglishlanguage.caption
 msgid "English (EN)"
@@ -667,7 +668,7 @@ msgstr "英语 (EN)"
 
 #: tform1.menufile.caption
 msgid "&File"
-msgstr "文件 (&F)"
+msgstr "文件(&F)"
 
 #: tform1.menuitem1.caption
 msgid "About"
@@ -679,11 +680,11 @@ msgstr "语言"
 
 #: tform1.menuitem3.caption
 msgid "Issues"
-msgstr "疑问"
+msgstr "问题反馈"
 
 #: tform1.mfpcbugs.caption
 msgid "FPC bugs"
-msgstr "FPC bugs"
+msgstr "FPC 缺陷报告"
 
 #: tform1.mfrenchlanguage.caption
 msgid "French (F)"
@@ -695,11 +696,11 @@ msgstr "德语 (D)"
 
 #: tform1.missuesforum.caption
 msgid "Up Lazarus forum"
-msgstr "前往Lazarus论坛"
+msgstr "前往 Lazarus 论坛"
 
 #: tform1.missuesgithub.caption
 msgid "Up GitHub issues"
-msgstr "前往GitHub issues"
+msgstr "前往 GitHub Issues"
 
 #: tform1.monlinedocs.caption
 msgid "Online docs"
@@ -715,15 +716,15 @@ msgstr "帮助"
 
 #: tform1.mwiki.caption
 msgid "Online Wiki"
-msgstr "在线wiki"
+msgstr "在线 Wiki"
 
 #: tform1.mabout.caption
 msgid "About Up"
-msgstr "关于Up"
+msgstr "关于 Up"
 
 #: tform1.mlazarusbugs.caption
 msgid "Lazarus bugs"
-msgstr "Lazarus bugs"
+msgstr "Lazarus 缺陷报告"
 
 #: tform1.modulesheet.caption
 msgid "Modules"
@@ -735,15 +736,15 @@ msgstr "mORMot2"
 
 #: tform1.mormotbtn.hint
 msgid "Get the mORMot2 for FPC"
-msgstr "为FPC安装mORMot2"
+msgstr "获取适用于 FPC 的 mORMot2"
 
 #: tform1.opmbtn.caption
 msgid "OPM"
-msgstr "在线包管理器"
+msgstr "OPM"
 
 #: tform1.opmbtn.hint
 msgid "Will install/update the Online Package Manager"
-msgstr "将安装/更新在线包管理器"
+msgstr "将安装/更新 Lazarus 在线包管理器（OPM）"
 
 #: tform1.picobtn.caption
 msgid "Pico"
@@ -751,7 +752,7 @@ msgstr "Pico"
 
 #: tform1.picobtn.hint
 msgid "Get FPC for armv6m RPi Pico"
-msgstr "为armv6m RPi Pico安装FPC"
+msgstr "获取用于 armv6m RPi Pico 的 FPC"
 
 #: tform1.radgrpcpu.caption
 msgid "CPU"
@@ -764,24 +765,24 @@ msgstr "操作系统"
 #: tform1.realfpcurl.hint
 msgctxt "tform1.realfpcurl.hint"
 msgid "Double click to allow editing"
-msgstr "双击以允许编辑"
+msgstr "双击可进入编辑状态"
 
 #: tform1.reallazurl.hint
 msgctxt "tform1.reallazurl.hint"
 msgid "Double click to allow editing"
-msgstr "双击以允许编辑"
+msgstr "双击可进入编辑状态"
 
 #: tform1.stablebtn.caption
 msgid "Stable"
-msgstr "稳定版本"
+msgstr "稳定版"
 
 #: tform1.stablebtn.hint
 msgid "Will install/update stable versions of both FPC and Lazarus"
-msgstr "将安装/更新FPC和Lazarus的稳定的版本"
+msgstr "将安装/更新 FPC 和 Lazarus 的稳定版本"
 
 #: tform1.statusmessage.text
 msgid "Sitting and waiting"
-msgstr "等待中"
+msgstr "空闲中，等待您的操作"
 
 #: tform1.tagsheet.caption
 msgid "Tags"
@@ -789,15 +790,15 @@ msgstr "标签"
 
 #: tform1.trunkbtn.caption
 msgid "Trunk"
-msgstr "主干版本"
+msgstr "开发版"
 
 #: tform1.trunkbtn.hint
 msgid "Will install/update trunk version of both FPC and Lazarus."
-msgstr "将安装/更新FPC和Lazarus的主干(trunk)版本."
+msgstr "将安装/更新 FPC 和 Lazarus 的开发版（trunk）。"
 
 #: tform1.ultibobtn.hint
 msgid "Install baremetal Ultibo for RPi3"
-msgstr "为RPi3安装baremetal Ultibo"
+msgstr "为 RPi3 安装裸机版 Ultibo"
 
 #: tform1.wabtn.caption
 msgid "WA"
@@ -805,7 +806,7 @@ msgstr "WA"
 
 #: tform1.wabtn.hint
 msgid "Install FPC and Lazarus for Web Assembly"
-msgstr "为Web Assembly安装FPC和Lazarus"
+msgstr "为 WebAssembly 安装 FPC 和 Lazarus"
 
 #: tform1.wiobtn.caption
 msgid "Wio"
@@ -813,15 +814,15 @@ msgstr "Wio"
 
 #: tform1.wiobtn.hint
 msgid "Get FPC for SAMD51 embedded on Wio Terminal"
-msgstr "为嵌入在Wio终端上的SAMD51安装FPC"
+msgstr "获取用于 Wio Terminal 上 SAMD51 芯片的 FPC"
 
 #: tform2.btnaddfpcpatch.caption
 msgid "Add FPC patch"
-msgstr "添加FPC补丁"
+msgstr "添加 FPC 补丁"
 
 #: tform2.btnaddlazpatch.caption
 msgid "Add Laz. patch"
-msgstr "添加Lazarus补丁"
+msgstr "添加 Lazarus 补丁"
 
 #: tform2.btnlistcustomoptions.caption
 msgid "List All"
@@ -829,11 +830,11 @@ msgstr "列出全部"
 
 #: tform2.btnremfpcpatch.caption
 msgid "Rem. FPC patch"
-msgstr "撤销FPC补丁"
+msgstr "移除 FPC 补丁"
 
 #: tform2.btnremlazpatch.caption
 msgid "Rem. Laz. patch"
-msgstr "撤销lazarus补丁"
+msgstr "移除 Lazarus 补丁"
 
 #: tform2.btnselectbindir.caption
 msgid "Tools"
@@ -864,17 +865,17 @@ msgstr "调试"
 #: tform2.editbinlocation.hint
 msgctxt "tform2.editbinlocation.hint"
 msgid "Double click to clear"
-msgstr "双击以清理"
+msgstr "双击可清除"
 
 #: tform2.editcompileroverride.hint
 msgctxt "tform2.editcompileroverride.hint"
 msgid "Double click to clear"
-msgstr "双击以清理"
+msgstr "双击可清除"
 
 #: tform2.editliblocation.hint
 msgctxt "tform2.editliblocation.hint"
 msgid "Double click to clear"
-msgstr "双击以清理"
+msgstr "双击可清除"
 
 #: tform2.groupbox1.caption
 msgid "Proxy settings"
@@ -882,7 +883,7 @@ msgstr "代理设置"
 
 #: tform2.groupbox2.caption
 msgid "Miscellaneous settings"
-msgstr "杂项设置"
+msgstr "其他设置"
 
 #: tform2.groupboxcompileoptions.caption
 msgid "Options Override"
@@ -890,11 +891,11 @@ msgstr "选项覆盖"
 
 #: tform2.groupboxfpclazbranchrevision.caption
 msgid "Branch and revision"
-msgstr "分支和修订版本"
+msgstr "分支与版本号"
 
 #: tform2.groupboxfpclazscripts.caption
 msgid "Pre and post install scripts"
-msgstr "前置和后置安装脚本"
+msgstr "安装前/后脚本"
 
 #: tform2.grppatching.caption
 msgid "Source patching"
@@ -902,71 +903,71 @@ msgstr "源代码补丁"
 
 #: tform2.label1.caption
 msgid "HTTP proxy URL:"
-msgstr "HTTP代理URL:"
+msgstr "HTTP 代理 URL："
 
 #: tform2.label2.caption
 msgid "HTTP proxy port:"
-msgstr "HTTP代理端口:"
+msgstr "HTTP 代理端口："
 
 #: tform2.label3.caption
 msgid "HTTP proxy username:"
-msgstr "HTTP代理用户名:"
+msgstr "HTTP 代理用户名："
 
 #: tform2.label4.caption
 msgid "HTTP proxy password:"
-msgstr "HTTP代理密码:"
+msgstr "HTTP 代理密码："
 
 #: tform2.labelcompileroverride.caption
 msgid "Compiler Override"
-msgstr "编译器覆盖"
+msgstr "编译器覆盖设置"
 
 #: tform2.labelcpu.caption
 msgid "Select CPU"
-msgstr "选择CPU"
+msgstr "选择 CPU"
 
 #: tform2.labelcrossbuildoptions.caption
 msgid "Cross Build Options Override (i.e. -CfSoft)"
-msgstr "交叉构建选项覆盖(例如 -CfSoft)"
+msgstr "交叉编译选项覆盖（例如 -CfSoft）"
 
 #: tform2.labelfpcbranch.caption
 msgid "FPC branch"
-msgstr "FPC分支"
+msgstr "FPC 分支"
 
 #: tform2.labelfpcoptions.caption
 msgid "FPC options"
-msgstr "FPC选项"
+msgstr "FPC 选项"
 
 #: tform2.labelfpcpostinstall.caption
 msgid "FPC post"
-msgstr "FPC后置脚本"
+msgstr "FPC 安装后脚本"
 
 #: tform2.labelfpcpreinstall.caption
 msgid "FPC pre"
-msgstr "FPC前置脚本"
+msgstr "FPC 安装前脚本"
 
 #: tform2.labelfpcrevision.caption
 msgid "FPC hash/tag"
-msgstr "FPC的hash/标签"
+msgstr "FPC 哈希值/标签"
 
 #: tform2.labellazarusbranch.caption
 msgid "Laz. branch"
-msgstr "Lazarus分支"
+msgstr "Lazarus 分支"
 
 #: tform2.labellazarusoptions.caption
 msgid "Laz. options"
-msgstr "Lazarus选项"
+msgstr "Lazarus 选项"
 
 #: tform2.labellazaruspostinstall.caption
 msgid "Lazarus post"
-msgstr "Lazarus后置脚本"
+msgstr "Lazarus 安装后脚本"
 
 #: tform2.labellazaruspreinstall.caption
 msgid "Lazarus pre"
-msgstr "Lazarus前置脚本"
+msgstr "Lazarus 安装前脚本"
 
 #: tform2.labellazarusrevision.caption
 msgid "Laz. hash/tag"
-msgstr "Lazarus的hash/标签"
+msgstr "Lazarus 哈希值/标签"
 
 #: tform2.labelos.caption
 msgid "Select OS"
@@ -974,7 +975,7 @@ msgstr "选择操作系统"
 
 #: tform2.radiogrouparmarch.caption
 msgid "ARM target"
-msgstr "ARM target"
+msgstr "ARM 目标平台"
 
 #: tform2.rgrpsearchoptions.caption
 msgid "Search options"
@@ -982,7 +983,7 @@ msgstr "搜索选项"
 
 #: tform2.rgrpsubarch.caption
 msgid "Select subarch"
-msgstr "选择subarch"
+msgstr "选择子架构"
 
 #: tform2.tscpuos.caption
 msgid "CPU/OS"
@@ -990,4 +991,4 @@ msgstr "CPU/操作系统"
 
 #: tform2.tssubarch.caption
 msgid "Subarch"
-msgstr "Subarch"
+msgstr "子架构"
