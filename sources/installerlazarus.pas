@@ -1788,6 +1788,8 @@ begin
         begin
           if LazarusConfig.IfNewFile(DebuggerConfig) then
           begin
+            Infoln(infotext+'Setting-up new '+DebuggerConfig, etInfo);
+
             ConfigSwitch:=LazarusConfig.IsLegacyList(DebuggerConfig, 'Debugger/Backends/');
 
             j:=0;
@@ -1976,8 +1978,6 @@ begin
         end;
 
         // We might do some more QT trickery here and not in GetModule !!
-
-
 
       end;
       {$ENDIF}

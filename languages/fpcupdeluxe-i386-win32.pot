@@ -978,12 +978,12 @@ msgstr ""
 
 #: tform1.unleashedbtn.caption
 msgctxt "tform1.unleashedbtn.caption"
-msgid "U-FPC"
+msgid "Unleashed"
 msgstr ""
 
 #: tform1.unleashedbtn.hint
 msgctxt "tform1.unleashedbtn.hint"
-msgid "Get FPC unleashed"
+msgid "Get unleashed Pascal"
 msgstr ""
 
 #: tform1.wabtn.caption

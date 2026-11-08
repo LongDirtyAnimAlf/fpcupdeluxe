@@ -391,7 +391,7 @@ end;
 
 function THelpInstaller.GetModule(ModuleName: string): boolean;
 const
-  HELPSOURCEURL : array [0..32,0..1] of string = (
+  HELPSOURCEURL : array [0..33,0..1] of string = (
     ('0.9.28','/Old%20releases/Lazarus%200.9.28/fpc-lazarus-0.9.28-doc-chm.tar.bz2'),
     ('0.9.30','/Old%20releases/Lazarus%200.9.30/fpc-lazarus-doc-chm-0.9.30.tar.bz2'),
     ('0.9.30.4','/Old%20releases/Lazarus%200.9.30.4/fpc-lazarus-doc-chm-0.9.30.4.tar.bz2'),
@@ -424,7 +424,9 @@ const
     ('4.2','/Lazarus%204.2/doc-chm-fpc3.2.2-laz4.2-0.zip'),
     ('4.4','/Lazarus%204.4/doc-chm-fpc3.2.2-laz4.4-0.zip'),
     ('4.6','/Lazarus%204.6/doc-chm-fpc3.2.4-laz4.6-0.zip'),
-    ('4.8','/Lazarus%204.8/doc-chm-fpc3.2.4-laz4.8-0.zip')
+    ('4.8','/Lazarus%204.8/doc-chm-fpc3.2.4-laz4.8-0.zip'),
+    ('5.0','/Lazarus%205.0RC1/doc-chm-fpc3.2.2-laz5.0RC1-0.zip')
+
   );
   HELP_URL_BASE='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation';
 

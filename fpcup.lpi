@@ -24,15 +24,9 @@
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
-    <MacroValues Count="1">
-      <Macro1 Name="LCLWidgetType" Value="nogui"/>
-    </MacroValues>
     <BuildModes>
       <Item Name="Default" Default="True"/>
       <Item Name="Debug">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -74,9 +68,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="win32">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -113,9 +104,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="win64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -153,9 +141,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="win64arm64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -186,9 +171,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="linuxi386">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -226,9 +208,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="linux64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -266,9 +245,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="linuxaarch64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -306,9 +282,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="freebsdi386">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -346,9 +319,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="freebsdx64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -386,9 +356,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="linuxppc64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -426,9 +393,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="linuxarmhf">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -466,9 +430,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="darwinx64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -506,9 +467,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="darwinarm64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -546,9 +504,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="darwini386">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -586,9 +541,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="darwinppc">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -626,9 +578,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="darwinppc64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -666,9 +615,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="openbsdx64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -706,9 +652,6 @@ end;"/>
         </CompilerOptions>
       </Item>
       <Item Name="openbsdi386">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -745,9 +688,6 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item>
-      <SharedMatrixOptions Count="1">
-        <Item1 ID="233755810855" Modes="Default,Debug,win32,win64,linuxi386,linux64,linuxaarch64,freebsdi386,freebsdx64,linuxppc64,linuxarmhf,darwinx64,darwinarm64,darwini386,darwinppc,darwinppc64,win64arm64,openbsdx64,openbsdi386" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
-      </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
