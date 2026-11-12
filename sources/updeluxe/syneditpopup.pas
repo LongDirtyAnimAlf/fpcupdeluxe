@@ -100,9 +100,9 @@ procedure TSynEdit.CreateActns;
 begin
   AddActItem('&Copy',Menus.ShortCut(Word('C'), [ssCtrl]),False, @CopyExecute, @CopyUpdate);
   AddActItem('-',0,False,nil,nil);
-  AddActItem('&Select All',Menus.ShortCut(Word('S'), [ssCtrl]),False, @SelectAllExecute, @SelectAllUpdate);
+  AddActItem('&Select All',Menus.ShortCut(Word('A'), [ssCtrl]),False, @SelectAllExecute, @SelectAllUpdate);
   AddActItem('-',0,False,nil,nil);
-  AddActItem('Select and Copy &All',Menus.ShortCut(Word('A'), [ssCtrl]),False, @SelectCopyAllExecute, @SelectCopyAllUpdate);
+  AddActItem('Select and Copy &All',0,False, @SelectCopyAllExecute, @SelectCopyAllUpdate);
 end;
 
 procedure TSynEdit.SetPopupMenu_(const Value: TPopupMenu);
