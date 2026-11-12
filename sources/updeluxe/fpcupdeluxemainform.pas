@@ -1695,6 +1695,35 @@ begin
 end;
 
 {$ifndef READER}
+
+function CheckURL(s:string;aCol:integer):string;
+const
+  LINKSTART : array[0..1] of string = ('https://','http://');
+  LINKEND   = [#0..' ','"','''','<','>','|'];
+  LINKTAIL  = ['.',',',';',':','!','?',')',']'];
+var
+  i,aStart,aStop:integer;
+begin
+  result:='';
+  for i:=Low(LINKSTART) to High(LINKSTART) do
+  begin
+    aStart:=Pos(LINKSTART[i],s);
+    while (aStart>0) do
+    begin
+      aStop:=aStart;
+      while (aStop<=Length(s)) AND (NOT (s[aStop] in LINKEND)) do Inc(aStop);
+      // a dot or bracket that ends the sentence is not part of the address
+      while (aStop>aStart) AND (s[aStop-1] in LINKTAIL) do Dec(aStop);
+      if (aCol>=aStart) AND (aCol<aStop) AND ((aStop-aStart)>Length(LINKSTART[i])) then
+      begin
+        result:=Copy(s,aStart,aStop-aStart);
+        exit;
+      end;
+      aStart:=PosEx(LINKSTART[i],s,aStop+1);
+    end;
+  end;
+end;
+
 function TForm1.OutputLinkAt(X,Y:integer):string;
 // The web address in the output under the mouse (client coordinates), if any.
 const
@@ -1714,6 +1743,10 @@ begin
   s:=CommandOutputScreen.Lines[aPos.Y-1];
   aCol:=CommandOutputScreen.PhysicalToLogicalPos(aPos).X;
   if (aCol<1) OR (aCol>Length(s)) then exit;
+
+  result:=CheckURL(s,aCol);
+
+  (*
   for i:=Low(LINKSTART) to High(LINKSTART) do
   begin
     aStart:=Pos(LINKSTART[i],s);
@@ -1726,11 +1759,13 @@ begin
       if (aCol>=aStart) AND (aCol<aStop) AND ((aStop-aStart)>Length(LINKSTART[i])) then
       begin
         result:=Copy(s,aStart,aStop-aStart);
+        CommandOutputScreen.Markup[aPos.Y-1].BGColor;
         exit;
       end;
       aStart:=PosEx(LINKSTART[i],s,aStop+1);
     end;
   end;
+  *)
 end;
 
 procedure TForm1.CommandOutputScreenMouseMove(Sender: TObject; Shift: TShiftState;
@@ -1764,6 +1799,15 @@ begin
   s:=Trim(s);
   Special:=False;
   if Length(s)=0 then exit;
+
+  if Length(CheckURL(s,1))>0 then
+  begin
+    FG      := clRed;
+    BG      := clBlack;
+    //Markup.FrameColor:=clYellow;
+    Markup.Style := [fsBold,fsUnderline];
+    Special := True;
+  end;
 
   // special override for me: for easy debugging FPC and Lazarus source with plain writelines in source
   if ExistWordInString(PChar(s),'donalf:',[soWholeWord]) then
