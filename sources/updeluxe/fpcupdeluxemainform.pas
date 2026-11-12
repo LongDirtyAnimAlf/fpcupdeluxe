@@ -1697,6 +1697,7 @@ end;
 {$ifndef READER}
 
 function CheckURL(s:string;aCol:integer):string;
+// The web address in s at column aCol; with aCol<1 the first web address anywhere in s.
 const
   LINKSTART : array[0..1] of string = ('https://','http://');
   LINKEND   = [#0..' ','"','''','<','>','|'];
@@ -1714,7 +1715,7 @@ begin
       while (aStop<=Length(s)) AND (NOT (s[aStop] in LINKEND)) do Inc(aStop);
       // a dot or bracket that ends the sentence is not part of the address
       while (aStop>aStart) AND (s[aStop-1] in LINKTAIL) do Dec(aStop);
-      if (aCol>=aStart) AND (aCol<aStop) AND ((aStop-aStart)>Length(LINKSTART[i])) then
+      if ((aCol<1) OR ((aCol>=aStart) AND (aCol<aStop))) AND ((aStop-aStart)>Length(LINKSTART[i])) then
       begin
         result:=Copy(s,aStart,aStop-aStart);
         exit;
@@ -1800,7 +1801,8 @@ begin
   Special:=False;
   if Length(s)=0 then exit;
 
-  if Length(CheckURL(s,1))>0 then
+  // color the line when it has a web address anywhere in it, not only at the start
+  if Length(CheckURL(s,0))>0 then
   begin
     FG      := clRed;
     BG      := clBlack;
