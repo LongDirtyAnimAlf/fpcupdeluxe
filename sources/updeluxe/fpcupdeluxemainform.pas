@@ -272,6 +272,7 @@ type
     function  SetFPCUPSettings(IniDirectory:string):boolean;
     procedure FillSourceListboxes;
     procedure AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
+    function  OutputAtEnd:boolean;
     procedure SetTarget(aControl:TControl;const aTarget:string='');
     procedure InitFPCupManager;
     function  GetCmdFontSize:integer;
@@ -4905,10 +4906,23 @@ begin
 
 end;
 
+function TForm1.OutputAtEnd:boolean;
+begin
+  // True when the last line of the output is in view (or one line away).
+  // When the user has scrolled up to read, new output must not pull the view back down.
+  {$ifdef READER}
+  result:=true;
+  {$else}
+  result:=((CommandOutputScreen.TopLine+CommandOutputScreen.LinesInWindow)>=CommandOutputScreen.Lines.Count);
+  {$endif}
+end;
+
 procedure TForm1.AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
 var
   aMessageStrings:TStrings;
+  aFollow:boolean;
 begin
+  aFollow:=OutputAtEnd;
   if Length(aMessage)=0 then
     CommandOutputScreen.Lines.Append('')
   else
@@ -4925,8 +4939,11 @@ begin
   {$ifdef READER}
   CommandOutputScreen.CaretPos.SetLocation(0,CommandOutputScreen.Lines.Count);
   {$else}
-  CommandOutputScreen.CaretX:=0;
-  CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
+  if aFollow then
+  begin
+    CommandOutputScreen.CaretX:=0;
+    CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
+  end;
   {$endif}
   Application.ProcessMessages;
 end;
@@ -5106,9 +5123,11 @@ var
   MsgStr: PChar;
   //MsgPStr: PString;
   MsgPasStr: string;
+  aFollow: boolean;
 begin
   MsgStr := {%H-}PChar(Msg.lParam);
   MsgPasStr := StrPas(MsgStr);
+  aFollow := OutputAtEnd;
   //MsgPStr := PString(Msg.lParam);
   //MsgPasStr := MsgPStr^;
   try
@@ -5127,8 +5146,11 @@ begin
     {$else}
     CommandOutputScreen.Lines.Append(MsgPasStr);
     {$endif}
-    CommandOutputScreen.CaretX:=0;
-    CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
+    if aFollow then
+    begin
+      CommandOutputScreen.CaretX:=0;
+      CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
+    end;
     {$endif}
 
     ProcessInfo(CommandOutputScreen);
