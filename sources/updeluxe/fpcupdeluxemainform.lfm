@@ -91,6 +91,8 @@ object Form1: TForm1
     Font.Quality = fqCleartype
     Font.Style = [fsBold]
     TabOrder = 4
+    OnMouseMove = CommandOutputScreenMouseMove
+    OnMouseUp = CommandOutputScreenMouseUp
     OnMouseWheel = CommandOutputScreenMouseWheel
     Gutter.AutoSize = False
     Gutter.Visible = False
