@@ -1799,17 +1799,9 @@ begin
   s:=CommandOutputScreen.Lines[Line-1];
   s:=Trim(s);
   Special:=False;
+  // Markup is the same for every line: the style of a link line must not stay on the next ones
+  Markup.Style := [];
   if Length(s)=0 then exit;
-
-  // color the line when it has a web address anywhere in it, not only at the start
-  if Length(CheckURL(s,0))>0 then
-  begin
-    FG      := clRed;
-    BG      := clBlack;
-    //Markup.FrameColor:=clYellow;
-    Markup.Style := [fsBold,fsUnderline];
-    Special := True;
-  end;
 
   // special override for me: for easy debugging FPC and Lazarus source with plain writelines in source
   if ExistWordInString(PChar(s),'donalf:',[soWholeWord]) then
@@ -2108,6 +2100,15 @@ begin
       BG      := TColor($402000);
       Special := True;
     end;
+  end;
+
+  // a line with a web address and no color of its own is shown as a link
+  if (NOT Special) AND (Length(CheckURL(s,0))>0) then
+  begin
+    FG      := clRed;
+    BG      := clBlack;
+    Markup.Style := [fsBold,fsUnderline];
+    Special := True;
   end;
 
   if Special then
