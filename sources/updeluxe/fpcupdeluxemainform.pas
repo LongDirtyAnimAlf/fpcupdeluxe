@@ -362,7 +362,7 @@ resourcestring
 
   upInstallDirectory = 'Install directory';
   upQuestionContinue = 'Do you want to continue ?';
-  upSpaceWarning = 'Having a space in your install path is very ill-advised !';
+  upSpaceWarning = 'Having a space character in your install path is very ill-advised !';
 
   upInstallDirectoryCurrent = 'Current install directory';
   upInstallSettingsCurrent = 'Got settings from install directory';
