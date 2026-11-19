@@ -58,6 +58,7 @@ program fpcupdeluxe;
     Ondrej Kelle
     Marco van de Voort (marcov)
     Olly (ollydev)
+    TonyStone31
 *)
 
 uses
